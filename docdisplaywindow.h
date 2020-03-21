@@ -31,8 +31,7 @@ private:
     Ui::DocDisplayWindow *ui;
 
 private slots:
-    void on_actionPrint_triggered();
-    void print(const QString &text);
+    void printTriggered();
 
 signals:
     void closed();

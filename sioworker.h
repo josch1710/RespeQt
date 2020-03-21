@@ -111,6 +111,7 @@ public:
 
 signals:
     void statusChanged(QString status);
+
 public slots:
     void start(Priority p);
 };
@@ -146,6 +147,7 @@ public:
     int mTotalDuration;
 signals:
     void statusChanged(int remainingTime);
+
 public slots:
     void start(Priority p);
 };

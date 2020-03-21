@@ -44,13 +44,13 @@ CassetteDialog::CassetteDialog(QWidget *parent, const QString &fileName)
                        .arg(minutes)
                        .arg(seconds, 2, 10, QChar('0')));
 
-    connect(worker, SIGNAL(statusChanged(int)), this, SLOT(progress(int)), Qt::QueuedConnection);
-    connect(worker, SIGNAL(finished()), this, SLOT(reject()));
+    connect(worker, &CassetteWorker::statusChanged, this, &CassetteDialog::progress, Qt::QueuedConnection);
+    connect(worker, &CassetteWorker::finished, this, &CassetteDialog::reject);
 }
 
 CassetteDialog::~CassetteDialog()
 {
-    disconnect(this, SLOT(reject()));
+    disconnect(worker, &CassetteWorker::finished, this, &CassetteDialog::reject);
     if (worker->isRunning()) {
         worker->setPriority(QThread::NormalPriority);
         worker->wait();

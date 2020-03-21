@@ -30,33 +30,34 @@ OptionsDialog::OptionsDialog(QWidget *parent) :
 
     m_ui->setupUi(this);
 
-    m_ui->treeWidget->expandAll();
-    itemStandard = m_ui->treeWidget->topLevelItem(0)->child(0);
-    itemAtariSio = m_ui->treeWidget->topLevelItem(0)->child(1);
-    itemEmulation = m_ui->treeWidget->topLevelItem(1);
-    itemDiskOptions = m_ui->treeWidget->topLevelItem(2)->child(0);
-    itemDiskOSB = m_ui->treeWidget->topLevelItem(2)->child(1);
-    itemDiskIcons = m_ui->treeWidget->topLevelItem(2)->child(2);
-    itemDiskFavorite = m_ui->treeWidget->topLevelItem(2)->child(3);
-    itemI18n = m_ui->treeWidget->topLevelItem(3);
-    itemTestSerialPort = m_ui->treeWidget->topLevelItem(0)->child(2);
-    itemAtari1027 = m_ui->treeWidget->topLevelItem(4)->child(0);
-    itemPassthrough = m_ui->treeWidget->topLevelItem(4)->child(1);
-
-    m_ui->translatorSelectButton->setDefaultAction(m_ui->actionSelectTranslatorDisk);
-    m_ui->toolDiskSelectButton->setDefaultAction(m_ui->actionSelectToolDisk);
+    m_ui->optionSections->expandAll();
+    itemStandard = m_ui->optionSections->topLevelItem(0)->child(0);
+    itemAtariSio = m_ui->optionSections->topLevelItem(0)->child(1);
+    itemEmulation = m_ui->optionSections->topLevelItem(1);
+    itemDiskImages = m_ui->optionSections->topLevelItem(2);
+    itemDiskOptions = m_ui->optionSections->topLevelItem(2)->child(0);
+    itemDiskOSB = m_ui->optionSections->topLevelItem(2)->child(1);
+    itemDiskIcons = m_ui->optionSections->topLevelItem(2)->child(2);
+    itemDiskFavorite = m_ui->optionSections->topLevelItem(2)->child(3);
+    itemI18n = m_ui->optionSections->topLevelItem(3);
+    itemTestSerialPort = m_ui->optionSections->topLevelItem(0)->child(2);
+    itemAtari1027 = m_ui->optionSections->topLevelItem(4)->child(0);
+    itemPassthrough = m_ui->optionSections->topLevelItem(4)->child(1);
 
 #ifndef Q_OS_LINUX
-    m_ui->treeWidget->topLevelItem(0)->removeChild(itemAtariSio);
+    m_ui->optionSections->topLevelItem(0)->removeChild(itemAtariSio);
 #endif
 #ifdef QT_NO_DEBUG
-    m_ui->treeWidget->topLevelItem(0)->removeChild(itemTestSerialPort);
+    m_ui->optionSections->topLevelItem(0)->removeChild(itemTestSerialPort);
 #endif
 
-    connect(this, SIGNAL(accepted()), this, SLOT(OptionsDialog_accepted()));
+    connectSignals();
+    setupSettings();
+}
 
+void OptionsDialog::setupSettings()
+{
     /* Retrieve application settings */
-
     m_ui->serialPortComboBox->clear();
     const QList<QSerialPortInfo>& infos = QSerialPortInfo::availablePorts();
     for (QList<QSerialPortInfo>::const_iterator it = infos.begin() ; it!=infos.end() ; it++)
@@ -124,7 +125,7 @@ OptionsDialog::OptionsDialog(QWidget *parent) :
 #ifndef QT_NO_DEBUG
             itemTestSerialPort->setCheckState(0, Qt::Unchecked);
 #endif
-            m_ui->treeWidget->setCurrentItem(itemStandard);
+            m_ui->optionSections->setCurrentItem(itemStandard);
             break;
         case SERIAL_BACKEND_SIO_DRIVER:
             itemStandard->setCheckState(0, Qt::Unchecked);
@@ -132,12 +133,12 @@ OptionsDialog::OptionsDialog(QWidget *parent) :
 #ifndef QT_NO_DEBUG
             itemTestSerialPort->setCheckState(0, Qt::Unchecked);
 #endif
-            m_ui->treeWidget->setCurrentItem(itemAtariSio);
+            m_ui->optionSections->setCurrentItem(itemAtariSio);
             break;
     }
     m_ui->serialPortBox->setCheckState(itemStandard->checkState(0));
     m_ui->atariSioBox->setCheckState(itemAtariSio->checkState(0));
-    
+
     /* list available translations */
     QTranslator local_translator;
     m_ui->i18nLanguageCombo->clear();
@@ -205,9 +206,49 @@ OptionsDialog::OptionsDialog(QWidget *parent) :
         m_ui->rawPrinterName->setCurrentText(rawPrinterName);
 }
 
-OptionsDialog::~OptionsDialog()
+// This will connect all necessary signals to slots on this dialog.
+void OptionsDialog::connectSignals()
 {
-    delete m_ui;
+    // Dialog
+    connect(this, &OptionsDialog::accepted, this, &OptionsDialog::saveSettings);
+
+    // Tree
+    connect(m_ui->optionSections, &QTreeWidget::itemClicked, this, &OptionsDialog::sectionClicked);
+    connect(m_ui->optionSections, &QTreeWidget::currentItemChanged, this, &OptionsDialog::currentSectionChanged);
+
+    // Serial port section
+    void (QComboBox::*serialPortChanged)(int) = &QComboBox::currentIndexChanged;
+    connect(m_ui->serialPortComboBox, serialPortChanged, this, &OptionsDialog::serialPortChanged);
+    void (QComboBox::*handshakeChanged)(int) = &QComboBox::currentIndexChanged;
+    connect(m_ui->serialPortHandshakeCombo, handshakeChanged, this, &OptionsDialog::handshakeChanged);
+    connect(m_ui->serialPortUseDivisorsBox, &QCheckBox::toggled, this, &OptionsDialog::useDivisorToggled);
+
+#ifndef QT_NO_QDEBUG
+    // Serial test section
+    connect(m_ui->testFileButton, &QPushButton::clicked, this, &OptionsDialog::testFileClicked);
+#endif
+
+    // Emulation section
+    connect(m_ui->emulationUseCustomCasBaudBox, &QCheckBox::toggled, this, &OptionsDialog::useCustomBaudToggled);
+    connect(m_ui->buttonRclFolder, &QPushButton::clicked, this, &OptionsDialog::rclFolderClicked);
+
+    // Disk images
+#ifdef SHOWFIRMWARE
+    connect(m_ui->atari810FirmwareButton, &QPushButton::clicked, this, &OptionsDialog::select810FirmwareTriggered);
+    connect(m_ui->atari810HappyFirmwareButton, &QPushButton::clicked, this, &OptionsDialog::select810HappyFirmwareTriggered);
+    connect(m_ui->atari810ChipFirmwareButton, &QPushButton::clicked, this, &OptionsDialog::select810ChipFirmwareTriggered);
+    connect(m_ui->atari1050FirmwareButton, &QPushButton::clicked, this, &OptionsDialog::select1050FirmwareTriggered);
+    connect(m_ui->atari1050HappyFirmwareButton, &QPushButton::clicked, this, &OptionsDialog::select1050HappyFirmwareTriggered);
+    connect(m_ui->atari1050TurboFirmwareButton, &QPushButton::clicked, this, &OptionsDialog::select1050TurboFirmwareTriggered);
+    connect(m_ui->atari1050SpeedyFirmwareButton, &QPushButton::clicked, this, &OptionsDialog::select1050SpeedyFirmwareTriggered);
+    connect(m_ui->atari1050ArchiverFirmwareButton, &QPushButton::clicked, this, &OptionsDialog::select1050ArchiverFirmwareTriggered);
+    connect(m_ui->atari1050DuplicatorFirmwareButton, &QPushButton::clicked, this, &OptionsDialog::select1050DuplicatorFirmwareTriggered);
+#endif
+    connect(m_ui->toolDiskSelectButton, &QPushButton::clicked, this, &OptionsDialog::selectToolDiskTriggered);
+    connect(m_ui->translatorSelectButton, &QPushButton::clicked, this, &OptionsDialog::selectTranslatorDiskTriggered);
+
+    // printer section
+    connect(m_ui->button_atarifixed, &QPushButton::clicked, this, &OptionsDialog::fixedFontClicked);
 }
 
 void OptionsDialog::changeEvent(QEvent *e)
@@ -222,15 +263,15 @@ void OptionsDialog::changeEvent(QEvent *e)
     }
 }
 
-void OptionsDialog::on_serialPortComboBox_currentIndexChanged(int index)
+void OptionsDialog::serialPortChanged(int index)
 {
     bool isCustomPath = !m_ui->serialPortComboBox->itemData(index).isValid();
     m_ui->serialPortComboBox->setEditable(isCustomPath);
 }
 
-void OptionsDialog::on_serialPortHandshakeCombo_currentIndexChanged(int index)
+void OptionsDialog::handshakeChanged(int index)
 {
-    bool software_handshake = (index==HANDSHAKE_SOFTWARE);
+    auto software_handshake = (index==HANDSHAKE_SOFTWARE);
     m_ui->serialPortWriteDelayLabel->setVisible(software_handshake);
     m_ui->serialPortWriteDelayCombo->setVisible(software_handshake);
     m_ui->serialPortBaudLabel->setVisible(!software_handshake);
@@ -251,7 +292,7 @@ void OptionsDialog::on_serialPortHandshakeCombo_currentIndexChanged(int index)
     }
 }
 
-void OptionsDialog::on_serialPortUseDivisorsBox_toggled(bool checked)
+void OptionsDialog::useDivisorToggled(bool checked)
 {
     m_ui->serialPortBaudLabel->setEnabled(!checked);
     m_ui->serialPortBaudCombo->setEnabled(!checked);
@@ -259,9 +300,10 @@ void OptionsDialog::on_serialPortUseDivisorsBox_toggled(bool checked)
     m_ui->serialPortDivisorEdit->setEnabled(checked);
 }
 
-void OptionsDialog::on_treeWidget_itemClicked(QTreeWidgetItem* item, int /*column*/)
+// TODO Bug with serial selection
+void OptionsDialog::sectionClicked(QTreeWidgetItem* item, int column)
 {
-    if (item->checkState(0) == Qt::Checked)
+    if (item->checkState(column) == Qt::Checked)
     {
         if (item == itemStandard)
         {
@@ -269,7 +311,7 @@ void OptionsDialog::on_treeWidget_itemClicked(QTreeWidgetItem* item, int /*colum
         }
         else
         {
-            itemStandard->setCheckState(0, Qt::Unchecked);
+            itemStandard->setCheckState(column, Qt::Unchecked);
         }
         if (item == itemAtariSio)
         {
@@ -277,28 +319,28 @@ void OptionsDialog::on_treeWidget_itemClicked(QTreeWidgetItem* item, int /*colum
         }
         else
         {
-            itemAtariSio->setCheckState(0, Qt::Unchecked);
+            itemAtariSio->setCheckState(column, Qt::Unchecked);
         }
 #ifndef QT_NO_DEBUG
         if (item != itemTestSerialPort)
         {
-            itemTestSerialPort->setCheckState(0, Qt::Unchecked);
+            itemTestSerialPort->setCheckState(column, Qt::Unchecked);
         }
 #endif
     }
-    else if ((itemStandard->checkState(0) == Qt::Unchecked) &&
-            (itemAtariSio->checkState(0) == Qt::Unchecked))
+    else if ((itemStandard->checkState(column) == Qt::Unchecked) &&
+            (itemAtariSio->checkState(column) == Qt::Unchecked))
     {
-        item->setCheckState(0, Qt::Checked);
+        item->setCheckState(column, Qt::Checked);
     }
-    m_ui->serialPortBox->setCheckState(itemStandard->checkState(0));
-    m_ui->atariSioBox->setCheckState(itemAtariSio->checkState(0));
+    m_ui->serialPortBox->setCheckState(itemStandard->checkState(column));
+    m_ui->atariSioBox->setCheckState(itemAtariSio->checkState(column));
 #ifndef QT_NO_DEBUG
-    m_ui->serialTestBox->setCheckState(itemTestSerialPort->checkState(0));
+    m_ui->serialTestBox->setCheckState(itemTestSerialPort->checkState(column));
 #endif
 }
 
-void OptionsDialog::on_treeWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/)
+void OptionsDialog::currentSectionChanged(QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/)
 {
     if (current == itemStandard) {
         m_ui->stackedWidget->setCurrentIndex(0);
@@ -325,7 +367,7 @@ void OptionsDialog::on_treeWidget_currentItemChanged(QTreeWidgetItem* current, Q
     }
 }
 
-void OptionsDialog::OptionsDialog_accepted()
+void OptionsDialog::saveSettings()
 {
     respeqtSettings->setSerialPortName(m_ui->serialPortComboBox->currentText());
     respeqtSettings->setSerialPortHandshakingMethod(m_ui->serialPortHandshakeCombo->currentIndex());
@@ -389,98 +431,100 @@ void OptionsDialog::OptionsDialog_accepted()
         respeqtSettings->setRawPrinterName("");
 }
 
-void OptionsDialog::on_useEmulationCustomCasBaudBox_toggled(bool checked)
+void OptionsDialog::useCustomBaudToggled(bool checked)
 {
     m_ui->emulationCustomCasBaudSpin->setEnabled(checked);
 }
 
 void OptionsDialog::selectFirmware(QLineEdit *edit, QString title, QString filters)
 {
-    QString dir = edit->text();
-    int lastSlash = dir.lastIndexOf("/");
-    int lastBackslash = dir.lastIndexOf("\\");
+    auto dir = edit->text();
+    auto lastSlash = dir.lastIndexOf("/");
+    auto lastBackslash = dir.lastIndexOf("\\");
     if ((lastSlash != -1) || (lastBackslash != -1))
     {
-        int lastIndex = lastSlash > lastBackslash ? lastSlash : lastBackslash;
+        auto lastIndex = lastSlash > lastBackslash ? lastSlash : lastBackslash;
         dir = dir.left(lastIndex);
     }
     else
     {
         dir = "";
     }
-    QString fileName = QFileDialog::getOpenFileName(this, title, dir, filters);
+    auto fileName = QFileDialog::getOpenFileName(this, title, dir, filters);
     if (fileName.isEmpty()) {
         return;
     }
     edit->setText(fileName);
 }
 
-void OptionsDialog::on_actionSelect810Firmware_triggered()
+#ifdef SHOWFIRMWARE
+void OptionsDialog::select810FirmwareTriggered()
 {
     selectFirmware(m_ui->atari810FirmwarePath, tr("Select Atari 810 firmware"), tr("Atari drive firmware (*.rom);;All files (*)"));
 }
 
-void OptionsDialog::on_actionSelect810ChipFirmware_triggered()
+void OptionsDialog::select810ChipFirmwareTriggered()
 {
     selectFirmware(m_ui->atari810ChipFirmwarePath, tr("Select Atari 810 Chip firmware"), tr("Atari drive firmware (*.rom);;All files (*)"));
 }
 
-void OptionsDialog::on_actionSelect810HappyFirmware_triggered()
+void OptionsDialog::select810HappyFirmwareTriggered()
 {
     selectFirmware(m_ui->atari810HappyFirmwarePath, tr("Select Atari 810 Happy firmware"), tr("Atari drive firmware (*.rom);;All files (*)"));
 }
 
-void OptionsDialog::on_actionSelect1050Firmware_triggered()
+void OptionsDialog::select1050FirmwareTriggered()
 {
     selectFirmware(m_ui->atari1050FirmwarePath, tr("Select Atari 1050 firmware"), tr("Atari drive firmware (*.rom);;All files (*)"));
 }
 
-void OptionsDialog::on_actionSelect1050ArchiverFirmware_triggered()
+void OptionsDialog::select1050ArchiverFirmwareTriggered()
 {
     selectFirmware(m_ui->atari1050ArchiverFirmwarePath, tr("Select Atari 1050 Archiver firmware"), tr("Atari drive firmware (*.rom);;All files (*)"));
 }
 
-void OptionsDialog::on_actionSelect1050HappyFirmware_triggered()
+void OptionsDialog::select1050HappyFirmwareTriggered()
 {
     selectFirmware(m_ui->atari1050HappyFirmwarePath, tr("Select Atari 1050 Happy firmware"), tr("Atari drive firmware (*.rom);;All files (*)"));
 }
 
-void OptionsDialog::on_actionSelect1050SpeedyFirmware_triggered()
+void OptionsDialog::select1050SpeedyFirmwareTriggered()
 {
     selectFirmware(m_ui->atari1050SpeedyFirmwarePath, tr("Select Atari 1050 Speedy firmware"), tr("Atari drive firmware (*.rom);;All files (*)"));
 }
 
-void OptionsDialog::on_actionSelect1050TurboFirmware_triggered()
+void OptionsDialog::select1050TurboFirmwareTriggered()
 {
     selectFirmware(m_ui->atari1050TurboFirmwarePath, tr("Select Atari 1050 Turbo firmware"), tr("Atari drive firmware (*.rom);;All files (*)"));
 }
 
-void OptionsDialog::on_actionSelect1050DuplicatorFirmware_triggered()
+void OptionsDialog::select1050DuplicatorFirmwareTriggered()
 {
     selectFirmware(m_ui->atari1050DuplicatorFirmwarePath, tr("Select Atari 1050 Duplicator firmware"), tr("Atari drive firmware (*.rom);;All files (*)"));
 }
+#endif
 
-void OptionsDialog::on_actionSelectTranslatorDisk_triggered()
+void OptionsDialog::selectTranslatorDiskTriggered()
 {
     selectFirmware(m_ui->translatorDiskImagePath, tr("Select translator disk image"), tr("Atari disk image (*.atr);;All files (*)"));
 }
 
-void OptionsDialog::on_actionSelectToolDisk_triggered()
+void OptionsDialog::selectToolDiskTriggered()
 {
     selectFirmware(m_ui->toolDiskImagePath, tr("Select tool disk image"), tr("Atari disk image (*.atr);;All files (*)"));
 }
 
-void OptionsDialog::on_testFileButton_clicked()
+void OptionsDialog::testFileClicked()
 {
 #ifndef QT_NO_DEBUG
-    QString file1Name = QFileDialog::getOpenFileName(this,
+    auto file1Name = QFileDialog::getOpenFileName(this,
              tr("Open test XML File"), QString(), tr("XML Files (*.xml)"));
     m_ui->testFileLabel->setText(file1Name);
     respeqtSettings->setTestFile(file1Name);
 #endif
 }
 
-void OptionsDialog::on_button_atarifixed_clicked()
+void OptionsDialog::fixedFontClicked()
 {
     bool ok;
     QFont font;
@@ -496,7 +540,7 @@ void OptionsDialog::on_button_atarifixed_clicked()
     }
 }
 
-void OptionsDialog::on_buttonRclFolder_clicked()
+void OptionsDialog::rclFolderClicked()
 {
      QString dir;
      dir = respeqtSettings->lastRclDir();

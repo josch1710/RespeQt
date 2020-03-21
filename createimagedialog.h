@@ -30,7 +30,7 @@ protected:
 private:
     Ui::CreateImageDialog *m_ui;
 
-public slots:
+private slots:
     void recalculate();
     void harddiskToggled(bool checked);
     void customToggled(bool checked);

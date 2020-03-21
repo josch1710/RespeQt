@@ -25,6 +25,8 @@ DocDisplayWindow::DocDisplayWindow(QWidget *parent) :
     f.setFixedPitch(true);
     f.setFamily("monospace");
     ui->docDisplay->setFont(f);
+
+    connect(ui->actionPrint, &QAction::triggered, this, &DocDisplayWindow::printTriggered);
 }
 
 DocDisplayWindow::~DocDisplayWindow()
@@ -50,15 +52,7 @@ void DocDisplayWindow::closeEvent(QCloseEvent *e)
     e->accept();
 }
 
-void DocDisplayWindow::print(const QString &text)
-{
-    QTextCursor c = ui->docDisplay->textCursor();
-    c.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
-    ui->docDisplay->setTextCursor(c);
-    ui->docDisplay->insertPlainText(text);
-}
-
-void DocDisplayWindow::on_actionPrint_triggered()
+void DocDisplayWindow::printTriggered()
 {
      QPrinter printer;
      auto *dialog = new QPrintDialog(&printer, this);

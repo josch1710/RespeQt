@@ -74,7 +74,7 @@ private:
     SimpleDiskImage *m_disk;
     QComboBox *m_fileSystemBox;
 
-public slots:
+private slots:
     void addFilesTriggered();
     void deleteSelectedFilesTriggered();
     void textConversionTriggered();

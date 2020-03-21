@@ -38,8 +38,11 @@ private:
 public slots:
     int exec();
     void accept();
-    void progress(int remainingTime);
     void tick();
+
+private slots:
+    void progress(int remainingTime);
+
 };
 
 #endif // CASSETTEDIALOG_H

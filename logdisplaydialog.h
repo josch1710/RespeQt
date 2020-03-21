@@ -25,16 +25,16 @@ public:
     LogDisplayDialog(QWidget *parent = 0);
     ~LogDisplayDialog();
 
-public slots:
-    void getLogText(QString logText);
-    void getLogTextChange(QString logChange);
-
 protected:
     void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *);
 
 private:
     Ui::LogDisplayDialog *l_ui;
+
+public slots:
+    void getLogText(QString logText);
+    void getLogTextChange(QString logChange);
 
 private slots:
     void diskFilter();

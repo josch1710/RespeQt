@@ -63,7 +63,7 @@ private:
     int fontSize;
     QString atasciiFont;
 
-public slots:
+protected slots:
     void saveTriggered();
     void clearTriggered();
     void wordwrapTriggered();

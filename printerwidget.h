@@ -31,7 +31,7 @@ signals:
     void actionEject(int deviceId);
     void actionConnectPrinter(int deviceId);
 
-public slots:
+private slots:
     void connectPrinter();
     void disconnectPrinter();
     void outputSelectionChanged(const QString &outputName);

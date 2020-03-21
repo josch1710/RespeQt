@@ -27,7 +27,7 @@ class OptionsDialog : public QDialog {
 
 public:
     OptionsDialog(QWidget *parent = 0);
-    ~OptionsDialog();
+    ~OptionsDialog() = default;
 
 protected:
     void changeEvent(QEvent *e);
@@ -36,32 +36,37 @@ private:
     Ui::OptionsDialog *m_ui;
     QTreeWidgetItem *itemTestSerialPort, *itemPassthrough, *itemAtari1027,
         *itemStandard, *itemAtariSio, *itemEmulation, *itemDiskOptions, *itemDiskOSB, *itemDiskIcons, *itemDiskFavorite, *itemI18n,
-        *itemFirmware810Path, *itemFirmware1050Path, *itemFirmwareEmulation, *itemTraceOptions;
+        *itemFirmware810Path, *itemFirmware1050Path, *itemFirmwareEmulation, *itemTraceOptions, *itemDiskImages;
 
     void selectFirmware(QLineEdit *edit, QString title, QString filters);
 
+    void connectSignals();
+    void setupSettings();
+
 private slots:
-    void on_serialPortComboBox_currentIndexChanged(int index);
-    void on_serialPortHandshakeCombo_currentIndexChanged(int index);
-    void on_serialPortUseDivisorsBox_toggled(bool checked);
-    void on_treeWidget_itemClicked(QTreeWidgetItem* item, int column);
-    void on_treeWidget_currentItemChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
-    void OptionsDialog_accepted();
-    void on_useEmulationCustomCasBaudBox_toggled(bool checked);
-    void on_testFileButton_clicked();
-    void on_actionSelect810Firmware_triggered();
-    void on_actionSelect810ChipFirmware_triggered();
-    void on_actionSelect810HappyFirmware_triggered();
-    void on_actionSelect1050Firmware_triggered();
-    void on_actionSelect1050ArchiverFirmware_triggered();
-    void on_actionSelect1050HappyFirmware_triggered();
-    void on_actionSelect1050SpeedyFirmware_triggered();
-    void on_actionSelect1050TurboFirmware_triggered();
-    void on_actionSelect1050DuplicatorFirmware_triggered();
-    void on_actionSelectTranslatorDisk_triggered();
-    void on_actionSelectToolDisk_triggered();
-    void on_button_atarifixed_clicked();
-    void on_buttonRclFolder_clicked();
+    void serialPortChanged(int index);
+    void handshakeChanged(int index);
+    void useDivisorToggled(bool checked);
+    void sectionClicked(QTreeWidgetItem* item, int column);
+    void currentSectionChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
+    void saveSettings();
+    void useCustomBaudToggled(bool checked);
+    void testFileClicked();
+#ifdef SHOWFIRMWARE
+    void select810FirmwareTriggered();
+    void select810ChipFirmwareTriggered();
+    void select810HappyFirmwareTriggered();
+    void select1050FirmwareTriggered();
+    void select1050ArchiverFirmwareTriggered();
+    void select1050HappyFirmwareTriggered();
+    void select1050SpeedyFirmwareTriggered();
+    void select1050TurboFirmwareTriggered();
+    void select1050DuplicatorFirmwareTriggered();
+#endif
+    void selectTranslatorDiskTriggered();
+    void selectToolDiskTriggered();
+    void fixedFontClicked();
+    void rclFolderClicked();
 };
 
 #endif // OPTIONSDIALOG_H
