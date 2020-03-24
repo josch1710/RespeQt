@@ -54,7 +54,9 @@ namespace Printers
                 {
                     mESC = false;
                     QFontPtr font = mOutput->font();
-                    font->setUnderline(false);
+                    if (font)
+                        font->setUnderline(false);
+
                     mOutput->setFont(font);
                     mOutput->newLine();
                     // Drop the rest of the buffer

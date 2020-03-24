@@ -124,7 +124,7 @@ void TestSerialPortBackend::forwardXml()
         token = mXmlReader->readNext();
         /*qDebug()<<"!n is start: "<<mXmlReader->isStartElement()
                << " is end: "<<mXmlReader->isEndElement()
-               <<" Name: "<<mXmlReader->name();*/
+               <<" Name: "<<mXmlReader->name(); */
     } while(!mXmlReader->atEnd()
           && token != QXmlStreamReader::EndElement
           && token != QXmlStreamReader::StartElement);

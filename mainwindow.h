@@ -35,6 +35,7 @@
 #include "infowidget.h"
 #include "printerwidget.h"
 #include "Emulator.h"
+#include "printers/textprinterwindow.h"
 
 namespace Ui
 {
@@ -60,9 +61,8 @@ public slots:
     void autoCommit(int no, bool st);       //
     void happy(int no, bool st);       //
     void chip(int no, bool st);       //
-    void openRecent();
     void bootExeTriggered(const QString &fileName);
-
+    void closeTextPrinterWindow(const Printers::TextPrinterWindow *window);
 
 private:
     int untitledName;
@@ -123,17 +123,16 @@ private:
     SimpleDiskImage *installDiskImage(int no);
 
 protected:
-    void mousePressEvent(QMouseEvent *event);
-    void dragEnterEvent(QDragEnterEvent *event);
-    void dragMoveEvent(QDragMoveEvent *event);
-    void dragLeaveEvent(QDragLeaveEvent *);
-    void dropEvent(QDropEvent *event);
-    void closeEvent(QCloseEvent *event);
-    void hideEvent(QHideEvent *event);
-    void enterEvent(QEvent *);
-    void leaveEvent(QEvent *);
-    void resizeEvent(QResizeEvent *);
-    bool eventFilter(QObject *obj, QEvent *event);
+    void mousePressEvent(QMouseEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
+    void dragLeaveEvent(QDragLeaveEvent *) override;
+    void dropEvent(QDropEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;
+    void hideEvent(QHideEvent *event) override;
+    void enterEvent(QEvent *) override;
+    void leaveEvent(QEvent *) override;
+    bool eventFilter(QObject *obj, QEvent *event) override;
 
 signals:
     void logMessage(int type, const QString &msg);
@@ -147,13 +146,13 @@ public:
     void doLogMessage(int type, const QString &msg);
 
 private slots:
+    void openRecent(); //
+
     void on_actionPlaybackCassette_triggered();
     void on_actionBootExe_triggered();
     void on_actionSaveSession_triggered();
     void on_actionOpenSession_triggered();
     void on_actionNewImage_triggered();
-    void on_actionMountFolder_triggered();
-    void on_actionMountDisk_triggered();
     void on_actionEjectAll_triggered();
     void on_actionOptions_triggered();
     void on_actionStartEmulation_triggered();
@@ -164,37 +163,38 @@ private slots:
     void on_actionDocumentation_triggered();
 
     // Device widget events
-    void on_actionMountDisk_triggered(int deviceId);
-    void on_actionMountFolder_triggered(int deviceId);
-    void on_actionEject_triggered(int deviceId);
-    void on_actionNextSide_triggered(int deviceId);
-    void on_actionToggleHappy_triggered(int deviceId, bool enabled);
-    void on_actionToggleChip_triggered(int deviceId, bool open);
-    void on_actionToggleOSB_triggered(int deviceId, bool open);
-    void on_actionToolDisk_triggered(int deviceId, bool open);
-    void on_actionWriteProtect_triggered(int deviceId, bool writeProtectEnabled);
-    void on_actionMountRecent_triggered(const QString &fileName);
-    void on_actionEditDisk_triggered(int deviceId);
-    void on_actionSave_triggered(int deviceId);
-    void on_actionAutoSave_triggered(int deviceId);
-    void on_actionSaveAs_triggered(int deviceId);
-    void on_actionRevert_triggered(int deviceId);
+    void mountDiskTriggered(int deviceId); //
+    void mountFolderTriggered(int deviceId); //
+    void ejectTriggered(int deviceId); //
+    void nextSideTriggered(int deviceId); //
+    void happyToggled(int deviceId, bool enabled); //
+    void chipToggled(int deviceId, bool open); //
+    void OSBToggled(int deviceId, bool open); //
+    void toolDiskTriggered(int deviceId, bool open); //
+    void protectTriggered(int deviceId, bool writeProtectEnabled); //
+    void mountRecentTriggered(const QString &fileName);
+    void editDiskTriggered(int deviceId); //
+    void saveTriggered(int deviceId); //
+    void autoSaveTriggered(int deviceId); //
+    void saveAsTriggered(int deviceId); // MIA
+    void revertTriggered(int deviceId); // MIA
 
 
-    void on_actionBootOption_triggered();
+    void bootOptionTriggered(); //
     void on_actionToggleMiniMode_triggered();
     void on_actionToggleShade_triggered();
     void on_actionLogWindow_triggered();
 
     void showHideDrives();
-    void sioFinished();
-    void sioStarted();
-    void sioStatusChanged(QString status);
+    void sioFinished(); //
+    void sioStarted(); //
+    void sioStatusChanged(QString status); //
     void textPrinterWindowClosed();
-    void docDisplayWindowClosed();
-    void deviceStatusChanged(int deviceNo);
+    void docDisplayWindowClosed(); //
+    void deviceStatusChanged(int deviceNo); //
     void uiMessage(int t, const QString message);
-    void trayIconActivated(QSystemTrayIcon::ActivationReason reason);
+    // TODO Check on Windows and Linux
+    void trayIconActivated(QSystemTrayIcon::ActivationReason reason); //
     void keepBootExeOpen();
     void saveWindowGeometry();
     void saveMiniWindowGeometry();

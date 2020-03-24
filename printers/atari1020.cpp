@@ -144,12 +144,14 @@ namespace Printers
 
             case 'S': // Scale characters
                 try {
-                    unsigned int end;
+                    unsigned int end = 0;
                     int scale = fetchIntFromBuffer(buffer, len, i, end);
                     if (scale >= 0 && scale <= 63)
                     {
                         QFontPtr font = mOutput->font();
-                        font->setPixelSize(font->pixelSize() * scale);
+                        if (font)
+                            font->setPixelSize(font->pixelSize() * scale);
+
                         i = end;
                     } else
                         handlePrintableCodes(b);
@@ -162,27 +164,30 @@ namespace Printers
             case 'C': // Set Color
             {
                 auto next = static_cast<unsigned char>(buffer.at(static_cast<int>(i + 1)));
-                if (next >= '0' && next <= '3')
+                if (mOutput->painter())
                 {
-                    QColor temp("black");
-                    switch(next)
+                    if (next >= '0' && next <= '3')
                     {
-                        default:
-                        case '0':
-                            temp = QColor("black");
-                            break;
-                        case '1':
-                            temp = QColor("blue");
-                            break;
-                        case '2':
-                            temp = QColor("green");
-                            break;
-                        case '3':
-                            temp = QColor("red");
-                            break;
-                    }
+                        QColor temp("black");
+                        switch(next)
+                        {
+                            default:
+                            case '0':
+                                temp = QColor("black");
+                                break;
+                            case '1':
+                                temp = QColor("blue");
+                                break;
+                            case '2':
+                                temp = QColor("green");
+                                break;
+                            case '3':
+                                temp = QColor("red");
+                                break;
+                        }
 
-                    mOutput->painter()->setPen(temp);
+                        mOutput->painter()->setPen(temp);
+                    }
                     i++;
                 } else
                     handlePrintableCodes(b);
@@ -191,20 +196,23 @@ namespace Printers
 
             case 'L': // Line mode 0 = solid, anything else dashed
                 try {
-                    unsigned int end;
+                    unsigned int end = 0;
                     int line = fetchIntFromBuffer(buffer, len, i, end);
                     if (line >= 0 && line <= 15)
                     {
-                        auto pen = mOutput->painter()->pen();
-                        if (line == 0) {
-                            pen.setStyle(Qt::SolidLine);
-                        } else {
-                            pen.setStyle(Qt::CustomDashLine);
-                            QVector<qreal> pattern;
-                            pattern << 1 << line;
-                            pen.setDashPattern(pattern);
+                        if (mOutput->painter())
+                        {
+                            auto pen = mOutput->painter()->pen();
+                            if (line == 0) {
+                                pen.setStyle(Qt::SolidLine);
+                            } else {
+                                pen.setStyle(Qt::CustomDashLine);
+                                QVector<qreal> pattern;
+                                pattern << 1 << line;
+                                pen.setDashPattern(pattern);
+                            }
+                            mOutput->painter()->setPen(pen);
                         }
-                        mOutput->painter()->setPen(pen);
                         i = end;
                     } else {
                         handlePrintableCodes(b);
@@ -216,7 +224,10 @@ namespace Printers
             break;
 
             case 'I': // Init plotter
-                mOutput->painter()->translate(mPenPoint);
+                if (mOutput->painter())
+                {
+                    mOutput->painter()->translate(mPenPoint);
+                }
             break;
 
             case 'D': // draw to point
@@ -227,9 +238,8 @@ namespace Printers
                 unsigned char command = b;
                 do {
                     try {
-
-                        unsigned int endx;
-                        unsigned int endy;
+                        unsigned int endx = 0;
+                        unsigned int endy = 0;
                         int x = fetchIntFromBuffer(buffer, len, i, endx);
                         if (buffer.at(static_cast<int>(endx)) != ',')
                         {
@@ -247,33 +257,36 @@ namespace Printers
 
                         i = endy;
 
+                        if (mOutput->painter())
+                        {
                         QPointF point(x, y);
 
-                        switch (command) {
-                            case 'D':
-                                mOutput->painter()->drawLine(mPenPoint, point);
-                                mPenPoint = point;
-                            break;
+                            switch (command) {
+                                case 'D':
+                                    mOutput->painter()->drawLine(mPenPoint, point);
+                                    mPenPoint = point;
+                                break;
 
-                            case 'J':
-                                point += mPenPoint;
-                                mOutput->painter()->drawLine(mPenPoint, point);
-                                mPenPoint = point;
-                            break;
+                                case 'J':
+                                    point += mPenPoint;
+                                    mOutput->painter()->drawLine(mPenPoint, point);
+                                    mPenPoint = point;
+                                break;
 
-                            case 'M':
-                                mPenPoint = point;
-                            break;
+                                case 'M':
+                                    mPenPoint = point;
+                                break;
 
-                            case 'R':
-                                mPenPoint += point;
-                            break;
+                                case 'R':
+                                    mPenPoint += point;
+                                break;
+                            }
                         }
 
                         b = static_cast<unsigned char>(buffer.at(static_cast<int>(i)));
-                    } catch(std::exception& e)
+                    } catch(std::exception* e)
                     {
-                        qDebug() << "!n" << "std::exception: " << QString(e.what());
+                        qDebug() << "!n" << "std::exception: " << QString(e->what());
                         handlePrintableCodes(b);
                         break;
                     } catch(...)
@@ -353,6 +366,9 @@ namespace Printers
 
     bool Atari1020::drawAxis(bool xAxis, int size, int count)
     {
+        if (!mOutput->painter())
+            return false;
+
         QPointF start = QPointF(mPenPoint);
         QPointF end = QPointF(start);
 
@@ -401,6 +417,14 @@ namespace Printers
             end++;
             next = buffer.at(static_cast<int>(end));
         }
+        // Some Basic programs (even on the 1020 master disk)
+        // seem to just drop the floating point variable on the print stream, so we ignore the rest.
+        while((next >= '0' && next <= '9') || next == '.')
+        {
+            end++;
+            next = buffer.at(static_cast<int>(end));
+        }
+
         bool ok;
         result = number.toInt(&ok);
         if (ok)

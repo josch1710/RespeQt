@@ -24,7 +24,7 @@ OptionsDialog::OptionsDialog(QWidget *parent) :
     QDialog(parent),
     m_ui(new Ui::OptionsDialog)
 {
-    Qt::WindowFlags flags = windowFlags();
+    auto flags = windowFlags();
     flags = flags & (~Qt::WindowContextHelpButtonHint);
     setWindowFlags(flags);
 
@@ -111,8 +111,15 @@ void OptionsDialog::setupSettings()
     m_ui->useLargerFont->setChecked(respeqtSettings->useLargeFont());
     m_ui->enableShade->setChecked(respeqtSettings->enableShade());
     m_ui->RclNameEdit->setText(respeqtSettings->lastRclDir());
+    m_ui->warning_nativemenu->hide();
 #ifdef Q_OS_MAC
     m_ui->useNativeMenu->setChecked(respeqtSettings->nativeMenu());
+    const auto& actualNoMenu = QApplication::testAttribute(Qt::AA_DontUseNativeMenuBar);
+    // The meaning of both flags are the opposite (i.e. boolean not) of each other.
+    // So, we have to test for equality to get difference (i.e. a != !b).
+    if (actualNoMenu == respeqtSettings->nativeMenu())
+        m_ui->warning_nativemenu->show();
+    m_ui->minimizeToTrayBox->hide();
 #endif
 
     switch (respeqtSettings->backend()) {
@@ -249,6 +256,9 @@ void OptionsDialog::connectSignals()
 
     // printer section
     connect(m_ui->button_atarifixed, &QPushButton::clicked, this, &OptionsDialog::fixedFontClicked);
+
+    // UI section
+    connect(m_ui->useNativeMenu, &QCheckBox::toggled, this, &OptionsDialog::useNativeMenuToggled);
 }
 
 void OptionsDialog::changeEvent(QEvent *e)
@@ -552,4 +562,14 @@ void OptionsDialog::rclFolderClicked()
      respeqtSettings->setRclDir(fileName);
      m_ui->RclNameEdit->setText(fileName);
 
+}
+
+void OptionsDialog::useNativeMenuToggled()
+{
+    // The meaning of both flags are the opposite (i.e. boolean not) of each other.
+    // So, we have to test for equality to get difference (i.e. a != !b).
+    const auto& actualNoMenu = QApplication::testAttribute(Qt::AA_DontUseNativeMenuBar);
+    // We reverse the meaning of the checkbox to match the application attribute, see above for reason.
+    const auto& checkboxNoMenu = m_ui->useNativeMenu->checkState() == Qt::Unchecked;
+    m_ui->warning_nativemenu->setVisible(actualNoMenu != checkboxNoMenu);
 }

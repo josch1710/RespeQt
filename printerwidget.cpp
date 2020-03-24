@@ -18,7 +18,6 @@ PrinterWidget::PrinterWidget(int printerNum, QWidget *parent)
    , mPrinter(nullptr)
    , mDevice(nullptr)
    , mSio(nullptr)
-   , mInitialized(false)
 {
     ui->setupUi(this);
 
@@ -35,6 +34,8 @@ PrinterWidget::PrinterWidget(int printerNum, QWidget *parent)
     // Connect widget actions to buttons
     ui->buttonDisconnectPrinter->setDefaultAction(ui->actionDisconnectPrinter);
     ui->buttonConnectPrinter->setDefaultAction(ui->actionConnectPrinter);
+
+    setup();
 }
 
 PrinterWidget::~PrinterWidget()
@@ -191,11 +192,12 @@ void PrinterWidget::connectPrinter()
 
         mPrinter->setOutput(mDevice);
         mDevice->setPrinter(mPrinter);
-        if (!mPrinter->output()->beginOutput())
+        if (!mDevice->beginOutput())
         {
             QMessageBox::critical(this, tr("Beginning output"), tr("The output device couldn't start."));
             return;
         }
+        mConnected = true;
         ui->outputSelection->setEnabled(false);
         ui->atariPrinters->setEnabled(false);
         ui->actionDisconnectPrinter->setEnabled(true);
@@ -205,6 +207,8 @@ void PrinterWidget::connectPrinter()
 
 void PrinterWidget::disconnectPrinter()
 {
+    mDevice->endOutput();
+    mConnected = false;
     ui->outputSelection->setEnabled(true);
     ui->atariPrinters->setEnabled(true);
     ui->actionDisconnectPrinter->setEnabled(false);

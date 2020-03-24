@@ -30,7 +30,8 @@ namespace Printers
                 case 15: // CTRL+O starts underline mode
                 {
                     QFontPtr font = mOutput->font();
-                    font->setUnderline(true);
+                    if (font)
+                        font->setUnderline(true);
                     mOutput->setFont(font);
                     qDebug() << "!n" << "Underline on";
                 }
@@ -39,7 +40,8 @@ namespace Printers
                 case 14: // CTRL+N ends underline mode
                 {
                     QFontPtr font = mOutput->font();
-                    font->setUnderline(false);
+                    if (font)
+                        font->setUnderline(false);
                     mOutput->setFont(font);
                     qDebug() << "!n" << "Underline off";
                 }
@@ -64,7 +66,8 @@ namespace Printers
                 {
                     mESC = false;
                     QFontPtr font = mOutput->font();
-                    font->setUnderline(false);
+                    if (font)
+                        font->setUnderline(false);
                     mOutput->setFont(font);
                     mOutput->newLine();
                     // Drop the rest of the buffer
@@ -105,7 +108,8 @@ namespace Printers
             case 25: // CTRL+Y starts underline mode
             {
                 QFontPtr font = mOutput->font();
-                font->setUnderline(true);
+                if (font)
+                    font->setUnderline(true);
                 mOutput->setFont(font);
                 mESC = false;
                 qDebug() << "!n" << "ESC Underline on";
@@ -115,7 +119,8 @@ namespace Printers
             {
                 QFontPtr font = mOutput->font();
                 font->setUnderline(false);
-                mOutput->setFont(font);
+                if (font)
+                    mOutput->setFont(font);
                 mESC = false;
                 qDebug() << "!n" << "ESC Underline off";
                 return true;

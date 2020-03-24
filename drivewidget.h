@@ -61,8 +61,10 @@ signals:
     void actionRevert(int deviceId);
     void actionBootOptions(int deviceId);
 
-private slots:
+public slots:
     void setFont(const QFont& font);
+
+private slots:
     void on_actionMountFolder_triggered();
     void on_actionMountDisk_triggered();
 

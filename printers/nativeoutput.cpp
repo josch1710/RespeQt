@@ -4,18 +4,9 @@
 
 namespace Printers
 {
-    NativeOutput::NativeOutput():
-        mPainter(nullptr),
-        mDevice(nullptr),
-        mFont(nullptr),
-        mX(0), mY(0),
-        mCharsPerLine(80),
-        mCharCount(0),
-        mLPIMode(0),
-        mCharMode(true),
-        hResolution(0), vResolution(0),
-        mPrinter()
+    NativeOutput::NativeOutput(): BaseOutput()
     {
+        mCharMode = true;
         calculateFixedFontSize(mCharsPerLine);
     }
 
@@ -144,13 +135,5 @@ namespace Printers
         else
             mPainter->setPen(QColor("white"));
         mPainter->drawPoint(p);
-    }
-
-    void NativeOutput::setPrinter(const QWeakPointer<BasePrinter>& printer)
-    {
-        if (printer)
-        {
-            mPrinter = printer;
-        }
     }
 }

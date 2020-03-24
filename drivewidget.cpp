@@ -59,7 +59,8 @@ void DriveWidget::setup(bool happyHidden, bool chipHidden, bool nextSideHidden, 
     FormatStatusTip(ui->actionEditDisk, driveTxt);
 
     // Add actions to context menu
-    if(driveNo_ == 0) insertAction(0, ui->actionBootOption );
+    if(driveNo_ == 0)
+        insertAction(0, ui->actionBootOption );
     insertAction(0, ui->actionSave);
     insertAction(0, ui->actionAutoSave);       //
     insertAction(0, ui->actionSaveAs);
@@ -87,6 +88,7 @@ void DriveWidget::setup(bool happyHidden, bool chipHidden, bool nextSideHidden, 
     ui->buttonSave->setDefaultAction(ui->actionSave);
     ui->autoSave->setDefaultAction(ui->actionAutoSave);
     ui->buttonEditDisk->setDefaultAction(ui->actionEditDisk);
+    //  TODO Revert and SaveAs are MIA.
 
     ui->buttonNextSide->setVisible(!nextSideHidden);
     ui->buttonToggleHappy->setVisible(!happyHidden);

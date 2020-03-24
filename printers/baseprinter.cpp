@@ -97,7 +97,7 @@ namespace Printers
         }
     }
 
-    void BasePrinter::setOutput(const NativeOutputPtr& output)
+    void BasePrinter::setOutput(const BaseOutputPtr& output)
     {
         if (mOutput && mOutput != output)
         {

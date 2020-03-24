@@ -20,6 +20,7 @@
 #include <QString>
 #include <QFontComboBox>
 #include <QMessageBox>
+#include <QSharedPointer>
 
 namespace Printers {
 
@@ -34,12 +35,14 @@ TextPrinterWindow::TextPrinterWindow(QWidget *parent) :
     atasciiFont("Atari Classic Chunky")
 {
     ui->setupUi(this);
+
+    // Set initial font for ASCII text window
     QFont f;
     f.setFixedPitch(true);
     f.setFamily("monospace");
     ui->printerTextEditASCII->setFont(f);
 
-    // Set Initial Font for ATASCII text Window // 
+    // Set initial font for ATASCII text window //
     QFont a;
     a.setFixedPitch(true);
     a.setFamily(atasciiFont);
@@ -50,6 +53,7 @@ TextPrinterWindow::TextPrinterWindow(QWidget *parent) :
 
     connect(ui->asciiFontName, &QFontComboBox::currentFontChanged, this, &TextPrinterWindow::asciiFontChanged);
     connect(this, &TextPrinterWindow::textPrint, this, &TextPrinterWindow::print);
+    connect(this, &TextPrinterWindow::closed, MainWindow::getInstance(), &MainWindow::closeTextPrinterWindow);
     connect(ui->actionAtasciiFont, &QAction::triggered, this, &TextPrinterWindow::atasciiFontTriggered);
     connect(ui->actionSave, &QAction::triggered, this, &TextPrinterWindow::saveTriggered);
     connect(ui->actionClear, &QAction::triggered, this, &TextPrinterWindow::clearTriggered);
@@ -91,7 +95,7 @@ void TextPrinterWindow::closeEvent(QCloseEvent *e)
         respeqtSettings->setLastPrtWidth(TextPrinterWindow::geometry().width());
         respeqtSettings->setLastPrtHeight(TextPrinterWindow::geometry().height());
     }
-    emit closed();
+    emit closed(this);
     e->accept();
 }
 
@@ -195,7 +199,7 @@ void TextPrinterWindow::fontSizeTriggered()
 
 }
 // Change ASCII text window font    // 
-void TextPrinterWindow::asciiFontChanged(const QFont &)
+void TextPrinterWindow::asciiFontChanged(const QFont &/*font*/)
 {
     ui->printerTextEditASCII->setFont(ui->asciiFontName->currentFont());
 }

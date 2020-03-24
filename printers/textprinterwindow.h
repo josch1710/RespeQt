@@ -29,7 +29,7 @@ public:
     virtual void newPage(bool) override {}
     virtual void updateBoundingBox() override {}
     virtual bool beginOutput() override { return true; }
-    virtual bool endOutput() override { return true; }
+    virtual bool endOutput() override { return close(); }
     virtual void printChar(const QChar &c) override;
     virtual void printString(const QString &s) override;
     virtual void setWindow(const QRect &) {}
@@ -79,7 +79,7 @@ protected slots:
     void print(const QString &text);
 
 signals:
-    void closed();
+    void closed(const TextPrinterWindow* window);
     void textPrint(const QString &text);
 };
 

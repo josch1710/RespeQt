@@ -3,7 +3,7 @@
  *
  * Copyright 2015, 2017 Joseph Zatarski
  * Copyright 2016 TheMontezuma
- * Copyright 2017 josch1710
+ * Copyright 2017, 2020 josch1710
  * Copyright 2017 blind
  *
  * This file is copyrighted by either Fatih Aygun, Ray Ataergin, or both.
@@ -145,7 +145,7 @@ MainWindow::MainWindow(QWidget *parent)
     logFile = new QFile(QDir::temp().absoluteFilePath("respeqt.log"));
     logFile->open(QFile::WriteOnly | QFile::Truncate | QFile::Unbuffered | QFile::Text);
     logMutex = new QMutex();
-    connect(this, SIGNAL(logMessage(int,QString)), this, SLOT(uiMessage(int,QString)), Qt::QueuedConnection);
+    connect(this, &MainWindow::logMessage, this, &MainWindow::uiMessage, Qt::QueuedConnection);
     qInstallMessageHandler(logMessageOutput);
     qDebug() << "!d" << tr("RespeQt started at %1.").arg(QDateTime::currentDateTime().toString());
     
@@ -170,7 +170,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 #ifdef Q_OS_MAC
     /// This HAS to be executed before setupUi
-    bool noNative = !respeqtSettings->nativeMenu();
+    auto noNative = !respeqtSettings->nativeMenu();
     QApplication::setAttribute(Qt::AA_DontUseNativeMenuBar, noNative);
 #endif
 
@@ -199,7 +199,7 @@ MainWindow::MainWindow(QWidget *parent)
     /* Add QActions for most recent */
     for( int i = 0; i < NUM_RECENT_FILES; ++i ) {
         auto recentAction = new QAction(this);
-        connect(recentAction,SIGNAL(triggered()), this, SLOT(openRecent()));
+        connect(recentAction, &QAction::triggered, this, &MainWindow::openRecent);
         recentFilesActions_.append(recentAction);
     }
 
@@ -313,9 +313,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     /* Connect SioWorker signals */
     sio = SioWorkerPtr::create();
-    connect(sio.data(), SIGNAL(started()), this, SLOT(sioStarted()));
-    connect(sio.data(), SIGNAL(finished()), this, SLOT(sioFinished()));
-    connect(sio.data(), SIGNAL(statusChanged(QString)), this, SLOT(sioStatusChanged(QString)));
+    connect(sio.data(), &SioWorker::started, this, &MainWindow::sioStarted);
+    connect(sio.data(), &SioWorker::finished, this, &MainWindow::sioFinished);
+    connect(sio.data(), &SioWorker::statusChanged, this, &MainWindow::sioStatusChanged);
     shownFirstTime = true;
 
     PCLINK* pclink = new PCLINK(sio);
@@ -342,24 +342,27 @@ MainWindow::MainWindow(QWidget *parent)
     // Documentation Display
     docDisplayWindow = new DocDisplayWindow();
 
-    connect(docDisplayWindow, SIGNAL(closed()), this, SLOT(docDisplayWindowClosed()));
+    connect(docDisplayWindow, &DocDisplayWindow::closed, this, &MainWindow::docDisplayWindowClosed);
 
     setUpPrinterEmulationWidgets(respeqtSettings->printerEmulation());
 
     untitledName = 0;
 
-    connect(&trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
+#ifndef Q_OS_MACX
+    connect(&trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::trayIconActivated);
     trayIcon.setIcon(windowIcon());
+#endif
 
+    // TODO Testing.
     // Connections needed for remotely mounting a disk image & Toggle Auto-Commit //
-    connect (rcl, SIGNAL(findNewSlot(int,bool)), this, SLOT(firstEmptyDiskSlot(int,bool)));
-    connect (this, SIGNAL(newSlot(int)), rcl, SLOT(gotNewSlot(int)));
-    connect (rcl, SIGNAL(mountFile(int,QString)), this, SLOT(mountFileWithDefaultProtection(int,QString)));
-    connect (this, SIGNAL(fileMounted(bool)), rcl, SLOT(fileMounted(bool)));
-    connect (rcl, SIGNAL(toggleAutoCommit(int, bool)), this, SLOT(autoCommit(int, bool)));
-    connect (rcl, SIGNAL(toggleHappy(int, bool)), this, SLOT(happy(int, bool)));
-    connect (rcl, SIGNAL(toggleChip(int, bool)), this, SLOT(chip(int, bool)));
-    connect (rcl, SIGNAL(bootExe(QString)), this, SLOT(bootExeTriggered(QString)));
+    connect (rcl, &RCl::findNewSlot, this, &MainWindow::firstEmptyDiskSlot);
+    connect (this, &MainWindow::newSlot, rcl, &RCl::gotNewSlot);
+    connect (rcl, &RCl::mountFile, this, &MainWindow::mountFileWithDefaultProtection);
+    connect (this, &MainWindow::fileMounted, rcl, &RCl::fileMounted);
+    connect (rcl, &RCl::toggleAutoCommit, this, &MainWindow::autoCommit);
+    connect (rcl, &RCl::toggleHappy, this, &MainWindow::happy);
+    connect (rcl, &RCl::toggleChip, this, &MainWindow::chip);
+    connect (rcl, &RCl::bootExe, this, &MainWindow::bootExeTriggered);
 }
 
 MainWindow::~MainWindow()
@@ -385,36 +388,36 @@ void MainWindow::createDeviceWidgets()
     ui->rightColumn->setAlignment(Qt::AlignTop);
 
     for (int i = 0; i < DISK_COUNT; i++) {      //
-        auto deviceWidget = new DriveWidget(i);
+        auto driveWidget = new DriveWidget(i);
 
         if (i<8) {
-            ui->leftColumn->addWidget( deviceWidget );
+            ui->leftColumn->addWidget( driveWidget );
         } else {
-            ui->rightColumn->addWidget( deviceWidget );
+            ui->rightColumn->addWidget( driveWidget );
         }
 
-        deviceWidget->setup(respeqtSettings->hideHappyMode(), respeqtSettings->hideChipMode(), respeqtSettings->hideNextImage(), respeqtSettings->hideOSBMode(), respeqtSettings->hideToolDisk());
-        diskWidgets[i] = deviceWidget;
+        driveWidget->setup(respeqtSettings->hideHappyMode(), respeqtSettings->hideChipMode(), respeqtSettings->hideNextImage(), respeqtSettings->hideOSBMode(), respeqtSettings->hideToolDisk());
+        diskWidgets[i] = driveWidget;
 
         // connect signals to slots
-        connect(deviceWidget, SIGNAL(actionMountDisk(int)),this, SLOT(on_actionMountDisk_triggered(int)));
-        connect(deviceWidget, SIGNAL(actionMountFolder(int)),this, SLOT(on_actionMountFolder_triggered(int)));
-        connect(deviceWidget, SIGNAL(actionAutoSave(int)),this, SLOT(on_actionAutoSave_triggered(int)));
-        connect(deviceWidget, SIGNAL(actionEject(int)),this, SLOT(on_actionEject_triggered(int)));
-        connect(deviceWidget, SIGNAL(actionNextSide(int)),this, SLOT(on_actionNextSide_triggered(int)));
-        connect(deviceWidget, SIGNAL(actionToggleHappy(int,bool)),this, SLOT(on_actionToggleHappy_triggered(int,bool)));
-        connect(deviceWidget, SIGNAL(actionToggleChip(int,bool)),this, SLOT(on_actionToggleChip_triggered(int,bool)));
-        connect(deviceWidget, SIGNAL(actionToggleOSB(int,bool)),this, SLOT(on_actionToggleOSB_triggered(int,bool)));
-        connect(deviceWidget, SIGNAL(actionToolDisk(int,bool)),this, SLOT(on_actionToolDisk_triggered(int,bool)));
-        connect(deviceWidget, SIGNAL(actionWriteProtect(int,bool)),this, SLOT(on_actionWriteProtect_triggered(int,bool)));
-        connect(deviceWidget, SIGNAL(actionEditDisk(int)),this, SLOT(on_actionEditDisk_triggered(int)));
-        connect(deviceWidget, SIGNAL(actionSave(int)),this, SLOT(on_actionSave_triggered(int)));
-        connect(deviceWidget, SIGNAL(actionRevert(int)),this, SLOT(on_actionRevert_triggered(int)));
-        connect(deviceWidget, SIGNAL(actionSaveAs(int)),this, SLOT(on_actionSaveAs_triggered(int)));
-        connect(deviceWidget, SIGNAL(actionAutoSave(int)),this, SLOT(on_actionAutoSave_triggered(int)));
-        connect(deviceWidget, SIGNAL(actionBootOptions(int)),this, SLOT(on_actionBootOption_triggered()));
-
-        connect(this, SIGNAL(setFont(const QFont&)),deviceWidget, SLOT(setFont(const QFont&)));
+        // TODO Test
+        connect(driveWidget, &DriveWidget::actionMountDisk, this, &MainWindow::mountDiskTriggered);
+        connect(driveWidget, &DriveWidget::actionMountFolder, this, &MainWindow::mountFolderTriggered);
+        connect(driveWidget, &DriveWidget::actionAutoSave, this, &MainWindow::autoSaveTriggered);
+        connect(driveWidget, &DriveWidget::actionEject, this, &MainWindow::ejectTriggered);
+        connect(driveWidget, &DriveWidget::actionNextSide, this, &MainWindow::nextSideTriggered);
+        connect(driveWidget, &DriveWidget::actionToggleHappy, this, &MainWindow::happyToggled);
+        connect(driveWidget, &DriveWidget::actionToggleChip, this, &MainWindow::chipToggled);
+        connect(driveWidget, &DriveWidget::actionToggleOSB, this, &MainWindow::OSBToggled);
+        connect(driveWidget, &DriveWidget::actionToolDisk, this, &MainWindow::toolDiskTriggered);
+        connect(driveWidget, &DriveWidget::actionWriteProtect, this, &MainWindow::protectTriggered);
+        connect(driveWidget, &DriveWidget::actionEditDisk, this, &MainWindow::editDiskTriggered);
+        connect(driveWidget, &DriveWidget::actionSave, this, &MainWindow::saveTriggered);
+        connect(driveWidget, &DriveWidget::actionRevert, this, &MainWindow::revertTriggered);
+        connect(driveWidget, &DriveWidget::actionSaveAs, this, &MainWindow::saveAsTriggered);
+        connect(driveWidget, &DriveWidget::actionAutoSave, this, &MainWindow::autoSaveTriggered);
+        connect(driveWidget, &DriveWidget::actionBootOptions, this, &MainWindow::bootOptionTriggered);
+        connect(this, &MainWindow::setFont, driveWidget, &DriveWidget::setFont);
     }
 
 
@@ -426,12 +429,10 @@ void MainWindow::createDeviceWidgets()
         } else {
             ui->rightColumn2->addWidget( printerWidget );
         }
-        printerWidget->setup();
         printerWidgets[i] = printerWidget;
    }
 
-
-    changeFonts();
+   changeFonts();
 }
 
  void MainWindow::mousePressEvent(QMouseEvent *event)
@@ -674,6 +675,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::hideEvent(QHideEvent *event)
 {
+#ifndef Q_OS_MACX
     if (respeqtSettings->minimizeToTray()) {
         trayIcon.show();
         oldWindowFlags = windowFlags();
@@ -683,6 +685,7 @@ void MainWindow::hideEvent(QHideEvent *event)
         event->ignore();
         return;
     }
+#endif
     QMainWindow::hideEvent(event);
 }
 
@@ -690,11 +693,13 @@ void MainWindow::show()
 {
     QMainWindow::show();
     if (shownFirstTime) {
+        shownFirstTime = false; // Reset the flag
+
         /* Open options dialog if it's the first time */
         if (respeqtSettings->isFirstTime()) {
             if (QMessageBox::Yes == QMessageBox::question(this, tr("First run"),
-                                       tr("You are running RespeQt for the first time.\n\nDo you want to open the options dialog?"),
-                                       QMessageBox::Yes, QMessageBox::No)) {
+                    tr("You are running RespeQt for the first time.\n\nDo you want to open the options dialog?"),
+                    QMessageBox::Yes, QMessageBox::No)) {
                 ui->actionOptions->trigger();
             }
         }
@@ -716,10 +721,6 @@ void MainWindow::leaveEvent(QEvent *)
     if (g_miniMode && g_shadeMode) {
        setWindowOpacity(0.25);
     }
-}
-
-void MainWindow::resizeEvent(QResizeEvent *)
-{
 }
 
 bool MainWindow::eventFilter(QObject * /*obj*/, QEvent *event)
@@ -1431,7 +1432,7 @@ void MainWindow::mountFile(int no, const QString &fileName, bool /*prot*/)
 
         respeqtSettings->mountImage(no, fileName, disk->isReadOnly());
         updateRecentFileActions();
-        connect(disk, SIGNAL(statusChanged(int)), this, SLOT(deviceStatusChanged(int)), Qt::QueuedConnection);
+        connect(disk, &SimpleDiskImage::statusChanged, this, &MainWindow::deviceStatusChanged, Qt::QueuedConnection);
         deviceStatusChanged(DISK_BASE_CDEVIC + no);
 
         // Extract the file name without the path //
@@ -1521,6 +1522,11 @@ bool MainWindow::firmwareAvailable(int no, QString &name, QString path)
 void MainWindow::mountDiskImage(int no)
 {
     QString dir;
+
+    if (no < 0)
+    {
+        no = firstEmptyDiskSlot(0, true);
+    }
 // Always mount from "last image dir" //
 //    if (diskWidgets[no].fileNameLabel->text().isEmpty()) {
         dir = respeqtSettings->lastDiskImageDir();
@@ -1548,6 +1554,11 @@ void MainWindow::mountDiskImage(int no)
 void MainWindow::mountFolderImage(int no)
 {
     QString dir;
+
+    if (no < 0)
+    {
+        no = firstEmptyDiskSlot(0, true);
+    }
     // Always mount from "last folder dir" //
     dir = respeqtSettings->lastFolderImageDir();
     QString fileName = QFileDialog::getExistingDirectory(this, tr("Open a folder image"), dir);
@@ -1792,23 +1803,23 @@ void MainWindow::revertDisk(int no)
 }
 
 // Slots for handling actions for devices.
-void MainWindow::on_actionMountDisk_triggered(int deviceId) {mountDiskImage(deviceId);}
-void MainWindow::on_actionMountFolder_triggered(int deviceId) {mountFolderImage(deviceId);}
-void MainWindow::on_actionEject_triggered(int deviceId) {ejectImage(deviceId);}
-void MainWindow::on_actionNextSide_triggered(int deviceId) {loadNextSide(deviceId);}
-void MainWindow::on_actionToggleHappy_triggered(int deviceId, bool open) {toggleHappy(deviceId, open);}
-void MainWindow::on_actionToggleChip_triggered(int deviceId, bool open) {toggleChip(deviceId, open);}
-void MainWindow::on_actionToggleOSB_triggered(int deviceId, bool open) {toggleOSB(deviceId, open);}
-void MainWindow::on_actionToolDisk_triggered(int deviceId, bool open) {toggleToolDisk(deviceId, open);}
-void MainWindow::on_actionWriteProtect_triggered(int deviceId, bool writeProtectEnabled) {toggleWriteProtection(deviceId, writeProtectEnabled);}
-void MainWindow::on_actionEditDisk_triggered(int deviceId) {openEditor(deviceId);}
-void MainWindow::on_actionSave_triggered(int deviceId) {saveDisk(deviceId);}
+void MainWindow::mountDiskTriggered(int deviceId) { mountDiskImage(deviceId); }
+void MainWindow::mountFolderTriggered(int deviceId) { mountFolderImage(deviceId); }
+void MainWindow::ejectTriggered(int deviceId) { ejectImage(deviceId); }
+void MainWindow::nextSideTriggered(int deviceId) { loadNextSide(deviceId); }
+void MainWindow::happyToggled(int deviceId, bool open) { toggleHappy(deviceId, open) ;}
+void MainWindow::chipToggled(int deviceId, bool open) { toggleChip(deviceId, open); }
+void MainWindow::OSBToggled(int deviceId, bool open) { toggleOSB(deviceId, open); }
+void MainWindow::toolDiskTriggered(int deviceId, bool open) { toggleToolDisk(deviceId, open); }
+void MainWindow::protectTriggered(int deviceId, bool writeProtectEnabled) { toggleWriteProtection(deviceId, writeProtectEnabled); }
+void MainWindow::editDiskTriggered(int deviceId) { openEditor(deviceId); }
+void MainWindow::saveTriggered(int deviceId) { saveDisk(deviceId); }
 //
-void MainWindow::on_actionAutoSave_triggered(int deviceId) {autoSaveDisk(deviceId);}
-void MainWindow::on_actionSaveAs_triggered(int deviceId) {saveDiskAs(deviceId);}
-void MainWindow::on_actionRevert_triggered(int deviceId) {revertDisk(deviceId);}
+void MainWindow::autoSaveTriggered(int deviceId) { autoSaveDisk(deviceId); }
+void MainWindow::saveAsTriggered(int deviceId) { saveDiskAs(deviceId); } // TODO SaveAs is MIA
+void MainWindow::revertTriggered(int deviceId) { revertDisk(deviceId); } // TODO Revert is MIA
 
-void MainWindow::on_actionMountRecent_triggered(const QString &fileName) {mountFileWithDefaultProtection(firstEmptyDiskSlot(), fileName);}
+void MainWindow::mountRecentTriggered(const QString &fileName) { mountFileWithDefaultProtection(firstEmptyDiskSlot(), fileName); }
 
 void MainWindow::on_actionEjectAll_triggered()
 {
@@ -1857,15 +1868,6 @@ void MainWindow::on_actionEjectAll_triggered()
     if (wasRunning) {
         ui->actionStartEmulation->trigger();
     }
-}
-void MainWindow::on_actionMountDisk_triggered()
-{
-    mountDiskImage(firstEmptyDiskSlot(0, true));
-}
-
-void MainWindow::on_actionMountFolder_triggered()
-{
-    mountFolderImage(firstEmptyDiskSlot(0, true));
 }
 
 void MainWindow::on_actionNewImage_triggered()
@@ -2031,6 +2033,7 @@ void MainWindow::on_actionQuit_triggered()
 
 void MainWindow::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
 {
+#ifndef Q_OS_MACX
     if (reason == QSystemTrayIcon::DoubleClick) {
         setWindowFlags(oldWindowFlags);
         setWindowState(oldWindowStates);
@@ -2039,11 +2042,24 @@ void MainWindow::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
         raise();
         trayIcon.hide();
     }
+#endif
 }
 
-void MainWindow::on_actionBootOption_triggered()
+void MainWindow::bootOptionTriggered()
 {
     QString folderPath = respeqtSettings->mountedImageSetting(0).fileName;
     BootOptionsDialog bod(folderPath, this);
     bod.exec();
+}
+
+void MainWindow::closeTextPrinterWindow(const Printers::TextPrinterWindow *window)
+{
+    for(auto i = 0; i < PRINTER_COUNT; i++)
+    {
+        if (printerWidgets[i]->connected() && printerWidgets[i]->device() == window)
+        {
+            printerWidgets[i]->disconnectPrinter();
+            break;
+        }
+    }
 }

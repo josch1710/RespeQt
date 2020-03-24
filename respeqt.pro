@@ -100,6 +100,7 @@ win32:SOURCES += serialport-win32.cpp \
 unix:SOURCES += serialport-unix.cpp \
     printers/rawoutput_cups.cpp
 HEADERS += mainwindow.h \
+    printers/baseoutput.h \
     printers/outputs.h \
     printers/printers.h \
     rcl.h \

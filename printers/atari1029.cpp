@@ -54,7 +54,8 @@ namespace Printers
                         mESC = false;
                         setElongatedMode(false);
                         QFontPtr font = mOutput->font();
-                        font->setUnderline(false);
+                        if (font)
+                            font->setUnderline(false);
                         mOutput->setFont(font);
                         mOutput->newLine();
                         // Drop the rest of the buffer
@@ -96,7 +97,8 @@ namespace Printers
             case 25: // CTRL+Y starts underline mode
             {
                 QFontPtr font = mOutput->font();
-                font->setUnderline(true);
+                if (font)
+                    font->setUnderline(true);
                 mOutput->setFont(font);
                 mESC = false;
                 qDebug() << "!n" << "ESC Underline on";
@@ -105,7 +107,8 @@ namespace Printers
             case 26: // CTRL+Z ends underline mode
             {
                 QFontPtr font = mOutput->font();
-                font->setUnderline(false);
+                if (font)
+                    font->setUnderline(false);
                 mOutput->setFont(font);
                 mESC = false;
                 qDebug() << "!n" << "ESC Underline off";
@@ -200,7 +203,7 @@ namespace Printers
             break;
 
             case GraphicsMode::NOT_GRAPHICS: //Should not happen.
-                assert(0);
+                Q_ASSERT(0);
             break;
         }
 

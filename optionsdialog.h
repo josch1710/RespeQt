@@ -67,6 +67,7 @@ private slots:
     void selectToolDiskTriggered();
     void fixedFontClicked();
     void rclFolderClicked();
+    void useNativeMenuToggled();
 };
 
 #endif // OPTIONSDIALOG_H
