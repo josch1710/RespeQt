@@ -20,7 +20,7 @@ namespace Printers {
 
     bool RawOutput::setupOutput()
     {
-        rawPrinterName = respeqtSettings->rawPrinterName();
+        rawPrinterName = RespeqtSettings::instance()->rawPrinterName();
         return true;
     }
 

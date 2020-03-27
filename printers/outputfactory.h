@@ -3,8 +3,8 @@
 
 #include <QVector>
 #include <QString>
+#include <memory>
 #include "nativeoutput.h"
-
 
 namespace Printers {
 
@@ -23,16 +23,12 @@ namespace Printers {
         using CreatorVector = QVector<CreatorPair>;
         CreatorVector creatorFunctions;
 
-        static std::unique_ptr<OutputFactory> sInstance;
+        static std::shared_ptr<OutputFactory> sInstance;
         OutputFactory() {}
 
     public:
-        static std::unique_ptr<OutputFactory>& instance()
+        static std::shared_ptr<OutputFactory> instance()
         {
-            if (sInstance == nullptr)
-            {
-                sInstance.reset(new OutputFactory());
-            }
             return sInstance;
         }
 

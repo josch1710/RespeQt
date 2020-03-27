@@ -484,7 +484,7 @@ DiskEditDialog::DiskEditDialog(QWidget *parent) :
     connect(m_ui->fileList, &QTableView::doubleClicked, this, &DiskEditDialog::fileListDoubleClicked);
 
     m_ui->fileList->viewport()->setAcceptDrops(true);
-    if(respeqtSettings->explorerOnTop())
+    if(RespeqtSettings::instance()->explorerOnTop())
     {
             m_ui->onTopBox->setChecked(true);
             setWindowFlags(Qt::WindowStaysOnTopHint);
@@ -611,13 +611,13 @@ void DiskEditDialog::extractFilesTriggered()
         return;
     }
 
-    QString target = QFileDialog::getExistingDirectory(this, tr("Extract files"), respeqtSettings->lastExtractDir());
+    QString target = QFileDialog::getExistingDirectory(this, tr("Extract files"), RespeqtSettings::instance()->lastExtractDir());
 
     if (target.isEmpty()) {
         return;
     }
 
-    respeqtSettings->setLastExtractDir(target);
+    RespeqtSettings::instance()->setLastExtractDir(target);
 
     QList <AtariDirEntry> selectedEntries;
     foreach (QModelIndex i, indexes) {
@@ -653,7 +653,7 @@ void DiskEditDialog::deleteSelectedFilesTriggered()
 
 void DiskEditDialog::addFilesTriggered()
 {
-    QStringList files = QFileDialog::getOpenFileNames(this, tr("Add files"), respeqtSettings->lastExtractDir());
+    QStringList files = QFileDialog::getOpenFileNames(this, tr("Add files"), RespeqtSettings::instance()->lastExtractDir());
     if (files.empty()) {
         return;
     }
@@ -691,10 +691,10 @@ void DiskEditDialog::stayOnTopChanged()
     if(m_ui->onTopBox->isChecked())
     {
        setWindowFlags(Qt::WindowStaysOnTopHint);
-       respeqtSettings->setExplorerOnTop(true);
+       RespeqtSettings::instance()->setExplorerOnTop(true);
     } else {
        setWindowFlags(Qt::WindowStaysOnBottomHint);
-       respeqtSettings->setExplorerOnTop(false);
+       RespeqtSettings::instance()->setExplorerOnTop(false);
     }
     show();
 }

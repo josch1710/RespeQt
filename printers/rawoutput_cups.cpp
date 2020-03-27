@@ -83,7 +83,7 @@ namespace Printers {
         cups_ptype_t type = CUPS_PRINTER_LOCAL, mask = CUPS_PRINTER_LOCAL;
         char *resource = new char[256];
 
-        rawPrinterName = respeqtSettings->rawPrinterName();
+        rawPrinterName = RespeqtSettings::instance()->rawPrinterName();
 
         if (!cupsEnumDests(CUPS_DEST_FLAGS_NONE, 5000, nullptr, type, mask,
             reinterpret_cast<cups_dest_cb_t>(my_dest_cb), &user_data))

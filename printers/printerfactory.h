@@ -25,16 +25,12 @@ namespace Printers {
         using CreatorVector = std::vector<CreatorPair>;
         CreatorVector creatorFunctions;
 
-        static std::unique_ptr<PrinterFactory> sInstance;
+        static std::shared_ptr<PrinterFactory> sInstance;
         PrinterFactory() {}
 
     public:
-        static std::unique_ptr<PrinterFactory>& instance()
+        static std::shared_ptr<PrinterFactory> instance()
         {
-            if (sInstance == nullptr)
-            {
-                sInstance.reset(new PrinterFactory());
-            }
             return sInstance;
         }
 

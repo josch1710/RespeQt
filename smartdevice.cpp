@@ -59,7 +59,7 @@ void SmartDevice::handleCommand(quint8 command, quint16 aux)
     // Submit URL
     case 0x55:
     {
-        if(respeqtSettings->isURLSubmitEnabled() && aux!=0 && aux<=2000)
+        if(RespeqtSettings::instance()->isURLSubmitEnabled() && aux!=0 && aux<=2000)
         {
             if (!sio->port()->writeCommandAck())
             {

@@ -1,5 +1,6 @@
 #include "svgoutput.h"
 #include "mainwindow.h"
+#include <memory>
 #include <cmath>
 #include <QFileDialog>
 
@@ -26,7 +27,7 @@ namespace Printers {
 
     bool SVGOutput::setupOutput()
     {
-        QString fileName = QFileDialog::getSaveFileName(MainWindow::getInstance(), QObject::tr("Save SVG"), "", QObject::tr("SVG (*.svg)"));
+        QString fileName = QFileDialog::getSaveFileName(MainWindow::instance(), QObject::tr("Save SVG"), "", QObject::tr("SVG (*.svg)"));
         if (fileName.count() > 0)
         {
             setFileName(fileName);

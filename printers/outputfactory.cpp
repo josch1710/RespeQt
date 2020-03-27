@@ -1,3 +1,5 @@
 #include "outputfactory.h"
 
-std::unique_ptr<Printers::OutputFactory> Printers::OutputFactory::sInstance = nullptr;
+namespace Printers {
+    std::shared_ptr<OutputFactory> OutputFactory::sInstance = std::shared_ptr<OutputFactory>(new OutputFactory);
+}

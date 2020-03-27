@@ -17,11 +17,13 @@
 
 #include <QSettings>
 #include <QPrinterInfo>
+#include <memory>
 
 #include "Emulator.h"
 
 #define NUM_RECENT_FILES 10
 
+// There should always only be one instance, so this is a singleton.
 class RespeqtSettings
 {
 public:
@@ -36,7 +38,6 @@ public:
         QString outputName;
     };
 
-    RespeqtSettings();
     ~RespeqtSettings();
 
     bool isFirstTime();
@@ -326,7 +327,21 @@ public:
     void setRawPrinterName(const QString &name);
     QString rawPrinterName() const;
 
+    static const std::unique_ptr<RespeqtSettings>& instance() {
+        if (!sInstance)
+        {
+            sInstance.reset(new RespeqtSettings);
+        }
+        return sInstance;
+    }
+
 private:
+    friend std::unique_ptr<RespeqtSettings>;
+
+    RespeqtSettings();
+
+    static std::unique_ptr<RespeqtSettings> sInstance;
+
     QSettings *mSettings;
 
     void writeRecentImageSettings();

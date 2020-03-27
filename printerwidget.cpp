@@ -48,12 +48,12 @@ void PrinterWidget::setup()
     QString printerTxt = QString("P%1").arg(printerNo_ + 1);
     ui->printerLabel->setText(printerTxt);
 
-    RespeqtSettings::PrinterSettings ps = respeqtSettings->printerSettings(printerNo_);
+    RespeqtSettings::PrinterSettings ps = RespeqtSettings::instance()->printerSettings(printerNo_);
 
     ui->atariPrinters->clear();
     std::map<QString, int> list;
     ui->atariPrinters->addItem(tr("None"), -1);
-    auto& factory = Printers::PrinterFactory::instance();
+    auto factory = Printers::PrinterFactory::instance();
     const QVector<QString> pnames = factory->getPrinterNames();
     QVector<QString>::const_iterator it;
     for(it = pnames.begin(); it != pnames.end(); ++it)
@@ -123,7 +123,7 @@ bool PrinterWidget::selectPrinter()
        {
            mSio->installDevice(static_cast<quint8>(PRINTER_BASE_CDEVIC + printerNo_), newPrinter.data());
            mPrinter = newPrinter;
-           respeqtSettings->setPrinterName(printerNo_, ui->atariPrinters->currentText());
+           RespeqtSettings::instance()->setPrinterName(printerNo_, ui->atariPrinters->currentText());
            return true;
        }
     }
@@ -153,7 +153,7 @@ bool PrinterWidget::selectOutput()
         if (output->setupOutput())
         {
             mDevice = output;
-            respeqtSettings->setOutputName(printerNo_, label);
+            RespeqtSettings::instance()->setOutputName(printerNo_, label);
         }
 
         return true;
@@ -217,10 +217,10 @@ void PrinterWidget::disconnectPrinter()
 
 void PrinterWidget::outputSelectionChanged(const QString &outputName)
 {
-    respeqtSettings->setOutputName(printerNo_, outputName);
+    RespeqtSettings::instance()->setOutputName(printerNo_, outputName);
 }
 
 void PrinterWidget::printerSelectionChanged(const QString &printerName)
 {
-    respeqtSettings->setPrinterName(printerNo_, printerName);
+    RespeqtSettings::instance()->setPrinterName(printerNo_, printerName);
 }

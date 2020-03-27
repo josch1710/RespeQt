@@ -17,7 +17,6 @@
 #include "respeqtsettings.h"
 #include "mainwindow.h"
 
-
 #include <QDateTime>
 #include <QtDebug>
 #include <QDesktopServices>
@@ -26,7 +25,6 @@
 char RCl::rclSlotNo;
 
 // RespeQt Client ()
-
 void RCl::handleCommand(quint8 command, quint16 aux)
 {
     QByteArray data(6, 0);
@@ -35,8 +33,6 @@ void RCl::handleCommand(quint8 command, quint16 aux)
     QDateTime dateTime = QDateTime::currentDateTime();
 
     switch (command) {
-
-
 
     case 0x91 : // list rcl folder(up to 250 files)
     {
@@ -69,7 +65,7 @@ void RCl::handleCommand(quint8 command, quint16 aux)
         {
             QByteArray  ddata(255, 0);
             quint8 index  = 0;
-            QString pth = respeqtSettings->lastRclDir();
+            QString pth = RespeqtSettings::instance()->lastRclDir();
             QDir dir(pth);
             QStringList filters;
             QString fileFilter = g_fileFilter.trimmed();
@@ -182,7 +178,7 @@ void RCl::handleCommand(quint8 command, quint16 aux)
                 sio->swapDevices(
                     static_cast<quint8>(swapDisk1 + DISK_BASE_CDEVIC - 1),
                     static_cast<quint8>(swapDisk2 + DISK_BASE_CDEVIC - 1));
-                respeqtSettings->swapImages(swapDisk1 - 1, swapDisk2 - 1);
+                RespeqtSettings::instance()->swapImages(swapDisk1 - 1, swapDisk2 - 1);
                 qDebug() << "!n" << tr("[%1] Swapped disk %2 with disk %3.")
                                 .arg(deviceName())
                                 .arg(swapDisk2)
@@ -224,7 +220,7 @@ void RCl::handleCommand(quint8 command, quint16 aux)
                                   (sio->getDevice(static_cast<quint8>(i + DISK_BASE_CDEVIC)));
                           sio->uninstallDevice(static_cast<quint8>(i + DISK_BASE_CDEVIC));
                           delete img;
-                          respeqtSettings->unmountImage(i);
+                          RespeqtSettings::instance()->unmountImage(i);
                           qDebug() << "!n" << tr("[%1] Unmounted disk %2")
                                         .arg(deviceName())
                                         .arg(i + 1);
@@ -250,7 +246,7 @@ void RCl::handleCommand(quint8 command, quint16 aux)
                   } else {
                       sio->uninstallDevice(static_cast<quint8>(unmountDisk - 1 + DISK_BASE_CDEVIC));
                       delete img;
-                      respeqtSettings->unmountImage(unmountDisk - 1);
+                      RespeqtSettings::instance()->unmountImage(unmountDisk - 1);
                       qDebug() << "!n" << tr("[%1] Remotely unmounted disk %2")
                                   .arg(deviceName())
                                   .arg(unmountDisk);
@@ -275,7 +271,7 @@ void RCl::handleCommand(quint8 command, quint16 aux)
           }
           // If no Folder Image has ever been mounted abort the command as we won't
           // know which folder to use to remotely create/mount an image file.
-          if(respeqtSettings->lastFolderImageDir() == "") {
+          if(RespeqtSettings::instance()->lastFolderImageDir() == "") {
               qCritical() << "!e" << tr("[%1] RespeQt can't determine the folder where the image file must be created/mounted!")
                             .arg(deviceName());
               qCritical() << "!e" << tr("[%1] Mount a Folder Image at least once before issuing a remote mount command.")
@@ -318,7 +314,7 @@ void RCl::handleCommand(quint8 command, quint16 aux)
                       return;
                   }
                   imageFileName = imageFileName.left(i);
-                  QFile file(respeqtSettings->lastRclDir() + "/" + imageFileName);
+                  QFile file(RespeqtSettings::instance()->lastRclDir() + "/" + imageFileName);
                   if (!file.open(QIODevice::WriteOnly)) {
                       qCritical() << "!e" << tr("[%1] Can not create PC File: %2")
                                      .arg(deviceName())
@@ -525,7 +521,7 @@ void RCl::handleCommand(quint8 command, quint16 aux)
         bool isDiskImage = (aux/256)?false:true;
         // If no Folder Image has ever been mounted abort the command as we won't
         // know which folder to use to remotely create/mount an image file.
-        if(respeqtSettings->lastRclDir() == "") {
+        if(RespeqtSettings::instance()->lastRclDir() == "") {
             qCritical() << "!e" << tr("[%1] RespeQt can't determine the folder where the image file must be created/mounted!")
                            .arg(deviceName());
             qCritical() << "!e" << tr("[%1] Mount a Folder Image at least once before issuing a remote mount command.")
@@ -682,7 +678,7 @@ QString RCl::toAtariFileName(QString dosFileName) {
 
 QString RCl::toDosFileName(QString atariFileName)
 {
-    QString pth = respeqtSettings->lastRclDir();
+    QString pth = RespeqtSettings::instance()->lastRclDir();
     QDir dir(pth);
     QStringList filters;
     filters <<"*.atr"<<"*.xfd" <<"*.atx"<<"*.pro"<<"*.xex"<<"*.exe"<<"*.com";

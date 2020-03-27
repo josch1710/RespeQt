@@ -20,7 +20,6 @@
 #include "pclink.h"
 #include "rcl.h"
 #include "smartdevice.h"
-#include "respeqtsettings.h"
 #include "autobootdialog.h"
 #include "autoboot.h"
 #include "cassettedialog.h"
@@ -32,6 +31,7 @@
 #include "printers/outputfactory.h"
 #include "printers/printers.h"
 #include "printers/outputs.h"
+#include "respeqtsettings.h"
 
 #include <QEvent>
 #include <QDragEnterEvent>
@@ -58,8 +58,6 @@
 
 #include <QFontDatabase>
 
-RespeqtSettings *respeqtSettings;
-
 static QFile *logFile;
 static QMutex *logMutex;
 
@@ -74,6 +72,8 @@ static bool g_shadeMode = false;
 SimpleDiskImage *g_translator = nullptr;
 //static int g_savedWidth;
 
+MainWindow* MainWindow::sInstance{nullptr};
+
 // ****************************** END OF GLOBALS ************************************//
 
 // Displayed only in debug mode    "!d"
@@ -82,9 +82,7 @@ SimpleDiskImage *g_translator = nullptr;
 // Important       (blue)          "!i"
 // Warning         (brown)         "!w"
 // Error           (red)           "!e"
-
-void logMessageOutput(QtMsgType type, const QMessageLogContext &/*context*/, const QString &msg)
-// void logMessageOutput(QtMsgType type, const char *msg)
+void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext &/*context*/, const QString &msg)
 {
     logMutex->lock();
     logFile->write(QString::number((quint64)QThread::currentThreadId(), 16).toLatin1());
@@ -123,7 +121,8 @@ void logMessageOutput(QtMsgType type, const QMessageLogContext &/*context*/, con
             return;
         }
 #endif
-        MainWindow::getInstance()->doLogMessage(localMsg.at(1), displayMsg);
+        // TODO Should be signal-slot
+        sInstance->doLogMessage(localMsg.at(1), displayMsg);
     }
 }
 
@@ -132,21 +131,19 @@ void MainWindow::doLogMessage(int type, const QString &msg)
     emit logMessage(type, msg);
 }
 
-MainWindow *MainWindow::instance = nullptr;
-
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow),
+MainWindow::MainWindow()
+    : QMainWindow(nullptr), ui(new Ui::MainWindow),
       isClosing(false)
-{
+ {
     /* Setup the logging system */
-    instance = this;
+    sInstance = this;
     g_respeQtAppPath = QCoreApplication::applicationDirPath();
     g_disablePicoHiSpeed = false;
     logFile = new QFile(QDir::temp().absoluteFilePath("respeqt.log"));
     logFile->open(QFile::WriteOnly | QFile::Truncate | QFile::Unbuffered | QFile::Text);
     logMutex = new QMutex();
     connect(this, &MainWindow::logMessage, this, &MainWindow::uiMessage, Qt::QueuedConnection);
-    qInstallMessageHandler(logMessageOutput);
+    qInstallMessageHandler(MainWindow::logMessageOutput);
     qDebug() << "!d" << tr("RespeQt started at %1.").arg(QDateTime::currentDateTime().toString());
     
     logWindow_ = nullptr;
@@ -163,22 +160,23 @@ MainWindow::MainWindow(QWidget *parent)
     QCoreApplication::setOrganizationName("ZeeSoft");
     QCoreApplication::setOrganizationDomain("https://github.com/jzatarski/RespeQt");
     QCoreApplication::setApplicationName("RespeQt");
-    respeqtSettings = new RespeqtSettings();
-       
+
     /* Load translators */
     loadTranslators();
 
 #ifdef Q_OS_MAC
     /// This HAS to be executed before setupUi
-    auto noNative = !respeqtSettings->nativeMenu();
+    auto noNative = !(RespeqtSettings::instance()->nativeMenu());
     QApplication::setAttribute(Qt::AA_DontUseNativeMenuBar, noNative);
 #endif
 
     /* Setup UI */
     ui->setupUi(this);
 
+    connectUISignal();
+
     /* Setup the printer factory */
-    auto& pfactory = Printers::PrinterFactory::instance();
+    auto pfactory = Printers::PrinterFactory::instance();
     pfactory->registerPrinter<Printers::Atari1020>(Printers::Atari1020::typeName());
     pfactory->registerPrinter<Printers::Atari1025>(Printers::Atari1025::typeName());
     pfactory->registerPrinter<Printers::Atari1027>(Printers::Atari1027::typeName());
@@ -186,7 +184,7 @@ MainWindow::MainWindow(QWidget *parent)
     pfactory->registerPrinter<Printers::Passthrough>(Printers::Passthrough::typeName());
 
     /* Setup the output factory */
-    auto& ofactory = Printers::OutputFactory::instance();
+    auto ofactory = Printers::OutputFactory::instance();
     ofactory->registerOutput<Printers::SVGOutput>(Printers::SVGOutput::typeName());
     ofactory->registerOutput<Printers::TextPrinterWindow>(Printers::TextPrinterWindow::typeName());
     ofactory->registerOutput<Printers::RawOutput>(Printers::RawOutput::typeName());
@@ -244,18 +242,18 @@ MainWindow::MainWindow(QWidget *parent)
         }
     }
     // Pass Session file name, path and MainWindow title to RespeQtSettings //
-    respeqtSettings->setSessionFile(g_sessionFile, g_sessionFilePath);
-    respeqtSettings->setMainWindowTitle(g_mainWindowTitle);
+    RespeqtSettings::instance()->setSessionFile(g_sessionFile, g_sessionFilePath);
+    RespeqtSettings::instance()->setMainWindowTitle(g_mainWindowTitle);
 
     // Display Session name, and restore session parameters if session file was specified //
     g_mainWindowTitle = tr("RespeQt - Atari Serial Peripheral Emulator for Qt");
     if (g_sessionFile != "") {
         setWindowTitle(g_mainWindowTitle + tr(" -- Session: ") + g_sessionFile);
-        respeqtSettings->loadSessionFromFile(g_sessionFilePath+g_sessionFile);
+        RespeqtSettings::instance()->loadSessionFromFile(g_sessionFilePath+g_sessionFile);
     } else {
         setWindowTitle(g_mainWindowTitle);
     }
-    setGeometry(respeqtSettings->lastHorizontalPos(),respeqtSettings->lastVerticalPos(),respeqtSettings->lastWidth(),respeqtSettings->lastHeight());
+    setGeometry(RespeqtSettings::instance()->lastHorizontalPos(), RespeqtSettings::instance()->lastVerticalPos(), RespeqtSettings::instance()->lastWidth(), RespeqtSettings::instance()->lastHeight());
 
     /* Setup status bar */
     speedLabel = new QLabel(this);
@@ -280,9 +278,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->statusBar->addPermanentWidget(prtOnOffLabel);
     ui->statusBar->addPermanentWidget(netLabel);
     ui->statusBar->addPermanentWidget(clearMessagesLabel);
-    ui->textEdit->installEventFilter(MainWindow::getInstance());
+    ui->textEdit->installEventFilter(this);
     changeFonts();
-    g_D9DOVisible =  respeqtSettings->D9DOVisible();
+    g_D9DOVisible =  RespeqtSettings::instance()->D9DOVisible();
     showHideDrives();
 
 #ifndef QT_NO_DEBUG
@@ -324,7 +322,7 @@ MainWindow::MainWindow(QWidget *parent)
     /* Restore application state */
     for (int i = 0; i < DISK_COUNT; i++) {
         RespeqtSettings::ImageSettings is;
-        is = respeqtSettings->mountedImageSetting(i);
+        is = RespeqtSettings::instance()->mountedImageSetting(i);
         mountFile(i, is.fileName, is.isWriteProtected);
     }
     updateRecentFileActions();
@@ -344,7 +342,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(docDisplayWindow, &DocDisplayWindow::closed, this, &MainWindow::docDisplayWindowClosed);
 
-    setUpPrinterEmulationWidgets(respeqtSettings->printerEmulation());
+    setUpPrinterEmulationWidgets(RespeqtSettings::instance()->printerEmulation());
 
     untitledName = 0;
 
@@ -371,8 +369,6 @@ MainWindow::~MainWindow()
         ui->actionStartEmulation->trigger();
     }
 
-    delete respeqtSettings;
-
     delete ui;
 
     qDebug() << "!d" << tr("RespeQt stopped at %1.").arg(QDateTime::currentDateTime().toString());
@@ -396,11 +392,10 @@ void MainWindow::createDeviceWidgets()
             ui->rightColumn->addWidget( driveWidget );
         }
 
-        driveWidget->setup(respeqtSettings->hideHappyMode(), respeqtSettings->hideChipMode(), respeqtSettings->hideNextImage(), respeqtSettings->hideOSBMode(), respeqtSettings->hideToolDisk());
+        driveWidget->setup(RespeqtSettings::instance()->hideHappyMode(), RespeqtSettings::instance()->hideChipMode(), RespeqtSettings::instance()->hideNextImage(), RespeqtSettings::instance()->hideOSBMode(), RespeqtSettings::instance()->hideToolDisk());
         diskWidgets[i] = driveWidget;
 
         // connect signals to slots
-        // TODO Test
         connect(driveWidget, &DriveWidget::actionMountDisk, this, &MainWindow::mountDiskTriggered);
         connect(driveWidget, &DriveWidget::actionMountFolder, this, &MainWindow::mountFolderTriggered);
         connect(driveWidget, &DriveWidget::actionAutoSave, this, &MainWindow::autoSaveTriggered);
@@ -415,12 +410,9 @@ void MainWindow::createDeviceWidgets()
         connect(driveWidget, &DriveWidget::actionSave, this, &MainWindow::saveTriggered);
         connect(driveWidget, &DriveWidget::actionRevert, this, &MainWindow::revertTriggered);
         connect(driveWidget, &DriveWidget::actionSaveAs, this, &MainWindow::saveAsTriggered);
-        connect(driveWidget, &DriveWidget::actionAutoSave, this, &MainWindow::autoSaveTriggered);
         connect(driveWidget, &DriveWidget::actionBootOptions, this, &MainWindow::bootOptionTriggered);
         connect(this, &MainWindow::setFont, driveWidget, &DriveWidget::setFont);
     }
-
-
 
     for (int i = 0; i < PRINTER_COUNT; i++) {      //
         auto printerWidget = new PrinterWidget(i);
@@ -534,7 +526,7 @@ void MainWindow::dropEvent(QDropEvent *event)
         int source = event->mimeData()->data("application/x-respeqt-disk-image").at(0);
         if (slot != source) {
             sio->swapDevices(slot + DISK_BASE_CDEVIC, source + DISK_BASE_CDEVIC);
-            respeqtSettings->swapImages(slot, source);
+            RespeqtSettings::instance()->swapImages(slot, source);
 
             auto pclink = reinterpret_cast<PCLINK*>(sio->getDevice(PCLINK_CDEVIC));
             if(pclink->hasLink(slot+1) || pclink->hasLink(source+1))
@@ -608,7 +600,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     isClosing = true;
 
     // Save various session settings  //
-    if (respeqtSettings->saveWindowsPos()) {
+    if (RespeqtSettings::instance()->saveWindowsPos()) {
         if (g_miniMode) {
             saveMiniWindowGeometry();
         } else {
@@ -616,8 +608,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
         }
     }
     if (g_sessionFile != "")
-        respeqtSettings->saveSessionToFile(g_sessionFilePath + "/" + g_sessionFile);
-    respeqtSettings->setD9DOVisible(g_D9DOVisible);
+        RespeqtSettings::instance()->saveSessionToFile(g_sessionFilePath + "/" + g_sessionFile);
+    RespeqtSettings::instance()->setD9DOVisible(g_D9DOVisible);
     bool wasRunning = ui->actionStartEmulation->isChecked();
     QMessageBox::StandardButton answer = QMessageBox::No;
 
@@ -676,7 +668,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::hideEvent(QHideEvent *event)
 {
 #ifndef Q_OS_MACX
-    if (respeqtSettings->minimizeToTray()) {
+    if (RespeqtSettings::instance()->minimizeToTray()) {
         trayIcon.show();
         oldWindowFlags = windowFlags();
         oldWindowStates = windowState();
@@ -696,7 +688,7 @@ void MainWindow::show()
         shownFirstTime = false; // Reset the flag
 
         /* Open options dialog if it's the first time */
-        if (respeqtSettings->isFirstTime()) {
+        if (RespeqtSettings::instance()->isFirstTime()) {
             if (QMessageBox::Yes == QMessageBox::question(this, tr("First run"),
                     tr("You are running RespeQt for the first time.\n\nDo you want to open the options dialog?"),
                     QMessageBox::Yes, QMessageBox::No)) {
@@ -726,12 +718,12 @@ void MainWindow::leaveEvent(QEvent *)
 bool MainWindow::eventFilter(QObject * /*obj*/, QEvent *event)
 {
     if (event->type() == QEvent::MouseButtonDblClick) {
-        on_actionLogWindow_triggered();
+        showLogWindowTriggered();
     }
     return false;
 }
 
-void MainWindow::on_actionLogWindow_triggered()
+void MainWindow::showLogWindowTriggered()
 {
     if (logWindow_ == nullptr)
     {
@@ -746,8 +738,8 @@ void MainWindow::on_actionLogWindow_triggered()
         } else {
             logWindow_->setGeometry(x+20, y+60, w, h*2);
         }
-        connect(this, SIGNAL(sendLogText(QString)), logWindow_, SLOT(getLogText(QString)));
-        connect(this, SIGNAL(sendLogTextChange(QString)), logWindow_, SLOT(getLogTextChange(QString)));
+        connect(this, &MainWindow::sendLogText, logWindow_, &LogDisplayDialog::getLogText);
+        connect(this, &MainWindow::sendLogTextChange, logWindow_, &LogDisplayDialog::getLogTextChange);
         emit sendLogText(ui->textEdit->toHtml());
     }
 
@@ -761,19 +753,19 @@ void MainWindow::logChanged(QString text)
 
 void MainWindow::saveWindowGeometry()
 {
-    respeqtSettings->setLastHorizontalPos(geometry().x());
-    respeqtSettings->setLastVerticalPos(geometry().y());
-    respeqtSettings->setLastWidth(geometry().width());
-    respeqtSettings->setLastHeight(geometry().height());
+    RespeqtSettings::instance()->setLastHorizontalPos(geometry().x());
+    RespeqtSettings::instance()->setLastVerticalPos(geometry().y());
+    RespeqtSettings::instance()->setLastWidth(geometry().width());
+    RespeqtSettings::instance()->setLastHeight(geometry().height());
 }
 
 void MainWindow::saveMiniWindowGeometry()
 {
-    respeqtSettings->setLastMiniHorizontalPos(geometry().x());
-    respeqtSettings->setLastMiniVerticalPos(geometry().y());
+    RespeqtSettings::instance()->setLastMiniHorizontalPos(geometry().x());
+    RespeqtSettings::instance()->setLastMiniVerticalPos(geometry().y());
 }
 
-void MainWindow::on_actionToggleShade_triggered()
+void MainWindow::toggleShadeTriggered()
 {
     if (g_shadeMode) {
         setWindowFlags(Qt::WindowSystemMenuHint);
@@ -789,7 +781,7 @@ void MainWindow::on_actionToggleShade_triggered()
 }
 
 // Toggle Mini Mode //
-void MainWindow::on_actionToggleMiniMode_triggered()
+void MainWindow::toggleMiniModeTriggered()
 {
     g_miniMode = !g_miniMode;
 
@@ -827,11 +819,11 @@ void MainWindow::on_actionToggleMiniMode_triggered()
         setMinimumWidth(400);
         setMinimumHeight(100);
         setMaximumHeight(100);
-        setGeometry(respeqtSettings->lastMiniHorizontalPos(), respeqtSettings->lastMiniVerticalPos(),
+        setGeometry(RespeqtSettings::instance()->lastMiniHorizontalPos(), RespeqtSettings::instance()->lastMiniVerticalPos(),
                     minimumWidth(), minimumHeight());
         ui->actionHideShowDrives->setDisabled(true);
         ui->actionToggleShade->setEnabled(true);
-        if (respeqtSettings->enableShade()) {
+        if (RespeqtSettings::instance()->enableShade()) {
             setWindowOpacity(0.25);
             setWindowFlags(Qt::FramelessWindowHint);
             g_shadeMode = true;
@@ -867,7 +859,7 @@ void MainWindow::showHideDrives()
 }
 
 // Toggle Hide/Show drives D9-DO  //
-void MainWindow::on_actionHideShowDrives_triggered()
+void MainWindow::hideShowTriggered()
 {
     g_D9DOVisible = !g_D9DOVisible;
     g_miniMode = false;
@@ -879,15 +871,15 @@ void MainWindow::on_actionHideShowDrives_triggered()
 }
 
 // Toggle printer Emulation ON/OFF //
-void MainWindow::on_actionPrinterEmulation_triggered()
+void MainWindow::printerEmulationTriggered()
 {
-    if (respeqtSettings->printerEmulation()) {
+    if (RespeqtSettings::instance()->printerEmulation()) {
         setUpPrinterEmulationWidgets(false);
-        respeqtSettings->setPrinterEmulation(false);
+        RespeqtSettings::instance()->setPrinterEmulation(false);
         qWarning() << "!i" << tr("Printer emulation stopped.");
     } else {
         setUpPrinterEmulationWidgets(true);
-        respeqtSettings->setPrinterEmulation(true);
+        RespeqtSettings::instance()->setPrinterEmulation(true);
         qWarning() << "!i" << tr("Printer emulation started.");
     }
 }
@@ -909,7 +901,7 @@ void MainWindow::setUpPrinterEmulationWidgets(bool enable)
     prtOnOffLabel->setStatusTip(ui->actionPrinterEmulation->statusTip());
 }
 
-void MainWindow::on_actionStartEmulation_triggered()
+void MainWindow::startEmulationTriggered()
 {
     if (ui->actionStartEmulation->isChecked()) {
         sio->start(QThread::TimeCriticalPriority);
@@ -957,7 +949,7 @@ void MainWindow::sioStatusChanged(QString status)
 {
     speedLabel->setText(status);
     speedLabel->show();
-    sio->setDisplayCommandName(respeqtSettings->isCommandName());
+    sio->setDisplayCommandName(RespeqtSettings::instance()->isCommandName());
 }
 
 void MainWindow::deviceStatusChanged(int deviceNo)
@@ -1016,31 +1008,31 @@ void MainWindow::deviceStatusChanged(int deviceNo)
                     }
                 }
                 diskWidget->showAsImageMounted(filenamelabel, img->description(), enableEdit, enableSave, img->isLeverOpen(), img->isHappyEnabled(), img->isChipOpen(),
-                                               img->isTranslatorActive(), img->isToolDiskActive(), img->hasSeveralSides(), respeqtSettings->hideHappyMode(), respeqtSettings->hideChipMode(),
-                                               respeqtSettings->hideNextImage(), respeqtSettings->hideOSBMode(), respeqtSettings->hideToolDisk());
+                                               img->isTranslatorActive(), img->isToolDiskActive(), img->hasSeveralSides(), RespeqtSettings::instance()->hideHappyMode(), RespeqtSettings::instance()->hideChipMode(),
+                                               RespeqtSettings::instance()->hideNextImage(), RespeqtSettings::instance()->hideOSBMode(), RespeqtSettings::instance()->hideToolDisk());
             }
 
-            img->setDisplayTransmission(respeqtSettings->displayTransmission());
-            img->setSpyMode(respeqtSettings->isSpyMode());
-            img->setDisassembleUploadedCode(respeqtSettings->disassembleUploadedCode());
-            img->setTranslatorAutomaticDetection(respeqtSettings->translatorAutomaticDetection());
-            img->setTranslatorDiskImagePath(respeqtSettings->translatorDiskImagePath());
-            img->setToolDiskImagePath(respeqtSettings->toolDiskImagePath());
-            img->setActivateChipModeWithTool(respeqtSettings->activateChipModeWithTool());
-            img->setActivateHappyModeWithTool(respeqtSettings->activateHappyModeWithTool());
+            img->setDisplayTransmission(RespeqtSettings::instance()->displayTransmission());
+            img->setSpyMode(RespeqtSettings::instance()->isSpyMode());
+            img->setDisassembleUploadedCode(RespeqtSettings::instance()->disassembleUploadedCode());
+            img->setTranslatorAutomaticDetection(RespeqtSettings::instance()->translatorAutomaticDetection());
+            img->setTranslatorDiskImagePath(RespeqtSettings::instance()->translatorDiskImagePath());
+            img->setToolDiskImagePath(RespeqtSettings::instance()->toolDiskImagePath());
+            img->setActivateChipModeWithTool(RespeqtSettings::instance()->activateChipModeWithTool());
+            img->setActivateHappyModeWithTool(RespeqtSettings::instance()->activateHappyModeWithTool());
             auto fimg = qobject_cast <FirmwareDiskImage*> (sio->getDevice(deviceNo));
             if (fimg) {
-                fimg->SetDisplayDriveHead(respeqtSettings->displayDriveHead());
-                fimg->SetDisplayFdcCommands(respeqtSettings->displayFdcCommands());
-                fimg->SetDisplayIndexPulse(respeqtSettings->displayIndexPulse());
-                fimg->SetDisplayMotorOnOff(respeqtSettings->displayMotorOnOff());
-                fimg->SetDisplayIDAddressMarks(respeqtSettings->displayIDAddressMarks());
-                fimg->SetDisplayTrackInformation(respeqtSettings->displayTrackInformation());
-                fimg->SetDisplayCpuInstructions(respeqtSettings->displayCpuInstructions());
-                fimg->SetTraceFilename(respeqtSettings->traceFilename());
+                fimg->SetDisplayDriveHead(RespeqtSettings::instance()->displayDriveHead());
+                fimg->SetDisplayFdcCommands(RespeqtSettings::instance()->displayFdcCommands());
+                fimg->SetDisplayIndexPulse(RespeqtSettings::instance()->displayIndexPulse());
+                fimg->SetDisplayMotorOnOff(RespeqtSettings::instance()->displayMotorOnOff());
+                fimg->SetDisplayIDAddressMarks(RespeqtSettings::instance()->displayIDAddressMarks());
+                fimg->SetDisplayTrackInformation(RespeqtSettings::instance()->displayTrackInformation());
+                fimg->SetDisplayCpuInstructions(RespeqtSettings::instance()->displayCpuInstructions());
+                fimg->SetTraceFilename(RespeqtSettings::instance()->traceFilename());
             }
         } else {
-            diskWidget->showAsEmpty(respeqtSettings->hideHappyMode(), respeqtSettings->hideChipMode(), respeqtSettings->hideNextImage(), respeqtSettings->hideOSBMode(), respeqtSettings->hideToolDisk());
+            diskWidget->showAsEmpty(RespeqtSettings::instance()->hideHappyMode(), RespeqtSettings::instance()->hideChipMode(), RespeqtSettings::instance()->hideNextImage(), RespeqtSettings::instance()->hideOSBMode(), RespeqtSettings::instance()->hideToolDisk());
         }
     }
 }
@@ -1114,10 +1106,9 @@ void MainWindow::uiMessage(int t, QString message)
     logChanged(message);
 }
 
-void MainWindow::on_actionOptions_triggered()
+void MainWindow::showOptionsTriggered()
 {
-    bool restart;
-    restart = ui->actionStartEmulation->isChecked();
+    auto restart = ui->actionStartEmulation->isChecked();
     if (restart) {
         ui->actionStartEmulation->trigger();
         sio->wait();
@@ -1145,7 +1136,7 @@ void MainWindow::on_actionOptions_triggered()
 void MainWindow::changeFonts()
 {
     QFont font = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
-    if (respeqtSettings->useLargeFont()) {
+    if (RespeqtSettings::instance()->useLargeFont()) {
         //QFont font("Arial Black", 9, QFont::Normal);
         font.setPointSize(9);
         emit setFont(font);
@@ -1156,16 +1147,14 @@ void MainWindow::changeFonts()
     }
  }
 
-void MainWindow::on_actionAbout_triggered()
+void MainWindow::showAboutTriggered()
 {
     AboutDialog aboutDialog(this, VERSION);
     aboutDialog.exec();
 }
 //
-void MainWindow::on_actionDocumentation_triggered()
+void MainWindow::showDocumentationTriggered()
 {
-    QString dir = respeqtSettings->lastSessionDir();
-
     if (ui->actionDocumentation->isChecked()) {
         docDisplayWindow->show();
     } else {
@@ -1215,7 +1204,7 @@ void MainWindow::updateRecentFileActions()
     for(int i = 0; i < NUM_RECENT_FILES; ++i)
     {
         QAction* action = this->recentFilesActions_[i];
-        const RespeqtSettings::ImageSettings& image = respeqtSettings->recentImageSetting(i);
+        const RespeqtSettings::ImageSettings& image = RespeqtSettings::instance()->recentImageSetting(i);
 
         if(image.fileName != "" )
         {
@@ -1253,8 +1242,8 @@ bool MainWindow::ejectImage(int no, bool ask)
     sio->uninstallDevice(no + DISK_BASE_CDEVIC);
     if (img) {
         delete img;
-        diskWidgets[no]->showAsEmpty(respeqtSettings->hideHappyMode(), respeqtSettings->hideChipMode(), respeqtSettings->hideNextImage(), respeqtSettings->hideOSBMode(), respeqtSettings->hideToolDisk());
-        respeqtSettings->unmountImage(no);
+        diskWidgets[no]->showAsEmpty(RespeqtSettings::instance()->hideHappyMode(), RespeqtSettings::instance()->hideChipMode(), RespeqtSettings::instance()->hideNextImage(), RespeqtSettings::instance()->hideOSBMode(), RespeqtSettings::instance()->hideToolDisk());
+        RespeqtSettings::instance()->unmountImage(no);
         updateRecentFileActions();
         deviceStatusChanged(no + DISK_BASE_CDEVIC);
         qDebug() << "!n" << tr("Unmounted disk %1").arg(no + 1);
@@ -1303,20 +1292,21 @@ void MainWindow::bootExe(const QString &fileName)
     AutoBoot loader(sio, old);    
     AutoBootDialog dlg(this);
 
-    bool highSpeed =    respeqtSettings->useHighSpeedExeLoader() &&
-                        (respeqtSettings->serialPortHandshakingMethod() != HANDSHAKE_SOFTWARE);
+    bool highSpeed = RespeqtSettings::instance()->useHighSpeedExeLoader() &&
+        (RespeqtSettings::instance()->serialPortHandshakingMethod() != HANDSHAKE_SOFTWARE);
 
     if (!loader.open(fileName, highSpeed)) {
         return;
     }
 
+    // TODO Test
     sio->uninstallDevice(DISK_BASE_CDEVIC);
     sio->installDevice(DISK_BASE_CDEVIC, &loader);
-    connect(&loader, SIGNAL(booterStarted()), &dlg, SLOT(booterStarted()));
-    connect(&loader, SIGNAL(booterLoaded()), &dlg, SLOT(booterLoaded()));
-    connect(&loader, SIGNAL(blockRead(int, int)), &dlg, SLOT(blockRead(int, int)));
-    connect(&loader, SIGNAL(loaderDone()), &dlg, SLOT(loaderDone()));
-    connect(&dlg, SIGNAL(keepOpen()), this, SLOT(keepBootExeOpen()));
+    connect(&loader, &AutoBoot::booterStarted, &dlg, &AutoBootDialog::booterStarted);
+    connect(&loader, &AutoBoot::booterLoaded, &dlg, &AutoBootDialog::booterLoaded);
+    connect(&loader, &AutoBoot::blockRead, &dlg, &AutoBootDialog::blockRead);
+    connect(&loader, &AutoBoot::loaderDone, &dlg, &AutoBootDialog::loaderDone);
+    // TODO keepOpen MIA connect(&dlg, &AutoBootDialog::keepOpen()), this, &MainWindow::keepBootExeOpen);
 
     dlg.exec();
 
@@ -1327,6 +1317,7 @@ void MainWindow::bootExe(const QString &fileName)
     }
     if(!g_exefileName.isEmpty()) bootExe(g_exefileName);
 }
+
 // Make boot executable dialog persistant until it's manually closed //
 void MainWindow::keepBootExeOpen()
 {
@@ -1335,10 +1326,26 @@ void MainWindow::keepBootExeOpen()
 
 void MainWindow::bootExeTriggered(const QString &fileName)
 {
-    QString path = respeqtSettings->lastRclDir();
+    QString path = RespeqtSettings::instance()->lastRclDir();
     g_exefileName = path + "/" + fileName;
     if (!g_exefileName.isEmpty()) {
-        respeqtSettings->setLastExeDir(QFileInfo(g_exefileName).absolutePath());
+        RespeqtSettings::instance()->setLastExeDir(QFileInfo(g_exefileName).absolutePath());
+        bootExe(g_exefileName);
+    }
+}
+
+void MainWindow::selectBootExeTriggered()
+{
+    auto dir = RespeqtSettings::instance()->lastExeDir();
+    g_exefileName = QFileDialog::getOpenFileName(this, tr("Open executable"),
+        dir,
+        tr(
+           "Atari executables (*.xex *.com *.exe);;"
+           "All files (*)")
+    );
+
+    if (!g_exefileName.isEmpty()) {
+        RespeqtSettings::instance()->setLastExeDir(QFileInfo(g_exefileName).absolutePath());
         bootExe(g_exefileName);
     }
 }
@@ -1354,7 +1361,7 @@ void MainWindow::mountFileWithDefaultProtection(int no, const QString &fileName)
 
     if(atariFileName.left(1) == "*") {
         atariLongName = atariFileName.mid(1);
-        QString path = respeqtSettings->lastRclDir();
+        QString path = RespeqtSettings::instance()->lastRclDir();
         if(atariLongName == "") {
             sio->port()->writeDataNak();
             return;
@@ -1363,7 +1370,7 @@ void MainWindow::mountFileWithDefaultProtection(int no, const QString &fileName)
         }
     }
 
-    const RespeqtSettings::ImageSettings* imgSetting = respeqtSettings->getImageSettingsFromName(atariFileName);
+    const RespeqtSettings::ImageSettings* imgSetting = RespeqtSettings::instance()->getImageSettingsFromName(atariFileName);
     bool prot = (imgSetting!=nullptr) && imgSetting->isWriteProtected;
     mountFile(no, atariFileName, prot);
 }
@@ -1393,7 +1400,7 @@ void MainWindow::mountFile(int no, const QString &fileName, bool /*prot*/)
         Board *board = oldDisk != nullptr ? oldDisk->getBoardInfo() : nullptr;
         if(g_rclFileName.left(1) == "*") ask = false;
         if (!disk->open(fileName, type) || !ejectImage(no, ask) ) {
-            respeqtSettings->unmountImage(no);
+            RespeqtSettings::instance()->unmountImage(no);
             delete disk;
             if (board != nullptr) {
                 delete board;
@@ -1428,10 +1435,11 @@ void MainWindow::mountFile(int no, const QString &fileName, bool /*prot*/)
             qDebug() << "!e " << tr("Bad cast for PCLINK");
         }
 
-        diskWidgets[no]->updateFromImage(disk, respeqtSettings->hideHappyMode(), respeqtSettings->hideChipMode(), respeqtSettings->hideNextImage(), respeqtSettings->hideOSBMode(), respeqtSettings->hideToolDisk());
+        diskWidgets[no]->updateFromImage(disk, RespeqtSettings::instance()->hideHappyMode(), RespeqtSettings::instance()->hideChipMode(), RespeqtSettings::instance()->hideNextImage(), RespeqtSettings::instance()->hideOSBMode(), RespeqtSettings::instance()->hideToolDisk());
 
-        respeqtSettings->mountImage(no, fileName, disk->isReadOnly());
+        RespeqtSettings::instance()->mountImage(no, fileName, disk->isReadOnly());
         updateRecentFileActions();
+        // TODO Test
         connect(disk, &SimpleDiskImage::statusChanged, this, &MainWindow::deviceStatusChanged, Qt::QueuedConnection);
         deviceStatusChanged(DISK_BASE_CDEVIC + no);
 
@@ -1454,44 +1462,44 @@ void MainWindow::mountFile(int no, const QString &fileName, bool /*prot*/)
 
 SimpleDiskImage *MainWindow::installDiskImage(int no)
 {
-    eHARDWARE emulationLevel = respeqtSettings->firmwareType(no);
-    QString name = respeqtSettings->firmwareName(emulationLevel);
-    QString path = respeqtSettings->firmwarePath(emulationLevel);
+    eHARDWARE emulationLevel = RespeqtSettings::instance()->firmwareType(no);
+    QString name = RespeqtSettings::instance()->firmwareName(emulationLevel);
+    QString path = RespeqtSettings::instance()->firmwarePath(emulationLevel);
     if ((emulationLevel != SIO_EMULATION) && (!firmwareAvailable(no, name, path))) {
         emulationLevel = SIO_EMULATION;
     }
     if (emulationLevel != SIO_EMULATION) {
         Rom *rom = m_romProvider->RegisterRom(name, path);
-        FirmwareDiskImage *disk = new FirmwareDiskImage(sio, emulationLevel, name, rom, 288, respeqtSettings->firmwarePowerOnWithDisk(no));
-        disk->setDisplayTransmission(respeqtSettings->displayTransmission());
-        disk->setSpyMode(respeqtSettings->isSpyMode());
-        disk->setTrackLayout(respeqtSettings->isTrackLayout());
-        disk->setDisassembleUploadedCode(respeqtSettings->disassembleUploadedCode());
-        disk->setTranslatorAutomaticDetection(respeqtSettings->translatorAutomaticDetection());
-        disk->setTranslatorDiskImagePath(respeqtSettings->translatorDiskImagePath());
-        disk->setToolDiskImagePath(respeqtSettings->toolDiskImagePath());
-        disk->setActivateChipModeWithTool(respeqtSettings->activateChipModeWithTool());
-        disk->setActivateHappyModeWithTool(respeqtSettings->activateHappyModeWithTool());
-        disk->SetDisplayDriveHead(respeqtSettings->displayDriveHead());
-        disk->SetDisplayFdcCommands(respeqtSettings->displayFdcCommands());
-        disk->SetDisplayIndexPulse(respeqtSettings->displayIndexPulse());
-        disk->SetDisplayMotorOnOff(respeqtSettings->displayMotorOnOff());
-        disk->SetDisplayIDAddressMarks(respeqtSettings->displayIDAddressMarks());
-        disk->SetDisplayTrackInformation(respeqtSettings->displayTrackInformation());
-        disk->SetDisplayCpuInstructions(respeqtSettings->displayCpuInstructions());
-        disk->SetTraceFilename(respeqtSettings->traceFilename());
+        FirmwareDiskImage *disk = new FirmwareDiskImage(sio, emulationLevel, name, rom, 288, RespeqtSettings::instance()->firmwarePowerOnWithDisk(no));
+        disk->setDisplayTransmission(RespeqtSettings::instance()->displayTransmission());
+        disk->setSpyMode(RespeqtSettings::instance()->isSpyMode());
+        disk->setTrackLayout(RespeqtSettings::instance()->isTrackLayout());
+        disk->setDisassembleUploadedCode(RespeqtSettings::instance()->disassembleUploadedCode());
+        disk->setTranslatorAutomaticDetection(RespeqtSettings::instance()->translatorAutomaticDetection());
+        disk->setTranslatorDiskImagePath(RespeqtSettings::instance()->translatorDiskImagePath());
+        disk->setToolDiskImagePath(RespeqtSettings::instance()->toolDiskImagePath());
+        disk->setActivateChipModeWithTool(RespeqtSettings::instance()->activateChipModeWithTool());
+        disk->setActivateHappyModeWithTool(RespeqtSettings::instance()->activateHappyModeWithTool());
+        disk->SetDisplayDriveHead(RespeqtSettings::instance()->displayDriveHead());
+        disk->SetDisplayFdcCommands(RespeqtSettings::instance()->displayFdcCommands());
+        disk->SetDisplayIndexPulse(RespeqtSettings::instance()->displayIndexPulse());
+        disk->SetDisplayMotorOnOff(RespeqtSettings::instance()->displayMotorOnOff());
+        disk->SetDisplayIDAddressMarks(RespeqtSettings::instance()->displayIDAddressMarks());
+        disk->SetDisplayTrackInformation(RespeqtSettings::instance()->displayTrackInformation());
+        disk->SetDisplayCpuInstructions(RespeqtSettings::instance()->displayCpuInstructions());
+        disk->SetTraceFilename(RespeqtSettings::instance()->traceFilename());
         return disk;
     } else {
         SimpleDiskImage *disk = new SimpleDiskImage(sio);
-        disk->setDisplayTransmission(respeqtSettings->displayTransmission());
-        disk->setSpyMode(respeqtSettings->isSpyMode());
-        disk->setTrackLayout(respeqtSettings->isTrackLayout());
-        disk->setDisassembleUploadedCode(respeqtSettings->disassembleUploadedCode());
-        disk->setTranslatorAutomaticDetection(respeqtSettings->translatorAutomaticDetection());
-        disk->setTranslatorDiskImagePath(respeqtSettings->translatorDiskImagePath());
-        disk->setToolDiskImagePath(respeqtSettings->toolDiskImagePath());
-        disk->setActivateChipModeWithTool(respeqtSettings->activateChipModeWithTool());
-        disk->setActivateHappyModeWithTool(respeqtSettings->activateHappyModeWithTool());
+        disk->setDisplayTransmission(RespeqtSettings::instance()->displayTransmission());
+        disk->setSpyMode(RespeqtSettings::instance()->isSpyMode());
+        disk->setTrackLayout(RespeqtSettings::instance()->isTrackLayout());
+        disk->setDisassembleUploadedCode(RespeqtSettings::instance()->disassembleUploadedCode());
+        disk->setTranslatorAutomaticDetection(RespeqtSettings::instance()->translatorAutomaticDetection());
+        disk->setTranslatorDiskImagePath(RespeqtSettings::instance()->translatorDiskImagePath());
+        disk->setToolDiskImagePath(RespeqtSettings::instance()->toolDiskImagePath());
+        disk->setActivateChipModeWithTool(RespeqtSettings::instance()->activateChipModeWithTool());
+        disk->setActivateHappyModeWithTool(RespeqtSettings::instance()->activateHappyModeWithTool());
         return disk;
     }
 }
@@ -1529,7 +1537,7 @@ void MainWindow::mountDiskImage(int no)
     }
 // Always mount from "last image dir" //
 //    if (diskWidgets[no].fileNameLabel->text().isEmpty()) {
-        dir = respeqtSettings->lastDiskImageDir();
+        dir = RespeqtSettings::instance()->lastDiskImageDir();
 //    } else {
 //        dir = QFileInfo(diskWidgets[no].fileNameLabel->text()).absolutePath();
 //    }
@@ -1547,7 +1555,7 @@ void MainWindow::mountDiskImage(int no)
     if (fileName.isEmpty()) {
         return;
     }
-    respeqtSettings->setLastDiskImageDir(QFileInfo(fileName).absolutePath());
+    RespeqtSettings::instance()->setLastDiskImageDir(QFileInfo(fileName).absolutePath());
     mountFileWithDefaultProtection(no, fileName);
 }
 
@@ -1560,13 +1568,13 @@ void MainWindow::mountFolderImage(int no)
         no = firstEmptyDiskSlot(0, true);
     }
     // Always mount from "last folder dir" //
-    dir = respeqtSettings->lastFolderImageDir();
+    dir = RespeqtSettings::instance()->lastFolderImageDir();
     QString fileName = QFileDialog::getExistingDirectory(this, tr("Open a folder image"), dir);
     fileName = QDir::fromNativeSeparators(fileName);    //
     if (fileName.isEmpty()) {
         return;
     }
-    respeqtSettings->setLastFolderImageDir(fileName);
+    RespeqtSettings::instance()->setLastFolderImageDir(fileName);
     mountFileWithDefaultProtection(no, fileName);
 }
 
@@ -1604,7 +1612,7 @@ void MainWindow::toggleWriteProtection(int no, bool protectionEnabled)
 {
     auto img = qobject_cast <SimpleDiskImage*> (sio->getDevice(no + DISK_BASE_CDEVIC));
     img->setReadOnly(protectionEnabled);
-    respeqtSettings->setMountedImageProtection(no, protectionEnabled);
+    RespeqtSettings::instance()->setMountedImageProtection(no, protectionEnabled);
 }
 
 void MainWindow::openEditor(int no)
@@ -1646,15 +1654,15 @@ void MainWindow::loadTranslators()
 {
     qApp->removeTranslator(&respeqt_qt_translator);
     qApp->removeTranslator(&respeqt_translator);
-    if (respeqtSettings->i18nLanguage().compare("auto") == 0) {
+    if (RespeqtSettings::instance()->i18nLanguage().compare("auto") == 0) {
         QString locale = QLocale::system().name();
         respeqt_translator.load(":/translations/i18n/respeqt_" + locale);
         respeqt_qt_translator.load(":/translations/i18n/qt_" + locale);
         qApp->installTranslator(&respeqt_qt_translator);
         qApp->installTranslator(&respeqt_translator);
-    } else if (respeqtSettings->i18nLanguage().compare("en") != 0) {
-        respeqt_translator.load(":/translations/i18n/respeqt_" + respeqtSettings->i18nLanguage());
-        respeqt_qt_translator.load(":/translations/i18n/qt_" + respeqtSettings->i18nLanguage());
+    } else if (RespeqtSettings::instance()->i18nLanguage().compare("en") != 0) {
+        respeqt_translator.load(":/translations/i18n/respeqt_" + RespeqtSettings::instance()->i18nLanguage());
+        respeqt_qt_translator.load(":/translations/i18n/qt_" + RespeqtSettings::instance()->i18nLanguage());
         qApp->installTranslator(&respeqt_qt_translator);
         qApp->installTranslator(&respeqt_translator);
     }
@@ -1716,7 +1724,7 @@ void MainWindow::autoSaveDisk(int no)
 
     if (img->isUnnamed()) {
         saveDiskAs(no);
-        widget->updateFromImage(img, respeqtSettings->hideHappyMode(), respeqtSettings->hideChipMode(), respeqtSettings->hideNextImage(), respeqtSettings->hideOSBMode(), respeqtSettings->hideToolDisk());
+        widget->updateFromImage(img, RespeqtSettings::instance()->hideHappyMode(), RespeqtSettings::instance()->hideChipMode(),  RespeqtSettings::instance()->hideNextImage(), RespeqtSettings::instance()->hideOSBMode(), RespeqtSettings::instance()->hideToolDisk());
         return;
     }
 
@@ -1739,8 +1747,9 @@ void MainWindow::autoSaveDisk(int no)
             saveDiskAs(no);
         }
     }
-    widget->updateFromImage(img, respeqtSettings->hideHappyMode(), respeqtSettings->hideChipMode(), respeqtSettings->hideNextImage(), respeqtSettings->hideOSBMode(), respeqtSettings->hideToolDisk());
+    widget->updateFromImage(img, RespeqtSettings::instance()->hideHappyMode(), RespeqtSettings::instance()->hideChipMode(), RespeqtSettings::instance()->hideNextImage(), RespeqtSettings::instance()->hideOSBMode(), RespeqtSettings::instance()->hideToolDisk());
 }
+
 //
 void MainWindow::saveDiskAs(int no)
 {
@@ -1749,7 +1758,7 @@ void MainWindow::saveDiskAs(int no)
     bool saved = false;
 
     if (img->isUnnamed()) {
-        dir = respeqtSettings->lastDiskImageDir();
+        dir = RespeqtSettings::instance()->lastDiskImageDir();
     } else {
         dir = QFileInfo(img->originalFileName()).absolutePath();
     }
@@ -1783,10 +1792,10 @@ void MainWindow::saveDiskAs(int no)
     } while (!saved);
 
     if (saved) {
-        respeqtSettings->setLastDiskImageDir(QFileInfo(fileName).absolutePath());
+        RespeqtSettings::instance()->setLastDiskImageDir(QFileInfo(fileName).absolutePath());
     }
-    respeqtSettings->unmountImage(no);
-    respeqtSettings->mountImage(no, fileName, img->isReadOnly());
+    RespeqtSettings::instance()->unmountImage(no);
+    RespeqtSettings::instance()->mountImage(no, fileName, img->isReadOnly());
 }
 
 void MainWindow::revertDisk(int no)
@@ -1814,14 +1823,11 @@ void MainWindow::toolDiskTriggered(int deviceId, bool open) { toggleToolDisk(dev
 void MainWindow::protectTriggered(int deviceId, bool writeProtectEnabled) { toggleWriteProtection(deviceId, writeProtectEnabled); }
 void MainWindow::editDiskTriggered(int deviceId) { openEditor(deviceId); }
 void MainWindow::saveTriggered(int deviceId) { saveDisk(deviceId); }
-//
 void MainWindow::autoSaveTriggered(int deviceId) { autoSaveDisk(deviceId); }
-void MainWindow::saveAsTriggered(int deviceId) { saveDiskAs(deviceId); } // TODO SaveAs is MIA
-void MainWindow::revertTriggered(int deviceId) { revertDisk(deviceId); } // TODO Revert is MIA
+void MainWindow::saveAsTriggered(int deviceId) { saveDiskAs(deviceId); }
+void MainWindow::revertTriggered(int deviceId) { revertDisk(deviceId); }
 
-void MainWindow::mountRecentTriggered(const QString &fileName) { mountFileWithDefaultProtection(firstEmptyDiskSlot(), fileName); }
-
-void MainWindow::on_actionEjectAll_triggered()
+void MainWindow::ejectAllTriggered()
 {
     QMessageBox::StandardButton answer = QMessageBox::No;
 
@@ -1870,7 +1876,7 @@ void MainWindow::on_actionEjectAll_triggered()
     }
 }
 
-void MainWindow::on_actionNewImage_triggered()
+void MainWindow::newImageTriggered()
 {
     CreateImageDialog dlg(this);
     if (!dlg.exec()) {
@@ -1879,8 +1885,9 @@ void MainWindow::on_actionNewImage_triggered()
 
     int no = firstEmptyDiskSlot(0, true);
 
-    SimpleDiskImage *disk = installDiskImage(no);
-    connect(disk, SIGNAL(statusChanged(int)), this, SLOT(deviceStatusChanged(int)), Qt::QueuedConnection);
+    auto disk = installDiskImage(no);
+    // TODO Test
+    connect(disk, &SimpleDiskImage::statusChanged, this, &MainWindow::deviceStatusChanged, Qt::QueuedConnection);
 
     if (!disk->create(++untitledName)) {
         delete disk;
@@ -1916,78 +1923,65 @@ void MainWindow::on_actionNewImage_triggered()
             .arg(disk->description());
 }
 
-void MainWindow::on_actionOpenSession_triggered()
+void MainWindow::openSessionTriggered()
 {
-    QString dir = respeqtSettings->lastSessionDir();
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open session"),
-                                 dir,
-                                 tr(
-                                         "RespeQt sessions (*.respeqt);;"
-                                         "All files (*)"));
+    auto dir = RespeqtSettings::instance()->lastSessionDir();
+    auto fileName = QFileDialog::getOpenFileName(this, tr("Open session"),
+         dir,
+         tr(
+            "RespeQt sessions (*.respeqt);;"
+            "All files (*)")
+    );
     if (fileName.isEmpty()) {
         return;
     }
 // First eject existing images, then mount session images and restore mainwindow position and size //
-    MainWindow::on_actionEjectAll_triggered();
+    MainWindow::ejectAllTriggered();
 
-    respeqtSettings->setLastSessionDir(QFileInfo(fileName).absolutePath());
+    RespeqtSettings::instance()->setLastSessionDir(QFileInfo(fileName).absolutePath());
     g_sessionFile = QFileInfo(fileName).fileName();
     g_sessionFilePath = QFileInfo(fileName).absolutePath();
 
 // Pass Session file name, path and MainWindow title to RespeQtSettings //
-    respeqtSettings->setSessionFile(g_sessionFile, g_sessionFilePath);
-    respeqtSettings->setMainWindowTitle(g_mainWindowTitle);
+    RespeqtSettings::instance()->setSessionFile(g_sessionFile, g_sessionFilePath);
+    RespeqtSettings::instance()->setMainWindowTitle(g_mainWindowTitle);
 
-    respeqtSettings->loadSessionFromFile(fileName);
+    RespeqtSettings::instance()->loadSessionFromFile(fileName);
 
     setWindowTitle(g_mainWindowTitle + tr(" -- Session: ") + g_sessionFile);
-    setGeometry(respeqtSettings->lastHorizontalPos(), respeqtSettings->lastVerticalPos(), respeqtSettings->lastWidth() , respeqtSettings->lastHeight());
+    setGeometry(RespeqtSettings::instance()->lastHorizontalPos(), RespeqtSettings::instance()->lastVerticalPos(), RespeqtSettings::instance()->lastWidth() , RespeqtSettings::instance()->lastHeight());
 
     for (int i = 0; i < DISK_COUNT; i++) {  //
         RespeqtSettings::ImageSettings is;
-        is = respeqtSettings->mountedImageSetting(i);
+        is = RespeqtSettings::instance()->mountedImageSetting(i);
         mountFile(i, is.fileName, is.isWriteProtected);
     }
-    g_D9DOVisible =  respeqtSettings->D9DOVisible();
-    on_actionHideShowDrives_triggered();
+    g_D9DOVisible = RespeqtSettings::instance()->D9DOVisible();
+    hideShowTriggered();
     setSession();
 }
-void MainWindow::on_actionSaveSession_triggered()
+void MainWindow::saveSessionTriggered()
 {
-    QString dir = respeqtSettings->lastSessionDir();
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save session as"),
-                                 dir,
-                                 tr(
-                                         "RespeQt sessions (*.respeqt);;"
-                                         "All files (*)"));
+    auto dir = RespeqtSettings::instance()->lastSessionDir();
+    auto fileName = QFileDialog::getSaveFileName(this, tr("Save session as"),
+         dir,
+         tr(
+            "RespeQt sessions (*.respeqt);;"
+            "All files (*)")
+    );
     if (fileName.isEmpty()) {
         return;
     }
-    respeqtSettings->setLastSessionDir(QFileInfo(fileName).absolutePath());
+    RespeqtSettings::instance()->setLastSessionDir(QFileInfo(fileName).absolutePath());
 
 // Save mainwindow position and size to session file //
-    if (respeqtSettings->saveWindowsPos()) {
-        respeqtSettings->setLastHorizontalPos(geometry().x());
-        respeqtSettings->setLastVerticalPos(geometry().y());
-        respeqtSettings->setLastWidth(geometry().width());
-        respeqtSettings->setLastHeight(geometry().height());
+    if (RespeqtSettings::instance()->saveWindowsPos()) {
+        RespeqtSettings::instance()->setLastHorizontalPos(geometry().x());
+        RespeqtSettings::instance()->setLastVerticalPos(geometry().y());
+        RespeqtSettings::instance()->setLastWidth(geometry().width());
+        RespeqtSettings::instance()->setLastHeight(geometry().height());
     }
-    respeqtSettings->saveSessionToFile(fileName);
-}
-
-void MainWindow::on_actionBootExe_triggered()
-{
-    QString dir = respeqtSettings->lastExeDir();
-    g_exefileName = QFileDialog::getOpenFileName(this, tr("Open executable"),
-                                 dir,
-                                 tr(
-                                         "Atari executables (*.xex *.com *.exe);;"
-                                         "All files (*)"));
-
-    if (!g_exefileName.isEmpty()) {
-        respeqtSettings->setLastExeDir(QFileInfo(g_exefileName).absolutePath());
-        bootExe(g_exefileName);
-    }
+    RespeqtSettings::instance()->saveSessionToFile(fileName);
 }
 
 void MainWindow::textPrinterWindowClosed()
@@ -1995,19 +1989,18 @@ void MainWindow::textPrinterWindowClosed()
     ui->actionShowPrinterTextOutput->setChecked(false);
 }
 
-void MainWindow::on_actionPlaybackCassette_triggered()
+void MainWindow::cassettePlaybackTriggered()
 {
-    QString fileName = QFileDialog::getOpenFileName(this,
-                                                    tr("Open a cassette image"),
-                                                    respeqtSettings->lastCasDir(),
-                                                    tr(
-                                                    "CAS images (*.cas);;"
-                                                    "All files (*)"));
+    auto fileName = QFileDialog::getOpenFileName(this,
+            tr("Open a cassette image"),
+            RespeqtSettings::instance()->lastCasDir(),
+            tr("CAS images (*.cas);;All files (*)")
+    );
 
     if (fileName.isEmpty()) {
         return;
     }
-    respeqtSettings->setLastCasDir(QFileInfo(fileName).absolutePath());
+    RespeqtSettings::instance()->setLastCasDir(QFileInfo(fileName).absolutePath());
 
     bool restart;
     restart = ui->actionStartEmulation->isChecked();
@@ -2026,7 +2019,7 @@ void MainWindow::on_actionPlaybackCassette_triggered()
     }
 }
 
-void MainWindow::on_actionQuit_triggered()
+void MainWindow::quitApplicationTriggered()
 {
     close();
 }
@@ -2042,12 +2035,14 @@ void MainWindow::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
         raise();
         trayIcon.hide();
     }
+#else
+    (void)reason; // Suppress the unused parameter warning.
 #endif
 }
 
 void MainWindow::bootOptionTriggered()
 {
-    QString folderPath = respeqtSettings->mountedImageSetting(0).fileName;
+    QString folderPath = RespeqtSettings::instance()->mountedImageSetting(0).fileName;
     BootOptionsDialog bod(folderPath, this);
     bod.exec();
 }
@@ -2062,4 +2057,25 @@ void MainWindow::closeTextPrinterWindow(const Printers::TextPrinterWindow *windo
             break;
         }
     }
+}
+
+// This connect the signal from UI to slots
+void MainWindow::connectUISignal()
+{
+    connect(ui->actionPlaybackCassette, &QAction::triggered, this, &MainWindow::cassettePlaybackTriggered);
+    connect(ui->actionBootExe, &QAction::triggered, this, &MainWindow::selectBootExeTriggered);
+    connect(ui->actionSaveSession, &QAction::triggered, this, &MainWindow::saveSessionTriggered);
+    connect(ui->actionOpenSession, &QAction::triggered, this, &MainWindow::openSessionTriggered);
+    connect(ui->actionNewImage, &QAction::triggered, this, &MainWindow::newImageTriggered);
+    connect(ui->actionEjectAll, &QAction::triggered, this, &MainWindow::ejectAllTriggered);
+    connect(ui->actionOptions, &QAction::triggered, this, &MainWindow::showOptionsTriggered);
+    connect(ui->actionStartEmulation, &QAction::triggered, this, &MainWindow::startEmulationTriggered);
+    connect(ui->actionPrinterEmulation, &QAction::triggered, this, &MainWindow::printerEmulationTriggered);
+    connect(ui->actionHideShowDrives, &QAction::triggered, this, &MainWindow::hideShowTriggered);
+    connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::quitApplicationTriggered);
+    connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::showAboutTriggered);
+    connect(ui->actionDocumentation, &QAction::triggered, this, &MainWindow::showDocumentationTriggered);
+    connect(ui->actionToggleMiniMode, &QAction::triggered, this, &MainWindow::toggleMiniModeTriggered);
+    connect(ui->actionToggleShade, &QAction::triggered, this, &MainWindow::toggleShadeTriggered);
+    connect(ui->actionLogWindow, &QAction::triggered, this, &MainWindow::showLogWindowTriggered);
 }

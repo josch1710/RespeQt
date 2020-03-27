@@ -84,7 +84,7 @@ bool SioWorker::wait(unsigned long time)
 
 void SioWorker::start(Priority p)
 {
-    switch (respeqtSettings->backend()) {
+    switch (RespeqtSettings::instance()->backend()) {
         default:
         case SERIAL_BACKEND_STANDARD:
             mPort = new StandardSerialPortBackend(this);
@@ -428,7 +428,7 @@ QString SioWorker::deviceName(int device)
 #ifndef QT_NO_DEBUG
 void SioWorker::startSIOSnapshot()
 {
-    QString fileName = QFileDialog::getSaveFileName(MainWindow::getInstance(),
+    QString fileName = QFileDialog::getSaveFileName(MainWindow::instance(),
                  tr("Save test XML File"), QString(), tr("XML Files (*.xml)"));
     if (fileName.length() > 0)
     {
@@ -573,8 +573,8 @@ bool CassetteWorker::loadCasImage(const QString &fileName)
 
         /* Verify the header */
         if (magic == 0x64756162) {          // "baud"
-            if (respeqtSettings->useCustomCasBaud()) {
-                lastBaud = respeqtSettings->customCasBaud();
+            if (RespeqtSettings::instance()->useCustomCasBaud()) {
+                lastBaud = RespeqtSettings::instance()->customCasBaud();
             } else {
                 lastBaud = aux;
             }
@@ -671,7 +671,7 @@ void CassetteWorker::run()
 
 void CassetteWorker::start(Priority p)
 {
-    switch (respeqtSettings->backend()) {
+    switch (RespeqtSettings::instance()->backend()) {
         case SERIAL_BACKEND_STANDARD:
             mPort = new StandardSerialPortBackend(this);
             break;

@@ -80,7 +80,7 @@ void FolderImage::buildDirectory()
             info = infos.at(j);
             longName = info.completeBaseName();
             name = longName.toUpper();
-            if(respeqtSettings->filterUnderscore()) {
+            if(RespeqtSettings::instance()->filterUnderscore()) {
                 name.remove(QRegExp("[^A-Z0-9]"));
             } else {
                 name.remove(QRegExp("[^A-Z0-9_]"));
@@ -91,7 +91,7 @@ void FolderImage::buildDirectory()
             }
             longName += "." + info.suffix();
             ext = info.suffix().toUpper();
-            if(respeqtSettings->filterUnderscore()) {
+            if(RespeqtSettings::instance()->filterUnderscore()) {
                 ext.remove(QRegExp("[^A-Z0-9]"));
             } else {
                 ext.remove(QRegExp("[^A-Z0-9_]"));

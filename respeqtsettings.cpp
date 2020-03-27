@@ -15,6 +15,10 @@
 //#include "mainwindow.h"
 #include "Emulator.h"
 
+#include <memory>
+
+std::unique_ptr<RespeqtSettings> RespeqtSettings::sInstance;
+
 RespeqtSettings::RespeqtSettings()
 {
     mSettings = new QSettings(); //uses QApplication's info to determine setting to use

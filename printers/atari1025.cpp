@@ -16,7 +16,7 @@ namespace Printers
     {
         if (mOutput)
         {
-            QFontPtr font = QFontPtr::create(respeqtSettings->atariFixedFontFamily(), 12);
+            QFontPtr font = QFontPtr::create(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
             font->setUnderline(false);
             mOutput->setFont(font);
             mOutput->calculateFixedFontSize(mLineChars);

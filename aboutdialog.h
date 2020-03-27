@@ -28,7 +28,8 @@ protected:
 private:
     Ui::AboutDialog *m_ui;
 
-//private slots:
+private slots:
+    void showAboutQt();
 };
 
 #endif // ABOUTDIALOG_H

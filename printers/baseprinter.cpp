@@ -21,7 +21,7 @@ namespace Printers
 
     void BasePrinter::handleCommand(const quint8 command, const quint16 aux)
     {
-        if (respeqtSettings->printerEmulation() && mOutput) {  // Ignore printer commands  if Emulation turned OFF)    //
+        if (RespeqtSettings::instance()->printerEmulation() && mOutput) {  // Ignore printer commands  if Emulation turned OFF)    //
             qDebug() << "!n" << "[" << deviceName() << "] "
                      << hex << "command: " << command << " aux: " << aux;
             switch(command) {

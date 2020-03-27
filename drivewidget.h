@@ -74,19 +74,12 @@ private slots:
     void on_actionToggleChip_triggered(bool open);
     void on_actionToggleOSB_triggered(bool open);
     void on_actionToolDisk_triggered(bool open);
-
     void on_actionWriteProtect_toggled(bool state);
-
     void on_actionEditDisk_triggered();
-
     void on_actionSave_triggered();
-
     void on_actionRevert_triggered();
-
     void on_actionSaveAs_triggered();
-
     void on_actionAutoSave_toggled(bool arg1);
-
     void on_actionBootOption_triggered();
 
 private:

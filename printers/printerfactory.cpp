@@ -1,3 +1,5 @@
 #include "printerfactory.h"
 
-std::unique_ptr<Printers::PrinterFactory> Printers::PrinterFactory::sInstance = nullptr;
+namespace Printers {
+std::shared_ptr<PrinterFactory> PrinterFactory::sInstance = std::shared_ptr<PrinterFactory>(new PrinterFactory);
+}

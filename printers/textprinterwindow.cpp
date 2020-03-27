@@ -12,6 +12,7 @@
 #include "ui_textprinterwindow.h"
 #include "respeqtsettings.h"
 
+#include <memory>
 #include <QFileDialog>
 #include <QPrintDialog>
 #include <QPrinter>
@@ -53,7 +54,7 @@ TextPrinterWindow::TextPrinterWindow(QWidget *parent) :
 
     connect(ui->asciiFontName, &QFontComboBox::currentFontChanged, this, &TextPrinterWindow::asciiFontChanged);
     connect(this, &TextPrinterWindow::textPrint, this, &TextPrinterWindow::print);
-    connect(this, &TextPrinterWindow::closed, MainWindow::getInstance(), &MainWindow::closeTextPrinterWindow);
+    connect(this, &TextPrinterWindow::closed, MainWindow::instance(), &MainWindow::closeTextPrinterWindow);
     connect(ui->actionAtasciiFont, &QAction::triggered, this, &TextPrinterWindow::atasciiFontTriggered);
     connect(ui->actionSave, &QAction::triggered, this, &TextPrinterWindow::saveTriggered);
     connect(ui->actionClear, &QAction::triggered, this, &TextPrinterWindow::clearTriggered);
@@ -89,11 +90,11 @@ void TextPrinterWindow::changeEvent(QEvent *e)
 void TextPrinterWindow::closeEvent(QCloseEvent *e)
 {
     // Save Current TexPrinterWindow Position and size // 
-    if (respeqtSettings->saveWindowsPos()) {
-        respeqtSettings->setLastPrtHorizontalPos(TextPrinterWindow::geometry().x());
-        respeqtSettings->setLastPrtVerticalPos(TextPrinterWindow::geometry().y());
-        respeqtSettings->setLastPrtWidth(TextPrinterWindow::geometry().width());
-        respeqtSettings->setLastPrtHeight(TextPrinterWindow::geometry().height());
+    if (RespeqtSettings::instance()->saveWindowsPos()) {
+        RespeqtSettings::instance()->setLastPrtHorizontalPos(TextPrinterWindow::geometry().x());
+        RespeqtSettings::instance()->setLastPrtVerticalPos(TextPrinterWindow::geometry().y());
+        RespeqtSettings::instance()->setLastPrtWidth(TextPrinterWindow::geometry().width());
+        RespeqtSettings::instance()->setLastPrtHeight(TextPrinterWindow::geometry().height());
     }
     emit closed(this);
     e->accept();
@@ -245,12 +246,12 @@ void TextPrinterWindow::printTriggered()
 
 void TextPrinterWindow::saveTriggered()
 {
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save printer text output"), respeqtSettings->lastPrinterTextDir(),
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save printer text output"), RespeqtSettings::instance()->lastPrinterTextDir(),
                                                     tr("Text files (*.txt);;All files (*)"), nullptr);
     if (fileName.isEmpty()) {
         return;
     }
-    respeqtSettings->setLastPrinterTextDir(QFileInfo(fileName).absolutePath());
+    RespeqtSettings::instance()->setLastPrinterTextDir(QFileInfo(fileName).absolutePath());
     QFile file(fileName);
     file.open(QFile::WriteOnly | QFile::Truncate | QFile::Text);
     file.write(ui->printerTextEdit->toPlainText().toLatin1());
@@ -318,7 +319,7 @@ void TextPrinterWindow::saveTriggered()
 
  bool TextPrinterWindow::setupOutput()
  {
-    this->setGeometry(respeqtSettings->lastPrtHorizontalPos(), respeqtSettings->lastPrtVerticalPos(), respeqtSettings->lastPrtWidth(), respeqtSettings->lastPrtHeight());
+    this->setGeometry(RespeqtSettings::instance()->lastPrtHorizontalPos(), RespeqtSettings::instance()->lastPrtVerticalPos(), RespeqtSettings::instance()->lastPrtWidth(), RespeqtSettings::instance()->lastPrtHeight());
     this->show();
 
     return true;

@@ -15,7 +15,7 @@ TestSerialPortBackend::TestSerialPortBackend(QObject *parent)
       mXmlReader(nullptr),
       mRegexp("&#(x?)(\\d{0,3});", QRegularExpression::CaseInsensitiveOption)
 {
-    mTestFilename = respeqtSettings->testFile();
+    mTestFilename = RespeqtSettings::instance()->testFile();
 }
 
 TestSerialPortBackend::~TestSerialPortBackend()

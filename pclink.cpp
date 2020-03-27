@@ -342,7 +342,7 @@ void PCLINK::unix_time_2_sdx(time_t *todp, uchar *ob)
 bool PCLINK::isSDXLegalChar(uchar c)
 {
 #if defined(Q_OS_LINUX) || defined(Q_OS_OSX)
-    if (respeqtSettings->capitalLettersInPCLINK())
+    if (RespeqtSettings::instance()->capitalLettersInPCLINK())
         return (isupper(c) || isdigit(c) || (c == '_') || (c == '@'));
 
     return (islower(c) || isdigit(c) || (c == '_') || (c == '@'));
@@ -431,7 +431,7 @@ void PCLINK::uexpand(uchar *rawname, char *name83)
     {
         t = rawname[x];
         if (t && (t != 0x20))
-            name83[x] = respeqtSettings->capitalLettersInPCLINK() ? toupper(t) : tolower(t);
+            name83[x] = RespeqtSettings::instance()->capitalLettersInPCLINK() ? toupper(t) : tolower(t);
         else
             break;
     }
@@ -445,7 +445,7 @@ void PCLINK::uexpand(uchar *rawname, char *name83)
 
         while ((y < 11) && rawname[y] && (rawname[y] != 0x20))
         {
-            name83[x] = respeqtSettings->capitalLettersInPCLINK() ? toupper(rawname[y]) : tolower(rawname[y]);
+            name83[x] = RespeqtSettings::instance()->capitalLettersInPCLINK() ? toupper(rawname[y]) : tolower(rawname[y]);
             x++;
             y++;
         }
@@ -929,7 +929,7 @@ void PCLINK::path_copy(uchar *dst, uchar *src)
 
                for(int i=0 ; i<length ; i++)
                {
-                  *dst++ = respeqtSettings->capitalLettersInPCLINK() ? toupper(*src_prev_ptr) : tolower(*src_prev_ptr);
+                  *dst++ = RespeqtSettings::instance()->capitalLettersInPCLINK() ? toupper(*src_prev_ptr) : tolower(*src_prev_ptr);
                   src_prev_ptr++;
                }
                
@@ -949,7 +949,7 @@ void PCLINK::path_copy(uchar *dst, uchar *src)
          {
             if(*src_ptr && !isSDXPathSeparator(*src_ptr) && *src_ptr!=SDX_GO_UP_DIR_CHAR)
             {
-               *dst++ = respeqtSettings->capitalLettersInPCLINK() ? toupper(*src_ptr) : tolower(*src_ptr);
+               *dst++ = RespeqtSettings::instance()->capitalLettersInPCLINK() ? toupper(*src_ptr) : tolower(*src_ptr);
                src_ptr++;
             }
             else

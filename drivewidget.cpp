@@ -88,7 +88,6 @@ void DriveWidget::setup(bool happyHidden, bool chipHidden, bool nextSideHidden, 
     ui->buttonSave->setDefaultAction(ui->actionSave);
     ui->autoSave->setDefaultAction(ui->actionAutoSave);
     ui->buttonEditDisk->setDefaultAction(ui->actionEditDisk);
-    //  TODO Revert and SaveAs are MIA.
 
     ui->buttonNextSide->setVisible(!nextSideHidden);
     ui->buttonToggleHappy->setVisible(!happyHidden);
@@ -178,12 +177,13 @@ void DriveWidget::showAsEmpty(bool happyHidden, bool chipHidden, bool nextSideHi
     ui->buttonToolDisk->setVisible((driveNo_ == 0) &&(!toolDiskHidden));
     ui->actionToolDisk->setChecked(false);
     ui->actionToolDisk->setEnabled(false);
-    ui->actionRevert->setEnabled(false);
-    ui->actionSaveAs->setEnabled(false);
     ui->actionEditDisk->setEnabled(false);
     ui->actionEditDisk->setChecked(false);
     ui->actionAutoSave->setEnabled(false);
     ui->actionAutoSave->setChecked(false);
+    ui->actionRevert->setEnabled(false);
+    ui->actionSaveAs->setEnabled(false);
+
     if(driveNo_ == 0) ui->actionBootOption->setEnabled(false);
     QString empty = "";
     setLabelToolTips(empty, empty, empty);
@@ -210,9 +210,9 @@ void DriveWidget::showAsFolderMounted(const QString &fileName, const QString &de
     ui->labelFileName->setStyleSheet("color: rgb(54, 168, 164); font-weight: bold");
     ui->actionEditDisk->setEnabled(true);
 
-    ui->actionSaveAs->setEnabled(false);
     ui->actionSave->setEnabled(false);
     ui->actionAutoSave->setEnabled(false);
+    ui->actionSaveAs->setEnabled(false);
     ui->actionRevert->setEnabled(false);
 
     if(driveNo_ == 0) ui->actionBootOption->setEnabled(true);

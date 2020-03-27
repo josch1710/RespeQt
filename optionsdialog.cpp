@@ -64,65 +64,65 @@ void OptionsDialog::setupSettings()
     {
         m_ui->serialPortComboBox->addItem(it->portName(),it->systemLocation());
     }
-    m_ui->serialPortComboBox->setCurrentText(respeqtSettings->serialPortName());
-    if(0 != m_ui->serialPortComboBox->currentText().compare(respeqtSettings->serialPortName(),Qt::CaseInsensitive))
+    m_ui->serialPortComboBox->setCurrentText(RespeqtSettings::instance()->serialPortName());
+    if(0 != m_ui->serialPortComboBox->currentText().compare(RespeqtSettings::instance()->serialPortName(),Qt::CaseInsensitive))
     {
         m_ui->serialPortComboBox->setEditable(true);
-        m_ui->serialPortComboBox->addItem(respeqtSettings->serialPortName());
-        m_ui->serialPortComboBox->setCurrentText(respeqtSettings->serialPortName());
+        m_ui->serialPortComboBox->addItem(RespeqtSettings::instance()->serialPortName());
+        m_ui->serialPortComboBox->setCurrentText(RespeqtSettings::instance()->serialPortName());
     }
     else
     {
         m_ui->serialPortComboBox->addItem(tr("Custom"));
     }
-    m_ui->serialPortHandshakeCombo->setCurrentIndex(respeqtSettings->serialPortHandshakingMethod());
-    m_ui->serialPortFallingEdge->setChecked(respeqtSettings->serialPortTriggerOnFallingEdge());
-    m_ui->serialPortDTRControlEnable->setChecked(respeqtSettings->serialPortDTRControlEnable());
-    m_ui->serialPortWriteDelayCombo->setCurrentIndex(respeqtSettings->serialPortWriteDelay());
-    m_ui->serialPortBaudCombo->setCurrentIndex(respeqtSettings->serialPortMaximumSpeed());
-    m_ui->serialPortUseDivisorsBox->setChecked(respeqtSettings->serialPortUsePokeyDivisors());
-    m_ui->serialPortDivisorEdit->setValue(respeqtSettings->serialPortPokeyDivisor());
-    m_ui->serialPortCompErrDelayBox->setValue(respeqtSettings->serialPortCompErrDelay());
-    m_ui->atariSioDriverNameEdit->setText(respeqtSettings->atariSioDriverName());
-    m_ui->atariSioHandshakingMethodCombo->setCurrentIndex(respeqtSettings->atariSioHandshakingMethod());
-    m_ui->emulationHighSpeedExeLoaderBox->setChecked(respeqtSettings->useHighSpeedExeLoader());
-    m_ui->emulationUseCustomCasBaudBox->setChecked(respeqtSettings->useCustomCasBaud());
-    m_ui->emulationCustomCasBaudSpin->setValue(respeqtSettings->customCasBaud());
-    m_ui->minimizeToTrayBox->setChecked(respeqtSettings->minimizeToTray());
-    m_ui->saveWinPosBox->setChecked(respeqtSettings->saveWindowsPos());
-    m_ui->saveDiskVisBox->setChecked(respeqtSettings->saveDiskVis());
-    m_ui->filterUscore->setChecked(respeqtSettings->filterUnderscore());
-    m_ui->capitalLettersPCLINK->setChecked(respeqtSettings->capitalLettersInPCLINK());
-    m_ui->URLSubmit->setChecked(respeqtSettings->isURLSubmitEnabled());
-    m_ui->spyMode->setChecked(respeqtSettings->isSpyMode());
-    m_ui->commandName->setChecked(respeqtSettings->isCommandName());
-    m_ui->trackLayout->setChecked(respeqtSettings->isTrackLayout());
-    m_ui->disassembleUploadedCode->setChecked(respeqtSettings->disassembleUploadedCode());
-    m_ui->translatorDiskImagePath->setText(respeqtSettings->translatorDiskImagePath());
-    m_ui->translatorAutomaticDetection->setChecked(respeqtSettings->translatorAutomaticDetection());
-    m_ui->hideChipMode->setChecked(respeqtSettings->hideChipMode());
-    m_ui->hideHappyMode->setChecked(respeqtSettings->hideHappyMode());
-    m_ui->hideNextImage->setChecked(respeqtSettings->hideNextImage());
-    m_ui->hideOSBMode->setChecked(respeqtSettings->hideOSBMode());
-    m_ui->hideToolDisk->setChecked(respeqtSettings->hideToolDisk());
-    m_ui->toolDiskImagePath->setText(respeqtSettings->toolDiskImagePath());
-    m_ui->activateChipModeWithTool->setChecked(respeqtSettings->activateChipModeWithTool());
-    m_ui->activateHappyModeWithTool->setChecked(respeqtSettings->activateHappyModeWithTool());
-    m_ui->useLargerFont->setChecked(respeqtSettings->useLargeFont());
-    m_ui->enableShade->setChecked(respeqtSettings->enableShade());
-    m_ui->RclNameEdit->setText(respeqtSettings->lastRclDir());
+    m_ui->serialPortHandshakeCombo->setCurrentIndex(RespeqtSettings::instance()->serialPortHandshakingMethod());
+    m_ui->serialPortFallingEdge->setChecked(RespeqtSettings::instance()->serialPortTriggerOnFallingEdge());
+    m_ui->serialPortDTRControlEnable->setChecked(RespeqtSettings::instance()->serialPortDTRControlEnable());
+    m_ui->serialPortWriteDelayCombo->setCurrentIndex(RespeqtSettings::instance()->serialPortWriteDelay());
+    m_ui->serialPortBaudCombo->setCurrentIndex(RespeqtSettings::instance()->serialPortMaximumSpeed());
+    m_ui->serialPortUseDivisorsBox->setChecked(RespeqtSettings::instance()->serialPortUsePokeyDivisors());
+    m_ui->serialPortDivisorEdit->setValue(RespeqtSettings::instance()->serialPortPokeyDivisor());
+    m_ui->serialPortCompErrDelayBox->setValue(RespeqtSettings::instance()->serialPortCompErrDelay());
+    m_ui->atariSioDriverNameEdit->setText(RespeqtSettings::instance()->atariSioDriverName());
+    m_ui->atariSioHandshakingMethodCombo->setCurrentIndex(RespeqtSettings::instance()->atariSioHandshakingMethod());
+    m_ui->emulationHighSpeedExeLoaderBox->setChecked(RespeqtSettings::instance()->useHighSpeedExeLoader());
+    m_ui->emulationUseCustomCasBaudBox->setChecked(RespeqtSettings::instance()->useCustomCasBaud());
+    m_ui->emulationCustomCasBaudSpin->setValue(RespeqtSettings::instance()->customCasBaud());
+    m_ui->minimizeToTrayBox->setChecked(RespeqtSettings::instance()->minimizeToTray());
+    m_ui->saveWinPosBox->setChecked(RespeqtSettings::instance()->saveWindowsPos());
+    m_ui->saveDiskVisBox->setChecked(RespeqtSettings::instance()->saveDiskVis());
+    m_ui->filterUscore->setChecked(RespeqtSettings::instance()->filterUnderscore());
+    m_ui->capitalLettersPCLINK->setChecked(RespeqtSettings::instance()->capitalLettersInPCLINK());
+    m_ui->URLSubmit->setChecked(RespeqtSettings::instance()->isURLSubmitEnabled());
+    m_ui->spyMode->setChecked(RespeqtSettings::instance()->isSpyMode());
+    m_ui->commandName->setChecked(RespeqtSettings::instance()->isCommandName());
+    m_ui->trackLayout->setChecked(RespeqtSettings::instance()->isTrackLayout());
+    m_ui->disassembleUploadedCode->setChecked(RespeqtSettings::instance()->disassembleUploadedCode());
+    m_ui->translatorDiskImagePath->setText(RespeqtSettings::instance()->translatorDiskImagePath());
+    m_ui->translatorAutomaticDetection->setChecked(RespeqtSettings::instance()->translatorAutomaticDetection());
+    m_ui->hideChipMode->setChecked(RespeqtSettings::instance()->hideChipMode());
+    m_ui->hideHappyMode->setChecked(RespeqtSettings::instance()->hideHappyMode());
+    m_ui->hideNextImage->setChecked(RespeqtSettings::instance()->hideNextImage());
+    m_ui->hideOSBMode->setChecked(RespeqtSettings::instance()->hideOSBMode());
+    m_ui->hideToolDisk->setChecked(RespeqtSettings::instance()->hideToolDisk());
+    m_ui->toolDiskImagePath->setText(RespeqtSettings::instance()->toolDiskImagePath());
+    m_ui->activateChipModeWithTool->setChecked(RespeqtSettings::instance()->activateChipModeWithTool());
+    m_ui->activateHappyModeWithTool->setChecked(RespeqtSettings::instance()->activateHappyModeWithTool());
+    m_ui->useLargerFont->setChecked(RespeqtSettings::instance()->useLargeFont());
+    m_ui->enableShade->setChecked(RespeqtSettings::instance()->enableShade());
+    m_ui->RclNameEdit->setText(RespeqtSettings::instance()->lastRclDir());
     m_ui->warning_nativemenu->hide();
 #ifdef Q_OS_MAC
-    m_ui->useNativeMenu->setChecked(respeqtSettings->nativeMenu());
+    m_ui->useNativeMenu->setChecked(RespeqtSettings::instance()->nativeMenu());
     const auto& actualNoMenu = QApplication::testAttribute(Qt::AA_DontUseNativeMenuBar);
     // The meaning of both flags are the opposite (i.e. boolean not) of each other.
     // So, we have to test for equality to get difference (i.e. a != !b).
-    if (actualNoMenu == respeqtSettings->nativeMenu())
+    if (actualNoMenu == RespeqtSettings::instance()->nativeMenu())
         m_ui->warning_nativemenu->show();
     m_ui->minimizeToTrayBox->hide();
 #endif
 
-    switch (respeqtSettings->backend()) {
+    switch (RespeqtSettings::instance()->backend()) {
 #ifndef QT_NO_DEBUG
         case SERIAL_BACKEND_TEST:
 #endif
@@ -150,10 +150,10 @@ void OptionsDialog::setupSettings()
     QTranslator local_translator;
     m_ui->i18nLanguageCombo->clear();
     m_ui->i18nLanguageCombo->addItem(tr("Automatic"), "auto");
-    if (respeqtSettings->i18nLanguage().compare("auto") == 0)
+    if (RespeqtSettings::instance()->i18nLanguage().compare("auto") == 0)
       m_ui->i18nLanguageCombo->setCurrentIndex(0);
     m_ui->i18nLanguageCombo->addItem(QT_TR_NOOP("English"), "en");
-    if (respeqtSettings->i18nLanguage().compare("en") == 0)
+    if (RespeqtSettings::instance()->i18nLanguage().compare("en") == 0)
       m_ui->i18nLanguageCombo->setCurrentIndex(1);
     QDir dir(":/translations/i18n/");
     QStringList filters;
@@ -162,12 +162,12 @@ void OptionsDialog::setupSettings()
     for (int i = 0; i < dir.entryList().size(); ++i) {
         local_translator.load(":/translations/i18n/" + dir.entryList()[i]);
         m_ui->i18nLanguageCombo->addItem(local_translator.translate("OptionsDialog", "English"), dir.entryList()[i].replace("respeqt_", "").replace(".qm", ""));
-        if (dir.entryList()[i].replace("respeqt_", "").replace(".qm", "").compare(respeqtSettings->i18nLanguage()) == 0) {
+        if (dir.entryList()[i].replace("respeqt_", "").replace(".qm", "").compare(RespeqtSettings::instance()->i18nLanguage()) == 0) {
             m_ui->i18nLanguageCombo->setCurrentIndex(i+2);
         }
     }
 
-    bool software_handshake = (respeqtSettings->serialPortHandshakingMethod()==HANDSHAKE_SOFTWARE);
+    bool software_handshake = (RespeqtSettings::instance()->serialPortHandshakingMethod()==HANDSHAKE_SOFTWARE);
     m_ui->serialPortWriteDelayLabel->setVisible(software_handshake);
     m_ui->serialPortWriteDelayCombo->setVisible(software_handshake);
     m_ui->serialPortBaudLabel->setVisible(!software_handshake);
@@ -178,14 +178,14 @@ void OptionsDialog::setupSettings()
     m_ui->serialPortCompErrDelayLabel->setVisible(!software_handshake);
     m_ui->serialPortCompErrDelayBox->setVisible(!software_handshake);
 #ifdef Q_OS_WIN
-    bool no_handshake = (respeqtSettings->serialPortHandshakingMethod()==HANDSHAKE_NO_HANDSHAKE);
+    bool no_handshake = (RespeqtSettings::instance()->serialPortHandshakingMethod()==HANDSHAKE_NO_HANDSHAKE);
     m_ui->serialPortFallingEdge->setVisible(!no_handshake && !software_handshake);
     m_ui->serialPortDTRControlEnable->setVisible(no_handshake || software_handshake);
 #else
     m_ui->serialPortFallingEdge->setVisible(false);
 #endif
 
-    if((SERIAL_BACKEND_STANDARD == respeqtSettings->backend()) && software_handshake)
+    if((SERIAL_BACKEND_STANDARD == RespeqtSettings::instance()->backend()) && software_handshake)
     {
         m_ui->emulationHighSpeedExeLoaderBox->setVisible(false);
     }
@@ -194,7 +194,7 @@ void OptionsDialog::setupSettings()
         m_ui->emulationHighSpeedExeLoaderBox->setVisible(true);
     }
 
-    m_ui->label_atarifixed->setText(respeqtSettings->atariFixedFontFamily());
+    m_ui->label_atarifixed->setText(RespeqtSettings::instance()->atariFixedFontFamily());
     QFont font;
     font.setPointSize(12);
     font.setFamily(m_ui->label_atarifixed->text());
@@ -202,13 +202,13 @@ void OptionsDialog::setupSettings()
 
 #ifdef Q_OS_MAC
     m_ui->useNativeMenu->show();
-    m_ui->useNativeMenu->setChecked(respeqtSettings->nativeMenu());
+    m_ui->useNativeMenu->setChecked(RespeqtSettings::instance()->nativeMenu());
 #else
     m_ui->useNativeMenu->hide();
 #endif
     // Setup via platform dependent class
     Printers::RawOutput::setupRawPrinters(m_ui->rawPrinterName);
-    QString rawPrinterName = respeqtSettings->rawPrinterName();
+    QString rawPrinterName = RespeqtSettings::instance()->rawPrinterName();
     if (rawPrinterName.length() > 0)
         m_ui->rawPrinterName->setCurrentText(rawPrinterName);
 }
@@ -379,43 +379,43 @@ void OptionsDialog::currentSectionChanged(QTreeWidgetItem* current, QTreeWidgetI
 
 void OptionsDialog::saveSettings()
 {
-    respeqtSettings->setSerialPortName(m_ui->serialPortComboBox->currentText());
-    respeqtSettings->setSerialPortHandshakingMethod(m_ui->serialPortHandshakeCombo->currentIndex());
-    respeqtSettings->setSerialPortTriggerOnFallingEdge(m_ui->serialPortFallingEdge->isChecked());
-    respeqtSettings->setSerialPortDTRControlEnable(m_ui->serialPortDTRControlEnable->isChecked());
-    respeqtSettings->setSerialPortWriteDelay(m_ui->serialPortWriteDelayCombo->currentIndex());
-    respeqtSettings->setSerialPortCompErrDelay(m_ui->serialPortCompErrDelayBox->value());
-    respeqtSettings->setSerialPortMaximumSpeed(m_ui->serialPortBaudCombo->currentIndex());
-    respeqtSettings->setSerialPortUsePokeyDivisors(m_ui->serialPortUseDivisorsBox->isChecked());
-    respeqtSettings->setSerialPortPokeyDivisor(m_ui->serialPortDivisorEdit->value());
-    respeqtSettings->setAtariSioDriverName(m_ui->atariSioDriverNameEdit->text());
-    respeqtSettings->setAtariSioHandshakingMethod(m_ui->atariSioHandshakingMethodCombo->currentIndex());
-    respeqtSettings->setUseHighSpeedExeLoader(m_ui->emulationHighSpeedExeLoaderBox->isChecked());
-    respeqtSettings->setUseCustomCasBaud(m_ui->emulationUseCustomCasBaudBox->isChecked());
-    respeqtSettings->setCustomCasBaud(m_ui->emulationCustomCasBaudSpin->value());
-    respeqtSettings->setMinimizeToTray(m_ui->minimizeToTrayBox->isChecked());
-    respeqtSettings->setsaveWindowsPos(m_ui->saveWinPosBox->isChecked());
-    respeqtSettings->setsaveDiskVis(m_ui->saveDiskVisBox->isChecked());
-    respeqtSettings->setfilterUnderscore(m_ui->filterUscore->isChecked());
-    respeqtSettings->setCapitalLettersInPCLINK(m_ui->capitalLettersPCLINK->isChecked());
-    respeqtSettings->setURLSubmit(m_ui->URLSubmit->isChecked());
-    respeqtSettings->setSpyMode(m_ui->spyMode->isChecked());
-    respeqtSettings->setCommandName(m_ui->commandName->isChecked());
-    respeqtSettings->setTrackLayout(m_ui->trackLayout->isChecked());
-    respeqtSettings->setDisassembleUploadedCode(m_ui->disassembleUploadedCode->isChecked());
-    respeqtSettings->setTranslatorAutomaticDetection(m_ui->translatorAutomaticDetection->isChecked());
-    respeqtSettings->setTranslatorDiskImagePath(m_ui->translatorDiskImagePath->text());
-    respeqtSettings->setHideChipMode(m_ui->hideChipMode->isChecked());
-    respeqtSettings->setHideHappyMode(m_ui->hideHappyMode->isChecked());
-    respeqtSettings->setHideNextImage(m_ui->hideNextImage->isChecked());
-    respeqtSettings->setHideOSBMode(m_ui->hideOSBMode->isChecked());
-    respeqtSettings->setHideToolDisk(m_ui->hideToolDisk->isChecked());
-    respeqtSettings->setToolDiskImagePath(m_ui->toolDiskImagePath->text());
-    respeqtSettings->setActivateChipModeWithTool(m_ui->activateChipModeWithTool->isChecked());
-    respeqtSettings->setActivateHappyModeWithTool(m_ui->activateHappyModeWithTool->isChecked());
-    respeqtSettings->setUseLargeFont(m_ui->useLargerFont->isChecked());
-    respeqtSettings->setEnableShade(m_ui->enableShade->isChecked());
-    respeqtSettings->setRclDir(m_ui->RclNameEdit->text());
+    RespeqtSettings::instance()->setSerialPortName(m_ui->serialPortComboBox->currentText());
+    RespeqtSettings::instance()->setSerialPortHandshakingMethod(m_ui->serialPortHandshakeCombo->currentIndex());
+    RespeqtSettings::instance()->setSerialPortTriggerOnFallingEdge(m_ui->serialPortFallingEdge->isChecked());
+    RespeqtSettings::instance()->setSerialPortDTRControlEnable(m_ui->serialPortDTRControlEnable->isChecked());
+    RespeqtSettings::instance()->setSerialPortWriteDelay(m_ui->serialPortWriteDelayCombo->currentIndex());
+    RespeqtSettings::instance()->setSerialPortCompErrDelay(m_ui->serialPortCompErrDelayBox->value());
+    RespeqtSettings::instance()->setSerialPortMaximumSpeed(m_ui->serialPortBaudCombo->currentIndex());
+    RespeqtSettings::instance()->setSerialPortUsePokeyDivisors(m_ui->serialPortUseDivisorsBox->isChecked());
+    RespeqtSettings::instance()->setSerialPortPokeyDivisor(m_ui->serialPortDivisorEdit->value());
+    RespeqtSettings::instance()->setAtariSioDriverName(m_ui->atariSioDriverNameEdit->text());
+    RespeqtSettings::instance()->setAtariSioHandshakingMethod(m_ui->atariSioHandshakingMethodCombo->currentIndex());
+    RespeqtSettings::instance()->setUseHighSpeedExeLoader(m_ui->emulationHighSpeedExeLoaderBox->isChecked());
+    RespeqtSettings::instance()->setUseCustomCasBaud(m_ui->emulationUseCustomCasBaudBox->isChecked());
+    RespeqtSettings::instance()->setCustomCasBaud(m_ui->emulationCustomCasBaudSpin->value());
+    RespeqtSettings::instance()->setMinimizeToTray(m_ui->minimizeToTrayBox->isChecked());
+    RespeqtSettings::instance()->setsaveWindowsPos(m_ui->saveWinPosBox->isChecked());
+    RespeqtSettings::instance()->setsaveDiskVis(m_ui->saveDiskVisBox->isChecked());
+    RespeqtSettings::instance()->setfilterUnderscore(m_ui->filterUscore->isChecked());
+    RespeqtSettings::instance()->setCapitalLettersInPCLINK(m_ui->capitalLettersPCLINK->isChecked());
+    RespeqtSettings::instance()->setURLSubmit(m_ui->URLSubmit->isChecked());
+    RespeqtSettings::instance()->setSpyMode(m_ui->spyMode->isChecked());
+    RespeqtSettings::instance()->setCommandName(m_ui->commandName->isChecked());
+    RespeqtSettings::instance()->setTrackLayout(m_ui->trackLayout->isChecked());
+    RespeqtSettings::instance()->setDisassembleUploadedCode(m_ui->disassembleUploadedCode->isChecked());
+    RespeqtSettings::instance()->setTranslatorAutomaticDetection(m_ui->translatorAutomaticDetection->isChecked());
+    RespeqtSettings::instance()->setTranslatorDiskImagePath(m_ui->translatorDiskImagePath->text());
+    RespeqtSettings::instance()->setHideChipMode(m_ui->hideChipMode->isChecked());
+    RespeqtSettings::instance()->setHideHappyMode(m_ui->hideHappyMode->isChecked());
+    RespeqtSettings::instance()->setHideNextImage(m_ui->hideNextImage->isChecked());
+    RespeqtSettings::instance()->setHideOSBMode(m_ui->hideOSBMode->isChecked());
+    RespeqtSettings::instance()->setHideToolDisk(m_ui->hideToolDisk->isChecked());
+    RespeqtSettings::instance()->setToolDiskImagePath(m_ui->toolDiskImagePath->text());
+    RespeqtSettings::instance()->setActivateChipModeWithTool(m_ui->activateChipModeWithTool->isChecked());
+    RespeqtSettings::instance()->setActivateHappyModeWithTool(m_ui->activateHappyModeWithTool->isChecked());
+    RespeqtSettings::instance()->setUseLargeFont(m_ui->useLargerFont->isChecked());
+    RespeqtSettings::instance()->setEnableShade(m_ui->enableShade->isChecked());
+    RespeqtSettings::instance()->setRclDir(m_ui->RclNameEdit->text());
 
     int backend = SERIAL_BACKEND_STANDARD;
     if (itemAtariSio->checkState(0) == Qt::Checked)
@@ -429,16 +429,16 @@ void OptionsDialog::saveSettings()
     }
 #endif
 
-    respeqtSettings->setBackend(backend);
+    RespeqtSettings::instance()->setBackend(backend);
 
-    respeqtSettings->setI18nLanguage(m_ui->i18nLanguageCombo->itemData(m_ui->i18nLanguageCombo->currentIndex()).toString());
+    RespeqtSettings::instance()->setI18nLanguage(m_ui->i18nLanguageCombo->itemData(m_ui->i18nLanguageCombo->currentIndex()).toString());
 #ifdef Q_OS_MAC
-    respeqtSettings->setNativeMenu(m_ui->useNativeMenu->isChecked());
+    RespeqtSettings::instance()->setNativeMenu(m_ui->useNativeMenu->isChecked());
 #endif
     if (m_ui->rawPrinterName->currentData() != -1)
-        respeqtSettings->setRawPrinterName(m_ui->rawPrinterName->currentText());
+        RespeqtSettings::instance()->setRawPrinterName(m_ui->rawPrinterName->currentText());
     else
-        respeqtSettings->setRawPrinterName("");
+        RespeqtSettings::instance()->setRawPrinterName("");
 }
 
 void OptionsDialog::useCustomBaudToggled(bool checked)
@@ -530,7 +530,7 @@ void OptionsDialog::testFileClicked()
     auto file1Name = QFileDialog::getOpenFileName(this,
              tr("Open test XML File"), QString(), tr("XML Files (*.xml)"));
     m_ui->testFileLabel->setText(file1Name);
-    respeqtSettings->setTestFile(file1Name);
+    RespeqtSettings::instance()->setTestFile(file1Name);
 #endif
 }
 
@@ -546,20 +546,20 @@ void OptionsDialog::fixedFontClicked()
         newFont.setPointSize(12);
         m_ui->label_atarifixed->setText(newFont.family());
         m_ui->fontSample->setFont(newFont);
-        respeqtSettings->setAtariFixedFontFamily(newFont.family());
+        RespeqtSettings::instance()->setAtariFixedFontFamily(newFont.family());
     }
 }
 
 void OptionsDialog::rclFolderClicked()
 {
      QString dir;
-     dir = respeqtSettings->lastRclDir();
+     dir = RespeqtSettings::instance()->lastRclDir();
      QString fileName = QFileDialog::getExistingDirectory(this, tr("Selec RCL image folder"), dir);
      fileName = QDir::fromNativeSeparators(fileName);    //
      if (fileName.isEmpty()) {
          return;
      }
-     respeqtSettings->setRclDir(fileName);
+     RespeqtSettings::instance()->setRclDir(fileName);
      m_ui->RclNameEdit->setText(fileName);
 
 }

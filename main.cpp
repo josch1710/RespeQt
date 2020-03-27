@@ -9,6 +9,7 @@
 #include <QtWidgets/QApplication>
 #include <QTextCodec>
 #include <QLibraryInfo>
+#include <memory>
 #include "mainwindow.h"
 
 #ifdef Q_OS_WIN
@@ -18,15 +19,14 @@
 
 int main(int argc, char *argv[])
 {
-    int ret;
+    int ret = 0;
 #ifdef Q_OS_WIN
     timeBeginPeriod(1);
 #endif
-
     QApplication a(argc, argv);
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
-    MainWindow w;
-    w.show();
+    auto w = new MainWindow;
+    w->show();
     ret = a.exec();
 #ifdef Q_OS_WIN
     timeEndPeriod(1);

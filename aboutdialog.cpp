@@ -22,7 +22,7 @@ AboutDialog::AboutDialog(QWidget *parent, QString version) :
     m_ui->versionLabel->setText(tr("version %1").arg(version));
     m_ui->textBrowser->setSource(*new QUrl(tr("qrc:/documentation/about.html")));
 
-    //connect(this, SIGNAL(accepted()), this, SLOT(AboutDialog_accepted()));
+    connect(m_ui->aboutQt, &QPushButton::clicked, this, &AboutDialog::showAboutQt);
 }
 
 AboutDialog::~AboutDialog()
@@ -40,4 +40,9 @@ void AboutDialog::changeEvent(QEvent *e)
     default:
         break;
     }
+}
+
+void AboutDialog::showAboutQt()
+{
+    QApplication::aboutQt();
 }

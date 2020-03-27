@@ -22,6 +22,7 @@
 #include <QTranslator>
 #include <QSystemTrayIcon>
 #include <QTextEdit>
+#include <memory>
 
 #include "optionsdialog.h"
 #include "aboutdialog.h"
@@ -36,6 +37,7 @@
 #include "printerwidget.h"
 #include "Emulator.h"
 #include "printers/textprinterwindow.h"
+#include "logdisplaydialog.h"
 
 namespace Ui
 {
@@ -47,24 +49,18 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow();
     ~MainWindow();
     QString g_sessionFile;
     QString g_sessionFilePath;
     QString g_mainWindowTitle;
-    static MainWindow *getInstance() { return instance; }
-
-public slots:
-    void show();
-    int firstEmptyDiskSlot(int startFrom = 0, bool createOne = true);       //
-    void mountFileWithDefaultProtection(int no, const QString &fileName);   //
-    void autoCommit(int no, bool st);       //
-    void happy(int no, bool st);       //
-    void chip(int no, bool st);       //
-    void bootExeTriggered(const QString &fileName);
-    void closeTextPrinterWindow(const Printers::TextPrinterWindow *window);
-
+    void doLogMessage(int type, const QString &msg);
+    static void logMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    static MainWindow* instance() {
+        return sInstance;
+    }
 private:
+    static MainWindow* sInstance;
     int untitledName;
     Ui::MainWindow *ui;
     SioWorkerPtr sio;
@@ -84,11 +80,10 @@ private:
     Qt::WindowStates oldWindowStates;
     QString lastMessage;
     int lastMessageRepeat;
-    static MainWindow *instance;
     
     bool isClosing;
 
-    QDialog *logWindow_;
+    LogDisplayDialog *logWindow_;
 
     RomProvider *m_romProvider;
 
@@ -121,6 +116,8 @@ private:
 
     void createDeviceWidgets();
     SimpleDiskImage *installDiskImage(int no);
+    void changeFonts();
+    void connectUISignal();
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -138,29 +135,37 @@ signals:
     void logMessage(int type, const QString &msg);
     void newSlot (int slot);
     void fileMounted(bool mounted);
-    void sendLogText (QString logText);
-    void sendLogTextChange (QString logTextChange);
-    void setFont(const QFont &font);
+    void sendLogText (QString logText); //
+    void sendLogTextChange (QString logTextChange); //
+    void setFont(const QFont &font); //
 
-public:
-    void doLogMessage(int type, const QString &msg);
+public slots:
+    void show();
+    int firstEmptyDiskSlot(int startFrom = 0, bool createOne = true);       //
+    void mountFileWithDefaultProtection(int no, const QString &fileName);   //
+    void autoCommit(int no, bool st);       //
+    void happy(int no, bool st);       //
+    void chip(int no, bool st);       //
+    void bootExeTriggered(const QString &fileName);
+    void closeTextPrinterWindow(const Printers::TextPrinterWindow *window);
+
 
 private slots:
     void openRecent(); //
 
-    void on_actionPlaybackCassette_triggered();
-    void on_actionBootExe_triggered();
-    void on_actionSaveSession_triggered();
-    void on_actionOpenSession_triggered();
-    void on_actionNewImage_triggered();
-    void on_actionEjectAll_triggered();
-    void on_actionOptions_triggered();
-    void on_actionStartEmulation_triggered();
-    void on_actionPrinterEmulation_triggered();
-    void on_actionHideShowDrives_triggered();
-    void on_actionQuit_triggered();
-    void on_actionAbout_triggered();
-    void on_actionDocumentation_triggered();
+    void cassettePlaybackTriggered(); //
+    void selectBootExeTriggered(); //
+    void saveSessionTriggered(); //
+    void openSessionTriggered(); //
+    void newImageTriggered(); //
+    void ejectAllTriggered(); //
+    void showOptionsTriggered(); //
+    void startEmulationTriggered(); //
+    void printerEmulationTriggered(); //
+    void hideShowTriggered(); //
+    void quitApplicationTriggered(); //
+    void showAboutTriggered(); //
+    void showDocumentationTriggered(); //
 
     // Device widget events
     void mountDiskTriggered(int deviceId); //
@@ -172,7 +177,6 @@ private slots:
     void OSBToggled(int deviceId, bool open); //
     void toolDiskTriggered(int deviceId, bool open); //
     void protectTriggered(int deviceId, bool writeProtectEnabled); //
-    void mountRecentTriggered(const QString &fileName);
     void editDiskTriggered(int deviceId); //
     void saveTriggered(int deviceId); //
     void autoSaveTriggered(int deviceId); //
@@ -181,11 +185,11 @@ private slots:
 
 
     void bootOptionTriggered(); //
-    void on_actionToggleMiniMode_triggered();
-    void on_actionToggleShade_triggered();
-    void on_actionLogWindow_triggered();
+    void toggleMiniModeTriggered(); //
+    void toggleShadeTriggered(); //
+    void showLogWindowTriggered(); //
 
-    void showHideDrives();
+    void showHideDrives(); //
     void sioFinished(); //
     void sioStarted(); //
     void sioStatusChanged(QString status); //
@@ -195,11 +199,10 @@ private slots:
     void uiMessage(int t, const QString message);
     // TODO Check on Windows and Linux
     void trayIconActivated(QSystemTrayIcon::ActivationReason reason); //
-    void keepBootExeOpen();
+    void keepBootExeOpen(); // Signal AutoBootDialog::keepOpen MIA
     void saveWindowGeometry();
     void saveMiniWindowGeometry();
     void logChanged(QString text);
-    void changeFonts();
 };
 
 #endif // MAINWINDOW_H

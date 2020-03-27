@@ -23,7 +23,6 @@ public:
     AutoBootDialog(QWidget *parent = 0);
     ~AutoBootDialog();
 
-signals:
 
 protected:
     void changeEvent(QEvent *e);
@@ -32,11 +31,13 @@ protected:
 private:
     Ui::AutoBootDialog *ui;
 
-private slots:
+public slots:
     void booterStarted();
     void booterLoaded();
     void blockRead(int current, int all);
     void loaderDone();
+
+private slots:
     void onClick(QAbstractButton* button);
     void reloadExe();
 };
