@@ -56,11 +56,11 @@ bool StandardSerialPortBackend::open()
 //    qDebug() << "!d" << tr("DBG -- Serial Port Open...");
 
     QString name(SERIAL_PORT_LOCATION);
-    name.append(respeqtSettings->serialPortName());
+    name.append(RespeqtSettings::instance()->serialPortName());
 
-    mMethod = respeqtSettings->serialPortHandshakingMethod();
-    mWriteDelay = SLEEP_FACTOR * respeqtSettings->serialPortWriteDelay();
-    mCompErrDelay = respeqtSettings->serialPortCompErrDelay();
+    mMethod = RespeqtSettings::instance()->serialPortHandshakingMethod();
+    mWriteDelay = SLEEP_FACTOR * RespeqtSettings::instance()->serialPortWriteDelay();
+    mCompErrDelay = RespeqtSettings::instance()->serialPortCompErrDelay();
 
     if(mMethod==HANDSHAKE_SOFTWARE)
     {
@@ -74,7 +74,7 @@ bool StandardSerialPortBackend::open()
             0
         ));
         if (mHandle == INVALID_HANDLE_VALUE) {
-            qCritical() << "!e" << tr("Cannot open serial port '%1': %2").arg(respeqtSettings->serialPortName(), lastErrorMessage());
+            qCritical() << "!e" << tr("Cannot open serial port '%1': %2").arg(RespeqtSettings::instance()->serialPortName(), lastErrorMessage());
             return false;
         }
     }
@@ -90,15 +90,15 @@ bool StandardSerialPortBackend::open()
             0
         ));
         if (mHandle == INVALID_HANDLE_VALUE) {
-            qCritical() << "!e" << tr("Cannot open serial port '%1': %2").arg(respeqtSettings->serialPortName(), lastErrorMessage());
+            qCritical() << "!e" << tr("Cannot open serial port '%1': %2").arg(RespeqtSettings::instance()->serialPortName(), lastErrorMessage());
             return false;
         }
         if (!EscapeCommFunction(mHandle, CLRDTR)) {
-            qCritical() << "!e" << tr("Cannot clear DTR line in serial port '%1': %2").arg(respeqtSettings->serialPortName(), lastErrorMessage());
+            qCritical() << "!e" << tr("Cannot clear DTR line in serial port '%1': %2").arg(RespeqtSettings::instance()->serialPortName(), lastErrorMessage());
             return false;
         }
         if (!EscapeCommFunction(mHandle, CLRRTS)) {
-            qCritical() << "!e" << tr("Cannot clear RTS line in serial port '%1': %2").arg(respeqtSettings->serialPortName(), lastErrorMessage());
+            qCritical() << "!e" << tr("Cannot clear RTS line in serial port '%1': %2").arg(RespeqtSettings::instance()->serialPortName(), lastErrorMessage());
             return false;
         }
     }
@@ -134,7 +134,7 @@ bool StandardSerialPortBackend::open()
 
     /* Notify the user that emulation is started */
     qWarning() << "!i" << tr("Emulation started through standard serial port backend on '%1' with %2 handshaking")
-                  .arg(respeqtSettings->serialPortName())
+                  .arg(RespeqtSettings::instance()->serialPortName())
                   .arg(m);
     return true;
 }
@@ -166,13 +166,13 @@ int StandardSerialPortBackend::speedByte()
 {
 //    qDebug() << "!d" << tr("DBG -- Serial Port speedByte...");
 
-    if (respeqtSettings->serialPortHandshakingMethod()==HANDSHAKE_SOFTWARE) {
+    if (RespeqtSettings::instance()->serialPortHandshakingMethod()==HANDSHAKE_SOFTWARE) {
         return 0x28; // standard speed (19200)
-    } else if (respeqtSettings->serialPortUsePokeyDivisors()) {
-        return respeqtSettings->serialPortPokeyDivisor();
+    } else if (RespeqtSettings::instance()->serialPortUsePokeyDivisors()) {
+        return RespeqtSettings::instance()->serialPortPokeyDivisor();
     } else {
         int speed = 0x08;
-        switch (respeqtSettings->serialPortMaximumSpeed()) {
+        switch (RespeqtSettings::instance()->serialPortMaximumSpeed()) {
         case 0:
             speed = 0x28;
             break;
@@ -196,11 +196,11 @@ bool StandardSerialPortBackend::setNormalSpeed()
 bool StandardSerialPortBackend::setHighSpeed()
 {
     mHighSpeed = true;
-    if (respeqtSettings->serialPortUsePokeyDivisors()) {
-        return setSpeed(divisorToBaud(respeqtSettings->serialPortPokeyDivisor()));
+    if (RespeqtSettings::instance()->serialPortUsePokeyDivisors()) {
+        return setSpeed(divisorToBaud(RespeqtSettings::instance()->serialPortPokeyDivisor()));
     } else {
         int speed = 57600;
-        switch (respeqtSettings->serialPortMaximumSpeed()) {
+        switch (RespeqtSettings::instance()->serialPortMaximumSpeed()) {
         case 0:
             speed = 19200;
             break;
@@ -231,7 +231,7 @@ bool StandardSerialPortBackend::setSpeed(int speed)
     dcb.fOutxCtsFlow = FALSE;
     dcb.fOutxDsrFlow = FALSE;
     if((mMethod==HANDSHAKE_NO_HANDSHAKE || mMethod==HANDSHAKE_SOFTWARE) &&
-       respeqtSettings->serialPortDTRControlEnable())
+       RespeqtSettings::instance()->serialPortDTRControlEnable())
     {
         dcb.fDtrControl = DTR_CONTROL_ENABLE;
     }
@@ -431,7 +431,7 @@ QByteArray StandardSerialPortBackend::readCommandFrame()
             // if we use hardware handshake and the command line status was succesfully retrieved
             if( (MODEM_STAT != 0) && GetCommModemStatus(mHandle, &tmp) )
             {
-                if(respeqtSettings->serialPortTriggerOnFallingEdge())
+                if(RespeqtSettings::instance()->serialPortTriggerOnFallingEdge())
                 {
                     // ignore the trigger is the command line status is ON (we're waiting for a falling edge)
                     if( tmp & MODEM_STAT )continue;

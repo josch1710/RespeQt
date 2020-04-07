@@ -336,7 +336,7 @@ public:
     }
 
 private:
-    friend std::unique_ptr<RespeqtSettings>;
+    //friend std::unique_ptr<RespeqtSettings>;
 
     RespeqtSettings();
 
@@ -464,7 +464,5 @@ private:
 #endif
     QString mRawPrinterName;
 };
-
-extern RespeqtSettings *respeqtSettings;
 
 #endif // RESPEQTSETTINGS_H
