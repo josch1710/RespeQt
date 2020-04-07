@@ -40,10 +40,13 @@ namespace Printers
             }
             // TODO calculate the correct font size.
             mFontSize = 10;
-            QFontPtr font = QFontPtr::create("Atari  Console", mFontSize);
-            font->setUnderline(false);
-            mOutput->setFont(font);
-            mOutput->calculateFixedFontSize(80);
+            QFontPtr font = std::make_shared<QFont>("Atari  Console", mFontSize);
+            if (font)
+            {
+                font->setUnderline(false);
+                mOutput->setFont(font);
+                mOutput->calculateFixedFontSize(80);
+            }
             if (mOutput->painter())
             {
                 mOutput->painter()->setPen(QColor("black"));
@@ -148,10 +151,10 @@ namespace Printers
                     int scale = fetchIntFromBuffer(buffer, len, i, end);
                     if (scale >= 0 && scale <= 63)
                     {
-                        QFontPtr font = mOutput->font();
-                        if (font)
-                            font->setPixelSize(font->pixelSize() * scale);
-
+                        if (mOutput->font())
+                        {
+                            mOutput->font()->setPixelSize(mOutput->font()->pixelSize() * scale);
+                        }
                         i = end;
                     } else
                         handlePrintableCodes(b);
@@ -186,7 +189,8 @@ namespace Printers
                                 break;
                         }
 
-                        mOutput->painter()->setPen(temp);
+                        if (mOutput->painter())
+                            mOutput->painter()->setPen(temp);
                     }
                     i++;
                 } else
@@ -259,7 +263,7 @@ namespace Printers
 
                         if (mOutput->painter())
                         {
-                        QPointF point(x, y);
+                            QPointF point(x, y);
 
                             switch (command) {
                                 case 'D':

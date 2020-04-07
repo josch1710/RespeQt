@@ -187,8 +187,7 @@ void PrinterWidget::connectPrinter()
                 disconnectPrinter();
                 return;
             }
-        } catch(...)
-        {}
+        } catch(...) {}
 
         mPrinter->setOutput(mDevice);
         mDevice->setPrinter(mPrinter);

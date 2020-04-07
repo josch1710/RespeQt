@@ -65,22 +65,21 @@ public slots:
     void setFont(const QFont& font);
 
 private slots:
-    void on_actionMountFolder_triggered();
-    void on_actionMountDisk_triggered();
-
-    void on_actionEject_triggered();
-    void on_actionNextSide_triggered();
-    void on_actionToggleHappy_triggered(bool enabled);
-    void on_actionToggleChip_triggered(bool open);
-    void on_actionToggleOSB_triggered(bool open);
-    void on_actionToolDisk_triggered(bool open);
-    void on_actionWriteProtect_toggled(bool state);
-    void on_actionEditDisk_triggered();
-    void on_actionSave_triggered();
-    void on_actionRevert_triggered();
-    void on_actionSaveAs_triggered();
-    void on_actionAutoSave_toggled(bool arg1);
-    void on_actionBootOption_triggered();
+    void mountFolderTriggered();
+    void mountDiskTriggered();
+    void ejectTriggered();
+    void nextSideTriggered();
+    void happyToggled(bool enabled);
+    void chipToggled(bool open);
+    void osbToggled(bool open);
+    void toolDiskToggled(bool open);
+    void writeProtectToggled(bool state);
+    void editDiskTriggered();
+    void saveTriggered();
+    void revertTriggered();
+    void saveAsTriggered();
+    void autoSaveToggled(bool arg1);
+    void bootOptionTriggered();
 
 private:
     Ui::DriveWidget *ui;

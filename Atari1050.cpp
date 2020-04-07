@@ -30,7 +30,7 @@ Atari1050::~Atari1050()
     }
 }
 
-int Atari1050::Step(void)
+int Atari1050::Step()
 {
 	return AtariDrive::Step();
 }

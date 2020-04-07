@@ -13,7 +13,7 @@ namespace Printers
     {
         if (mOutput)
         {
-            QFontPtr font = QFontPtr::create(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
+            auto font = std::make_shared<QFont>(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
             font->setUnderline(false);
             mOutput->setFont(font);
             mOutput->calculateFixedFontSize(80);
@@ -29,21 +29,25 @@ namespace Printers
             switch(b) {
                 case 15: // CTRL+O starts underline mode
                 {
-                    QFontPtr font = mOutput->font();
+                    auto font = mOutput->font();
                     if (font)
+                    {
                         font->setUnderline(true);
-                    mOutput->setFont(font);
+                        mOutput->applyFont();
+                    }
                     qDebug() << "!n" << "Underline on";
                 }
                 break;
 
                 case 14: // CTRL+N ends underline mode
                 {
-                    QFontPtr font = mOutput->font();
+                    auto font = mOutput->font();
                     if (font)
+                    {
                         font->setUnderline(false);
-                    mOutput->setFont(font);
-                    qDebug() << "!n" << "Underline off";
+                        mOutput->applyFont();
+                    }
+                    qDebug() << "!d" << "Underline off";
                 }
                 break;
 
@@ -65,10 +69,12 @@ namespace Printers
                 case 155: // EOL
                 {
                     mESC = false;
-                    QFontPtr font = mOutput->font();
+                    auto font = mOutput->font();
                     if (font)
+                    {
                         font->setUnderline(false);
-                    mOutput->setFont(font);
+                        mOutput->applyFont();
+                    }
                     mOutput->newLine();
                     // Drop the rest of the buffer
                     return true;
@@ -107,22 +113,26 @@ namespace Printers
         switch(b) {
             case 25: // CTRL+Y starts underline mode
             {
-                QFontPtr font = mOutput->font();
+                auto font = mOutput->font();
                 if (font)
+                {
                     font->setUnderline(true);
-                mOutput->setFont(font);
+                    mOutput->applyFont();
+                }
                 mESC = false;
-                qDebug() << "!n" << "ESC Underline on";
+                qDebug() << "!d" << "ESC Underline on";
                 return true;
             }
             case 26: // CTRL+Z ends underline mode
             {
-                QFontPtr font = mOutput->font();
-                font->setUnderline(false);
+                auto font = mOutput->font();
                 if (font)
-                    mOutput->setFont(font);
+                {
+                    font->setUnderline(false);
+                    mOutput->applyFont();
+                }
                 mESC = false;
-                qDebug() << "!n" << "ESC Underline off";
+                qDebug() << "!d" << "ESC Underline off";
                 return true;
             }
             case 23: // CTRL+W starts international mode

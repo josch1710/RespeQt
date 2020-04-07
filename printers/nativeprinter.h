@@ -6,7 +6,7 @@
 #include <QPrinter>
 #include <QSharedPointer>
 
-using QPrinterPtr = QSharedPointer<QPrinter>;
+using QPrinterPtr = std::shared_ptr<QPrinter>;
 namespace Printers
 {
     class NativePrinter : public NativeOutput
@@ -14,7 +14,7 @@ namespace Printers
     public:
         NativePrinter();
         inline QPrinterPtr printer() const {
-            return qSharedPointerDynamicCast<QPrinter>(mDevice);
+            return std::dynamic_pointer_cast<QPrinter>(mDevice);
         }
         virtual void newPage(bool linefeed = false) override;
         virtual bool setupOutput() override;

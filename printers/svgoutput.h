@@ -6,7 +6,7 @@
 #include <QSvgGenerator>
 #include <QSharedPointer>
 
-using QSvgGeneratorPtr = QSharedPointer<QSvgGenerator>;
+using QSvgGeneratorPtr = std::shared_ptr<QSvgGenerator>;
 
 namespace Printers
 {
@@ -16,7 +16,7 @@ namespace Printers
         SVGOutput();
         virtual ~SVGOutput();
         QSvgGeneratorPtr svg() {
-            return qSharedPointerDynamicCast<QSvgGenerator>(mDevice);
+            return std::dynamic_pointer_cast<QSvgGenerator>(mDevice);
         }
 
         void setFileName(const QString &filename) { svg()->setFileName(filename); }

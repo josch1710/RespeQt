@@ -1,10 +1,14 @@
 #include <cmath>
+#include <utility>
 #include "nativeoutput.h"
 #include "logdisplaydialog.h"
 
+template <typename T>
+class TD;
+
 namespace Printers
 {
-    NativeOutput::NativeOutput(): BaseOutput()
+    NativeOutput::NativeOutput()
     {
         mCharMode = true;
         calculateFixedFontSize(mCharsPerLine);
@@ -16,9 +20,12 @@ namespace Printers
     }
 
     bool NativeOutput::beginOutput() {
-        mPainter = QPainterPtr::create();
+        if (!mDevice)
+            return false;
+
+        mPainter = std::make_shared<QPainter>();
         mPainter->setRenderHint(QPainter::Antialiasing);
-        mPainter->begin(mDevice.data());
+        mPainter->begin(mDevice.get());
         setFont(mFont);
         updateBoundingBox();
         if (mPrinter)
@@ -43,56 +50,56 @@ namespace Printers
 
     void NativeOutput::calculateFixedFontSize(uint8_t charsPerLine)
     {
-        if (font() == nullptr)
+        if (!mFont)
         {
             return;
         }
         qreal painterWidth = mBoundingBox.right() - mBoundingBox.left();
-        qreal oldFontSize = font()->pointSizeF();
+        qreal oldFontSize = mFont->pointSizeF();
         int oldWidth;
 
         // Loop to approximate correct font size
         for (int i=0 ; i<3 ; i++)
         {
-            QFontMetrics metrics(*mFont);
-            QRect bounds = metrics.boundingRect('M');
+            QFontMetrics metrics{*mFont};
+            auto bounds = metrics.boundingRect('M');
             oldWidth = bounds.width();
             qreal scale = painterWidth / (oldWidth * charsPerLine);
             mFont->setPointSizeF(bounds.height() * scale);
-            setFont(mFont);
+            applyFont();
             oldFontSize = bounds.height() * scale;
         }
 
         // End
         mFont->setPointSizeF(oldFontSize);
-        setFont(mFont);
+        applyFont();
         mCharsPerLine = charsPerLine;
     }
 
-    void NativeOutput::setFont(const QFontPtr& font)
+    void NativeOutput::setFont(QFontPtr font)
     {
         if (font != mFont)
         {
             mFont = font;
         }
-        if (mFont && mPainter)
-        {
-            mPainter->setFont(*mFont);
-        }
+        applyFont();
     }
 
     void NativeOutput::printChar(const QChar &c)
     {
         QFontMetrics metrics(*mFont);
-        //qDebug() << "!n" << mBoundingBox.right();
+        qDebug() << "!d" << mBoundingBox.right();
         if (metrics.width(c) + mX > mBoundingBox.right()
             || mCharCount + 1 > mCharsPerLine) {
             // Char has to go on next line
             newLine();
         }
-        QColor color(255, 0, 0);
-        mPainter->setPen(color);
-        mPainter->drawText(mX, mY + metrics.height(), c);
+        if (mPainter)
+        {
+            QColor color(255, 0, 0);
+            mPainter->setPen(color);
+            mPainter->drawText(mX, mY + metrics.height(), c);
+        }
         mX += metrics.width(c);
         mCharCount++;
     }
@@ -130,10 +137,19 @@ namespace Printers
 
     void NativeOutput::plot(QPoint p, uint8_t dot)
     {
+        if (!mPainter)
+            return;
+
         if (dot > 0)
             mPainter->setPen(QColor("black"));
         else
             mPainter->setPen(QColor("white"));
         mPainter->drawPoint(p);
+    }
+
+    void NativeOutput::applyFont()
+    {
+        if (mPainter && mFont)
+            mPainter->setFont(*mFont);
     }
 }

@@ -2,6 +2,7 @@
 #include "respeqtsettings.h"
 #include <cstdlib>
 #include <utility> 
+
 namespace Printers
 {
     Atari1029::Atari1029(SioWorkerPtr worker)
@@ -14,7 +15,7 @@ namespace Printers
     {
         if (mOutput)
         {
-            QFontPtr font = QFontPtr::create(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
+            auto font = std::make_shared<QFont>(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
             font->setUnderline(false);
             mOutput->setFont(font);
             mOutput->calculateFixedFontSize(80);
@@ -53,10 +54,11 @@ namespace Printers
                     {
                         mESC = false;
                         setElongatedMode(false);
-                        QFontPtr font = mOutput->font();
-                        if (font)
-                            font->setUnderline(false);
-                        mOutput->setFont(font);
+                        if (mOutput->font())
+                        {
+                            mOutput->font()->setUnderline(false);
+                            mOutput->applyFont();
+                        }
                         mOutput->newLine();
                         // Drop the rest of the buffer
                         return true;
@@ -96,22 +98,24 @@ namespace Printers
         switch(b) {
             case 25: // CTRL+Y starts underline mode
             {
-                QFontPtr font = mOutput->font();
-                if (font)
-                    font->setUnderline(true);
-                mOutput->setFont(font);
+                if (mOutput->font())
+                {
+                    mOutput->font()->setUnderline(true);
+                    mOutput->applyFont();
+                }
                 mESC = false;
-                qDebug() << "!n" << "ESC Underline on";
+                qDebug() << "!d" << "ESC Underline on";
                 return true;
             }
             case 26: // CTRL+Z ends underline mode
             {
-                QFontPtr font = mOutput->font();
-                if (font)
-                    font->setUnderline(false);
-                mOutput->setFont(font);
+                if (mOutput->font())
+                {
+                    mOutput->font()->setUnderline(false);
+                    mOutput->applyFont();
+                }
                 mESC = false;
-                qDebug() << "!n" << "ESC Underline off";
+                qDebug() << "!d" << "ESC Underline off";
                 return true;
             }
             case 23: // CTRL+W starts international mode
@@ -203,7 +207,7 @@ namespace Printers
             break;
 
             case GraphicsMode::NOT_GRAPHICS: //Should not happen.
-                Q_ASSERT(0);
+                Q_ASSERT(false);
             break;
         }
 

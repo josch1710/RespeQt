@@ -12,13 +12,13 @@ namespace Printers {
     {
     private:
         template<class TDerived>
-        static BaseOutputPtr creator()
+        static NativeOutputPtr creator()
         {
             return QSharedPointer<TDerived>::create();
         }
 
         // Instanciation maps
-        using Creator = BaseOutputPtr(); // Function type definition
+        using Creator = NativeOutputPtr(); // Function type definition
         using CreatorPair = QPair<QString, Creator*>;
         using CreatorVector = QVector<CreatorPair>;
         CreatorVector creatorFunctions;
@@ -39,7 +39,7 @@ namespace Printers {
             creatorFunctions.append(CreatorPair(label, &creator<TDerived>));
         }
 
-        BaseOutputPtr createOutput(QString label) const
+        NativeOutputPtr createOutput(QString label) const
         {
             for(const auto& it : creatorFunctions)
             {

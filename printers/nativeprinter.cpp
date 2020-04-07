@@ -6,7 +6,7 @@ namespace Printers
     NativePrinter::NativePrinter()
         :NativeOutput()
     {
-        QPrinterPtr printer = QPrinterPtr::create();
+        auto printer = std::make_shared<QPrinter>();
         mDevice = printer;
         mBoundingBox = printer->pageRect();
     }
@@ -27,10 +27,15 @@ namespace Printers
 
     bool NativePrinter::setupOutput()
     {
-        QPrintDialog dialog(printer().data());
-        dialog.setOption(QAbstractPrintDialog::PrintSelection, false);
-        dialog.setOption(QAbstractPrintDialog::PrintPageRange, false);
-        dialog.setOption(QAbstractPrintDialog::PrintCurrentPage, false);
-        return dialog.exec() == QDialog::Accepted;
+        auto temp = printer().get();
+        if (temp)
+        {
+            QPrintDialog dialog(temp);
+            dialog.setOption(QAbstractPrintDialog::PrintSelection, false);
+            dialog.setOption(QAbstractPrintDialog::PrintPageRange, false);
+            dialog.setOption(QAbstractPrintDialog::PrintCurrentPage, false);
+            return dialog.exec() == QDialog::Accepted;
+        }
+        return false;
     }
 }

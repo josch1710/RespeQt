@@ -94,6 +94,24 @@ void DriveWidget::setup(bool happyHidden, bool chipHidden, bool nextSideHidden, 
     ui->buttonToggleChip->setVisible(!chipHidden);
     ui->buttonToggleOSB->setVisible((driveNo_ == 0) &&(!OSBHidden));
     ui->buttonToolDisk->setVisible((driveNo_ == 0) &&(!toolDiskHidden));
+
+
+    // do the connections.
+    connect(ui->actionSave, &QAction::triggered, this, &DriveWidget::saveTriggered);
+    connect(ui->actionEject, &QAction::triggered, this, &DriveWidget::ejectTriggered);
+    connect(ui->actionNextSide, &QAction::triggered, this, &DriveWidget::nextSideTriggered);
+    connect(ui->actionToggleHappy, &QAction::toggled, this, &DriveWidget::happyToggled);
+    connect(ui->actionToggleOSB, &QAction::toggled, this, &DriveWidget::osbToggled);
+    connect(ui->actionToggleChip, &QAction::toggled, this, &DriveWidget::chipToggled);
+    connect(ui->actionMountDisk, &QAction::triggered, this, &DriveWidget::mountDiskTriggered);
+    connect(ui->actionMountFolder, &QAction::triggered, this, &DriveWidget::mountFolderTriggered);
+    connect(ui->actionToolDisk, &QAction::toggled, this, &DriveWidget::toolDiskToggled);
+    connect(ui->actionWriteProtect, &QAction::toggled, this, &DriveWidget::writeProtectToggled);
+    connect(ui->actionEditDisk, &QAction::triggered, this, &DriveWidget::editDiskTriggered);
+    connect(ui->actionRevert, &QAction::triggered, this, &DriveWidget::revertTriggered);
+    connect(ui->actionSaveAs, &QAction::triggered, this, &DriveWidget::saveAsTriggered);
+    connect(ui->actionAutoSave, &QAction::toggled, this, &DriveWidget::autoSaveToggled);
+    connect(ui->actionBootOption, &QAction::triggered, this, &DriveWidget::bootOptionTriggered);
 }
 
 void DriveWidget::updateFromImage(SimpleDiskImage *diskImage, bool happyHidden, bool chipHidden, bool nextSideHidden, bool OSBHidden, bool toolDiskHidden)
@@ -289,20 +307,20 @@ void DriveWidget::setFont(const QFont& font) {
     ui->labelFileName->setFont(font);
 }
 
-void DriveWidget::on_actionMountFolder_triggered()  { emit actionMountFolder(driveNo_); }
-void DriveWidget::on_actionMountDisk_triggered()    { emit actionMountDisk(driveNo_); }
-void DriveWidget::on_actionEject_triggered()        { emit actionEject(driveNo_); }
-void DriveWidget::on_actionNextSide_triggered()     { emit actionNextSide(driveNo_); }
-void DriveWidget::on_actionToggleHappy_triggered(bool open) { emit actionToggleHappy(driveNo_, open); }
-void DriveWidget::on_actionToggleChip_triggered(bool open) { emit actionToggleChip(driveNo_, open); }
-void DriveWidget::on_actionToggleOSB_triggered(bool open) { emit actionToggleOSB(driveNo_, open); }
-void DriveWidget::on_actionToolDisk_triggered(bool open) { emit actionToolDisk(driveNo_, open); }
-void DriveWidget::on_actionWriteProtect_toggled(bool state) { emit actionWriteProtect(driveNo_, state); }
-void DriveWidget::on_actionEditDisk_triggered()     { emit actionEditDisk(driveNo_); }
-void DriveWidget::on_actionSave_triggered()         { emit actionSave(driveNo_); }
-void DriveWidget::on_actionRevert_triggered()       { emit actionRevert(driveNo_); }
-void DriveWidget::on_actionSaveAs_triggered()       { emit actionSaveAs(driveNo_); }
-void DriveWidget::on_actionAutoSave_toggled(bool state) { emit actionAutoSave(driveNo_, state); }
-void DriveWidget::on_actionBootOption_triggered()   { emit actionBootOptions(driveNo_); }
+void DriveWidget::mountFolderTriggered()  { emit actionMountFolder(driveNo_); }
+void DriveWidget::mountDiskTriggered()    { emit actionMountDisk(driveNo_); }
+void DriveWidget::ejectTriggered()        { emit actionEject(driveNo_); }
+void DriveWidget::nextSideTriggered()     { emit actionNextSide(driveNo_); }
+void DriveWidget::happyToggled(bool open) { emit actionToggleHappy(driveNo_, open); }
+void DriveWidget::chipToggled(bool open) { emit actionToggleChip(driveNo_, open); }
+void DriveWidget::osbToggled(bool open) { emit actionToggleOSB(driveNo_, open); }
+void DriveWidget::toolDiskToggled(bool open) { emit actionToolDisk(driveNo_, open); }
+void DriveWidget::writeProtectToggled(bool state) { emit actionWriteProtect(driveNo_, state); }
+void DriveWidget::editDiskTriggered()     { emit actionEditDisk(driveNo_); }
+void DriveWidget::saveTriggered()         { emit actionSave(driveNo_); }
+void DriveWidget::revertTriggered()       { emit actionRevert(driveNo_); }
+void DriveWidget::saveAsTriggered()       { emit actionSaveAs(driveNo_); }
+void DriveWidget::autoSaveToggled(bool state) { emit actionAutoSave(driveNo_, state); }
+void DriveWidget::bootOptionTriggered()   { emit actionBootOptions(driveNo_); }
 
 

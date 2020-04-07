@@ -38,7 +38,6 @@ public:
     virtual void setPen(const QPen &) {}
     virtual int dpiX() override { return 1; }
     virtual const QPen &pen() const { return mPen; }
-    virtual void setFont(const QFontPtr&) override {}
     virtual void translate(const QPointF &) {}
     virtual void drawLine(const QPointF &, const QPointF &) {}
     virtual void calculateFixedFontSize(uint8_t) override {}
@@ -79,7 +78,7 @@ protected slots:
     void print(const QString &text);
 
 signals:
-    void closed(const TextPrinterWindow* window);
+    void closed(const Printers::TextPrinterWindow* window);
     void textPrint(const QString &text);
 };
 

@@ -493,7 +493,7 @@ DiskEditDialog::DiskEditDialog(QWidget *parent) :
 
 DiskEditDialog::~DiskEditDialog()
 {
-    m_disk->setEditDialog(0);
+    m_disk->setEditDialog(nullptr);
     m_disk->unlock();
     delete m_ui;
 }

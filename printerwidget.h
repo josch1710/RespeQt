@@ -26,7 +26,7 @@ public:
 
     void setSioWorker(SioWorkerPtr sio);
 
-    Printers::BaseOutputPtr device() { return mDevice; }
+    Printers::NativeOutputPtr device() { return mDevice; }
 
     bool connected() const { return mConnected; }
 
@@ -50,7 +50,7 @@ private:
     Ui::PrinterWidget *ui;
     int printerNo_;
     Printers::BasePrinterPtr mPrinter;
-    Printers::BaseOutputPtr mDevice;
+    Printers::NativeOutputPtr mDevice;
     SioWorkerPtr mSio;
     bool mInitialized{false};
     bool mConnected{false};

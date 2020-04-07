@@ -37,8 +37,8 @@ namespace Printers
 
         virtual const QChar translateAtascii(const unsigned char b) const;
 
-        BaseOutputPtr output() const { return mOutput; }
-        void setOutput(const BaseOutputPtr& output);
+        NativeOutputPtr output() const { return mOutput; }
+        void setOutput(const NativeOutputPtr& output);
         void resetOutput();
         virtual void setupFont() {}
         virtual void setupOutput();
@@ -50,7 +50,7 @@ namespace Printers
 
     protected:
         Atascii mAtascii;
-        BaseOutputPtr mOutput;
+        NativeOutputPtr mOutput;
 
     private:
         char m_lastOperation;

@@ -16,9 +16,12 @@ namespace Printers
     {
         if (mOutput)
         {
-            QFontPtr font = QFontPtr::create(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
-            font->setUnderline(false);
-            mOutput->setFont(font);
+            auto font = std::make_shared<QFont>(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
+            if (font)
+            {
+                font->setUnderline(false);
+                mOutput->setFont(font);
+            }
             mOutput->calculateFixedFontSize(mLineChars);
         }
     }
@@ -53,11 +56,11 @@ namespace Printers
                 case 155: // EOL
                 {
                     mESC = false;
-                    QFontPtr font = mOutput->font();
-                    if (font)
-                        font->setUnderline(false);
-
-                    mOutput->setFont(font);
+                    if (mOutput->font())
+                    {
+                        mOutput->font()->setUnderline(false);
+                        mOutput->applyFont();
+                    }
                     mOutput->newLine();
                     // Drop the rest of the buffer
                     return true;
