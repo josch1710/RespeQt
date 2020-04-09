@@ -43,9 +43,6 @@ QString SioDevice::deviceName()
 
 SioWorker::SioWorker()
         : QThread()
-#ifndef QT_NO_DEBUG
-      , mSnapshotRunning(false), mSnapshotWriter(nullptr)
-#endif
 {
     deviceMutex = new QMutex(QMutex::Recursive);
     for (int i=0; i <= 255; i++) {
@@ -139,10 +136,6 @@ void SioWorker::run()
         quint8 no = (quint8)cmd[0];
         quint8 command = (quint8)cmd[1];
         quint16 aux = ((quint8)cmd[2]) + ((quint8)cmd[3] * 256);
-
-#ifndef QT_NO_DEBUG
-        writeSnapshotCommandFrame(no, command, cmd[2], cmd[3]);
-#endif
 
         /* Redirect the command to the appropriate device */
         deviceMutex->lock();
@@ -426,70 +419,6 @@ QString SioWorker::deviceName(int device)
 }
 
 #ifndef QT_NO_DEBUG
-void SioWorker::startSIOSnapshot()
-{
-    QString fileName = QFileDialog::getSaveFileName(MainWindow::instance(),
-                 tr("Save test XML File"), QString(), tr("XML Files (*.xml)"));
-    if (fileName.length() > 0)
-    {
-        auto file = new QFile(fileName);
-        file->open(QFile::WriteOnly | QFile::Truncate);
-        if (!mSnapshotWriter)
-        {
-            mSnapshotWriter = new QXmlStreamWriter(file);
-        }
-        mSnapshotWriter->setAutoFormatting(true);
-        mSnapshotWriter->writeStartDocument();
-        mSnapshotWriter->writeStartElement("testcase");
-        mSnapshotRunning = true;
-    }
-}
-
-void SioWorker::stopSIOSnapshot()
-{
-    if (mSnapshotWriter)
-    {
-        mSnapshotWriter->writeEndElement();
-        mSnapshotWriter->writeEndDocument();
-        mSnapshotWriter->device()->close();
-        delete mSnapshotWriter;
-        mSnapshotWriter = nullptr;
-        mSnapshotRunning = false;
-    }
-}
-
-void SioWorker::writeSnapshotCommandFrame(qint8 no, qint8 command, qint8 aux1, qint8 aux2)
-{
-    // Record the command frame, if the snapshot is running
-    if (mSnapshotRunning && mSnapshotWriter)
-    {
-        mSnapshotWriter->writeStartElement("commandframe");
-        mSnapshotWriter->writeAttribute("device", QString::number(no));
-        mSnapshotWriter->writeAttribute("command", QString::number(command));
-        mSnapshotWriter->writeAttribute("aux1", QString::number(aux1));
-        mSnapshotWriter->writeAttribute("aux2", QString::number(aux2));
-        mSnapshotWriter->writeEndElement();
-    }
-}
-
-void SioWorker::writeSnapshotDataFrame(QByteArray &data)
-{
-    // Record the command frame, if the snapshot is running
-    if (mSnapshotRunning && mSnapshotWriter)
-    {
-        mSnapshotWriter->writeStartElement("dataframe");
-        QString cs;
-        foreach(char c, data)
-        {
-            auto chr = static_cast<unsigned char>(c);
-            cs.append("&#");
-            cs.append(QString::number(chr, 10));
-            cs.append(";");
-        }
-        mSnapshotWriter->writeCDATA(cs);
-        mSnapshotWriter->writeEndElement();
-    }
-}
 
 #endif
 

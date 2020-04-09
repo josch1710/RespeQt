@@ -27,11 +27,11 @@ namespace Printers {
             // Job created, now start first and last document.
             bool return_ = cupsStartDestDocument(mHttp, mDest, mInfo, mJobId, "RespeQt", CUPS_FORMAT_TEXT, 0, nullptr, 1) == HTTP_STATUS_CONTINUE;
             if (!return_)
-                qDebug() << "!n" << cupsLastErrorString();
+                qDebug() << "!e" << cupsLastErrorString();
             return return_;
         } else {
             // Error
-            qDebug() << "!n"<< cupsLastErrorString();
+            qDebug() << "!e"<< cupsLastErrorString();
             return false;
         }
     }
@@ -57,7 +57,7 @@ namespace Printers {
         // CUPS direct print
         bool return_ = cupsWriteRequestData(mHttp, b.data(), static_cast<size_t>(len)) != HTTP_STATUS_ERROR;
         if (!return_)
-            qDebug()<<"!n "<< cupsLastErrorString();
+            qDebug()<<"!e"<< cupsLastErrorString();
         return return_;
     }
 

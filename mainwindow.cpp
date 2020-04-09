@@ -58,6 +58,10 @@
 
 #include <QFontDatabase>
 
+#ifndef QT_NO_QDEBUG
+#include "tests/siorecorder.h"
+#endif
+
 static QFile *logFile;
 static QMutex *logMutex;
 
@@ -459,10 +463,20 @@ void MainWindow::createDeviceWidgets()
      }
 #ifndef QT_NO_DEBUG
      if (sio && event->button() == Qt::LeftButton && !snapshot->isHidden() && snapshot->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
-        if (!sio->isSnapshotRunning())
-            sio->startSIOSnapshot();
-        else
-            sio->stopSIOSnapshot();
+         static QFile *file = nullptr;
+         Tests::SioRecorderPtr recorder = Tests::SioRecorder::instance();
+
+         if (!recorder->isSnapshotRunning())
+         {
+            QString fileName = QFileDialog::getSaveFileName(MainWindow::instance(),
+                tr("Save test XML File"), QString(), tr("XML Files (*.xml)"));
+            file = new QFile(fileName);
+            file->open(QFile::WriteOnly|QFile::Truncate);
+            recorder->startSIOSnapshot(file);
+         } else {
+            recorder->stopSIOSnapshot();
+            file->close();
+         }
      }
 #endif
 }

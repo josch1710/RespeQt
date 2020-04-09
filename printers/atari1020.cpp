@@ -40,7 +40,7 @@ namespace Printers
             }
             // TODO calculate the correct font size.
             mFontSize = 10;
-            QFontPtr font = std::make_shared<QFont>("Atari  Console", mFontSize);
+            auto font = std::make_shared<QFont>("Atari  Console", mFontSize);
             if (font)
             {
                 font->setUnderline(false);

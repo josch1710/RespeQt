@@ -20,6 +20,8 @@
 #include <QPrinter>
 #include <QDebug>
 
+#include <algorithm>
+
 #include "respeqtsettings.h"
 #include "miscutils.h"
 
@@ -279,50 +281,57 @@ void FileModel::sort(int column, Qt::SortOrder order)
         return;
     }
     emit layoutAboutToBeChanged();
+
+    bool (*sortFunction)(const AtariDirEntry &e1, const AtariDirEntry &e2) = nullptr;
+
     switch (column) {
         case 0:
             if (order == Qt::AscendingOrder) {
-                qStableSort(entries.begin(), entries.end(), atariDirEntryNoLessThan);
+                sortFunction = atariDirEntryNoLessThan;
             } else {
-                qStableSort(entries.begin(), entries.end(), atariDirEntryNoGreaterThan);
+                sortFunction = atariDirEntryNoGreaterThan;
             }
             break;
         case 1:
             if (order == Qt::AscendingOrder) {
-                qStableSort(entries.begin(), entries.end(), atariDirEntryNameLessThan);
+                sortFunction = atariDirEntryNameLessThan;
             } else {
-                qStableSort(entries.begin(), entries.end(), atariDirEntryNameGreaterThan);
+                sortFunction = atariDirEntryNameGreaterThan;
             }
             break;
         case 2:
             if (order == Qt::AscendingOrder) {
-                qStableSort(entries.begin(), entries.end(), atariDirEntryExtensionLessThan);
+                sortFunction = atariDirEntryExtensionLessThan;
             } else {
-                qStableSort(entries.begin(), entries.end(), atariDirEntryExtensionGreaterThan);
+                sortFunction = atariDirEntryExtensionGreaterThan;
             }
             break;
         case 3:
             if (order == Qt::AscendingOrder) {
-                qStableSort(entries.begin(), entries.end(), atariDirEntrySizeLessThan);
+                sortFunction = atariDirEntrySizeLessThan;
             } else {
-                qStableSort(entries.begin(), entries.end(), atariDirEntrySizeGreaterThan);
+                sortFunction = atariDirEntrySizeGreaterThan;
             }
             break;
         case 4:
             if (order == Qt::AscendingOrder) {
-                qStableSort(entries.begin(), entries.end(), atariDirEntryDateLessThan);
+                sortFunction = atariDirEntryDateLessThan;
             } else {
-                qStableSort(entries.begin(), entries.end(), atariDirEntryDateGreaterThan);
+                sortFunction = atariDirEntryDateGreaterThan;
             }
             break;
         case 5:
             if (order == Qt::AscendingOrder) {
-                qStableSort(entries.begin(), entries.end(), atariDirEntryNotesLessThan);
+                sortFunction = atariDirEntryNotesLessThan;
             } else {
-                qStableSort(entries.begin(), entries.end(), atariDirEntryNotesGreaterThan);
+                sortFunction = atariDirEntryNotesGreaterThan;
             }
             break;
     }
+
+    if (sortFunction)
+        std::stable_sort(entries.begin(), entries.end(), *sortFunction);
+
     emit layoutChanged();
 }
 

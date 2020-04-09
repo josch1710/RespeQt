@@ -74,11 +74,6 @@ private:
     SioDevice* devices[256];
     AbstractSerialPortBackend *mPort;
     bool mustTerminate;
-#ifndef QT_NO_DEBUG
-    bool mSnapshotRunning;
-    QXmlStreamWriter *mSnapshotWriter;
-    void writeSnapshotCommandFrame(qint8 no, qint8 command, qint8 aux1, qint8 aux2);
-#endif
     bool displayCommandName;
 
 public:
@@ -101,13 +96,6 @@ public:
     QString deviceName(int device);
     void setDisplayCommandName(bool display) {displayCommandName = display;}
     static void usleep(unsigned long time) {QThread::usleep(time);}
-
-#ifndef QT_NO_DEBUG
-    void startSIOSnapshot();
-    void stopSIOSnapshot();
-    bool isSnapshotRunning() { return mSnapshotRunning; }
-    void writeSnapshotDataFrame(QByteArray &data);
-#endif
 
 signals:
     void statusChanged(QString status);

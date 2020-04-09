@@ -21,6 +21,8 @@
 
 #include <QtDebug>
 
+#include <algorithm>
+
 // pattern to write when Super Archiver formats a track with $08 as a fill byte in a sector ($08 is interpreted as the CRC byte by FDC)
 quint8 FDC_CRC_PATTERN[] = { 0x08, 0x60, 0x07 };
 
@@ -897,7 +899,7 @@ bool SimpleDiskImage::open(const QString &fileName, FileTypes::FileType type)
             }
             if (imageList.size() > 1) {
                 m_numberOfSides = imageList.size();
-                qSort(imageList.begin(), imageList.end(), qLess<QString>());
+                std::sort(imageList.begin(), imageList.end(), std::less<QString>());
                 int currentIndex = 0;
                 foreach(QString otherFileName, imageList) {
                     if (otherFileName == fileName) {
@@ -3629,15 +3631,6 @@ QByteArray SimpleDiskImage::readDataFrame(uint size)
         qDebug() << "!u" << tr("[%1] Receiving %2 bytes from Atari").arg(deviceName()).arg(data.length());
         dumpBuffer((unsigned char *) data.data(), data.length());
     }
-#ifndef QT_NO_DEBUG
-    try {
-        // TODO Does this really work? Parent should be nullptr
-        auto sio = dynamic_cast<SioWorker*>(parent());
-        if (sio) {
-            sio->writeSnapshotDataFrame(data);
-        }
-    } catch(...) {}
-#endif
     return data;
 }
 

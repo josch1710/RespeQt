@@ -534,16 +534,6 @@ QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool verbose)
     if (expected == got) {
         data.resize(size);
 
-#ifndef QT_NO_DEBUG
-    try {
-        // TODO. Does this actually work? parent should be nullptr
-        auto sio = dynamic_cast<SioWorker*>(parent());
-        if (sio) {
-            sio->writeSnapshotDataFrame(data);
-        }
-    } catch(...) {}
-#endif
-
         return data;
     } else {
         if (verbose) {
@@ -938,16 +928,6 @@ QByteArray AtariSioBackend::readDataFrame(uint size, bool verbose)
         }
         data.clear();
     }
-
-#ifndef QT_NO_DEBUG
-    try {
-        // TODO. Does this actually work? parent should be nullptr
-        auto sio = dynamic_cast<SioWorker*>(parent());
-        if (sio) {
-            sio->writeSnapshotDataFrame(data);
-        }
-    } catch(...) {}
-#endif
 
     return data;
 }

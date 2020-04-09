@@ -106,12 +106,20 @@ namespace Printers
         mOutput = output;
     }
 
-    void BasePrinter::setupOutput()
-    {}
-
     void BasePrinter::resetOutput()
     {
         mOutput->setPrinter(QWeakPointer<BasePrinter>());
         mOutput.reset();
     }
+
+    void BasePrinter::setupOutput()
+    {
+        if (mOutput && mOutput->painter())
+        {
+            QColor color{"black"};
+            mOutput->painter()->setPen(color);
+        }
+    }
+
+
 }

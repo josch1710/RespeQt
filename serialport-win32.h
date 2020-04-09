@@ -23,24 +23,24 @@ public:
 
     static QString defaultPortName();
 
-    bool open();
-    bool isOpen();
-    void close();
-    void cancel();
-    int speedByte();
-    QByteArray readCommandFrame();
-    QByteArray readDataFrame(uint size, bool verbose = true);
-    bool writeDataFrame(const QByteArray &data);
-    bool writeCommandAck();
-    bool writeCommandNak();
-    bool writeDataAck();
-    bool writeDataNak();
-    bool writeComplete();
-    bool writeError();
-    bool setSpeed(int speed);
-    bool writeRawFrame(const QByteArray &data);
-    void setActiveSioDevices(const QByteArray &data);
-    int speed();
+    bool open() override;
+    bool isOpen() override;
+    void close() override;
+    void cancel() override;
+    int speedByte() override;
+    QByteArray readCommandFrame() override;
+    QByteArray readDataFrame(uint size, bool verbose = true) override;
+    bool writeDataFrame(const QByteArray &data) override;
+    bool writeCommandAck() override;
+    bool writeCommandNak() override;
+    bool writeDataAck() override;
+    bool writeDataNak() override;
+    bool writeComplete() override;
+    bool writeError() override;
+    bool setSpeed(int speed) override;
+    bool writeRawFrame(const QByteArray &data) override;
+    void setActiveSioDevices(const QByteArray &data) override;
+    int speed() override;
 
 private:
     bool mCanceled;
@@ -70,24 +70,24 @@ public:
 
     AtariSioBackend(QObject *parent = 0);
     ~AtariSioBackend();
-    bool open();
-    bool isOpen();
-    void close();
-    void cancel();
-    int speedByte();
-    QByteArray readCommandFrame();
-    QByteArray readDataFrame(uint size, bool verbose = true);
-    bool writeDataFrame(const QByteArray &data);
-    bool writeCommandAck();
-    bool writeCommandNak();
-    bool writeDataAck();
-    bool writeDataNak();
-    bool writeComplete();
-    bool writeError();
-    bool setSpeed(int speed);
-    bool writeRawFrame(const QByteArray &data);
-    void setActiveSioDevices(const QByteArray &data);
-    int speed();
+    bool open() override;
+    bool isOpen() override;
+    void close() override;
+    void cancel() override;
+    int speedByte() override;
+    QByteArray readCommandFrame() override;
+    QByteArray readDataFrame(uint size, bool verbose = true) override;
+    bool writeDataFrame(const QByteArray &data) override;
+    bool writeCommandAck() override;
+    bool writeCommandNak() override;
+    bool writeDataAck() override;
+    bool writeDataNak() override;
+    bool writeComplete() override;
+    bool writeError() override;
+    bool setSpeed(int speed) override;
+    bool writeRawFrame(const QByteArray &data) override;
+    void setActiveSioDevices(const QByteArray &data) override;
+    int speed() override;
 };
 
 #endif // SERIALPORTWIN32_H
