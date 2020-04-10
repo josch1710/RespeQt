@@ -293,6 +293,8 @@ public:
     void setTranslatorDiskImagePath(const QString &diskImage);
     QString toolDiskImagePath();
     void setToolDiskImagePath(const QString &diskImage);
+    bool sioAutoReconnect();
+    void setSioAutoReconnect(bool sioAutoReconnect);
     bool hideChipMode();
     void setHideChipMode(bool hidden);
     bool hideHappyMode();
@@ -444,6 +446,7 @@ private:
     bool mDisassembleUploadedCode;
     bool mTranslatorAutomaticDetection;
     QString mTranslatorDiskImagePath;
+    bool mSioAutoReconnect;
     bool mHideChipMode;
     bool mHideHappyMode;
     bool mHideNextImage;

@@ -51,6 +51,7 @@ StandardSerialPortBackend::StandardSerialPortBackend(QObject *parent)
     : AbstractSerialPortBackend(parent)
 {
     mHandle = -1;
+    mForceHighSpeed = 0;
 }
 
 StandardSerialPortBackend::~StandardSerialPortBackend()
@@ -165,6 +166,8 @@ int StandardSerialPortBackend::speedByte()
 {
     if (RespeqtSettings::instance()->serialPortHandshakingMethod()==HANDSHAKE_SOFTWARE) {
         return 0x28; // standard speed (19200)
+    } else if (mForceHighSpeed != 0) {
+        return baudToDivisor(mForceHighSpeed); // speed when SuperArchiver/BitWriter is active
     } else if (RespeqtSettings::instance()->serialPortUsePokeyDivisors()) {
         return RespeqtSettings::instance()->serialPortPokeyDivisor();
     } else {
@@ -184,6 +187,11 @@ int StandardSerialPortBackend::speedByte()
     }
 }
 
+void StandardSerialPortBackend::forceHighSpeed(int speed)
+{
+    mForceHighSpeed = speed;
+}
+
 bool StandardSerialPortBackend::setNormalSpeed()
 {
     mHighSpeed = false;
@@ -193,7 +201,9 @@ bool StandardSerialPortBackend::setNormalSpeed()
 bool StandardSerialPortBackend::setHighSpeed()
 {
     mHighSpeed = true;
-    if (RespeqtSettings::instance()->serialPortUsePokeyDivisors()) {
+    if (mForceHighSpeed != 0) {
+        return setSpeed(mForceHighSpeed); // used to force 52400 when SuperArchiver/BitWriter is active
+    } else if (RespeqtSettings::instance()->serialPortUsePokeyDivisors()) {
         return setSpeed(divisorToBaud(RespeqtSettings::instance()->serialPortPokeyDivisor()));
     } else {
         int speed = 57600;
@@ -468,22 +478,7 @@ QByteArray StandardSerialPortBackend::readCommandFrame()
                 return data;
             }
 
-            data = readRawFrame(5, false);
-            if (data.isEmpty()) {
-                return nullptr;
-            }
-            auto expected = (quint8)data.at(4);
-            quint8 got = sioChecksum(data, 4);
-            if (expected == got) {
-                data.resize(4);
-            } else {
-                qWarning() << "!w" << tr("Command frame checksum error, expected: %1, got: %2. (%3)")
-                                   .arg(expected)
-                                   .arg(got)
-                                   .arg(QString(data.toHex()));
-
-                data.clear();
-            }
+            data = readDataFrame(4, false);
 
             if (!data.isEmpty()) {
                 if(mMethod != HANDSHAKE_NO_HANDSHAKE)
@@ -527,7 +522,7 @@ QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool verbose)
 {
     QByteArray data = readRawFrame(size + 1, verbose);
     if (data.isEmpty()) {
-        return nullptr;
+        return data;
     }
     auto expected = (quint8)data.at(size);
     auto got = sioChecksum(data, size);
@@ -838,6 +833,10 @@ void AtariSioBackend::cancel()
     if (::write(mCancelHandles[1], "C", 1) < 1) {
         qCritical() << "!e" << tr("Cannot stop AtariSio backend.");
     }
+}
+
+void AtariSioBackend::forceHighSpeed(int)
+{
 }
 
 bool AtariSioBackend::setSpeed(int speed)

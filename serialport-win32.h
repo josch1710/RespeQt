@@ -41,10 +41,12 @@ public:
     bool writeRawFrame(const QByteArray &data) override;
     void setActiveSioDevices(const QByteArray &data) override;
     int speed() override;
+    void forceHighSpeed(int speed) override;
 
 private:
     bool mCanceled;
     bool mHighSpeed;
+    int mForceHighSpeed;
     void *mHandle, *mCancelHandle;
     int mSpeed;
     int mMethod;
@@ -88,6 +90,7 @@ public:
     bool writeRawFrame(const QByteArray &data) override;
     void setActiveSioDevices(const QByteArray &data) override;
     int speed() override;
+    void forceHighSpeed(int speed) override;
 };
 
 #endif // SERIALPORTWIN32_H

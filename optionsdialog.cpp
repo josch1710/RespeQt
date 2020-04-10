@@ -97,9 +97,11 @@ void OptionsDialog::setupSettings()
     m_ui->spyMode->setChecked(RespeqtSettings::instance()->isSpyMode());
     m_ui->commandName->setChecked(RespeqtSettings::instance()->isCommandName());
     m_ui->trackLayout->setChecked(RespeqtSettings::instance()->isTrackLayout());
+    m_ui->displayTransmission->setChecked(RespeqtSettings::instance()->displayTransmission());
     m_ui->disassembleUploadedCode->setChecked(RespeqtSettings::instance()->disassembleUploadedCode());
     m_ui->translatorDiskImagePath->setText(RespeqtSettings::instance()->translatorDiskImagePath());
     m_ui->translatorAutomaticDetection->setChecked(RespeqtSettings::instance()->translatorAutomaticDetection());
+    m_ui->sioAutoReconnect->setChecked(RespeqtSettings::instance()->sioAutoReconnect());
     m_ui->hideChipMode->setChecked(RespeqtSettings::instance()->hideChipMode());
     m_ui->hideHappyMode->setChecked(RespeqtSettings::instance()->hideHappyMode());
     m_ui->hideNextImage->setChecked(RespeqtSettings::instance()->hideNextImage());
@@ -116,7 +118,7 @@ void OptionsDialog::setupSettings()
     m_ui->useNativeMenu->setChecked(RespeqtSettings::instance()->nativeMenu());
     const auto& actualNoMenu = QApplication::testAttribute(Qt::AA_DontUseNativeMenuBar);
     // The meaning of both flags are the opposite (i.e. boolean not) of each other.
-    // So, we have to test for equality to get difference (i.e. a != !b).
+    // So, we have to test for equality to get the difference (i.e. a != !b).
     if (actualNoMenu == RespeqtSettings::instance()->nativeMenu())
         m_ui->warning_nativemenu->show();
     m_ui->minimizeToTrayBox->hide();
@@ -402,9 +404,11 @@ void OptionsDialog::saveSettings()
     RespeqtSettings::instance()->setSpyMode(m_ui->spyMode->isChecked());
     RespeqtSettings::instance()->setCommandName(m_ui->commandName->isChecked());
     RespeqtSettings::instance()->setTrackLayout(m_ui->trackLayout->isChecked());
+    RespeqtSettings::instance()->setDisplayTransmission(m_ui->displayTransmission->isChecked());
     RespeqtSettings::instance()->setDisassembleUploadedCode(m_ui->disassembleUploadedCode->isChecked());
     RespeqtSettings::instance()->setTranslatorAutomaticDetection(m_ui->translatorAutomaticDetection->isChecked());
     RespeqtSettings::instance()->setTranslatorDiskImagePath(m_ui->translatorDiskImagePath->text());
+    RespeqtSettings::instance()->setSioAutoReconnect(m_ui->sioAutoReconnect->isChecked());
     RespeqtSettings::instance()->setHideChipMode(m_ui->hideChipMode->isChecked());
     RespeqtSettings::instance()->setHideHappyMode(m_ui->hideHappyMode->isChecked());
     RespeqtSettings::instance()->setHideNextImage(m_ui->hideNextImage->isChecked());

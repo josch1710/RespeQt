@@ -10,7 +10,6 @@
 # know the specific year(s) please let the current maintainer know.
 #
 #CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
-DEFINES += VERSION=\\\"r5.1\\\"
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -18,13 +17,19 @@ DEFINES += VERSION=\\\"r5.1\\\"
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
+VERSION = r5.3
+DEFINES += VERSION=\\\"$$VERSION\\\"
 TARGET = RespeQt
 TEMPLATE = app
 CONFIG += qt
 QT += core gui network widgets printsupport serialport svg
-CONFIG += mobility
-MOBILITY = bearer
 INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
+
+# Warnings for Deprecated functions
+DEFINES += QT_DEPRECATED_WARNINGS
+# Errors for QT4 deprecated functions
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x050000
+
 SOURCES += main.cpp \
     Tests/siorecorder.cpp \
     mainwindow.cpp \
@@ -101,12 +106,6 @@ SOURCES += main.cpp \
     printers/atari1025.cpp \
     printers/passthrough.cpp
 
-win32:LIBS += -lwinmm -lz -lwinspool
-unix:LIBS += -lz -lcups
-win32:SOURCES += serialport-win32.cpp \
-    printers/rawoutput_win.cpp
-unix:SOURCES += serialport-unix.cpp \
-    printers/rawoutput_cups.cpp
 HEADERS += mainwindow.h \
     Tests/siorecorder.h \
     tools/make_unique.h \
@@ -185,8 +184,6 @@ HEADERS += mainwindow.h \
     printers/rawoutput.h \
     smartdevice.h
 
-win32:HEADERS += serialport-win32.h
-unix:HEADERS += serialport-unix.h
 FORMS += mainwindow.ui \
     optionsdialog.ui \
     aboutdialog.ui \
@@ -201,35 +198,50 @@ FORMS += mainwindow.ui \
     infowidget.ui \
     printerwidget.ui \
     printers/textprinterwindow.ui
+
 RESOURCES += icons.qrc \
     atarifiles.qrc \
     i18n.qrc \
     documentation.qrc \
     fonts.qrc
+
 OTHER_FILES += \
     license.txt \
     history.txt \
     atascii_read_me.txt \
     RespeQt.rc \
     about.html \
-    compile.txt \
+    compile.txt
+
+# To update translations:
+# lupdate respeqt.pro; lrelease i18n/respeqt_*.ts
 TRANSLATIONS = \
     i18n/respeqt_de.ts \
     i18n/respeqt_es.ts \
-    i18n/qt_pl.ts \
-    i18n/qt_tr.ts \
-    i18n/qt_ru.ts \
-    i18n/qt_sk.ts \
-    i18n/qt_de.ts \
-    i18n/qt_es.ts \
     i18n/respeqt_de.ts \
     i18n/respeqt_es.ts \
     i18n/respeqt_pl.ts \
     i18n/respeqt_ru.ts \
     i18n/respeqt_sk.ts \
-i18n/respeqt_tr.ts
+    i18n/respeqt_tr.ts
 
 RC_FILE = RespeQt.rc
 ICON = RespeQt.icns
 
 DISTFILES +=
+
+win32 {
+    SOURCES += serialport-win32.cpp \
+               printers/rawoutput_win.cpp
+    HEADERS += serialport-win32.h
+    LIBS += -lwinmm -lz -lwinspool
+}
+
+unix {
+    SOURCES += serialport-unix.cpp \
+               printers/rawoutput_cups.cpp
+    HEADERS += serialport-unix.h
+    LIBS += -lz -lcups
+
+    #QMAKE_CXXFLAGS += -Werror
+}

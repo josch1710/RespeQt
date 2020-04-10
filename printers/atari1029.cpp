@@ -2,6 +2,7 @@
 #include "respeqtsettings.h"
 #include <cstdlib>
 #include <utility> 
+#include <qglobal.h>
 
 namespace Printers
 {

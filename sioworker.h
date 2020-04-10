@@ -75,6 +75,7 @@ private:
     AbstractSerialPortBackend *mPort;
     bool mustTerminate;
     bool displayCommandName;
+    bool mAutoReconnect;
 
 public:
     AbstractSerialPortBackend* port() {return mPort;}
@@ -87,6 +88,7 @@ public:
 
     void run();
 
+    void setAutoReconnect(bool autoReconnect);
     void installDevice(quint8 no, SioDevice *device);
     void uninstallDevice(quint8 no);
     void swapDevices(quint8 d1, quint8 d2);
