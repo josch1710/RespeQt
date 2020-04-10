@@ -13,68 +13,6 @@
 #include <QMessageBox>
 #include "diskeditdialog.h"
 
-/* Compare functions */
-
-bool atariDirEntryNoLessThan(const AtariDirEntry &e1, const AtariDirEntry &e2)
-{
-    return e1.no < e2.no;
-}
-
-bool atariDirEntryNoGreaterThan(const AtariDirEntry &e1, const AtariDirEntry &e2)
-{
-    return e1.no > e2.no;
-}
-
-bool atariDirEntryNameLessThan(const AtariDirEntry &e1, const AtariDirEntry &e2)
-{
-    return e1.baseName() < e2.baseName();
-}
-
-bool atariDirEntryNameGreaterThan(const AtariDirEntry &e1, const AtariDirEntry &e2)
-{
-    return e1.baseName() > e2.baseName();
-}
-
-bool atariDirEntryExtensionLessThan(const AtariDirEntry &e1, const AtariDirEntry &e2)
-{
-    return e1.suffix() < e2.suffix();
-}
-
-bool atariDirEntryExtensionGreaterThan(const AtariDirEntry &e1, const AtariDirEntry &e2)
-{
-    return e1.suffix() > e2.suffix();
-}
-
-bool atariDirEntrySizeLessThan(const AtariDirEntry &e1, const AtariDirEntry &e2)
-{
-    return e1.size < e2.size;
-}
-
-bool atariDirEntrySizeGreaterThan(const AtariDirEntry &e1, const AtariDirEntry &e2)
-{
-    return e1.size > e2.size;
-}
-
-bool atariDirEntryDateLessThan(const AtariDirEntry &e1, const AtariDirEntry &e2)
-{
-    return e1.dateTime < e2.dateTime;
-}
-
-bool atariDirEntryDateGreaterThan(const AtariDirEntry &e1, const AtariDirEntry &e2)
-{
-    return e1.dateTime > e2.dateTime;
-}
-
-bool atariDirEntryNotesLessThan(const AtariDirEntry &e1, const AtariDirEntry &e2)
-{
-    return e1.attributeNames() < e2.attributeNames();
-}
-
-bool atariDirEntryNotesGreaterThan(const AtariDirEntry &e1, const AtariDirEntry &e2)
-{
-    return e1.attributeNames() > e2.attributeNames();
-}
-
 /* AtariDirEntry */
 
 QString AtariDirEntry::name() const
@@ -1202,6 +1140,11 @@ QList <AtariDirEntry> SpartaDosFileSystem::getEntries(quint16 dir)
 
     QByteArray dosEntry = sf.read(23);
 
+    if (dosEntry.size() < 6)
+    {
+        list.clear();
+        return list;
+    }
     int dirLen = (quint8)dosEntry.at(3) + (quint8)dosEntry.at(4) * 256 + (quint8)dosEntry.at(5) * 65536 - 23;
     int no = 0;
 

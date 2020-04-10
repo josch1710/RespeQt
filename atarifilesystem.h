@@ -53,19 +53,6 @@ public:
 
 Q_DECLARE_OPERATORS_FOR_FLAGS (AtariDirEntry::Attributes)
 
-bool atariDirEntryNoLessThan(const AtariDirEntry &e1, const AtariDirEntry &e2);
-bool atariDirEntryNoGreaterThan(const AtariDirEntry &e1, const AtariDirEntry &e2);
-bool atariDirEntryNameLessThan(const AtariDirEntry &e1, const AtariDirEntry &e2);
-bool atariDirEntryNameGreaterThan(const AtariDirEntry &e1, const AtariDirEntry &e2);
-bool atariDirEntryExtensionLessThan(const AtariDirEntry &e1, const AtariDirEntry &e2);
-bool atariDirEntryExtensionGreaterThan(const AtariDirEntry &e1, const AtariDirEntry &e2);
-bool atariDirEntrySizeLessThan(const AtariDirEntry &e1, const AtariDirEntry &e2);
-bool atariDirEntrySizeGreaterThan(const AtariDirEntry &e1, const AtariDirEntry &e2);
-bool atariDirEntryDateLessThan(const AtariDirEntry &e1, const AtariDirEntry &e2);
-bool atariDirEntryDateGreaterThan(const AtariDirEntry &e1, const AtariDirEntry &e2);
-bool atariDirEntryNotesLessThan(const AtariDirEntry &e1, const AtariDirEntry &e2);
-bool atariDirEntryNotesGreaterThan(const AtariDirEntry &e1, const AtariDirEntry &e2);
-
 class AtariFileSystem: public QObject
 {
     Q_OBJECT

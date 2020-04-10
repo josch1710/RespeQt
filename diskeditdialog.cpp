@@ -282,55 +282,55 @@ void FileModel::sort(int column, Qt::SortOrder order)
     }
     emit layoutAboutToBeChanged();
 
-    bool (*sortFunction)(const AtariDirEntry &e1, const AtariDirEntry &e2) = nullptr;
-
-    switch (column) {
-        case 0:
-            if (order == Qt::AscendingOrder) {
-                sortFunction = atariDirEntryNoLessThan;
-            } else {
-                sortFunction = atariDirEntryNoGreaterThan;
-            }
-            break;
-        case 1:
-            if (order == Qt::AscendingOrder) {
-                sortFunction = atariDirEntryNameLessThan;
-            } else {
-                sortFunction = atariDirEntryNameGreaterThan;
-            }
-            break;
-        case 2:
-            if (order == Qt::AscendingOrder) {
-                sortFunction = atariDirEntryExtensionLessThan;
-            } else {
-                sortFunction = atariDirEntryExtensionGreaterThan;
-            }
-            break;
-        case 3:
-            if (order == Qt::AscendingOrder) {
-                sortFunction = atariDirEntrySizeLessThan;
-            } else {
-                sortFunction = atariDirEntrySizeGreaterThan;
-            }
-            break;
-        case 4:
-            if (order == Qt::AscendingOrder) {
-                sortFunction = atariDirEntryDateLessThan;
-            } else {
-                sortFunction = atariDirEntryDateGreaterThan;
-            }
-            break;
-        case 5:
-            if (order == Qt::AscendingOrder) {
-                sortFunction = atariDirEntryNotesLessThan;
-            } else {
-                sortFunction = atariDirEntryNotesGreaterThan;
-            }
-            break;
-    }
-
-    if (sortFunction)
-        std::stable_sort(entries.begin(), entries.end(), *sortFunction);
+    auto sorting = [column, order](const AtariDirEntry &e1, const AtariDirEntry &e2)
+    {
+        switch (column) {
+            case 0:
+                if (order == Qt::AscendingOrder) {
+                    return e1.no < e2.no;
+                } else {
+                    return e1.no > e2.no;
+                }
+                break;
+            case 1:
+                if (order == Qt::AscendingOrder) {
+                    return e1.baseName() < e2.baseName();
+                } else {
+                    return e1.baseName() > e2.baseName();
+                }
+                break;
+            case 2:
+                if (order == Qt::AscendingOrder) {
+                    return e1.suffix() < e2.suffix();
+                } else {
+                    return e1.suffix() > e2.suffix();
+                }
+                break;
+            case 3:
+                if (order == Qt::AscendingOrder) {
+                    return e1.size < e2.size;
+                } else {
+                    return e1.size > e2.size;
+                }
+                break;
+            case 4:
+                if (order == Qt::AscendingOrder) {
+                    return e1.dateTime < e2.dateTime;
+                } else {
+                    return e1.dateTime > e2.dateTime;
+                }
+                break;
+            case 5:
+                if (order == Qt::AscendingOrder) {
+                    return e1.attributeNames() < e2.attributeNames();
+                } else {
+                    return e1.attributeNames() > e2.attributeNames();
+                }
+                break;
+        }
+        return false;
+    };
+    std::stable_sort(entries.begin(), entries.end(), sorting);
 
     emit layoutChanged();
 }
