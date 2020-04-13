@@ -37,7 +37,7 @@
     </message>
 </context>
 <context>
-    <name>AspeCl</name>
+    <name>RCL</name>
     <message>
         <source>Swapped disk %1 with disk %2.</source>
         <translation type="obsolete">Диск %1 заменен на диск %2.</translation>

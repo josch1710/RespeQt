@@ -104,7 +104,7 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
-    <name>AspeCl</name>
+    <name>RCL</name>
     <message>
         <source>[%1] Date/time sent to client (%2).</source>
         <translation type="vanished">[%1] Data/czas wysłane do klienta (%2).</translation>

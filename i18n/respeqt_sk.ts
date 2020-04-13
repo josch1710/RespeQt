@@ -38,7 +38,7 @@
     </message>
 </context>
 <context>
-    <name>AspeCl</name>
+    <name>RCL</name>
     <message>
         <source>[%1] Date/time sent to client (%2).</source>
         <translation type="vanished">[%1] Dátum/čas poslaný na klienta (%2).</translation>

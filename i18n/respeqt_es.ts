@@ -6669,7 +6669,7 @@ Do you want to open the options dialog?</source>
     <message>
         <location filename="../sioworker.cpp" line="410"/>
         <source>RespeQt Client</source>
-        <translation>AspeQt Cliente</translation>
+        <translation>RespeQt Cliente</translation>
     </message>
     <message>
         <location filename="../sioworker.cpp" line="416"/>
