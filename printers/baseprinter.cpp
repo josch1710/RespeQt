@@ -45,7 +45,7 @@ namespace Printers
             case 0x57: // dec 87
                 {
                     // Write
-                    int aux2 = aux % 256;
+                    int aux2 = aux / 256;
 
                     unsigned int len;
                     switch (aux2) {

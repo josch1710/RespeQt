@@ -464,19 +464,19 @@ void MainWindow::createDeviceWidgets()
      }
 #ifndef QT_NO_DEBUG
      if (sio && event->button() == Qt::LeftButton && !snapshot->isHidden() && snapshot->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
-         static QFile *file = nullptr;
          Tests::SioRecorderPtr recorder = Tests::SioRecorder::instance();
 
          if (!recorder->isSnapshotRunning())
          {
-            QString fileName = QFileDialog::getSaveFileName(MainWindow::instance(),
-                tr("Save test XML File"), QString(), tr("XML Files (*.xml)"));
-            file = new QFile(fileName);
-            file->open(QFile::WriteOnly|QFile::Truncate);
-            recorder->startSIOSnapshot(file);
+            recorder->startSIOSnapshot();
          } else {
-            recorder->stopSIOSnapshot();
-            file->close();
+            auto snapshot = recorder->stopSIOSnapshot();
+            auto fileName = QFileDialog::getSaveFileName(MainWindow::instance(),
+                tr("Save test Json File"), QString(), tr("Json Files (*.json)"));
+            QFile file{fileName};
+            file.open(QFile::WriteOnly|QFile::Truncate);
+            file.write(snapshot);
+            file.close();
          }
      }
 #endif

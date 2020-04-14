@@ -11,27 +11,51 @@
 #
 #CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 
-# The following define makes your compiler emit warnings if you use
-# any Qt feature that has been marked deprecated (the exact warnings
-# depend on your compiler). Please consult the documentation of the
-# deprecated API in order to know how to port your code away from it.
-DEFINES += QT_DEPRECATED_WARNINGS
-
 VERSION = r5.3
 DEFINES += VERSION=\\\"$$VERSION\\\"
-TARGET = RespeQt
-TEMPLATE = app
-CONFIG += qt
+
+#debug {
+#  QMAKE_CXXFLAGS+="-fsanitize=thread -fno-omit-frame-pointer -stdlib=libc++"
+#  QMAKE_LFLAGS+="-fsanitize=thread"
+#}
+
+test {
+  SOURCES += tests/units/tests.cpp \
+    tests/units/siorecordertest.cpp
+  HEADERS += tests/units/siorecordertest.h \
+    tests/units/nulloutput.h \
+    tests/units/dummyworker.h
+  INCLUDEPATH += tests
+  TARGET = RespeQtTests
+  CONFIG += console testcase
+  CONFIG -= app_bundle
+  QT += testlib
+
+  # We want to have the testfiles in the build directory, so we have to this.
+  copytestdata.commands = $(COPY_DIR) $$PWD/tests/units/testdata $$OUT_PWD
+  first.depends = $(first) copytestdata
+  export(first.depends)
+  QMAKE_EXTRA_TARGETS += first copytestdata
+  DEFINES += RESPEQT_TEST
+}
+
+!test {
+  SOURCES += main.cpp
+  TARGET = RespeQt
+  TEMPLATE = app
+}
+
+CONFIG += qt c++11 strict_c++
 QT += core gui network widgets printsupport serialport svg
 INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
+
 
 # Warnings for Deprecated functions
 DEFINES += QT_DEPRECATED_WARNINGS
 # Errors for QT4 deprecated functions
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x050000
 
-SOURCES += main.cpp \
-    Tests/siorecorder.cpp \
+SOURCES += tests/siorecorder.cpp \
     mainwindow.cpp \
     rcl.cpp \
     sdxprotocol.cpp \
@@ -107,7 +131,7 @@ SOURCES += main.cpp \
     printers/passthrough.cpp
 
 HEADERS += mainwindow.h \
-    Tests/siorecorder.h \
+    tests/siorecorder.h \
     tools/make_unique.h \
     printers/outputs.h \
     printers/printers.h \
@@ -228,8 +252,6 @@ TRANSLATIONS = \
 RC_FILE = RespeQt.rc
 ICON = RespeQt.icns
 
-DISTFILES +=
-
 win32 {
     SOURCES += serialport-win32.cpp \
                printers/rawoutput_win.cpp
@@ -245,3 +267,7 @@ unix {
 
     #QMAKE_CXXFLAGS += -Werror
 }
+
+DISTFILES += \
+    tests/units/USAGE.md \
+    tests/units/testdata/writeSioCapture.json
