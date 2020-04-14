@@ -46,9 +46,9 @@ SioWorker::SioWorker()
 {
     deviceMutex = new QMutex(QMutex::Recursive);
     for (int i=0; i <= 255; i++) {
-        devices[i] = 0;
+        devices[i] = nullptr;
     }
-    mPort = 0;  
+    mPort = nullptr;
 }
 
 SioWorker::~SioWorker()
@@ -443,7 +443,7 @@ QString SioWorker::deviceName(int device)
 CassetteWorker::CassetteWorker()
     : QThread()
 {
-    mPort = 0;
+    mPort = nullptr;
     mustTerminate.lock();
 }
 
@@ -554,7 +554,7 @@ bool CassetteWorker::wait (unsigned long time)
     if (mPort) {
         mPort->close();
         delete mPort;
-        mPort = 0;
+        mPort = nullptr;
     }
 
     return result;

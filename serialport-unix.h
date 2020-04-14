@@ -13,6 +13,7 @@
 #define SERIALPORTUNIX_H
 
 #include "serialport.h"
+#include <atomic>
 
 class StandardSerialPortBackend : public AbstractSerialPortBackend
 {
@@ -45,7 +46,7 @@ public:
     void forceHighSpeed(int speed) override;
 
 private:
-    bool mCanceled;
+    std::atomic_bool mCanceled;
     bool mHighSpeed;
     int mForceHighSpeed;
     int mHandle;

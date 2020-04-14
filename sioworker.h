@@ -21,6 +21,7 @@
 
 #include "serialport.h"
 #include <memory>
+#include <atomic>
 
 enum SIO_CDEVIC:quint8
 {
@@ -73,7 +74,7 @@ private:
     QMutex *deviceMutex;
     SioDevice* devices[256];
     AbstractSerialPortBackend *mPort;
-    bool mustTerminate;
+    std::atomic_bool mustTerminate;
     bool displayCommandName;
     bool mAutoReconnect;
 
@@ -82,7 +83,15 @@ public:
     int maxSpeed;
 
     SioWorker();
-    ~SioWorker();
+#ifdef RESPEQT_TEST
+    // This is totally ugly, we must get rid of this special ctor
+    explicit SioWorker(AbstractSerialPortBackend *port): QThread(), mPort(port) {
+        deviceMutex = nullptr;
+        for (int i=0; i <= 255; i++)
+            devices[i] = nullptr;
+    }
+#endif
+    virtual ~SioWorker();
 
     bool wait (unsigned long time = ULONG_MAX);
 
@@ -90,7 +99,7 @@ public:
 
     void setAutoReconnect(bool autoReconnect);
     void installDevice(quint8 no, SioDevice *device);
-    void uninstallDevice(quint8 no);
+    virtual void uninstallDevice(quint8 no);
     void swapDevices(quint8 d1, quint8 d2);
     SioDevice* getDevice(quint8 no);
 

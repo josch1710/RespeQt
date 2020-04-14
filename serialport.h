@@ -46,7 +46,7 @@ class AbstractSerialPortBackend : public QObject
 //    Q_ENUMS(MessageType::UiMessageType)
 //    Q_ENUMS(SerialLine)
 public:
-    AbstractSerialPortBackend(QObject *parent = 0);
+    AbstractSerialPortBackend(QObject *parent = nullptr);
     virtual ~AbstractSerialPortBackend();
 
     static inline int baudToDivisor(int baud) {return (int)(1781610.0 / baud / 2 - 7);}
