@@ -16,6 +16,7 @@
 #include <QFileDialog>
 #include <QPrintDialog>
 #include <QPrinter>
+#include <QGraphicsEllipseItem>
 
 // Includes, Globals and various additional class declarations // 
 #include <QString>
@@ -52,9 +53,13 @@ TextPrinterWindow::TextPrinterWindow(QWidget *parent) :
     ui->atasciiFontName->setText(atasciiFont + " - " + QString("%1").arg(fontSize));
     effAtasciiFont = 1;
 
+    mGraphicsScene.setSceneRect(0, -499, 480, 1499);
+    ui->printerGraphics->setScene(&mGraphicsScene);
+
     connect(ui->asciiFontName, &QFontComboBox::currentFontChanged, this, &TextPrinterWindow::asciiFontChanged);
     connect(this, &TextPrinterWindow::textPrint, this, &TextPrinterWindow::print);
     connect(this, &TextPrinterWindow::closed, MainWindow::instance(), &MainWindow::closeTextPrinterWindow);
+    connect(this, &TextPrinterWindow::graphicsPrint, this, &TextPrinterWindow::printGraphics);
     connect(ui->actionAtasciiFont, &QAction::triggered, this, &TextPrinterWindow::atasciiFontTriggered);
     connect(ui->actionSave, &QAction::triggered, this, &TextPrinterWindow::saveTriggered);
     connect(ui->actionClear, &QAction::triggered, this, &TextPrinterWindow::clearTriggered);
@@ -100,7 +105,7 @@ void TextPrinterWindow::closeEvent(QCloseEvent *e)
     e->accept();
 }
 
- void TextPrinterWindow::print(const QString &text)
+void TextPrinterWindow::print(const QString &text)
 {
      // DO both ASCII and ATASCII windows   // 
     QTextCursor c = ui->printerTextEdit->textCursor();
@@ -123,6 +128,12 @@ void TextPrinterWindow::closeEvent(QCloseEvent *e)
     c.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
     ui->printerTextEditASCII->setTextCursor(c);
     ui->printerTextEditASCII->insertPlainText(textASCII);
+}
+
+void TextPrinterWindow::printGraphics(GraphicsPrimitive *primitive)
+{
+    primitive->execute(mGraphicsScene);
+    delete primitive;
 }
 
 void TextPrinterWindow::wordwrapTriggered()
@@ -323,6 +334,11 @@ void TextPrinterWindow::saveTriggered()
     this->show();
 
     return true;
+ }
+
+ void TextPrinterWindow::executeGraphicsPrimitive(GraphicsPrimitive *primitive)
+ {
+    emit graphicsPrint(primitive);
  }
 
 } // End of namespace

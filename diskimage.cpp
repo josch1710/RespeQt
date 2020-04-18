@@ -872,10 +872,6 @@ bool SimpleDiskImage::open(const QString &fileName, FileTypes::FileType type)
         case FileTypes::AtxGz:
             bResult = openAtx(fileName);
         break;
-        case FileTypes::Scp:
-        case FileTypes::ScpGz:
-            bResult = openScp(fileName);
-        break;
         default:
             qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Unknown file type."));
         break;
@@ -997,10 +993,6 @@ bool SimpleDiskImage::save()
         case FileTypes::DcmGz:
             return saveDcm(m_originalFileName);
             break;
-        case FileTypes::Scp:
-        case FileTypes::ScpGz:
-            return saveScp(m_originalFileName);
-            break;
         case FileTypes::Di:
         case FileTypes::DiGz:
             return saveDi(m_originalFileName);
@@ -1094,9 +1086,6 @@ bool SimpleDiskImage::saveAs(const QString &fileName)
             return saveAtx(fileName);
         }
         return saveAsAtx(fileName, destinationImageType);
-    } else if (fileName.endsWith(".SCP", Qt::CaseInsensitive)) {
-        m_originalImageType = FileTypes::Scp;
-        return saveScp(fileName);
     } else {
         qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(tr("Unknown file extension."));
         return false;
@@ -1110,9 +1099,6 @@ bool SimpleDiskImage::create(int untitledName)
     }
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return createAtx(untitledName);
-    }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return createScp(untitledName);
     }
     return createAtr(untitledName);
 }
@@ -1422,9 +1408,6 @@ bool SimpleDiskImage::readHappySectorAtPosition(int trackNumber, int sectorNumbe
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return readHappyAtxSectorAtPosition(trackNumber, sectorNumber, afterSectorNumber, index, data);
     }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return readHappyScpSectorAtPosition(trackNumber, sectorNumber, afterSectorNumber, index, data);
-    }
     return readHappyAtrSectorAtPosition(trackNumber, sectorNumber, afterSectorNumber, index, data);
 }
 
@@ -1435,9 +1418,6 @@ bool SimpleDiskImage::readHappySkewAlignment(bool happy1050)
     }
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return readHappyAtxSkewAlignment(happy1050);
-    }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return readHappyScpSkewAlignment(happy1050);
     }
     return readHappyAtrSkewAlignment(happy1050);
 }
@@ -1450,9 +1430,6 @@ bool SimpleDiskImage::writeHappyTrack(int trackNumber, bool happy1050)
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return writeHappyAtxTrack(trackNumber, happy1050);
     }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return writeHappyScpTrack(trackNumber, happy1050);
-    }
     return writeHappyAtrTrack(trackNumber, happy1050);
 }
 
@@ -1463,9 +1440,6 @@ bool SimpleDiskImage::writeHappySectors(int trackNumber, int afterSectorNumber, 
     }
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return writeHappyAtxSectors(trackNumber, afterSectorNumber, happy1050);
-    }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return writeHappyScpSectors(trackNumber, afterSectorNumber, happy1050);
     }
     return writeHappyAtrSectors(trackNumber, afterSectorNumber, happy1050);
 }
@@ -1478,9 +1452,6 @@ bool SimpleDiskImage::format(const DiskGeometry &geo)
     else if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return formatAtx(geo);
     }
-    else if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return formatScp(geo);
-    }
     return formatAtr(geo);
 }
 
@@ -1491,9 +1462,6 @@ void SimpleDiskImage::readTrack(quint16 aux, QByteArray &data, int length)
     }
     else if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         readAtxTrack(aux, data, length);
-    }
-    else if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        readScpTrack(aux, data, length);
     }
     else {
         readAtrTrack(aux, data, length);
@@ -1508,9 +1476,6 @@ bool SimpleDiskImage::readSectorStatuses(QByteArray &data)
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return readAtxSectorStatuses(data);
     }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return readScpSectorStatuses(data);
-    }
     return readAtrSectorStatuses(data);
 }
 
@@ -1521,9 +1486,6 @@ bool SimpleDiskImage::readSectorUsingIndex(quint16 aux, QByteArray &data)
     }
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return readAtxSectorUsingIndex(aux, data);
-    }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return readScpSectorUsingIndex(aux, data);
     }
     return readAtrSectorUsingIndex(aux, data);
 }
@@ -1536,9 +1498,6 @@ bool SimpleDiskImage::readSector(quint16 aux, QByteArray &data)
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return readAtxSector(aux, data);
     }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return readScpSector(aux, data);
-    }
     return readAtrSector(aux, data);
 }
 
@@ -1549,9 +1508,6 @@ bool SimpleDiskImage::readSkewAlignment(quint16 aux, QByteArray &data, bool timi
     }
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return readAtxSkewAlignment(aux, data, timingOnly);
-    }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return readScpSkewAlignment(aux, data, timingOnly);
     }
     return readAtrSkewAlignment(aux, data, timingOnly);
 }
@@ -1568,9 +1524,6 @@ bool SimpleDiskImage::resetTrack(quint16 aux)
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return resetAtxTrack(aux);
     }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return resetScpTrack(aux);
-    }
     return resetAtrTrack(aux);
 }
 
@@ -1582,9 +1535,6 @@ bool SimpleDiskImage::writeTrack(quint16 aux, const QByteArray &data)
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return writeAtxTrack(aux, data);
     }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return writeScpTrack(aux, data);
-    }
     return writeAtrTrack(aux, data);
 }
 
@@ -1594,9 +1544,6 @@ bool SimpleDiskImage::writeTrackWithSkew(quint16 aux, const QByteArray &data) {
     }
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return writeAtxTrackWithSkew(aux, data);
-    }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return writeScpTrackWithSkew(aux, data);
     }
     return writeAtrTrackWithSkew(aux, data);
 }
@@ -1609,9 +1556,6 @@ bool SimpleDiskImage::writeSectorUsingIndex(quint16 aux, const QByteArray &data,
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return writeAtxSectorUsingIndex(aux, data, fuzzy);
     }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return writeScpSectorUsingIndex(aux, data, fuzzy);
-    }
     return writeAtrSectorUsingIndex(aux, data, fuzzy);
 }
 
@@ -1622,9 +1566,6 @@ bool SimpleDiskImage::writeFuzzySector(quint16 aux, const QByteArray &data)
     }
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return writeFuzzyAtxSector(aux, data);
-    }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return writeFuzzyScpSector(aux, data);
     }
     return writeFuzzyAtrSector(aux, data);
 }
@@ -1637,9 +1578,6 @@ bool SimpleDiskImage::writeSector(quint16 aux, const QByteArray &data)
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return writeAtxSector(aux, data);
     }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return writeScpSector(aux, data);
-    }
     return writeAtrSector(aux, data);
 }
 
@@ -1651,9 +1589,6 @@ bool SimpleDiskImage::writeSectorExtended(int bitNumber, quint8 dataType, quint8
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return writeAtxSectorExtended(bitNumber, dataType, trackNumber, sideNumber, sectorNumber, sectorSize, data, crcError, weakOffset);
     }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return writeScpSectorExtended(bitNumber, dataType, trackNumber, sideNumber, sectorNumber, sectorSize, data, crcError, weakOffset);
-    }
     return writeAtrSectorExtended(bitNumber, dataType, trackNumber, sideNumber, sectorNumber, sectorSize, data, crcError, weakOffset);
 }
 
@@ -1664,9 +1599,6 @@ int SimpleDiskImage::sectorsInCurrentTrack()
     }
     if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
         return sectorsInCurrentAtxTrack();
-    }
-    if ((m_originalImageType == FileTypes::Scp) || (m_originalImageType == FileTypes::ScpGz)) {
-        return sectorsInCurrentScpTrack();
     }
     return sectorsInCurrentAtrTrack();
 }

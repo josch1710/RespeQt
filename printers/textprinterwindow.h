@@ -10,6 +10,7 @@
 #define TEXTPRINTERWINDOW_H
 
 #include <QMainWindow>
+#include <QGraphicsScene>
 #include <QString>
 #include "nativeoutput.h"
 
@@ -42,6 +43,7 @@ public:
     virtual void drawLine(const QPointF &, const QPointF &) {}
     virtual void calculateFixedFontSize(uint8_t) override {}
     virtual bool setupOutput() override;
+    virtual void executeGraphicsPrimitive(GraphicsPrimitive *primitive) override;
 
     static QString typeName()
     {
@@ -61,6 +63,7 @@ private:
     bool showAtascii;
     int fontSize;
     QString atasciiFont;
+    QGraphicsScene mGraphicsScene;
 
 protected slots:
     void saveTriggered();
@@ -76,10 +79,12 @@ protected slots:
     void stripLineNumbersTriggered();
     void asciiFontChanged (const QFont &);
     void print(const QString &text);
+    void printGraphics(GraphicsPrimitive *primitive);
 
 signals:
     void closed(const Printers::TextPrinterWindow* window);
     void textPrint(const QString &text);
+    void graphicsPrint(GraphicsPrimitive *primitive);
 };
 
 }

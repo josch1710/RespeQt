@@ -19,8 +19,6 @@
 #include <QPrinterInfo>
 #include <memory>
 
-#include "Emulator.h"
-
 #define NUM_RECENT_FILES 10
 
 // There should always only be one instance, so this is a singleton.
@@ -229,6 +227,18 @@ public:
     bool explorerOnTop();
     void setExplorerOnTop(bool expOnTop);
 
+// Printer Spy Mode
+    bool isPrinterSpyMode();
+    void setPrinterSpyMode(bool enabled);
+
+// 1020 Graphics Instructions
+    bool displayGraphicsInstructions();
+    void setDisplayGraphicsInstructions(bool enabled);
+
+// Clear 1020 Graphics pane on STATUS command
+    bool clearOnStatus();
+    void setClearOnStatus(bool enabled);
+
 // Methods for setting and getting the Printer emulation settings.
     void setOutputName(int no, const QString &outputName);
     const QString &outputName(int no) const;
@@ -239,38 +249,7 @@ public:
     QString atariFixedFontFamily();
     void setAtariFixedFontFamily(QString fontFamily);
 
-// Atari drive firmware
-    QString atari810Firmware();
-    void setAtari810Firmware(const QString &firmware);
-    QString atari810ChipFirmware();
-    void setAtari810ChipFirmware(const QString &firmware);
-    QString atari810HappyFirmware();
-    void setAtari810HappyFirmware(const QString &firmware);
-    QString atari1050Firmware();
-    void setAtari1050Firmware(const QString &firmware);
-    QString atari1050ArchiverFirmware();
-    void setAtari1050ArchiverFirmware(const QString &firmware);
-    QString atari1050HappyFirmware();
-    void setAtari1050HappyFirmware(const QString &firmware);
-    QString atari1050SpeedyFirmware();
-    void setAtari1050SpeedyFirmware(const QString &firmware);
-    QString atari1050TurboFirmware();
-    void setAtari1050TurboFirmware(const QString &firmware);
-    QString atari1050DuplicatorFirmware();
-    void setAtari1050DuplicatorFirmware(const QString &firmware);
-    QString firmwarePath(eHARDWARE eHardware);
-    QString firmwareName(eHARDWARE eHardware);
-
 // Drive emulation (SIO or firmware)
-    eHARDWARE d1EmulationType();
-    void setD1EmulationType(eHARDWARE type);
-    eHARDWARE d2EmulationType();
-    void setD2EmulationType(eHARDWARE type);
-    eHARDWARE d3EmulationType();
-    void setD3EmulationType(eHARDWARE type);
-    eHARDWARE d4EmulationType();
-    void setD4EmulationType(eHARDWARE type);
-    eHARDWARE firmwareType(int drive);
     bool displayTransmission();
     void setDisplayTransmission(bool displayTransmission);
     bool displayDriveHead();
@@ -313,15 +292,6 @@ public:
     void setDisplayCpuInstructions(bool displayCpuInstructions);
 	QString traceFilename();
     void setTraceFilename(const QString &filename);
-    bool d1PowerOnWithDiskInserted();
-    void setD1PowerOnWithDiskInserted(bool d1PowerOnWithDiskInserted);
-    bool d2PowerOnWithDiskInserted();
-    void setD2PowerOnWithDiskInserted(bool d2PowerOnWithDiskInserted);
-    bool d3PowerOnWithDiskInserted();
-    void setD3PowerOnWithDiskInserted(bool d3PowerOnWithDiskInserted);
-    bool d4PowerOnWithDiskInserted();
-    void setD4PowerOnWithDiskInserted(bool d4PowerOnWithDiskInserted);
-    bool firmwarePowerOnWithDisk(int drive);
 #ifdef Q_OS_MAC
     void setNativeMenu(bool nativeMenu);
     bool nativeMenu();
@@ -421,21 +391,10 @@ private:
     bool mUseLargeFont;
     bool mExplorerOnTop;
     bool mEnableShade;
+    bool mPrinterSpyMode;
+    bool mDisplayGraphicsInstructions;
+    bool mClearOnStatus;
 
-    QString m810Firmware;
-    QString m810ChipFirmware;
-    QString m810HappyFirmware;
-    QString m1050Firmware;
-    QString m1050ArchiverFirmware;
-    QString m1050HappyFirmware;
-    QString m1050SpeedyFirmware;
-    QString m1050TurboFirmware;
-    QString m1050DuplicatorFirmware;
-
-    eHARDWARE mD1EmulationType;
-    eHARDWARE mD2EmulationType;
-    eHARDWARE mD3EmulationType;
-    eHARDWARE mD4EmulationType;
     bool mDisplayTransmission;
     bool mDisplayDriveHead;
     bool mDisplayFdcCommands;
@@ -457,10 +416,6 @@ private:
     bool mActivateHappyModeWithTool;
     bool mDisplayCpuInstructions;
 	QString mTraceFilename;
-    bool mD1PowerOnWithDiskInserted;
-    bool mD2PowerOnWithDiskInserted;
-    bool mD3PowerOnWithDiskInserted;
-    bool mD4PowerOnWithDiskInserted;
 
 #ifdef Q_OS_MAC
     bool mNativeMenu;

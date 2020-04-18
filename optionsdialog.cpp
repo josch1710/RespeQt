@@ -34,7 +34,6 @@ OptionsDialog::OptionsDialog(QWidget *parent) :
     itemStandard = m_ui->optionSections->topLevelItem(0)->child(0);
     itemAtariSio = m_ui->optionSections->topLevelItem(0)->child(1);
     itemEmulation = m_ui->optionSections->topLevelItem(1);
-    itemDiskImages = m_ui->optionSections->topLevelItem(2);
     itemDiskOptions = m_ui->optionSections->topLevelItem(2)->child(0);
     itemDiskOSB = m_ui->optionSections->topLevelItem(2)->child(1);
     itemDiskIcons = m_ui->optionSections->topLevelItem(2)->child(2);
@@ -43,6 +42,8 @@ OptionsDialog::OptionsDialog(QWidget *parent) :
     itemTestSerialPort = m_ui->optionSections->topLevelItem(0)->child(2);
     itemAtari1027 = m_ui->optionSections->topLevelItem(4)->child(0);
     itemPassthrough = m_ui->optionSections->topLevelItem(4)->child(1);
+    itemPrinterProtocol = m_ui->optionSections->topLevelItem(4)->child(2);
+    item1020Options = m_ui->optionSections->topLevelItem(4)->child(3);
 
 #ifndef Q_OS_LINUX
     m_ui->optionSections->topLevelItem(0)->removeChild(itemAtariSio);
@@ -75,6 +76,7 @@ void OptionsDialog::setupSettings()
     {
         m_ui->serialPortComboBox->addItem(tr("Custom"));
     }
+
     m_ui->serialPortHandshakeCombo->setCurrentIndex(RespeqtSettings::instance()->serialPortHandshakingMethod());
     m_ui->serialPortFallingEdge->setChecked(RespeqtSettings::instance()->serialPortTriggerOnFallingEdge());
     m_ui->serialPortDTRControlEnable->setChecked(RespeqtSettings::instance()->serialPortDTRControlEnable());
@@ -113,7 +115,10 @@ void OptionsDialog::setupSettings()
     m_ui->useLargerFont->setChecked(RespeqtSettings::instance()->useLargeFont());
     m_ui->enableShade->setChecked(RespeqtSettings::instance()->enableShade());
     m_ui->RclNameEdit->setText(RespeqtSettings::instance()->lastRclDir());
-    m_ui->warning_nativemenu->hide();
+    m_ui->printerSpyMode->setChecked(RespeqtSettings::instance()->isPrinterSpyMode());
+    m_ui->displayGraphicsInstructions->setChecked(RespeqtSettings::instance()->displayGraphicsInstructions());
+    m_ui->clearOnStatus->setChecked(RespeqtSettings::instance()->clearOnStatus());
+
 #ifdef Q_OS_MAC
     m_ui->useNativeMenu->setChecked(RespeqtSettings::instance()->nativeMenu());
     const auto& actualNoMenu = QApplication::testAttribute(Qt::AA_DontUseNativeMenuBar);
@@ -376,6 +381,10 @@ void OptionsDialog::currentSectionChanged(QTreeWidgetItem* current, QTreeWidgetI
         m_ui->stackedWidget->setCurrentIndex(6);
     } else if (current == itemPassthrough) {
         m_ui->stackedWidget->setCurrentIndex(7);
+    } else if (current == itemPrinterProtocol) {
+        m_ui->stackedWidget->setCurrentIndex(15);
+    } else if (current == item1020Options) {
+        m_ui->stackedWidget->setCurrentIndex(16);
     }
 }
 
@@ -420,6 +429,9 @@ void OptionsDialog::saveSettings()
     RespeqtSettings::instance()->setUseLargeFont(m_ui->useLargerFont->isChecked());
     RespeqtSettings::instance()->setEnableShade(m_ui->enableShade->isChecked());
     RespeqtSettings::instance()->setRclDir(m_ui->RclNameEdit->text());
+    RespeqtSettings::instance()->setPrinterSpyMode(m_ui->printerSpyMode->isChecked());
+    RespeqtSettings::instance()->setDisplayGraphicsInstructions(m_ui->displayGraphicsInstructions->isChecked());
+    RespeqtSettings::instance()->setClearOnStatus(m_ui->clearOnStatus->isChecked());
 
     int backend = SERIAL_BACKEND_STANDARD;
     if (itemAtariSio->checkState(0) == Qt::Checked)

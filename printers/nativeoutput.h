@@ -22,6 +22,7 @@ namespace Printers
 
 #include "sioworker.h"
 #include "baseprinter.h"
+#include "graphicsprimitive.h"
 
 using QPaintDevicePtr = std::shared_ptr<QPaintDevice>;
 using QPainterPtr = std::shared_ptr<QPainter>;
@@ -67,6 +68,13 @@ namespace Printers
                 mPrinter = printer;
             }
         };
+
+        virtual void executeGraphicsPrimitive(GraphicsPrimitive *primitive) {
+            if (painter()) {
+                primitive->execute(painter());
+            }
+        }
+
         BasePrinterWPtr printer() const { return mPrinter; }
 
         static QString typeName()

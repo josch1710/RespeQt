@@ -15,12 +15,21 @@
 #include <QElapsedTimer>
 #include <QtDebug>
 
-#include <Crc16.hpp>
+#include <crc16.h>
 #include "disassembly810.h"
 #include "disassembly1050.h"
 
 #include "sioworker.h"
 #include "miscutils.h"
+
+#define DISK_CRC_MARK         0xF7
+#define DISK_DATA_ADDR_MARK1  0xF8
+#define DISK_DATA_ADDR_MARK2  0xF9
+#define DISK_DATA_ADDR_MARK3  0xFA
+#define DISK_DATA_ADDR_MARK4  0xFB
+#define DISK_INDEX_ADDR_MARK  0xFC
+#define DISK_SPARE_MARK       0xFD
+#define DISK_ID_ADDR_MARK     0xFE
 
 class AtariFileSystem;
 class DiskEditDialog;
@@ -143,54 +152,6 @@ public:
     AtxSectorInfo* find(quint8 sectorNumber, quint16 distance);
     int duplicateIndex(AtxSectorInfo *sectorInfo, int sectorNumber);
     int shortSectorSize(int track, int sectorIndex, int *bitShift);
-};
-
-class ScpTrackRevolution: public QObject
-{
-    Q_OBJECT
-
-private:
-	quint32 m_duration;
-	quint32 m_bitcells;
-	quint32 m_offset;
-
-public:
-    ScpTrackRevolution(quint32 duration, quint32 bitcells, quint32 offset) {
-        m_duration = duration;
-        m_bitcells = bitcells;
-        m_offset = offset;
-    }
-    virtual ~ScpTrackRevolution() { }
-};
-
-class ScpTrackInfo: public QObject
-{
-    Q_OBJECT
-
-private:
-	// if false, it means the track is in the original file.
-	// if true, a new version of the track has been produced in the temp file
-	bool m_updated;
-	// if trackOffset is 0, it means that the track has not been loaded
-	quint32 m_trackOffset;
-    QList<ScpTrackRevolution*> m_trackRevolutions;
-    QList<AtxSectorInfo*> m_sectors;
-
-public:
-    ScpTrackInfo() { m_updated = false; m_trackOffset = 0; }
-    virtual ~ScpTrackInfo() { clearRevolutions(); clear(); }
-    quint32 getTrackOffset() { return m_trackOffset; }
-    void setTrackOffset(quint32 trackOffset) { m_trackOffset = trackOffset; }
-	// revolutions
-    ScpTrackRevolution* addRevolution(quint32 duration, quint32 bitcells, quint32 offset);
-    void clearRevolutions();
-    ScpTrackRevolution* revolutionAt(int pos) { return m_trackRevolutions.at(pos); }
-	// sectors
-    void clear();
-    int size() { return m_sectors.size(); }
-    AtxSectorInfo* at(int pos) { return m_sectors.at(pos); }
-    int count(quint8 sectorNumber);
-    bool loadTrack(QString &originalFileName);
 };
 
 enum BOOT_STATE
@@ -378,8 +339,6 @@ protected:
     quint16 m_trackContent[200];
 	// Atx specific data
     AtxTrackInfo m_atxTrackInfo[40];
-	// Scp specific data
-	ScpTrackInfo m_scpTrackInfo[40];
     // data for Happy or Archiver
     Board m_board;
     // Tanslator and tool disk
@@ -397,7 +356,6 @@ protected:
     bool openPro(const QString &fileName);
     bool openAtx(const QString &fileName);
     bool openDcm(const QString &fileName);
-    bool openScp(const QString &fileName);
     bool openDi(const QString &fileName);
 
     bool saveAtr(const QString &fileName);
@@ -405,7 +363,6 @@ protected:
     bool savePro(const QString &fileName);
     bool saveAtx(const QString &fileName);
     bool saveDcm(const QString &fileName);
-    bool saveScp(const QString &fileName);
     bool saveDi(const QString &fileName);
 
     bool saveAsAtr(const QString &fileName, FileTypes::FileType destImageType);
@@ -415,97 +372,78 @@ protected:
     bool createAtr(int untitledName);
     bool createPro(int untitledName);
     bool createAtx(int untitledName);
-    bool createScp(int untitledName);
 
     bool formatAtr(const DiskGeometry &geo);
     bool formatPro(const DiskGeometry &geo);
     bool formatAtx(const DiskGeometry &geo);
-    bool formatScp(const DiskGeometry &geo);
 
     bool readHappyAtrSectorAtPosition(int trackNumber, int sectorNumber, int afterSectorNumber, int &index, QByteArray &data);
     bool readHappyProSectorAtPosition(int trackNumber, int sectorNumber, int afterSectorNumber, int &index, QByteArray &data);
     bool readHappyAtxSectorAtPosition(int trackNumber, int sectorNumber, int afterSectorNumber, int &index, QByteArray &data);
-    bool readHappyScpSectorAtPosition(int trackNumber, int sectorNumber, int afterSectorNumber, int &index, QByteArray &data);
 
     bool readHappyAtrSkewAlignment(bool happy1050);
     bool readHappyProSkewAlignment(bool happy1050);
     bool readHappyAtxSkewAlignment(bool happy1050);
-    bool readHappyScpSkewAlignment(bool happy1050);
 
     bool writeHappyAtrTrack(int trackNumber, bool happy1050);
     bool writeHappyProTrack(int trackNumber, bool happy1050);
     bool writeHappyAtxTrack(int trackNumber, bool happy1050);
-    bool writeHappyScpTrack(int trackNumber, bool happy1050);
 
     bool writeHappyAtrSectors(int trackNumber, int afterSectorNumber, bool happy1050);
     bool writeHappyProSectors(int trackNumber, int afterSectorNumber, bool happy1050);
     bool writeHappyAtxSectors(int trackNumber, int afterSectorNumber, bool happy1050);
-    bool writeHappyScpSectors(int trackNumber, int afterSectorNumber, bool happy1050);
 
     void readAtrTrack(quint16 aux, QByteArray &data, int length);
     void readProTrack(quint16 aux, QByteArray &data, int length);
     void readAtxTrack(quint16 aux, QByteArray &data, int length);
-    void readScpTrack(quint16 aux, QByteArray &data, int length);
 
     bool readAtrSectorStatuses(QByteArray &data);
     bool readProSectorStatuses(QByteArray &data);
     bool readAtxSectorStatuses(QByteArray &data);
-    bool readScpSectorStatuses(QByteArray &data);
 
     bool readAtrSectorUsingIndex(quint16 aux, QByteArray &data);
     bool readProSectorUsingIndex(quint16 aux, QByteArray &data);
     bool readAtxSectorUsingIndex(quint16 aux, QByteArray &data);
-    bool readScpSectorUsingIndex(quint16 aux, QByteArray &data);
 
     bool readAtrSector(quint16 aux, QByteArray &data);
     bool readProSector(quint16 aux, QByteArray &data);
     bool readAtxSector(quint16 aux, QByteArray &data);
-    bool readScpSector(quint16 aux, QByteArray &data);
 
     bool readAtrSkewAlignment(quint16 aux, QByteArray &data, bool timingOnly);
     bool readProSkewAlignment(quint16 aux, QByteArray &data, bool timingOnly);
     bool readAtxSkewAlignment(quint16 aux, QByteArray &data, bool timingOnly);
-    bool readScpSkewAlignment(quint16 aux, QByteArray &data, bool timingOnly);
 
     bool resetAtrTrack(quint16 aux);
     bool resetProTrack(quint16 aux);
     bool resetAtxTrack(quint16 aux);
-    bool resetScpTrack(quint16 aux);
 
     bool writeAtrTrack(quint16 aux, const QByteArray &data);
     bool writeProTrack(quint16 aux, const QByteArray &data);
     bool writeAtxTrack(quint16 aux, const QByteArray &data);
-    bool writeScpTrack(quint16 aux, const QByteArray &data);
 
     bool writeAtrTrackWithSkew(quint16 aux, const QByteArray &data);
     bool writeProTrackWithSkew(quint16 aux, const QByteArray &data);
     bool writeAtxTrackWithSkew(quint16 aux, const QByteArray &data);
-    bool writeScpTrackWithSkew(quint16 aux, const QByteArray &data);
 
     bool writeAtrSectorUsingIndex(quint16 aux, const QByteArray &data, bool fuzzy);
     bool writeProSectorUsingIndex(quint16 aux, const QByteArray &data, bool fuzzy);
     bool writeAtxSectorUsingIndex(quint16 aux, const QByteArray &data, bool fuzzy);
-    bool writeScpSectorUsingIndex(quint16 aux, const QByteArray &data, bool fuzzy);
 
     bool writeFuzzyAtrSector(quint16 aux, const QByteArray &data);
     bool writeFuzzyProSector(quint16 aux, const QByteArray &data);
     bool writeFuzzyAtxSector(quint16 aux, const QByteArray &data);
-    bool writeFuzzyScpSector(quint16 aux, const QByteArray &data);
 
     bool writeAtrSector(quint16 aux, const QByteArray &data);
     bool writeProSector(quint16 aux, const QByteArray &data);
     bool writeAtxSector(quint16 aux, const QByteArray &data);
-    bool writeScpSector(quint16 aux, const QByteArray &data);
 
     bool writeAtrSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8 sideNumber, quint8 sectorNumber, quint8 sectorSize, const QByteArray &data, bool crcError, int weakOffset);
     bool writeProSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8 sideNumber, quint8 sectorNumber, quint8 sectorSize, const QByteArray &data, bool crcError, int weakOffset);
     bool writeAtxSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8 sideNumber, quint8 sectorNumber, quint8 sectorSize, const QByteArray &data, bool crcError, int weakOffset);
-    bool writeScpSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8 sideNumber, quint8 sectorNumber, quint8 sectorSize, const QByteArray &data, bool crcError, int weakOffset);
 
     int sectorsInCurrentAtrTrack();
     int sectorsInCurrentProTrack();
     int sectorsInCurrentAtxTrack();
-    int sectorsInCurrentScpTrack();
 
     bool fillProSectorInfo(const QString &fileName, QFile *sourceFile, quint16 slot, quint16 absoluteSector);
     quint16 findPositionInProTrack(int track, int indexInProSector, bool withoutData);
