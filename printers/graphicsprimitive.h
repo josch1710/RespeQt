@@ -4,6 +4,7 @@
 #include <QFont>
 #include <QGraphicsTextItem>
 #include <QGraphicsScene>
+#include <memory>
 
 using QPainterPtr = std::shared_ptr<QPainter>;
 

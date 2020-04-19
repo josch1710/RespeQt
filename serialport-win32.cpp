@@ -206,6 +206,7 @@ bool StandardSerialPortBackend::setHighSpeed()
     mHighSpeed = true;
     if (RespeqtSettings::instance()->serialPortUsePokeyDivisors()) {
         return setSpeed(divisorToBaud(RespeqtSettings::instance()->serialPortPokeyDivisor()));
+    }
     if (mForceHighSpeed != 0) {
         return setSpeed(mForceHighSpeed); // used to force 52400 when SuperArchiver/BitWriter is active
     } else if (RespeqtSettings::instance()->serialPortUsePokeyDivisors()) {
@@ -522,12 +523,12 @@ QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool verbose)
         data.resize(size);
 
 #ifndef QT_NO_DEBUG
-    try {
+    /*try {
         SioWorker *sio = dynamic_cast<SioWorker*>(parent());
         if (sio) {
             sio->writeSnapshotDataFrame(data);
         }
-    } catch(...) {}
+    } catch(...) {}*/
 #endif
 
         return data;
