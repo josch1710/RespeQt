@@ -32,7 +32,7 @@ namespace Printers
     public:
         Atari1020(SioWorkerPtr sio);
 
-        virtual void handleCommand(const quint8 command, const quint16 aux) override;
+        virtual void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) override;
         virtual bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
         virtual void setupFont() override;
         virtual void setupOutput() override;

@@ -6,8 +6,8 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#ifndef TEXTPRINTERWINDOW_H
-#define TEXTPRINTERWINDOW_H
+#ifndef GRAPHICSPRINTERWINDOW_H
+#define GRAPHICSPRINTERWINDOW_H
 
 #include <QMainWindow>
 #include <QGraphicsScene>
@@ -15,18 +15,18 @@
 #include "nativeoutput.h"
 
 namespace Ui {
-    class TextPrinterWindow;
+    class GraphicsPrinterWindow;
 }
 
 namespace Printers {
 
-class TextPrinterWindow : public QMainWindow, public NativeOutput {
+class GraphicsPrinterWindow : public QMainWindow, public NativeOutput {
     Q_OBJECT
 public:
-    explicit TextPrinterWindow(QWidget *parent = nullptr);
-    ~TextPrinterWindow();
+    explicit GraphicsPrinterWindow(QWidget *parent = nullptr);
+    ~GraphicsPrinterWindow();
 
-    virtual void newLine(bool linefeed = false) override;
+    virtual void newLine(bool = false) override {};
     virtual void newPage(bool) override {}
     virtual void updateBoundingBox() override {}
     virtual bool beginOutput() override { return true; }
@@ -43,10 +43,11 @@ public:
     virtual void drawLine(const QPointF &, const QPointF &) {}
     virtual void calculateFixedFontSize(uint8_t) override {}
     virtual bool setupOutput() override;
+    virtual void executeGraphicsPrimitive(GraphicsPrimitive *primitive) override;
 
     static QString typeName()
     {
-        return QObject::tr("Text printer");
+        return QObject::tr("Graphics printer");
     }
 
 protected:
@@ -54,34 +55,24 @@ protected:
     void closeEvent(QCloseEvent *e) override;
 
 private:
-    Ui::TextPrinterWindow *ui;
+    Ui::GraphicsPrinterWindow *ui;
     QPen mPen;
-    int effAtasciiFont;
-    int effFontSize;
-    bool showAscii;
-    bool showAtascii;
-    int fontSize;
-    QString atasciiFont;
+    QGraphicsScene mGraphicsScene;
 
 protected slots:
     void saveTriggered();
     void clearTriggered();
-    void wordwrapTriggered();
     void printTriggered();
 
     // To manipulate fonts and ascii/atascii windows  // 
-    void atasciiFontTriggered();
-    void fontSizeTriggered();
-    void hideshowAsciiTriggered();
-    void hideshowAtasciiTriggered();
-    void stripLineNumbersTriggered();
-    void asciiFontChanged (const QFont &);
     void print(const QString &text);
+    void printGraphics(GraphicsPrimitive *primitive);
 
 signals:
-    void closed(const Printers::TextPrinterWindow* window);
+    void closed(const Printers::GraphicsPrinterWindow* window);
     void textPrint(const QString &text);
+    void graphicsPrint(GraphicsPrimitive *primitive);
 };
 
 }
-#endif // TEXTPRINTERWINDOW_H
+#endif // GRAPHICSPRINTERWINDOW_H

@@ -57,6 +57,7 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x050000
 
 SOURCES += tests/siorecorder.cpp \
     mainwindow.cpp \
+    printers/graphicsprinterwindow.cpp \
     rcl.cpp \
     sdxprotocol.cpp \
     sioworker.cpp \
@@ -109,6 +110,7 @@ SOURCES += tests/siorecorder.cpp \
     cpu6502.cpp
 
 HEADERS += mainwindow.h \
+    printers/graphicsprinterwindow.h \
     tests/siorecorder.h \
     tools/make_unique.h \
     printers/outputs.h \
@@ -175,6 +177,7 @@ FORMS += mainwindow.ui \
     logdisplaydialog.ui \
     drivewidget.ui \
     infowidget.ui \
+    printers/graphicsprinterwindow.ui \
     printerwidget.ui \
     printers/textprinterwindow.ui
 

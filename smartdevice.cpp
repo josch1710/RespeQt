@@ -25,7 +25,7 @@
 
 //SmartDevice (ApeTime + URL submit)
 
-void SmartDevice::handleCommand(quint8 command, quint16 aux)
+void SmartDevice::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2)
 {
     switch(command)
     {
@@ -59,6 +59,7 @@ void SmartDevice::handleCommand(quint8 command, quint16 aux)
     // Submit URL
     case 0x55:
     {
+        quint16 aux = aux1 + aux2 * 256;
         if(RespeqtSettings::instance()->isURLSubmitEnabled() && aux!=0 && aux<=2000)
         {
             if (!sio->port()->writeCommandAck())
@@ -98,10 +99,11 @@ void SmartDevice::handleCommand(quint8 command, quint16 aux)
     default:
     {
         sio->port()->writeCommandNak();
-        qWarning() << "!w" << tr("[%1] command: $%2, aux: $%3 NAKed.")
+        qWarning() << "!w" << tr("[%1] command: $%2, aux1: $%3, aux2: $%4 NAKed.")
                        .arg(deviceName())
                        .arg(command, 2, 16, QChar('0'))
-                       .arg(aux, 4, 16, QChar('0'));
+                       .arg(aux1, 2, 16, QChar('0'))
+                       .arg(aux2, 2, 16, QChar('0'));
         break;
     }
 

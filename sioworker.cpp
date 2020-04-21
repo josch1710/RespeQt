@@ -10,7 +10,7 @@
  */
 
 #include "sioworker.h"
-
+#include "tests/siorecorder.h"
 #include "respeqtsettings.h"
 #include <QFile>
 #include <QDateTime>
@@ -91,7 +91,12 @@ void SioWorker::start(Priority p)
             break;
 #ifndef QT_NO_DEBUG
         case SERIAL_BACKEND_TEST:
-            mPort = new TestSerialPortBackend(this);
+            mPort = new Tests::SioRecorder();
+            QFile *file = new QFile(RespeqtSettings::instance()->testFile());
+            file->open(QFile::ReadOnly);
+            dynamic_cast<Tests::SioRecorder*>(mPort)->prepareReplaySnapshot(file);
+            file->close();
+            delete file;
             break;
 #endif
     }
@@ -149,35 +154,37 @@ void SioWorker::run()
             break;
         }
         /* Decode the command */
-        quint8 no = (quint8)cmd[0];
-        quint8 command = (quint8)cmd[1];
-        quint16 aux = ((quint8)cmd[2]) + ((quint8)cmd[3] * 256);
+        auto no = static_cast<quint8>(cmd[0]);
+        auto command = static_cast<quint8>(cmd[1]);
+        auto aux1 = static_cast<quint8>(cmd[2]);
+        auto aux2 = static_cast<quint8>(cmd[3]);
 
         /* Redirect the command to the appropriate device */
         deviceMutex->lock();
         if (devices[no]) {
             if (devices[no]->tryLock()) {
-                devices[no]->handleCommand(command, aux);
+                devices[no]->handleCommand(command, aux1, aux2);
                 devices[no]->unlock();
             } else {
                 qWarning() << "!w" << tr("[%1] command: $%2, aux: $%3 ignored because the image explorer is open.")
                                .arg(deviceName(no))
                                .arg(command, 2, 16, QChar('0'))
-                               .arg(aux, 4, 16, QChar('0'));
+                               .arg(aux1, 2, 16, QChar('0'));
             }
         } else {
             if ((displayCommandName) && (no >= 0x31 && no <= 0x3F)) {
                 qDebug() << "!u" << tr("[%1] command: $%2, aux: $%3 ignored: %4")
                             .arg(deviceName(no))
                             .arg(command, 2, 16, QChar('0'))
-                            .arg(aux, 4, 16, QChar('0'))
-                            .arg(guessDiskCommand(command, aux));
+                            .arg(aux1, 2, 16, QChar('0'))
+                            .arg(guessDiskCommand(command, aux1, aux2));
             }
             else {
-                qDebug() << "!u" << tr("[%1] command: $%2, aux: $%3 ignored.")
+                qDebug() << "!u" << tr("[%1] command: $%2, aux1: $%3, aux2: $%4 ignored.")
                                .arg(deviceName(no))
                                .arg(command, 2, 16, QChar('0'))
-                               .arg(aux, 4, 16, QChar('0'));
+                               .arg(aux1, 2, 16, QChar('0'))
+                               .arg(aux2, 2, 16, QChar('0'));
             }
         }
         deviceMutex->unlock();
@@ -186,7 +193,7 @@ void SioWorker::run()
     mPort->close();
 }
 
-QString SioWorker::guessDiskCommand(quint8 command, quint16 aux)
+QString SioWorker::guessDiskCommand(const quint8 command, const quint8 aux1, const quint8 /*aux2*/)
 {
 #if ALL_COMMANDS
     // displays all known command meaning
@@ -271,11 +278,11 @@ QString SioWorker::guessDiskCommand(quint8 command, quint16 aux)
     case 0x46:  return tr("Super Archiver Write Track or Happy Write Track");
     case 0x47:  return tr("Super Archiver Read Track (128 bytes) or Happy Write All Sectors");
     case 0x48:
-        if ((aux & 0xFF) == 0x01)
+        if (aux1 == 0x01)
                 return tr("Happy Set Idle Timeout");
-        else if ((aux & 0xFF) == 0x02)
+        else if (aux1 == 0x02)
                 return tr("Happy Set Alternate Device ID");
-        else if ((aux & 0xFF) == 0x03)
+        else if (aux1 == 0x03)
                 return tr("Happy Reinitialize Drive");
         else	return tr("Happy Configure Drive");
     case 0x49:	return tr("Happy Write Track with Skew Alignment");
@@ -625,7 +632,12 @@ void CassetteWorker::start(Priority p)
             break;
 #ifndef QT_NO_DEBUG
         case SERIAL_BACKEND_TEST:
-            mPort = new TestSerialPortBackend(this);
+            mPort = new Tests::SioRecorder();
+            QFile *file = new QFile(RespeqtSettings::instance()->testFile());
+            file->open(QFile::ReadOnly);
+            dynamic_cast<Tests::SioRecorder*>(mPort)->prepareReplaySnapshot(file);
+            file->close();
+            delete file;
             break;
 #endif
     }

@@ -25,7 +25,7 @@
 char RCl::rclSlotNo;
 
 // RespeQt Client ()
-void RCl::handleCommand(quint8 command, quint16 aux)
+void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2)
 {
     QByteArray data(6, 0);
     QByteArray  fdata(21, 0);
@@ -40,8 +40,8 @@ void RCl::handleCommand(quint8 command, quint16 aux)
             return;
         }
 
-        quint8 list   = (aux  / 256);
-        quint8 offset = (aux  % 256);
+        quint8 list   = aux2;
+        quint8 offset = aux1;
 
         if(!list) {
             QByteArray ddata = sio->port()->readDataFrame(32);
@@ -115,7 +115,7 @@ void RCl::handleCommand(quint8 command, quint16 aux)
         }
 
         qint8 deviceNo;
-        deviceNo =  (aux  % 256);
+        deviceNo =  aux1;
         deviceNo  = (deviceNo > 9) ? (deviceNo -16) :deviceNo;
 
         if (deviceNo >= 0x0 && deviceNo <= 0xF ) {
@@ -164,9 +164,8 @@ void RCl::handleCommand(quint8 command, quint16 aux)
 
       case 0x94 :   // Swap Disks
          {
-            qint8 swapDisk1, swapDisk2;
-            swapDisk1 = static_cast<qint8>(aux / 256);
-            swapDisk2 = static_cast<qint8>(aux % 256);
+            auto swapDisk1 = static_cast<qint8>(aux2);
+            auto swapDisk2 = static_cast<qint8>(aux1);
             if (swapDisk1 > 25)
                 swapDisk1 -= 16;
             if (swapDisk2 > 25)
@@ -175,9 +174,7 @@ void RCl::handleCommand(quint8 command, quint16 aux)
                 && swapDisk2 > 0 && swapDisk2 <= 15
                 && swapDisk1 != swapDisk2)
             {
-                sio->swapDevices(
-                    static_cast<quint8>(swapDisk1 + DISK_BASE_CDEVIC - 1),
-                    static_cast<quint8>(swapDisk2 + DISK_BASE_CDEVIC - 1));
+                sio->swapDevices(swapDisk1 + DISK_BASE_CDEVIC - 1, swapDisk2 + DISK_BASE_CDEVIC - 1);
                 RespeqtSettings::instance()->swapImages(swapDisk1 - 1, swapDisk2 - 1);
                 qDebug() << "!n" << tr("[%1] Swapped disk %2 with disk %3.")
                                 .arg(deviceName())
@@ -197,8 +194,7 @@ void RCl::handleCommand(quint8 command, quint16 aux)
 
       case 0x95 :   // Unmount Disk(s)
        {
-          qint8 unmountDisk;
-          unmountDisk = static_cast<qint8>(aux / 256);
+          auto unmountDisk = static_cast<qint8>(aux1);
           if (unmountDisk == -6)
               unmountDisk = 0;        // All drives
           if (unmountDisk > 25)
@@ -287,7 +283,7 @@ void RCl::handleCommand(quint8 command, quint16 aux)
           } else {
             len = 14;
           }
-          if (aux == 0) {
+          if (aux1 == 0 && aux2 == 0) {
               QByteArray data(len, 0);
               data = sio->port()->readDataFrame(static_cast<uint>(len));
 
@@ -436,8 +432,8 @@ void RCl::handleCommand(quint8 command, quint16 aux)
         }
         qint8 commitDisk;
         bool commitOnOff;
-        commitDisk = aux % 256 - 1;
-        commitOnOff = (aux/256)?false:true;
+        commitDisk = aux1 - 1;
+        commitOnOff = aux2?false:true;
 
         if (commitDisk > 9) commitDisk -= 16;
         if (commitDisk != -7 && (commitDisk <0 || commitDisk > 14)) {
@@ -465,8 +461,7 @@ void RCl::handleCommand(quint8 command, quint16 aux)
         }
 
         int diskSaved = 0;
-        qint8 deviceNo;
-        deviceNo = aux /256;
+        auto deviceNo = static_cast<qint8>(aux2);
 
         if (deviceNo == -6) deviceNo = 0;        // All drives
         if (deviceNo > 9) deviceNo -= 16;        // Drive 10-15
@@ -518,7 +513,7 @@ void RCl::handleCommand(quint8 command, quint16 aux)
             return;
         }
 
-        bool isDiskImage = (aux/256)?false:true;
+        auto isDiskImage = aux2 ? false : true;
         // If no Folder Image has ever been mounted abort the command as we won't
         // know which folder to use to remotely create/mount an image file.
         if(RespeqtSettings::instance()->lastRclDir() == "") {
@@ -569,10 +564,8 @@ void RCl::handleCommand(quint8 command, quint16 aux)
         if (!sio->port()->writeCommandAck()) {
             return;
         }
-        qint8 happyDisk;
-        bool happyOnOff;
-        happyDisk = aux % 256 - 1;
-        happyOnOff = (aux/256)?false:true;
+        auto happyDisk = static_cast<qint8>(aux1) - 1;
+        auto happyOnOff = static_cast<qint8>(aux2) ? false : true;
 
         if (happyDisk > 9) happyDisk -= 16;
         if (happyDisk != -7 && (happyDisk <0 || happyDisk > 14)) {
@@ -600,10 +593,8 @@ void RCl::handleCommand(quint8 command, quint16 aux)
         if (!sio->port()->writeCommandAck()) {
             return;
         }
-        qint8 chipDisk;
-        bool chipOnOff;
-        chipDisk = aux % 256 - 1;
-        chipOnOff = (aux/256)?false:true;
+        auto chipDisk = static_cast<qint8>(aux1) - 1;
+        auto chipOnOff = aux2 ? false : true;
 
         if (chipDisk > 9) chipDisk -= 16;
         if (chipDisk != -7 && (chipDisk <0 || chipDisk > 14)) {
@@ -628,10 +619,11 @@ void RCl::handleCommand(quint8 command, quint16 aux)
     default :
         // Invalid Command
         sio->port()->writeCommandNak();
-        qWarning() << "!e" << tr("[%1] command: $%2, aux: $%3 NAKed.")
+        qWarning() << "!e" << tr("[%1] command: $%2, aux1: $%3, aux2: $%4 NAKed.")
                       .arg(deviceName())
                       .arg(command, 2, 16, QChar('0'))
-                      .arg(aux, 4, 16, QChar('0'));
+                      .arg(aux1, 2, 16, QChar('0'))
+                      .arg(aux2, 2, 16, QChar('0'));
     }
 }
 

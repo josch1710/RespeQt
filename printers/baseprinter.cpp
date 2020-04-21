@@ -19,11 +19,11 @@ namespace Printers
         return mAtascii(b);
     }
 
-    void BasePrinter::handleCommand(const quint8 command, const quint16 aux)
+    void BasePrinter::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2)
     {
         if (RespeqtSettings::instance()->printerEmulation() && mOutput) {  // Ignore printer commands  if Emulation turned OFF)    //
             qDebug() << "!n" << "[" << deviceName() << "] "
-                     << hex << "command: " << command << " aux: " << aux;
+                     << hex << "command: " << command << " aux1: " << aux1 << " aux2: " << aux2;
             switch(command) {
             case 0x53: // dec 83
                 {
@@ -48,30 +48,29 @@ namespace Printers
                 }
             case 0x57: // dec 87
                 {
-                    // Write
-                    int aux2 = aux / 256;
 
                     unsigned int len;
-                    switch (aux2) {
-                    case 0x4e: // dec 78
-                        // Normal
-                        len = 40;
-                        break;
-                    case 0x53: // dec 83
-                        // Sideways
-                        len = 29;
-                        break;
-                    case 0x44: // dec 68
-                        // Double width
-                        len = 21;
-                        break;
-                    default:
-                        sio->port()->writeCommandNak();
-                        qWarning() << "!w" << tr("[%1] Command: $%2, aux: $%3 NAKed because aux2 is not supported")
-                                      .arg(deviceName())
-                                      .arg(command, 2, 16, QChar('0'))
-                                      .arg(aux, 4, 16, QChar('0'));
-                        return;
+                    switch (aux1) {
+                        case 0x4e: // dec 78
+                            // Normal
+                            len = 40;
+                            break;
+                        case 0x53: // dec 83
+                            // Sideways
+                            len = 29;
+                            break;
+                        case 0x44: // dec 68
+                            // Double width
+                            len = 21;
+                            break;
+                        default:
+                            sio->port()->writeCommandNak();
+                            qWarning() << "!w" << tr("[%1] Command: $%2, aux1: $%3, aux2: $%4 NAKed because aux1 is not supported")
+                                          .arg(deviceName())
+                                          .arg(command, 2, 16, QChar('0'))
+                                          .arg(aux1, 2, 16, QChar('0'))
+                                          .arg(aux2, 2, 16, QChar('0'));
+                            return;
                     }
                     if (!sio->port()->writeCommandAck()) {
                         return;
@@ -95,10 +94,11 @@ namespace Printers
                 }
             default:
                 sio->port()->writeCommandNak();
-                qWarning() << "!w" << tr("[%1] command: $%2, aux: $%3 NAKed.")
+                qWarning() << "!w" << tr("[%1] command: $%2, aux1: $%3, aux2: $%4 NAKed.")
                                .arg(deviceName())
                                .arg(command, 2, 16, QChar('0'))
-                               .arg(aux, 4, 16, QChar('0'));
+                               .arg(aux1, 2, 16, QChar('0'))
+                               .arg(aux2, 2, 16, QChar('0'));
             }
         } else {
             qDebug() << "!u" << tr("[%1] ignored").arg(deviceName());

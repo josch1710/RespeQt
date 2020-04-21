@@ -40,6 +40,7 @@ PrinterWidget::PrinterWidget(int printerNum, QWidget *parent)
 
 PrinterWidget::~PrinterWidget()
 {
+    disconnectPrinter();
     delete ui;
 }
 
@@ -206,7 +207,11 @@ void PrinterWidget::connectPrinter()
 
 void PrinterWidget::disconnectPrinter()
 {
-    mDevice->endOutput();
+    if (mDevice)
+    {
+        mDevice->endOutput();
+        mDevice.reset();
+    }
     mConnected = false;
     ui->outputSelection->setEnabled(true);
     ui->atariPrinters->setEnabled(true);

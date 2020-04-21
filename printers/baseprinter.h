@@ -32,7 +32,7 @@ namespace Printers
         BasePrinter(SioWorkerPtr worker);
         virtual ~BasePrinter();
 
-        virtual void handleCommand(const quint8 command, const quint16 aux);
+        void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) override;
         virtual bool handleBuffer(const QByteArray &buffer, const unsigned int len) = 0;
 
         virtual const QChar translateAtascii(const unsigned char b) const;

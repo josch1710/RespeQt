@@ -19,7 +19,7 @@ class PCLINK: public SDXProtocol
 public:
     PCLINK(SioWorkerPtr worker);
     ~PCLINK() = default;
-    void handleCommand(quint8 command, quint16 aux);
+    void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2);
     // links are numbered from 1 to 15
     bool hasLink(int no);
     void setLink(int no, const char* fileName);

@@ -4,3 +4,4 @@
 #include "rawoutput.h"
 #include "svgoutput.h"
 #include "textprinterwindow.h"
+#include "graphicsprinterwindow.h"

@@ -66,7 +66,7 @@ namespace Printers
         }
     }
 
-    void Atari1020::handleCommand(const quint8 command, const quint16 aux)
+    void Atari1020::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2)
     {
         if (RespeqtSettings::instance()->printerEmulation() && mOutput) {  // Ignore printer commands if Emulation turned OFF)
             switch(command) {
@@ -147,7 +147,8 @@ namespace Printers
                 qWarning() << "!w" << tr("[%1] command: $%2, aux: $%3 NAKed.")
                                .arg(deviceName())
                                .arg(command, 2, 16, QChar('0'))
-                               .arg(aux, 4, 16, QChar('0'));
+                               .arg(aux1, 2, 16, QChar('0'))
+                               .arg(aux2, 2, 16, QChar('0'));
             }
         } else {
             qDebug() << "!u" << tr("[%1] ignored").arg(deviceName());

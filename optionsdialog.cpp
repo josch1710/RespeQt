@@ -544,7 +544,7 @@ void OptionsDialog::testFileClicked()
 {
 #ifndef QT_NO_DEBUG
     auto file1Name = QFileDialog::getOpenFileName(this,
-             tr("Open test XML File"), QString(), tr("XML Files (*.xml)"));
+             tr("Open test JSON File"), QString(), tr("JSON Files (*.json)"));
     m_ui->testFileLabel->setText(file1Name);
     RespeqtSettings::instance()->setTestFile(file1Name);
 #endif

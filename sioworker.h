@@ -54,7 +54,7 @@ protected:
 public:
     SioDevice(SioWorkerPtr worker);
     virtual ~SioDevice();
-    virtual void handleCommand(const quint8 command, const quint16 aux) = 0;
+    virtual void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) = 0;
     virtual QString deviceName();
     inline void lock() {mLock.lock();}
     inline bool tryLock() {return mLock.tryLock();}
@@ -103,7 +103,7 @@ public:
     void swapDevices(quint8 d1, quint8 d2);
     SioDevice* getDevice(quint8 no);
 
-    QString guessDiskCommand(quint8 command, quint16 aux);
+    QString guessDiskCommand(const quint8 command, const quint8 aux1, const quint8 aux2);
     QString deviceName(int device);
     void setDisplayCommandName(bool display) {displayCommandName = display;}
     static void usleep(unsigned long time) {QThread::usleep(time);}

@@ -1625,22 +1625,23 @@ int SimpleDiskImage::findNearestSpeed(int speed)
     return bestSpeed;
 }
 
-void SimpleDiskImage::handleCommand(quint8 command, quint16 aux)
+void SimpleDiskImage::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2)
 {
     if ((! isReady()) || isLeverOpen()) {
         if ((command != 0x4E) && (command != 0x4F) && (command != 0x53)) {
             qWarning() << "!w" << tr("[%1] command: $%2, aux: $%3 ignored because the drive is not ready.")
                            .arg(deviceName())
                            .arg(command, 2, 16, QChar('0'))
-                           .arg(aux, 4, 16, QChar('0'));
+                           .arg(aux1, 2, 16, QChar('0'))
+                           .arg(aux2, 2, 16, QChar('0'));
             writeCommandNak();
             return;
         }
     }
     if ((m_deviceNo == 0x31) && (command == 0x52)) {
-        quint16 sector = aux;
+        quint16 sector = aux1 + aux2 * 256;
         if (m_board.isChipOpen()) {
-            sector = aux & 0x3FF;
+            sector &= 0x3FF;
         }
         if (m_board.isTranslatorActive()) {
             if (sector == 1) {
@@ -1679,7 +1680,7 @@ void SimpleDiskImage::handleCommand(quint8 command, quint16 aux)
                 m_board.setTranslatorState(READ_OTHER_SECTOR);
             }
             if (m_board.isTranslatorActive() && (m_translatorDisk != nullptr)) {
-                m_translatorDisk->handleCommand(command, aux);
+                m_translatorDisk->handleCommand(command, aux1, aux2);
                 return;
             }
         }
@@ -1713,7 +1714,7 @@ void SimpleDiskImage::handleCommand(quint8 command, quint16 aux)
                 }
             }
             if (m_board.isToolDiskActive() && (m_toolDisk != nullptr)) {
-                m_toolDisk->handleCommand(command, aux);
+                m_toolDisk->handleCommand(command, aux1, aux2);
                 return;
             }
         }
@@ -1783,8 +1784,8 @@ void SimpleDiskImage::handleCommand(quint8 command, quint16 aux)
             }
             qDebug() << "!n" << tr("[%1] Run Speed Diagnostic with AUX1=$%2 and AUX2=$%3")
                         .arg(deviceName())
-                        .arg((aux & 0xFF), 2, 16, QChar('0'))
-                        .arg(((aux >> 8) & 0xFF), 2, 16, QChar('0'));
+                        .arg(aux1, 2, 16, QChar('0'))
+                        .arg(aux2, 2, 16, QChar('0'));
             QByteArray data = readDataFrame(m_geometry.bytesPerSector());
             if (!writeDataAck()) {
                 break;
@@ -1801,8 +1802,8 @@ void SimpleDiskImage::handleCommand(quint8 command, quint16 aux)
             }
             qDebug() << "!n" << tr("[%1] Run Diagnostic with AUX1=$%2 and AUX2=$%3")
                         .arg(deviceName())
-                        .arg((aux & 0xFF), 2, 16, QChar('0'))
-                        .arg(((aux >> 8) & 0xFF), 2, 16, QChar('0'));
+                        .arg(aux1, 2, 16, QChar('0'))
+                        .arg(aux2, 2, 16, QChar('0'));
             if (m_diagData.size() < 128) {
                 m_diagData.resize(128);
                 m_diagData[0] = m_diagData[1] = 0x00;
@@ -1854,6 +1855,7 @@ void SimpleDiskImage::handleCommand(quint8 command, quint16 aux)
                     if (!writeCommandAck()) {
                         break;
                     }
+                    quint16 aux = aux1 + aux2 * 256;
                     int trackNumber = (int)(0xFF - (aux & 0xFF));
                     qDebug() << "!n" << tr("[%1] Happy Read Track %2 ($%3)")
                                 .arg(deviceName())
@@ -1866,10 +1868,11 @@ void SimpleDiskImage::handleCommand(quint8 command, quint16 aux)
                     writeDataFrame(m_board.m_happyRam.mid(0xD00, 128));
                 }
                 else {
-                    qWarning() << "!w" << tr("[%1] Happy Execute custom code $%2 with AUX $%3 and CRC16 $%4. Ignored")
+                    qWarning() << "!w" << tr("[%1] Happy Execute custom code $%2 with AUX1 $%3, AUX2 $%4 and CRC16 $%5. Ignored")
                                 .arg(deviceName())
                                 .arg(command, 2, 16, QChar('0'))
-                                .arg(aux, 4, 16, QChar('0'))
+                                .arg(aux1, 2, 16, QChar('0'))
+                                .arg(aux2, 2, 16, QChar('0'))
                                 .arg(m_board.getLastHappyUploadCrc16(), 4, 16, QChar('0'));
                     writeCommandNak();
                 }
@@ -2022,6 +2025,7 @@ void SimpleDiskImage::handleCommand(quint8 command, quint16 aux)
         }
     case 0x44:  // Read Sector using Index (CHIP/ARCHIVER) or Read Skew Alignment (HAPPY Rev.7)
         {
+            quint16 aux = aux1 + aux2 * 256;
             if (m_board.isHappyEnabled() && m_board.isHappy1050()) {
                 if (m_board.getLastHappyUploadCrc16() == 0x4312) {
                     if (!writeCommandAck()) {
@@ -2104,7 +2108,7 @@ void SimpleDiskImage::handleCommand(quint8 command, quint16 aux)
                     if (!writeCommandAck()) {
                         break;
                     }
-                    int trackNumber = (int)(0xFF - (aux & 0xFF));
+                    int trackNumber = (int)(0xFF - aux1);
                     qDebug() << "!n" << tr("[%1] Happy Write track %2 ($%3)")
                                 .arg(deviceName())
                                 .arg(trackNumber)
@@ -2120,10 +2124,11 @@ void SimpleDiskImage::handleCommand(quint8 command, quint16 aux)
                     }
                 }
                 else {
-                    qWarning() << "!w" << tr("[%1] Happy Execute custom code $%2 with AUX $%3 and CRC16 $%4. Ignored")
+                    qWarning() << "!w" << tr("[%1] Happy Execute custom code $%2 with AUX1 $%3, AUX2 $%4 and CRC16 $%5. Ignored")
                                 .arg(deviceName())
                                 .arg(command, 2, 16, QChar('0'))
-                                .arg(aux, 4, 16, QChar('0'))
+                                .arg(aux1, 2, 16, QChar('0'))
+                                .arg(aux2, 2, 16, QChar('0'))
                                 .arg(m_board.getLastHappyUploadCrc16(), 4, 16, QChar('0'));
                     writeCommandNak();
                 }
@@ -2140,8 +2145,8 @@ void SimpleDiskImage::handleCommand(quint8 command, quint16 aux)
             }
             qDebug() << "!n" << tr("[%1] Super Archiver Write Track with AUX1=$%2 and AUX2=$%3")
                           .arg(deviceName())
-                          .arg((aux & 0xFF), 2, 16, QChar('0'))
-                          .arg(((aux >> 8) & 0xFF), 2, 16, QChar('0'));
+                          .arg(aux1, 2, 16, QChar('0'))
+                          .arg(aux2, 2, 16, QChar('0'));
             QByteArray data = readDataFrame(m_geometry.bytesPerSector(aux));
             if (!data.isEmpty()) {
                 if (!writeDataAck()) {

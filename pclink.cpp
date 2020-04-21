@@ -171,16 +171,13 @@ PCLINK::PCLINK(SioWorkerPtr worker)
 
 /*************************************************************************/
 
-void PCLINK::handleCommand(quint8 command, quint16 aux)
+void PCLINK::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2)
 {
-    uchar caux1 = aux & 0xFF;
-    uchar caux2 = (aux >> 8) & 0xFF;
-    
-    uchar cunit = caux2 & 0x0F;	/* PCLink ignores DUNIT */
+    auto cunit = aux2 & 0x0F;	/* PCLink ignores DUNIT */
 
     if(D) qDebug() << "!n" << tr("PCLINK Command=[$%1] aux1=$%2 aux2=$%3 cunit=$%4").arg(command,0,16)
-                                                                          .arg(caux1,0,16)
-                                                                          .arg(caux2,0,16)
+                                                                          .arg(aux1,2,16, QChar('0'))
+                                                                          .arg(aux2,2,16, QChar('0'))
                                                                           .arg(cunit,0,16);
 
     /* cunit == 0 is init during warm reset */
@@ -191,14 +188,14 @@ void PCLINK::handleCommand(quint8 command, quint16 aux)
             case 'P':
             {
                 qDebug() << "!n" << tr("[%1] P").arg(deviceName());
-                do_pclink(PCLINK_CDEVIC, command, caux1, caux2);
+                do_pclink(PCLINK_CDEVIC, command, aux1, aux2);
                 break;
             }
 
             case 'R':
             {
                 qDebug() << "!n" << tr("[%1] R").arg(deviceName());
-                do_pclink(PCLINK_CDEVIC, command, caux1, caux2);
+                do_pclink(PCLINK_CDEVIC, command, aux1, aux2);
                 break;
             }
 
@@ -236,7 +233,8 @@ void PCLINK::handleCommand(quint8 command, quint16 aux)
                 qWarning() << "!w" << tr("[%1] command: $%2, aux: $%3 NAKed.")
                                .arg(deviceName())
                                .arg(command, 2, 16, QChar('0'))
-                               .arg(aux, 4, 16, QChar('0'));
+                               .arg(aux1, 2, 16, QChar('0'))
+                               .arg(aux2, 2, 16, QChar('0'));
                 break;
             }
         }

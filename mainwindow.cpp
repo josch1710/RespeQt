@@ -138,6 +138,9 @@ MainWindow::MainWindow()
     : QMainWindow(nullptr), ui(new Ui::MainWindow),
       isClosing(false)
  {
+    // Make the main window delete when closed.
+    setAttribute(Qt::WA_DeleteOnClose, true);
+
     /* Setup the logging system */
     sInstance = this;
     g_respeQtAppPath = QCoreApplication::applicationDirPath();
@@ -190,6 +193,7 @@ MainWindow::MainWindow()
     auto ofactory = Printers::OutputFactory::instance();
     ofactory->registerOutput<Printers::SVGOutput>(Printers::SVGOutput::typeName());
     ofactory->registerOutput<Printers::TextPrinterWindow>(Printers::TextPrinterWindow::typeName());
+    ofactory->registerOutput<Printers::GraphicsPrinterWindow>(Printers::GraphicsPrinterWindow::typeName());
     ofactory->registerOutput<Printers::RawOutput>(Printers::RawOutput::typeName());
     QStringList printers = QPrinterInfo::availablePrinterNames();
     for (QStringList::const_iterator sit = printers.cbegin(); sit != printers.cend(); ++sit)
@@ -371,12 +375,12 @@ MainWindow::~MainWindow()
         ui->actionStartEmulation->trigger();
     }
 
-    delete ui;
-
     qDebug() << "!d" << tr("RespeQt stopped at %1.").arg(QDateTime::currentDateTime().toString());
     qInstallMessageHandler(0);
     delete logMutex;
     delete logFile;
+    delete ui;
+
 }
 
 
@@ -673,8 +677,14 @@ void MainWindow::closeEvent(QCloseEvent *event)
         }
     }
 
-    event->accept();
+    for(int i = 0; i < PRINTER_COUNT; i++)
+    {
+        auto printerWidget = printerWidgets[i];
+        if (printerWidget)
+            printerWidget->disconnectPrinter();
+    }
 
+    event->accept();
 }
 
 void MainWindow::hideEvent(QHideEvent *event)
@@ -2018,6 +2028,18 @@ void MainWindow::bootOptionTriggered()
 }
 
 void MainWindow::closeTextPrinterWindow(const Printers::TextPrinterWindow *window)
+{
+    for(auto i = 0; i < PRINTER_COUNT; i++)
+    {
+        if (printerWidgets[i]->connected() && printerWidgets[i]->device() == window)
+        {
+            printerWidgets[i]->disconnectPrinter();
+            break;
+        }
+    }
+}
+
+void MainWindow::closeGraphicsPrinterWindow(const Printers::GraphicsPrinterWindow *window)
 {
     for(auto i = 0; i < PRINTER_COUNT; i++)
     {

@@ -19,20 +19,21 @@ AutoBoot::~AutoBoot()
     close();
 }
 
-void AutoBoot::passToOldHandler(quint8 command, quint16 aux)
+void AutoBoot::passToOldHandler(const quint8 command, const quint8 aux1, const quint8 aux2)
 {
     if (oldDevice) {
-        oldDevice->handleCommand(command, aux);
+        oldDevice->handleCommand(command, aux1, aux2);
     } else {
         sio->port()->writeCommandNak();
         qWarning() << "!w" << tr("[%1] command: $%2, aux: $%3 NAKed.")
                        .arg(deviceName())
                        .arg(command, 2, 16, QChar('0'))
-                       .arg(aux, 4, 16, QChar('0'));
+                       .arg(aux1, 2, 16, QChar('0'))
+                       .arg(aux2, 2, 16, QChar('0'));
     }
 }
 
-void AutoBoot::handleCommand(quint8 command, quint16 aux)
+void AutoBoot::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2)
 {
 
     switch (command) {
@@ -51,9 +52,10 @@ void AutoBoot::handleCommand(quint8 command, quint16 aux)
         case 0x52:
             {    /* Read sector */
                 if (loaded) {
-                    passToOldHandler(command, aux);
+                    passToOldHandler(command, aux1, aux2);
                     return;
                 }
+                quint16 aux = aux1 + aux2 * 256;
                 if (aux >= 1 && aux <= sectorCount) {
                     if (!sio->port()->writeCommandAck()) {
                         return;
@@ -77,14 +79,14 @@ void AutoBoot::handleCommand(quint8 command, quint16 aux)
                                        .arg(aux);
                     }
                 } else {
-                    passToOldHandler(command, aux);
+                    passToOldHandler(command, aux1, aux2);
                 }
                 break;
             }
         case 0x53:
             {    /* Get status */
                 if (loaded) {
-                    passToOldHandler(command, aux);
+                    passToOldHandler(command, aux1, aux2);
                     return;
                 }
                 if (!sio->port()->writeCommandAck()) {
@@ -107,13 +109,14 @@ void AutoBoot::handleCommand(quint8 command, quint16 aux)
                 }
                 qDebug() << "!n" << tr("[%1] Atari is jumping to %2.")
                                .arg(deviceName())
-                               .arg(aux);
+                               .arg(aux1+aux2*256);
                 emit loaderDone();
                 sio->port()->writeComplete();
                 break;
             }
         case 0xFE:
             {   /* Get chunk */
+                quint16 aux = aux1 + aux2 * 256;
                 if(aux >= chunks.count()) {
                     qDebug() << "!e" << tr("[%1] Invalid chunk in get chunk: aux = %2")
                                    .arg(deviceName())
@@ -135,6 +138,7 @@ void AutoBoot::handleCommand(quint8 command, quint16 aux)
             }
         case 0xFF:
             {   /* Get chunk info */
+                quint16 aux = aux1 + aux2 * 256;
                 if(aux >= chunks.count()) {
                     qDebug() << "!e" << tr("[%1] Invalid chunk in get chunk info: aux = %2")
                                    .arg(deviceName())
@@ -166,7 +170,7 @@ void AutoBoot::handleCommand(quint8 command, quint16 aux)
                 break;
             }
         default:
-            passToOldHandler(command, aux);
+            passToOldHandler(command, aux1, aux2);
             return;
             break;
     }

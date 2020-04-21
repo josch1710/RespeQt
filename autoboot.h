@@ -35,12 +35,12 @@ private:
 public:
     AutoBoot(SioWorkerPtr worker, SioDevice *aOldDevice): SioDevice(worker) {oldDevice = aOldDevice; started = loaded = false;}
     ~AutoBoot();
-    void handleCommand(quint8 command, quint16 aux);
-    void passToOldHandler(quint8 command, quint16 aux);
+    void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) override;
+    void passToOldHandler(const quint8 command, const quint8 aux1, const quint8 aux2);
     bool open(const QString &fileName, bool highSpeed);
     void close();
     bool readSector(quint16 sector, QByteArray &data);
-    QString deviceName();
+    QString deviceName() override;
 signals:
     void booterStarted();
     void booterLoaded();
