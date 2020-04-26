@@ -39,7 +39,7 @@ namespace Printers
         mFont.setPixelSize(18);
     }
 
-    void Atari1020::setupOutput()
+/*    void Atari1020::setupOutput()
     {
         AtariPrinter::setupOutput();
         if (mOutput && mOutput->painter()) {
@@ -64,11 +64,11 @@ namespace Printers
                 mOutput->painter()->setPen(QColor("black"));
             }
         }
-    }
+    } */
 
     void Atari1020::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2)
     {
-        if (RespeqtSettings::instance()->printerEmulation() && mOutput) {  // Ignore printer commands if Emulation turned OFF)
+        if (RespeqtSettings::instance()->printerEmulation() && mOutputWindow) {  // Ignore printer commands if Emulation turned OFF)
             switch(command) {
             case 0x53: // Get status
                 {
@@ -181,7 +181,7 @@ namespace Printers
                     executeGraphicsCommand();
                     resetGraphics();
                 } else {
-                    mOutput->newLine();
+                    //mOutput->newLine();
                 }
                 mEsc = false;
                 mStartOfLogicalLine = true;
@@ -294,7 +294,7 @@ namespace Printers
                                     qDebug() << "!n" << tr("[%1] Switch to 40 columns")
                                                 .arg(deviceName());
                                 }
-                                mOutput->calculateFixedFontSize(40);
+                                //mOutput->calculateFixedFontSize(40);
                                 break;
 
                             case 0x10: // CTRL+P: 20 characters
@@ -302,7 +302,7 @@ namespace Printers
                                     qDebug() << "!n" << tr("[%1] Switch to 20 columns")
                                                 .arg(deviceName());
                                 }
-                                mOutput->calculateFixedFontSize(20);
+                                //mOutput->calculateFixedFontSize(20);
                                 break;
 
                             case 0x13: // CTRL+S: 80 characters
@@ -310,7 +310,7 @@ namespace Printers
                                     qDebug() << "!n" << tr("[%1] Switch to 80 columns")
                                                 .arg(deviceName());
                                 }
-                                mOutput->calculateFixedFontSize(80);
+                                //mOutput->calculateFixedFontSize(80);
                                 break;
 
                             case 0x17: // CTRL+W: Enter international mode
@@ -786,12 +786,12 @@ namespace Printers
 
     void Atari1020::executeGraphicsPrimitive(GraphicsPrimitive *primitive)
     {
-        if (mOutput) {
+        if (mOutputWindow) {
             if (mClearPane) {
                 mClearPane = false;
-                mOutput->executeGraphicsPrimitive(new GraphicsClearPane());
+                mOutputWindow->executeGraphicsPrimitive(new GraphicsClearPane());
             }
-            mOutput->executeGraphicsPrimitive(primitive);
+            mOutputWindow->executeGraphicsPrimitive(primitive);
         }
     }
 
@@ -876,7 +876,7 @@ namespace Printers
     bool Atari1020::handlePrintableCodes(const unsigned char b)
     {
         QChar qb = translateAtascii(b & 127); // Masking inverse characters.
-        mOutput->printChar(qb);
+        //mOutput->printChar(qb);
 
         return true;
     }

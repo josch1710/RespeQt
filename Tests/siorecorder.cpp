@@ -168,8 +168,8 @@ namespace Tests {
                 qDebug() << "!d" << tr("Sleeping %1 milliseconds").arg(value);
                 QThread::currentThread()->msleep(value);
             }
+            mReadIndex++;
         }
-        mReadIndex++;
         return true;
     }
 

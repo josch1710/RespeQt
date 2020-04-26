@@ -8,8 +8,8 @@
 namespace Printers
 {
     BasePrinter::BasePrinter(SioWorkerPtr worker)
-        : SioDevice(std::move(worker)),
-          mOutput()
+        : SioDevice(std::move(worker))//,
+          //mOutput()
     {}
 
     BasePrinter::~BasePrinter() = default;
@@ -21,7 +21,7 @@ namespace Printers
 
     void BasePrinter::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2)
     {
-        if (RespeqtSettings::instance()->printerEmulation() && mOutput) {  // Ignore printer commands  if Emulation turned OFF)    //
+        if (RespeqtSettings::instance()->printerEmulation() && mOutputWindow) {  // Ignore printer commands  if Emulation turned OFF)    //
             qDebug() << "!n" << "[" << deviceName() << "] "
                      << hex << "command: " << command << " aux1: " << aux1 << " aux2: " << aux2;
             switch(command) {
@@ -105,7 +105,7 @@ namespace Printers
         }
     }
 
-    void BasePrinter::setOutput(const NativeOutputPtr& output)
+    /*void BasePrinter::setOutput(const NativeOutputPtr& output)
     {
         if (mOutput && mOutput != output)
         {
@@ -127,7 +127,22 @@ namespace Printers
             QColor color{"black"};
             mOutput->painter()->setPen(color);
         }
+    }*/
+
+    void BasePrinter::setOutputWindow(OutputWindowPtr outputWindow)
+    {
+        if (mOutputWindow)
+        {
+            mOutputWindow->close();
+        }
+        mOutputWindow = outputWindow;
     }
+
+    void BasePrinter::resetOutputWindow()
+    {
+        mOutputWindow.reset();
+    }
+
 
     QByteArray BasePrinter::readDataFrame(uint size)
     {

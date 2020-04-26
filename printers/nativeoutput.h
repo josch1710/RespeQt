@@ -36,7 +36,7 @@ namespace Printers
         NativeOutput();
         virtual ~NativeOutput();
 
-        virtual bool setupOutput() = 0;
+        //virtual bool setupOutput() = 0;
         virtual bool beginOutput();
         virtual bool endOutput();
         virtual void newPage(bool linefeed = false) = 0;
@@ -62,20 +62,18 @@ namespace Printers
         int y() const { return mY; }
         void setX(int x) { mX = x; }
         void setY(int y) { mY = y; }
-        void setPrinter(const BasePrinterWPtr& printer) {
+        /*void setPrinter(const BasePrinterWPtr& printer) {
             if (printer)
             {
                 mPrinter = printer;
             }
-        };
+        };*/
 
         virtual void executeGraphicsPrimitive(GraphicsPrimitive *primitive) {
-            if (painter()) {
-                primitive->execute(painter());
-            }
+            primitive->execute(nullptr);
         }
 
-        BasePrinterWPtr printer() const { return mPrinter; }
+        //BasePrinterWPtr printer() const { return mPrinter; }
 
         static QString typeName()
         {
@@ -95,7 +93,7 @@ namespace Printers
         bool mCharMode{false};
         uint32_t hResolution{0};
         uint32_t vResolution{0};
-        BasePrinterWPtr mPrinter;
+        //BasePrinterWPtr mPrinter;
 
         virtual void updateBoundingBox() = 0;
 

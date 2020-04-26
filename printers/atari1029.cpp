@@ -14,13 +14,13 @@ namespace Printers
 
     void Atari1029::setupFont()
     {
-        if (mOutput)
+        /*if (mOutput)
         {
             auto font = std::make_shared<QFont>(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
             font->setUnderline(false);
             mOutput->setFont(font);
             mOutput->calculateFixedFontSize(80);
-        }
+        }*/
     }
 
     bool Atari1029::handleBuffer(const QByteArray &buffer, const unsigned int len)
@@ -55,12 +55,12 @@ namespace Printers
                     {
                         mESC = false;
                         setElongatedMode(false);
-                        if (mOutput->font())
+                        /*if (mOutput->font())
                         {
                             mOutput->font()->setUnderline(false);
                             mOutput->applyFont();
                         }
-                        mOutput->newLine();
+                        mOutput->newLine();*/
                         // Drop the rest of the buffer
                         return true;
                     }
@@ -99,22 +99,22 @@ namespace Printers
         switch(b) {
             case 25: // CTRL+Y starts underline mode
             {
-                if (mOutput->font())
+                /*if (mOutput->font())
                 {
                     mOutput->font()->setUnderline(true);
                     mOutput->applyFont();
-                }
+                }*/
                 mESC = false;
                 qDebug() << "!d" << "ESC Underline on";
                 return true;
             }
             case 26: // CTRL+Z ends underline mode
             {
-                if (mOutput->font())
+                /*if (mOutput->font())
                 {
                     mOutput->font()->setUnderline(false);
                     mOutput->applyFont();
-                }
+                }*/
                 mESC = false;
                 qDebug() << "!d" << "ESC Underline off";
                 return true;
@@ -158,7 +158,7 @@ namespace Printers
     bool Atari1029::handlePrintableCodes(const unsigned char b)
     {
         QChar qb = translateAtascii(b & 127); // Masking inverse characters.
-        mOutput->printChar(qb);
+        //mOutput->printChar(qb);
         return true;
     }
 
@@ -167,9 +167,9 @@ namespace Printers
         mElongatedMode = elongatedMode;
         if (mElongatedMode)
         {
-            mOutput->calculateFixedFontSize(40);
+            //mOutput->calculateFixedFontSize(40);
         } else {
-            mOutput->calculateFixedFontSize(80);
+            //mOutput->calculateFixedFontSize(80);
         }
     }
 
@@ -193,7 +193,7 @@ namespace Printers
             {
                 // Now we fetch the graphics data, until mGraphicsColumns is 0
                 // Paint the dots;
-                QPoint point(mOutput->x(), mOutput->y() + 6);
+                /*QPoint point(mOutput->x(), mOutput->y() + 6);
                 for(int i = 0; i < 7; i++)
                 {
                     // Mask the point we want to draw.
@@ -202,6 +202,7 @@ namespace Printers
                 }
                 mGraphicsColumns --;
                 mOutput->setX(mOutput->x() + 1); // Move to next column;
+                */
                 if (mGraphicsColumns == 0)
                     mGraphicsMode = GraphicsMode::NOT_GRAPHICS;
             }

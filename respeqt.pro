@@ -57,7 +57,7 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x050000
 
 SOURCES += tests/siorecorder.cpp \
     mainwindow.cpp \
-    printers/graphicsprinterwindow.cpp \
+    printers/outputwindow.cpp \
     rcl.cpp \
     sdxprotocol.cpp \
     sioworker.cpp \
@@ -93,8 +93,6 @@ SOURCES += tests/siorecorder.cpp \
     printers/nativeoutput.cpp \
     printers/centronics.cpp \
     printers/escp.cpp \
-    printers/nativeprinter.cpp \
-    printers/svgoutput.cpp \
     printers/atari1029.cpp \
     diskimagepro.cpp \
     diskimageatx.cpp \
@@ -102,7 +100,6 @@ SOURCES += tests/siorecorder.cpp \
     disassembly810.cpp \
     disassembly1050.cpp \
     printers/printerfactory.cpp \
-    printers/outputfactory.cpp \
     printers/atari1025.cpp \
     printers/passthrough.cpp \
     printers/graphicsprimitive.cpp \
@@ -110,10 +107,10 @@ SOURCES += tests/siorecorder.cpp \
     cpu6502.cpp
 
 HEADERS += mainwindow.h \
-    printers/graphicsprinterwindow.h \
+    printers/outputwindow.h \
+    printers/rawoutput.h \
     tests/siorecorder.h \
     tools/make_unique.h \
-    printers/outputs.h \
     printers/printers.h \
     rcl.h \
     sdxprotocol.h \
@@ -150,16 +147,12 @@ HEADERS += mainwindow.h \
     printers/nativeoutput.h \
     printers/centronics.h \
     printers/escp.h \
-    printers/nativeprinter.h \
-    printers/svgoutput.h \
     printers/atari1029.h \
     disassembly810.h \
     disassembly1050.h \
     printers/printerfactory.h \
-    printers/outputfactory.h \
     printers/atari1025.h \
     printers/passthrough.h \
-    printers/rawoutput.h \
     smartdevice.h  \
     printers/graphicsprimitive.h \
     crc16.h \
@@ -177,7 +170,7 @@ FORMS += mainwindow.ui \
     logdisplaydialog.ui \
     drivewidget.ui \
     infowidget.ui \
-    printers/graphicsprinterwindow.ui \
+    printers/outputwindow.ui \
     printerwidget.ui \
     printers/textprinterwindow.ui
 

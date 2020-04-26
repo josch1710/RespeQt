@@ -18,10 +18,10 @@ namespace Printers
     Passthrough::~Passthrough()
     = default;
 
-    void Passthrough::setupOutput()
+    /*void Passthrough::setupOutput()
     {
         BasePrinter::setupOutput();
-    }
+    }*/
 
     void Passthrough::setupFont()
     {}
@@ -30,9 +30,9 @@ namespace Printers
     {
         QSharedPointer<RawOutput> output;
         try {
-            output = qSharedPointerDynamicCast<RawOutput>(mOutput);
+            /*output = qSharedPointerDynamicCast<RawOutput>(mOutput);
             if (output == nullptr)
-                return false;
+                return false;*/
         } catch(...)
         {
             return false;

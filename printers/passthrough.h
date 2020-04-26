@@ -13,7 +13,7 @@ namespace Printers
 
         virtual bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
         virtual void setupFont() override;
-        virtual void setupOutput() override;
+        //virtual void setupOutput() override;
 
         static QString typeName()
         {

@@ -5,7 +5,6 @@
 
 namespace Printers {
     RawOutput::RawOutput()
-        :NativeOutput()
     {}
 
     RawOutput::~RawOutput()
@@ -77,7 +76,7 @@ namespace Printers {
         return 1;
     }
 
-    bool RawOutput::setupOutput()
+/*    bool RawOutput::setupOutput()
     {
         my_user_data_t user_data = { 0, nullptr };
         cups_ptype_t type = CUPS_PRINTER_LOCAL, mask = CUPS_PRINTER_LOCAL;
@@ -116,7 +115,7 @@ namespace Printers {
         cupsFreeDests(user_data.num_dests, user_data.dests);
 
         return mDest != nullptr && mHttp != nullptr;
-    }
+    }*/
 
     void RawOutput::setupRawPrinters(QComboBox *list)
     {

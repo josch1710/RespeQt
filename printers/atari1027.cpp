@@ -11,13 +11,13 @@ namespace Printers
 
     void Atari1027::setupFont()
     {
-        if (mOutput)
+        /*if (mOutput)
         {
             auto font = std::make_shared<QFont>(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
             font->setUnderline(false);
             mOutput->setFont(font);
             mOutput->calculateFixedFontSize(80);
-        }
+        }*/
     }
 
     bool Atari1027::handleBuffer(const QByteArray &buffer, const unsigned int len)
@@ -29,24 +29,24 @@ namespace Printers
             switch(b) {
                 case 15: // CTRL+O starts underline mode
                 {
-                    auto font = mOutput->font();
+                    /*auto font = mOutput->font();
                     if (font)
                     {
                         font->setUnderline(true);
                         mOutput->applyFont();
-                    }
+                    }*/
                     qDebug() << "!n" << "Underline on";
                 }
                 break;
 
                 case 14: // CTRL+N ends underline mode
                 {
-                    auto font = mOutput->font();
+                    /*auto font = mOutput->font();
                     if (font)
                     {
                         font->setUnderline(false);
                         mOutput->applyFont();
-                    }
+                    }*/
                     qDebug() << "!d" << "Underline off";
                 }
                 break;
@@ -69,13 +69,13 @@ namespace Printers
                 case 155: // EOL
                 {
                     mESC = false;
-                    auto font = mOutput->font();
+                    /*auto font = mOutput->font();
                     if (font)
                     {
                         font->setUnderline(false);
                         mOutput->applyFont();
                     }
-                    mOutput->newLine();
+                    mOutput->newLine();*/
                     // Drop the rest of the buffer
                     return true;
                 }
@@ -113,24 +113,24 @@ namespace Printers
         switch(b) {
             case 25: // CTRL+Y starts underline mode
             {
-                auto font = mOutput->font();
+                /*auto font = mOutput->font();
                 if (font)
                 {
                     font->setUnderline(true);
                     mOutput->applyFont();
-                }
+                }*/
                 mESC = false;
                 qDebug() << "!d" << "ESC Underline on";
                 return true;
             }
             case 26: // CTRL+Z ends underline mode
             {
-                auto font = mOutput->font();
+                /*auto font = mOutput->font();
                 if (font)
                 {
                     font->setUnderline(false);
                     mOutput->applyFont();
-                }
+                }*/
                 mESC = false;
                 qDebug() << "!d" << "ESC Underline off";
                 return true;
@@ -156,7 +156,7 @@ namespace Printers
     bool Atari1027::handlePrintableCodes(const unsigned char b)
     {
         QChar qb = translateAtascii(b & 127); // Masking inverse characters.
-        mOutput->printChar(qb);
+        //mOutput->printChar(qb);
         return true;
     }
 }

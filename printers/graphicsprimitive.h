@@ -15,11 +15,10 @@ namespace Printers
         Q_OBJECT
 
     public:
-        GraphicsPrimitive();
-        virtual ~GraphicsPrimitive();
+        GraphicsPrimitive() = default;
+        virtual ~GraphicsPrimitive() = default;
 
-        virtual void execute(QGraphicsScene &graphicsScene) = 0;
-        virtual void execute(QPainterPtr painter) = 0;
+        virtual void execute(QGraphicsScene *graphicsScene) = 0;
 
         static QString typeName()
         {
@@ -37,10 +36,9 @@ namespace Printers
 
     public:
         GraphicsClearPane();
-        virtual ~GraphicsClearPane();
+        virtual ~GraphicsClearPane() = default;
 
-        virtual void execute(QGraphicsScene &graphicsScene) override;
-        virtual void execute(QPainterPtr painter) override;
+        virtual void execute(QGraphicsScene *graphicsScene) override;
 
         static QString typeName()
         {
@@ -54,10 +52,7 @@ namespace Printers
 
     public:
         GraphicsSetPoint(const QPoint point, const QPen);
-        virtual ~GraphicsSetPoint();
-
-        virtual void execute(QGraphicsScene &graphicsScene) = 0;
-        virtual void execute(QPainterPtr painter) = 0;
+        virtual ~GraphicsSetPoint() = default;
 
         static QString typeName()
         {
@@ -75,10 +70,9 @@ namespace Printers
 
     public:
         GraphicsDrawLine(const QPoint srcPoint, const QPen pen, const QPoint destPoint);
-        virtual ~GraphicsDrawLine();
+        virtual ~GraphicsDrawLine() = default;
 
-        virtual void execute(QGraphicsScene &graphicsScene) override;
-        virtual void execute(QPainterPtr painter) override;
+        virtual void execute(QGraphicsScene *graphicsScene) override;
 
         static QString typeName()
         {
@@ -95,10 +89,9 @@ namespace Printers
 
     public:
         GraphicsDrawText(const QPoint point, const QPen pen, const int orientation, const QFont font, QString text);
-        virtual ~GraphicsDrawText();
+        virtual ~GraphicsDrawText() = default;
 
-        virtual void execute(QGraphicsScene &graphicsScene) override;
-        virtual void execute(QPainterPtr painter) override;
+        virtual void execute(QGraphicsScene *graphicsScene) override;
 
         static QString typeName()
         {

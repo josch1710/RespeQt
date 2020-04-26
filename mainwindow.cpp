@@ -27,9 +27,9 @@
 #include "infowidget.h"
 #include "printerwidget.h"
 #include "printers/printerfactory.h"
-#include "printers/outputfactory.h"
+//#include "printers/outputfactory.h"
 #include "printers/printers.h"
-#include "printers/outputs.h"
+//#include "printers/outputs.h"
 #include "respeqtsettings.h"
 
 #include <QEvent>
@@ -187,19 +187,19 @@ MainWindow::MainWindow()
     pfactory->registerPrinter<Printers::Atari1025>(Printers::Atari1025::typeName());
     pfactory->registerPrinter<Printers::Atari1027>(Printers::Atari1027::typeName());
     pfactory->registerPrinter<Printers::Atari1029>(Printers::Atari1029::typeName());
-    pfactory->registerPrinter<Printers::Passthrough>(Printers::Passthrough::typeName());
+    //pfactory->registerPrinter<Printers::Passthrough>(Printers::Passthrough::typeName());
 
     /* Setup the output factory */
-    auto ofactory = Printers::OutputFactory::instance();
+    /*auto ofactory = Printers::OutputFactory::instance();
     ofactory->registerOutput<Printers::SVGOutput>(Printers::SVGOutput::typeName());
     ofactory->registerOutput<Printers::TextPrinterWindow>(Printers::TextPrinterWindow::typeName());
-    ofactory->registerOutput<Printers::GraphicsPrinterWindow>(Printers::GraphicsPrinterWindow::typeName());
+    ofactory->registerOutput<Printers::OutputWindow>(Printers::GraphicsPrinterWindow::typeName());
     ofactory->registerOutput<Printers::RawOutput>(Printers::RawOutput::typeName());
     QStringList printers = QPrinterInfo::availablePrinterNames();
     for (QStringList::const_iterator sit = printers.cbegin(); sit != printers.cend(); ++sit)
     {
         ofactory->registerOutput<Printers::NativePrinter>(*sit);
-    }
+    }*/
 
     /* Add QActions for most recent */
     for( int i = 0; i < NUM_RECENT_FILES; ++i ) {
@@ -2027,7 +2027,7 @@ void MainWindow::bootOptionTriggered()
     bod.exec();
 }
 
-void MainWindow::closeTextPrinterWindow(const Printers::TextPrinterWindow *window)
+/*void MainWindow::closeTextPrinterWindow(const Printers::TextPrinterWindow *window)
 {
     for(auto i = 0; i < PRINTER_COUNT; i++)
     {
@@ -2037,19 +2037,7 @@ void MainWindow::closeTextPrinterWindow(const Printers::TextPrinterWindow *windo
             break;
         }
     }
-}
-
-void MainWindow::closeGraphicsPrinterWindow(const Printers::GraphicsPrinterWindow *window)
-{
-    for(auto i = 0; i < PRINTER_COUNT; i++)
-    {
-        if (printerWidgets[i]->connected() && printerWidgets[i]->device() == window)
-        {
-            printerWidgets[i]->disconnectPrinter();
-            break;
-        }
-    }
-}
+}*/
 
 // This connect the signal from UI to slots
 void MainWindow::connectUISignal()

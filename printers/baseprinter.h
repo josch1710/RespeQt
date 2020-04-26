@@ -16,12 +16,13 @@ namespace Printers
 {
     class BasePrinter;
     using BasePrinterPtr = QSharedPointer<BasePrinter>;
-    using BasePrinterWPtr = QWeakPointer<BasePrinter>;
+    //using BasePrinterWPtr = QWeakPointer<BasePrinter>;
 }
 
 #include "sioworker.h"
 #include "atascii.h"
-#include "nativeoutput.h"
+//#include "nativeoutput.h"
+#include "outputwindow.h"
 
 namespace Printers
 {
@@ -37,11 +38,12 @@ namespace Printers
 
         virtual const QChar translateAtascii(const unsigned char b) const;
 
-        NativeOutputPtr output() const { return mOutput; }
-        void setOutput(const NativeOutputPtr& output);
-        void resetOutput();
+        OutputWindowPtr outputWindow() const { return mOutputWindow; }
+        void setOutputWindow(OutputWindowPtr outputWindow);
+        void resetOutputWindow();
+        //void resetOutput();
         virtual void setupFont() {}
-        virtual void setupOutput();
+        //virtual void setupOutput();
 
         static QString typeName()
         {
@@ -50,7 +52,8 @@ namespace Printers
 
     protected:
         Atascii mAtascii;
-        NativeOutputPtr mOutput;
+        //NativeOutputPtr mOutput;
+        OutputWindowPtr mOutputWindow;
 
         QByteArray readDataFrame(uint size);
         bool writeDataFrame(QByteArray data);

@@ -4,26 +4,14 @@
 
 namespace Printers
 {
-    GraphicsPrimitive::GraphicsPrimitive()
-    {
-    }
-
-    GraphicsPrimitive::~GraphicsPrimitive() = default;
-
     GraphicsClearPane::GraphicsClearPane()
         :GraphicsPrimitive()
     {
     }
 
-    GraphicsClearPane::~GraphicsClearPane() = default;
-
-    void GraphicsClearPane::execute(QGraphicsScene &graphicsScene)
+    void GraphicsClearPane::execute(QGraphicsScene *graphicsScene)
     {
-        graphicsScene.clear();
-    }
-
-    void GraphicsClearPane::execute(QPainterPtr /*painter*/)
-    {
+        graphicsScene->clear();
     }
 
     GraphicsSetPoint::GraphicsSetPoint(const QPoint point, const QPen pen):
@@ -32,25 +20,15 @@ namespace Printers
     {
     }
 
-    GraphicsSetPoint::~GraphicsSetPoint() = default;
-
     GraphicsDrawLine::GraphicsDrawLine(const QPoint srcPoint, const QPen pen, const QPoint destPoint)
         :GraphicsSetPoint(srcPoint, pen),
           mDestPoint(destPoint)
     {
     }
 
-    GraphicsDrawLine::~GraphicsDrawLine() = default;
-
-    void GraphicsDrawLine::execute(QGraphicsScene &graphicsScene)
+    void GraphicsDrawLine::execute(QGraphicsScene *graphicsScene)
     {
-        graphicsScene.addLine(mPoint.x(), -mPoint.y(), mDestPoint.x(), -mDestPoint.y(), mPen);
-    }
-
-    void GraphicsDrawLine::execute(QPainterPtr painter)
-    {
-        painter->setPen(mPen);
-        painter->drawLine(mPoint.x(), -mPoint.y(), mDestPoint.x(), -mDestPoint.y());
+        graphicsScene->addLine(mPoint.x(), -mPoint.y(), mDestPoint.x(), -mDestPoint.y(), mPen);
     }
 
     GraphicsDrawText::GraphicsDrawText(const QPoint point, const QPen pen, const int orientation, const QFont font, QString text)
@@ -61,27 +39,13 @@ namespace Printers
     {
     }
 
-    GraphicsDrawText::~GraphicsDrawText() = default;
-
-    void GraphicsDrawText::execute(QGraphicsScene &graphicsScene)
+    void GraphicsDrawText::execute(QGraphicsScene *graphicsScene)
     {
-        QGraphicsTextItem *text = graphicsScene.addText(mText, mFont);
+        QGraphicsTextItem *text = graphicsScene->addText(mText, mFont);
         text->setDefaultTextColor(mPen.color());
         text->setRotation(mOrientation);
         QPoint adjusted = computeTextCoordinates();
         text->setPos(adjusted.x(), adjusted.y());
-    }
-
-    void GraphicsDrawText::execute(QPainterPtr painter)
-    {
-        QFont previous = painter->font();
-        painter->setFont(mFont);
-        painter->setPen(mPen);
-        painter->rotate((qreal) mOrientation);
-        QPoint adjusted = computeTextCoordinates();
-        painter->drawText(adjusted.x(), adjusted.y(), mText);
-        painter->rotate(0);
-        painter->setFont(previous);
     }
 
     QPoint GraphicsDrawText::computeTextCoordinates()

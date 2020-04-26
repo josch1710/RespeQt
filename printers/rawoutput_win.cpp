@@ -18,11 +18,11 @@ namespace Printers {
     void RawOutput::newPage(bool /*linefeed*/)
     {}
 
-    bool RawOutput::setupOutput()
+    /*bool RawOutput::setupOutput()
     {
         rawPrinterName = RespeqtSettings::instance()->rawPrinterName();
         return true;
-    }
+    }*/
 
     bool RawOutput::beginOutput()
     {

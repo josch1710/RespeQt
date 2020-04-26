@@ -126,6 +126,9 @@ void OptionsDialog::setupSettings()
     // So, we have to test for equality to get the difference (i.e. a != !b).
     if (actualNoMenu == RespeqtSettings::instance()->nativeMenu())
         m_ui->warning_nativemenu->show();
+    else
+        m_ui->warning_nativemenu->hide();
+
     m_ui->minimizeToTrayBox->hide();
 #endif
 

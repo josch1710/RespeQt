@@ -14,7 +14,7 @@ namespace Printers
 
     void Atari1025::setupFont()
     {
-        if (mOutput)
+        /*if (mOutput)
         {
             auto font = std::make_shared<QFont>(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
             if (font)
@@ -23,7 +23,7 @@ namespace Printers
                 mOutput->setFont(font);
             }
             mOutput->calculateFixedFontSize(mLineChars);
-        }
+        }*/
     }
 
     bool Atari1025::handleBuffer(const QByteArray &buffer, const unsigned int len)
@@ -56,12 +56,12 @@ namespace Printers
                 case 155: // EOL
                 {
                     mESC = false;
-                    if (mOutput->font())
+                    /*if (mOutput->font())
                     {
                         mOutput->font()->setUnderline(false);
                         mOutput->applyFont();
                     }
-                    mOutput->newLine();
+                    mOutput->newLine();*/
                     // Drop the rest of the buffer
                     return true;
                 }
@@ -153,7 +153,7 @@ namespace Printers
     bool Atari1025::handlePrintableCodes(const unsigned char b)
     {
         QChar qb = translateAtascii(b & 127); // Masking inverse characters.
-        mOutput->printChar(qb);
+        //mOutput->printChar(qb);
         return true;
     }
 

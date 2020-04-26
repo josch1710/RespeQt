@@ -55,7 +55,7 @@ TextPrinterWindow::TextPrinterWindow(QWidget *parent) :
 
     connect(ui->asciiFontName, &QFontComboBox::currentFontChanged, this, &TextPrinterWindow::asciiFontChanged);
     connect(this, &TextPrinterWindow::textPrint, this, &TextPrinterWindow::print);
-    connect(this, &TextPrinterWindow::closed, MainWindow::instance(), &MainWindow::closeTextPrinterWindow);
+    //connect(this, &TextPrinterWindow::closed, MainWindow::instance(), &MainWindow::closeTextPrinterWindow);
     connect(ui->actionAtasciiFont, &QAction::triggered, this, &TextPrinterWindow::atasciiFontTriggered);
     connect(ui->actionSave, &QAction::triggered, this, &TextPrinterWindow::saveTriggered);
     connect(ui->actionClear, &QAction::triggered, this, &TextPrinterWindow::clearTriggered);
@@ -318,11 +318,11 @@ void TextPrinterWindow::saveTriggered()
     emit textPrint(s);
  }
 
- bool TextPrinterWindow::setupOutput()
+ /*bool TextPrinterWindow::setupOutput()
  {
     this->setGeometry(RespeqtSettings::instance()->lastPrtHorizontalPos(), RespeqtSettings::instance()->lastPrtVerticalPos(), RespeqtSettings::instance()->lastPrtWidth(), RespeqtSettings::instance()->lastPrtHeight());
     this->show();
 
     return true;
- }
+ }*/
 } // End of namespace

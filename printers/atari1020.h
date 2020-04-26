@@ -34,8 +34,8 @@ namespace Printers
 
         virtual void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) override;
         virtual bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
-        virtual void setupFont() override;
-        virtual void setupOutput() override;
+        //virtual void setupFont() override;
+        //virtual void setupOutput() override;
 
         static QString typeName() {
             return "Atari 1020";

@@ -28,7 +28,7 @@ namespace Printers
         mPainter->begin(mDevice.get());
         setFont(mFont);
         updateBoundingBox();
-        if (mPrinter)
+        /*if (mPrinter)
         {
             BasePrinterPtr temp = mPrinter.lock();
             if (temp)
@@ -36,7 +36,7 @@ namespace Printers
                 temp->setupOutput();
                 temp->setupFont();
             }
-        }
+        }*/
         return true;
     }
 

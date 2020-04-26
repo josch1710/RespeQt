@@ -36,7 +36,7 @@
 #include "infowidget.h"
 #include "printerwidget.h"
 #include "printers/textprinterwindow.h"
-#include "printers/graphicsprinterwindow.h"
+#include "printers/outputwindow.h"
 #include "logdisplaydialog.h"
 
 namespace Ui
@@ -146,9 +146,7 @@ public slots:
     void happy(int no, bool st);       //
     void chip(int no, bool st);       //
     void bootExeTriggered(const QString &fileName);
-    void closeTextPrinterWindow(const Printers::TextPrinterWindow *window);
-    void closeGraphicsPrinterWindow(const Printers::GraphicsPrinterWindow *window);
-
+    //void closeTextPrinterWindow(const Printers::TextPrinterWindow *window);
 
 private slots:
     void openRecent(); //
