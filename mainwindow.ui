@@ -161,7 +161,7 @@
      <x>0</x>
      <y>0</y>
      <width>587</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Disk">
@@ -214,11 +214,19 @@
     <addaction name="actionToggleShade"/>
     <addaction name="actionLogWindow"/>
    </widget>
+   <widget class="QMenu" name="menuDebug">
+    <property name="title">
+     <string>Debug</string>
+    </property>
+    <addaction name="actionCapture_snapshot"/>
+    <addaction name="actionReplay_snapshot"/>
+   </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Disk"/>
    <addaction name="menu_Tools"/>
    <addaction name="menu_Window"/>
    <addaction name="menu_Help"/>
+   <addaction name="menuDebug"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionEjectAll">
@@ -397,7 +405,7 @@
   </action>
   <action name="actionBootExe">
    <property name="icon">
-    <iconset>
+    <iconset resource="icons.qrc">
      <normaloff>:/icons/other-icons/Atari.png</normaloff>:/icons/other-icons/Atari.png</iconset>
    </property>
    <property name="text">
@@ -627,6 +635,19 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionCapture_snapshot">
+   <property name="text">
+    <string>Capture snapshot</string>
+   </property>
+   <property name="visible">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionReplay_snapshot">
+   <property name="text">
+    <string>Replay snapshot</string>
    </property>
   </action>
  </widget>

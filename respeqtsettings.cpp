@@ -183,82 +183,77 @@ void RespeqtSettings::saveSessionToFile(const QString &fileName)
     extern bool g_miniMode;
     QSettings s(fileName, QSettings::IniFormat);
 
-#ifndef QT_NO_DEBUG
-    if (mBackend == SERIAL_BACKEND_TEST) {
-        mBackend = SERIAL_BACKEND_STANDARD;
+    s.beginGroup("RespeQt");
+    s.setValue("Backend", mBackend);
+    s.setValue("AtariSioDriverName", mAtariSioDriverName);
+    s.setValue("AtariSioHandshakingMethod", mAtariSioHandshakingMethod);
+    s.setValue("SerialPortName", mSerialPortName);
+    s.setValue("HandshakingMethod", mSerialPortHandshakingMethod);
+    s.setValue("FallingEdge", mSerialPortTriggerOnFallingEdge);
+    s.setValue("DTRControlEnable", mSerialPortDTRControlEnable);
+    s.setValue("WriteDelay", mSerialPortWriteDelay);
+    s.setValue("CompErrDelay", mSerialPortCompErrDelay);
+    s.setValue("MaximumSerialPortSpeed", mSerialPortMaximumSpeed);
+    s.setValue("SerialPortUsePokeyDivisors", mSerialPortUsePokeyDivisors);
+    s.setValue("SerialPortPokeyDivisor", mSerialPortPokeyDivisor);
+    s.setValue("UseHighSpeedExeLoader", mUseHighSpeedExeLoader);
+    s.setValue("PrinterEmulation", mPrinterEmulation);
+    s.setValue("CustomCasBaud", mCustomCasBaud);
+    s.setValue("UseCustomCasBaud", mUseCustomCasBaud);
+    s.setValue("I18nLanguage", mI18nLanguage);
+    s.setValue("SaveWindowsPosSize", msaveWindowsPos);
+    s.setValue("SaveDiskVisibility", msaveDiskVis);
+    s.setValue("D9DOVisible", mdVis);
+    if (g_miniMode) {
+        s.setValue("MiniX", mMiniX);
+        s.setValue("MiniY", mMiniY);
+    } else {
+        s.setValue("MainX", mMainX);
+        s.setValue("MainY", mMainY);
+        s.setValue("MainW", mMainW);
+        s.setValue("MainH", mMainH);
     }
-#endif
-
-        s.beginGroup("RespeQt");
-        s.setValue("Backend", mBackend);
-        s.setValue("AtariSioDriverName", mAtariSioDriverName);
-        s.setValue("AtariSioHandshakingMethod", mAtariSioHandshakingMethod);
-        s.setValue("SerialPortName", mSerialPortName);
-        s.setValue("HandshakingMethod", mSerialPortHandshakingMethod);
-        s.setValue("FallingEdge", mSerialPortTriggerOnFallingEdge);
-        s.setValue("DTRControlEnable", mSerialPortDTRControlEnable);
-        s.setValue("WriteDelay", mSerialPortWriteDelay);
-        s.setValue("CompErrDelay", mSerialPortCompErrDelay);
-        s.setValue("MaximumSerialPortSpeed", mSerialPortMaximumSpeed);
-        s.setValue("SerialPortUsePokeyDivisors", mSerialPortUsePokeyDivisors);
-        s.setValue("SerialPortPokeyDivisor", mSerialPortPokeyDivisor);
-        s.setValue("UseHighSpeedExeLoader", mUseHighSpeedExeLoader);
-        s.setValue("PrinterEmulation", mPrinterEmulation);
-        s.setValue("CustomCasBaud", mCustomCasBaud);
-        s.setValue("UseCustomCasBaud", mUseCustomCasBaud);
-        s.setValue("I18nLanguage", mI18nLanguage);
-        s.setValue("SaveWindowsPosSize", msaveWindowsPos);
-        s.setValue("SaveDiskVisibility", msaveDiskVis);
-        s.setValue("D9DOVisible", mdVis);
-        if (g_miniMode) {
-            s.setValue("MiniX", mMiniX);
-            s.setValue("MiniY", mMiniY);
-        } else {
-            s.setValue("MainX", mMainX);
-            s.setValue("MainY", mMainY);
-            s.setValue("MainW", mMainW);
-            s.setValue("MainH", mMainH);
-        }
-        s.setValue("PrtX", mPrtX);
-        s.setValue("PrtY", mPrtY);
-        s.setValue("PrtW", mPrtW);
-        s.setValue("PrtH", mPrtH);
-        s.setValue("FilterUnderscore", mFilterUnderscore);
-        s.setValue("CapitalLettersInPCLINK", mUseCapitalLettersInPCLINK);
-        s.setValue("URLSubmit", mUseURLSubmit);
-        s.setValue("SpyMode", mSpyMode);
-        s.setValue("CommandName", mCommandName);
-        s.setValue("TrackLayout", mTrackLayout);
-        s.setValue("UseLargeFont", mUseLargeFont);
-        s.setValue("ExplorerOnTop", mExplorerOnTop);
-        s.setValue("EnableShadeByDefault", mEnableShade);
-        s.setValue("PrinterSpyMode", mPrinterSpyMode);
-        s.setValue("DisplayGraphicsInstructions", mDisplayGraphicsInstructions);
-        s.setValue("ClearOnStatus", mClearOnStatus);
-        s.setValue("DisplayTransmission", mDisplayTransmission);
-        s.setValue("DisplayFdcCommands", mDisplayFdcCommands);
-        s.setValue("DisplayIndexPulse", mDisplayIndexPulse);
-        s.setValue("DisplayMotorOnOff", mDisplayMotorOnOff);
-        s.setValue("DisplayIDAddressMarks", mDisplayIDAddressMarks);
-        s.setValue("DisplayTrackInformation", mDisplayTrackInformation);
-        s.setValue("DisassembleUploadedCode", mDisassembleUploadedCode);
-        s.setValue("TranslatorAutomaticDetection", mTranslatorAutomaticDetection);
-        s.setValue("TranslatorDiskImagePath", mTranslatorDiskImagePath);
-        s.setValue("SioAutoReconnect", mSioAutoReconnect);
-        s.setValue("HideChipMode", mHideChipMode);
-        s.setValue("HideHappyMode", mHideHappyMode);
-        s.setValue("HideNextImage", mHideNextImage);
-        s.setValue("HideOSBMode", mHideOSBMode);
-        s.setValue("HideToolDisk", mHideToolDisk);
-        s.setValue("ToolDiskImagePath", mToolDiskImagePath);
-        s.setValue("ActivateChipModeWithTool", mActivateChipModeWithTool);
-        s.setValue("ActivateHappyModeWithTool", mActivateHappyModeWithTool);
-        s.setValue("DisplayCpuInstructions", mDisplayCpuInstructions);
-        s.setValue("TraceFilename", mTraceFilename);
-        s.setValue("RawPrinterName", mRawPrinterName);
-        s.setValue("LastRclDir",mRclDir);
+    s.setValue("PrtX", mPrtX);
+    s.setValue("PrtY", mPrtY);
+    s.setValue("PrtW", mPrtW);
+    s.setValue("PrtH", mPrtH);
+    s.setValue("FilterUnderscore", mFilterUnderscore);
+    s.setValue("CapitalLettersInPCLINK", mUseCapitalLettersInPCLINK);
+    s.setValue("URLSubmit", mUseURLSubmit);
+    s.setValue("SpyMode", mSpyMode);
+    s.setValue("CommandName", mCommandName);
+    s.setValue("TrackLayout", mTrackLayout);
+    s.setValue("UseLargeFont", mUseLargeFont);
+    s.setValue("ExplorerOnTop", mExplorerOnTop);
+    s.setValue("EnableShadeByDefault", mEnableShade);
+    s.setValue("PrinterSpyMode", mPrinterSpyMode);
+    s.setValue("DisplayGraphicsInstructions", mDisplayGraphicsInstructions);
+    s.setValue("ClearOnStatus", mClearOnStatus);
+    s.setValue("DisplayTransmission", mDisplayTransmission);
+    s.setValue("DisplayFdcCommands", mDisplayFdcCommands);
+    s.setValue("DisplayIndexPulse", mDisplayIndexPulse);
+    s.setValue("DisplayMotorOnOff", mDisplayMotorOnOff);
+    s.setValue("DisplayIDAddressMarks", mDisplayIDAddressMarks);
+    s.setValue("DisplayTrackInformation", mDisplayTrackInformation);
+    s.setValue("DisassembleUploadedCode", mDisassembleUploadedCode);
+    s.setValue("TranslatorAutomaticDetection", mTranslatorAutomaticDetection);
+    s.setValue("TranslatorDiskImagePath", mTranslatorDiskImagePath);
+    s.setValue("SioAutoReconnect", mSioAutoReconnect);
+    s.setValue("HideChipMode", mHideChipMode);
+    s.setValue("HideHappyMode", mHideHappyMode);
+    s.setValue("HideNextImage", mHideNextImage);
+    s.setValue("HideOSBMode", mHideOSBMode);
+    s.setValue("HideToolDisk", mHideToolDisk);
+    s.setValue("ToolDiskImagePath", mToolDiskImagePath);
+    s.setValue("ActivateChipModeWithTool", mActivateChipModeWithTool);
+    s.setValue("ActivateHappyModeWithTool", mActivateHappyModeWithTool);
+    s.setValue("DisplayCpuInstructions", mDisplayCpuInstructions);
+    s.setValue("TraceFilename", mTraceFilename);
+    s.setValue("RawPrinterName", mRawPrinterName);
+    s.setValue("LastRclDir",mRclDir);
+    s.setValue("DebugMenuVisible", mDebugMenuVisible);
 #ifdef Q_OS_MAC
-        s.setValue("NativeMenu", mNativeMenu);
+    s.setValue("NativeMenu", mNativeMenu);
 #endif
     s.endGroup();
 //
@@ -285,76 +280,77 @@ void RespeqtSettings::saveSessionToFile(const QString &fileName)
 {
     QSettings s(fileName, QSettings::IniFormat);
     s.beginGroup("RespeQt");
-        mBackend = s.value("Backend", 0).toInt();
-        mAtariSioDriverName = s.value("AtariSioDriverName", AtariSioBackend::defaultPortName()).toString();
-        mAtariSioHandshakingMethod = s.value("AtariSioHandshakingMethod", 0).toInt();
-        mSerialPortName = s.value("SerialPortName", StandardSerialPortBackend::defaultPortName()).toString();
-        mSerialPortHandshakingMethod = s.value("HandshakingMethod", 0).toInt();
-        mSerialPortTriggerOnFallingEdge = s.value("FallingEdge", false).toBool();
-        mRclDir = mSettings->value("LastRclDir","").toString();
-        mSerialPortDTRControlEnable = s.value("DTRControlEnable", false).toBool();
-        mSerialPortWriteDelay = s.value("WriteDelay", 1).toInt();
-        mSerialPortCompErrDelay = s.value("CompErrDelay", 1).toInt();
-        mSerialPortMaximumSpeed = s.value("MaximumSerialPortSpeed", 2).toInt();
-        mSerialPortUsePokeyDivisors = s.value("SerialPortUsePokeyDivisors", false).toBool();
-        mSerialPortPokeyDivisor = s.value("SerialPortPokeyDivisor", 6).toInt();
-        mUseHighSpeedExeLoader = s.value("UseHighSpeedExeLoader", false).toBool();
-        mPrinterEmulation = s.value("PrinterEmulation", true).toBool();
-        mCustomCasBaud = s.value("CustomCasBaud", 875).toInt();
-        mUseCustomCasBaud = s.value("UseCustomCasBaud", false).toBool();
-        mI18nLanguage = s.value("I18nLanguage").toString();
-        msaveWindowsPos = s.value("SaveWindowsPosSize", true).toBool();
-        msaveDiskVis = s.value("SaveDiskVisibility", true).toBool();
-        mdVis = s.value("D9DOVisible", true).toBool();
-        mMainX = s.value("MainX", 20).toInt();
-        mMainY = s.value("MainY", 40).toInt();
-        mMainW = s.value("MainW", 688).toInt();
-        mMainH = s.value("MainH", 426).toInt();
-        if (mMainW < 688 && mdVis) mMainW = 688;
-        if (mMainH < 426 && mdVis) mMainH = 426;
-        mMiniX = s.value("MiniX", 8).toInt();
-        mMiniY = s.value("MiniY", 30).toInt();
-        mPrtX = s.value("PrtX", 20).toInt();
-        mPrtY = s.value("PrtY", 40).toInt();
-        mPrtW = s.value("PrtW", 600).toInt();
-        mPrtH = s.value("PrtH", 486).toInt();
-        mFilterUnderscore = s.value("FilterUnderscore", true).toBool();
-        mUseCapitalLettersInPCLINK = s.value("CapitalLettersInPCLINK", false).toBool();
-        mUseURLSubmit = s.value("URLSubmit", false).toBool();
-        mSpyMode = s.value("SpyMode", false).toBool();
-        mCommandName = s.value("CommandName", false).toBool();
-        mTrackLayout = s.value("TrackLayout", false).toBool();
-        mUseLargeFont = s.value("UseLargeFont", false).toBool();
-        mExplorerOnTop = s.value("ExplorerOnTop", false).toBool();
-        mEnableShade = s.value("EnableShadeByDefault", true).toBool();
-        mDisplayTransmission = s.value("DisplayTransmission", false).toBool();
-        mDisplayDriveHead = s.value("DisplayDriveHead", false).toBool();
-        mDisplayFdcCommands = s.value("DisplayFdcCommands", false).toBool();
-        mDisplayIndexPulse = s.value("DisplayIndexPulse", false).toBool();
-        mDisplayMotorOnOff = s.value("DisplayMotorOnOff", false).toBool();
-        mDisplayIDAddressMarks = s.value("DisplayIDAddressMarks", false).toBool();
-        mDisplayTrackInformation = s.value("DisplayTrackInformation", false).toBool();
-        mDisassembleUploadedCode = s.value("DisassembleUploadedCode", false).toBool();
-        mTranslatorAutomaticDetection = s.value("TranslatorAutomaticDetection", false).toBool();
-        mTranslatorDiskImagePath = s.value("TranslatorDiskImagePath", false).toString();
-        mSioAutoReconnect = s.value("SioAutoReconnect", false).toBool();
-        mHideChipMode = s.value("HideChipMode", false).toBool();
-        mHideHappyMode = s.value("HideHappyMode", false).toBool();
-        mHideNextImage = s.value("HideNextImage", false).toBool();
-        mHideOSBMode = s.value("HideOSBMode", false).toBool();
-        mHideToolDisk = s.value("HideToolDisk", false).toBool();
-        mToolDiskImagePath = s.value("ToolDiskImagePath", false).toString();
-        mActivateChipModeWithTool = s.value("ActivateChipModeWithTool", false).toBool();
-        mActivateHappyModeWithTool = s.value("ActivateHappyModeWithTool", false).toBool();
-        mDisplayCpuInstructions = s.value("DisplayCpuInstructions", false).toBool();
-        mTraceFilename = s.value("TraceFilename", false).toBool();
-        mRawPrinterName = s.value("RawPrinterName", "").toString();
-        mPrinterSpyMode = s.value("PrinterSpyMode", false).toBool();
-        mDisplayGraphicsInstructions = s.value("DisplayGraphicsInstructions", true).toBool();
-        mClearOnStatus = s.value("ClearOnStatus", false).toBool();
+    mBackend = s.value("Backend", 0).toInt();
+    mAtariSioDriverName = s.value("AtariSioDriverName", AtariSioBackend::defaultPortName()).toString();
+    mAtariSioHandshakingMethod = s.value("AtariSioHandshakingMethod", 0).toInt();
+    mSerialPortName = s.value("SerialPortName", StandardSerialPortBackend::defaultPortName()).toString();
+    mSerialPortHandshakingMethod = s.value("HandshakingMethod", 0).toInt();
+    mSerialPortTriggerOnFallingEdge = s.value("FallingEdge", false).toBool();
+    mRclDir = mSettings->value("LastRclDir","").toString();
+    mSerialPortDTRControlEnable = s.value("DTRControlEnable", false).toBool();
+    mSerialPortWriteDelay = s.value("WriteDelay", 1).toInt();
+    mSerialPortCompErrDelay = s.value("CompErrDelay", 1).toInt();
+    mSerialPortMaximumSpeed = s.value("MaximumSerialPortSpeed", 2).toInt();
+    mSerialPortUsePokeyDivisors = s.value("SerialPortUsePokeyDivisors", false).toBool();
+    mSerialPortPokeyDivisor = s.value("SerialPortPokeyDivisor", 6).toInt();
+    mUseHighSpeedExeLoader = s.value("UseHighSpeedExeLoader", false).toBool();
+    mPrinterEmulation = s.value("PrinterEmulation", true).toBool();
+    mCustomCasBaud = s.value("CustomCasBaud", 875).toInt();
+    mUseCustomCasBaud = s.value("UseCustomCasBaud", false).toBool();
+    mI18nLanguage = s.value("I18nLanguage").toString();
+    msaveWindowsPos = s.value("SaveWindowsPosSize", true).toBool();
+    msaveDiskVis = s.value("SaveDiskVisibility", true).toBool();
+    mdVis = s.value("D9DOVisible", true).toBool();
+    mMainX = s.value("MainX", 20).toInt();
+    mMainY = s.value("MainY", 40).toInt();
+    mMainW = s.value("MainW", 688).toInt();
+    mMainH = s.value("MainH", 426).toInt();
+    if (mMainW < 688 && mdVis) mMainW = 688;
+    if (mMainH < 426 && mdVis) mMainH = 426;
+    mMiniX = s.value("MiniX", 8).toInt();
+    mMiniY = s.value("MiniY", 30).toInt();
+    mPrtX = s.value("PrtX", 20).toInt();
+    mPrtY = s.value("PrtY", 40).toInt();
+    mPrtW = s.value("PrtW", 600).toInt();
+    mPrtH = s.value("PrtH", 486).toInt();
+    mFilterUnderscore = s.value("FilterUnderscore", true).toBool();
+    mUseCapitalLettersInPCLINK = s.value("CapitalLettersInPCLINK", false).toBool();
+    mUseURLSubmit = s.value("URLSubmit", false).toBool();
+    mSpyMode = s.value("SpyMode", false).toBool();
+    mCommandName = s.value("CommandName", false).toBool();
+    mTrackLayout = s.value("TrackLayout", false).toBool();
+    mUseLargeFont = s.value("UseLargeFont", false).toBool();
+    mExplorerOnTop = s.value("ExplorerOnTop", false).toBool();
+    mEnableShade = s.value("EnableShadeByDefault", true).toBool();
+    mDisplayTransmission = s.value("DisplayTransmission", false).toBool();
+    mDisplayDriveHead = s.value("DisplayDriveHead", false).toBool();
+    mDisplayFdcCommands = s.value("DisplayFdcCommands", false).toBool();
+    mDisplayIndexPulse = s.value("DisplayIndexPulse", false).toBool();
+    mDisplayMotorOnOff = s.value("DisplayMotorOnOff", false).toBool();
+    mDisplayIDAddressMarks = s.value("DisplayIDAddressMarks", false).toBool();
+    mDisplayTrackInformation = s.value("DisplayTrackInformation", false).toBool();
+    mDisassembleUploadedCode = s.value("DisassembleUploadedCode", false).toBool();
+    mTranslatorAutomaticDetection = s.value("TranslatorAutomaticDetection", false).toBool();
+    mTranslatorDiskImagePath = s.value("TranslatorDiskImagePath", false).toString();
+    mSioAutoReconnect = s.value("SioAutoReconnect", false).toBool();
+    mHideChipMode = s.value("HideChipMode", false).toBool();
+    mHideHappyMode = s.value("HideHappyMode", false).toBool();
+    mHideNextImage = s.value("HideNextImage", false).toBool();
+    mHideOSBMode = s.value("HideOSBMode", false).toBool();
+    mHideToolDisk = s.value("HideToolDisk", false).toBool();
+    mToolDiskImagePath = s.value("ToolDiskImagePath", false).toString();
+    mActivateChipModeWithTool = s.value("ActivateChipModeWithTool", false).toBool();
+    mActivateHappyModeWithTool = s.value("ActivateHappyModeWithTool", false).toBool();
+    mDisplayCpuInstructions = s.value("DisplayCpuInstructions", false).toBool();
+    mTraceFilename = s.value("TraceFilename", false).toBool();
+    mRawPrinterName = s.value("RawPrinterName", "").toString();
+    mPrinterSpyMode = s.value("PrinterSpyMode", false).toBool();
+    mDisplayGraphicsInstructions = s.value("DisplayGraphicsInstructions", true).toBool();
+    mClearOnStatus = s.value("ClearOnStatus", false).toBool();
+    mDebugMenuVisible = s.value("DebugMenuVisible", false).toBool();
 
 #ifdef Q_OS_MAC
-        mNativeMenu = s.value("NativeMenu", false).toBool();
+    mNativeMenu = s.value("NativeMenu", false).toBool();
 #endif
     s.endGroup();
  //
@@ -1337,4 +1333,14 @@ void RespeqtSettings::setRawPrinterName(const QString &name)
 QString RespeqtSettings::rawPrinterName() const
 {
     return mRawPrinterName;
+}
+
+bool RespeqtSettings::debugMenuVisible() const
+{
+    return mDebugMenuVisible;
+}
+
+void RespeqtSettings::setDebugMenuVisible(bool menuVisible)
+{
+    mDebugMenuVisible = menuVisible;
 }

@@ -51,7 +51,7 @@ private slots:
     void currentSectionChanged(QTreeWidgetItem* current, QTreeWidgetItem* previous);
     void saveSettings();
     void useCustomBaudToggled(bool checked);
-    void testFileClicked();
+
 #ifdef SHOWFIRMWARE
     void select810FirmwareTriggered();
     void select810ChipFirmwareTriggered();

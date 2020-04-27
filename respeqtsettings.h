@@ -299,6 +299,9 @@ public:
     void setRawPrinterName(const QString &name);
     QString rawPrinterName() const;
 
+    bool debugMenuVisible() const;
+    void setDebugMenuVisible(bool menuVisible);
+
     static const std::unique_ptr<RespeqtSettings>& instance() {
         if (!sInstance)
         {
@@ -416,6 +419,7 @@ private:
     bool mActivateHappyModeWithTool;
     bool mDisplayCpuInstructions;
 	QString mTraceFilename;
+    bool mDebugMenuVisible;
 
 #ifdef Q_OS_MAC
     bool mNativeMenu;

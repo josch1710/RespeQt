@@ -89,7 +89,6 @@ void SioWorker::start(Priority p)
         case SERIAL_BACKEND_SIO_DRIVER:
             mPort = new AtariSioBackend(this);
             break;
-#ifndef QT_NO_DEBUG
         case SERIAL_BACKEND_TEST:
             mPort = new Tests::SioRecorder();
             QFile *file = new QFile(RespeqtSettings::instance()->testFile());
@@ -98,7 +97,6 @@ void SioWorker::start(Priority p)
             file->close();
             delete file;
             break;
-#endif
     }
 
     QByteArray data;

@@ -189,18 +189,6 @@ MainWindow::MainWindow()
     pfactory->registerPrinter<Printers::Atari1029>(Printers::Atari1029::typeName());
     //pfactory->registerPrinter<Printers::Passthrough>(Printers::Passthrough::typeName());
 
-    /* Setup the output factory */
-    /*auto ofactory = Printers::OutputFactory::instance();
-    ofactory->registerOutput<Printers::SVGOutput>(Printers::SVGOutput::typeName());
-    ofactory->registerOutput<Printers::TextPrinterWindow>(Printers::TextPrinterWindow::typeName());
-    ofactory->registerOutput<Printers::OutputWindow>(Printers::GraphicsPrinterWindow::typeName());
-    ofactory->registerOutput<Printers::RawOutput>(Printers::RawOutput::typeName());
-    QStringList printers = QPrinterInfo::availablePrinterNames();
-    for (QStringList::const_iterator sit = printers.cbegin(); sit != printers.cend(); ++sit)
-    {
-        ofactory->registerOutput<Printers::NativePrinter>(*sit);
-    }*/
-
     /* Add QActions for most recent */
     for( int i = 0; i < NUM_RECENT_FILES; ++i ) {
         auto recentAction = new QAction(this);
@@ -290,14 +278,14 @@ MainWindow::MainWindow()
     g_D9DOVisible =  RespeqtSettings::instance()->D9DOVisible();
     showHideDrives();
 
-#ifndef QT_NO_DEBUG
     snapshot = new QLabel(this);
     snapshot->setMinimumWidth(21);
     snapshot->setPixmap(QIcon(":/icons/silk-icons/icons/camera.png").pixmap(16, 16, QIcon::Normal));
     snapshot->setToolTip(tr("Record SIO traffic"));
     snapshot->setStatusTip(snapshot->toolTip());
     ui->statusBar->addPermanentWidget(snapshot);
-#endif
+    snapshot->setVisible(RespeqtSettings::instance()->debugMenuVisible());
+    ui->menuDebug->setVisible(RespeqtSettings::instance()->debugMenuVisible());
 
     /* Connect to the network */
     QString netInterface;

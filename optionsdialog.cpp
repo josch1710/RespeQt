@@ -133,23 +133,14 @@ void OptionsDialog::setupSettings()
 #endif
 
     switch (RespeqtSettings::instance()->backend()) {
-#ifndef QT_NO_DEBUG
-        case SERIAL_BACKEND_TEST:
-#endif
         case SERIAL_BACKEND_STANDARD:
             itemStandard->setCheckState(0, Qt::Checked);
             itemAtariSio->setCheckState(0, Qt::Unchecked);
-#ifndef QT_NO_DEBUG
-            itemTestSerialPort->setCheckState(0, Qt::Unchecked);
-#endif
             m_ui->optionSections->setCurrentItem(itemStandard);
             break;
         case SERIAL_BACKEND_SIO_DRIVER:
             itemStandard->setCheckState(0, Qt::Unchecked);
             itemAtariSio->setCheckState(0, Qt::Checked);
-#ifndef QT_NO_DEBUG
-            itemTestSerialPort->setCheckState(0, Qt::Unchecked);
-#endif
             m_ui->optionSections->setCurrentItem(itemAtariSio);
             break;
     }
@@ -216,6 +207,8 @@ void OptionsDialog::setupSettings()
 #else
     m_ui->useNativeMenu->hide();
 #endif
+    m_ui->showDebugMenu->setChecked(RespeqtSettings::instance()->debugMenuVisible());
+
     // Setup via platform dependent class
     Printers::RawOutput::setupRawPrinters(m_ui->rawPrinterName);
     QString rawPrinterName = RespeqtSettings::instance()->rawPrinterName();
@@ -239,11 +232,6 @@ void OptionsDialog::connectSignals()
     void (QComboBox::*handshakeChanged)(int) = &QComboBox::currentIndexChanged;
     connect(m_ui->serialPortHandshakeCombo, handshakeChanged, this, &OptionsDialog::handshakeChanged);
     connect(m_ui->serialPortUseDivisorsBox, &QCheckBox::toggled, this, &OptionsDialog::useDivisorToggled);
-
-#ifndef QT_NO_QDEBUG
-    // Serial test section
-    connect(m_ui->testFileButton, &QPushButton::clicked, this, &OptionsDialog::testFileClicked);
-#endif
 
     // Emulation section
     connect(m_ui->emulationUseCustomCasBaudBox, &QCheckBox::toggled, this, &OptionsDialog::useCustomBaudToggled);
@@ -355,9 +343,6 @@ void OptionsDialog::sectionClicked(QTreeWidgetItem* item, int column)
     }
     m_ui->serialPortBox->setCheckState(itemStandard->checkState(column));
     m_ui->atariSioBox->setCheckState(itemAtariSio->checkState(column));
-#ifndef QT_NO_DEBUG
-    m_ui->serialTestBox->setCheckState(itemTestSerialPort->checkState(column));
-#endif
 }
 
 void OptionsDialog::currentSectionChanged(QTreeWidgetItem* current, QTreeWidgetItem* /*previous*/)
@@ -366,28 +351,26 @@ void OptionsDialog::currentSectionChanged(QTreeWidgetItem* current, QTreeWidgetI
         m_ui->stackedWidget->setCurrentIndex(0);
     } else if (current == itemAtariSio) {
         m_ui->stackedWidget->setCurrentIndex(1);
-    } else if (current == itemTestSerialPort) {
-        m_ui->stackedWidget->setCurrentIndex(2);
     } else if (current == itemEmulation) {
-        m_ui->stackedWidget->setCurrentIndex(3);
+        m_ui->stackedWidget->setCurrentIndex(2);
     } else if (current == itemDiskOptions) {
-        m_ui->stackedWidget->setCurrentIndex(4);
+        m_ui->stackedWidget->setCurrentIndex(3);
     } else if (current == itemDiskOSB) {
-        m_ui->stackedWidget->setCurrentIndex(12);
+        m_ui->stackedWidget->setCurrentIndex(11);
     } else if (current == itemDiskIcons) {
-        m_ui->stackedWidget->setCurrentIndex(13);
+        m_ui->stackedWidget->setCurrentIndex(12);
     } else if (current == itemDiskFavorite) {
-        m_ui->stackedWidget->setCurrentIndex(14);
+        m_ui->stackedWidget->setCurrentIndex(13);
     } else if (current == itemI18n) {
-        m_ui->stackedWidget->setCurrentIndex(5);
+        m_ui->stackedWidget->setCurrentIndex(4);
     } else if (current == itemAtari1027) {
-        m_ui->stackedWidget->setCurrentIndex(6);
+        m_ui->stackedWidget->setCurrentIndex(5);
     } else if (current == itemPassthrough) {
-        m_ui->stackedWidget->setCurrentIndex(7);
+        m_ui->stackedWidget->setCurrentIndex(6);
     } else if (current == itemPrinterProtocol) {
-        m_ui->stackedWidget->setCurrentIndex(15);
+        m_ui->stackedWidget->setCurrentIndex(14);
     } else if (current == item1020Options) {
-        m_ui->stackedWidget->setCurrentIndex(16);
+        m_ui->stackedWidget->setCurrentIndex(15);
     }
 }
 
@@ -441,12 +424,6 @@ void OptionsDialog::saveSettings()
     {
         backend = SERIAL_BACKEND_SIO_DRIVER;
     }
-#ifndef QT_NO_DEBUG
-    else if (itemTestSerialPort->checkState(0) == Qt::Checked)
-    {
-        backend = SERIAL_BACKEND_TEST;
-    }
-#endif
 
     RespeqtSettings::instance()->setBackend(backend);
 
@@ -458,6 +435,8 @@ void OptionsDialog::saveSettings()
         RespeqtSettings::instance()->setRawPrinterName(m_ui->rawPrinterName->currentText());
     else
         RespeqtSettings::instance()->setRawPrinterName("");
+
+    RespeqtSettings::instance()->setDebugMenuVisible(m_ui->showDebugMenu->checkState() == Qt::Checked);
 }
 
 void OptionsDialog::useCustomBaudToggled(bool checked)
@@ -541,16 +520,6 @@ void OptionsDialog::selectTranslatorDiskTriggered()
 void OptionsDialog::selectToolDiskTriggered()
 {
     selectFirmware(m_ui->toolDiskImagePath, tr("Select tool disk image"), tr("Atari disk image (*.atr);;All files (*)"));
-}
-
-void OptionsDialog::testFileClicked()
-{
-#ifndef QT_NO_DEBUG
-    auto file1Name = QFileDialog::getOpenFileName(this,
-             tr("Open test JSON File"), QString(), tr("JSON Files (*.json)"));
-    m_ui->testFileLabel->setText(file1Name);
-    RespeqtSettings::instance()->setTestFile(file1Name);
-#endif
 }
 
 void OptionsDialog::fixedFontClicked()
