@@ -47,9 +47,6 @@ OptionsDialog::OptionsDialog(QWidget *parent) :
 #ifndef Q_OS_LINUX
     m_ui->optionSections->topLevelItem(0)->removeChild(itemAtariSio);
 #endif
-#ifdef QT_NO_DEBUG
-    m_ui->optionSections->topLevelItem(0)->removeChild(itemTestSerialPort);
-#endif
 
     connectSignals();
     setupSettings();
