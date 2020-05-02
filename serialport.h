@@ -23,11 +23,12 @@ enum eHandshake
     HANDSHAKE_SOFTWARE=4
 };
 
-enum eSerialBackend
+enum class SerialBackend: int
 {
-    SERIAL_BACKEND_STANDARD=0,
-    SERIAL_BACKEND_SIO_DRIVER=1,
-    SERIAL_BACKEND_TEST = 99
+    NONE = -1,
+    STANDARD = 0,
+    SIO_DRIVER = 1,
+    TEST = 99
 };
 
 enum eSIOConstants
@@ -91,6 +92,9 @@ signals:
     void statusChanged(QString status);
 };
 
+using AbstractSerialPortBackendPtr = std::shared_ptr<AbstractSerialPortBackend>;
+
+
 #ifdef Q_OS_WIN
 #define SERIAL_PORT_LOCATION "\\\\.\\"
 #include "serialport-win32.h"
@@ -98,9 +102,6 @@ signals:
 #ifdef Q_OS_UNIX
 #define SERIAL_PORT_LOCATION "/dev/"
 #include "serialport-unix.h"
-#endif
-#ifndef QT_NO_DEBUG
-#include "serialport-test.h"
 #endif
 
 #endif // SERIALPORT_H

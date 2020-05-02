@@ -72,8 +72,7 @@ bool SioWorker::wait(unsigned long time)
     bool result = QThread::wait(time);
 
     if (mPort) {
-        delete mPort;
-        mPort = 0;
+        mPort.reset();
     }
 
     return result;
@@ -83,19 +82,14 @@ void SioWorker::start(Priority p)
 {
     switch (RespeqtSettings::instance()->backend()) {
         default:
-        case SERIAL_BACKEND_STANDARD:
-            mPort = new StandardSerialPortBackend(this);
+        case SerialBackend::STANDARD:
+            mPort = std::make_shared<StandardSerialPortBackend>(this);
             break;
-        case SERIAL_BACKEND_SIO_DRIVER:
-            mPort = new AtariSioBackend(this);
+        case SerialBackend::SIO_DRIVER:
+            mPort = std::make_shared<AtariSioBackend>(this);
             break;
-        case SERIAL_BACKEND_TEST:
-            mPort = new Tests::SioRecorder();
-            QFile *file = new QFile(RespeqtSettings::instance()->testFile());
-            file->open(QFile::ReadOnly);
-            dynamic_cast<Tests::SioRecorder*>(mPort)->prepareReplaySnapshot(file);
-            file->close();
-            delete file;
+        case SerialBackend::TEST:
+            mPort = Tests::SioRecorder::instance();
             break;
     }
 
@@ -120,7 +114,7 @@ void SioWorker::setAutoReconnect(bool autoReconnect)
 
 void SioWorker::run()
 {
-    connect(mPort, SIGNAL(statusChanged(QString)), this, SIGNAL(statusChanged(QString)));
+    connect(mPort.get(), SIGNAL(statusChanged(QString)), this, SIGNAL(statusChanged(QString)));
 
     /* Open serial port */
     if (!mPort->open()) {
@@ -558,8 +552,7 @@ bool CassetteWorker::wait (unsigned long time)
 
     if (mPort) {
         mPort->close();
-        delete mPort;
-        mPort = nullptr;
+        mPort.reset();
     }
 
     return result;
@@ -622,22 +615,16 @@ void CassetteWorker::run()
 void CassetteWorker::start(Priority p)
 {
     switch (RespeqtSettings::instance()->backend()) {
-        case SERIAL_BACKEND_STANDARD:
-            mPort = new StandardSerialPortBackend(this);
+        default:
+        case SerialBackend::STANDARD:
+            mPort = std::make_shared<StandardSerialPortBackend>(this);
             break;
-        case SERIAL_BACKEND_SIO_DRIVER:
-            mPort = new AtariSioBackend(this);
+        case SerialBackend::SIO_DRIVER:
+            mPort = std::make_shared<AtariSioBackend>(this);
             break;
-#ifndef QT_NO_DEBUG
-        case SERIAL_BACKEND_TEST:
-            mPort = new Tests::SioRecorder();
-            QFile *file = new QFile(RespeqtSettings::instance()->testFile());
-            file->open(QFile::ReadOnly);
-            dynamic_cast<Tests::SioRecorder*>(mPort)->prepareReplaySnapshot(file);
-            file->close();
-            delete file;
+        case SerialBackend::TEST:
+            mPort = Tests::SioRecorder::instance();
             break;
-#endif
     }
     QThread::start(p);
 }

@@ -1,6 +1,7 @@
 #include "siorecorder.h"
 #include "mainwindow.h"
 #include "make_unique.h"
+#include "respeqtsettings.h"
 
 #include <QFileDialog>
 #include <QDataStream>
@@ -11,8 +12,8 @@
 namespace Tests {
     SioRecorderPtr SioRecorder::sInstance = std::make_shared<SioRecorder>();
 
-    SioRecorder::SioRecorder()
-        : AbstractSerialPortBackend(nullptr)
+    SioRecorder::SioRecorder(QObject *parent)
+        : AbstractSerialPortBackend(parent)
     {}
 
     SioRecorder::~SioRecorder()
@@ -83,8 +84,9 @@ namespace Tests {
         }
     }
 
-    void SioRecorder::prepareReplaySnapshot(QFile *file)
+    void SioRecorder::prepareReplaySnapshot(QFile *file, SerialBackend previousBackend)
     {
+        mPreviousBackend = previousBackend;
         if (file->isOpen() && file->isReadable())
         {
             // Now we read the whole file to memory.
@@ -102,7 +104,7 @@ namespace Tests {
         if (isOpen()) {
             close();
         }
-        // Open XML and parse it
+        // Open Json and parse it
         if (mTestData.size() == 0)
             return false;
 
@@ -131,6 +133,11 @@ namespace Tests {
     void SioRecorder::cancel()
     {
         mSnapshotData.reset();
+        if (mPreviousBackend != SerialBackend::NONE)
+        {
+            RespeqtSettings::instance()->setBackend(mPreviousBackend);
+            mPreviousBackend = SerialBackend::NONE;
+        }
     }
 
     int SioRecorder::speedByte()

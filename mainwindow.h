@@ -38,6 +38,7 @@
 #include "printers/textprinterwindow.h"
 #include "printers/outputwindow.h"
 #include "logdisplaydialog.h"
+#include "tests/siorecorder.h"
 
 namespace Ui
 {
@@ -68,11 +69,11 @@ private:
     PrinterWidget* printerWidgets[PRINTER_COUNT]; //
     DriveWidget* diskWidgets[DISK_COUNT];    //
     // InfoWidget* infoWidget;
+    Tests::SioRecorder *mRecorder{nullptr};
+    QString mTestfile{};
 
     QLabel *speedLabel, *onOffLabel, *prtOnOffLabel, *netLabel, *clearMessagesLabel;  //
-#ifndef Q_NO_DEBUG
-    QLabel *snapshot;
-#endif
+
     DocDisplayWindow *docDisplayWindow;    //
     QTranslator respeqt_translator, respeqt_qt_translator;
     QSystemTrayIcon trayIcon;
@@ -118,6 +119,8 @@ private:
     void connectUISignal();
     SimpleDiskImage *installDiskImage();
 
+    void setupDebugItems();
+
 protected:
     void mousePressEvent(QMouseEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -146,6 +149,8 @@ public slots:
     void happy(int no, bool st);       //
     void chip(int no, bool st);       //
     void bootExeTriggered(const QString &fileName);
+    void toggleSnapshotCapture(bool toggle);
+    void replaySnapshot();
     //void closeTextPrinterWindow(const Printers::TextPrinterWindow *window);
 
 private slots:

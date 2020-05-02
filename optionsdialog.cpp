@@ -39,7 +39,6 @@ OptionsDialog::OptionsDialog(QWidget *parent) :
     itemDiskIcons = m_ui->optionSections->topLevelItem(2)->child(2);
     itemDiskFavorite = m_ui->optionSections->topLevelItem(2)->child(3);
     itemI18n = m_ui->optionSections->topLevelItem(3);
-    itemTestSerialPort = m_ui->optionSections->topLevelItem(0)->child(2);
     itemAtari1027 = m_ui->optionSections->topLevelItem(4)->child(0);
     itemPassthrough = m_ui->optionSections->topLevelItem(4)->child(1);
     itemPrinterProtocol = m_ui->optionSections->topLevelItem(4)->child(2);
@@ -133,12 +132,13 @@ void OptionsDialog::setupSettings()
 #endif
 
     switch (RespeqtSettings::instance()->backend()) {
-        case SERIAL_BACKEND_STANDARD:
+        default:
+        case SerialBackend::STANDARD:
             itemStandard->setCheckState(0, Qt::Checked);
             itemAtariSio->setCheckState(0, Qt::Unchecked);
             m_ui->optionSections->setCurrentItem(itemStandard);
             break;
-        case SERIAL_BACKEND_SIO_DRIVER:
+        case SerialBackend::SIO_DRIVER:
             itemStandard->setCheckState(0, Qt::Unchecked);
             itemAtariSio->setCheckState(0, Qt::Checked);
             m_ui->optionSections->setCurrentItem(itemAtariSio);
@@ -186,7 +186,7 @@ void OptionsDialog::setupSettings()
     m_ui->serialPortFallingEdge->setVisible(false);
 #endif
 
-    if((SERIAL_BACKEND_STANDARD == RespeqtSettings::instance()->backend()) && software_handshake)
+    if((SerialBackend::STANDARD == RespeqtSettings::instance()->backend()) && software_handshake)
     {
         m_ui->emulationHighSpeedExeLoaderBox->setVisible(false);
     }
@@ -329,12 +329,6 @@ void OptionsDialog::sectionClicked(QTreeWidgetItem* item, int column)
         {
             itemAtariSio->setCheckState(column, Qt::Unchecked);
         }
-#ifndef QT_NO_DEBUG
-        if (item != itemTestSerialPort)
-        {
-            itemTestSerialPort->setCheckState(column, Qt::Unchecked);
-        }
-#endif
     }
     else if ((itemStandard->checkState(column) == Qt::Unchecked) &&
             (itemAtariSio->checkState(column) == Qt::Unchecked))
@@ -419,13 +413,13 @@ void OptionsDialog::saveSettings()
     RespeqtSettings::instance()->setDisplayGraphicsInstructions(m_ui->displayGraphicsInstructions->isChecked());
     RespeqtSettings::instance()->setClearOnStatus(m_ui->clearOnStatus->isChecked());
 
-    int backend = SERIAL_BACKEND_STANDARD;
+    SerialBackend backend = SerialBackend::STANDARD;
     if (itemAtariSio->checkState(0) == Qt::Checked)
     {
-        backend = SERIAL_BACKEND_SIO_DRIVER;
+        backend = SerialBackend::SIO_DRIVER;
     }
 
-    RespeqtSettings::instance()->setBackend(backend);
+    RespeqtSettings::instance()->setBackend(static_cast<SerialBackend>(backend));
 
     RespeqtSettings::instance()->setI18nLanguage(m_ui->i18nLanguageCombo->itemData(m_ui->i18nLanguageCombo->currentIndex()).toString());
 #ifdef Q_OS_MAC
@@ -436,7 +430,7 @@ void OptionsDialog::saveSettings()
     else
         RespeqtSettings::instance()->setRawPrinterName("");
 
-    RespeqtSettings::instance()->setDebugMenuVisible(m_ui->showDebugMenu->checkState() == Qt::Checked);
+    RespeqtSettings::instance()->setDebugMenuVisible(m_ui->showDebugMenu->isChecked());
 }
 
 void OptionsDialog::useCustomBaudToggled(bool checked)

@@ -66,12 +66,10 @@ RespeqtSettings::RespeqtSettings()
     }
     mAtariSioHandshakingMethod = mSettings->value("AtariSioHandshakingMethod", 0).toInt();
 
-    mBackend = mSettings->value("Backend", 0).toInt();
-#ifndef QT_NO_DEBUG
-    if (mBackend == SERIAL_BACKEND_TEST) {
-        mBackend = SERIAL_BACKEND_STANDARD;
+    mBackend = static_cast<SerialBackend>(mSettings->value("Backend", 0).toInt());
+    if (mBackend == SerialBackend::TEST) {
+        mBackend = SerialBackend::STANDARD;
     }
-#endif
 
     mUseHighSpeedExeLoader = mSettings->value("UseHighSpeedExeLoader", false).toBool();
     mPrinterEmulation = mSettings->value("PrinterEmulation", true).toBool();
@@ -159,6 +157,7 @@ RespeqtSettings::RespeqtSettings()
     mActivateHappyModeWithTool = mSettings->value("ActivateHappyModeWithTool", false).toBool();
     mDisplayCpuInstructions = mSettings->value("DisplayCpuInstructions", false).toBool();
     mTraceFilename = mSettings->value("TraceFilename", "").toString();
+    mDebugMenuVisible = mSettings->value("DebugMenuVisible", false).toBool();
 
 #ifdef Q_OS_MAC
     mNativeMenu = mSettings->value("NativeMenu", false).toBool();
@@ -184,7 +183,7 @@ void RespeqtSettings::saveSessionToFile(const QString &fileName)
     QSettings s(fileName, QSettings::IniFormat);
 
     s.beginGroup("RespeQt");
-    s.setValue("Backend", mBackend);
+    s.setValue("Backend", static_cast<int>(mBackend));
     s.setValue("AtariSioDriverName", mAtariSioDriverName);
     s.setValue("AtariSioHandshakingMethod", mAtariSioHandshakingMethod);
     s.setValue("SerialPortName", mSerialPortName);
@@ -280,7 +279,7 @@ void RespeqtSettings::saveSessionToFile(const QString &fileName)
 {
     QSettings s(fileName, QSettings::IniFormat);
     s.beginGroup("RespeQt");
-    mBackend = s.value("Backend", 0).toInt();
+    mBackend = static_cast<SerialBackend>(s.value("Backend", 0).toInt());
     mAtariSioDriverName = s.value("AtariSioDriverName", AtariSioBackend::defaultPortName()).toString();
     mAtariSioHandshakingMethod = s.value("AtariSioHandshakingMethod", 0).toInt();
     mSerialPortName = s.value("SerialPortName", StandardSerialPortBackend::defaultPortName()).toString();
@@ -387,7 +386,8 @@ QString RespeqtSettings::serialPortName()
 void RespeqtSettings::setSerialPortName(const QString &name)
 {
     mSerialPortName = name;
-    if(mSessionFileName == "") mSettings->setValue("SerialPortName", mSerialPortName);
+    if(mSessionFileName == "")
+        mSettings->setValue("SerialPortName", mSerialPortName);
 }
 
 int RespeqtSettings::serialPortMaximumSpeed()
@@ -398,7 +398,8 @@ int RespeqtSettings::serialPortMaximumSpeed()
 void RespeqtSettings::setSerialPortMaximumSpeed(int speed)
 {
     mSerialPortMaximumSpeed = speed;
-    if(mSessionFileName == "") mSettings->setValue("MaximumSerialPortSpeed", mSerialPortMaximumSpeed);
+    if(mSessionFileName == "")
+        mSettings->setValue("MaximumSerialPortSpeed", mSerialPortMaximumSpeed);
 }
 
 bool RespeqtSettings::serialPortUsePokeyDivisors()
@@ -409,7 +410,8 @@ bool RespeqtSettings::serialPortUsePokeyDivisors()
 void RespeqtSettings::setSerialPortUsePokeyDivisors(bool use)
 {
     mSerialPortUsePokeyDivisors = use;
-    if(mSessionFileName == "") mSettings->setValue("SerialPortUsePokeyDivisors", mSerialPortUsePokeyDivisors);
+    if(mSessionFileName == "")
+        mSettings->setValue("SerialPortUsePokeyDivisors", mSerialPortUsePokeyDivisors);
 }
 
 int RespeqtSettings::serialPortPokeyDivisor()
@@ -420,7 +422,8 @@ int RespeqtSettings::serialPortPokeyDivisor()
 void RespeqtSettings::setSerialPortPokeyDivisor(int divisor)
 {
     mSerialPortPokeyDivisor = divisor;
-    if(mSessionFileName == "") mSettings->setValue("SerialPortPokeyDivisor", mSerialPortPokeyDivisor);
+    if(mSessionFileName == "")
+        mSettings->setValue("SerialPortPokeyDivisor", mSerialPortPokeyDivisor);
 }
 
 int RespeqtSettings::serialPortHandshakingMethod()
@@ -431,7 +434,8 @@ int RespeqtSettings::serialPortHandshakingMethod()
 void RespeqtSettings::setSerialPortHandshakingMethod(int method)
 {
     mSerialPortHandshakingMethod = method;
-    if(mSessionFileName == "") mSettings->setValue("HandshakingMethod", mSerialPortHandshakingMethod);
+    if(mSessionFileName == "")
+        mSettings->setValue("HandshakingMethod", mSerialPortHandshakingMethod);
 }
 
 bool RespeqtSettings::serialPortTriggerOnFallingEdge()
@@ -442,7 +446,8 @@ bool RespeqtSettings::serialPortTriggerOnFallingEdge()
 void RespeqtSettings::setSerialPortTriggerOnFallingEdge(bool use)
 {
     mSerialPortTriggerOnFallingEdge = use;
-    if(mSessionFileName == "") mSettings->setValue("FallingEdge", mSerialPortTriggerOnFallingEdge);
+    if(mSessionFileName == "")
+        mSettings->setValue("FallingEdge", mSerialPortTriggerOnFallingEdge);
 }
 
 bool RespeqtSettings::serialPortDTRControlEnable()
@@ -453,7 +458,8 @@ bool RespeqtSettings::serialPortDTRControlEnable()
 void RespeqtSettings::setSerialPortDTRControlEnable(bool use)
 {
     mSerialPortDTRControlEnable = use;
-    if(mSessionFileName == "") mSettings->setValue("DTRControlEnable", mSerialPortDTRControlEnable);
+    if(mSessionFileName == "")
+        mSettings->setValue("DTRControlEnable", mSerialPortDTRControlEnable);
 }
 
 int RespeqtSettings::serialPortWriteDelay()
@@ -464,7 +470,8 @@ int RespeqtSettings::serialPortWriteDelay()
 void RespeqtSettings::setSerialPortWriteDelay(int delay)
 {
     mSerialPortWriteDelay = delay;
-    if(mSessionFileName == "") mSettings->setValue("WriteDelay", mSerialPortWriteDelay);
+    if(mSessionFileName == "")
+        mSettings->setValue("WriteDelay", mSerialPortWriteDelay);
 }
 
 int RespeqtSettings::serialPortCompErrDelay()
@@ -475,7 +482,8 @@ int RespeqtSettings::serialPortCompErrDelay()
 void RespeqtSettings::setSerialPortCompErrDelay(int delay)
 {
     mSerialPortCompErrDelay = delay;
-    if(mSessionFileName == "") mSettings->setValue("CompErrDelay", mSerialPortCompErrDelay);
+    if(mSessionFileName == "")
+        mSettings->setValue("CompErrDelay", mSerialPortCompErrDelay);
 }
 
 QString RespeqtSettings::atariSioDriverName()
@@ -486,7 +494,8 @@ QString RespeqtSettings::atariSioDriverName()
 void RespeqtSettings::setAtariSioDriverName(const QString &name)
 {    
     mAtariSioDriverName = name;
-    if(mSessionFileName == "") mSettings->setValue("AtariSioDriverName", mAtariSioDriverName);
+    if(mSessionFileName == "")
+        mSettings->setValue("AtariSioDriverName", mAtariSioDriverName);
 }
 
 int RespeqtSettings::atariSioHandshakingMethod()
@@ -497,18 +506,20 @@ int RespeqtSettings::atariSioHandshakingMethod()
 void RespeqtSettings::setAtariSioHandshakingMethod(int method)
 {    
     mAtariSioHandshakingMethod = method;
-    if(mSessionFileName == "") mSettings->setValue("AtariSioHandshakingMethod", mAtariSioHandshakingMethod);
+    if(mSessionFileName == "")
+        mSettings->setValue("AtariSioHandshakingMethod", mAtariSioHandshakingMethod);
 }
 
-int RespeqtSettings::backend()
+SerialBackend RespeqtSettings::backend()
 {
     return mBackend;
 }
 
-void RespeqtSettings::setBackend(int backend)
+void RespeqtSettings::setBackend(SerialBackend backend)
 {   
     mBackend = backend;
-    if(mSessionFileName == "") mSettings->setValue("Backend", mBackend);
+    if(mSessionFileName == "")
+        mSettings->setValue("Backend", static_cast<int>(mBackend));
 }
 
 QString RespeqtSettings::lastRclDir()
@@ -530,7 +541,8 @@ bool RespeqtSettings::useHighSpeedExeLoader()
 void RespeqtSettings::setUseHighSpeedExeLoader(bool use)
 {   
     mUseHighSpeedExeLoader = use;
-    if(mSessionFileName == "") mSettings->setValue("UseHighSpeedExeLoader", mUseHighSpeedExeLoader);
+    if(mSessionFileName == "")
+        mSettings->setValue("UseHighSpeedExeLoader", mUseHighSpeedExeLoader);
 }
 
 bool RespeqtSettings::printerEmulation()
@@ -541,7 +553,8 @@ bool RespeqtSettings::printerEmulation()
 void RespeqtSettings::setPrinterEmulation(bool status)
 {
     mPrinterEmulation = status;
-    if(mSessionFileName == "") mSettings->setValue("PrinterEmulation", mPrinterEmulation);
+    if(mSessionFileName == "")
+        mSettings->setValue("PrinterEmulation", mPrinterEmulation);
 }
 
 bool RespeqtSettings::useCustomCasBaud()
@@ -563,7 +576,8 @@ int RespeqtSettings::customCasBaud()
 void RespeqtSettings::setCustomCasBaud(int baud)
 {    
     mCustomCasBaud = baud;
-    if(mSessionFileName == "") mSettings->setValue("CustomCasBaud", mCustomCasBaud);
+    if(mSessionFileName == "")
+        mSettings->setValue("CustomCasBaud", mCustomCasBaud);
 }
 
 const RespeqtSettings::ImageSettings* RespeqtSettings::getImageSettingsFromName(const QString &fileName)
@@ -604,15 +618,18 @@ const RespeqtSettings::ImageSettings& RespeqtSettings::recentImageSetting(int no
 void RespeqtSettings::setMountedImageProtection(int no, bool prot)
 {
     mMountedImageSettings[no].isWriteProtected = prot;
-    if(mSessionFileName == "") mSettings->setValue(QString("MountedImageSettings/%1/IsWriteProtected").arg(no+1), prot);
+    if(mSessionFileName == "")
+        mSettings->setValue(QString("MountedImageSettings/%1/IsWriteProtected").arg(no+1), prot);
 }
 
 void RespeqtSettings::setMountedImageSetting(int no, const QString &fileName, bool prot)
 {
     mMountedImageSettings[no].fileName = fileName;
     mMountedImageSettings[no].isWriteProtected = prot;
-    if(mSessionFileName == "") mSettings->setValue(QString("MountedImageSettings/%1/FileName").arg(no+1), fileName);
-    if(mSessionFileName == "") mSettings->setValue(QString("MountedImageSettings/%1/IsWriteProtected").arg(no+1), prot);
+    if(mSessionFileName == "")
+        mSettings->setValue(QString("MountedImageSettings/%1/FileName").arg(no+1), fileName);
+    if(mSessionFileName == "")
+        mSettings->setValue(QString("MountedImageSettings/%1/IsWriteProtected").arg(no+1), prot);
 }
 
 void RespeqtSettings::mountImage(int no, const QString &fileName, bool prot)
@@ -667,7 +684,8 @@ bool RespeqtSettings::saveDiskVis()
 void RespeqtSettings::setsaveDiskVis(bool saveDvis)
 {
     msaveDiskVis = saveDvis;
-    if(mSessionFileName == "") mSettings->setValue("SaveDiskVisibility", msaveDiskVis);
+    if(mSessionFileName == "")
+        mSettings->setValue("SaveDiskVisibility", msaveDiskVis);
 }
 
 // Drive visibility status //
@@ -679,7 +697,8 @@ bool RespeqtSettings::D9DOVisible()
 void RespeqtSettings::setD9DOVisible(bool dVis)
 {
     mdVis = dVis;
-    if(mSessionFileName == "") mSettings->setValue("D9DOVisible", mdVis);
+    if(mSessionFileName == "")
+        mSettings->setValue("D9DOVisible", mdVis);
 }
 // Shade Mode Enable //
 bool RespeqtSettings::enableShade()
@@ -690,7 +709,8 @@ bool RespeqtSettings::enableShade()
 void RespeqtSettings::setEnableShade(bool shade)
 {
     mEnableShade = shade;
-    if(mSessionFileName == "") mSettings->setValue("EnableShadeByDefault", mEnableShade);
+    if(mSessionFileName == "")
+        mSettings->setValue("EnableShadeByDefault", mEnableShade);
 }
 
 // Use Large Font //
@@ -702,7 +722,8 @@ bool RespeqtSettings::useLargeFont()
 void RespeqtSettings::setUseLargeFont(bool largeFont)
 {
     mUseLargeFont = largeFont;
-    if(mSessionFileName == "") mSettings->setValue("UseLargeFont", mUseLargeFont);
+    if(mSessionFileName == "")
+        mSettings->setValue("UseLargeFont", mUseLargeFont);
 }
 
 // Explorer Window always on top
@@ -714,7 +735,8 @@ bool RespeqtSettings::explorerOnTop()
 void RespeqtSettings::setExplorerOnTop(bool expOnTop)
 {
     mExplorerOnTop = expOnTop;
-    if(mSessionFileName =="") mSettings->setValue("ExplorerOnTop", mExplorerOnTop);
+    if(mSessionFileName =="")
+        mSettings->setValue("ExplorerOnTop", mExplorerOnTop);
 }
 
 // Save/return last main window position/size option //
@@ -726,7 +748,8 @@ bool RespeqtSettings::saveWindowsPos()
 void RespeqtSettings::setsaveWindowsPos(bool saveMwp)
 {    
     msaveWindowsPos = saveMwp;
-    if(mSessionFileName == "") mSettings->setValue("SaveWindowsPosSize", msaveWindowsPos);
+    if(mSessionFileName == "")
+        mSettings->setValue("SaveWindowsPosSize", msaveWindowsPos);
 }
 // Last main window position/size (No Session File) //
 
@@ -738,7 +761,8 @@ int RespeqtSettings::lastHorizontalPos()
 void RespeqtSettings::setLastHorizontalPos(int lastHpos)
 {    
     mMainX = lastHpos;
-    if(mSessionFileName == "") mSettings->setValue("MainX", mMainX);
+    if(mSessionFileName == "")
+        mSettings->setValue("MainX", mMainX);
 }
 int RespeqtSettings::lastVerticalPos()
 {
@@ -748,7 +772,8 @@ int RespeqtSettings::lastVerticalPos()
 void RespeqtSettings::setLastVerticalPos(int lastVpos)
 {    
     mMainY = lastVpos;
-    if(mSessionFileName == "") mSettings->setValue("MainY", mMainY);
+    if(mSessionFileName == "")
+        mSettings->setValue("MainY", mMainY);
 }
 int RespeqtSettings::lastWidth()
 {
@@ -758,7 +783,8 @@ int RespeqtSettings::lastWidth()
 void RespeqtSettings::setLastWidth(int lastW)
 {    
     mMainW = lastW;
-    if(mSessionFileName == "") mSettings->setValue("MainW", mMainW);
+    if(mSessionFileName == "")
+        mSettings->setValue("MainW", mMainW);
 }
 int RespeqtSettings::lastHeight()
 {
@@ -768,7 +794,8 @@ int RespeqtSettings::lastHeight()
 void RespeqtSettings::setLastHeight(int lastH)
 {
     mMainH = lastH;
-    if(mSessionFileName == "") mSettings->setValue("MainH", mMainH);
+    if(mSessionFileName == "")
+        mSettings->setValue("MainH", mMainH);
 }
 // Last mini window position (No Session File) //
 
@@ -780,7 +807,8 @@ int RespeqtSettings::lastMiniHorizontalPos()
 void RespeqtSettings::setLastMiniHorizontalPos(int lastMHpos)
 {
     mMiniX = lastMHpos;
-    if(mSessionFileName == "") mSettings->setValue("MiniX", mMiniX);
+    if(mSessionFileName == "")
+        mSettings->setValue("MiniX", mMiniX);
 }
 int RespeqtSettings::lastMiniVerticalPos()
 {
@@ -790,7 +818,8 @@ int RespeqtSettings::lastMiniVerticalPos()
 void RespeqtSettings::setLastMiniVerticalPos(int lastMVpos)
 {
     mMiniY = lastMVpos;
-    if(mSessionFileName == "") mSettings->setValue("MiniY", mMiniY);
+    if(mSessionFileName == "")
+        mSettings->setValue("MiniY", mMiniY);
 }
 
 // Last print window position/size (No Session File) //
@@ -803,7 +832,8 @@ int RespeqtSettings::lastPrtHorizontalPos()
 void RespeqtSettings::setLastPrtHorizontalPos(int lastPrtHpos)
 {
     mPrtX = lastPrtHpos;
-    if(mSessionFileName == "") mSettings->setValue("PrtX", mPrtX);
+    if(mSessionFileName == "")
+        mSettings->setValue("PrtX", mPrtX);
 }
 int RespeqtSettings::lastPrtVerticalPos()
 {
@@ -813,7 +843,8 @@ int RespeqtSettings::lastPrtVerticalPos()
 void RespeqtSettings::setLastPrtVerticalPos(int lastPrtVpos)
 {
     mPrtY = lastPrtVpos;
-    if(mSessionFileName == "") mSettings->setValue("PrtY", mPrtY);
+    if(mSessionFileName == "")
+        mSettings->setValue("PrtY", mPrtY);
 }
 int RespeqtSettings::lastPrtWidth()
 {
@@ -823,7 +854,8 @@ int RespeqtSettings::lastPrtWidth()
 void RespeqtSettings::setLastPrtWidth(int lastPrtW)
 {
     mPrtW = lastPrtW;
-    if(mSessionFileName == "") mSettings->setValue("PrtW", mPrtW);
+    if(mSessionFileName == "")
+        mSettings->setValue("PrtW", mPrtW);
 }
 int RespeqtSettings::lastPrtHeight()
 {
@@ -833,7 +865,8 @@ int RespeqtSettings::lastPrtHeight()
 void RespeqtSettings::setLastPrtHeight(int lastPrtH)
 {
     mPrtH = lastPrtH;
-    if(mSessionFileName == "") mSettings->setValue("PrtH", mPrtH);
+    if(mSessionFileName == "")
+        mSettings->setValue("PrtH", mPrtH);
 }
 QString RespeqtSettings::lastDiskImageDir()
 {
@@ -922,7 +955,8 @@ void RespeqtSettings::setI18nLanguage(const QString &lang)
 {
 
     mI18nLanguage = lang;
-    if(mSessionFileName == "") mSettings->setValue("I18nLanguage", mI18nLanguage);
+    if(mSessionFileName == "")
+        mSettings->setValue("I18nLanguage", mI18nLanguage);
 }
 
 bool RespeqtSettings::minimizeToTray()
@@ -1088,7 +1122,8 @@ bool RespeqtSettings::displayTransmission()
 void RespeqtSettings::setDisplayTransmission(bool displayTransmission)
 {
     mDisplayTransmission = displayTransmission;
-    if(mSessionFileName == "") mSettings->setValue("DisplayTransmission", mDisplayTransmission);
+    if(mSessionFileName == "")
+        mSettings->setValue("DisplayTransmission", mDisplayTransmission);
 }
 
 bool RespeqtSettings::displayDriveHead()
@@ -1099,7 +1134,8 @@ bool RespeqtSettings::displayDriveHead()
 void RespeqtSettings::setDisplayDriveHead(bool displayDriveHead)
 {
     mDisplayDriveHead = displayDriveHead;
-    if(mSessionFileName == "") mSettings->setValue("DisplayDriveHead", mDisplayDriveHead);
+    if(mSessionFileName == "")
+        mSettings->setValue("DisplayDriveHead", mDisplayDriveHead);
 }
 
 bool RespeqtSettings::displayFdcCommands()
@@ -1110,7 +1146,8 @@ bool RespeqtSettings::displayFdcCommands()
 void RespeqtSettings::setDisplayFdcCommands(bool displayFdcCommands)
 {
     mDisplayFdcCommands = displayFdcCommands;
-    if(mSessionFileName == "") mSettings->setValue("DisplayFdcCommands", mDisplayFdcCommands);
+    if(mSessionFileName == "")
+        mSettings->setValue("DisplayFdcCommands", mDisplayFdcCommands);
 }
 
 bool RespeqtSettings::displayIndexPulse()
@@ -1121,7 +1158,8 @@ bool RespeqtSettings::displayIndexPulse()
 void RespeqtSettings::setDisplayIndexPulse(bool displayIndexPulse)
 {
     mDisplayIndexPulse = displayIndexPulse;
-    if(mSessionFileName == "") mSettings->setValue("DisplayIndexPulse", mDisplayIndexPulse);
+    if(mSessionFileName == "")
+        mSettings->setValue("DisplayIndexPulse", mDisplayIndexPulse);
 }
 
 bool RespeqtSettings::displayMotorOnOff()
@@ -1132,7 +1170,8 @@ bool RespeqtSettings::displayMotorOnOff()
 void RespeqtSettings::setDisplayMotorOnOff(bool displayMotorOnOff)
 {
     mDisplayMotorOnOff = displayMotorOnOff;
-    if(mSessionFileName == "") mSettings->setValue("DisplayMotorOnOff", mDisplayMotorOnOff);
+    if(mSessionFileName == "")
+        mSettings->setValue("DisplayMotorOnOff", mDisplayMotorOnOff);
 }
 
 bool RespeqtSettings::displayIDAddressMarks()
@@ -1143,7 +1182,8 @@ bool RespeqtSettings::displayIDAddressMarks()
 void RespeqtSettings::setDisplayIDAddressMarks(bool displayIDAddressMarks)
 {
     mDisplayIDAddressMarks = displayIDAddressMarks;
-    if(mSessionFileName == "") mSettings->setValue("DisplayIDAddressMarks", mDisplayIDAddressMarks);
+    if(mSessionFileName == "")
+        mSettings->setValue("DisplayIDAddressMarks", mDisplayIDAddressMarks);
 }
 
 bool RespeqtSettings::displayTrackInformation()
@@ -1154,7 +1194,8 @@ bool RespeqtSettings::displayTrackInformation()
 void RespeqtSettings::setDisplayTrackInformation(bool displayTrackInformation)
 {
     mDisplayTrackInformation = displayTrackInformation;
-    if(mSessionFileName == "") mSettings->setValue("DisplayTrackInformation", mDisplayTrackInformation);
+    if(mSessionFileName == "")
+        mSettings->setValue("DisplayTrackInformation", mDisplayTrackInformation);
 }
 
 bool RespeqtSettings::disassembleUploadedCode()
@@ -1165,7 +1206,8 @@ bool RespeqtSettings::disassembleUploadedCode()
 void RespeqtSettings::setDisassembleUploadedCode(bool disassembleUploadedCode)
 {
     mDisassembleUploadedCode = disassembleUploadedCode;
-    if(mSessionFileName == "") mSettings->setValue("DisassembleUploadedCode", mDisassembleUploadedCode);
+    if(mSessionFileName == "")
+        mSettings->setValue("DisassembleUploadedCode", mDisassembleUploadedCode);
 }
 
 bool RespeqtSettings::translatorAutomaticDetection()
@@ -1176,7 +1218,8 @@ bool RespeqtSettings::translatorAutomaticDetection()
 void RespeqtSettings::setTranslatorAutomaticDetection(bool translatorAutomaticDetection)
 {
     mTranslatorAutomaticDetection = translatorAutomaticDetection;
-    if(mSessionFileName == "") mSettings->setValue("TranslatorAutomaticDetection", mTranslatorAutomaticDetection);
+    if(mSessionFileName == "")
+        mSettings->setValue("TranslatorAutomaticDetection", mTranslatorAutomaticDetection);
 }
 
 bool RespeqtSettings::sioAutoReconnect()
@@ -1187,7 +1230,8 @@ bool RespeqtSettings::sioAutoReconnect()
 void RespeqtSettings::setSioAutoReconnect(bool sioAutoReconnect)
 {
     mSioAutoReconnect = sioAutoReconnect;
-    if(mSessionFileName == "") mSettings->setValue("SioAutoReconnect", mSioAutoReconnect);
+    if(mSessionFileName == "")
+        mSettings->setValue("SioAutoReconnect", mSioAutoReconnect);
 }
 
 bool RespeqtSettings::hideChipMode()
@@ -1198,7 +1242,8 @@ bool RespeqtSettings::hideChipMode()
 void RespeqtSettings::setHideChipMode(bool hidden)
 {
     mHideChipMode = hidden;
-    if(mSessionFileName == "") mSettings->setValue("HideChipMode", mHideChipMode);
+    if(mSessionFileName == "")
+        mSettings->setValue("HideChipMode", mHideChipMode);
 }
 
 bool RespeqtSettings::hideHappyMode()
@@ -1209,7 +1254,8 @@ bool RespeqtSettings::hideHappyMode()
 void RespeqtSettings::setHideHappyMode(bool hidden)
 {
     mHideHappyMode = hidden;
-    if(mSessionFileName == "") mSettings->setValue("HideHappyMode", mHideHappyMode);
+    if(mSessionFileName == "")
+        mSettings->setValue("HideHappyMode", mHideHappyMode);
 }
 
 bool RespeqtSettings::hideNextImage()
@@ -1220,7 +1266,8 @@ bool RespeqtSettings::hideNextImage()
 void RespeqtSettings::setHideNextImage(bool hidden)
 {
     mHideNextImage = hidden;
-    if(mSessionFileName == "") mSettings->setValue("HideNextImage", mHideNextImage);
+    if(mSessionFileName == "")
+        mSettings->setValue("HideNextImage", mHideNextImage);
 }
 
 bool RespeqtSettings::hideOSBMode()
@@ -1231,7 +1278,8 @@ bool RespeqtSettings::hideOSBMode()
 void RespeqtSettings::setHideOSBMode(bool hidden)
 {
     mHideOSBMode = hidden;
-    if(mSessionFileName == "") mSettings->setValue("HideOSBMode", mHideOSBMode);
+    if(mSessionFileName == "")
+        mSettings->setValue("HideOSBMode", mHideOSBMode);
 }
 
 bool RespeqtSettings::hideToolDisk()
@@ -1242,7 +1290,8 @@ bool RespeqtSettings::hideToolDisk()
 void RespeqtSettings::setHideToolDisk(bool hidden)
 {
     mHideToolDisk = hidden;
-    if(mSessionFileName == "") mSettings->setValue("HideToolDisk", mHideToolDisk);
+    if(mSessionFileName == "")
+        mSettings->setValue("HideToolDisk", mHideToolDisk);
 }
 
 QString RespeqtSettings::translatorDiskImagePath()
@@ -1253,7 +1302,8 @@ QString RespeqtSettings::translatorDiskImagePath()
 void RespeqtSettings::setTranslatorDiskImagePath(const QString &diskImage)
 {
     mTranslatorDiskImagePath = diskImage;
-    if(mSessionFileName == "") mSettings->setValue("TranslatorDiskImagePath", mTranslatorDiskImagePath);
+    if(mSessionFileName == "")
+        mSettings->setValue("TranslatorDiskImagePath", mTranslatorDiskImagePath);
 }
 
 QString RespeqtSettings::toolDiskImagePath()
@@ -1264,7 +1314,8 @@ QString RespeqtSettings::toolDiskImagePath()
 void RespeqtSettings::setToolDiskImagePath(const QString &diskImage)
 {
     mToolDiskImagePath = diskImage;
-    if(mSessionFileName == "") mSettings->setValue("ToolDiskImagePath", mToolDiskImagePath);
+    if(mSessionFileName == "")
+        mSettings->setValue("ToolDiskImagePath", mToolDiskImagePath);
 }
 
 bool RespeqtSettings::activateChipModeWithTool()
@@ -1275,7 +1326,8 @@ bool RespeqtSettings::activateChipModeWithTool()
 void RespeqtSettings::setActivateChipModeWithTool(bool activate)
 {
     mActivateChipModeWithTool = activate;
-    if(mSessionFileName == "") mSettings->setValue("ActivateChipModeWithTool", mActivateChipModeWithTool);
+    if(mSessionFileName == "")
+        mSettings->setValue("ActivateChipModeWithTool", mActivateChipModeWithTool);
 }
 
 bool RespeqtSettings::activateHappyModeWithTool()
@@ -1286,7 +1338,8 @@ bool RespeqtSettings::activateHappyModeWithTool()
 void RespeqtSettings::setActivateHappyModeWithTool(bool activate)
 {
     mActivateHappyModeWithTool = activate;
-    if(mSessionFileName == "") mSettings->setValue("ActivateHappyModeWithTool", mActivateHappyModeWithTool);
+    if(mSessionFileName == "")
+        mSettings->setValue("ActivateHappyModeWithTool", mActivateHappyModeWithTool);
 }
 
 bool RespeqtSettings::displayCpuInstructions()
@@ -1297,7 +1350,8 @@ bool RespeqtSettings::displayCpuInstructions()
 void RespeqtSettings::setDisplayCpuInstructions(bool displayCpuInstructions)
 {
     mDisplayCpuInstructions = displayCpuInstructions;
-    if(mSessionFileName == "") mSettings->setValue("DisplayCpuInstructions", mDisplayCpuInstructions);
+    if(mSessionFileName == "")
+        mSettings->setValue("DisplayCpuInstructions", mDisplayCpuInstructions);
 }
 
 QString RespeqtSettings::traceFilename()
@@ -1308,7 +1362,8 @@ QString RespeqtSettings::traceFilename()
 void RespeqtSettings::setTraceFilename(const QString &filename)
 {
     mTraceFilename = filename;
-    if(mSessionFileName == "") mSettings->setValue("TraceFilename", mTraceFilename);
+    if(mSessionFileName == "")
+        mSettings->setValue("TraceFilename", mTraceFilename);
 }
 
 #ifdef Q_OS_MAC
@@ -1343,4 +1398,5 @@ bool RespeqtSettings::debugMenuVisible() const
 void RespeqtSettings::setDebugMenuVisible(bool menuVisible)
 {
     mDebugMenuVisible = menuVisible;
+    mSettings->setValue("DebugMenuVisible", mDebugMenuVisible);
 }

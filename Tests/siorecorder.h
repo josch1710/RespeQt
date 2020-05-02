@@ -17,7 +17,7 @@ namespace Tests
     class SioRecorder final : public AbstractSerialPortBackend
     {
     public:
-        SioRecorder();
+        SioRecorder(QObject *parent = nullptr);
         virtual ~SioRecorder();
 
         static SioRecorderPtr instance() { return sInstance; }
@@ -29,7 +29,7 @@ namespace Tests
         void writeSnapshotCommandFrame(const qint8 no, const qint8 command, const qint8 aux1, const qint8 aux2);
         void writeSnapshotDataFrame(const QByteArray &data);
 
-        void prepareReplaySnapshot(QFile *file);
+        void prepareReplaySnapshot(QFile *file, SerialBackend prevSerialBackend);
 
         void writePauseCommand(int msec);
 
@@ -64,6 +64,7 @@ namespace Tests
         std::unique_ptr<QJsonArray> mSnapshotData{nullptr};
         std::vector<char> mTestData{};
         int mReadIndex{0};
+        SerialBackend mPreviousBackend{SerialBackend::NONE};
 
         static SioRecorderPtr sInstance;
     };

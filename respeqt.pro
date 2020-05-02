@@ -39,7 +39,7 @@ test {
   DEFINES += RESPEQT_TEST
 }
 
-!test {
+!test {o
   SOURCES += main.cpp
   TARGET = RespeQt
   TEMPLATE = app
@@ -88,7 +88,6 @@ SOURCES += tests/siorecorder.cpp \
     printerwidget.cpp \
     printers/atariprinter.cpp \
     printers/atari1020.cpp \
-    serialport-test.cpp \
     smartdevice.cpp \
     printers/nativeoutput.cpp \
     printers/centronics.cpp \
@@ -143,7 +142,6 @@ HEADERS += mainwindow.h \
     atasciiinternational.h \
     printers/atariprinter.h \
     printers/atari1020.h \
-    serialport-test.h \
     printers/nativeoutput.h \
     printers/centronics.h \
     printers/escp.h \

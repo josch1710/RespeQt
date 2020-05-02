@@ -278,15 +278,6 @@ MainWindow::MainWindow()
     g_D9DOVisible =  RespeqtSettings::instance()->D9DOVisible();
     showHideDrives();
 
-    snapshot = new QLabel(this);
-    snapshot->setMinimumWidth(21);
-    snapshot->setPixmap(QIcon(":/icons/silk-icons/icons/camera.png").pixmap(16, 16, QIcon::Normal));
-    snapshot->setToolTip(tr("Record SIO traffic"));
-    snapshot->setStatusTip(snapshot->toolTip());
-    ui->statusBar->addPermanentWidget(snapshot);
-    snapshot->setVisible(RespeqtSettings::instance()->debugMenuVisible());
-    ui->menuDebug->setVisible(RespeqtSettings::instance()->debugMenuVisible());
-
     /* Connect to the network */
     QString netInterface;
     auto oNet = new Network();
@@ -371,7 +362,6 @@ MainWindow::~MainWindow()
 
 }
 
-
 void MainWindow::createDeviceWidgets()
 {
 
@@ -451,24 +441,6 @@ void MainWindow::createDeviceWidgets()
      if (event->button() == Qt::LeftButton && !speedLabel->isHidden() && speedLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
         ui->actionOptions->trigger();
      }
-#ifndef QT_NO_DEBUG
-     if (sio && event->button() == Qt::LeftButton && !snapshot->isHidden() && snapshot->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
-         Tests::SioRecorderPtr recorder = Tests::SioRecorder::instance();
-
-         if (!recorder->isSnapshotRunning())
-         {
-            recorder->startSIOSnapshot();
-         } else {
-            auto snapshot = recorder->stopSIOSnapshot();
-            auto fileName = QFileDialog::getSaveFileName(MainWindow::instance(),
-                tr("Save test Json File"), QString(), tr("Json Files (*.json)"));
-            QFile file{fileName};
-            file.open(QFile::WriteOnly|QFile::Truncate);
-            file.write(snapshot);
-            file.close();
-         }
-     }
-#endif
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -933,9 +905,6 @@ void MainWindow::sioStarted()
     for (int i = 0; i < PRINTER_COUNT; i++) {
         printerWidgets[i]->setSioWorker(sio);
     }
-#ifndef QT_NO_DEBUG
-    snapshot->show();
-#endif
 }
 
 void MainWindow::sioFinished()
@@ -949,9 +918,6 @@ void MainWindow::sioFinished()
     onOffLabel->setStatusTip(ui->actionStartEmulation->statusTip());
     speedLabel->hide();
     speedLabel->clear();
-#ifndef QT_NO_DEBUG
-    //snapshot->hide();
-#endif
     qWarning() << "!i" << tr("Emulation stopped.");
 }
 
@@ -1134,7 +1100,7 @@ void MainWindow::showOptionsTriggered()
         qApp->processEvents();
     }
     OptionsDialog optionsDialog(this);
-    optionsDialog.exec() ;
+    optionsDialog.exec();
 
 // Change drive slot description fonts
     changeFonts();
@@ -1144,6 +1110,8 @@ void MainWindow::showOptionsTriggered()
 
 // retranslate Designer Form
     ui->retranslateUi(this);
+
+    setupDebugItems();
 
     for (int i = DISK_BASE_CDEVIC; i < (DISK_BASE_CDEVIC+DISK_COUNT); i++) {    // 0x31 - 0x3E
         deviceStatusChanged(i);
@@ -2046,4 +2014,56 @@ void MainWindow::connectUISignal()
     connect(ui->actionToggleMiniMode, &QAction::triggered, this, &MainWindow::toggleMiniModeTriggered);
     connect(ui->actionToggleShade, &QAction::triggered, this, &MainWindow::toggleShadeTriggered);
     connect(ui->actionLogWindow, &QAction::triggered, this, &MainWindow::showLogWindowTriggered);
+    connect(ui->actionCaptureSnapshot, &QAction::toggled, this, &MainWindow::toggleSnapshotCapture);
+    connect(ui->actionReplaySnapshot, &QAction::triggered, this, &MainWindow::replaySnapshot);
+}
+
+void MainWindow::toggleSnapshotCapture(bool toggle)
+{
+    if (sio) {
+        auto recorder = Tests::SioRecorder::instance();
+
+        if (!recorder->isSnapshotRunning())
+        {
+           recorder->startSIOSnapshot();
+        } else {
+           auto snapshot = recorder->stopSIOSnapshot();
+           auto fileName = QFileDialog::getSaveFileName(MainWindow::instance(),
+               tr("Save test Json File"), QString(), tr("Json Files (*.json)"));
+           QFile file{fileName};
+           file.open(QFile::WriteOnly|QFile::Truncate);
+           file.write(snapshot);
+           file.close();
+        }
+    }
+    ui->actionCaptureSnapshot->setChecked(toggle);
+}
+
+void MainWindow::replaySnapshot()
+{
+    if (sio->isRunning() && RespeqtSettings::instance()->backend() != SerialBackend::TEST)
+    {
+    // TODO Ask for permission to cut the serial connection, if open.
+        auto answer = QMessageBox::question(this, tr("Disconnect serial"), tr("If you proceed, the standard serial port will be disconnected. Would you like to proceed?"));
+        if (answer == QMessageBox::No)
+            return;
+    }
+
+    // Open the snapshot and load it into SioRecorder
+    auto fileName = QFileDialog::getOpenFileName(MainWindow::instance(),
+        tr("Save test Json File"), QString(), tr("Json Files (*.json)"));
+    QFile file{fileName};
+    file.open(QFile::ReadOnly);
+    auto recorder = Tests::SioRecorder::instance();
+    recorder->prepareReplaySnapshot(&file, RespeqtSettings::instance()->backend());
+    file.close();
+    // Now set SioRecorder to be the serial port and start the connection again.
+    ui->actionStartEmulation->trigger();
+    RespeqtSettings::instance()->setBackend(SerialBackend::TEST);
+    ui->actionStartEmulation->trigger();
+}
+
+void MainWindow::setupDebugItems()
+{
+    ui->menuDebug->menuAction()->setVisible(RespeqtSettings::instance()->debugMenuVisible());
 }

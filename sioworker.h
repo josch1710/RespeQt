@@ -73,13 +73,13 @@ private:
     quint8 sioChecksum(const QByteArray &data, uint size);
     QMutex *deviceMutex;
     SioDevice* devices[256];
-    AbstractSerialPortBackend *mPort;
+    AbstractSerialPortBackendPtr mPort;
     std::atomic_bool mustTerminate;
     bool displayCommandName;
     bool mAutoReconnect;
 
 public:
-    AbstractSerialPortBackend* port() {return mPort;}
+    AbstractSerialPortBackendPtr port() { return mPort; }
     int maxSpeed;
 
     SioWorker();
@@ -129,10 +129,10 @@ class CassetteWorker : public QThread
 
 private:
     QMutex mustTerminate;
-    AbstractSerialPortBackend *mPort;
+    AbstractSerialPortBackendPtr mPort;
     QList<CassetteRecord> mRecords;
 public:
-    AbstractSerialPortBackend* port() {return mPort;}
+    AbstractSerialPortBackendPtr port() { return mPort; }
 
     CassetteWorker();
     ~CassetteWorker();

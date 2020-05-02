@@ -22,7 +22,7 @@
 #define NUM_RECENT_FILES 10
 
 // There should always only be one instance, so this is a singleton.
-class RespeqtSettings
+class RespeqtSettings final
 {
 public:
     class ImageSettings {
@@ -73,12 +73,8 @@ public:
     int atariSioHandshakingMethod();
     void setAtariSioHandshakingMethod(int method);
 
-    int backend();
-    void setBackend(int backend);
-#ifndef QT_NO_DEBUG
-    QString testFile() const { return mTestFile; }
-    void setTestFile(const QString testFile) { mTestFile = testFile; }
-#endif
+    SerialBackend backend();
+    void setBackend(SerialBackend backend);
 
     bool useHighSpeedExeLoader();
     void setUseHighSpeedExeLoader(bool use);
@@ -311,8 +307,6 @@ public:
     }
 
 private:
-    //friend std::unique_ptr<RespeqtSettings>;
-
     RespeqtSettings();
 
     static std::unique_ptr<RespeqtSettings> sInstance;
@@ -360,10 +354,7 @@ private:
 
     QString mRclDir;
 
-    int mBackend;
-#ifndef QT_NO_DEBUG
-    QString mTestFile;
-#endif
+    SerialBackend mBackend;
 
     bool mUseCustomCasBaud;
     int mCustomCasBaud;

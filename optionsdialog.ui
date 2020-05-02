@@ -988,7 +988,50 @@
         <string>User inteface</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
+        <item row="5" column="0">
+         <widget class="QCheckBox" name="saveWinPosBox">
+          <property name="text">
+           <string>Save window positions and sizes</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="13" column="0">
+         <spacer name="i18nSpacer2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="4" column="0">
+         <widget class="QCheckBox" name="minimizeToTrayBox">
+          <property name="text">
+           <string>Minimize to system tray</string>
+          </property>
+         </widget>
+        </item>
         <item row="10" column="0">
+         <widget class="QCheckBox" name="useNativeMenu">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Use native menu bar</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="11" column="0">
          <widget class="QLabel" name="warning_nativemenu">
           <property name="text">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#c50000;&quot;&gt;Restart application to apply this option.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -1001,33 +1044,6 @@
           </property>
           <property name="indent">
            <number>20</number>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QCheckBox" name="minimizeToTrayBox">
-          <property name="text">
-           <string>Minimize to system tray</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0">
-         <widget class="QCheckBox" name="saveDiskVisBox">
-          <property name="text">
-           <string>Save D9-DO drive visibility status</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QCheckBox" name="saveWinPosBox">
-          <property name="text">
-           <string>Save window positions and sizes</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -1080,33 +1096,17 @@
           </property>
          </widget>
         </item>
-        <item row="12" column="0">
-         <spacer name="i18nSpacer2">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="9" column="0">
-         <widget class="QCheckBox" name="useNativeMenu">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
+        <item row="6" column="0">
+         <widget class="QCheckBox" name="saveDiskVisBox">
           <property name="text">
-           <string>Use native menu bar</string>
+           <string>Save D9-DO drive visibility status</string>
           </property>
           <property name="checked">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
          </widget>
         </item>
-        <item row="11" column="0">
+        <item row="14" column="0">
          <widget class="QCheckBox" name="showDebugMenu">
           <property name="text">
            <string>Show debug menu</string>

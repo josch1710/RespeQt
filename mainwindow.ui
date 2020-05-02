@@ -161,7 +161,7 @@
      <x>0</x>
      <y>0</y>
      <width>587</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Disk">
@@ -208,18 +208,24 @@
      <bool>true</bool>
     </property>
     <property name="title">
-     <string>Window</string>
+     <string>&amp;Window</string>
     </property>
     <addaction name="actionToggleMiniMode"/>
     <addaction name="actionToggleShade"/>
     <addaction name="actionLogWindow"/>
    </widget>
    <widget class="QMenu" name="menuDebug">
-    <property name="title">
-     <string>Debug</string>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
     </property>
-    <addaction name="actionCapture_snapshot"/>
-    <addaction name="actionReplay_snapshot"/>
+    <property name="title">
+     <string>De&amp;bug</string>
+    </property>
+    <property name="separatorsCollapsible">
+     <bool>false</bool>
+    </property>
+    <addaction name="actionCaptureSnapshot"/>
+    <addaction name="actionReplaySnapshot"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Disk"/>
@@ -637,17 +643,20 @@
     <string>Ctrl+L</string>
    </property>
   </action>
-  <action name="actionCapture_snapshot">
+  <action name="actionCaptureSnapshot">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>Capture snapshot</string>
+    <string>&amp;Capture snapshot</string>
    </property>
    <property name="visible">
     <bool>true</bool>
    </property>
   </action>
-  <action name="actionReplay_snapshot">
+  <action name="actionReplaySnapshot">
    <property name="text">
-    <string>Replay snapshot</string>
+    <string>&amp;Replay snapshot</string>
    </property>
   </action>
  </widget>
