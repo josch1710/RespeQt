@@ -543,6 +543,8 @@ namespace Printers
     void Atari1020::executeGraphicsCommand()
     {
         if (mCurrentCommand) {
+            auto primitive = new GraphicsPrimitive();
+
             switch (mCurrentCommand) {
             case 'A': // Abandon Graphics mode
                 mGraphicsMode = false;
@@ -676,7 +678,12 @@ namespace Printers
 
                         switch (mCurrentCommand) {
                             case 'D':
-                                executeGraphicsPrimitive(new GraphicsDrawLine(mPenPoint, mPen, point));
+                                {
+                                auto item = new QGraphicsLineItem{QLine{mPenPoint, point}};
+                                    item->setPen(mPen);
+                                    primitive->addItem(item);
+                                }
+
                                 if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
                                     qDebug() << "!n" << tr("[%1] Draw to point (%2,%3)")
                                                 .arg(deviceName())
@@ -688,7 +695,12 @@ namespace Printers
 
                             case 'J':
                                 point += mPenPoint;
-                                executeGraphicsPrimitive(new GraphicsDrawLine(mPenPoint, mPen, point));
+
+                                {
+                                    auto item = new QGraphicsLineItem{QLine{mPenPoint, point}};
+                                    item->setPen(mPen);
+                                    primitive->addItem(item);
+                                }
                                 if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
                                     qDebug() << "!n" << tr("[%1] Draw relative to point (%2,%3)")
                                                 .arg(deviceName())
@@ -780,6 +792,7 @@ namespace Printers
                 break;
 
             }
+            executeGraphicsPrimitive(primitive);
         }
         mCurrentCommand = 0; // to prevent execution of this command a second time !
     }
@@ -788,8 +801,8 @@ namespace Printers
     {
         if (mOutputWindow) {
             if (mClearPane) {
-                mClearPane = false;
-                mOutputWindow->executeGraphicsPrimitive(new GraphicsClearPane());
+                primitive->clearScene();
+                mOutputWindow->clearScene();
             }
             mOutputWindow->executeGraphicsPrimitive(primitive);
         }
@@ -822,24 +835,64 @@ namespace Printers
         }
         QPen pen(mPen);
         pen.setStyle(Qt::SolidLine);
-        executeGraphicsPrimitive(new GraphicsDrawLine(mPenPoint, pen, end));
+
+        auto primitive = new GraphicsPrimitive;
+        auto item = new QGraphicsLineItem{QLine{mPenPoint, end}};
+        primitive->addItem(item);
 
         for (int c = 1; c <= count; c++) {
             if (xAxis) {
                 auto xc = mPenPoint.x() + c * size;
-                executeGraphicsPrimitive(new GraphicsDrawLine(QPoint(xc, mPenPoint.y() - 2), pen, QPoint(xc, mPenPoint.y() + 2)));
+                item = new QGraphicsLineItem{QLine{QPoint{xc, mPenPoint.y() -2}, QPoint{xc, mPenPoint.y() + 2}}};
             } else {
                 auto yc = mPenPoint.y() + c * size;
-                executeGraphicsPrimitive(new GraphicsDrawLine(QPoint(mPenPoint.x() - 2, yc), pen, QPoint(mPenPoint.x() + 2, yc)));
+                item = new QGraphicsLineItem{QLine{QPoint{mPenPoint.x() -2, yc}, QPoint{mPenPoint.x() + 2, yc}}};
             }
+            item->setPen(pen);
+            primitive->addItem(item);
         }
 
+        executeGraphicsPrimitive(primitive);
         return true;
+    }
+
+    QPoint Atari1020::computeTextCoordinates(const QPoint point, int orientation)
+    {
+        // fix position because (0,0) on Windows/Linux is top left but on the 1020 it is bottom left.
+        QPoint adjusted(point.x(), -point.y());
+        QFontMetrics metrics(mFont);
+        switch (orientation) {
+
+        case 0:
+            adjusted.setY(adjusted.y() - metrics.height());
+            break;
+
+        case 90:
+            adjusted.setX(adjusted.x() + metrics.height());
+            break;
+
+        case 180:
+            adjusted.setY(adjusted.y() + metrics.height());
+            break;
+
+        case 270:
+            adjusted.setY(adjusted.x() - metrics.height());
+            break;
+        }
+
+        return adjusted;
     }
 
     bool Atari1020::drawText()
     {
-        executeGraphicsPrimitive(new GraphicsDrawText(mPenPoint, mPen, mTextOrientation, mFont, QString(mPrintText)));
+        auto primitive = new GraphicsPrimitive;
+        auto item = new QGraphicsTextItem{QString{mPrintText}};
+        item->setFont(mFont);
+        item->setDefaultTextColor(mPen.color());
+        item->setRotation(mTextOrientation);
+        item->setPos(computeTextCoordinates(mPenPoint, mTextOrientation));
+        primitive->addItem(item);
+        executeGraphicsPrimitive(primitive);
 
         // update head position
         QFontMetrics metrics(mFont);
@@ -847,28 +900,28 @@ namespace Printers
         int nbPixel = size.width();
         switch (mTextOrientation) {
 
-        case 0: // text towards right
-            mPenPoint.setX(mPenPoint.x() + nbPixel);
-            if (mPenPoint.x() > 480) {
-                mPenPoint.setX(480);
+            case 0: // text towards right
+                mPenPoint.setX(mPenPoint.x() + nbPixel);
+                if (mPenPoint.x() > 480) {
+                    mPenPoint.setX(480);
+                }
+                break;
+
+            case 90: // text towards bottom
+                mPenPoint.setY(mPenPoint.y() - nbPixel);
+                break;
+
+            case 180: // text towards left
+                mPenPoint.setX(mPenPoint.x() - nbPixel);
+                if (mPenPoint.x() < 0) {
+                    mPenPoint.setX(0);
+                }
+                break;
+
+            case 270: // text towards top
+                mPenPoint.setY(mPenPoint.y() + nbPixel);
+                break;
             }
-            break;
-
-        case 90: // text towards bottom
-            mPenPoint.setY(mPenPoint.y() - nbPixel);
-            break;
-
-        case 180: // text towards left
-            mPenPoint.setX(mPenPoint.x() - nbPixel);
-            if (mPenPoint.x() < 0) {
-                mPenPoint.setX(0);
-            }
-            break;
-
-        case 270: // text towards top
-            mPenPoint.setY(mPenPoint.y() + nbPixel);
-            break;
-        }
 
         return true;
     }
@@ -876,7 +929,9 @@ namespace Printers
     bool Atari1020::handlePrintableCodes(const unsigned char b)
     {
         QChar qb = translateAtascii(b & 127); // Masking inverse characters.
-        //mOutput->printChar(qb);
+        mPrintText.append(qb);
+        if (b==155)
+            drawText();
 
         return true;
     }

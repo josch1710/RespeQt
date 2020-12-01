@@ -34,6 +34,7 @@ public:
     //virtual void calculateFixedFontSize(uint8_t) override {}
     //virtual bool setupOutput() override;
     virtual void executeGraphicsPrimitive(GraphicsPrimitive *primitive);
+    virtual void clearScene() { mGraphicsScene.clear(); }
 
     /*static QString typeName()
     {

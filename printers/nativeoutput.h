@@ -70,7 +70,7 @@ namespace Printers
         };*/
 
         virtual void executeGraphicsPrimitive(GraphicsPrimitive *primitive) {
-            primitive->execute(nullptr);
+            primitive->executeQueue(nullptr);
         }
 
         //BasePrinterWPtr printer() const { return mPrinter; }

@@ -82,16 +82,13 @@ void OutputWindow::print(const QString&)
 
 void OutputWindow::printGraphics(GraphicsPrimitive *primitive)
 {
-    primitive->execute(ui->printerGraphics->scene());
-    delete primitive;
+    primitive->executeQueue(ui->printerGraphics->scene());
 }
 
 
 void OutputWindow::clearTriggered()
 {
-    auto primitive = new GraphicsClearPane;
-    primitive->execute(ui->printerGraphics->scene());
-    delete primitive;
+    ui->printerGraphics->scene()->clear();
 }
 
 // Send to Printer Action   // 
@@ -156,6 +153,7 @@ bool OutputWindow::setupOutput()
     return true;
 }*/
 
+// Needed for cross-thread execution
 void OutputWindow::executeGraphicsPrimitive(GraphicsPrimitive *primitive)
 {
     emit graphicsPrint(primitive);

@@ -4,21 +4,23 @@
 #include <QFont>
 #include <QGraphicsTextItem>
 #include <QGraphicsScene>
-#include <memory>
+#include <vector>
+#include <iostream>
 
 using QPainterPtr = std::shared_ptr<QPainter>;
 
 namespace Printers
 {
-    class GraphicsPrimitive : public QObject
+    class GraphicsPrimitive final: public QObject
     {
-        Q_OBJECT
-
+        Q_OBJECT;
     public:
         GraphicsPrimitive() = default;
-        virtual ~GraphicsPrimitive() = default;
+        ~GraphicsPrimitive() = default;
 
-        virtual void execute(QGraphicsScene *graphicsScene) = 0;
+        void executeQueue(QGraphicsScene *);
+        void addItem(QGraphicsItem*);
+        void clearScene();
 
         static QString typeName()
         {
@@ -26,14 +28,20 @@ namespace Printers
         }
 
     protected:
+        std::vector<QGraphicsItem*> mGraphicsItems{};
         QPoint mPoint;
         int mColor;
+
+    protected slots:
+        void changed(const QList<QRectF> &)
+            {
+                std::cout << "changed\n";
+            }
     };
 
-    class GraphicsClearPane : public GraphicsPrimitive
-    {
-        Q_OBJECT
 
+/*    class GraphicsClearPane : public GraphicsPrimitive
+    {
     public:
         GraphicsClearPane();
         virtual ~GraphicsClearPane() = default;
@@ -48,8 +56,6 @@ namespace Printers
 
     class GraphicsSetPoint : public GraphicsPrimitive
     {
-        Q_OBJECT
-
     public:
         GraphicsSetPoint(const QPoint point, const QPen);
         virtual ~GraphicsSetPoint() = default;
@@ -66,8 +72,6 @@ namespace Printers
 
     class GraphicsDrawLine : public GraphicsSetPoint
     {
-        Q_OBJECT
-
     public:
         GraphicsDrawLine(const QPoint srcPoint, const QPen pen, const QPoint destPoint);
         virtual ~GraphicsDrawLine() = default;
@@ -85,8 +89,6 @@ namespace Printers
 
     class GraphicsDrawText : public GraphicsSetPoint
     {
-        Q_OBJECT
-
     public:
         GraphicsDrawText(const QPoint point, const QPen pen, const int orientation, const QFont font, QString text);
         virtual ~GraphicsDrawText() = default;
@@ -104,6 +106,7 @@ namespace Printers
         QString mText;
 
         QPoint computeTextCoordinates();
-    };
+    }; */
 }
 #endif // GRAPHICSPRIMITIVE_H
+

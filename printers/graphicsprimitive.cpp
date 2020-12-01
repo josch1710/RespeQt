@@ -4,7 +4,7 @@
 
 namespace Printers
 {
-    GraphicsClearPane::GraphicsClearPane()
+/*    GraphicsClearPane::GraphicsClearPane()
         :GraphicsPrimitive()
     {
     }
@@ -28,7 +28,10 @@ namespace Printers
 
     void GraphicsDrawLine::execute(QGraphicsScene *graphicsScene)
     {
-        graphicsScene->addLine(mPoint.x(), -mPoint.y(), mDestPoint.x(), -mDestPoint.y(), mPen);
+        auto line = new QGraphicsLineItem(mPoint.x(), -mPoint.y(), mDestPoint.x(), -mDestPoint.y());
+        line->setPen(mPen);
+        graphicsScene->addItem(line);
+        //graphicsScene->addLine(mPoint.x(), -mPoint.y(), mDestPoint.x(), -mDestPoint.y(), mPen);
     }
 
     GraphicsDrawText::GraphicsDrawText(const QPoint point, const QPen pen, const int orientation, const QFont font, QString text)
@@ -73,5 +76,34 @@ namespace Printers
         }
 
         return adjusted;
+    } */
+
+    void GraphicsPrimitive::executeQueue(QGraphicsScene *scene)
+    {
+        if (scene == nullptr)
+            return;
+        connect(scene, &QGraphicsScene::changed, this, &GraphicsPrimitive::changed);
+        for(auto item: mGraphicsItems)
+        {
+            scene->addItem(item);
+        }
+        // Now the items are owned by scene
     }
+
+    void GraphicsPrimitive::addItem(QGraphicsItem *item)
+    {
+        mGraphicsItems.push_back(item);
+    }
+
+    void GraphicsPrimitive::clearScene()
+    {
+        for(auto item: mGraphicsItems)
+        {
+            // Only delete if item is not owned by a scene
+            if (item->scene() == nullptr)
+                delete item;
+        }
+        mGraphicsItems.clear();
+    }
+
 }
