@@ -186,6 +186,9 @@ namespace Tests {
         if (!readPauseTag())
             return {};
 
+        if (mSnapshotData == nullptr)
+            return {};
+
         auto data = mSnapshotData->at(mReadIndex);
         if (data == QJsonValue::Undefined || !data.isObject())
             return {};
