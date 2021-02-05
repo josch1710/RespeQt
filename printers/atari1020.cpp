@@ -181,7 +181,7 @@ namespace Printers
                     executeGraphicsCommand();
                     resetGraphics();
                 } else {
-                    //mOutput->newLine();
+                    newTextLine();
                 }
                 mEsc = false;
                 mStartOfLogicalLine = true;
@@ -893,6 +893,8 @@ namespace Printers
         item->setPos(computeTextCoordinates(mPenPoint, mTextOrientation));
         primitive->addItem(item);
         executeGraphicsPrimitive(primitive);
+        // clear text buffer
+        mPrintText.clear();
 
         // update head position
         QFontMetrics metrics(mFont);
@@ -930,8 +932,37 @@ namespace Printers
     {
         QChar qb = translateAtascii(b & 127); // Masking inverse characters.
         mPrintText.append(qb);
-        if (b==155)
-            drawText();
+        return true;
+    }
+
+    bool Atari1020::newTextLine()
+    {
+        drawText();
+        QRectF sceneRect = mOutputWindow->getSceneRect();
+        auto x = mPenPoint.x(),
+            y = mPenPoint.y();
+
+        switch(mTextOrientation)
+        {
+            case 0:
+                y += 10;
+                x = sceneRect.left();
+                break;
+            case 90:
+                x += 10;
+                y = sceneRect.top();
+                break;
+            case 180:
+                y -= 10;
+                x = sceneRect.right();
+                break;
+            case 270:
+                x -= 10;
+                y = sceneRect.bottom();
+                break;
+        }
+        mPenPoint.setX(x);
+        mPenPoint.setY(y);
 
         return true;
     }

@@ -58,7 +58,7 @@
 #include <QFontDatabase>
 
 #ifndef QT_NO_QDEBUG
-#include "tests/siorecorder.h"
+#include "Tests/siorecorder.h"
 #endif
 
 static QFile *logFile;
@@ -2043,7 +2043,7 @@ void MainWindow::replaySnapshot()
 {
     if (sio->isRunning() && RespeqtSettings::instance()->backend() != SerialBackend::TEST)
     {
-    // TODO Ask for permission to cut the serial connection, if open.
+        // Ask for permission to cut the serial connection, if open.
         auto answer = QMessageBox::question(this, tr("Disconnect serial"), tr("If you proceed, the standard serial port will be disconnected. Would you like to proceed?"));
         if (answer == QMessageBox::No)
             return;
@@ -2058,7 +2058,7 @@ void MainWindow::replaySnapshot()
     recorder->prepareReplaySnapshot(&file, RespeqtSettings::instance()->backend());
     file.close();
     // Now set SioRecorder to be the serial port and start the connection again.
-    ui->actionStartEmulation->trigger();
+    //ui->actionStartEmulation->trigger();
     RespeqtSettings::instance()->setBackend(SerialBackend::TEST);
     ui->actionStartEmulation->trigger();
 }

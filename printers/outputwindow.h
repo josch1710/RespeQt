@@ -35,6 +35,7 @@ public:
     //virtual bool setupOutput() override;
     virtual void executeGraphicsPrimitive(GraphicsPrimitive *primitive);
     virtual void clearScene() { mGraphicsScene.clear(); }
+    virtual QRectF getSceneRect() { return mGraphicsScene.sceneRect(); }
 
     /*static QString typeName()
     {

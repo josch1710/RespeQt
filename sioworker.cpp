@@ -10,12 +10,12 @@
  */
 
 #include "sioworker.h"
-#include "tests/siorecorder.h"
 #include "respeqtsettings.h"
 #include <QFile>
 #include <QDateTime>
 #include <QtDebug>
 #ifndef QT_NO_DEBUG
+#include "Tests/siorecorder.h"
 #include <QFileDialog>
 #endif
 
@@ -88,9 +88,11 @@ void SioWorker::start(Priority p)
         case SerialBackend::SIO_DRIVER:
             mPort = std::make_shared<AtariSioBackend>(this);
             break;
+#ifndef QT_NO_DEBUG
         case SerialBackend::TEST:
             mPort = Tests::SioRecorder::instance();
             break;
+#endif
     }
 
     QByteArray data;
@@ -622,9 +624,11 @@ void CassetteWorker::start(Priority p)
         case SerialBackend::SIO_DRIVER:
             mPort = std::make_shared<AtariSioBackend>(this);
             break;
+#ifndef QT_NO_DEBUG
         case SerialBackend::TEST:
             mPort = Tests::SioRecorder::instance();
             break;
+#endif
     }
     QThread::start(p);
 }

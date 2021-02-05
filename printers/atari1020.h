@@ -76,6 +76,7 @@ namespace Printers
         int getNumber(const QString number, const bool negative, const int defaultValue = 0);
         bool drawAxis(bool xAxis, int size, int count);
         bool drawText();
+        bool newTextLine();
         QPoint computeTextCoordinates(const QPoint point, int orientation);
     };
 }
