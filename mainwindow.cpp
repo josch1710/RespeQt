@@ -58,7 +58,7 @@
 #include <QFontDatabase>
 
 #ifndef QT_NO_QDEBUG
-#include "Tests/siorecorder.h"
+#include "tests/siorecorder.h"
 #endif
 
 static QFile *logFile;

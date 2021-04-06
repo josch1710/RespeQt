@@ -39,7 +39,7 @@
 #include "printers/outputwindow.h"
 #include "logdisplaydialog.h"
 #ifndef QT_NO_DEBUG
-#include "Tests/siorecorder.h"
+#include "tests/siorecorder.h"
 #endif
 
 namespace Ui
