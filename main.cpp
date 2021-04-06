@@ -23,6 +23,7 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_WIN
     timeBeginPeriod(1);
 #endif
+    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication a(argc, argv);
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     auto w = new MainWindow;
