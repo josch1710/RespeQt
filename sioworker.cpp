@@ -15,7 +15,7 @@
 #include <QDateTime>
 #include <QtDebug>
 #ifndef QT_NO_DEBUG
-#include "Tests/siorecorder.h"
+#include "tests/siorecorder.h"
 #include <QFileDialog>
 #endif
 
