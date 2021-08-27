@@ -10,7 +10,6 @@
 # know the specific year(s) please let the current maintainer know.
 #
 #CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
-
 VERSION = r5.3
 DEFINES += VERSION=\\\"$$VERSION\\\"
 
@@ -48,7 +47,6 @@ test {
 CONFIG += qt c++11 strict_c++
 QT += core gui network widgets printsupport serialport svg
 INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
-
 
 # Warnings for Deprecated functions
 DEFINES += QT_DEPRECATED_WARNINGS
@@ -88,6 +86,7 @@ SOURCES += tests/siorecorder.cpp \
     printerwidget.cpp \
     printers/atariprinter.cpp \
     printers/atari1020.cpp \
+    serialport-test.cpp \
     smartdevice.cpp \
     printers/nativeoutput.cpp \
     printers/centronics.cpp \
@@ -189,8 +188,6 @@ OTHER_FILES += \
 # To update translations:
 # lupdate respeqt.pro; lrelease i18n/respeqt_*.ts
 TRANSLATIONS = \
-    i18n/respeqt_de.ts \
-    i18n/respeqt_es.ts \
     i18n/respeqt_de.ts \
     i18n/respeqt_es.ts \
     i18n/respeqt_pl.ts \

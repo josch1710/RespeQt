@@ -1,5 +1,4 @@
 #include "atascii.h"
-
 #include <stdexcept>
 
 std::map<unsigned char, QChar> Atascii::mapping;
