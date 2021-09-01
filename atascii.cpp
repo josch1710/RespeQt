@@ -1,4 +1,5 @@
 #include "atascii.h"
+#include <stdexcept>
 
 #include <stdexcept>
 
