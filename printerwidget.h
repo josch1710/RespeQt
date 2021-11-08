@@ -3,7 +3,6 @@
 
 #include "printers/baseprinter.h"
 #include "sioworker.h"
-//#include "printers/nativeoutput.h"
 #include "printers/outputwindow.h"
 
 #include <QFrame>
@@ -27,7 +26,6 @@ public:
 
     void setSioWorker(SioWorkerPtr sio);
 
-    //Printers::NativeOutputPtr device() { return mDevice; }
     Printers::OutputWindowPtr outputWindow() { return mOutputWindow; }
 
     bool connected() const { return mConnected; }
@@ -48,12 +46,9 @@ private:
     void setup();
     bool selectPrinter();
 
-    //bool selectOutput();
-
     Ui::PrinterWidget *ui;
     int printerNo_;
     Printers::BasePrinterPtr mPrinter;
-    //Printers::NativeOutputPtr mDevice;
     Printers::OutputWindowPtr mOutputWindow;
     
     SioWorkerPtr mSio;

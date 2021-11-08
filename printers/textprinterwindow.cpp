@@ -27,7 +27,7 @@
 namespace Printers {
 
 TextPrinterWindow::TextPrinterWindow(QWidget *parent) :
-    QMainWindow(parent), NativeOutput(),
+    QMainWindow(parent),
     ui(new Ui::TextPrinterWindow),
     effAtasciiFont(0),
     effFontSize(0),

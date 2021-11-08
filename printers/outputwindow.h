@@ -13,7 +13,6 @@
 #include <QGraphicsScene>
 #include <QString>
 #include <memory>
-//#include "nativeoutput.h"
 #include "graphicsprimitive.h"
 
 namespace Ui {
@@ -22,7 +21,7 @@ namespace Ui {
 
 namespace Printers {
 
-class OutputWindow : public QMainWindow/*, public NativeOutput*/ {
+class OutputWindow : public QMainWindow {
     Q_OBJECT
 public:
     explicit OutputWindow(QWidget *parent = nullptr);
@@ -32,7 +31,6 @@ public:
     virtual void translate(const QPointF &) {}
     virtual void drawLine(const QPointF &, const QPointF &) {}
     //virtual void calculateFixedFontSize(uint8_t) override {}
-    //virtual bool setupOutput() override;
     virtual void executeGraphicsPrimitive(GraphicsPrimitive *primitive);
     virtual void clearScene() { mGraphicsScene.clear(); }
     virtual QRectF getSceneRect() { return mGraphicsScene.sceneRect(); }

@@ -29,7 +29,7 @@
 namespace Printers {
 
 OutputWindow::OutputWindow(QWidget *parent) :
-    QMainWindow(parent),/* NativeOutput(),*/
+    QMainWindow(parent),
     ui(new Ui::OutputWindow)
 {
     ui->setupUi(this);

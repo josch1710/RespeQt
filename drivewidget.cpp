@@ -60,7 +60,7 @@ void DriveWidget::setup(bool happyHidden, bool chipHidden, bool nextSideHidden, 
 
     // Add actions to context menu
     if(driveNo_ == 0)
-        insertAction(0, ui->actionBootOption );
+        insertAction(0, ui->actionBootOption);
     insertAction(0, ui->actionSave);
     insertAction(0, ui->actionAutoSave);       //
     insertAction(0, ui->actionSaveAs);
@@ -75,6 +75,8 @@ void DriveWidget::setup(bool happyHidden, bool chipHidden, bool nextSideHidden, 
     insertAction(0, ui->actionToolDisk);
     insertAction(0, ui->actionWriteProtect);
     insertAction(0, ui->actionEditDisk);
+    //if (d)
+    //    insertAction(0, ui->actionLimitDirSize);
 
     // Connect widget actions to buttons
     ui->buttonMountDisk->setDefaultAction(ui->actionMountDisk);
@@ -202,7 +204,8 @@ void DriveWidget::showAsEmpty(bool happyHidden, bool chipHidden, bool nextSideHi
     ui->actionRevert->setEnabled(false);
     ui->actionSaveAs->setEnabled(false);
 
-    if(driveNo_ == 0) ui->actionBootOption->setEnabled(false);
+    if(driveNo_ == 0)
+        ui->actionBootOption->setEnabled(false);
     QString empty = "";
     setLabelToolTips(empty, empty, empty);
 }
@@ -233,7 +236,8 @@ void DriveWidget::showAsFolderMounted(const QString &fileName, const QString &de
     ui->actionSaveAs->setEnabled(false);
     ui->actionRevert->setEnabled(false);
 
-    if(driveNo_ == 0) ui->actionBootOption->setEnabled(true);
+    if(driveNo_ == 0)
+        ui->actionBootOption->setEnabled(true);
 }
 
 void DriveWidget::showAsImageMounted(const QString &fileName, const QString &description, bool editEnabled, bool enableSave, bool leverOpen, bool happyEnabled, bool chipOpen,
@@ -273,7 +277,8 @@ void DriveWidget::showAsImageMounted(const QString &fileName, const QString &des
 
     ui->actionAutoSave->setEnabled(true);
 
-    if(driveNo_ == 0) ui->actionBootOption->setEnabled(false);
+    if(driveNo_ == 0)
+        ui->actionBootOption->setEnabled(false);
 
     ui->actionSave->setEnabled(enableSave);
     ui->actionRevert->setEnabled(enableSave);
@@ -322,5 +327,3 @@ void DriveWidget::revertTriggered()       { emit actionRevert(driveNo_); }
 void DriveWidget::saveAsTriggered()       { emit actionSaveAs(driveNo_); }
 void DriveWidget::autoSaveToggled(bool state) { emit actionAutoSave(driveNo_, state); }
 void DriveWidget::bootOptionTriggered()   { emit actionBootOptions(driveNo_); }
-
-

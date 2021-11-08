@@ -9,9 +9,10 @@
 #include <QFont>
 #include <QFontMetrics>
 #include <QSharedData>
+#include <QSharedPointer>
 
 // We need a forward class definition,
-//because we reference BasePrinter in NativeOutput
+//because we reference BasePrinter in other classes
 namespace Printers
 {
     class BasePrinter;
@@ -21,7 +22,6 @@ namespace Printers
 
 #include "sioworker.h"
 #include "atascii.h"
-//#include "nativeoutput.h"
 #include "outputwindow.h"
 
 namespace Printers
@@ -41,9 +41,7 @@ namespace Printers
         OutputWindowPtr outputWindow() const { return mOutputWindow; }
         void setOutputWindow(OutputWindowPtr outputWindow);
         void resetOutputWindow();
-        //void resetOutput();
         virtual void setupFont() {}
-        //virtual void setupOutput();
 
         static QString typeName()
         {
@@ -52,8 +50,8 @@ namespace Printers
 
     protected:
         Atascii mAtascii;
-        //NativeOutputPtr mOutput;
         OutputWindowPtr mOutputWindow;
+        QSharedPointer<QFont> mFont;
 
         QByteArray readDataFrame(uint size);
         bool writeDataFrame(QByteArray data);

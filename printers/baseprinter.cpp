@@ -105,30 +105,6 @@ namespace Printers
         }
     }
 
-    /*void BasePrinter::setOutput(const NativeOutputPtr& output)
-    {
-        if (mOutput && mOutput != output)
-        {
-            mOutput->endOutput();
-        }
-        mOutput = output;
-    }
-
-    void BasePrinter::resetOutput()
-    {
-        mOutput->setPrinter(QWeakPointer<BasePrinter>());
-        mOutput.reset();
-    }
-
-    void BasePrinter::setupOutput()
-    {
-        if (mOutput && mOutput->painter())
-        {
-            QColor color{"black"};
-            mOutput->painter()->setPen(color);
-        }
-    }*/
-
     void BasePrinter::setOutputWindow(OutputWindowPtr outputWindow)
     {
         if (mOutputWindow)

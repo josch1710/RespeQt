@@ -13,6 +13,7 @@
 #define FOLDERIMAGE_H
 
 #include <QDir>
+#include <QVector>
 #include "diskimage.h"
 
 class AtariFile
@@ -36,7 +37,7 @@ protected:
     QDir dir;
     bool mReadOnly;
     void buildDirectory();
-    AtariFile atariFiles[64];
+    QVector<AtariFile> atariFiles;
     int atariFileNo;             // 
 
 public:
@@ -52,6 +53,7 @@ public:
 
     virtual QString description() const {return tr("Folder image");}
 };
-    extern FolderImage *folderImage;
+
+extern FolderImage *folderImage;
 
 #endif // FOLDERIMAGE_H

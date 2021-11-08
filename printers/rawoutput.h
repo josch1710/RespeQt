@@ -1,7 +1,6 @@
 #ifndef RAWOUTPUT_H
 #define RAWOUTPUT_H
 
-#include "nativeoutput.h"
 #include <QObject>
 
 #if defined(Q_OS_WIN)

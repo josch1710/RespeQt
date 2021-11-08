@@ -30,8 +30,7 @@ namespace Printers
           mEsc(false),
           mStartOfLogicalLine(true),
           mGraphicsMode(false),
-          mTextOrientation(0),
-          mPrintText("")
+          mTextOrientation(0)
     {
         QFontDatabase::addApplicationFont(":/fonts/1020");
         mFont = QFont("ATARI 1020 VECTOR FONT APPROXIM");
@@ -102,7 +101,7 @@ namespace Printers
                     mGraphicsMode = false;
                     mEsc = false;
                     mStartOfLogicalLine = true;
-                    mInternational = false;
+                    setInternationalMode(false);
                     mPenPoint.setX(0);
                     mPenPoint.setY(0);
                     if (RespeqtSettings::instance()->clearOnStatus()) {
@@ -251,7 +250,7 @@ namespace Printers
                             qDebug() << "!n" << tr("[%1] Entering international mode")
                                         .arg(deviceName());
                         }
-                        mInternational = true;
+                        setInternationalMode(true);
                         break;
 
                     case 0x18: // CTRL+X: Exit international mode
@@ -259,7 +258,7 @@ namespace Printers
                             qDebug() << "!n" << tr("[%1] Exiting international mode")
                                         .arg(deviceName());
                         }
-                        mInternational = false;
+                        setInternationalMode(false);
                         break;
 
                     default: // Other commands are ignored unless at the start of a logical line
@@ -318,7 +317,7 @@ namespace Printers
                                     qDebug() << "!n" << tr("[%1] Enter international mode")
                                                 .arg(deviceName());
                                 }
-                                mInternational = true;
+                                setInternationalMode(true);
                                 break;
 
                             case 0x18: // CTRL+X: Exit international mode
@@ -326,7 +325,7 @@ namespace Printers
                                     qDebug() << "!n" << tr("[%1] Exit international mode")
                                                 .arg(deviceName());
                                 }
-                                mInternational = false;
+                                setInternationalMode(false);
                                 break;
 
                             default: // Unknown control codes are consumed.
@@ -659,7 +658,7 @@ namespace Printers
                 mGraphicsMode = false;
                 mEsc = false;
                 mStartOfLogicalLine = true;
-                mInternational = false;
+                setInternationalMode(false);
 // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //                if (mOutput && mOutput->painter()) {
 //                    mOutput->painter()->translate(mPenPoint);
