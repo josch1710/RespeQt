@@ -8,3 +8,4 @@ test.xml
 .DS_Store
 build
 .idea
+ui_*.*
