@@ -6,7 +6,6 @@
 namespace Printers {
 
     RawOutput::RawOutput()
-        //:NativeOutput()
     {}
 
     RawOutput::~RawOutput()

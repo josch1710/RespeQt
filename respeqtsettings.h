@@ -29,6 +29,7 @@ public:
     public:
         QString fileName;
         bool isWriteProtected;
+        bool limitDirSize;
     };
     class PrinterSettings {
     public:

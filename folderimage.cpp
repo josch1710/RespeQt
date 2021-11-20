@@ -35,9 +35,7 @@ FolderImage::~FolderImage()
 
 void FolderImage::close()
 {
-    for (int i = 0; i < 64; i++) {
-        atariFiles[i].exists = false;
-    }
+    atariFiles.clear();
 
     return;
 }
@@ -52,9 +50,9 @@ bool FolderImage::format(const DiskGeometry&)
 QString FolderImage::longName(QString &lastMountedFolder, QString &atariFileName)
 {
     if (FolderImage::open(lastMountedFolder, FileTypes::Dir)) {
-        for (int i = 0; i < 64; i++) {
-            if(atariFiles[i].atariName + "." + atariFiles[i].atariExt == atariFileName)
-                return atariFiles[i].longName;
+        for (auto file: atariFiles) {
+            if(file.atariName + "." + file.atariExt == atariFileName)
+                return file.longName;
         }
      }
      return nullptr;
@@ -68,9 +66,13 @@ void FolderImage::buildDirectory()
     QFileInfo info;
     QString name, longName;
     QString ext;
+    QList<QString> knownNames, duplicateNames;
 
+    auto count = infos.count();
+    if (count > 64)
+        count = 64; // TODO Respect flags for count
     int j = -1, k, i;
-    for (i = 0; i < 64; i++) {
+    for (i = 0; i < count; i++) {
         do {
             j++;
             if (j >= infos.count()) {
@@ -97,47 +99,57 @@ void FolderImage::buildDirectory()
                 ext.remove(QRegExp("[^A-Z0-9_]"));
             }
             ext = ext.left(3);
-            QString baseName = name.left(7);
 
-            int l = 2;
-            do {
-                for (k = 0; k < i; k++) {
-                    if (atariFiles[k].atariName == name && atariFiles[k].atariExt == ext) {
-                        break;
-                    }
-                }
-                if (k < i) {
-                    name = QString("%1%2").arg(baseName).arg(l);
-                    l++;
-                }
-            } while (k < i && l < 10000000);
-            if (l == 10) {baseName = name.left(6);}
-            if (l == 100) {baseName = name.left(5);}
-            if (l == 1000) {baseName = name.left(4);}
-            if (l == 10000) {baseName = name.left(3);}
-            if (l == 100000) {baseName = name.left(2);}
-            if (l == 1000000) {baseName = name.left(1);}
-            if (l == 10000000) {baseName = "";}
-            if (l == 100000000) {
-                qWarning() << "!w" << tr("Cannot mirror '%1' in '%2': No suitable Atari name can be found.")
-                               .arg(info.fileName())
-                               .arg(dir.path());
-            }
+            // Check, whether we have to shorten the filename because of duplicates, and record them.
+            auto completeName = QString("%1.%2").arg(name).arg(ext);
+            if (!knownNames.contains(completeName))
+                knownNames.push_back(completeName);
+            else
+                duplicateNames.push_back(completeName);
+
+            auto baseName = name.left(7);
         } while (k < i);
 
         if (j >= infos.count()) {
             break;
         }
 
-        atariFiles[i].exists = true;
-        atariFiles[i].original = info;
-        atariFiles[i].atariName = name;
-        atariFiles[i].longName = longName;
-        atariFiles[i].atariExt = ext;
-        atariFiles[i].lastSector = 0;
-        atariFiles[i].pos = 0;
-        atariFiles[i].sectPass = 0;
+        AtariFile file;
+        file.exists = true;
+        file.original = info;
+        file.atariName = name;
+        file.longName = longName;
+        file.atariExt = ext;
+        file.lastSector = 0;
+        file.pos = 0;
+        file.sectPass = 0;
+        atariFiles.push_back(file);
+    }
 
+    // Process duplicate file names
+    for(auto duplicate: duplicateNames)
+    {
+        auto i = 1;
+        for(auto j = 0; j <= atariFiles.count(); j++)
+        {
+            auto file = atariFiles[j];
+            auto completeName = QString("%1.%2").arg(file.atariName).arg(file.atariExt);
+            if (QString::compare(duplicate, completeName) != 0)
+                continue; // Not an duplicate
+            if (i == 1)
+            { // First filename doesn't need to be fixed.
+                i++;
+                continue;
+            }
+            auto digits = i / 10; // Integer division gives us the count of digits, we need to cut.
+            if (digits > 7) // We remove the file, because it will get shortended too much.
+            {
+                atariFiles[j].exists = false;
+            } else {
+                atariFiles[j].atariName = QString("%1%2").arg(file.atariName.left(8 - digits)).arg(i);
+            }
+            i++;
+        }
     }
 
     if (i < infos.count()) {
@@ -190,7 +202,7 @@ bool FolderImage::readSector(quint16 sector, QByteArray &data)
          } else {
              data = boot.read(128);
              buildDirectory();
-             for(int i=0; i<64; i++) {
+             for(int i=0; i<64; i++) { // TODO Remove 64
                  // AtariDOS, MyDos, SmartDOS  and DosXL
                  if(atariFiles[i].longName.toUpper() == "DOS.SYS") {
                      bootFileSector = 369 + i;
@@ -221,7 +233,7 @@ bool FolderImage::readSector(quint16 sector, QByteArray &data)
                      QByteArray nameLine;
                      nameLine.append(dir.dirName() + '\x9B');
                      picoName.write(nameLine);
-                     for(int i=0; i<64; i++){
+                     for(int i=0; i<64; i++){ // TODO Remove 64
                      if(atariFiles[i].exists) {
                          if(atariFiles[i].longName != "$boot.bin") {
                                  nameLine.clear();
@@ -324,7 +336,7 @@ bool FolderImage::readSector(quint16 sector, QByteArray &data)
         data.resize(0);
         for (int i = (sector - 361) * 8; i < (sector - 360) * 8; i++) {
             QByteArray entry;
-            if (!atariFiles[i].exists) {
+            if (i >= atariFiles.count() || !atariFiles[i].exists) {
                 entry = QByteArray(16, 0);
             } else {
                 entry = "";

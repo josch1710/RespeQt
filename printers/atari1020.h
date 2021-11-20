@@ -49,7 +49,6 @@ namespace Printers
         QPen mPen;
         QFont mFont;
         int mTextOrientation;
-        QByteArray mPrintText;
         enum AUTOMATA_STATES mAutomataState;
         unsigned char mCurrentCommand;
         bool mRepeatAllowed;

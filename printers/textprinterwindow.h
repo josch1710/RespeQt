@@ -42,7 +42,6 @@ public:
     virtual void translate(const QPointF &) {}
     virtual void drawLine(const QPointF &, const QPointF &) {}
     virtual void calculateFixedFontSize(uint8_t) override {}
-    //virtual bool setupOutput() override;
 
     static QString typeName()
     {

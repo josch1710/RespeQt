@@ -7,6 +7,7 @@
 #include <QFontMetrics>
 #include <QPrinter>
 #include <QRect>
+#include <QState>
 
 namespace Printers
 {
@@ -15,6 +16,7 @@ namespace Printers
         Q_OBJECT
     public:
         Atari1027(SioWorkerPtr worker);
+        ~Atari1027();
 
         virtual bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
         virtual void setupFont() override;
@@ -26,6 +28,7 @@ namespace Printers
 
     private:
         bool mESC;
+        QState *mUnderlinedState;
 
         bool handleEscapedCodes(const unsigned char b);
         bool handlePrintableCodes(const unsigned char b);
