@@ -86,7 +86,6 @@ SOURCES += tests/siorecorder.cpp \
     printerwidget.cpp \
     printers/atariprinter.cpp \
     printers/atari1020.cpp \
-    serialport-test.cpp \
     smartdevice.cpp \
     printers/nativeoutput.cpp \
     printers/centronics.cpp \
