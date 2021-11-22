@@ -522,14 +522,9 @@ QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool verbose)
     if (expected == got) {
         data.resize(size);
 
-#ifndef QT_NO_DEBUG
-    /*try {
-        SioWorker *sio = dynamic_cast<SioWorker*>(parent());
-        if (sio) {
-            sio->writeSnapshotDataFrame(data);
-        }
-    } catch(...) {}*/
-#endif
+        auto recorder = Tests::SioRecorder::instance();
+        if (recorder->isSnapshotRunning())
+            recorder->writeSnapshotDataFrame(data, true);
 
         return data;
     } else {
@@ -548,10 +543,15 @@ bool StandardSerialPortBackend::writeDataFrame(const QByteArray &data)
 {
 //    qDebug() << "!d" << tr("DBG -- Serial Port writeDataFrame...");
 
+    auto recorder = Tests::SioRecorder::instance();
+    if (recorder->isSnapshotRunning())
+        recorder->writeSnapshotDataFrame(data, false);
+
     QByteArray copy(data);
     copy.resize(copy.size() + 1);
     copy[copy.size() - 1] = sioChecksum(copy, copy.size() - 1);
-    if(mMethod==HANDSHAKE_SOFTWARE)SioWorker::usleep(mWriteDelay);
+    if(mMethod==HANDSHAKE_SOFTWARE)
+        SioWorker::usleep(mWriteDelay);
     SioWorker::usleep(50);
     return writeRawFrame(copy);
 }
