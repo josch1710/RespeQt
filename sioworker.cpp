@@ -10,12 +10,12 @@
  */
 
 #include "sioworker.h"
+#include "tests/siorecorder.h"
 #include "respeqtsettings.h"
 #include <QFile>
 #include <QDateTime>
 #include <QtDebug>
 #ifndef QT_NO_DEBUG
-#include "tests/siorecorder.h"
 #include <QFileDialog>
 #endif
 
@@ -88,11 +88,9 @@ void SioWorker::start(Priority p)
         case SerialBackend::SIO_DRIVER:
             mPort = std::make_shared<AtariSioBackend>(this);
             break;
-#ifndef QT_NO_DEBUG
         case SerialBackend::TEST:
             mPort = Tests::SioRecorder::instance();
             break;
-#endif
     }
 
     QByteArray data;
@@ -116,6 +114,7 @@ void SioWorker::setAutoReconnect(bool autoReconnect)
 
 void SioWorker::run()
 {
+    mustTerminate = false;
     connect(mPort.get(), SIGNAL(statusChanged(QString)), this, SIGNAL(statusChanged(QString)));
 
     /* Open serial port */
@@ -152,6 +151,10 @@ void SioWorker::run()
         auto command = static_cast<quint8>(cmd[1]);
         auto aux1 = static_cast<quint8>(cmd[2]);
         auto aux2 = static_cast<quint8>(cmd[3]);
+
+        auto recorder = Tests::SioRecorder::instance();
+        if (recorder->isSnapshotRunning())
+            recorder->writeSnapshotCommandFrame(no, command, aux1, aux2);
 
         /* Redirect the command to the appropriate device */
         deviceMutex->lock();
@@ -624,11 +627,9 @@ void CassetteWorker::start(Priority p)
         case SerialBackend::SIO_DRIVER:
             mPort = std::make_shared<AtariSioBackend>(this);
             break;
-#ifndef QT_NO_DEBUG
         case SerialBackend::TEST:
             mPort = Tests::SioRecorder::instance();
             break;
-#endif
     }
     QThread::start(p);
 }

@@ -27,7 +27,7 @@ namespace Tests
         QByteArray stopSIOSnapshot();
         bool isSnapshotRunning() const { return mSnapshotRunning; }
         void writeSnapshotCommandFrame(const qint8 no, const qint8 command, const qint8 aux1, const qint8 aux2);
-        void writeSnapshotDataFrame(const QByteArray &data);
+        void writeSnapshotDataFrame(const QByteArray &data, bool reading);
 
         void prepareReplaySnapshot(QFile *file, SerialBackend prevSerialBackend);
 

@@ -130,7 +130,7 @@ void FolderImage::buildDirectory()
     for(auto duplicate: duplicateNames)
     {
         auto i = 1;
-        for(auto j = 0; j <= atariFiles.count(); j++)
+        for(auto j = 0; j < atariFiles.count(); j++)
         {
             auto file = atariFiles[j];
             auto completeName = QString("%1.%2").arg(file.atariName).arg(file.atariExt);

@@ -59,12 +59,14 @@ namespace Tests {
         }
     }
 
-    void SioRecorder::writeSnapshotDataFrame(const QByteArray &data)
+    void SioRecorder::writeSnapshotDataFrame(const QByteArray &data, bool reading)
     {
         // Record the command frame, if the snapshot is running
         if (mSnapshotRunning && mSnapshotData)
         {
             QJsonObject dataframe{};
+            dataframe["direction"] = reading ? "Read" : "Write";
+
             QString text{};
             text.reserve(data.size());
             for(auto byte: data)
@@ -186,9 +188,6 @@ namespace Tests {
         if (!readPauseTag())
             return {};
 
-        if (mSnapshotData == nullptr)
-            return {};
-
         auto data = mSnapshotData->at(mReadIndex);
         if (data == QJsonValue::Undefined || !data.isObject())
             return {};
@@ -234,7 +233,10 @@ namespace Tests {
             return {};
 
         auto object = data.toObject();
-        if (!object.contains("data"))
+        if (!object.contains("data") && !object.contains("direction"))
+            return {};
+
+        if (object["direction"].toString("") != "Read")
             return {};
 
         auto framedata = object["data"].toString("");
@@ -251,6 +253,7 @@ namespace Tests {
     // The playback never writeDataFrame, we just want to feed RespeQt some data and watch the reaction.
     bool SioRecorder::writeDataFrame(const QByteArray &/*data*/)
     {
+        mReadIndex++; // Since we write out write frames, we have to jump over them
         return true;
     }
 
