@@ -68,51 +68,38 @@ void FolderImage::buildDirectory()
     QString ext;
     QList<QString> knownNames, duplicateNames;
 
+    atariFiles.clear();
     auto count = infos.count();
     if (count > 64)
         count = 64; // TODO Respect flags for count
-    int j = -1, k, i;
-    for (i = 0; i < count; i++) {
-        do {
-            j++;
-            if (j >= infos.count()) {
-                atariFiles[i].exists = false;
-                break;
-            }
-            info = infos.at(j);
-            longName = info.completeBaseName();
-            name = longName.toUpper();
-            if(RespeqtSettings::instance()->filterUnderscore()) {
-                name.remove(QRegExp("[^A-Z0-9]"));
-            } else {
-                name.remove(QRegExp("[^A-Z0-9_]"));
-            }
-            name = name.left(8);
-            if (name.isEmpty()) {
-                name = "BADNAME";
-            }
-            longName += "." + info.suffix();
-            ext = info.suffix().toUpper();
-            if(RespeqtSettings::instance()->filterUnderscore()) {
-                ext.remove(QRegExp("[^A-Z0-9]"));
-            } else {
-                ext.remove(QRegExp("[^A-Z0-9_]"));
-            }
-            ext = ext.left(3);
 
-            // Check, whether we have to shorten the filename because of duplicates, and record them.
-            auto completeName = QString("%1.%2").arg(name).arg(ext);
-            if (!knownNames.contains(completeName))
-                knownNames.push_back(completeName);
-            else
-                duplicateNames.push_back(completeName);
-
-            auto baseName = name.left(7);
-        } while (k < i);
-
-        if (j >= infos.count()) {
-            break;
+    for (auto info: infos) {
+        longName = info.completeBaseName();
+        name = longName.toUpper();
+        if(RespeqtSettings::instance()->filterUnderscore()) {
+            name.remove(QRegExp("[^A-Z0-9]"));
+        } else {
+            name.remove(QRegExp("[^A-Z0-9_]"));
         }
+        name = name.left(8);
+        if (name.isEmpty()) {
+            name = "BADNAME";
+        }
+        longName += "." + info.suffix();
+        ext = info.suffix().toUpper();
+        if(RespeqtSettings::instance()->filterUnderscore()) {
+            ext.remove(QRegExp("[^A-Z0-9]"));
+        } else {
+            ext.remove(QRegExp("[^A-Z0-9_]"));
+        }
+        ext = ext.left(3);
+
+        // Check, whether we have to shorten the filename because of duplicates, and record them.
+        auto completeName = QString("%1.%2").arg(name).arg(ext);
+        if (!knownNames.contains(completeName))
+            knownNames.push_back(completeName);
+        else
+            duplicateNames.push_back(completeName);
 
         AtariFile file;
         file.exists = true;
@@ -152,9 +139,9 @@ void FolderImage::buildDirectory()
         }
     }
 
-    if (i < infos.count()) {
+    if (atariFiles.count() < infos.count()) {
         qWarning() << "!w" << tr("Cannot mirror %1 of %2 files in '%3': Atari directory is full.")
-                       .arg(infos.count() - i)
+                       .arg(infos.count() - atariFiles.count())
                        .arg(infos.count())
                        .arg(dir.path());
     }

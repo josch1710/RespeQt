@@ -509,7 +509,7 @@ QByteArray StandardSerialPortBackend::readCommandFrame()
     return data;
 }
 
-QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool verbose)
+QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool isCommandFrame, bool verbose)
 {
 //    qDebug() << "!d" << tr("DBG -- Serial Port readDataFrame...");
 
@@ -523,8 +523,12 @@ QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool verbose)
         data.resize(size);
 
         auto recorder = Tests::SioRecorder::instance();
-        if (recorder->isSnapshotRunning())
-            recorder->writeSnapshotDataFrame(data, true);
+        if (recorder->isSnapshotRunning()) {
+            if (isCommandFrame)
+                recorder->writeSnapshotCommandFrame(data[0], data[1], data[2], data[3]);
+            else
+                recorder->writeSnapshotDataFrame(data, true);
+        }
 
         return data;
     } else {

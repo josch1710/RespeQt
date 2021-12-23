@@ -382,6 +382,11 @@ QByteArray StandardSerialPortBackend::readCommandFrame()
         if(got==expected)
         {
             data.resize(size);
+
+            auto recorder = Tests::SioRecorder::instance();
+            if (recorder->isSnapshotRunning())
+                recorder->writeSnapshotCommandFrame(data[0], data[1], data[2], data[3]);
+
             // After sending the last byte of the command frame
             // ATARI does not drop the command line immediately.
             // Within this small time window ATARI is not able to process the ACK byte.
@@ -478,7 +483,7 @@ QByteArray StandardSerialPortBackend::readCommandFrame()
                 return data;
             }
 
-            data = readDataFrame(4, false);
+            data = readDataFrame(4, true, false);
 
             if (!data.isEmpty()) {
                 if(mMethod != HANDSHAKE_NO_HANDSHAKE)
@@ -518,7 +523,7 @@ QByteArray StandardSerialPortBackend::readCommandFrame()
     return data;
 }
 
-QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool verbose)
+QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool isCommandFrame, bool verbose)
 {
     QByteArray data = readRawFrame(size + 1, verbose);
     if (data.isEmpty()) {
@@ -528,6 +533,14 @@ QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool verbose)
     auto got = sioChecksum(data, size);
     if (expected == got) {
         data.resize(size);
+
+        auto recorder = Tests::SioRecorder::instance();
+        if (recorder->isSnapshotRunning()) {
+            if (isCommandFrame)
+                recorder->writeSnapshotCommandFrame(data[0], data[1], data[2], data[3]);
+            else
+                recorder->writeSnapshotDataFrame(data, true);
+        }
 
         return data;
     } else {
@@ -544,10 +557,15 @@ QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool verbose)
 
 bool StandardSerialPortBackend::writeDataFrame(const QByteArray &data)
 {
+    auto recorder = Tests::SioRecorder::instance();
+    if (recorder->isSnapshotRunning())
+        recorder->writeSnapshotDataFrame(data, false);
+
     QByteArray copy(data);
     copy.resize(copy.size() + 1);
     copy[copy.size() - 1] = sioChecksum(copy, copy.size() - 1);
-    if(mMethod==HANDSHAKE_SOFTWARE)SioWorker::usleep(mWriteDelay);
+    if(mMethod==HANDSHAKE_SOFTWARE)
+        SioWorker::usleep(mWriteDelay);
     SioWorker::usleep(50);
     return writeRawFrame(copy);
 }
@@ -574,14 +592,16 @@ bool StandardSerialPortBackend::writeDataNak()
 
 bool StandardSerialPortBackend::writeComplete()
 {
-    if(mMethod==HANDSHAKE_SOFTWARE)SioWorker::usleep(mWriteDelay);
+    if(mMethod==HANDSHAKE_SOFTWARE)
+        SioWorker::usleep(mWriteDelay);
     else SioWorker::usleep(mCompErrDelay);
     return writeRawFrame(QByteArray(1, SIO_COMPLETE));
 }
 
 bool StandardSerialPortBackend::writeError()
 {
-    if(mMethod==HANDSHAKE_SOFTWARE)SioWorker::usleep(mWriteDelay);
+    if(mMethod==HANDSHAKE_SOFTWARE)
+        SioWorker::usleep(mWriteDelay);
     else SioWorker::usleep(mCompErrDelay);
     return writeRawFrame(QByteArray(1, SIO_ERROR));
 }
@@ -912,7 +932,7 @@ int AtariSioBackend::speed()
     return mSpeed;
 }
 
-QByteArray AtariSioBackend::readDataFrame(uint size, bool verbose)
+QByteArray AtariSioBackend::readDataFrame(uint size, bool isCommandFrame, bool verbose)
 {
     QByteArray data;
     SIO_data_frame frame;

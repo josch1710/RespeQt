@@ -59,12 +59,11 @@ namespace Printers
         QByteArray mFirstNumber;
         QByteArray mSecondNumber;
         QByteArray mThirdNumber;
-        bool mClearPane;
+        QTransform mTransform{};
 
         void executeGraphicsCommand();
         void resetGraphics();
         void executeAndRepeatCommand();
-        void executeGraphicsPrimitive(GraphicsPrimitive *primitive);
         bool checkGraphicsCommand(const unsigned char b);
         void handleGraphicsCodes(const unsigned char b);
         bool handlePrintableCodes(const unsigned char b);

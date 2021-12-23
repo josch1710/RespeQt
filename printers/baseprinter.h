@@ -49,6 +49,7 @@ namespace Printers
         }
 
     protected:
+        bool mClearPane;
         Atascii mAtascii;
         OutputWindowPtr mOutputWindow;
         QSharedPointer<QFont> mFont;
@@ -57,6 +58,7 @@ namespace Printers
         bool writeDataFrame(QByteArray data);
         void dumpBuffer(unsigned char *buf, int len);
         void fillBuffer(char *line, unsigned char *buf, int len, int ofs, bool dumpAscii);
+        void executeGraphicsPrimitive(GraphicsPrimitive *primitive);
 
     private:
         char m_lastOperation;

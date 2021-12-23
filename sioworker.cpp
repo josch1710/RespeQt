@@ -152,10 +152,6 @@ void SioWorker::run()
         auto aux1 = static_cast<quint8>(cmd[2]);
         auto aux2 = static_cast<quint8>(cmd[3]);
 
-        auto recorder = Tests::SioRecorder::instance();
-        if (recorder->isSnapshotRunning())
-            recorder->writeSnapshotCommandFrame(no, command, aux1, aux2);
-
         /* Redirect the command to the appropriate device */
         deviceMutex->lock();
         if (devices[no]) {

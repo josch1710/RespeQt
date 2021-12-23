@@ -40,7 +40,7 @@ namespace Tests
         void cancel() override;
         int speedByte() override;
         QByteArray readCommandFrame() override;
-        QByteArray readDataFrame(uint size, bool verbose = true) override;
+        QByteArray readDataFrame(uint size, bool isCommandFrame = false, bool verbose = true) override;
         bool writeDataFrame(const QByteArray &data) override;
         bool writeCommandAck() override;
         bool writeCommandNak() override;

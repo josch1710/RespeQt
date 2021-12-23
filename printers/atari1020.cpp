@@ -33,37 +33,12 @@ namespace Printers
           mTextOrientation(0)
     {
         QFontDatabase::addApplicationFont(":/fonts/1020");
-        mFont = QFont("ATARI 1020 VECTOR FONT APPROXIM");
+        mFont = QFont("Atari  Console");
+        auto family = mFont.family();
         mFont.setUnderline(false);
         mFont.setPixelSize(18);
+        mTransform.scale(1.0, -1.0);
     }
-
-/*    void Atari1020::setupOutput()
-    {
-        AtariPrinter::setupOutput();
-        if (mOutput && mOutput->painter()) {
-            mOutput->painter()->setWindow(QRect(0, -999, 800, 1000));
-        }
-    }
-
-    void Atari1020::setupFont()
-    {
-        if (mOutput) {
-            QFontDatabase fonts;
-            if (!fonts.hasFamily("Atari  Console")) {
-                QFontDatabase::addApplicationFont(":/fonts/1020");
-            }
-
-            // TODO calculate the correct font size.
-            auto font = std::make_shared<QFont>("ATARI 1020 VECTOR FONT APPROXIM", 10);
-            font->setUnderline(false);
-            mOutput->setFont(font);
-            mOutput->calculateFixedFontSize(80);
-            if (mOutput->painter()) {
-                mOutput->painter()->setPen(QColor("black"));
-            }
-        }
-    } */
 
     void Atari1020::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2)
     {
@@ -236,107 +211,106 @@ namespace Printers
                 if (mEsc) {
                     mEsc = false;
                     switch (b) {
-
-                    case 0x1B: // Cancel Esc
-                        if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
-                            qDebug() << "!n" << tr("[%1] Escape character repeated")
-                                        .arg(deviceName());
-                        }
-                        mEsc = true;
-                        break;
-
-                    case 0x17: // CTRL+W: Enter international mode
-                        if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
-                            qDebug() << "!n" << tr("[%1] Entering international mode")
-                                        .arg(deviceName());
-                        }
-                        setInternationalMode(true);
-                        break;
-
-                    case 0x18: // CTRL+X: Exit international mode
-                        if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
-                            qDebug() << "!n" << tr("[%1] Exiting international mode")
-                                        .arg(deviceName());
-                        }
-                        setInternationalMode(false);
-                        break;
-
-                    default: // Other commands are ignored unless at the start of a logical line
-
-                        /*
-                         * Esc commands are only interpreted at the start of the buffer except for International character set.
-                         * For example, sending AB $1B $07 C1 to the printer while in text mode will display AB but it
-                         * won't enter Graphics mode and won't change the pen color to blue.
-                         * Again, sending AB $1B $13 CD to the printer while in text mode will display ABCD in 40 column mode
-                         * even if an Esc Ctrl-S (80-column mode) is found between AB and CD.
-                         */
-                        if (! mStartOfLogicalLine) {
+                        case 0x1B: // Cancel Esc
                             if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
-                                qDebug() << "!n" << tr("[%1] Escape character not on start of line")
+                                qDebug() << "!n" << tr("[%1] Escape character repeated")
                                             .arg(deviceName());
                             }
-                        } else {
-                            switch (b) {
+                            mEsc = true;
+                            break;
 
-                            case 0x07: // CTRL+G: Enter Graphics Mode
-                                if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
-                                    qDebug() << "!n" << tr("[%1] Enter Graphics mode")
-                                                .arg(deviceName());
-                                }
-                                mStartOfLogicalLine = false;
-                                mGraphicsMode = true;
-                                resetGraphics();
-                                break;
-
-                            case 0x0E: // CTRL+N: 40 characters
-                                if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
-                                    qDebug() << "!n" << tr("[%1] Switch to 40 columns")
-                                                .arg(deviceName());
-                                }
-                                //mOutput->calculateFixedFontSize(40);
-                                break;
-
-                            case 0x10: // CTRL+P: 20 characters
-                                if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
-                                    qDebug() << "!n" << tr("[%1] Switch to 20 columns")
-                                                .arg(deviceName());
-                                }
-                                //mOutput->calculateFixedFontSize(20);
-                                break;
-
-                            case 0x13: // CTRL+S: 80 characters
-                                if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
-                                    qDebug() << "!n" << tr("[%1] Switch to 80 columns")
-                                                .arg(deviceName());
-                                }
-                                //mOutput->calculateFixedFontSize(80);
-                                break;
-
-                            case 0x17: // CTRL+W: Enter international mode
-                                if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
-                                    qDebug() << "!n" << tr("[%1] Enter international mode")
-                                                .arg(deviceName());
-                                }
-                                setInternationalMode(true);
-                                break;
-
-                            case 0x18: // CTRL+X: Exit international mode
-                                if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
-                                    qDebug() << "!n" << tr("[%1] Exit international mode")
-                                                .arg(deviceName());
-                                }
-                                setInternationalMode(false);
-                                break;
-
-                            default: // Unknown control codes are consumed.
-                                if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
-                                    qDebug() << "!n" << tr("[%1] Unknown control code $%2")
-                                                .arg(deviceName())
-                                                .arg(b, 2, 16, QChar('0'));
-                                }
-                                return true;
+                        case 0x17: // CTRL+W: Enter international mode
+                            if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
+                                qDebug() << "!n" << tr("[%1] Entering international mode")
+                                            .arg(deviceName());
                             }
-                        }
+                            setInternationalMode(true);
+                            break;
+
+                        case 0x18: // CTRL+X: Exit international mode
+                            if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
+                                qDebug() << "!n" << tr("[%1] Exiting international mode")
+                                            .arg(deviceName());
+                            }
+                            setInternationalMode(false);
+                            break;
+
+                        default: // Other commands are ignored unless at the start of a logical line
+
+                            /*
+                             * Esc commands are only interpreted at the start of the buffer except for International character set.
+                             * For example, sending AB $1B $07 C1 to the printer while in text mode will display AB but it
+                             * won't enter Graphics mode and won't change the pen color to blue.
+                             * Again, sending AB $1B $13 CD to the printer while in text mode will display ABCD in 40 column mode
+                             * even if an Esc Ctrl-S (80-column mode) is found between AB and CD.
+                             */
+                            if (! mStartOfLogicalLine) {
+                                if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
+                                    qDebug() << "!n" << tr("[%1] Escape character not on start of line")
+                                                .arg(deviceName());
+                                }
+                            } else {
+                                switch (b) {
+                                    case 0x07: // CTRL+G: Enter Graphics Mode
+                                        if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
+                                            qDebug() << "!n" << tr("[%1] Enter Graphics mode")
+                                                        .arg(deviceName());
+                                        }
+                                        mStartOfLogicalLine = false;
+                                        mGraphicsMode = true;
+                                        resetGraphics();
+                                        break;
+
+                                    case 0x0E: // CTRL+N: 40 characters
+                                        if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
+                                            qDebug() << "!n" << tr("[%1] Switch to 40 columns")
+                                                        .arg(deviceName());
+                                        }
+                                        //mOutput->calculateFixedFontSize(40);
+                                        break;
+
+                                    case 0x10: // CTRL+P: 20 characters
+                                        if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
+                                            qDebug() << "!n" << tr("[%1] Switch to 20 columns")
+                                                        .arg(deviceName());
+                                        }
+                                        //mOutput->calculateFixedFontSize(20);
+                                        break;
+
+                                    case 0x13: // CTRL+S: 80 characters
+                                        if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
+                                            qDebug() << "!n" << tr("[%1] Switch to 80 columns")
+                                                        .arg(deviceName());
+                                        }
+                                        //mOutput->calculateFixedFontSize(80);
+                                        break;
+
+                                    case 0x17: // CTRL+W: Enter international mode
+                                        if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
+                                            qDebug() << "!n" << tr("[%1] Enter international mode")
+                                                        .arg(deviceName());
+                                        }
+                                        setInternationalMode(true);
+                                        break;
+
+                                    case 0x18: // CTRL+X: Exit international mode
+                                        if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
+                                            qDebug() << "!n" << tr("[%1] Exit international mode")
+                                                        .arg(deviceName());
+                                        }
+                                        setInternationalMode(false);
+                                        break;
+
+                                    default: // Unknown control codes are consumed.
+                                        if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
+                                            qDebug() << "!n" << tr("[%1] Unknown control code $%2")
+                                                        .arg(deviceName())
+                                                        .arg(b, 2, 16, QChar('0'));
+                                        }
+                                        mEsc = false;
+                                        break;
+                                }
+                            }
                     }
                 } else if (b == 0x1B) { // ESC
                     mEsc = true;
@@ -543,6 +517,7 @@ namespace Printers
     {
         if (mCurrentCommand) {
             auto primitive = new GraphicsPrimitive();
+            primitive->setTransform(mTransform);
 
             switch (mCurrentCommand) {
             case 'A': // Abandon Graphics mode
@@ -659,10 +634,8 @@ namespace Printers
                 mEsc = false;
                 mStartOfLogicalLine = true;
                 setInternationalMode(false);
-// TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//                if (mOutput && mOutput->painter()) {
-//                    mOutput->painter()->translate(mPenPoint);
-//                }
+
+                mTransform.translate(mPenPoint.x(), mPenPoint.y());
                 break;
 
             case 'D': // draw to point
@@ -796,17 +769,6 @@ namespace Printers
         mCurrentCommand = 0; // to prevent execution of this command a second time !
     }
 
-    void Atari1020::executeGraphicsPrimitive(GraphicsPrimitive *primitive)
-    {
-        if (mOutputWindow) {
-            if (mClearPane) {
-                primitive->clearScene();
-                mOutputWindow->clearScene();
-            }
-            mOutputWindow->executeGraphicsPrimitive(primitive);
-        }
-    }
-
     int Atari1020::getNumber(const QString number, const bool negative, const int defaultValue)
     {
         if (number.length() == 0) {
@@ -836,6 +798,7 @@ namespace Printers
         pen.setStyle(Qt::SolidLine);
 
         auto primitive = new GraphicsPrimitive;
+        primitive->setTransform(mTransform);
         auto item = new QGraphicsLineItem{QLine{mPenPoint, end}};
         primitive->addItem(item);
 
@@ -860,8 +823,8 @@ namespace Printers
         // fix position because (0,0) on Windows/Linux is top left but on the 1020 it is bottom left.
         QPoint adjusted(point.x(), -point.y());
         QFontMetrics metrics(mFont);
-        switch (orientation) {
 
+        switch (orientation) {
         case 0:
             adjusted.setY(adjusted.y() - metrics.height());
             break;
@@ -885,6 +848,7 @@ namespace Printers
     bool Atari1020::drawText()
     {
         auto primitive = new GraphicsPrimitive;
+        //primitive->setTransform(mTransform);
         auto item = new QGraphicsTextItem{QString{mPrintText}};
         item->setFont(mFont);
         item->setDefaultTextColor(mPen.color());
@@ -940,23 +904,24 @@ namespace Printers
         QRectF sceneRect = mOutputWindow->getSceneRect();
         auto x = mPenPoint.x(),
             y = mPenPoint.y();
+        QFontMetrics metric(mFont);
 
         switch(mTextOrientation)
         {
             case 0:
-                y += 10;
+                y -= metric.lineSpacing();
                 x = sceneRect.left();
                 break;
             case 90:
-                x += 10;
+                x -= metric.lineSpacing();
                 y = sceneRect.top();
                 break;
             case 180:
-                y -= 10;
+                y += metric.lineSpacing();
                 x = sceneRect.right();
                 break;
             case 270:
-                x -= 10;
+                x += metric.lineSpacing();
                 y = sceneRect.bottom();
                 break;
         }

@@ -8,8 +8,8 @@
 namespace Printers
 {
     BasePrinter::BasePrinter(SioWorkerPtr worker)
-        : SioDevice(std::move(worker))//,
-          //mOutput()
+        : SioDevice(std::move(worker)),
+          mClearPane(false)
     {}
 
     BasePrinter::~BasePrinter() = default;
@@ -17,6 +17,17 @@ namespace Printers
     const QChar BasePrinter::translateAtascii(const unsigned char b) const
     {
         return mAtascii(b);
+    }
+
+    void BasePrinter::executeGraphicsPrimitive(GraphicsPrimitive *primitive)
+    {
+        if (mOutputWindow) {
+            if (mClearPane) {
+                primitive->clearScene();
+                mOutputWindow->clearScene();
+            }
+            mOutputWindow->executeGraphicsPrimitive(primitive);
+        }
     }
 
     void BasePrinter::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2)

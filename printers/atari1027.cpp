@@ -7,12 +7,13 @@
 #include <QState>
 #include <QStateMachine>
 #include <QSharedPointer>
+#include <QFont>
 
 namespace Printers
 {
     Atari1027::Atari1027(SioWorkerPtr worker)
         : AtariPrinter(std::move(worker)),
-          mESC(false)
+          mPoint(0, 0), mESC(false)
     {
         mUnderlinedState = new QState(mCombinedState);
         mUnderlinedState->assignProperty(this, "underlined", false);
@@ -76,15 +77,27 @@ namespace Printers
 
                 case 155: // EOL
                 {
+                    QFont font(RespeqtSettings::instance()->atariFixedFontFamily());
+                    font.setUnderline(mUnderlinedState->property("underlined").toBool());
+
                     mESC = false;
                     mEscState->setProperty("esc", false);
                     mUnderlinedState->setProperty("underlined", false);
-                    if (mFont)
-                    {
-                        mFont->setUnderline(false);
-                    }
-                    //mOutput->newLine();
-                    // Drop the rest of the buffer
+                    auto primitive = new GraphicsPrimitive;
+                    auto item = new QGraphicsTextItem{QString{mPrintText}};
+
+                    item->setFont(font);
+                    item->setDefaultTextColor(QColor(0, 0, 0));
+                    item->setRotation(0);
+                    item->setPos(mPoint.x(), mPoint.y());
+                    primitive->addItem(item);
+                    executeGraphicsPrimitive(primitive);
+                    // clear text buffer
+                    mPrintText.clear();
+
+                    QFontMetrics metrics(font);
+                    mPoint.setY(mPoint.y() + metrics.lineSpacing());
+
                     return true;
                 }
                 // no break needed

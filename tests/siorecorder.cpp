@@ -222,7 +222,7 @@ namespace Tests {
     }
 
     /// TODO Be more verbose about failures.
-    QByteArray SioRecorder::readDataFrame(uint size, bool verbose)
+    QByteArray SioRecorder::readDataFrame(uint size, bool isCommandFrame, bool verbose)
     {
         // We look whether there is a pause tag
         if (!readPauseTag())

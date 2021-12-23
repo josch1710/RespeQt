@@ -74,7 +74,7 @@ public:
     virtual void cancel() = 0;
     virtual int speedByte() = 0;
     virtual QByteArray readCommandFrame() = 0;
-    virtual QByteArray readDataFrame(uint size, bool verbose = true) = 0;
+    virtual QByteArray readDataFrame(uint size, bool isCommandFrame = false, bool verbose = true) = 0;
     virtual bool writeDataFrame(const QByteArray &data) = 0;
     virtual bool writeCommandAck() = 0;
     virtual bool writeCommandNak() = 0;

@@ -8,6 +8,7 @@
 #include <QPrinter>
 #include <QRect>
 #include <QState>
+#include <QPoint>
 
 namespace Printers
 {
@@ -27,6 +28,7 @@ namespace Printers
         }
 
     private:
+        QPoint mPoint;
         bool mESC;
         QState *mUnderlinedState;
 
