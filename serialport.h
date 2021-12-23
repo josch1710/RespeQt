@@ -13,6 +13,7 @@
 
 #include <QObject>
 #include <QByteArray>
+#include <memory>
 
 enum eHandshake
 {

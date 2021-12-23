@@ -7,6 +7,7 @@
 #include <QPoint>
 #include <vector>
 #include <iostream>
+#include <memory>
 
 using QPainterPtr = std::shared_ptr<QPainter>;
 

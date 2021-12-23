@@ -210,7 +210,7 @@ unix {
     HEADERS += serialport-unix.h
     LIBS += -lz -lcups
 
-    #QMAKE_CXXFLAGS += -Werror
+    QMAKE_CXXFLAGS += -Wno-deprecated-copy
 }
 
 DISTFILES += \
