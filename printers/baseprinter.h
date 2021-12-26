@@ -41,7 +41,6 @@ namespace Printers
         OutputWindowPtr outputWindow() const { return mOutputWindow; }
         void setOutputWindow(OutputWindowPtr outputWindow);
         void resetOutputWindow();
-        virtual void setupFont() {}
 
         static QString typeName()
         {

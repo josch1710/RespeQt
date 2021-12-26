@@ -10,21 +10,15 @@ namespace Printers
           mCPI(10),
           mLineChars(80),
           mLPI(6)
-    {}
-
-    void Atari1025::setupFont()
     {
-        /*if (mOutput)
+        mFont = QSharedPointer<QFont>(new QFont(RespeqtSettings::instance()->atariFixedFontFamily(), 12));
+        if (mFont)
         {
-            auto font = std::make_shared<QFont>(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
-            if (font)
-            {
-                font->setUnderline(false);
-                mOutput->setFont(font);
-            }
-            mOutput->calculateFixedFontSize(mLineChars);
-        }*/
+            mFont->setUnderline(false);
+        }
+        // TODO Calculate Font
     }
+
 
     bool Atari1025::handleBuffer(const QByteArray &buffer, const unsigned int len)
     {
@@ -160,7 +154,6 @@ namespace Printers
     void Atari1025::setCharsPI(float chars)
     {
         mCPI = chars;
-        setupFont();
     }
 
     float Atari1025::charsPI() const
@@ -171,7 +164,6 @@ namespace Printers
     void Atari1025::setLineChars(unsigned char chars)
     {
         mLineChars = chars;
-        setupFont();
     }
 
     unsigned char Atari1025::lineChars() const

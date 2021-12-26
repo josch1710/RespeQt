@@ -17,7 +17,6 @@ namespace Printers
         Atari1025(SioWorkerPtr worker);
 
         virtual bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
-        virtual void setupFont() override;
 
         static QString typeName()
         {

@@ -2,11 +2,13 @@
 #define ATARI1029_H
 
 #include "atariprinter.h"
+#include "common/graphicsdotsitem.h"
 
 #include <QFont>
 #include <QFontMetrics>
 #include <QPrinter>
 #include <QRect>
+#include <QPoint>
 
 namespace Printers
 {
@@ -16,6 +18,8 @@ namespace Printers
         PLOT_DOTS
     };
 
+    using GraphicsDots7Item = Common::GraphicsDotsItem<7, 1>;
+
     class Atari1029 : public AtariPrinter
     {
         Q_OBJECT
@@ -23,7 +27,6 @@ namespace Printers
         Atari1029(SioWorkerPtr worker);
 
         virtual bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
-        virtual void setupFont() override;
 
         static QString typeName()
         {
@@ -31,6 +34,7 @@ namespace Printers
         }
 
     private:
+        QPoint mPoint;
         bool mESC;
         bool mElongatedMode;
         GraphicsMode mGraphicsMode{GraphicsMode::NOT_GRAPHICS};
@@ -41,6 +45,7 @@ namespace Printers
         bool elongatedMode() { return mElongatedMode; }
         void setElongatedMode(bool elongatedMode);
         bool handleGraphicsMode(const unsigned char b);
+        bool flushTextBuffer();
     };
 }
 #endif // ATARI1029_H

@@ -15,16 +15,8 @@ namespace Printers
         : BasePrinter(std::move(sio))
     {}
 
-    Passthrough::~Passthrough()
-    = default;
+    Passthrough::~Passthrough() = default;
 
-    /*void Passthrough::setupOutput()
-    {
-        BasePrinter::setupOutput();
-    }*/
-
-    void Passthrough::setupFont()
-    {}
 
     bool Passthrough::handleBuffer(const QByteArray &buffer, const unsigned int len)
     {

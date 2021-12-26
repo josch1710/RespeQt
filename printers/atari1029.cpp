@@ -1,8 +1,12 @@
 #include "atari1029.h"
 #include "respeqtsettings.h"
+#include "common/graphicsdotsitem.h"
+
 #include <cstdlib>
 #include <utility> 
 #include <qglobal.h>
+#include <QGraphicsLineItem> // TODO Create GraphicsDotsItem template
+#include <QLineF>
 
 namespace Printers
 {
@@ -10,17 +14,11 @@ namespace Printers
         : AtariPrinter(std::move(worker)),
           mESC(false),
           mElongatedMode(false)
-    {}
-
-    void Atari1029::setupFont()
     {
-        /*if (mOutput)
-        {
-            auto font = std::make_shared<QFont>(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
-            font->setUnderline(false);
-            mOutput->setFont(font);
-            mOutput->calculateFixedFontSize(80);
-        }*/
+        auto font = new QFont(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
+        mFont = QSharedPointer<QFont>(font);
+        if (mFont)
+            mFont->setUnderline(false);
     }
 
     bool Atari1029::handleBuffer(const QByteArray &buffer, const unsigned int len)
@@ -53,14 +51,12 @@ namespace Printers
 
                     case 155: // EOL
                     {
+                        flushTextBuffer();
                         mESC = false;
                         setElongatedMode(false);
-                        /*if (mOutput->font())
-                        {
-                            mOutput->font()->setUnderline(false);
-                            mOutput->applyFont();
-                        }
-                        mOutput->newLine();*/
+                        if (mFont)
+                            mFont->setUnderline(false);
+
                         // Drop the rest of the buffer
                         return true;
                     }
@@ -99,22 +95,18 @@ namespace Printers
         switch(b) {
             case 25: // CTRL+Y starts underline mode
             {
-                /*if (mOutput->font())
-                {
-                    mOutput->font()->setUnderline(true);
-                    mOutput->applyFont();
-                }*/
+                if (mFont)
+                    mFont->setUnderline(true);
+
                 mESC = false;
                 qDebug() << "!d" << "ESC Underline on";
                 return true;
             }
             case 26: // CTRL+Z ends underline mode
             {
-                /*if (mOutput->font())
-                {
-                    mOutput->font()->setUnderline(false);
-                    mOutput->applyFont();
-                }*/
+                if (mFont)
+                    mFont->setUnderline(false);
+
                 mESC = false;
                 qDebug() << "!d" << "ESC Underline off";
                 return true;
@@ -148,6 +140,7 @@ namespace Printers
                 return true;
 
             case 65: // A starts graphics mode
+                flushTextBuffer();
                 mGraphicsMode = GraphicsMode::FETCH_MSB;
                 mESC = false;
                 return true;
@@ -155,10 +148,26 @@ namespace Printers
         return false;
     }
 
+    bool Atari1029::flushTextBuffer()
+    {
+        auto primitive = new GraphicsPrimitive;
+        auto item = new QGraphicsTextItem{QString{mPrintText}};
+        item->setFont(*mFont);
+        item->setDefaultTextColor(QColor(0, 0, 0));
+        item->setRotation(0);
+        item->setPos(mPoint);
+        primitive->addItem(item);
+        executeGraphicsPrimitive(primitive);
+        // clear text buffer
+        mPrintText.clear();
+
+        return true;
+    }
+
     bool Atari1029::handlePrintableCodes(const unsigned char b)
     {
         QChar qb = translateAtascii(b & 127); // Masking inverse characters.
-        //mOutput->printChar(qb);
+        mPrintText.append(qb);
         return true;
     }
 
@@ -167,9 +176,9 @@ namespace Printers
         mElongatedMode = elongatedMode;
         if (mElongatedMode)
         {
-            //mOutput->calculateFixedFontSize(40);
+            // TODO mOutput->calculateFixedFontSize(40);
         } else {
-            //mOutput->calculateFixedFontSize(80);
+            // TODO mOutput->calculateFixedFontSize(80);
         }
     }
 
@@ -193,16 +202,13 @@ namespace Printers
             {
                 // Now we fetch the graphics data, until mGraphicsColumns is 0
                 // Paint the dots;
-                /*QPoint point(mOutput->x(), mOutput->y() + 6);
-                for(int i = 0; i < 7; i++)
-                {
-                    // Mask the point we want to draw.
-                    mOutput->plot(point, b & (1 << i));
-                    point.setY(point.y() - 1);
-                }
-                mGraphicsColumns --;
-                mOutput->setX(mOutput->x() + 1); // Move to next column;
-                */
+                auto primitive = new GraphicsPrimitive;
+                auto dots = new GraphicsDots7Item(mPoint, b);
+                primitive->addItem(dots);
+                mGraphicsColumns--;
+                mPoint.setX(mPoint.x()+1); // Move to next column;
+                executeGraphicsPrimitive(primitive);
+
                 if (mGraphicsColumns == 0)
                     mGraphicsMode = GraphicsMode::NOT_GRAPHICS;
             }

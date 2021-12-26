@@ -17,18 +17,15 @@ namespace Printers
     {
         mUnderlinedState = new QState(mCombinedState);
         mUnderlinedState->assignProperty(this, "underlined", false);
+
+        mFont = QSharedPointer<QFont>(new QFont(RespeqtSettings::instance()->atariFixedFontFamily(), 12));
+        mFont->setUnderline(false);
+        // TODO calculateFixedFontSize(80);
     }
 
     Atari1027::~Atari1027()
     {
         delete mUnderlinedState;
-    }
-
-    void Atari1027::setupFont()
-    {
-        mFont = QSharedPointer<QFont>(new QFont(RespeqtSettings::instance()->atariFixedFontFamily(), 12));
-        mFont->setUnderline(false);
-        // TODO calculateFixedFontSize(80);
     }
 
     bool Atari1027::handleBuffer(const QByteArray &buffer, const unsigned int len)

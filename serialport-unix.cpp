@@ -16,6 +16,8 @@
 #include "sioworker.h"
 #include "headers/atarisio.h"
 #include "respeqtsettings.h"
+#include "tests/siorecorder.h"
+
 #include <QTime>
 #include <QtDebug>
 

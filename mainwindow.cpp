@@ -2044,7 +2044,10 @@ void MainWindow::replaySnapshot()
     if (sio->isRunning() && RespeqtSettings::instance()->backend() != SerialBackend::TEST)
     {
         // Ask for permission to cut the serial connection, if open.
-        auto answer = QMessageBox::question(this, tr("Disconnect serial"), tr("If you proceed, the standard serial port will be disconnected. Would you like to proceed?"));
+        auto answer = QMessageBox::question(this, tr("Disconnect serial"),
+                                            tr("If you proceed, the standard serial port will be disconnected. "
+                                               "You can reconnect the serial port by selecting it in Options.\n"
+                                               "Would you like to proceed?"));
         if (answer == QMessageBox::No)
             return;
     }

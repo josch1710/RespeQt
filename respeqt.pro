@@ -104,6 +104,7 @@ SOURCES += tests/siorecorder.cpp \
     cpu6502.cpp
 
 HEADERS += mainwindow.h \
+    printers/common/graphicsdotsitem.h \
     printers/outputwindow.h \
     printers/rawoutput.h \
     tests/siorecorder.h \
@@ -209,7 +210,9 @@ unix {
                printers/rawoutput_cups.cpp
     HEADERS += serialport-unix.h
     LIBS += -lz -lcups
+}
 
+linux {
     QMAKE_CXXFLAGS += -Wno-deprecated-copy
 }
 

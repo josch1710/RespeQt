@@ -14,6 +14,7 @@
 #include <string.h>
 #include "sioworker.h"
 #include "respeqtsettings.h"
+#include "tests/siorecorder.h"
 
 #include <QTime>
 #include <QtDebug>
