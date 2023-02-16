@@ -1,4 +1,4 @@
-respeqt.pro.user
+*.pro.user*
 a.xml
 1020_text2.pdf
 .qmake.stash
@@ -6,3 +6,9 @@ a.xml
 Ohne Titel.pdf
 test.xml
 .DS_Store
+*.json
+cmake-build*
+Makefile
+180!.cas
+.idea
+Testing
