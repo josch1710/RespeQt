@@ -19,6 +19,10 @@ namespace Printers
         // TODO Calculate Font
     }
 
+    void Atari1025::applyResizing(QResizeEvent */*e*/)
+    {
+
+    }
 
     bool Atari1025::handleBuffer(const QByteArray &buffer, const unsigned int len)
     {

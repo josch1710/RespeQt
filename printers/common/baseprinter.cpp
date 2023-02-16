@@ -9,7 +9,8 @@ namespace Printers
 {
     BasePrinter::BasePrinter(SioWorkerPtr worker)
         : SioDevice(std::move(worker)),
-          mClearPane(false)
+          mClearPane(false),
+          mOutputWindow(nullptr)
     {}
 
     BasePrinter::~BasePrinter() = default;
@@ -19,14 +20,13 @@ namespace Printers
         return mAtascii(b);
     }
 
-    void BasePrinter::executeGraphicsPrimitive(GraphicsPrimitive *primitive)
+    void BasePrinter::executeGraphicsItems()
     {
         if (mOutputWindow) {
             if (mClearPane) {
-                primitive->clearScene();
                 mOutputWindow->clearScene();
             }
-            mOutputWindow->executeGraphicsPrimitive(primitive);
+            mOutputWindow->executeGraphicsItems();
         }
     }
 
@@ -120,9 +120,25 @@ namespace Printers
     {
         if (mOutputWindow)
         {
+            disconnect(this, &BasePrinter::setCursorPosition, mOutputWindow.data(), &OutputWindow::setCursorPosition);
+            disconnect(this, &BasePrinter::decorateOutputToolbar, mOutputWindow.data(), &OutputWindow::decorateToolbar);
+            disconnect(outputWindow.data(), &OutputWindow::paperDown, this, &BasePrinter::paperDown);
+            disconnect(outputWindow.data(), &OutputWindow::paperUp, this, &BasePrinter::paperUp);
+            disconnect(outputWindow.data(), &OutputWindow::resized, this, &BasePrinter::outputWindowResized);
+            disconnect(this, &BasePrinter::setScale, outputWindow.data(), &OutputWindow::setScale);
             mOutputWindow->close();
         }
+        connect(this, &BasePrinter::setCursorPosition, outputWindow.data(), &OutputWindow::setCursorPosition);
+        connect(this, &BasePrinter::decorateOutputToolbar, outputWindow.data(), &OutputWindow::decorateToolbar);
+        connect(outputWindow.data(), &OutputWindow::paperDown, this, &BasePrinter::paperDown);
+        connect(outputWindow.data(), &OutputWindow::paperUp, this, &BasePrinter::paperUp);
+        connect(outputWindow.data(), &OutputWindow::resized, this, &BasePrinter::outputWindowResized);
+        connect(this, &BasePrinter::setScale, outputWindow.data(), &OutputWindow::setScale);
         mOutputWindow = outputWindow;
+        setPosition(0.0, 0.0);
+        applyResizing(nullptr);
+
+        createOutputButtons();
     }
 
     void BasePrinter::resetOutputWindow()
@@ -221,4 +237,42 @@ namespace Printers
             }
         }
     }
+
+    void BasePrinter::setPosition(const QPoint &position)
+    {
+        mPosition = position;
+        emit setCursorPosition(mPosition, 1.0, -1.0); // TODO Implement scale method
+    }
+
+    void BasePrinter::setPosition(int x, int y)
+    {
+        setPosition(QPoint(x, y));
+    }
+
+    void BasePrinter::movePositionX(int x)
+    {
+        mPosition += QPoint(x, 0);
+        emit setCursorPosition(mPosition, 1.0, -1.0); // TODO Implement scale method
+    }
+
+    void BasePrinter::movePositionY(int y)
+    {
+        mPosition += QPoint(0, y);
+        emit setCursorPosition(mPosition, 1.0, -1.0); // TODO Implement scale method
+    }
+
+    void BasePrinter::movePosition(QPoint p)
+    {
+        mPosition += p;
+        emit setCursorPosition(mPosition, 1.0, -1.0); // TODO Implement scale method
+    }
+
+    void BasePrinter::paperUp() {
+        movePositionY(20);
+    }
+
+    void BasePrinter::paperDown() {
+        movePositionY(-20);
+    }
+
 }

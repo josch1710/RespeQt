@@ -1,6 +1,6 @@
 // Contains all printer class headers
-#include "baseprinter.h"
-#include "atariprinter.h"
+#include "common/baseprinter.h"
+#include "common/atariprinter.h"
 #include "atari1020.h"
 #include "atari1025.h"
 #include "atari1027.h"

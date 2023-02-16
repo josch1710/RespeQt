@@ -7,7 +7,6 @@
 #include <QSharedPointer>
 #include <QWeakPointer>
 #include <cmath>
-#include <memory>
 #include <utility>
 
 
@@ -21,12 +20,12 @@ namespace Printers
 }
 
 #include "sioworker.h"
-#include "baseprinter.h"
+#include "common/baseprinter.h"
 #include "graphicsprimitive.h"
 
-using QPaintDevicePtr = std::shared_ptr<QPaintDevice>;
-using QPainterPtr = std::shared_ptr<QPainter>;
-using QFontPtr = std::shared_ptr<QFont>;
+using QPaintDevicePtr = QSharedPointer<QPaintDevice>;
+using QPainterPtr = QSharedPointer<QPainter>;
+using QFontPtr = QSharedPointer<QFont>;
 
 namespace Printers
 {
@@ -69,8 +68,8 @@ namespace Printers
             }
         };*/
 
-        virtual void executeGraphicsPrimitive(GraphicsPrimitive *primitive) {
-            primitive->executeQueue(nullptr);
+        virtual void executeGraphicsPrimitive() {
+            //primitive->executeQueue(nullptr);
         }
 
         //BasePrinterWPtr printer() const { return mPrinter; }

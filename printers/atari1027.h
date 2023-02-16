@@ -1,7 +1,7 @@
 #ifndef ATARI1027_H
 #define ATARI1027_H
 
-#include "atariprinter.h"
+#include "common/atariprinter.h"
 
 #include <QFont>
 #include <QFontMetrics>
@@ -25,6 +25,9 @@ namespace Printers
         {
             return "Atari 1027";
         }
+
+    protected:
+        void applyResizing(QResizeEvent *e) override;
 
     private:
         QPoint mPoint;

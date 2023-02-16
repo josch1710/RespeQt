@@ -13,7 +13,7 @@
 
 #include <QObject>
 #include <QByteArray>
-#include <memory>
+#include <QSharedPointer>
 
 enum eHandshake
 {
@@ -93,7 +93,7 @@ signals:
     void statusChanged(QString status);
 };
 
-using AbstractSerialPortBackendPtr = std::shared_ptr<AbstractSerialPortBackend>;
+using AbstractSerialPortBackendPtr = QSharedPointer<AbstractSerialPortBackend>;
 
 
 #ifdef Q_OS_WIN

@@ -1,7 +1,7 @@
 #ifndef PRINTERWIDGET_H
 #define PRINTERWIDGET_H
 
-#include "printers/baseprinter.h"
+#include "printers/common/baseprinter.h"
 #include "sioworker.h"
 #include "printers/outputwindow.h"
 

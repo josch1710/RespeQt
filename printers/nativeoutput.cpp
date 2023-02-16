@@ -1,4 +1,5 @@
 #include <cmath>
+#include <QSharedPointer>
 #include <utility>
 #include "nativeoutput.h"
 #include "logdisplaydialog.h"
@@ -23,9 +24,9 @@ namespace Printers
         if (!mDevice)
             return false;
 
-        mPainter = std::make_shared<QPainter>();
+        mPainter = QSharedPointer<QPainter>::create();
         mPainter->setRenderHint(QPainter::Antialiasing);
-        mPainter->begin(mDevice.get());
+        mPainter->begin(mDevice.data());
         setFont(mFont);
         updateBoundingBox();
         /*if (mPrinter)

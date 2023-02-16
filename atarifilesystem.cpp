@@ -94,7 +94,7 @@ QString AtariDirEntry::attributeNames() const
 void AtariDirEntry::makeFromAtariDosEntry(const QByteArray &entry, int aNo, int aDir, bool dd)
 {
     // Translate the attributes
-    attributes = 0;
+    attributes &= 0;
 
     internalData = entry;
 
@@ -143,7 +143,7 @@ void AtariDirEntry::makeFromAtariDosEntry(const QByteArray &entry, int aNo, int 
 void AtariDirEntry::makeFromSpartaDosEntry(const QByteArray &entry, int aNo, int aDir)
 {
     // Translate the attributes
-    attributes = 0;
+    attributes &= 0;
 
     internalData = entry;
 

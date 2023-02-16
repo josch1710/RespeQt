@@ -6,7 +6,7 @@
 #ifndef DISASSEMBLY1050_H
 #define DISASSEMBLY1050_H
 
-#include <cpu6502.h>
+#include "cpu6502.h"
 
 class disassembly1050 : public Cpu6502
 {

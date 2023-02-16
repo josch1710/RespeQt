@@ -38,9 +38,7 @@
 #include "printers/textprinterwindow.h"
 #include "printers/outputwindow.h"
 #include "logdisplaydialog.h"
-#ifndef QT_NO_DEBUG
-#include "tests/siorecorder.h"
-#endif
+#include "siorecorder.h"
 
 namespace Ui
 {
@@ -71,10 +69,8 @@ private:
     PrinterWidget* printerWidgets[PRINTER_COUNT]; //
     DriveWidget* diskWidgets[DISK_COUNT];    //
     // InfoWidget* infoWidget;
-#ifndef QT_NO_DEBUG
-    Tests::SioRecorder *mRecorder{nullptr};
+    SioRecorder *mRecorder{nullptr};
     QString mTestfile{};
-#endif
 
     QLabel *speedLabel, *onOffLabel, *prtOnOffLabel, *netLabel, *clearMessagesLabel;  //
 

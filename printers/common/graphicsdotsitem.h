@@ -16,7 +16,7 @@ namespace Printers {
         public:
             enum { Type = UserType + type_n };
 
-            GraphicsDotsItem(QPoint point, unsigned long val, QGraphicsItem *parent = Q_NULLPTR);
+            GraphicsDotsItem(QPointF point, unsigned long val, QGraphicsItem *parent = Q_NULLPTR);
 
             int type() const override { return Type; }
             virtual QRectF boundingRect() const override;
@@ -25,12 +25,12 @@ namespace Printers {
 
         private:
             std::bitset<N> mDots;
-            QPoint mPoint;
+            QPointF mPoint;
         };
 
         // ---- Implementation -----
         template<std::size_t N, unsigned char type_n>
-        GraphicsDotsItem<N, type_n>::GraphicsDotsItem(QPoint point, unsigned long val, QGraphicsItem *parent)
+        GraphicsDotsItem<N, type_n>::GraphicsDotsItem(QPointF point, unsigned long val, QGraphicsItem *parent)
            : QGraphicsObject(parent),
              mDots(val), mPoint(point)
         {}

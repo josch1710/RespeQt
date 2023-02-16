@@ -5,6 +5,8 @@
 #include <cmath>
 #include <QFontDatabase>
 #include <QPoint>
+#include <QComboBox>
+#include <QToolButton>
 #include <utility> 
 
 static struct GRAPHICS_COMMAND ALLOWED_GRAPHICS_COMMANDS[] = {
@@ -25,6 +27,13 @@ static struct GRAPHICS_COMMAND ALLOWED_GRAPHICS_COMMANDS[] = {
 
 namespace Printers
 {
+    const std::map<Atari1020::PenColor, QString> Atari1020::sColorNames = std::map<Atari1020::PenColor, QString> {
+        { Atari1020::PenColor::BLACK, "Black" },
+        { Atari1020::PenColor::BLUE,  "Blue" },
+        { Atari1020::PenColor::GREEN, "Green" },
+        { Atari1020::PenColor::RED,   "Red" }
+    };
+
     Atari1020::Atari1020(SioWorkerPtr sio)
         : AtariPrinter(std::move(sio)),
           mEsc(false),
@@ -37,7 +46,7 @@ namespace Printers
         auto family = mFont.family();
         mFont.setUnderline(false);
         mFont.setPixelSize(18);
-        mTransform.scale(1.0, -1.0);
+        applyResizing(nullptr);
     }
 
     void Atari1020::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2)
@@ -77,8 +86,7 @@ namespace Printers
                     mEsc = false;
                     mStartOfLogicalLine = true;
                     setInternationalMode(false);
-                    mPenPoint.setX(0);
-                    mPenPoint.setY(0);
+                    //setPosition(0, 0);
                     if (RespeqtSettings::instance()->clearOnStatus()) {
                         mClearPane = true;
                     }
@@ -213,24 +221,21 @@ namespace Printers
                     switch (b) {
                         case 0x1B: // Cancel Esc
                             if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
-                                qDebug() << "!n" << tr("[%1] Escape character repeated")
-                                            .arg(deviceName());
+                                qDebug() << "!n" << tr("[%1] Escape character repeated").arg(deviceName());
                             }
                             mEsc = true;
                             break;
 
                         case 0x17: // CTRL+W: Enter international mode
                             if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
-                                qDebug() << "!n" << tr("[%1] Entering international mode")
-                                            .arg(deviceName());
+                                qDebug() << "!n" << tr("[%1] Entering international mode").arg(deviceName());
                             }
                             setInternationalMode(true);
                             break;
 
                         case 0x18: // CTRL+X: Exit international mode
                             if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
-                                qDebug() << "!n" << tr("[%1] Exiting international mode")
-                                            .arg(deviceName());
+                                qDebug() << "!n" << tr("[%1] Exiting international mode").arg(deviceName());
                             }
                             setInternationalMode(false);
                             break;
@@ -516,9 +521,6 @@ namespace Printers
     void Atari1020::executeGraphicsCommand()
     {
         if (mCurrentCommand) {
-            auto primitive = new GraphicsPrimitive();
-            primitive->setTransform(mTransform);
-
             switch (mCurrentCommand) {
             case 'A': // Abandon Graphics mode
                 mGraphicsMode = false;
@@ -528,8 +530,7 @@ namespace Printers
                 break;
 
             case 'H': // set to HOME
-                mPenPoint.setX(0);
-                mPenPoint.setY(0);
+                setPosition(0, 0);
                 qDebug() << "!n" << tr("[%1] Move to Home")
                             .arg(deviceName());
                 break;
@@ -562,32 +563,15 @@ namespace Printers
                 {
                     auto next = getFirstNumber();
                     if (next >= 0 && next <= 3) {
-                        const char *colorName = "black";
-                        QColor temp(colorName);
-                        switch(next) {
-                            case 1:
-                                colorName = "blue";
-                                temp = QColor(colorName);
-                                break;
-                            case 2:
-                                colorName = "green";
-                                temp = QColor(colorName);
-                                break;
-                            case 3:
-                                colorName = "red";
-                                temp = QColor(colorName);
-                                break;
-                            default:
-                            case 0:
-                                break;
-                        }
-
+                        auto colorName = sColorNames.at(static_cast<PenColor>(next));
+                        setCursorColor(next);
+                        mPen.setColor(QColor(colorName.toLower()));
+                        emit setColorSelection(next);
                         if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
                             qDebug() << "!n" << tr("[%1] Set color to %2")
                                         .arg(deviceName())
                                         .arg(colorName);
                         }
-                        mPen.setColor(temp);
                     } else {
                         if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
                             qDebug() << "!n" << tr("[%1] Set color command ignored (%2 should be in range 0-3)")
@@ -627,15 +611,17 @@ namespace Printers
 
             case 'I': // Init plotter
                 if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
-                    qDebug() << "!n" << tr("[%1] Initialize plotter")
-                                .arg(deviceName());
+                    qDebug() << "!n" << tr("[%1] Initialize plotter").arg(deviceName());
                 }
                 mGraphicsMode = false;
                 mEsc = false;
                 mStartOfLogicalLine = true;
                 setInternationalMode(false);
 
-                mTransform.translate(mPenPoint.x(), mPenPoint.y());
+                {
+                    auto _position = position();
+                    // TODO mTransform.translate(_position.x(), _position.y());
+                }
                 break;
 
             case 'D': // draw to point
@@ -651,9 +637,10 @@ namespace Printers
                         switch (mCurrentCommand) {
                             case 'D':
                                 {
-                                auto item = new QGraphicsLineItem{QLine{mPenPoint, point}};
+                                    auto item = new QGraphicsLineItem{QLine{position(), point}};
                                     item->setPen(mPen);
-                                    primitive->addItem(item);
+                                    // TODO item->setTransform(mTransform);
+                                    mOutputWindow->addGraphicsItem(item);
                                 }
 
                                 if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
@@ -662,16 +649,16 @@ namespace Printers
                                                 .arg(x)
                                                 .arg(y);
                                 }
-                                mPenPoint = point;
+                                setPosition(point);
                             break;
 
                             case 'J':
-                                point += mPenPoint;
-
+                                point += position();
                                 {
-                                    auto item = new QGraphicsLineItem{QLine{mPenPoint, point}};
+                                    auto item = new QGraphicsLineItem{QLine{position(), point}};
                                     item->setPen(mPen);
-                                    primitive->addItem(item);
+                                    // TODO item->setTransform(mTransform);
+                                    mOutputWindow->addGraphicsItem(item);
                                 }
                                 if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
                                     qDebug() << "!n" << tr("[%1] Draw relative to point (%2,%3)")
@@ -679,7 +666,7 @@ namespace Printers
                                                 .arg(x)
                                                 .arg(y);
                                 }
-                                mPenPoint = point;
+                                setPosition(point);
                             break;
 
                             case 'M':
@@ -689,7 +676,7 @@ namespace Printers
                                                 .arg(x)
                                                 .arg(y);
                                 }
-                                mPenPoint = point;
+                                setPosition(point);
                             break;
 
                             case 'R':
@@ -699,7 +686,7 @@ namespace Printers
                                                 .arg(x)
                                                 .arg(y);
                                 }
-                                mPenPoint += point;
+                                movePosition(point);
                             break;
                         }
                     }
@@ -764,7 +751,7 @@ namespace Printers
                 break;
 
             }
-            executeGraphicsPrimitive(primitive);
+            executeGraphicsItems();
         }
         mCurrentCommand = 0; // to prevent execution of this command a second time !
     }
@@ -787,7 +774,7 @@ namespace Printers
 
     bool Atari1020::drawAxis(bool xAxis, int size, int count)
     {
-        QPoint end = QPoint(mPenPoint);
+        QPoint end{position()};
 
         if (xAxis) {
             end.setX(end.x() + (size * count));
@@ -797,24 +784,24 @@ namespace Printers
         QPen pen(mPen);
         pen.setStyle(Qt::SolidLine);
 
-        auto primitive = new GraphicsPrimitive;
-        primitive->setTransform(mTransform);
-        auto item = new QGraphicsLineItem{QLine{mPenPoint, end}};
-        primitive->addItem(item);
+        auto item = new QGraphicsLineItem{QLine{position(), end}};
+        // TODO item->setTransform(mTransform);
+        mOutputWindow->addGraphicsItem(item);
 
         for (int c = 1; c <= count; c++) {
             if (xAxis) {
-                auto xc = mPenPoint.x() + c * size;
-                item = new QGraphicsLineItem{QLine{QPoint{xc, mPenPoint.y() -2}, QPoint{xc, mPenPoint.y() + 2}}};
+                auto xc = position().x() + c * size;
+                item = new QGraphicsLineItem{QLine{QPoint{xc, position().y() -2}, QPoint{xc, position().y() + 2}}};
             } else {
-                auto yc = mPenPoint.y() + c * size;
-                item = new QGraphicsLineItem{QLine{QPoint{mPenPoint.x() -2, yc}, QPoint{mPenPoint.x() + 2, yc}}};
+                auto yc = position().y() + c * size;
+                item = new QGraphicsLineItem{QLine{QPoint{position().x() -2, yc}, QPoint{position().x() + 2, yc}}};
             }
             item->setPen(pen);
-            primitive->addItem(item);
+            // TODO item->setTransform(mTransform);
+            mOutputWindow->addGraphicsItem(item);
         }
 
-        executeGraphicsPrimitive(primitive);
+        executeGraphicsItems();
         return true;
     }
 
@@ -847,15 +834,13 @@ namespace Printers
 
     bool Atari1020::drawText()
     {
-        auto primitive = new GraphicsPrimitive;
-        //primitive->setTransform(mTransform);
         auto item = new QGraphicsTextItem{QString{mPrintText}};
         item->setFont(mFont);
         item->setDefaultTextColor(mPen.color());
         item->setRotation(mTextOrientation);
-        item->setPos(computeTextCoordinates(mPenPoint, mTextOrientation));
-        primitive->addItem(item);
-        executeGraphicsPrimitive(primitive);
+        item->setPos(computeTextCoordinates(position(), mTextOrientation));
+        mOutputWindow->addGraphicsItem(item);
+        executeGraphicsItems();
         // clear text buffer
         mPrintText.clear();
 
@@ -866,25 +851,25 @@ namespace Printers
         switch (mTextOrientation) {
 
             case 0: // text towards right
-                mPenPoint.setX(mPenPoint.x() + nbPixel);
-                if (mPenPoint.x() > 480) {
-                    mPenPoint.setX(480);
+                movePositionX(nbPixel);
+                if (position().x() > 480) {
+                    setPosition(480, position().y());
                 }
                 break;
 
             case 90: // text towards bottom
-                mPenPoint.setY(mPenPoint.y() - nbPixel);
+                movePositionY(-nbPixel);
                 break;
 
             case 180: // text towards left
-                mPenPoint.setX(mPenPoint.x() - nbPixel);
-                if (mPenPoint.x() < 0) {
-                    mPenPoint.setX(0);
+                movePositionX(-nbPixel);
+                if (position().x() < 0) {
+                    setPosition(0, position().y());
                 }
                 break;
 
             case 270: // text towards top
-                mPenPoint.setY(mPenPoint.y() + nbPixel);
+                movePositionY(nbPixel);
                 break;
             }
 
@@ -901,9 +886,8 @@ namespace Printers
     bool Atari1020::newTextLine()
     {
         drawText();
-        QRectF sceneRect = mOutputWindow->getSceneRect();
-        auto x = mPenPoint.x(),
-            y = mPenPoint.y();
+        auto sceneRect = mOutputWindow->sceneRect();
+        auto x{position().x()}, y{position().y()};
         QFontMetrics metric(mFont);
 
         switch(mTextOrientation)
@@ -925,9 +909,53 @@ namespace Printers
                 y = sceneRect.bottom();
                 break;
         }
-        mPenPoint.setX(x);
-        mPenPoint.setY(y);
+        setPosition(x, y);
 
         return true;
+    }
+
+    void Atari1020::setOutputWindow(OutputWindowPtr outputWindow)
+    {
+        if (mOutputWindow) {
+            disconnect(this, &Atari1020::setCursorColor, mOutputWindow.data(), &OutputWindow::setCursorColor);
+        }
+        AtariPrinter::setOutputWindow(outputWindow);
+        connect(this, &Atari1020::setCursorColor, mOutputWindow.data(), &OutputWindow::setCursorColor);
+        applyResizing(nullptr);
+    }
+
+    void Atari1020::applyResizing(QResizeEvent*)
+    {
+        if (mOutputWindow) {
+            auto size = mOutputWindow->size();
+
+            // We scale 481 points (0 - 480) to the x size of this scene and apply it to both coordinates.
+            qreal scale = (size.width()) / 481.0; // TODO Implement scale method
+            emit setScale(scale, -scale);
+//            qDebug() << "!n" << "Size " << size << " scale " << scale;
+        }
+    }
+
+    void Atari1020::createOutputButtons()
+    {
+        QWidgetList list{};
+
+        auto combo = new QComboBox();
+        for(const auto &item: sColorNames) {
+            combo->addItem(item.second);
+        }
+        void (QComboBox::*color)(int index) = &QComboBox::currentIndexChanged;
+        connect(combo, color, this, &Atari1020::changeColor);
+        connect(this, &Atari1020::setColorSelection, combo, &QComboBox::setCurrentIndex);
+        list.push_back(combo);
+
+        emit decorateOutputToolbar(list);
+    }
+
+    void Atari1020::changeColor(int index) {
+        auto colorName = sColorNames.at(static_cast<PenColor>(index));
+        QColor color { colorName.toLower() };
+        mPen.setColor(color);
+        emit setCursorColor(color);
     }
 }

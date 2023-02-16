@@ -14,7 +14,7 @@
 #include <string.h>
 #include "sioworker.h"
 #include "respeqtsettings.h"
-#include "tests/siorecorder.h"
+#include "siorecorder.h"
 
 #include <QTime>
 #include <QtDebug>
@@ -523,7 +523,7 @@ QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool isCommandFra
     if (expected == got) {
         data.resize(size);
 
-        auto recorder = Tests::SioRecorder::instance();
+        auto recorder = SioRecorder::instance();
         if (recorder->isSnapshotRunning()) {
             if (isCommandFrame)
                 recorder->writeSnapshotCommandFrame(data[0], data[1], data[2], data[3]);
@@ -548,7 +548,7 @@ bool StandardSerialPortBackend::writeDataFrame(const QByteArray &data)
 {
 //    qDebug() << "!d" << tr("DBG -- Serial Port writeDataFrame...");
 
-    auto recorder = Tests::SioRecorder::instance();
+    auto recorder = SioRecorder::instance();
     if (recorder->isSnapshotRunning())
         recorder->writeSnapshotDataFrame(data, false);
 

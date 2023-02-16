@@ -10,14 +10,11 @@
  */
 
 #include "sioworker.h"
-#include "tests/siorecorder.h"
+#include "siorecorder.h"
 #include "respeqtsettings.h"
 #include <QFile>
 #include <QDateTime>
 #include <QtDebug>
-#ifndef QT_NO_DEBUG
-#include <QFileDialog>
-#endif
 
 /* SioDevice */
 SioDevice::SioDevice(SioWorkerPtr worker)
@@ -48,7 +45,7 @@ SioWorker::SioWorker()
     for (int i=0; i <= 255; i++) {
         devices[i] = nullptr;
     }
-    mPort = nullptr;
+    mPort.reset();
 }
 
 SioWorker::~SioWorker()
@@ -83,13 +80,13 @@ void SioWorker::start(Priority p)
     switch (RespeqtSettings::instance()->backend()) {
         default:
         case SerialBackend::STANDARD:
-            mPort = std::make_shared<StandardSerialPortBackend>(this);
+            mPort = QSharedPointer<StandardSerialPortBackend>::create(this);
             break;
         case SerialBackend::SIO_DRIVER:
-            mPort = std::make_shared<AtariSioBackend>(this);
+            mPort = QSharedPointer<AtariSioBackend>::create(this);
             break;
         case SerialBackend::TEST:
-            mPort = Tests::SioRecorder::instance();
+            mPort = SioRecorder::instance();
             break;
     }
 
@@ -115,7 +112,7 @@ void SioWorker::setAutoReconnect(bool autoReconnect)
 void SioWorker::run()
 {
     mustTerminate = false;
-    connect(mPort.get(), SIGNAL(statusChanged(QString)), this, SIGNAL(statusChanged(QString)));
+    connect(mPort.data(), SIGNAL(statusChanged(QString)), this, SIGNAL(statusChanged(QString)));
 
     /* Open serial port */
     if (!mPort->open()) {
@@ -434,16 +431,12 @@ QString SioWorker::deviceName(int device)
     return result;
 }
 
-#ifndef QT_NO_DEBUG
-
-#endif
-
 /* CassetteWorker */
 
 CassetteWorker::CassetteWorker()
     : QThread()
 {
-    mPort = nullptr;
+    mPort.reset();
     mustTerminate.lock();
 }
 
@@ -618,13 +611,13 @@ void CassetteWorker::start(Priority p)
     switch (RespeqtSettings::instance()->backend()) {
         default:
         case SerialBackend::STANDARD:
-            mPort = std::make_shared<StandardSerialPortBackend>(this);
+            mPort = QSharedPointer<StandardSerialPortBackend>::create(this);
             break;
         case SerialBackend::SIO_DRIVER:
-            mPort = std::make_shared<AtariSioBackend>(this);
+            mPort = QSharedPointer<AtariSioBackend>::create(this);
             break;
         case SerialBackend::TEST:
-            mPort = Tests::SioRecorder::instance();
+            mPort = SioRecorder::instance();
             break;
     }
     QThread::start(p);

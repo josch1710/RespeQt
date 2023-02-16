@@ -1,7 +1,7 @@
 #ifndef ATARI1029_H
 #define ATARI1029_H
 
-#include "atariprinter.h"
+#include "common/atariprinter.h"
 #include "common/graphicsdotsitem.h"
 
 #include <QFont>
@@ -33,12 +33,15 @@ namespace Printers
             return "Atari 1029";
         }
 
+    protected:
+        void applyResizing(QResizeEvent *e) override;
+
     private:
-        QPoint mPoint;
         bool mESC;
         bool mElongatedMode;
         GraphicsMode mGraphicsMode{GraphicsMode::NOT_GRAPHICS};
         uint16_t mGraphicsColumns;
+        uint8_t mLPI{9};
 
         bool handleEscapedCodes(const unsigned char b);
         bool handlePrintableCodes(const unsigned char b);
@@ -46,6 +49,7 @@ namespace Printers
         void setElongatedMode(bool elongatedMode);
         bool handleGraphicsMode(const unsigned char b);
         bool flushTextBuffer();
+
     };
 }
 #endif // ATARI1029_H

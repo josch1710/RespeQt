@@ -9,3 +9,12 @@ test.xml
 build
 .idea
 ui_*.*
+/cmake-build-debug/
+/cmake-build-release/
+/cmake-build-test-debug/
+/cmake-build-test-release/
+/Makefile
+*.cas
+Testing
+*.json
+*.pro.user*

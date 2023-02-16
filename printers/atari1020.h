@@ -1,7 +1,7 @@
 #ifndef ATARI1020_H
 #define ATARI1020_H
 
-#include "atariprinter.h"
+#include "common/atariprinter.h"
 #include "graphicsprimitive.h"
 
 enum AUTOMATA_STATES {
@@ -29,6 +29,7 @@ namespace Printers
 {
     class Atari1020 : public AtariPrinter
     {
+        Q_OBJECT
     public:
         Atari1020(SioWorkerPtr sio);
 
@@ -40,10 +41,18 @@ namespace Printers
         }
 
     protected:
+        enum class PenColor : int {
+            BLACK = 0,
+            BLUE = 1,
+            GREEN = 2,
+            RED = 3
+        };
+
+        static const std::map<PenColor, QString> sColorNames;
         bool mEsc;
         bool mStartOfLogicalLine;
         bool mGraphicsMode;
-        QPoint mPenPoint;
+        //QPoint mPenPoint;
         QPen mPen;
         QFont mFont;
         int mTextOrientation;
@@ -57,7 +66,6 @@ namespace Printers
         QByteArray mFirstNumber;
         QByteArray mSecondNumber;
         QByteArray mThirdNumber;
-        QTransform mTransform{};
 
         void executeGraphicsCommand();
         void resetGraphics();
@@ -74,6 +82,17 @@ namespace Printers
         bool drawText();
         bool newTextLine();
         QPoint computeTextCoordinates(const QPoint point, int orientation);
+        virtual void createOutputButtons() override;
+
+        void setOutputWindow(OutputWindowPtr outputWindow) override;
+        void applyResizing(QResizeEvent *e) override;
+
+    public slots:
+        void changeColor(int index);
+
+    signals:
+        void setCursorColor(const QColor &color);
+        void setColorSelection(int colorIndex);
     };
 }
 #endif // ATARI1020_H

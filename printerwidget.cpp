@@ -169,8 +169,8 @@ void PrinterWidget::connectPrinter()
             }
         } catch(...) {}*/
 
-        mOutputWindow = std::make_shared<Printers::OutputWindow>(new Printers::OutputWindow(this));
-        connect(mOutputWindow.get(), &Printers::OutputWindow::closed, this, &PrinterWidget::disconnectPrinter);
+        mOutputWindow = Printers::OutputWindowPtr::create(new Printers::OutputWindow(this));
+        connect(mOutputWindow.data(), &Printers::OutputWindow::closed, this, &PrinterWidget::disconnectPrinter);
 
         mOutputWindow->show();
         mPrinter->setOutputWindow(mOutputWindow);

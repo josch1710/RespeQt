@@ -71,5 +71,10 @@
         <file>other-icons/toggleosb.png</file>
         <file>silk-icons/icons/shield.png</file>
         <file>silk-icons/icons/shield_go.png</file>
+        <file>silk-icons/icons/arrow_down.png</file>
+        <file>silk-icons/icons/zoom.png</file>
+        <file>silk-icons/icons/zoom_in.png</file>
+        <file>silk-icons/icons/zoom_out.png</file>
     </qresource>
+    <qresource prefix="/"/>
 </RCC>

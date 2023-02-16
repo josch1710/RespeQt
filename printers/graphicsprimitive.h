@@ -5,20 +5,19 @@
 #include <QGraphicsTextItem>
 #include <QGraphicsScene>
 #include <QPoint>
+#include <QSharedPointer>
 #include <vector>
 #include <iostream>
-#include <memory>
 
-using QPainterPtr = std::shared_ptr<QPainter>;
 
 namespace Printers
 {
-    class GraphicsPrimitive final: public QObject
+    class _GraphicsPrimitive final: public QObject
     {
         Q_OBJECT;
     public:
-        GraphicsPrimitive() = default;
-        ~GraphicsPrimitive() = default;
+        _GraphicsPrimitive() = default;
+        ~_GraphicsPrimitive() = default;
 
         void executeQueue(QGraphicsScene *);
         void addItem(QGraphicsItem*);

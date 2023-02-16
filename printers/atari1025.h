@@ -1,7 +1,7 @@
 #ifndef ATARI1025_H
 #define ATARI1025_H
 
-#include "atariprinter.h"
+#include "common/atariprinter.h"
 
 #include <QFont>
 #include <QFontMetrics>
@@ -36,6 +36,8 @@ namespace Printers
         void setLinesPI(unsigned char lines);
         // get lines per inch
         unsigned char linesPI() const;
+
+        void applyResizing(QResizeEvent *e) override;
 
     private:
         bool mESC;

@@ -10,6 +10,7 @@
 #include <QFontMetrics>
 #include <QSharedData>
 #include <QSharedPointer>
+#include <QResizeEvent>
 
 // We need a forward class definition,
 //because we reference BasePrinter in other classes
@@ -22,7 +23,7 @@ namespace Printers
 
 #include "sioworker.h"
 #include "atascii.h"
-#include "outputwindow.h"
+#include "../outputwindow.h"
 
 namespace Printers
 {
@@ -39,13 +40,25 @@ namespace Printers
         virtual const QChar translateAtascii(const unsigned char b) const;
 
         OutputWindowPtr outputWindow() const { return mOutputWindow; }
-        void setOutputWindow(OutputWindowPtr outputWindow);
+        virtual void setOutputWindow(OutputWindowPtr outputWindow);
         void resetOutputWindow();
+
+        void setPosition(const QPoint &position);
+        void setPosition(int x, int y);
+        const QPoint position() const { return mPosition; };
+        void movePositionX(int x);
+        void movePositionY(int y);
+        void movePosition(QPoint p);
 
         static QString typeName()
         {
             throw new std::invalid_argument("Not implemented");
         }
+
+    public slots:
+        void paperUp();
+        void paperDown();
+        void outputWindowResized(QResizeEvent *e) { applyResizing(e); };
 
     protected:
         bool mClearPane;
@@ -57,11 +70,18 @@ namespace Printers
         bool writeDataFrame(QByteArray data);
         void dumpBuffer(unsigned char *buf, int len);
         void fillBuffer(char *line, unsigned char *buf, int len, int ofs, bool dumpAscii);
-        void executeGraphicsPrimitive(GraphicsPrimitive *primitive);
+        void executeGraphicsItems();
+        virtual void createOutputButtons() {}
+        virtual void applyResizing(QResizeEvent *e) = 0;
 
     private:
         char m_lastOperation;
+        QPoint mPosition{0, 0};
 
+    signals:
+        void setCursorPosition(const QPoint &position, qreal xscale, qreal yscale);
+        void decorateOutputToolbar(QWidgetList buttons);
+        void setScale(qreal xscale, qreal yscale);
     };
 }
 #endif // BASEPRINTER_H

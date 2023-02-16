@@ -1,7 +1,7 @@
 #ifndef CENTRONICS_H
 #define CENTRONICS_H
 
-#include "baseprinter.h"
+#include "common/baseprinter.h"
 
 namespace Printers
 {

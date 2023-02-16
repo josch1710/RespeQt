@@ -16,7 +16,7 @@
 #include "sioworker.h"
 #include "headers/atarisio.h"
 #include "respeqtsettings.h"
-#include "tests/siorecorder.h"
+#include "siorecorder.h"
 
 #include <QTime>
 #include <QtDebug>
@@ -385,7 +385,7 @@ QByteArray StandardSerialPortBackend::readCommandFrame()
         {
             data.resize(size);
 
-            auto recorder = Tests::SioRecorder::instance();
+            auto recorder = SioRecorder::instance();
             if (recorder->isSnapshotRunning())
                 recorder->writeSnapshotCommandFrame(data[0], data[1], data[2], data[3]);
 
@@ -536,7 +536,7 @@ QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool isCommandFra
     if (expected == got) {
         data.resize(size);
 
-        auto recorder = Tests::SioRecorder::instance();
+        auto recorder = SioRecorder::instance();
         if (recorder->isSnapshotRunning()) {
             if (isCommandFrame)
                 recorder->writeSnapshotCommandFrame(data[0], data[1], data[2], data[3]);
@@ -559,7 +559,7 @@ QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool isCommandFra
 
 bool StandardSerialPortBackend::writeDataFrame(const QByteArray &data)
 {
-    auto recorder = Tests::SioRecorder::instance();
+    auto recorder = SioRecorder::instance();
     if (recorder->isSnapshotRunning())
         recorder->writeSnapshotDataFrame(data, false);
 

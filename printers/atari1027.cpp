@@ -28,6 +28,11 @@ namespace Printers
         delete mUnderlinedState;
     }
 
+    void Atari1027::applyResizing(QResizeEvent*/*e*/)
+    {
+
+    }
+
     bool Atari1027::handleBuffer(const QByteArray &buffer, const unsigned int len)
     {
         for(unsigned int i = 0; i < len; i++)
@@ -80,15 +85,14 @@ namespace Printers
                     mESC = false;
                     mEscState->setProperty("esc", false);
                     mUnderlinedState->setProperty("underlined", false);
-                    auto primitive = new GraphicsPrimitive;
-                    auto item = new QGraphicsTextItem{QString{mPrintText}};
 
+                    auto item = new QGraphicsTextItem{QString{mPrintText}};
                     item->setFont(font);
                     item->setDefaultTextColor(QColor(0, 0, 0));
                     item->setRotation(0);
                     item->setPos(mPoint.x(), mPoint.y());
-                    primitive->addItem(item);
-                    executeGraphicsPrimitive(primitive);
+                    mOutputWindow->addGraphicsItem(item);
+                    executeGraphicsItems();
                     // clear text buffer
                     mPrintText.clear();
 

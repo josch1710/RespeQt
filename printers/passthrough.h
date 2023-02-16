@@ -1,7 +1,7 @@
 #ifndef PASSTHROUGH_H
 #define PASSTHROUGH_H
 
-#include "baseprinter.h"
+#include "common/baseprinter.h"
 
 namespace Printers
 {

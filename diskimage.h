@@ -15,7 +15,7 @@
 #include <QElapsedTimer>
 #include <QtDebug>
 
-#include <crc16.h>
+#include "crc16.h"
 #include "disassembly810.h"
 #include "disassembly1050.h"
 

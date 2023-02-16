@@ -1,5 +1,5 @@
 #include "logdisplaydialog.h"
-#include "atariprinter.h"
+#include "common/atariprinter.h"
 #include "graphicsprimitive.h"
 
 #include <QTransform>
@@ -7,11 +7,11 @@
 
 namespace Printers
 {
-    void GraphicsPrimitive::executeQueue(QGraphicsScene *scene)
+    void _GraphicsPrimitive::executeQueue(QGraphicsScene *scene)
     {
         if (scene == nullptr)
             return;
-        connect(scene, &QGraphicsScene::changed, this, &GraphicsPrimitive::changed);
+        connect(scene, &QGraphicsScene::changed, this, &_GraphicsPrimitive::changed);
         for(auto item: mGraphicsItems)
         {
             scene->addItem(item);
@@ -19,13 +19,13 @@ namespace Printers
         // Now the items are owned by scene
     }
 
-    void GraphicsPrimitive::addItem(QGraphicsItem *item)
+    void _GraphicsPrimitive::addItem(QGraphicsItem *item)
     {
         item->setTransform(mTransform);
         mGraphicsItems.push_back(item);
     }
 
-    void GraphicsPrimitive::clearScene()
+    void _GraphicsPrimitive::clearScene()
     {
         for(auto item: mGraphicsItems)
         {
@@ -36,7 +36,7 @@ namespace Printers
         mGraphicsItems.clear();
     }
 
-    void GraphicsPrimitive::setTransform(QTransform transform)
+    void _GraphicsPrimitive::setTransform(QTransform transform)
     {
         mTransform = transform;
     }

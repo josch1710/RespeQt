@@ -21,6 +21,11 @@ namespace Printers
             mFont->setUnderline(false);
     }
 
+    void Atari1029::applyResizing(QResizeEvent */*e*/)
+    {
+
+    }
+
     bool Atari1029::handleBuffer(const QByteArray &buffer, const unsigned int len)
     {
         for(unsigned int i = 0; i < len; i++)
@@ -56,6 +61,8 @@ namespace Printers
                         setElongatedMode(false);
                         if (mFont)
                             mFont->setUnderline(false);
+
+                        // Linefeed
 
                         // Drop the rest of the buffer
                         return true;
@@ -132,10 +139,12 @@ namespace Printers
                 return true;
 
             case 54: // 6 sets LPI to 6
+                mLPI = 6;
                 mESC = false;
                 return true;
 
             case 57: // 9 sets LPI to 9
+                mLPI = 9;
                 mESC = false;
                 return true;
 
@@ -150,14 +159,13 @@ namespace Printers
 
     bool Atari1029::flushTextBuffer()
     {
-        auto primitive = new GraphicsPrimitive;
         auto item = new QGraphicsTextItem{QString{mPrintText}};
         item->setFont(*mFont);
         item->setDefaultTextColor(QColor(0, 0, 0));
         item->setRotation(0);
-        item->setPos(mPoint);
-        primitive->addItem(item);
-        executeGraphicsPrimitive(primitive);
+        item->setPos(position());
+        mOutputWindow->addGraphicsItem(item);
+        executeGraphicsItems();
         // clear text buffer
         mPrintText.clear();
 
@@ -202,12 +210,13 @@ namespace Printers
             {
                 // Now we fetch the graphics data, until mGraphicsColumns is 0
                 // Paint the dots;
-                auto primitive = new GraphicsPrimitive;
-                auto dots = new GraphicsDots7Item(mPoint, b);
-                primitive->addItem(dots);
+                auto _position = position();
+                auto dots = new GraphicsDots7Item(_position, b);
                 mGraphicsColumns--;
-                mPoint.setX(mPoint.x()+1); // Move to next column;
-                executeGraphicsPrimitive(primitive);
+                _position.setX(_position.x()+1); // Move to next column;
+                setPosition(_position);
+                mOutputWindow->addGraphicsItem(dots);
+                executeGraphicsItems();
 
                 if (mGraphicsColumns == 0)
                     mGraphicsMode = GraphicsMode::NOT_GRAPHICS;

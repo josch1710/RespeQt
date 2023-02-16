@@ -1,8 +1,8 @@
 #include "siorecordertest.h"
-#include "sioworker.h"
-#include "tests/siorecorder.h"
-#include "printers/atari1027.h"
-#include "respeqtsettings.h"
+#include "../sioworker.h"
+#include "siorecorder.h"
+#include "../printers/atari1027.h"
+#include "../respeqtsettings.h"
 #include "nulloutput.h"
 #include "dummyworker.h"
 #include <QTemporaryFile>
@@ -27,28 +27,28 @@ namespace Tests {
         QTemporaryFile file("testWriteSioCapture");
         file.open();
         file.setAutoRemove(true);
-        Tests::SioRecorder recorder;
-        recorder.startSIOSnapshot();
+        auto recorder = SioRecorder::instance();
+        recorder->startSIOSnapshot();
 
         // Pause
-        recorder.writePauseCommand(500);
+        recorder->writePauseCommand(500);
         // Get Status command
-        recorder.writeSnapshotCommandFrame(PRINTER_BASE_CDEVIC, 0x53, 0, 0);
+        recorder->writeSnapshotCommandFrame(PRINTER_BASE_CDEVIC, 0x53, 0, 0);
         // Pause
-        recorder.writePauseCommand(500);
+        recorder->writePauseCommand(500);
         // Write data command
-        recorder.writeSnapshotCommandFrame(PRINTER_BASE_CDEVIC, 0x57, 0, 0x4e);
+        recorder->writeSnapshotCommandFrame(PRINTER_BASE_CDEVIC, 0x57, 0, 0x4e);
         // Pause
-        recorder.writePauseCommand(500);
+        recorder->writePauseCommand(500);
         // Some random test data.
         for(unsigned int i = 0; i < 10; i++)
             data[i] = i * 3;
-        recorder.writeSnapshotDataFrame(data);
+        recorder->writeSnapshotDataFrame(data, true);
         // Pause
-        recorder.writePauseCommand(500);
+        recorder->writePauseCommand(500);
 
         // We close the test file
-        auto snapshot = recorder.stopSIOSnapshot();
+        auto snapshot = recorder->stopSIOSnapshot();
         file.write(snapshot);
         file.close();
 
@@ -71,23 +71,23 @@ namespace Tests {
         auto file = new QFile("testdata/writeSioCapture.json");
         file->open(QIODevice::ReadOnly);
 
-        Tests::SioRecorder recorder;
-        recorder.prepareReplaySnapshot(file);
+        auto recorder = SioRecorder::instance();
+        recorder->prepareReplaySnapshot(file, SerialBackend::NONE);
 
         // The test only involves a printer device, so we instanciate one.
-        SioWorkerPtr dummyworker{QSharedPointer<DummyWorker>::create(&recorder)};
+        auto dummyworker = QSharedPointer<DummyWorker>::create(nullptr);
+        //recorder->setParent(dummyworker.data());
         Printers::Atari1027 printer(dummyworker);
         printer.setDeviceNo(PRINTER_BASE_CDEVIC);
         Printers::NativeOutputPtr nulloutput(new NullOutput);
-        printer.setOutput(nulloutput);
         RespeqtSettings::instance()->setPrinterEmulation(true);
 
         /* Open serial port */
-       QVERIFY2(recorder.open(), tr("Recorder could not be opened.").toLatin1());
+        QVERIFY2(recorder->open(), tr("Recorder could not be opened.").toLatin1());
 
         // We simulate what SioWorker::run does just for the printer.
         /* Process two SIO commands */
-        QByteArray cmd = recorder.readCommandFrame();
+        QByteArray cmd = recorder->readCommandFrame();
         QVERIFY2(!cmd.isEmpty(), tr("The first command frame should not be empty.").toLatin1());
 
         /* Decode the command */
@@ -95,10 +95,10 @@ namespace Tests {
         auto aux = static_cast<quint16>(static_cast<quint8>(cmd[2]) + static_cast<quint8>(cmd[3]) * 256);
 
         /* Redirect the command to the printer */
-        printer.handleCommand(command, aux);
+        printer.handleCommand(command, aux, 0);
         cmd.clear();
 
-        cmd = recorder.readCommandFrame();
+        cmd = recorder->readCommandFrame();
         QVERIFY2(!cmd.isEmpty(), tr("The second command frame should not be empty.").toLatin1());
 
         /* Decode the command */
@@ -106,12 +106,12 @@ namespace Tests {
         aux = static_cast<quint16>(static_cast<quint8>(cmd[2]) + static_cast<quint8>(cmd[3]) * 256);
 
         /* Redirect the command to the printer */
-        printer.handleCommand(command, aux);
+        printer.handleCommand(command, aux, 0);
         cmd.clear();
 
-        cmd = recorder.readCommandFrame();
+        cmd = recorder->readCommandFrame();
         QVERIFY2(cmd.isEmpty(), tr("The third command frame must be empty.").toLatin1());
 
-        recorder.close();
+        recorder->close();
     }
 }

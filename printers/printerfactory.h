@@ -4,9 +4,10 @@
 #include <QVector>
 #include <QPair>
 #include <QString>
+#include <QSharedPointer>
 #include <memory>
 #include "sioworker.h"
-#include "baseprinter.h"
+#include "common/baseprinter.h"
 
 namespace Printers {
 
@@ -26,7 +27,7 @@ namespace Printers {
         CreatorVector creatorFunctions;
 
         static std::shared_ptr<PrinterFactory> sInstance;
-        PrinterFactory() {}
+        PrinterFactory() = default;
 
     public:
         static std::shared_ptr<PrinterFactory> instance()
