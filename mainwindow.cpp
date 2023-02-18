@@ -58,7 +58,7 @@
 #include <QFontDatabase>
 
 #ifndef QT_NO_QDEBUG
-#include "tests/siorecorder.h"
+#include "siorecorder.h"
 #endif
 
 static QFile *logFile;
@@ -445,13 +445,12 @@ void MainWindow::createDeviceWidgets()
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
-    int i = containingDiskSlot(event->pos());
+    int i{-1};
     if (i >= 0 && (event->mimeData()->hasUrls() ||
-                   event->mimeData()->hasFormat("application/x-respeqt-disk-image"))) {
-        event->acceptProposedAction();
-    } else {
-        i = -1;
+            event->mimeData()->hasFormat("application/x-respeqt-disk-image"))) {
+        i = containingDiskSlot(event->pos());
     }
+    event->acceptProposedAction();
     for (int j = 0; j < DISK_COUNT; j++) { //
         if (i == j) {
             diskWidgets[j]->setFrameShadow(QFrame::Sunken);
@@ -463,26 +462,18 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 
 void MainWindow::dragMoveEvent(QDragMoveEvent *event)
 {
-    int i = containingDiskSlot(event->pos());
+    int i{-1};
     if (i >= 0 && (event->mimeData()->hasUrls() ||
-                   event->mimeData()->hasFormat("application/x-respeqt-disk-image"))) {
-        event->acceptProposedAction();
-    } else {
-        i = -1;
+            event->mimeData()->hasFormat("application/x-respeqt-disk-image"))) {
+        i = containingDiskSlot(event->pos());
     }
+    event->acceptProposedAction();
     for (int j = 0; j < DISK_COUNT; j++) { //
         if (i == j) {
             diskWidgets[j]->setFrameShadow(QFrame::Sunken);
         } else {
             diskWidgets[j]->setFrameShadow(QFrame::Raised);
         }
-    }
-}
-
-void MainWindow::dragLeaveEvent(QDragLeaveEvent *)
-{
-    for (int j = 0; j < DISK_COUNT; j++) { //
-        diskWidgets[j]->setFrameShadow(QFrame::Raised);
     }
 }
 
