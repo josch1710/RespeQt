@@ -10,7 +10,7 @@
  */
 
 #include "sioworker.h"
-#include "tests/siorecorder.h"
+#include "siorecorder.h"
 #include "respeqtsettings.h"
 #include <QFile>
 #include <QDateTime>

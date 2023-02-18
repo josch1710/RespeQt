@@ -38,7 +38,7 @@
 #include "printers/textprinterwindow.h"
 #include "printers/outputwindow.h"
 #include "logdisplaydialog.h"
-#include "tests/siorecorder.h"
+#include "siorecorder.h"
 
 namespace Ui
 {
@@ -125,7 +125,6 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
-    void dragLeaveEvent(QDragLeaveEvent *) override;
     void dropEvent(QDropEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
     void hideEvent(QHideEvent *event) override;
