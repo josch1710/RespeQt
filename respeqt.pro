@@ -10,8 +10,9 @@
 # know the specific year(s) please let the current maintainer know.
 #
 #CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
-VERSION = r5.3.90
-DEFINES += VERSION=\\\"$$VERSION\\\"
+VERSION = r5.3
+RC_VERSION = RC1B1
+DEFINES += VERSION=\\\"$$VERSION$$RC_VERSION\\\"
 
 debug {
   QMAKE_CXXFLAGS+="-fsanitize=address -fno-omit-frame-pointer"

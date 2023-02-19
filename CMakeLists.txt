@@ -1,7 +1,9 @@
 ### RespeQt CMAKE version
 cmake_minimum_required(VERSION 3.1.0)
 set(CMAKE_OSX_ARCHITECTURES x86_64)
-project(RespeQt VERSION 5.3.90 LANGUAGES CXX)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.8)
+project(RespeQt VERSION 5.3 LANGUAGES CXX)
+set(RC_VERSION " RC1B1")
 cmake_policy(SET CMP0071 NEW)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,7 +12,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_definitions(-DQT_DEPRECATED_WARNINGS -DQT_DISABLE_DEPRECATED_BEFORE=0x050000)
-add_definitions(-DVERSION=\"r${PROJECT_VERSION}\")
+add_definitions(-DVERSION=\"r${PROJECT_VERSION}${RC_VERSION}\")
 
 option(MAKE_TEST "Build the test application" OFF)
 message(STATUS "Build tests ${MAKE_TEST}")
@@ -29,7 +31,7 @@ if (CMAKE_VERSION VERSION_LESS "3.7.0")
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++")
 # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -fno-omit-frame-pointer -stdlib=libc++")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address")
 
@@ -69,10 +71,10 @@ if (WINDOWS)
     set(RESOURCES ${RESOURCES} RespeQt.rc)
 endif()
 
-find_package(Qt5 5.0...<5.7 REQUIRED
+find_package(Qt5 5.0...<5.4 REQUIRED
         COMPONENTS Core Widgets Gui Network PrintSupport SerialPort Svg LinguistTools)
 if (MAKE_TEST)
-    find_package(Qt5 5.0...<5.7 REQUIRED COMPONENTS Test)
+    find_package(Qt5 5.0...<5.4 REQUIRED COMPONENTS Test)
 endif()
 
 # Translations
