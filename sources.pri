@@ -61,7 +61,6 @@ SOURCES += siorecorder.cpp \
     cpu6502.cpp
 
 HEADERS += mainwindow.h \
-    printers/graphicsdotsitem.h \
     printers/outputwindow.h \
     printers/rawoutput.h \
     siorecorder.h \
