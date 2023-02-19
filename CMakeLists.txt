@@ -71,10 +71,10 @@ if (WINDOWS)
     set(RESOURCES ${RESOURCES} RespeQt.rc)
 endif()
 
-find_package(Qt5 5.0...<5.4 REQUIRED
+find_package(Qt5 5.0...<5.7 REQUIRED
         COMPONENTS Core Widgets Gui Network PrintSupport SerialPort Svg LinguistTools)
 if (MAKE_TEST)
-    find_package(Qt5 5.0...<5.4 REQUIRED COMPONENTS Test)
+    find_package(Qt5 5.0...<5.7 REQUIRED COMPONENTS Test)
 endif()
 
 # Translations
