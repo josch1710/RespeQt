@@ -86,14 +86,13 @@ qt5_add_translation(QM_FILES ${TS_FILES})
 qt5_wrap_ui(UI_HEADERS ${FORMS})
 qt5_add_resources(UI_RESOURCES ${RESOURCES})
 
-add_executable(${TARGET} ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES})
 if (APPLE)
-    set(${TARGET}_ICON RespeQt.icns)
-    set_source_files_properties(${TARGET}_ICON PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    set(${TARGET} PROPERTIES MACOSX_BUNDLE_ICON_FILE RespeQt.icns)
-    set_target_properties(${TARGET} PROPERTIES
-        MACOSX_BUNDLE TRUE
-        BUNDLE TRUE)
+    set(MACOSX_BUNDLE_ICON_FILE RespeQt.icns)
+    set(APP_ICON ${CMAKE_CURRENT_SOURCE_DIR}/RespeQt.icns)
+    set_source_files_properties(${APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+    add_executable(${TARGET} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES} ${APP_ICON})
+else()
+    add_executable(${TARGET} ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES})
 endif()
 
 find_package(ZLIB REQUIRED)
