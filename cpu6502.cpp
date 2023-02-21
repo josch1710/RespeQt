@@ -3738,7 +3738,7 @@ int Cpu6502::GetOpCodeLength(unsigned char opCode)
 char *Cpu6502::GetAddressLabel(unsigned short addr)
 {
 	static char buffer[6];
-	sprintf(buffer, "$%04X", ((int)addr) & 0xFFFF);
+	snprintf(buffer, 5, "$%04X", ((int)addr) & 0xFFFF);
 	return buffer;
 }
 
@@ -3784,14 +3784,14 @@ unsigned short Cpu6502::BuildTrace(char *buffer)
 	}
     unsigned char opCode = ReadByte(m_PC);
 	int lenOpCode = GetOpCodeLength(opCode);
-	sprintf(p, "A=%02X X=%02X Y=%02X P=%02X SP=%02X  ", ((int)m_A) & 0xFF, ((int)m_X) & 0xFF, ((int)m_Y) & 0xFF, ((int)m_SR) & 0xFF, ((int)m_SP) & 0xFF);
+	snprintf(p, 28, "A=%02X X=%02X Y=%02X P=%02X SP=%02X  ", ((int)m_A) & 0xFF, ((int)m_X) & 0xFF, ((int)m_Y) & 0xFF, ((int)m_SR) & 0xFF, ((int)m_SP) & 0xFF);
 	p += strlen(p);
-	sprintf(p, "%04X:", ((int)m_PC) & 0xFFFF);
+	snprintf(p, 5, "%04X:", ((int)m_PC) & 0xFFFF);
 	p += strlen(p);
 	unsigned char opCodes[3];
 	for (int i = 0; i < lenOpCode; i++) {
 		opCodes[i] = ReadByte(m_PC + i);
-		sprintf(p, "%02X ", ((int)opCodes[i]) & 0xFF);
+		snprintf(p, 5, "%02X ", ((int)opCodes[i]) & 0xFF);
 		p += 3;
 	}
 	for (int i = lenOpCode; i < 3; i++) {
@@ -3820,7 +3820,7 @@ unsigned short Cpu6502::BuildTrace(char *buffer)
     MODE_ENUM wMode = m_cpuType == CPU_6502 ? tabOpcode02[opCode].wMode : tabOpcodeC02[opCode].wMode;
     switch (wMode) {
 	case MODE_IMMEDIATE:
-		sprintf(p, "#$%02X ", ((int)opCodes[1]) & 0xFF);
+		snprintf(p,5, "#$%02X ", ((int)opCodes[1]) & 0xFF);
 		p += strlen(p);
 		break;
 	case MODE_ZERO_PAGE:
@@ -3903,7 +3903,7 @@ unsigned short Cpu6502::BuildTrace(char *buffer)
 			strcpy(p, secondLabel);
 		}
 		else {
-			sprintf(p, "$%04X", ((int)addr) & 0xFFFF);
+			snprintf(p, 5, "$%04X", ((int)addr) & 0xFFFF);
 		}
 		p += strlen(p);
 		*p++ = ')';
@@ -3930,7 +3930,7 @@ unsigned short Cpu6502::BuildTrace(char *buffer)
         p += strlen(p);
         break;
     case MODE_IMMEDIATE_WORD:
-        sprintf(p, "#$%04X ", (((unsigned short)opCodes[1]) & 0x00FF) | ((((unsigned short)opCodes[2]) << 8) & 0xFF00));
+        snprintf(p, 6, "#$%04X ", (((unsigned short)opCodes[1]) & 0x00FF) | ((((unsigned short)opCodes[2]) << 8) & 0xFF00));
         p += strlen(p);
         break;
     default:
@@ -3938,14 +3938,14 @@ unsigned short Cpu6502::BuildTrace(char *buffer)
 	}
 	*p = 0;
 	if (m_instructionsSkipped) {
-        sprintf(p, " ; %d instructions skipped", m_instructionsSkipped);
+        snprintf(p, 30, " ; %d instructions skipped", m_instructionsSkipped);
 	}
     // The call to ReadByte is commented because it would be a second access for display purpose only and
     // this access may trigger something if address is a register (Port B for example)
     /*
 	if (addr != 0xFFFF) {
 		unsigned char val = ReadByte(addr);
-        sprintf(p, " ; $%04X=$%02X", ((int)addr) & 0xFFFF, ((int)val) & 0xFF);
+        snprintf(p, 15, " ; $%04X=$%02X", ((int)addr) & 0xFFFF, ((int)val) & 0xFF);
 	}
     */
 	m_instructionsSkipped = 0;
@@ -3964,12 +3964,12 @@ int Cpu6502::BuildInstruction(char *buffer, unsigned char *data, int lenData, un
 	if (lenData < lenOpCode) {
     	return -1;
 	}
-    sprintf(p, "$%04X: ", ((int)address) & 0xFFFF);
+    snprintf(p, 8, "$%04X: ", ((int)address) & 0xFFFF);
 	p += strlen(p);
 	unsigned char opCodes[3];
 	for (int i = 0; i < lenOpCode; i++) {
 		opCodes[i] = data[i];
-		sprintf(p, "%02X ", ((int)opCodes[i]) & 0xFF);
+		snprintf(p, 3, "%02X ", ((int)opCodes[i]) & 0xFF);
 		p += 3;
 	}
 	for (int i = lenOpCode; i < 3; i++) {
@@ -3998,7 +3998,7 @@ int Cpu6502::BuildInstruction(char *buffer, unsigned char *data, int lenData, un
     MODE_ENUM wMode = m_cpuType == CPU_6502 ? tabOpcode02[opCode].wMode : tabOpcodeC02[opCode].wMode;
     switch (wMode) {
 	case MODE_IMMEDIATE:
-		sprintf(p, "#$%02X ", ((int)opCodes[1]) & 0xFF);
+		snprintf(p, 10, "#$%02X ", ((int)opCodes[1]) & 0xFF);
 		p += strlen(p);
 		break;
 	case MODE_ZERO_PAGE:
@@ -4075,7 +4075,7 @@ int Cpu6502::BuildInstruction(char *buffer, unsigned char *data, int lenData, un
 			strcpy(p, secondLabel);
 		}
 		else {
-			sprintf(p, "$%04X", ((int)addr) & 0xFFFF);
+			snprintf(p, 10, "$%04X", ((int)addr) & 0xFFFF);
 		}
 		p += strlen(p);
 		*p++ = ')';
@@ -4101,7 +4101,7 @@ int Cpu6502::BuildInstruction(char *buffer, unsigned char *data, int lenData, un
         p += strlen(p);
         break;
     case MODE_IMMEDIATE_WORD:
-        sprintf(p, "#$%04X ", (((unsigned short)opCodes[1]) & 0x00FF) | ((((unsigned short)opCodes[2]) << 8) & 0xFF00));
+        snprintf(p, 10, "#$%04X ", (((unsigned short)opCodes[1]) & 0x00FF) | ((((unsigned short)opCodes[2]) << 8) & 0xFF00));
         p += strlen(p);
         break;
     default:
