@@ -28,6 +28,10 @@
 extern QString g_respeQtAppPath;
 extern bool g_disablePicoHiSpeed;
 
+FolderImage::FolderImage(SioWorkerPtr worker, int maxEntries): SimpleDiskImage(worker), maxEntries(maxEntries)
+{
+}
+
 FolderImage::~FolderImage()
 {
     close();
@@ -35,9 +39,7 @@ FolderImage::~FolderImage()
 
 void FolderImage::close()
 {
-    for (int i = 0; i < 64; i++) {
-        atariFiles[i].exists = false;
-    }
+    atariFiles.clear();
 
     return;
 }
@@ -52,12 +54,12 @@ bool FolderImage::format(const DiskGeometry&)
 QString FolderImage::longName(QString &lastMountedFolder, QString &atariFileName)
 {
     if (FolderImage::open(lastMountedFolder, FileTypes::Dir)) {
-        for (int i = 0; i < 64; i++) {
-            if(atariFiles[i].atariName + "." + atariFiles[i].atariExt == atariFileName)
-                return atariFiles[i].longName;
+        for (auto file: atariFiles) {
+            if(file.atariName + "." + file.atariExt == atariFileName)
+                return file.longName;
         }
-     }
-     return nullptr;
+    }
+    return nullptr;
 }
 
 
@@ -65,86 +67,86 @@ QString FolderImage::longName(QString &lastMountedFolder, QString &atariFileName
 void FolderImage::buildDirectory()
 {
     QFileInfoList infos = dir.entryInfoList(QDir::Files,  QDir::Name);
-    QFileInfo info;
     QString name, longName;
     QString ext;
+    QList<QString> knownNames, duplicateNames;
 
-    int j = -1, k, i;
-    for (i = 0; i < 64; i++) {
-        do {
-            j++;
-            if (j >= infos.count()) {
-                atariFiles[i].exists = false;
-                break;
-            }
-            info = infos.at(j);
-            longName = info.completeBaseName();
-            name = longName.toUpper();
-            if(RespeqtSettings::instance()->filterUnderscore()) {
-                name.remove(QRegExp("[^A-Z0-9]"));
-            } else {
-                name.remove(QRegExp("[^A-Z0-9_]"));
-            }
-            name = name.left(8);
-            if (name.isEmpty()) {
-                name = "BADNAME";
-            }
-            longName += "." + info.suffix();
-            ext = info.suffix().toUpper();
-            if(RespeqtSettings::instance()->filterUnderscore()) {
-                ext.remove(QRegExp("[^A-Z0-9]"));
-            } else {
-                ext.remove(QRegExp("[^A-Z0-9_]"));
-            }
-            ext = ext.left(3);
-            QString baseName = name.left(7);
+    atariFiles.clear();
+    auto count = infos.count();
+    if (maxEntries > 0 && count > maxEntries)
+        count = maxEntries;
 
-            int l = 2;
-            do {
-                for (k = 0; k < i; k++) {
-                    if (atariFiles[k].atariName == name && atariFiles[k].atariExt == ext) {
-                        break;
-                    }
-                }
-                if (k < i) {
-                    name = QString("%1%2").arg(baseName).arg(l);
-                    l++;
-                }
-            } while (k < i && l < 10000000);
-            if (l == 10) {baseName = name.left(6);}
-            if (l == 100) {baseName = name.left(5);}
-            if (l == 1000) {baseName = name.left(4);}
-            if (l == 10000) {baseName = name.left(3);}
-            if (l == 100000) {baseName = name.left(2);}
-            if (l == 1000000) {baseName = name.left(1);}
-            if (l == 10000000) {baseName = "";}
-            if (l == 100000000) {
-                qWarning() << "!w" << tr("Cannot mirror '%1' in '%2': No suitable Atari name can be found.")
-                               .arg(info.fileName())
-                               .arg(dir.path());
-            }
-        } while (k < i);
-
-        if (j >= infos.count()) {
-            break;
+    for (auto info: infos) {
+        longName = info.completeBaseName();
+        name = longName.toUpper();
+        if(RespeqtSettings::instance()->filterUnderscore()) {
+            name.remove(QRegExp("[^A-Z0-9]"));
+        } else {
+            name.remove(QRegExp("[^A-Z0-9_]"));
         }
+        name = name.left(8);
+        if (name.isEmpty()) {
+            name = "BADNAME";
+        }
+        longName += "." + info.suffix();
+        ext = info.suffix().toUpper();
+        if(RespeqtSettings::instance()->filterUnderscore()) {
+            ext.remove(QRegExp("[^A-Z0-9]"));
+        } else {
+            ext.remove(QRegExp("[^A-Z0-9_]"));
+        }
+        ext = ext.left(3);
 
-        atariFiles[i].exists = true;
-        atariFiles[i].original = info;
-        atariFiles[i].atariName = name;
-        atariFiles[i].longName = longName;
-        atariFiles[i].atariExt = ext;
-        atariFiles[i].lastSector = 0;
-        atariFiles[i].pos = 0;
-        atariFiles[i].sectPass = 0;
+        // Check, whether we have to shorten the filename because of duplicates, and record them.
+        auto completeName = QString("%1.%2").arg(name).arg(ext);
+        if (!knownNames.contains(completeName))
+            knownNames.push_back(completeName);
+        else
+            duplicateNames.push_back(completeName);
 
+        AtariFile file;
+        file.exists = true;
+        file.original = info;
+        file.atariName = name;
+        file.longName = longName;
+        file.atariExt = ext;
+        file.lastSector = 0;
+        file.pos = 0;
+        file.sectPass = 0;
+        atariFiles.push_back(file);
     }
 
-    if (i < infos.count()) {
+    // Process duplicate file names
+    for(auto duplicate: duplicateNames)
+    {
+        auto i = 1;
+        for(auto j = 0; j < atariFiles.count(); j++)
+        {
+            auto file = atariFiles[j];
+            auto completeName = QString("%1.%2").arg(file.atariName).arg(file.atariExt);
+            if (QString::compare(duplicate, completeName) != 0)
+                continue; // Not a duplicate
+            if (i == 1)
+            { // First filename doesn't need to be fixed.
+                i++;
+                continue;
+            }
+            auto digits = i / 10; // Integer division gives us the count of digits, we need to cut.
+            if (digits > 7) // We remove the file, because it will get shortened too much.
+            {
+                atariFiles[j].exists = false;
+            } else {
+                atariFiles[j].atariName = QString("%1%2").arg(file.atariName.left(8 - digits)).arg(i);
+            }
+            i++;
+        }
+    }
+
+    if (atariFiles.count() < infos.count()) {
         qWarning() << "!w" << tr("Cannot mirror %1 of %2 files in '%3': Atari directory is full.")
-                       .arg(infos.count() - i)
-                       .arg(infos.count())
-                       .arg(dir.path());
+                .arg(infos.count() - atariFiles.count())
+                .arg(infos.count())
+                .arg(dir.path());
     }
 }
 
@@ -177,98 +179,98 @@ bool FolderImage::readSector(quint16 sector, QByteArray &data)
     int bootFileSector;
 
     if (sector == 1) {
-         if (!boot.open(QFile::ReadOnly)) {
-             data[1] = 0x01;
-             data[3] = 0x07;
-             data[4] = 0x40;
-             data[5] = 0x15;
-             data[6] = 0x4c;
-             data[7] = 0x14;
-             data[8] = 0x07;     // JMP 0x0714
-             data[0x14] = 0x38;  // SEC
-             data[0x15] = 0x60;  // RTS
-         } else {
-             data = boot.read(128);
-             buildDirectory();
-             for(int i=0; i<64; i++) {
-                 // AtariDOS, MyDos, SmartDOS  and DosXL
-                 if(atariFiles[i].longName.toUpper() == "DOS.SYS") {
-                     bootFileSector = 369 + i;
-                     data[15] = bootFileSector % 256;
-                     data[16] = bootFileSector / 256;
-                     break;
-                 }
-                 // MyPicoDOS
-                 if(atariFiles[i].longName.toUpper() == "PICODOS.SYS") {
-                     bootFileSector = 369 + i;
-                     if(g_disablePicoHiSpeed) {
-                         data[15] = 0;
-                         QFile boot(dir.path() + "/$boot.bin");
-                         QByteArray speed;
-                         boot.open(QFile::ReadWrite);
-                         boot.seek(15);
-                         speed = boot.read(1);
-                         speed[0] = '\x30';
-                         boot.seek(15);
-                         boot.write(speed);
-                         boot.close();
-                     }
-                     data[9] = bootFileSector % 256;
-                     data[10] = bootFileSector / 256;
-                     // Create the piconame.txt file
-                     QFile picoName(dir.path() + "/piconame.txt");
-                     picoName.open(QFile::WriteOnly);
-                     QByteArray nameLine;
-                     nameLine.append(dir.dirName() + '\x9B');
-                     picoName.write(nameLine);
-                     for(int i=0; i<64; i++){
-                     if(atariFiles[i].exists) {
-                         if(atariFiles[i].longName != "$boot.bin") {
-                                 nameLine.clear();
-                                 nameLine.append(atariFiles[i].atariName);
-                                 QByteArray space;
-                                 int size;
-                                 size = atariFiles[i].atariName.size();
-                                 for(int j=0; j<=8-size-1; j++) {
-                                     space[j] = '\x20';
-                                 }
-                                 nameLine.append(space);
-                                 nameLine.append(atariFiles[i].atariExt);
-                                 nameLine.append('\x20');
-                                 nameLine.append(atariFiles[i].longName.mid(0, atariFiles[i].longName.indexOf(".", -1)-1));
-                                 nameLine.append('\x9B');
-                                 picoName.write(nameLine);
-                         }
-                      } else {
-                             picoName.close();
-                             break;
-                      }
-                     }
-                     break;
-                 }
-                 // SpartaDOS, force it to change to AtariDOS format after the boot
-                 if(atariFiles[i].longName.toUpper() == "X32.DOS") {
-                     QFile x32Dos(dir.path() + "/x32.dos");
-                     x32Dos.open(QFile::ReadOnly);
-                     QByteArray flag;
-                     flag = x32Dos.readAll();
-                     if(flag[0] == '\xFF') {
-                         flag[0] = '\x00';
-                         data[1] = 0x01;
-                         data[3] = 0x07;
-                         data[4] = 0x40;
-                         data[5] = 0x15;
-                         data[6] = 0x4c;
-                         data[7] = 0x14;
-                         data[8] = 0x07;
-                         data[0x14] = 0x38;
-                         data[0x15] = 0x60;
-                     }
-                   break;
-                 }
-             }
-         }
-         return true;
+        if (!boot.open(QFile::ReadOnly)) {
+            data[1] = 0x01;
+            data[3] = 0x07;
+            data[4] = 0x40;
+            data[5] = 0x15;
+            data[6] = 0x4c;
+            data[7] = 0x14;
+            data[8] = 0x07;     // JMP 0x0714
+            data[0x14] = 0x38;  // SEC
+            data[0x15] = 0x60;  // RTS
+        } else {
+            data = boot.read(128);
+            buildDirectory();
+            for(int i=0; i < maxEntries; i++) {
+                // AtariDOS, MyDos, SmartDOS  and DosXL
+                if(atariFiles[i].longName.toUpper() == "DOS.SYS") {
+                    bootFileSector = 369 + i;
+                    data[15] = bootFileSector % 256;
+                    data[16] = bootFileSector / 256;
+                    break;
+                }
+                // MyPicoDOS
+                if(atariFiles[i].longName.toUpper() == "PICODOS.SYS") {
+                    bootFileSector = 369 + i;
+                    if(g_disablePicoHiSpeed) {
+                        data[15] = 0;
+                        QFile boot(dir.path() + "/$boot.bin");
+                        QByteArray speed;
+                        boot.open(QFile::ReadWrite);
+                        boot.seek(15);
+                        speed = boot.read(1);
+                        speed[0] = '\x30';
+                        boot.seek(15);
+                        boot.write(speed);
+                        boot.close();
+                    }
+                    data[9] = bootFileSector % 256;
+                    data[10] = bootFileSector / 256;
+                    // Create the piconame.txt file
+                    QFile picoName(dir.path() + "/piconame.txt");
+                    picoName.open(QFile::WriteOnly);
+                    QByteArray nameLine;
+                    nameLine.append(dir.dirName() + '\x9B');
+                    picoName.write(nameLine);
+                    for(int i=0; i < maxEntries; i++){
+                        if(atariFiles[i].exists) {
+                            if(atariFiles[i].longName != "$boot.bin") {
+                                nameLine.clear();
+                                nameLine.append(atariFiles[i].atariName);
+                                QByteArray space;
+                                int size;
+                                size = atariFiles[i].atariName.size();
+                                for(int j=0; j<=8-size-1; j++) {
+                                    space[j] = '\x20';
+                                }
+                                nameLine.append(space);
+                                nameLine.append(atariFiles[i].atariExt);
+                                nameLine.append('\x20');
+                                nameLine.append(atariFiles[i].longName.mid(0, atariFiles[i].longName.indexOf(".", -1)-1));
+                                nameLine.append('\x9B');
+                                picoName.write(nameLine);
+                            }
+                        } else {
+                            picoName.close();
+                            break;
+                        }
+                    }
+                    break;
+                }
+                // SpartaDOS, force it to change to AtariDOS format after the boot
+                if(atariFiles[i].longName.toUpper() == "X32.DOS") {
+                    QFile x32Dos(dir.path() + "/x32.dos");
+                    x32Dos.open(QFile::ReadOnly);
+                    QByteArray flag;
+                    flag = x32Dos.readAll();
+                    if(flag[0] == '\xFF') {
+                        flag[0] = '\x00';
+                        data[1] = 0x01;
+                        data[3] = 0x07;
+                        data[4] = 0x40;
+                        data[5] = 0x15;
+                        data[6] = 0x4c;
+                        data[7] = 0x14;
+                        data[8] = 0x07;
+                        data[0x14] = 0x38;
+                        data[0x15] = 0x60;
+                    }
+                    break;
+                }
+            }
+        }
+        return true;
     }
     if (sector == 2) {
         boot.open(QFile::ReadOnly);
@@ -313,7 +315,7 @@ bool FolderImage::readSector(quint16 sector, QByteArray &data)
         for (int i = 11; i < 100; i++) {
             data[i] = 0xff;
         }
-        return true; 
+        return true;
     }
 
     /* Directory sectors */
@@ -324,7 +326,7 @@ bool FolderImage::readSector(quint16 sector, QByteArray &data)
         data.resize(0);
         for (int i = (sector - 361) * 8; i < (sector - 360) * 8; i++) {
             QByteArray entry;
-            if (!atariFiles[i].exists) {
+            if (i >= atariFiles.count() || !atariFiles[i].exists) {
                 entry = QByteArray(16, 0);
             } else {
                 entry = "";
@@ -356,58 +358,58 @@ bool FolderImage::readSector(quint16 sector, QByteArray &data)
     /* Data sectors */
 
     /* First sector of the file */
-        int size, next;
-        if  (sector >= 369 && sector <= 432) {
-            atariFileNo = sector - 369;
-            if (!atariFiles[atariFileNo].exists) {
-                data = QByteArray(128, 0);
-                return true;
-            }
-            QFile file(atariFiles[atariFileNo].original.absoluteFilePath());
-            file.open(QFile::ReadOnly);
-            data = file.read(125);
-            size = data.size();
-            data.resize(128);
-            if (file.atEnd()) {
-                next = 0;
-            }
-            else {
-                next = 433;
-            }
-            data[125] = (atariFileNo * 4) | (next / 256);
-            data[126] = next % 256;
-            data[127] = size;
+    int size, next;
+    if  (sector >= 369 && sector <= 432) {
+        atariFileNo = sector - 369;
+        if (!atariFiles[atariFileNo].exists) {
+            data = QByteArray(128, 0);
             return true;
         }
+        QFile file(atariFiles[atariFileNo].original.absoluteFilePath());
+        file.open(QFile::ReadOnly);
+        data = file.read(125);
+        size = data.size();
+        data.resize(128);
+        if (file.atEnd()) {
+            next = 0;
+        }
+        else {
+            next = 433;
+        }
+        data[125] = (atariFileNo * 4) | (next / 256);
+        data[126] = next % 256;
+        data[127] = size;
+        return true;
+    }
 
     /* Rest of the file sectors */
-        if ((sector >= 433 && sector <= 1023)) {
-            QFile file(atariFiles[atariFileNo].original.absoluteFilePath());
-            file.open(QFile::ReadOnly);
-            atariFiles[atariFileNo].pos = (125+((sector-433)*125))+(atariFiles[atariFileNo].sectPass*73875);
-            file.seek(atariFiles[atariFileNo].pos);
-            data = file.read(125);
-            next = sector + 1;
-            if (sector == 1023) {
-                next = 433;
-                atariFiles[atariFileNo].sectPass += 1;
-            }
-            size = data.size();
-            data.resize(128);
-            atariFiles[atariFileNo].lastSector = sector;
-            if (file.atEnd()) {
-                next = 0;
-            }
-            data[125] = (atariFileNo * 4) | (next / 256);
-            data[126] = next % 256;
-            data[127] = size;
-            return true;
+    if ((sector >= 433 && sector <= 1023)) {
+        QFile file(atariFiles[atariFileNo].original.absoluteFilePath());
+        file.open(QFile::ReadOnly);
+        atariFiles[atariFileNo].pos = (125+((sector-433)*125))+(atariFiles[atariFileNo].sectPass*73875);
+        file.seek(atariFiles[atariFileNo].pos);
+        data = file.read(125);
+        next = sector + 1;
+        if (sector == 1023) {
+            next = 433;
+            atariFiles[atariFileNo].sectPass += 1;
         }
+        size = data.size();
+        data.resize(128);
+        atariFiles[atariFileNo].lastSector = sector;
+        if (file.atEnd()) {
+            next = 0;
+        }
+        data[125] = (atariFileNo * 4) | (next / 256);
+        data[126] = next % 256;
+        data[127] = size;
+        return true;
+    }
 
     /* Any other sector */
 
-        data = QByteArray(128, 0);
-        return true;
+    data = QByteArray(128, 0);
+    return true;
 }
 
 bool FolderImage::writeSector(quint16, const QByteArray &)

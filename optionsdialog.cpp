@@ -90,6 +90,7 @@ void OptionsDialog::setupSettings()
     m_ui->saveWinPosBox->setChecked(RespeqtSettings::instance()->saveWindowsPos());
     m_ui->saveDiskVisBox->setChecked(RespeqtSettings::instance()->saveDiskVis());
     m_ui->filterUscore->setChecked(RespeqtSettings::instance()->filterUnderscore());
+    m_ui->limitEntries->setChecked(RespeqtSettings::instance()->limitEntries());
     m_ui->capitalLettersPCLINK->setChecked(RespeqtSettings::instance()->capitalLettersInPCLINK());
     m_ui->URLSubmit->setChecked(RespeqtSettings::instance()->isURLSubmitEnabled());
     m_ui->spyMode->setChecked(RespeqtSettings::instance()->isSpyMode());
@@ -385,6 +386,7 @@ void OptionsDialog::saveSettings()
     RespeqtSettings::instance()->setsaveWindowsPos(m_ui->saveWinPosBox->isChecked());
     RespeqtSettings::instance()->setsaveDiskVis(m_ui->saveDiskVisBox->isChecked());
     RespeqtSettings::instance()->setfilterUnderscore(m_ui->filterUscore->isChecked());
+    RespeqtSettings::instance()->setlimitEntries(m_ui->limitEntries->isChecked());
     RespeqtSettings::instance()->setCapitalLettersInPCLINK(m_ui->capitalLettersPCLINK->isChecked());
     RespeqtSettings::instance()->setURLSubmit(m_ui->URLSubmit->isChecked());
     RespeqtSettings::instance()->setSpyMode(m_ui->spyMode->isChecked());

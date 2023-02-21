@@ -13,6 +13,7 @@
 #define FOLDERIMAGE_H
 
 #include <QDir>
+#include <QVector>
 #include "diskimage.h"
 
 class AtariFile
@@ -30,17 +31,18 @@ public:
 
 class FolderImage : public SimpleDiskImage
 {
-    Q_OBJECT
+Q_OBJECT
 
 protected:
     QDir dir;
     bool mReadOnly;
     void buildDirectory();
-    AtariFile atariFiles[64];
-    int atariFileNo;             // 
+    QVector<AtariFile> atariFiles;
+    int atariFileNo;
+    int maxEntries{64};
 
 public:
-    FolderImage(SioWorkerPtr worker): SimpleDiskImage(worker) {}
+    FolderImage(SioWorkerPtr worker, int maxEntries = 64);
     ~FolderImage();
 
     void close();
@@ -48,10 +50,11 @@ public:
     bool readSector(quint16 sector, QByteArray &data);
     bool writeSector(quint16 sector, const QByteArray &data);
     bool format(const DiskGeometry& geo);
-    QString longName (QString &lastMountedFolder, QString &atariFileName);   // 
+    QString longName (QString &lastMountedFolder, QString &atariFileName);   //
 
     virtual QString description() const {return tr("Folder image");}
 };
-    extern FolderImage *folderImage;
+
+extern FolderImage *folderImage;
 
 #endif // FOLDERIMAGE_H

@@ -981,6 +981,17 @@ void RespeqtSettings::setfilterUnderscore(bool filter)
     mSettings->setValue("FilterUnderscore", mFilterUnderscore);
 }
 
+bool RespeqtSettings::limitEntries()
+{
+    return mLimitEntries;
+}
+
+void RespeqtSettings::setlimitEntries(bool limit)
+{
+    mLimitEntries = limit;
+    mSettings->setValue("LimitFileEntries", mLimitEntries);
+}
+
 bool RespeqtSettings::capitalLettersInPCLINK()
 {
     return mUseCapitalLettersInPCLINK;
