@@ -1368,7 +1368,7 @@ void MainWindow::mountFile(int no, const QString &fileName, bool /*prot*/)
     FileTypes::FileType type = FileTypes::getFileType(fileName);
 
     if (type == FileTypes::Dir) {
-        disk = new FolderImage(sio);
+        disk = new FolderImage(sio, RespeqtSettings::instance()->limitFileEntries() ? 64 : -1);
         isDir = true;
     } else {
         disk = installDiskImage();

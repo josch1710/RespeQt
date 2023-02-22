@@ -192,8 +192,8 @@ public:
     void setfilterUnderscore(bool filter);
 
 // Limit number of entries in Folder Images to 64 or not.
-    bool limitEntries();
-    void setlimitEntries(bool limit);
+    bool limitFileEntries();
+    void setlimitFileEntries(bool limit);
 
 // CAPITAL letters in file names for PCLINK
     bool capitalLettersInPCLINK();
@@ -381,7 +381,7 @@ private:
 
     bool mMinimizeToTray;
     bool mFilterUnderscore;
-    bool mLimitEntries{true};
+    bool mLimitFileEntries{true};
     bool mUseCapitalLettersInPCLINK;
     bool mUseURLSubmit;
     bool mSpyMode;

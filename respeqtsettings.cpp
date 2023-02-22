@@ -109,6 +109,7 @@ RespeqtSettings::RespeqtSettings()
     mMinimizeToTray = mSettings->value("MinimizeToTray", false).toBool();
     msaveWindowsPos = mSettings->value("SaveWindowsPosSize", true).toBool();
     mFilterUnderscore = mSettings->value("FilterUnderscore", true).toBool();
+    mLimitFileEntries = mSettings->value("LimitFileEntries", true).toBool();
     mUseCapitalLettersInPCLINK = mSettings->value("CapitalLettersInPCLINK", false).toBool();
     mUseURLSubmit = mSettings->value("URLSubmit", false).toBool();
     mSpyMode = mSettings->value("SpyMode", false).toBool();
@@ -217,6 +218,7 @@ void RespeqtSettings::saveSessionToFile(const QString &fileName)
     s.setValue("PrtW", mPrtW);
     s.setValue("PrtH", mPrtH);
     s.setValue("FilterUnderscore", mFilterUnderscore);
+    s.setValue("LimitFileEntries", mLimitFileEntries);
     s.setValue("CapitalLettersInPCLINK", mUseCapitalLettersInPCLINK);
     s.setValue("URLSubmit", mUseURLSubmit);
     s.setValue("SpyMode", mSpyMode);
@@ -313,6 +315,7 @@ void RespeqtSettings::saveSessionToFile(const QString &fileName)
     mPrtW = s.value("PrtW", 600).toInt();
     mPrtH = s.value("PrtH", 486).toInt();
     mFilterUnderscore = s.value("FilterUnderscore", true).toBool();
+    mLimitFileEntries = s.value("LimitFileEntries", true).toBool();
     mUseCapitalLettersInPCLINK = s.value("CapitalLettersInPCLINK", false).toBool();
     mUseURLSubmit = s.value("URLSubmit", false).toBool();
     mSpyMode = s.value("SpyMode", false).toBool();
@@ -981,15 +984,15 @@ void RespeqtSettings::setfilterUnderscore(bool filter)
     mSettings->setValue("FilterUnderscore", mFilterUnderscore);
 }
 
-bool RespeqtSettings::limitEntries()
+bool RespeqtSettings::limitFileEntries()
 {
-    return mLimitEntries;
+    return mLimitFileEntries;
 }
 
-void RespeqtSettings::setlimitEntries(bool limit)
+void RespeqtSettings::setlimitFileEntries(bool limit)
 {
-    mLimitEntries = limit;
-    mSettings->setValue("LimitFileEntries", mLimitEntries);
+    mLimitFileEntries = limit;
+    mSettings->setValue("LimitFileEntries", mLimitFileEntries);
 }
 
 bool RespeqtSettings::capitalLettersInPCLINK()
