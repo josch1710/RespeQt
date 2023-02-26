@@ -161,7 +161,7 @@
      <x>0</x>
      <y>0</y>
      <width>587</width>
-     <height>22</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Disk">
@@ -657,6 +657,14 @@
   <action name="actionReplaySnapshot">
    <property name="text">
     <string>&amp;Replay snapshot</string>
+   </property>
+  </action>
+  <action name="actionLimitFileEntries">
+   <property name="text">
+    <string>Limit file entries</string>
+   </property>
+   <property name="toolTip">
+    <string>Limit file entries to 64</string>
    </property>
   </action>
  </widget>

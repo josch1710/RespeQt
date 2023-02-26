@@ -72,7 +72,7 @@ private:
     Tests::SioRecorder *mRecorder{nullptr};
     QString mTestfile{};
 
-    QLabel *speedLabel, *onOffLabel, *prtOnOffLabel, *netLabel, *clearMessagesLabel;  //
+    QLabel *speedLabel, *onOffLabel, *prtOnOffLabel, *netLabel, *clearMessagesLabel, *limitEntriesLabel;  //
 
     DocDisplayWindow *docDisplayWindow;    //
     QTranslator respeqt_translator, respeqt_qt_translator;
@@ -168,6 +168,7 @@ private slots:
     void quitApplicationTriggered(); //
     void showAboutTriggered(); //
     void showDocumentationTriggered(); //
+    void toggleLimitEntriesTriggered();
 
     // Device widget events
     void mountDiskTriggered(int deviceId); //

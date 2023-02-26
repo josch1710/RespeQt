@@ -268,11 +268,22 @@ MainWindow::MainWindow()
 
     speedLabel->setMinimumWidth(80);
 
+    limitEntriesLabel = new QLabel(this);
+    limitEntriesLabel->setMinimumWidth(21);
+    limitEntriesLabel->setToolTip(tr("Should the file entry limit be 64."));
+    limitEntriesLabel->setStatusTip(limitEntriesLabel->toolTip());
+    if (RespeqtSettings::instance()->limitFileEntries())
+        limitEntriesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/lock.png").pixmap(16, 16, QIcon::Normal));
+    else
+        limitEntriesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/lock_open.png").pixmap(16, 16, QIcon::Normal));
+
     ui->statusBar->addPermanentWidget(speedLabel);
     ui->statusBar->addPermanentWidget(onOffLabel);
     ui->statusBar->addPermanentWidget(prtOnOffLabel);
     ui->statusBar->addPermanentWidget(netLabel);
     ui->statusBar->addPermanentWidget(clearMessagesLabel);
+    ui->statusBar->addPermanentWidget(limitEntriesLabel);
+
     ui->textEdit->installEventFilter(this);
     changeFonts();
     g_D9DOVisible =  RespeqtSettings::instance()->D9DOVisible();
@@ -440,6 +451,9 @@ void MainWindow::createDeviceWidgets()
      }
      if (event->button() == Qt::LeftButton && !speedLabel->isHidden() && speedLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
         ui->actionOptions->trigger();
+     }
+     if (event->button() == Qt::LeftButton && limitEntriesLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
+        ui->actionLimitFileEntries->trigger();
      }
 }
 
@@ -1997,6 +2011,7 @@ void MainWindow::connectUISignal()
     connect(ui->actionEjectAll, &QAction::triggered, this, &MainWindow::ejectAllTriggered);
     connect(ui->actionOptions, &QAction::triggered, this, &MainWindow::showOptionsTriggered);
     connect(ui->actionStartEmulation, &QAction::triggered, this, &MainWindow::startEmulationTriggered);
+    connect(ui->actionLimitFileEntries, &QAction::triggered, this, &MainWindow::toggleLimitEntriesTriggered);
     connect(ui->actionPrinterEmulation, &QAction::triggered, this, &MainWindow::printerEmulationTriggered);
     connect(ui->actionHideShowDrives, &QAction::triggered, this, &MainWindow::hideShowTriggered);
     connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::quitApplicationTriggered);
@@ -2057,4 +2072,15 @@ void MainWindow::replaySnapshot()
 void MainWindow::setupDebugItems()
 {
     ui->menuDebug->menuAction()->setVisible(RespeqtSettings::instance()->debugMenuVisible());
+}
+
+void MainWindow::toggleLimitEntriesTriggered()
+{
+    if (RespeqtSettings::instance()->limitFileEntries()) {
+        limitEntriesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/lock_open.png").pixmap(16, 16, QIcon::Normal));
+    }
+    else {
+        limitEntriesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/lock.png").pixmap(16, 16, QIcon::Normal));
+    }
+    RespeqtSettings::instance()->setlimitFileEntries(!RespeqtSettings::instance()->limitFileEntries());
 }
