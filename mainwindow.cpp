@@ -1118,6 +1118,13 @@ void MainWindow::showOptionsTriggered()
 
     setupDebugItems();
 
+    if (RespeqtSettings::instance()->limitFileEntries()) {
+        limitEntriesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/lock.png").pixmap(16, 16, QIcon::Normal));
+    }
+    else {
+        limitEntriesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/lock_open.png").pixmap(16, 16, QIcon::Normal));
+    }
+
     for (int i = DISK_BASE_CDEVIC; i < (DISK_BASE_CDEVIC+DISK_COUNT); i++) {    // 0x31 - 0x3E
         deviceStatusChanged(i);
     }
