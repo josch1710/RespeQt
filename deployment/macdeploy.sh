@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 if [[ "$1" == "" || "$2" == "" || "$3" == "" ]]; then
   echo "Please specify the project directory, the build directory, and the version number";
@@ -33,5 +33,12 @@ install -d "${deploydir}/rcl/menu"
 install "$1/atari_8-bit_Menu/"* "${deploydir}/rcl/menu"
 
 cd $2
-zip -9r -D "RespeQt_$3" $deploydir
-create-dmg --volname "RespeQt_$3" --volicon "$1/RespeQt.icns" --background "$1/main-icon/RespeQt.png" "RespeQt_$3.dmg" "$deploydir"
+test -f "RespeQt_$3.zip" && rm "RespeQt_$3.zip"
+zip -9r -D "RespeQt_$3.zip" $deploydir
+test -f "RespeQt_$3.dmg" && rm "RespeQt_$3.dmg"
+create-dmg --volname "RespeQt_$3" \
+    --icon-size 32 \
+    --volicon "$1/RespeQt.icns" \
+    --eula "$1/license.txt" \
+    --no-internet-enable \
+    "RespeQt_$3.dmg" "$deploydir"

@@ -91,6 +91,8 @@ if (APPLE)
     set(APP_ICON ${CMAKE_CURRENT_SOURCE_DIR}/RespeQt.icns)
     set_source_files_properties(${APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     add_executable(${TARGET} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES} ${APP_ICON})
+
+    add_custom_target(deploy ${CMAKE_SOURCE_DIR}/deployment/macdeploy.sh "\"${CMAKE_SOURCE_DIR}\"" "\"${CMAKE_BINARY_DIR}\"" "\"r${PROJECT_VERSION}${RC_VERSION}\"")
 else()
     add_executable(${TARGET} ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES})
 endif()
