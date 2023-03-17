@@ -40,7 +40,7 @@ OTHER_FILES += \
     atascii_read_me.txt \
     RespeQt.rc \
     about.html \
-    compile.txt
+    compile.html
 
 win32 {
     LIBS += -lwinmm -lz -lwinspool
@@ -57,4 +57,8 @@ DISTFILES += \
     tests/units/USAGE.md \
     tests/units/testdata/writeSioCapture.json
 
-
+macx {
+    QMAKE_MACOSX_DEPLOYMENT_TARGET=10.7
+    deploy.commands = $$PWD/deployment/macdeploy.sh $$PWD $$OUT_PWD "$$VERSION$$RC_VERSION"
+    QMAKE_EXTRA_TARGETS += deploy
+}

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 if [[ "$1" == "" || "$2" == "" || "$3" == "" ]]; then
   echo "Please specify the project directory, the build directory, and the version number";
@@ -6,26 +6,32 @@ if [[ "$1" == "" || "$2" == "" || "$3" == "" ]]; then
 fi
 
 # Build a deployment directory with the correct version number
-deploydir="$1/deployment/RespeQt_$3";
-echo $deploydir;
-mkdir -p $deploydir;
-cd $deploydir
-cp -aR "$2/RespeQt.app" .
-~/Qt/5.6.3/clang_64/bin/macdeployqt RespeQt.app -always-overwrite -verbose=2
-mkdir -p "\$boot"
-for dir in \$bootata \$bootdxl \$bootmyd \$bootpic \$bootsma
+cd $1
+deploydir="$2/RespeQt_$3";
+
+install -d ${deploydir}
+cp -aR "$2/RespeQt.app" ${deploydir}/RespeQt.app
+
+#macdeployqt $deploydir/RespeQt.app -always-overwrite
+
+for dir in bootata bootdxl bootmyd bootpic bootsma
 do
-  cp -aR "$1/$dir" "\$boot"
-done
-for file in atascii_fonts_for_PC.zip atascii_read_me.txt compile\ and\ install.html history.txt license.txt readme.txt RespeQt\ User\ Manual-English.html usb2pc_build_instructions.pdf
-do
-  cp -a "$1/$file" .
+    install -d "${deploydir}/${dir}"
+    install -p "$1/$dir"/* "${deploydir}/${dir}"
 done
 
-mkdir -p "rcl"
-cp "$1/atari/rcl_SpartaDos/rcl.com" rcl/rclspard.com
-cp "$1/atari/rcl_RealDos/rcl.com" rcl/rclreald.com
-cp "$1/atari_8-bit_Menu/"*.car rcl/
+#for file in atascii_fonts_for_PC.zip atascii_read_me.txt compile\ and\ install.html history.txt license.txt readme.txt RespeQt\ User\ Manual-English.html usb2pc_build_instructions.pdf
+#do
+#  install -p "$1/$file" ${deploydir}/docs/
+#done
 
-cd ..
+install -d "${deploydir}/rcl/spartados"
+install "$1/atari/rcl_SpartaDos/"* "${deploydir}/rcl/spartados"
+install -d "${deploydir}/rcl/realdos"
+install "$1/atari/rcl_RealDos/"* "${deploydir}/rcl/realdos"
+install -d "${deploydir}/rcl/menu"
+install "$1/atari_8-bit_Menu/"* "${deploydir}/rcl/menu"
+
+cd $2
 zip -9r -D "RespeQt_$3" $deploydir
+create-dmg --volname "RespeQt_$3" --volicon "$1/RespeQt.icns" --background "$1/main-icon/RespeQt.png" "RespeQt_$3.dmg" "$deploydir"
