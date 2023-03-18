@@ -12,7 +12,7 @@ deploydir="$2/RespeQt_$3";
 install -d ${deploydir}
 cp -aR "$2/RespeQt.app" ${deploydir}/RespeQt.app
 
-#macdeployqt $deploydir/RespeQt.app -always-overwrite
+macdeployqt $deploydir/RespeQt.app -always-overwrite
 
 for dir in bootata bootdxl bootmyd bootpic bootsma
 do
