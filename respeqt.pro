@@ -59,6 +59,16 @@ DISTFILES += \
 
 macx {
     QMAKE_MACOSX_DEPLOYMENT_TARGET=10.7
+    bundle.files = \
+        i18n/respeqt_de.qm \
+        i18n/respeqt_es.qm \
+        i18n/respeqt_pl.qm \
+        i18n/respeqt_ru.qm \
+        i18n/respeqt_sk.qm \
+        i18n/respeqt_tr.qm
+    bundle.path = Contents/Resources
+    QMAKE_BUNDLE_DATA += bundle
+
     deploy.commands = $$PWD/deployment/macdeploy.sh $$PWD $$OUT_PWD "$$VERSION$$RC_VERSION"
     QMAKE_EXTRA_TARGETS += deploy
 }
