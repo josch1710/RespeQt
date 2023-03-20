@@ -53,10 +53,6 @@ unix {
     QMAKE_CXXFLAGS += $$QMAKE_CXXFLAGS_WARN_ON -Wno-deprecated-copy
 }
 
-DISTFILES += \
-    tests/units/USAGE.md \
-    tests/units/testdata/writeSioCapture.json
-
 macx {
     QMAKE_MACOSX_DEPLOYMENT_TARGET=10.7
     bundle.files = \
@@ -72,18 +68,14 @@ macx {
     deploy.commands = $$PWD/deployment/macdeploy.sh $$PWD $$OUT_PWD "$$VERSION$$RC_VERSION"
     QMAKE_EXTRA_TARGETS += deploy
 }
-else {
-    deploy.commands = cqtdeployer -bin $$OUT_PWD/$$TARGET -qmake $$QMAKE_QMAKE -libDir $$PWD -confFile $$PWD/deployment/qctdeployer.json -extraData \
-        $$PWD/bootata,$$PWD/bootdxl,$$PWD/bootmyd,$$PWD/bootpic,$$PWD/bootsma,$$PWD/bootspa,\
-        $$PWD/atari/rcl_SpartaDos,$$PWD/atari/rcl_RealDos,$$PWD/atari_8-bit_Menu\
-        -description "RespeQt" -deployVersion "$$VERSION$$RC_VERSION" \
-        -tr $$PWD/i18n/respeqt_de.qm,$$PWD/i18n/respeqt_es.qm,$$PWD/i18n/respeqt_pl.qm,$$PWD/i18n/respeqt_ru.qm,$$PWD/i18n/respeqt_sk.qm,$$PWD/i18n/respeqt_tr.qm \
-        zip;
-    deploy.commands += cqtdeployer -bin $$OUT_PWD/$$TARGET -qmake $$QMAKE_QMAKE -libDir $$PWD -confFile $$PWD/deployment/qctdeployer.json -extraData \
-        $$PWD/bootata,$$PWD/bootdxl,$$PWD/bootmyd,$$PWD/bootpic,$$PWD/bootsma,$$PWD/bootspa,\
-        $$PWD/atari/rcl_SpartaDos,$$PWD/atari/rcl_RealDos,$$PWD/atari_8-bit_Menu\
-        -description "RespeQt" -deployVersion "$$VERSION$$RC_VERSION" \
-        -tr $$PWD/i18n/respeqt_de.qm,$$PWD/i18n/respeqt_es.qm,$$PWD/i18n/respeqt_pl.qm,$$PWD/i18n/respeqt_ru.qm,$$PWD/i18n/respeqt_sk.qm,$$PWD/i18n/respeqt_tr.qm \
-        qif
+win32 {
+    deploy.commands = $$PWD/deployment/windeploy.bat "$$OUT_PWD/release/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$$VERSION$$RC_VERSION"
     QMAKE_EXTRA_TARGETS += deploy
 }
+linux {
+    deploy.commands = $$PWD/deployment/lindeploy.sh "$$OUT_PWD/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$$VERSION$$RC_VERSION"
+    QMAKE_EXTRA_TARGETS += deploy
+}
+
+DISTFILES += \
+    deployment/lindeploy.sh
