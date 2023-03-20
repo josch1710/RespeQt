@@ -1,3 +1,10 @@
+release 5.4
+        * Lots of fixes
+        * You can deactivate the 64 item limit on a mounted directory by clicking on the lock icon in the status bar (issue #14)
+        * Drag and drop fixed (issue #7)
+        * You can record the SIO communication and replay it for debugging (Debug menu, issue #4)
+        * Fixed an issue with ATR images with more that 256 sectors (PR #6)
+
 release 5
 	* PRO and ATX images support in read/write mode with accurate (I hope so) protection emulation.
 	* Spy mode to display data exchanged with Atari.
