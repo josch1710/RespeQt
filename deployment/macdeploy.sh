@@ -36,7 +36,8 @@ cd $2
 test -f "RespeQt_$3.zip" && rm "RespeQt_$3.zip"
 zip -9r -D "RespeQt_$3.zip" $deploydir
 test -f "RespeQt_$3.dmg" && rm "RespeQt_$3.dmg"
-create-dmg --volname "RespeQt_$3" \
+
+/opt/homebrew/bin/create-dmg --volname "RespeQt_$3" \
     --icon-size 32 \
     --volicon "$1/RespeQt.icns" \
     --eula "$1/license.txt" \
