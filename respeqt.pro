@@ -19,13 +19,13 @@ DEFINES += VERSION=\\\"$$VERSION$$RC_VERSION\\\"
   #QMAKE_LFLAGS+="-fsanitize=address"
 #}
 
-SOURCES += main.cpp
+SOURCES += src/main.cpp
 TARGET = RespeQt
 TEMPLATE = app
 
 CONFIG += qt c++11 strict_c++
 QT += core gui network widgets printsupport serialport svg
-INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib
+INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib include headers tools
 
 # Warnings for Deprecated functions
 DEFINES += QT_DEPRECATED_WARNINGS

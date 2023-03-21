@@ -20,7 +20,7 @@ SOURCES +=  tests/units/siorecordertest.cpp \
 HEADERS += tests/units/siorecordertest.h \
     tests/units/nulloutput.h \
     tests/units/dummyworker.h
-INCLUDEPATH += tests $$[QT_INSTALL_HEADERS]/QtZlib
+INCLUDEPATH += tests $$[QT_INSTALL_HEADERS]/QtZlib include headers tools
 
 TARGET = RespeQtTests
 
