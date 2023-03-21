@@ -424,7 +424,7 @@ void MainWindow::createDeviceWidgets()
 
  void MainWindow::mousePressEvent(QMouseEvent *event)
  {
-     int slot = containingDiskSlot(event->pos());
+     auto slot{containingDiskSlot(event->pos())};
 
      if (event->button() == Qt::LeftButton
          && slot >= 0) {
@@ -459,12 +459,15 @@ void MainWindow::createDeviceWidgets()
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
-    int i{-1};
+    auto i{containingDiskSlot(event->pos())};
     if (i >= 0 && (event->mimeData()->hasUrls() ||
-            event->mimeData()->hasFormat("application/x-respeqt-disk-image"))) {
-        i = containingDiskSlot(event->pos());
-    }
-    event->acceptProposedAction();
+            event->mimeData()->hasFormat("application/x-respeqt-disk-image"))
+    )
+        event->setDropAction(event->proposedAction());
+    else
+        event->setDropAction(Qt::IgnoreAction);
+
+    event->accept();
     for (int j = 0; j < DISK_COUNT; j++) { //
         if (i == j) {
             diskWidgets[j]->setFrameShadow(QFrame::Sunken);
@@ -474,14 +477,22 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
     }
 }
 
+void MainWindow::dragLeaveEvent(QDragLeaveEvent *event) {
+    event->accept();
+}
+
 void MainWindow::dragMoveEvent(QDragMoveEvent *event)
 {
-    int i{-1};
+    auto i{containingDiskSlot(event->pos())};
     if (i >= 0 && (event->mimeData()->hasUrls() ||
-            event->mimeData()->hasFormat("application/x-respeqt-disk-image"))) {
-        i = containingDiskSlot(event->pos());
-    }
-    event->acceptProposedAction();
+            event->mimeData()->hasFormat("application/x-respeqt-disk-image"))
+    )
+        event->setDropAction(event->proposedAction());
+    else
+        event->setDropAction(Qt::IgnoreAction);
+
+    event->accept();
+
     for (int j = 0; j < DISK_COUNT; j++) { //
         if (i == j) {
             diskWidgets[j]->setFrameShadow(QFrame::Sunken);
@@ -496,7 +507,7 @@ void MainWindow::dropEvent(QDropEvent *event)
     for (int j = 0; j < DISK_COUNT; j++) { //
         diskWidgets[j]->setFrameShadow(QFrame::Raised);
     }
-    int slot = containingDiskSlot(event->pos());
+    auto slot{containingDiskSlot(event->pos())};
     if (!(event->mimeData()->hasUrls() ||
           event->mimeData()->hasFormat("application/x-respeqt-disk-image")) ||
           slot < 0) {
