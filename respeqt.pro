@@ -10,9 +10,9 @@
 # know the specific year(s) please let the current maintainer know.
 #
 #CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
-VERSION = r5.4
-RC_VERSION = "_RC1"
-DEFINES += VERSION=\\\"$$VERSION$$RC_VERSION\\\"
+VERSION = 5.4
+RC_VERSION = "RC2"
+DEFINES += VERSION=\\\"v$$VERSION_$$RC_VERSION\\\"
 
 #debug {
   #QMAKE_CXXFLAGS+="-fsanitize=address -fno-omit-frame-pointer"
@@ -65,15 +65,15 @@ macx {
     bundle.path = Contents/Resources
     QMAKE_BUNDLE_DATA += bundle
 
-    deploy.commands = $$PWD/deployment/macdeploy.sh $$PWD $$OUT_PWD "$$VERSION$$RC_VERSION"
+    deploy.commands = $$PWD/deployment/macdeploy.sh $$PWD $$OUT_PWD "$$VERSION" "$$RC_VERSION"
     QMAKE_EXTRA_TARGETS += deploy
 }
 win32 {
-    deploy.commands = $$PWD/deployment/windeploy.bat "$$OUT_PWD/release/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$$VERSION$$RC_VERSION"
+    deploy.commands = $$PWD/deployment/windeploy.bat "$$OUT_PWD/release/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$$VERSION_$$RC_VERSION"
     QMAKE_EXTRA_TARGETS += deploy
 }
 linux {
-    deploy.commands = $$PWD/deployment/lindeploy.sh "$$OUT_PWD/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$$VERSION$$RC_VERSION"
+    deploy.commands = $$PWD/deployment/lindeploy.sh "$$OUT_PWD/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$$VERSION_$$RC_VERSION"
     QMAKE_EXTRA_TARGETS += deploy
 }
 
