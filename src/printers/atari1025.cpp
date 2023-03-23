@@ -150,9 +150,9 @@ namespace Printers
         return false;
     }
 
-    bool Atari1025::handlePrintableCodes(const unsigned char b)
+    bool Atari1025::handlePrintableCodes(const unsigned char /*b*/)
     {
-        QChar qb = translateAtascii(b & 127); // Masking inverse characters.
+        //QChar qb = translateAtascii(b & 127); // Masking inverse characters.
         //mOutput->printChar(qb);
         return true;
     }
