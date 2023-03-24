@@ -9,20 +9,20 @@
 #ifndef TEXTPRINTERWINDOW_H
 #define TEXTPRINTERWINDOW_H
 
-#include <QMainWindow>
-#include <QGraphicsScene>
-#include <QString>
 #include "nativeoutput.h"
+#include <QGraphicsScene>
+#include <QMainWindow>
+#include <QString>
 
 namespace Ui {
-    class TextPrinterWindow;
+  class TextPrinterWindow;
 }
 
 namespace Printers {
 
-class TextPrinterWindow : public QMainWindow, public NativeOutput {
+  class TextPrinterWindow : public QMainWindow, public NativeOutput {
     Q_OBJECT
-public:
+  public:
     explicit TextPrinterWindow(QWidget *parent = nullptr);
     ~TextPrinterWindow();
 
@@ -44,16 +44,15 @@ public:
     virtual void calculateFixedFontSize(uint8_t) override {}
     //virtual bool setupOutput() override;
 
-    static QString typeName()
-    {
-        return QObject::tr("Text printer");
+    static QString typeName() {
+      return QObject::tr("Text printer");
     }
 
-protected:
+  protected:
     void changeEvent(QEvent *e) override;
     void closeEvent(QCloseEvent *e) override;
 
-private:
+  private:
     Ui::TextPrinterWindow *ui;
     QPen mPen;
     int effAtasciiFont;
@@ -63,25 +62,25 @@ private:
     int fontSize;
     QString atasciiFont;
 
-protected slots:
+  protected slots:
     void saveTriggered();
     void clearTriggered();
     void wordwrapTriggered();
     void printTriggered();
 
-    // To manipulate fonts and ascii/atascii windows  // 
+    // To manipulate fonts and ascii/atascii windows  //
     void atasciiFontTriggered();
     void fontSizeTriggered();
     void hideshowAsciiTriggered();
     void hideshowAtasciiTriggered();
     void stripLineNumbersTriggered();
-    void asciiFontChanged (const QFont &);
+    void asciiFontChanged(const QFont &);
     void print(const QString &text);
 
-signals:
-    void closed(const Printers::TextPrinterWindow* window);
+  signals:
+    void closed(const Printers::TextPrinterWindow *window);
     void textPrint(const QString &text);
-};
+  };
 
-}
-#endif // TEXTPRINTERWINDOW_H
+}// namespace Printers
+#endif// TEXTPRINTERWINDOW_H

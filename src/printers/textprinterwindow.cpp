@@ -9,33 +9,31 @@
  */
 
 #include "printers/textprinterwindow.h"
-#include "ui_textprinterwindow.h"
 #include "respeqtsettings.h"
+#include "ui_textprinterwindow.h"
 
-#include <memory>
 #include <QFileDialog>
+#include <QGraphicsEllipseItem>
 #include <QPrintDialog>
 #include <QPrinter>
-#include <QGraphicsEllipseItem>
+#include <memory>
 
-// Includes, Globals and various additional class declarations // 
-#include <QString>
+// Includes, Globals and various additional class declarations //
 #include <QFontComboBox>
 #include <QMessageBox>
 #include <QSharedPointer>
+#include <QString>
 
 namespace Printers {
 
-TextPrinterWindow::TextPrinterWindow(QWidget *parent) :
-    QMainWindow(parent), NativeOutput(),
-    ui(new Ui::TextPrinterWindow),
-    effAtasciiFont(0),
-    effFontSize(0),
-    showAscii(true),
-    showAtascii(true),
-    fontSize(9),
-    atasciiFont("Atari Classic Chunky")
-{
+  TextPrinterWindow::TextPrinterWindow(QWidget *parent) : QMainWindow(parent), NativeOutput(),
+                                                          ui(new Ui::TextPrinterWindow),
+                                                          effAtasciiFont(0),
+                                                          effFontSize(0),
+                                                          showAscii(true),
+                                                          showAtascii(true),
+                                                          fontSize(9),
+                                                          atasciiFont("Atari Classic Chunky") {
     ui->setupUi(this);
 
     // Set initial font for ASCII text window
@@ -69,41 +67,37 @@ TextPrinterWindow::TextPrinterWindow(QWidget *parent) :
     mFont.reset();
     mDevice.reset();
     mPainter.reset();
-}
+  }
 
-TextPrinterWindow::~TextPrinterWindow()
-{
+  TextPrinterWindow::~TextPrinterWindow() {
     delete ui;
-}
+  }
 
-void TextPrinterWindow::changeEvent(QEvent *e)
-{
+  void TextPrinterWindow::changeEvent(QEvent *e) {
     QMainWindow::changeEvent(e);
     switch (e->type()) {
-    case QEvent::LanguageChange:
+      case QEvent::LanguageChange:
         ui->retranslateUi(this);
         break;
-    default:
+      default:
         break;
     }
-}
+  }
 
-void TextPrinterWindow::closeEvent(QCloseEvent *e)
-{
-    // Save Current TexPrinterWindow Position and size // 
+  void TextPrinterWindow::closeEvent(QCloseEvent *e) {
+    // Save Current TexPrinterWindow Position and size //
     if (RespeqtSettings::instance()->saveWindowsPos()) {
-        RespeqtSettings::instance()->setLastPrtHorizontalPos(TextPrinterWindow::geometry().x());
-        RespeqtSettings::instance()->setLastPrtVerticalPos(TextPrinterWindow::geometry().y());
-        RespeqtSettings::instance()->setLastPrtWidth(TextPrinterWindow::geometry().width());
-        RespeqtSettings::instance()->setLastPrtHeight(TextPrinterWindow::geometry().height());
+      RespeqtSettings::instance()->setLastPrtHorizontalPos(TextPrinterWindow::geometry().x());
+      RespeqtSettings::instance()->setLastPrtVerticalPos(TextPrinterWindow::geometry().y());
+      RespeqtSettings::instance()->setLastPrtWidth(TextPrinterWindow::geometry().width());
+      RespeqtSettings::instance()->setLastPrtHeight(TextPrinterWindow::geometry().height());
     }
     emit closed(this);
     e->accept();
-}
+  }
 
-void TextPrinterWindow::print(const QString &text)
-{
-     // DO both ASCII and ATASCII windows   // 
+  void TextPrinterWindow::print(const QString &text) {
+    // DO both ASCII and ATASCII windows   //
     QTextCursor c = ui->printerTextEdit->textCursor();
     c.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
     ui->printerTextEdit->setTextCursor(c);
@@ -113,81 +107,76 @@ void TextPrinterWindow::print(const QString &text)
     QByteArray textASCII;
     textASCII.append(text);
 
-    // Disable ATASCII Inverse Video for ASCII window // 
-    for (int x = 0; x <= n-1; ++x){
-        char byte = textASCII[x];
-        if (byte < 0){
-            textASCII[x] = static_cast<char>(byte ^ 0x80);
-        }
+    // Disable ATASCII Inverse Video for ASCII window //
+    for (int x = 0; x <= n - 1; ++x) {
+      char byte = textASCII[x];
+      if (byte < 0) {
+        textASCII[x] = static_cast<char>(byte ^ 0x80);
+      }
     }
     c = ui->printerTextEditASCII->textCursor();
     c.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
     ui->printerTextEditASCII->setTextCursor(c);
     ui->printerTextEditASCII->insertPlainText(textASCII);
-}
+  }
 
-void TextPrinterWindow::wordwrapTriggered()
-{
+  void TextPrinterWindow::wordwrapTriggered() {
     if (ui->actionWord_wrap->isChecked()) {
-        ui->printerTextEdit->setLineWrapMode(QPlainTextEdit::WidgetWidth);
-        // 
-        ui->printerTextEditASCII->setLineWrapMode(QPlainTextEdit::WidgetWidth);
+      ui->printerTextEdit->setLineWrapMode(QPlainTextEdit::WidgetWidth);
+      //
+      ui->printerTextEditASCII->setLineWrapMode(QPlainTextEdit::WidgetWidth);
     } else {
-        ui->printerTextEdit->setLineWrapMode(QPlainTextEdit::NoWrap);
-        // 
-        ui->printerTextEditASCII->setLineWrapMode(QPlainTextEdit::NoWrap);
-
+      ui->printerTextEdit->setLineWrapMode(QPlainTextEdit::NoWrap);
+      //
+      ui->printerTextEditASCII->setLineWrapMode(QPlainTextEdit::NoWrap);
     }
-}
+  }
 
-void TextPrinterWindow::clearTriggered()
-{
+  void TextPrinterWindow::clearTriggered() {
     ui->printerTextEdit->clear();
-    // 
+    //
     ui->printerTextEditASCII->clear();
     ui->actionStrip_Line_Numbers->setEnabled(true);
-}
+  }
 
-// Toggle ATASCII fonts // 
-void TextPrinterWindow::atasciiFontTriggered()
-{
+  // Toggle ATASCII fonts //
+  void TextPrinterWindow::atasciiFontTriggered() {
     ++effAtasciiFont;
-    if (effAtasciiFont == 4){
-        effAtasciiFont = 1;
+    if (effAtasciiFont == 4) {
+      effAtasciiFont = 1;
     }
     switch (effAtasciiFont) {
-            case 1 :
-                atasciiFont = "Atari Classic Chunky";
-                break;
-            case 2 :
-                atasciiFont = "Atari Classic Smooth";
-                break;
-            case 3 :
-                atasciiFont = "Atari Classic Extrasmooth";
+      case 1:
+        atasciiFont = "Atari Classic Chunky";
+        break;
+      case 2:
+        atasciiFont = "Atari Classic Smooth";
+        break;
+      case 3:
+        atasciiFont = "Atari Classic Extrasmooth";
     }
     QFont a;
     a.setFamily(atasciiFont);
     a.setPointSize(fontSize);
     ui->printerTextEdit->setFont(a);
     ui->atasciiFontName->setText(atasciiFont + " - " + QString("%1").arg(fontSize));
-}
+  }
 
-// Toggle Atari Output Font Size in both ATASCII and ASCII Windows // 
-void TextPrinterWindow::fontSizeTriggered()
-{
+  // Toggle Atari Output Font Size in both ATASCII and ASCII Windows //
+  void TextPrinterWindow::fontSizeTriggered() {
     ++effFontSize;
-    if (effFontSize == 4){
-        effFontSize = 1;
+    if (effFontSize == 4) {
+      effFontSize = 1;
     }
     switch (effFontSize) {
-            case 1 :
-                fontSize = 6;
-                break;
-            case 2 :
-                fontSize = 9;
-                break;
-            case 3 :
-                fontSize = 12;
+      case 1:
+        fontSize = 6;
+        break;
+      case 2:
+        fontSize = 9;
+        break;
+      case 3:
+        fontSize = 12;
     }
     QFont a;
     a.setFamily(atasciiFont);
@@ -198,131 +187,119 @@ void TextPrinterWindow::fontSizeTriggered()
     f.setFamily(ui->asciiFontName->currentFont().toString());
     f.setPointSize(fontSize);
     ui->printerTextEditASCII->setFont(f);
-
-}
-// Change ASCII text window font    // 
-void TextPrinterWindow::asciiFontChanged(const QFont &/*font*/)
-{
+  }
+  // Change ASCII text window font    //
+  void TextPrinterWindow::asciiFontChanged(const QFont & /*font*/) {
     ui->printerTextEditASCII->setFont(ui->asciiFontName->currentFont());
-}
+  }
 
-// Hide/Show Ascii text window  // 
-void TextPrinterWindow::hideshowAsciiTriggered()
-{
+  // Hide/Show Ascii text window  //
+  void TextPrinterWindow::hideshowAsciiTriggered() {
     if (showAscii) {
-        ui->printerTextEditASCII->hide();
-        ui->asciiFontName->hide();
-        showAscii = false;
+      ui->printerTextEditASCII->hide();
+      ui->asciiFontName->hide();
+      showAscii = false;
+    } else {
+      ui->printerTextEditASCII->show();
+      ui->asciiFontName->show();
+      showAscii = true;
     }
-    else {
-        ui->printerTextEditASCII->show();
-        ui->asciiFontName->show();
-        showAscii = true;
-    }
-}
-// Hide/Show Atascii text window  // 
-void TextPrinterWindow::hideshowAtasciiTriggered()
-{
+  }
+  // Hide/Show Atascii text window  //
+  void TextPrinterWindow::hideshowAtasciiTriggered() {
     if (showAtascii) {
-        ui->printerTextEdit->hide();
-        ui->atasciiFontName->hide();
-        showAtascii = false;
+      ui->printerTextEdit->hide();
+      ui->atasciiFontName->hide();
+      showAtascii = false;
+    } else {
+      ui->printerTextEdit->show();
+      ui->atasciiFontName->show();
+      showAtascii = true;
     }
-    else {
-        ui->printerTextEdit->show();
-        ui->atasciiFontName->show();
-        showAtascii = true;
-    }
-}
-// Send to Printer Action   // 
-void TextPrinterWindow::printTriggered()
-{
+  }
+  // Send to Printer Action   //
+  void TextPrinterWindow::printTriggered() {
     QPrinter printer;
     auto dialog = new QPrintDialog(&printer, this);
     if (dialog->exec() != QDialog::Accepted)
-        return;
+      return;
 
     ui->printerTextEdit->print(&printer);
-}
+  }
 
-void TextPrinterWindow::saveTriggered()
-{
+  void TextPrinterWindow::saveTriggered() {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save printer text output"), RespeqtSettings::instance()->lastPrinterTextDir(),
                                                     tr("Text files (*.txt);;All files (*)"), nullptr);
     if (fileName.isEmpty()) {
-        return;
+      return;
     }
     RespeqtSettings::instance()->setLastPrinterTextDir(QFileInfo(fileName).absolutePath());
     QFile file(fileName);
     file.open(QFile::WriteOnly | QFile::Truncate | QFile::Text);
     file.write(ui->printerTextEdit->toPlainText().toLatin1());
-}
- void TextPrinterWindow::stripLineNumbersTriggered()
-{
-     bool number;
-     bool lineNumberFound = false;
+  }
+  void TextPrinterWindow::stripLineNumbersTriggered() {
+    bool number;
+    bool lineNumberFound = false;
 
-     QString plainTextEditContents = ui->printerTextEdit->toPlainText();
-     QStringList lines = plainTextEditContents.split("\n");
+    QString plainTextEditContents = ui->printerTextEdit->toPlainText();
+    QStringList lines = plainTextEditContents.split("\n");
 
-     for (int i = 0; i < lines.size(); ++i) {
+    for (int i = 0; i < lines.size(); ++i) {
+      int x = lines.at(i).indexOf(" ");
+      if (x > 0) {
+        lines.at(i).midRef(1, x - 1).toInt(&number);
+        if (number) {
+          lineNumberFound = true;
+          break;
+        }
+      }
+    }
+    if (!lineNumberFound) {
+      QMessageBox::information(this, tr("Stripping Line Numbers.."), tr("The text does not seem to contain any line numbers!"), QMessageBox::Ok);
+    } else {
+      ui->printerTextEdit->clear();
+      ui->printerTextEditASCII->clear();
+
+      for (int i = 0; i < lines.size(); ++i) {
         int x = lines.at(i).indexOf(" ");
         if (x > 0) {
-        lines.at(i).midRef(1,x-1).toInt(&number);
-            if (number) {
-                lineNumberFound = true;
-                break;
-            }
+          lines.at(i).midRef(1, x - 1).toInt(&number);
+          if (!number) {
+            x = -1;
+          }
         }
-     }
-     if (!lineNumberFound) {
-         QMessageBox::information (this, tr("Stripping Line Numbers.."),tr("The text does not seem to contain any line numbers!"),QMessageBox::Ok);
-     } else {
-         ui->printerTextEdit->clear();
-         ui->printerTextEditASCII->clear();
+        QTextCursor c = ui->printerTextEdit->textCursor();
+        c.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+        ui->printerTextEdit->setTextCursor(c);
+        ui->printerTextEdit->insertPlainText(lines.at(i).mid(x + 1) + "\n");
 
-         for (int i = 0; i < lines.size(); ++i) {
-             int x = lines.at(i).indexOf(" ");
-             if (x > 0) {
-             lines.at(i).midRef(1,x-1).toInt(&number);
-                 if (!number) {
-                     x = -1;
-                 }
-             }
-             QTextCursor c = ui->printerTextEdit->textCursor();
-             c.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
-             ui->printerTextEdit->setTextCursor(c);
-             ui->printerTextEdit->insertPlainText(lines.at(i).mid(x+1)+"\n");
+        c = ui->printerTextEditASCII->textCursor();
+        c.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+        ui->printerTextEditASCII->setTextCursor(c);
+        ui->printerTextEditASCII->insertPlainText(lines.at(i).mid(x + 1) + "\n");
+      }
+      //         ui->actionStrip_Line_Numbers->setEnabled(false);
+    }
+  }
 
-             c = ui->printerTextEditASCII->textCursor();
-             c.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
-             ui->printerTextEditASCII->setTextCursor(c);
-             ui->printerTextEditASCII->insertPlainText(lines.at(i).mid(x+1)+"\n");
-         }
-//         ui->actionStrip_Line_Numbers->setEnabled(false);
-     }
- }
-
- void TextPrinterWindow::newLine(bool /*linefeed*/)
- {
+  void TextPrinterWindow::newLine(bool /*linefeed*/) {
     emit textPrint("\n");
- }
+  }
 
- void TextPrinterWindow::printChar(const QChar &c)
- {
+  void TextPrinterWindow::printChar(const QChar &c) {
     emit textPrint(QString(c));
- }
+  }
 
- void TextPrinterWindow::printString(const QString &s)
- {
+  void TextPrinterWindow::printString(const QString &s) {
     emit textPrint(s);
- }
+  }
 
- /*bool TextPrinterWindow::setupOutput()
+  /*bool TextPrinterWindow::setupOutput()
  {
     this->setGeometry(RespeqtSettings::instance()->lastPrtHorizontalPos(), RespeqtSettings::instance()->lastPrtVerticalPos(), RespeqtSettings::instance()->lastPrtWidth(), RespeqtSettings::instance()->lastPrtHeight());
     this->show();
 
     return true;
  }*/
-} // End of namespace
+}// namespace Printers

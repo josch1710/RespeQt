@@ -9,22 +9,22 @@
 #ifndef OUTPUTWINDOW_H
 #define OUTPUTWINDOW_H
 
-#include <QMainWindow>
 #include <QGraphicsScene>
+#include <QMainWindow>
 #include <QString>
 #include <memory>
 //#include "nativeoutput.h"
 #include "graphicsprimitive.h"
 
 namespace Ui {
-    class OutputWindow;
+  class OutputWindow;
 }
 
 namespace Printers {
 
-class OutputWindow : public QMainWindow/*, public NativeOutput*/ {
+  class OutputWindow : public QMainWindow /*, public NativeOutput*/ {
     Q_OBJECT
-public:
+  public:
     explicit OutputWindow(QWidget *parent = nullptr);
     ~OutputWindow();
 
@@ -40,31 +40,31 @@ public:
         return QObject::tr("Graphics printer");
     }*/
 
-protected:
+  protected:
     void changeEvent(QEvent *e) override;
     void closeEvent(QCloseEvent *e) override;
 
-private:
+  private:
     Ui::OutputWindow *ui;
     QPen mPen;
     QGraphicsScene mGraphicsScene;
 
-protected slots:
+  protected slots:
     void saveTriggered();
     void clearTriggered();
     void printTriggered();
 
-    // To manipulate fonts and ascii/atascii windows  // 
+    // To manipulate fonts and ascii/atascii windows  //
     void print(const QString &text);
     void printGraphics(GraphicsPrimitive *primitive);
 
-signals:
-    void closed(const Printers::OutputWindow* window);
+  signals:
+    void closed(const Printers::OutputWindow *window);
     void textPrint(const QString &text);
     void graphicsPrint(GraphicsPrimitive *primitive);
-};
+  };
 
-using OutputWindowPtr = std::shared_ptr<OutputWindow>;
+  using OutputWindowPtr = std::shared_ptr<OutputWindow>;
 
-}
-#endif // OUTPUTWINDOW_H
+}// namespace Printers
+#endif// OUTPUTWINDOW_H

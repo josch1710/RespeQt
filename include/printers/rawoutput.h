@@ -6,44 +6,41 @@
 
 #if defined(Q_OS_WIN)
 #include <windows.h>
-#elif defined (Q_OS_MAC) || defined(Q_OS_LINUX)
+#elif defined(Q_OS_MAC) || defined(Q_OS_LINUX)
 #include <cups/cups.h>
 #endif
 
 class QComboBox;
 
-namespace Printers
-{
-    class RawOutput
-    {
-        public:
-            RawOutput();
-            virtual ~RawOutput();
+namespace Printers {
+  class RawOutput {
+  public:
+    RawOutput();
+    virtual ~RawOutput();
 
-            virtual bool beginOutput();
-            virtual bool endOutput();
-            virtual void updateBoundingBox();
-            virtual void newPage(bool linefeed = false);
-            virtual bool setupOutput() { return true; }
-            bool sendBuffer(const QByteArray &b, unsigned int len);
+    virtual bool beginOutput();
+    virtual bool endOutput();
+    virtual void updateBoundingBox();
+    virtual void newPage(bool linefeed = false);
+    virtual bool setupOutput() { return true; }
+    bool sendBuffer(const QByteArray &b, unsigned int len);
 
-            static QString typeName()
-            {
-                return QObject::tr("Raw output");
-            }
+    static QString typeName() {
+      return QObject::tr("Raw output");
+    }
 
-            static void setupRawPrinters(QComboBox *list);
+    static void setupRawPrinters(QComboBox *list);
 
-        protected:
-            QString rawPrinterName;
+  protected:
+    QString rawPrinterName;
 #if defined(Q_OS_WIN)
-            HANDLE mJob;
+    HANDLE mJob;
 #elif defined(Q_OS_MAC) || defined(Q_OS_LINUX)
-            int mJobId;
-            cups_dest_t *mDest;
-            cups_dinfo_t *mInfo;
-            http_t *mHttp;
+    int mJobId;
+    cups_dest_t *mDest;
+    cups_dinfo_t *mInfo;
+    http_t *mHttp;
 #endif
-    };
-}
-#endif // RAWOUTPUT_H
+  };
+}// namespace Printers
+#endif// RAWOUTPUT_H
