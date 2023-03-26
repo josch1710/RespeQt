@@ -8,22 +8,21 @@
 
 #include "cpu6502.h"
 
-class disassembly810 : public Cpu6502
-{
+class disassembly810 : public Cpu6502 {
 public:
-                            disassembly810();
-    virtual					~disassembly810() { }
+  disassembly810();
+  virtual ~disassembly810() {}
 
-    // read/write a byte in memory (unused)
-    virtual unsigned char	ReadByte(unsigned short) { return 0; }
-    virtual void			WriteByte(unsigned short, unsigned char) { }
+  // read/write a byte in memory (unused)
+  virtual unsigned char ReadByte(unsigned short) { return 0; }
+  virtual void WriteByte(unsigned short, unsigned char) {}
 
-    // enable/disable traces (unused)
-    virtual void			Trace(int, bool, const char *, ...) { }
-    virtual void			Dump(char *, int) { }
-    virtual bool			IsAddressSkipped(unsigned short) { return false; }
+  // enable/disable traces (unused)
+  virtual void Trace(int, bool, const char *, ...) {}
+  virtual void Dump(char *, int) {}
+  virtual bool IsAddressSkipped(unsigned short) { return false; }
 
-    virtual char			*GetAddressLabel(unsigned short addr);
+  virtual char *GetAddressLabel(unsigned short addr);
 };
 
-#endif // DISASSEMBLY810_H
+#endif// DISASSEMBLY810_H

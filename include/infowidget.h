@@ -4,26 +4,25 @@
  * Copyright 2017 blind
  *
  */
- 
+
 #ifndef INFOWIDGET_H
 #define INFOWIDGET_H
 
 #include <QFrame>
 
 namespace Ui {
-class InfoWidget;
+  class InfoWidget;
 }
 
-class InfoWidget : public QFrame
-{
-    Q_OBJECT
+class InfoWidget : public QFrame {
+  Q_OBJECT
 
 public:
-    explicit InfoWidget(QWidget *parent = 0);
-    ~InfoWidget();
+  explicit InfoWidget(QWidget *parent = 0);
+  ~InfoWidget();
 
 private:
-    Ui::InfoWidget *ui;
+  Ui::InfoWidget *ui;
 };
 
-#endif // INFOWIDGET_H
+#endif// INFOWIDGET_H

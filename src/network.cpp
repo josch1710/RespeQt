@@ -6,45 +6,41 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include <QTimer>
-#include <QMessageBox>
 #include "network.h"
+#include <QMessageBox>
+#include <QTimer>
 
 Network::Network(QWidget *parent)
-    : QMainWindow(parent)
-{
-//    QTimer::singleShot(0, this, SLOT(openConnection()));
+    : QMainWindow(parent) {
+  //    QTimer::singleShot(0, this, SLOT(openConnection()));
 }
 
-Network::~Network()
-{
-    if (m_session)
-        m_session->close();
+Network::~Network() {
+  if (m_session)
+    m_session->close();
 }
 
-bool Network::openConnection(QString &netInterface)
-{
-    // Internet Access Point
-    QNetworkConfigurationManager manager;
+bool Network::openConnection(QString &netInterface) {
+  // Internet Access Point
+  QNetworkConfigurationManager manager;
 
-    const bool canStartIAP = (manager.capabilities()
-        & QNetworkConfigurationManager::CanStartAndStopInterfaces);
+  const bool canStartIAP = (manager.capabilities() & QNetworkConfigurationManager::CanStartAndStopInterfaces);
 
-    // If there is a default access point, use it
-    QNetworkConfiguration cfg = manager.defaultConfiguration();
+  // If there is a default access point, use it
+  QNetworkConfiguration cfg = manager.defaultConfiguration();
 
-    if (!cfg.isValid() || !canStartIAP) {
-        return false;
-    }
+  if (!cfg.isValid() || !canStartIAP) {
+    return false;
+  }
 
-    // Open session
-    m_session = new QNetworkSession(cfg);
-    m_session->open();
-    // Waits for session to be open and continues after that
-    m_session->waitForOpened();
+  // Open session
+  m_session = new QNetworkSession(cfg);
+  m_session->open();
+  // Waits for session to be open and continues after that
+  m_session->waitForOpened();
 
-    // Show interface name to the user
-    QNetworkInterface iff = m_session->interface();
-    netInterface = iff.humanReadableName();
-    return true;
+  // Show interface name to the user
+  QNetworkInterface iff = m_session->interface();
+  netInterface = iff.humanReadableName();
+  return true;
 }

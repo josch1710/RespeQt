@@ -14,13 +14,12 @@
 #include "sioworker.h"
 
 // SmartDevice (ApeTime + URL submit)
-class SmartDevice: public SioDevice
-{
-    Q_OBJECT
+class SmartDevice : public SioDevice {
+  Q_OBJECT
 
 public:
-    SmartDevice(SioWorkerPtr worker): SioDevice(worker) {}
-    void handleCommand(quint8 command, const quint8 aux1, const quint8 aux2) override;
+  SmartDevice(SioWorkerPtr worker) : SioDevice(worker) {}
+  void handleCommand(quint8 command, const quint8 aux1, const quint8 aux2) override;
 };
 
-#endif // SMARTDEVICE_H
+#endif// SMARTDEVICE_H

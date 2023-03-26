@@ -12,24 +12,24 @@
 #include <QDialog>
 
 namespace Ui {
-    class AboutDialog;
+  class AboutDialog;
 }
 
 class AboutDialog : public QDialog {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    AboutDialog(QWidget *parent, QString version);
-    ~AboutDialog();
+  AboutDialog(QWidget *parent, QString version);
+  ~AboutDialog();
 
 protected:
-    void changeEvent(QEvent *e);
+  void changeEvent(QEvent *e);
 
 private:
-    Ui::AboutDialog *m_ui;
+  Ui::AboutDialog *m_ui;
 
 private slots:
-    void showAboutQt();
+  void showAboutQt();
 };
 
-#endif // ABOUTDIALOG_H
+#endif// ABOUTDIALOG_H

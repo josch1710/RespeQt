@@ -3,12 +3,10 @@
 
 #include "atascii.h"
 
-class AtasciiInternational : public Atascii
-{
+class AtasciiInternational : public Atascii {
 public:
-    AtasciiInternational();
-    virtual void initMapping();
-
+  AtasciiInternational();
+  virtual void initMapping();
 };
 
-#endif // ATASCIIINTERNATIONAL_H
+#endif// ATASCIIINTERNATIONAL_H

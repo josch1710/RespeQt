@@ -13,39 +13,40 @@
 
 #include "sioworker.h"
 
-class AtariExeChunk
-{
+class AtariExeChunk {
 public:
-    int address;
-    QByteArray data;
+  int address;
+  QByteArray data;
 };
 
-class AutoBoot : public SioDevice
-{
-    Q_OBJECT
+class AutoBoot : public SioDevice {
+  Q_OBJECT
 
 private:
-    QByteArray bootSectors;
-    QList <AtariExeChunk> chunks;
-    int sectorCount;
-    SioDevice *oldDevice;
-    bool started, loaded;
-    bool readExecutable(const QString &fileName);
+  QByteArray bootSectors;
+  QList<AtariExeChunk> chunks;
+  int sectorCount;
+  SioDevice *oldDevice;
+  bool started, loaded;
+  bool readExecutable(const QString &fileName);
 
 public:
-    AutoBoot(SioWorkerPtr worker, SioDevice *aOldDevice): SioDevice(worker) {oldDevice = aOldDevice; started = loaded = false;}
-    ~AutoBoot();
-    void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) override;
-    void passToOldHandler(const quint8 command, const quint8 aux1, const quint8 aux2);
-    bool open(const QString &fileName, bool highSpeed);
-    void close();
-    bool readSector(quint16 sector, QByteArray &data);
-    QString deviceName() override;
+  AutoBoot(SioWorkerPtr worker, SioDevice *aOldDevice) : SioDevice(worker) {
+    oldDevice = aOldDevice;
+    started = loaded = false;
+  }
+  ~AutoBoot();
+  void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) override;
+  void passToOldHandler(const quint8 command, const quint8 aux1, const quint8 aux2);
+  bool open(const QString &fileName, bool highSpeed);
+  void close();
+  bool readSector(quint16 sector, QByteArray &data);
+  QString deviceName() override;
 signals:
-    void booterStarted();
-    void booterLoaded();
-    void blockRead(int current, int all);
-    void loaderDone();
+  void booterStarted();
+  void booterLoaded();
+  void blockRead(int current, int all);
+  void loaderDone();
 };
 
-#endif // AUTOBOOT_H
+#endif// AUTOBOOT_H

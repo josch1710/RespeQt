@@ -12,32 +12,32 @@
 #include <QDialog>
 
 namespace Ui {
-    class CreateImageDialog;
+  class CreateImageDialog;
 }
 
 class CreateImageDialog : public QDialog {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    CreateImageDialog(QWidget *parent = 0);
-    ~CreateImageDialog();
-    int sectorCount();
-    int sectorSize();
+  CreateImageDialog(QWidget *parent = 0);
+  ~CreateImageDialog();
+  int sectorCount();
+  int sectorSize();
 
 protected:
-    void changeEvent(QEvent *e);
+  void changeEvent(QEvent *e);
 
 private:
-    Ui::CreateImageDialog *m_ui;
+  Ui::CreateImageDialog *m_ui;
 
 private slots:
-    void recalculate();
-    void harddiskToggled(bool checked);
-    void customToggled(bool checked);
-    void doubleDoubleToggled(bool checked);
-    void standardDoubleToggled(bool checked);
-    void standardSingleToggled(bool checked);
-    void standardEnhancedToggled(bool checked);
+  void recalculate();
+  void harddiskToggled(bool checked);
+  void customToggled(bool checked);
+  void doubleDoubleToggled(bool checked);
+  void standardDoubleToggled(bool checked);
+  void standardSingleToggled(bool checked);
+  void standardEnhancedToggled(bool checked);
 };
 
-#endif // CREATEIMAGEDIALOG_H
+#endif// CREATEIMAGEDIALOG_H

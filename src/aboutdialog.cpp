@@ -9,40 +9,35 @@
 #include "aboutdialog.h"
 #include "ui_aboutdialog.h"
 
-AboutDialog::AboutDialog(QWidget *parent, QString version) :
-    QDialog(parent),
-    m_ui(new Ui::AboutDialog)
-{
-    Qt::WindowFlags flags = windowFlags();
-    flags = flags & (~Qt::WindowContextHelpButtonHint);
-    setWindowFlags(flags);
+AboutDialog::AboutDialog(QWidget *parent, QString version) : QDialog(parent),
+                                                             m_ui(new Ui::AboutDialog) {
+  Qt::WindowFlags flags = windowFlags();
+  flags = flags & (~Qt::WindowContextHelpButtonHint);
+  setWindowFlags(flags);
 
-    m_ui->setupUi(this);
+  m_ui->setupUi(this);
 
-    m_ui->versionLabel->setText(tr("version %1").arg(version));
-    m_ui->textBrowser->setSource(*new QUrl(tr("qrc:/documentation/about.html")));
+  m_ui->versionLabel->setText(tr("version %1").arg(version));
+  m_ui->textBrowser->setSource(*new QUrl(tr("qrc:/documentation/about.html")));
 
-    connect(m_ui->aboutQt, &QPushButton::clicked, this, &AboutDialog::showAboutQt);
+  connect(m_ui->aboutQt, &QPushButton::clicked, this, &AboutDialog::showAboutQt);
 }
 
-AboutDialog::~AboutDialog()
-{
-    delete m_ui;
+AboutDialog::~AboutDialog() {
+  delete m_ui;
 }
 
-void AboutDialog::changeEvent(QEvent *e)
-{
-    QDialog::changeEvent(e);
-    switch (e->type()) {
+void AboutDialog::changeEvent(QEvent *e) {
+  QDialog::changeEvent(e);
+  switch (e->type()) {
     case QEvent::LanguageChange:
-        m_ui->retranslateUi(this);
-        break;
+      m_ui->retranslateUi(this);
+      break;
     default:
-        break;
-    }
+      break;
+  }
 }
 
-void AboutDialog::showAboutQt()
-{
-    QApplication::aboutQt();
+void AboutDialog::showAboutQt() {
+  QApplication::aboutQt();
 }

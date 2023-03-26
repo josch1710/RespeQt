@@ -11,32 +11,32 @@
 #ifndef BOOTOPTIONSDIALOG_H
 #define BOOTOPTIONSDIALOG_H
 
-#include <QDialog>
-#include <QDebug>
 #include <QAbstractButton>
+#include <QDebug>
+#include <QDialog>
 
 namespace Ui {
-    class BootOptionsDialog;
+  class BootOptionsDialog;
 }
 
 class BootOptionsDialog : public QDialog {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    BootOptionsDialog(const QString& bootFolderPath, QWidget *parent = 0);
-    ~BootOptionsDialog();
+  BootOptionsDialog(const QString &bootFolderPath, QWidget *parent = 0);
+  ~BootOptionsDialog();
 
 protected:
-    void changeEvent(QEvent *e);
+  void changeEvent(QEvent *e);
 
 private:
-    const QString& bootFolderPath_;
-    Ui::BootOptionsDialog *m_ui;
+  const QString &bootFolderPath_;
+  Ui::BootOptionsDialog *m_ui;
 
 public slots:
-    virtual void accept();
+  virtual void accept();
 
 private slots:
-    void picoDOSToggled();
+  void picoDOSToggled();
 };
-#endif // BOOTOPTIONSDIALOG_H
+#endif// BOOTOPTIONSDIALOG_H

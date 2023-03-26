@@ -9,37 +9,37 @@
 #ifndef AUTOBOOTDIALOG_H
 #define AUTOBOOTDIALOG_H
 
-#include <QDialog>
 #include <QAbstractButton>
+#include <QDialog>
 
 namespace Ui {
-    class AutoBootDialog;
+  class AutoBootDialog;
 }
 
 class AutoBootDialog : public QDialog {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    AutoBootDialog(QWidget *parent = 0);
-    ~AutoBootDialog();
+  AutoBootDialog(QWidget *parent = 0);
+  ~AutoBootDialog();
 
 
 protected:
-    void changeEvent(QEvent *e);
-    void closeEvent(QCloseEvent *);
+  void changeEvent(QEvent *e);
+  void closeEvent(QCloseEvent *);
 
 private:
-    Ui::AutoBootDialog *ui;
+  Ui::AutoBootDialog *ui;
 
 public slots:
-    void booterStarted();
-    void booterLoaded();
-    void blockRead(int current, int all);
-    void loaderDone();
+  void booterStarted();
+  void booterLoaded();
+  void blockRead(int current, int all);
+  void loaderDone();
 
 private slots:
-    void onClick(QAbstractButton* button);
-    void reloadExe();
+  void onClick(QAbstractButton *button);
+  void reloadExe();
 };
 
-#endif // AUTOBOOTDIALOG_H
+#endif// AUTOBOOTDIALOG_H

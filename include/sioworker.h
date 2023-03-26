@@ -12,143 +12,144 @@
 #ifndef SIOWORKER_H
 #define SIOWORKER_H
 
-#include <QThread>
 #include <QMutex>
 #include <QSharedPointer>
+#include <QThread>
 #ifndef QT_NO_DEBUG
 #include <QFile>
 #endif
 
 #include "serialport.h"
-#include <memory>
 #include <atomic>
+#include <memory>
 
-enum SIO_CDEVIC:quint8
-{
-    DISK_BASE_CDEVIC = 0x31,
-    PRINTER_BASE_CDEVIC = 0x40,
-    SMART_CDEVIC = 0x45,
-    RESPEQT_CLIENT_CDEVIC = 0x46,
-    RS232_BASE_CDEVIC = 0x50,
-    PCLINK_CDEVIC = 0x6F
+enum SIO_CDEVIC : quint8 {
+  DISK_BASE_CDEVIC = 0x31,
+  PRINTER_BASE_CDEVIC = 0x40,
+  SMART_CDEVIC = 0x45,
+  RESPEQT_CLIENT_CDEVIC = 0x46,
+  RS232_BASE_CDEVIC = 0x50,
+  PCLINK_CDEVIC = 0x6F
 };
 
-enum SIO_DEVICE_COUNT:quint8
-{
-    DISK_COUNT = 15,
-    PRINTER_COUNT = 4,
-    RS232_COUNT = 4
+enum SIO_DEVICE_COUNT : quint8 {
+  DISK_COUNT = 15,
+  PRINTER_COUNT = 4,
+  RS232_COUNT = 4
 };
 
 class SioWorker;
 using SioWorkerPtr = QSharedPointer<SioWorker>;
 
-class SioDevice : public QObject
-{
-    Q_OBJECT
+class SioDevice : public QObject {
+  Q_OBJECT
 
 protected:
-    int m_deviceNo;
-    QMutex mLock;
-    SioWorkerPtr sio;
+  int m_deviceNo;
+  QMutex mLock;
+  SioWorkerPtr sio;
+
 public:
-    SioDevice(SioWorkerPtr worker);
-    virtual ~SioDevice();
-    virtual void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) = 0;
-    virtual QString deviceName();
-    inline void lock() {mLock.lock();}
-    inline bool tryLock() {return mLock.tryLock();}
-    inline void unlock() {mLock.unlock();}
-    inline void setDeviceNo(int no) {emit statusChanged(m_deviceNo); m_deviceNo = no; emit statusChanged(no);}
-    inline int deviceNo() const {return m_deviceNo;}
+  SioDevice(SioWorkerPtr worker);
+  virtual ~SioDevice();
+  virtual void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) = 0;
+  virtual QString deviceName();
+  inline void lock() { mLock.lock(); }
+  inline bool tryLock() { return mLock.tryLock(); }
+  inline void unlock() { mLock.unlock(); }
+  inline void setDeviceNo(int no) {
+    emit statusChanged(m_deviceNo);
+    m_deviceNo = no;
+    emit statusChanged(no);
+  }
+  inline int deviceNo() const { return m_deviceNo; }
 signals:
-    void statusChanged(int deviceNo);
+  void statusChanged(int deviceNo);
 };
 
-class SioWorker : public QThread
-{
-    Q_OBJECT
+class SioWorker : public QThread {
+  Q_OBJECT
 
 private:
-    quint8 sioChecksum(const QByteArray &data, uint size);
-    QMutex *deviceMutex;
-    SioDevice* devices[256];
-    AbstractSerialPortBackendPtr mPort;
-    std::atomic_bool mustTerminate;
-    bool displayCommandName;
-    bool mAutoReconnect;
+  quint8 sioChecksum(const QByteArray &data, uint size);
+  QMutex *deviceMutex;
+  SioDevice *devices[256];
+  AbstractSerialPortBackendPtr mPort;
+  std::atomic_bool mustTerminate;
+  bool displayCommandName;
+  bool mAutoReconnect;
 
 public:
-    AbstractSerialPortBackendPtr port() { return mPort; }
-    int maxSpeed;
+  AbstractSerialPortBackendPtr port() { return mPort; }
+  int maxSpeed;
 
-    SioWorker();
+  SioWorker();
 #ifdef RESPEQT_TEST
-    // This is totally ugly, we must get rid of this special ctor
-    explicit SioWorker(AbstractSerialPortBackend *port): QThread(), mPort(port) {
-        deviceMutex = nullptr;
-        for (int i=0; i <= 255; i++)
-            devices[i] = nullptr;
-    }
+  // This is totally ugly, we must get rid of this special ctor
+  explicit SioWorker(AbstractSerialPortBackend *port) : QThread(), mPort(port) {
+    deviceMutex = nullptr;
+    for (int i = 0; i <= 255; i++)
+      devices[i] = nullptr;
+  }
 #endif
-    virtual ~SioWorker();
+  virtual ~SioWorker();
 
-    bool wait (unsigned long time = ULONG_MAX);
+  bool wait(unsigned long time = ULONG_MAX);
 
-    void run();
+  void run();
 
-    void setAutoReconnect(bool autoReconnect);
-    void installDevice(quint8 no, SioDevice *device);
-    virtual void uninstallDevice(quint8 no);
-    void swapDevices(quint8 d1, quint8 d2);
-    SioDevice* getDevice(quint8 no);
+  void setAutoReconnect(bool autoReconnect);
+  void installDevice(quint8 no, SioDevice *device);
+  virtual void uninstallDevice(quint8 no);
+  void swapDevices(quint8 d1, quint8 d2);
+  SioDevice *getDevice(quint8 no);
 
-    QString guessDiskCommand(const quint8 command, const quint8 aux1, const quint8 aux2);
-    QString deviceName(int device);
-    void setDisplayCommandName(bool display) {displayCommandName = display;}
-    static void usleep(unsigned long time) {QThread::usleep(time);}
+  QString guessDiskCommand(const quint8 command, const quint8 aux1, const quint8 aux2);
+  QString deviceName(int device);
+  void setDisplayCommandName(bool display) { displayCommandName = display; }
+  static void usleep(unsigned long time) { QThread::usleep(time); }
 
 signals:
-    void statusChanged(QString status);
+  void statusChanged(QString status);
 
 public slots:
-    void start(Priority p);
+  void start(Priority p);
 };
 
 class CassetteRecord {
 public:
-    int baudRate;
-    int gapDuration;
-    int totalDuration;
-    QByteArray data;
+  int baudRate;
+  int gapDuration;
+  int totalDuration;
+  QByteArray data;
 };
 
-class CassetteWorker : public QThread
-{
-    Q_OBJECT
+class CassetteWorker : public QThread {
+  Q_OBJECT
 
 private:
-    QMutex mustTerminate;
-    AbstractSerialPortBackendPtr mPort;
-    QList<CassetteRecord> mRecords;
+  QMutex mustTerminate;
+  AbstractSerialPortBackendPtr mPort;
+  QList<CassetteRecord> mRecords;
+
 public:
-    AbstractSerialPortBackendPtr port() { return mPort; }
+  AbstractSerialPortBackendPtr port() { return mPort; }
 
-    CassetteWorker();
-    ~CassetteWorker();
+  CassetteWorker();
+  ~CassetteWorker();
 
-    bool loadCasImage(const QString &fileName);
+  bool loadCasImage(const QString &fileName);
 
-    bool wait (unsigned long time = ULONG_MAX);
+  bool wait(unsigned long time = ULONG_MAX);
 
-    void run();
+  void run();
 
-    int mTotalDuration;
+  int mTotalDuration;
 signals:
-    void statusChanged(int remainingTime);
+  void statusChanged(int remainingTime);
 
 public slots:
-    void start(Priority p);
+  void start(Priority p);
 };
 
-#endif // SIOWORKER_H
+#endif// SIOWORKER_H

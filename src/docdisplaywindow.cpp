@@ -9,54 +9,48 @@
  */
 
 #include "docdisplaywindow.h"
-#include "ui_docdisplaywindow.h"
 #include "respeqtsettings.h"
+#include "ui_docdisplaywindow.h"
 
 #include <QFileDialog>
 #include <QPrintDialog>
 #include <QPrinter>
 
-DocDisplayWindow::DocDisplayWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::DocDisplayWindow)
-{
-    ui->setupUi(this);
-    QFont f;
-    f.setFixedPitch(true);
-    f.setFamily("monospace");
-    ui->docDisplay->setFont(f);
+DocDisplayWindow::DocDisplayWindow(QWidget *parent) : QMainWindow(parent),
+                                                      ui(new Ui::DocDisplayWindow) {
+  ui->setupUi(this);
+  QFont f;
+  f.setFixedPitch(true);
+  f.setFamily("monospace");
+  ui->docDisplay->setFont(f);
 
-    connect(ui->actionPrint, &QAction::triggered, this, &DocDisplayWindow::printTriggered);
+  connect(ui->actionPrint, &QAction::triggered, this, &DocDisplayWindow::printTriggered);
 }
 
-DocDisplayWindow::~DocDisplayWindow()
-{
-    delete ui;
+DocDisplayWindow::~DocDisplayWindow() {
+  delete ui;
 }
 
-void DocDisplayWindow::changeEvent(QEvent *e)
-{
-    QMainWindow::changeEvent(e);
-    switch (e->type()) {
+void DocDisplayWindow::changeEvent(QEvent *e) {
+  QMainWindow::changeEvent(e);
+  switch (e->type()) {
     case QEvent::LanguageChange:
-        ui->retranslateUi(this);
-        break;
+      ui->retranslateUi(this);
+      break;
     default:
-        break;
-    }
+      break;
+  }
 }
 
-void DocDisplayWindow::closeEvent(QCloseEvent *e)
-{
-    emit closed();
-    e->accept();
+void DocDisplayWindow::closeEvent(QCloseEvent *e) {
+  emit closed();
+  e->accept();
 }
 
-void DocDisplayWindow::printTriggered()
-{
-     QPrinter printer;
-     auto *dialog = new QPrintDialog(&printer, this);
-     if (dialog->exec() != QDialog::Accepted)
-         return;
-     ui->docDisplay->print(&printer);
+void DocDisplayWindow::printTriggered() {
+  QPrinter printer;
+  auto *dialog = new QPrintDialog(&printer, this);
+  if (dialog->exec() != QDialog::Accepted)
+    return;
+  ui->docDisplay->print(&printer);
 }

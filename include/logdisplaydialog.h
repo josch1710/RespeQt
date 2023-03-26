@@ -9,37 +9,37 @@
 #ifndef LOGDISPLAYDIALOG_H
 #define LOGDISPLAYDIALOG_H
 
-#include <QDialog>
-#include <QDebug>
 #include <QAbstractButton>
+#include <QDebug>
+#include <QDialog>
 #include <QTextEdit>
 
 namespace Ui {
-    class LogDisplayDialog;
+  class LogDisplayDialog;
 }
 
 class LogDisplayDialog : public QDialog {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    LogDisplayDialog(QWidget *parent = 0);
-    ~LogDisplayDialog();
+  LogDisplayDialog(QWidget *parent = 0);
+  ~LogDisplayDialog();
 
 protected:
-    void changeEvent(QEvent *e);
-    void closeEvent(QCloseEvent *);
+  void changeEvent(QEvent *e);
+  void closeEvent(QCloseEvent *);
 
 private:
-    Ui::LogDisplayDialog *l_ui;
+  Ui::LogDisplayDialog *l_ui;
 
 public slots:
-    void getLogText(QString logText);
-    void getLogTextChange(QString logChange);
+  void getLogText(QString logText);
+  void getLogTextChange(QString logChange);
 
 private slots:
-    void diskFilter();
-    void onClick(QAbstractButton* button);
+  void diskFilter();
+  void onClick(QAbstractButton *button);
 
 signals:
 };
-#endif // LOGDISPLAYDIALOG_H
+#endif// LOGDISPLAYDIALOG_H

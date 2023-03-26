@@ -9,27 +9,25 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 #include <QMainWindow>
+#include <QMessageBox>
 #include <QPointer>
 #include <QTimer>
-#include <QMessageBox>
+#include <qnetworkconfigmanager.h>
 #include <qnetworkinterface.h>
 #include <qnetworksession.h>
-#include <qnetworkconfigmanager.h>
 
 
-class Network : public QMainWindow
-{
-    Q_OBJECT
+class Network : public QMainWindow {
+  Q_OBJECT
 
 public:
-    Network(QWidget *parent = 0);
-    ~Network();
+  Network(QWidget *parent = 0);
+  ~Network();
 
 public slots:
-    bool openConnection(QString &netInterface);
+  bool openConnection(QString &netInterface);
 
 private:
-    QPointer<QNetworkSession> m_session;
-
+  QPointer<QNetworkSession> m_session;
 };
-#endif // NETWORK_H
+#endif// NETWORK_H

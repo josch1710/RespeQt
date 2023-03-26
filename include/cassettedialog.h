@@ -14,35 +14,34 @@
 #include <QMovie>
 
 namespace Ui {
-    class CassetteDialog;
+  class CassetteDialog;
 }
 
 class CassetteDialog : public QDialog {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    CassetteDialog(QWidget *parent, const QString &fileName);
-    ~CassetteDialog();
+  CassetteDialog(QWidget *parent, const QString &fileName);
+  ~CassetteDialog();
 
 protected:
-    void changeEvent(QEvent *e);
+  void changeEvent(QEvent *e);
 
 private:
-    Ui::CassetteDialog *ui;
-    CassetteWorker *worker;
-    QTimer *mTimer;
-    int mTotalDuration;
-    int mRemainingTime;
-    QString mFileName;
-    QMovie *mCassMovie;
+  Ui::CassetteDialog *ui;
+  CassetteWorker *worker;
+  QTimer *mTimer;
+  int mTotalDuration;
+  int mRemainingTime;
+  QString mFileName;
+  QMovie *mCassMovie;
 
 public slots:
-    int exec();
-    void accept();
-    void tick();
+  int exec();
+  void accept();
+  void tick();
 
 private slots:
-    void progress(int remainingTime);
-
+  void progress(int remainingTime);
 };
 
-#endif // CASSETTEDIALOG_H
+#endif// CASSETTEDIALOG_H

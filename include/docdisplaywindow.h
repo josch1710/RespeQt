@@ -10,31 +10,31 @@
 #ifndef DOCDISPLAYWINDOW_H
 #define DOCDISPLAYWINDOW_H
 
-#include <QMainWindow>
 #include <QCloseEvent>
+#include <QMainWindow>
 
 namespace Ui {
-    class DocDisplayWindow;
+  class DocDisplayWindow;
 }
 
 class DocDisplayWindow : public QMainWindow {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    DocDisplayWindow(QWidget *parent = 0);
-    ~DocDisplayWindow();
+  DocDisplayWindow(QWidget *parent = 0);
+  ~DocDisplayWindow();
 
 protected:
-    void changeEvent(QEvent *e);
-    void closeEvent(QCloseEvent *e);
+  void changeEvent(QEvent *e);
+  void closeEvent(QCloseEvent *e);
 
 private:
-    Ui::DocDisplayWindow *ui;
+  Ui::DocDisplayWindow *ui;
 
 private slots:
-    void printTriggered();
+  void printTriggered();
 
 signals:
-    void closed();
+  void closed();
 };
 
-#endif // DOCDISPLAYWINDOW_H
+#endif// DOCDISPLAYWINDOW_H
