@@ -17,8 +17,11 @@
 #include <unistd.h>
 #include <utime.h>
 
-#include "pclink.h"
+// The order matters
+// clang-format off
 #include "respeqtsettings.h"
+#include "pclink.h"
+// clang-format on
 
 #define SDX_MAXLEN 16777215L
 

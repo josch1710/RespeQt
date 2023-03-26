@@ -362,6 +362,7 @@ void RespeqtSettings::loadSessionFromFile(const QString &fileName) {
     setPrinterName(i, s.value("PrinterName", "").toString());
   }
 }
+
 // Get MainWindow title from MainWindow  //
 void RespeqtSettings::setMainWindowTitle(const QString &g_mainWindowTitle) {
   mMainWindowTitle = g_mainWindowTitle;
@@ -372,195 +373,156 @@ bool RespeqtSettings::isFirstTime() {
 }
 
 QString RespeqtSettings::serialPortName() {
-  return mSerialPortName;
+  return mSettings->value("SerialPortName").toString();
 }
 
 void RespeqtSettings::setSerialPortName(const QString &name) {
-  mSerialPortName = name;
-  if (mSessionFileName == "")
-    mSettings->setValue("SerialPortName", mSerialPortName);
+  mSettings->setValue("SerialPortName", name);
 }
 
 int RespeqtSettings::serialPortMaximumSpeed() {
-  return mSerialPortMaximumSpeed;
+  return mSettings->value("MaximumSerialPortSpeed").toInt();
 }
 
 void RespeqtSettings::setSerialPortMaximumSpeed(int speed) {
-  mSerialPortMaximumSpeed = speed;
-  if (mSessionFileName == "")
-    mSettings->setValue("MaximumSerialPortSpeed", mSerialPortMaximumSpeed);
+  mSettings->setValue("MaximumSerialPortSpeed", speed);
 }
 
 bool RespeqtSettings::serialPortUsePokeyDivisors() {
-  return mSerialPortUsePokeyDivisors;
+  return mSettings->value("SerialPortUsePokeyDivisors").toBool();
 }
 
 void RespeqtSettings::setSerialPortUsePokeyDivisors(bool use) {
-  mSerialPortUsePokeyDivisors = use;
-  if (mSessionFileName == "")
-    mSettings->setValue("SerialPortUsePokeyDivisors", mSerialPortUsePokeyDivisors);
+  mSettings->setValue("SerialPortUsePokeyDivisors", use);
 }
 
 int RespeqtSettings::serialPortPokeyDivisor() {
-  return mSerialPortPokeyDivisor;
+  return mSettings->value("").toInt();
 }
 
 void RespeqtSettings::setSerialPortPokeyDivisor(int divisor) {
-  mSerialPortPokeyDivisor = divisor;
-  if (mSessionFileName == "")
-    mSettings->setValue("SerialPortPokeyDivisor", mSerialPortPokeyDivisor);
+  mSettings->setValue("SerialPortPokeyDivisor", divisor);
 }
 
 int RespeqtSettings::serialPortHandshakingMethod() {
-  return mSerialPortHandshakingMethod;
+  return mSettings->value("HandshakingMethod").toInt();
 }
 
 void RespeqtSettings::setSerialPortHandshakingMethod(int method) {
-  mSerialPortHandshakingMethod = method;
-  if (mSessionFileName == "")
-    mSettings->setValue("HandshakingMethod", mSerialPortHandshakingMethod);
+  mSettings->setValue("HandshakingMethod", method);
 }
 
 bool RespeqtSettings::serialPortTriggerOnFallingEdge() {
-  return mSerialPortTriggerOnFallingEdge;
+  return mSettings->value("FallingEdge").toBool();
 }
 
 void RespeqtSettings::setSerialPortTriggerOnFallingEdge(bool use) {
-  mSerialPortTriggerOnFallingEdge = use;
-  if (mSessionFileName == "")
-    mSettings->setValue("FallingEdge", mSerialPortTriggerOnFallingEdge);
+  mSettings->setValue("FallingEdge", use);
 }
 
 bool RespeqtSettings::serialPortDTRControlEnable() {
-  return mSerialPortDTRControlEnable;
+  return mSettings->value("DTRControlEnable").toBool();
 }
 
 void RespeqtSettings::setSerialPortDTRControlEnable(bool use) {
-  mSerialPortDTRControlEnable = use;
-  if (mSessionFileName == "")
-    mSettings->setValue("DTRControlEnable", mSerialPortDTRControlEnable);
+  mSettings->setValue("DTRControlEnable", use);
 }
 
 int RespeqtSettings::serialPortWriteDelay() {
-  return mSerialPortWriteDelay;
+  return mSettings->value("WriteDelay").toInt();
 }
 
 void RespeqtSettings::setSerialPortWriteDelay(int delay) {
-  mSerialPortWriteDelay = delay;
-  if (mSessionFileName == "")
-    mSettings->setValue("WriteDelay", mSerialPortWriteDelay);
+  mSettings->setValue("WriteDelay", delay);
 }
 
 int RespeqtSettings::serialPortCompErrDelay() {
-  return mSerialPortCompErrDelay;
+  return mSettings->value("CompErrDelay").toInt();
 }
 
 void RespeqtSettings::setSerialPortCompErrDelay(int delay) {
-  mSerialPortCompErrDelay = delay;
-  if (mSessionFileName == "")
-    mSettings->setValue("CompErrDelay", mSerialPortCompErrDelay);
+  mSettings->setValue("CompErrDelay", delay);
 }
 
 QString RespeqtSettings::atariSioDriverName() {
-  return mAtariSioDriverName;
+  return mSettings->value("AtariSioDriverName").toString();
 }
 
 void RespeqtSettings::setAtariSioDriverName(const QString &name) {
-  mAtariSioDriverName = name;
-  if (mSessionFileName == "")
-    mSettings->setValue("AtariSioDriverName", mAtariSioDriverName);
+  mSettings->setValue("AtariSioDriverName", name);
 }
 
 int RespeqtSettings::atariSioHandshakingMethod() {
-  return mAtariSioHandshakingMethod;
+  return mSettings->value("AtariSioHandshakingMethod").toInt();
 }
 
 void RespeqtSettings::setAtariSioHandshakingMethod(int method) {
-  mAtariSioHandshakingMethod = method;
-  if (mSessionFileName == "")
-    mSettings->setValue("AtariSioHandshakingMethod", mAtariSioHandshakingMethod);
+  mSettings->setValue("AtariSioHandshakingMethod", method);
 }
 
 SerialBackend RespeqtSettings::backend() {
-  return mBackend;
+  return static_cast<SerialBackend>(mSettings->value("Backend").toInt());
 }
 
 void RespeqtSettings::setBackend(SerialBackend backend) {
-  mBackend = backend;
-  if (mSessionFileName == "")
-    mSettings->setValue("Backend", static_cast<int>(mBackend));
+  mSettings->setValue("Backend", static_cast<int>(backend));
 }
 
 QString RespeqtSettings::lastRclDir() {
-  return mRclDir;
+  return mSettings->value("LastRclDir").toString();
 }
 
 void RespeqtSettings::setRclDir(const QString &dir) {
-  mRclDir = dir;
-  mSettings->setValue("LastRclDir", mRclDir);
+  mSettings->setValue("LastRclDir", dir);
 }
 
 bool RespeqtSettings::useHighSpeedExeLoader() {
-  return mUseHighSpeedExeLoader;
+  return mSettings->value("UseHighSpeedExeLoader").toBool();
 }
 
 void RespeqtSettings::setUseHighSpeedExeLoader(bool use) {
-  mUseHighSpeedExeLoader = use;
-  if (mSessionFileName == "")
-    mSettings->setValue("UseHighSpeedExeLoader", mUseHighSpeedExeLoader);
+  mSettings->setValue("UseHighSpeedExeLoader", use);
 }
 
 bool RespeqtSettings::printerEmulation() {
-  return mPrinterEmulation;
+  return mSettings->value("PrinterEmulation").toBool();
 }
 
 void RespeqtSettings::setPrinterEmulation(bool status) {
-  mPrinterEmulation = status;
-  if (mSessionFileName == "")
-    mSettings->setValue("PrinterEmulation", mPrinterEmulation);
+  mSettings->setValue("PrinterEmulation", status);
 }
 
 bool RespeqtSettings::useCustomCasBaud() {
-  return mUseCustomCasBaud;
+  return mSettings->value("UseCustomCasBaud").toBool();
 }
 
 void RespeqtSettings::setUseCustomCasBaud(bool use) {
-  mUseCustomCasBaud = use;
-  if (mSessionFileName == "") mSettings->setValue("UseCustomCasBaud", mUseCustomCasBaud);
+  mSettings->setValue("UseCustomCasBaud", use);
 }
 
 int RespeqtSettings::customCasBaud() {
-  return mCustomCasBaud;
+  return mSettings->value("CustomCasBaud").toInt();
 }
 
 void RespeqtSettings::setCustomCasBaud(int baud) {
-  mCustomCasBaud = baud;
-  if (mSessionFileName == "")
-    mSettings->setValue("CustomCasBaud", mCustomCasBaud);
+  mSettings->setValue("CustomCasBaud", baud);
 }
 
+// TODO References
 const RespeqtSettings::ImageSettings *RespeqtSettings::getImageSettingsFromName(const QString &fileName) {
-  ImageSettings *is = nullptr;
-  int i;
-  bool found = false;
-
-  for (i = 0; i < 15; i++) {//
+  for (int i = 0; i < 15; i++) {//
     if (mMountedImageSettings[i].fileName == fileName) {
-      is = &mMountedImageSettings[i];
-      found = true;
-      break;
+      return &mMountedImageSettings[i];
     }
   }
-  if (!found) {
-    for (i = 0; i < NUM_RECENT_FILES; i++) {
-      if (mRecentImageSettings[i].fileName == fileName) {
-        is = &mRecentImageSettings[i];
-        found = true;
-        break;
-      }
+  // We didn't found anything in the list of mounted images
+  for (int i = 0; i < NUM_RECENT_FILES; i++) {
+    if (mRecentImageSettings[i].fileName == fileName) {
+      return &mRecentImageSettings[i];
     }
   }
-  return is;
+
+  return nullptr;
 }
 
 const RespeqtSettings::ImageSettings &RespeqtSettings::mountedImageSetting(int no) {
@@ -572,20 +534,15 @@ const RespeqtSettings::ImageSettings &RespeqtSettings::recentImageSetting(int no
 }
 
 void RespeqtSettings::setMountedImageProtection(int no, bool prot) {
-  mMountedImageSettings[no].isWriteProtected = prot;
-  if (mSessionFileName == "")
-    mSettings->setValue(QString("MountedImageSettings/%1/IsWriteProtected").arg(no + 1), prot);
+  mSettings->setValue(QString("MountedImageSettings/%1/IsWriteProtected").arg(no + 1), prot);
 }
 
 void RespeqtSettings::setMountedImageSetting(int no, const QString &fileName, bool prot) {
-  mMountedImageSettings[no].fileName = fileName;
-  mMountedImageSettings[no].isWriteProtected = prot;
-  if (mSessionFileName == "")
-    mSettings->setValue(QString("MountedImageSettings/%1/FileName").arg(no + 1), fileName);
-  if (mSessionFileName == "")
-    mSettings->setValue(QString("MountedImageSettings/%1/IsWriteProtected").arg(no + 1), prot);
+  mSettings->setValue(QString("MountedImageSettings/%1/FileName").arg(no + 1), fileName);
+  mSettings->setValue(QString("MountedImageSettings/%1/IsWriteProtected").arg(no + 1), prot);
 }
 
+// TODO Build stack?
 void RespeqtSettings::mountImage(int no, const QString &fileName, bool prot) {
   if (fileName.isEmpty()) {
     return;
@@ -626,58 +583,49 @@ void RespeqtSettings::swapImages(int no1, int no2) {
   setMountedImageSetting(no1, is2.fileName, is2.isWriteProtected);
   setMountedImageSetting(no2, is1.fileName, is1.isWriteProtected);
 }
+
 // Save drive visibility status //
 bool RespeqtSettings::saveDiskVis() {
-  return msaveDiskVis;
+  return mSettings->value("SaveDiskVisibility").toBool();
 }
 
 void RespeqtSettings::setsaveDiskVis(bool saveDvis) {
-  msaveDiskVis = saveDvis;
-  if (mSessionFileName == "")
-    mSettings->setValue("SaveDiskVisibility", msaveDiskVis);
+  mSettings->setValue("SaveDiskVisibility", saveDvis);
 }
 
 // Drive visibility status //
 bool RespeqtSettings::D9DOVisible() {
-  return mdVis;
+  return mSettings->value("D9DOVisible").toBool();
 }
 
 void RespeqtSettings::setD9DOVisible(bool dVis) {
-  mdVis = dVis;
-  if (mSessionFileName == "")
-    mSettings->setValue("D9DOVisible", mdVis);
+  mSettings->setValue("D9DOVisible", dVis);
 }
 // Shade Mode Enable //
 bool RespeqtSettings::enableShade() {
-  return mEnableShade;
+  return mSettings->value("EnableShadeByDefault").toBool();
 }
 
 void RespeqtSettings::setEnableShade(bool shade) {
-  mEnableShade = shade;
-  if (mSessionFileName == "")
-    mSettings->setValue("EnableShadeByDefault", mEnableShade);
+  mSettings->setValue("EnableShadeByDefault", shade);
 }
 
 // Use Large Font //
 bool RespeqtSettings::useLargeFont() {
-  return mUseLargeFont;
+  return mSettings->value("UseLargeFont").toBool();
 }
 
 void RespeqtSettings::setUseLargeFont(bool largeFont) {
-  mUseLargeFont = largeFont;
-  if (mSessionFileName == "")
-    mSettings->setValue("UseLargeFont", mUseLargeFont);
+  mSettings->setValue("UseLargeFont", largeFont);
 }
 
 // Explorer Window always on top
 bool RespeqtSettings::explorerOnTop() {
-  return mExplorerOnTop;
+  return mSettings->value("ExplorerOnTop").toBool();
 }
 
 void RespeqtSettings::setExplorerOnTop(bool expOnTop) {
-  mExplorerOnTop = expOnTop;
-  if (mSessionFileName == "")
-    mSettings->setValue("ExplorerOnTop", mExplorerOnTop);
+  mSettings->setValue("ExplorerOnTop", expOnTop);
 }
 
 // Save/return last main window position/size option //

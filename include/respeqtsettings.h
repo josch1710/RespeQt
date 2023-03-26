@@ -361,6 +361,7 @@ private:
   bool mUseCustomCasBaud;
   int mCustomCasBaud;
 
+  // TODO Vectors and Constant
   ImageSettings mMountedImageSettings[16];//
   PrinterSettings mPrinterSettings[PRINTER_COUNT];
 
