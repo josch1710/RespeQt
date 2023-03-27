@@ -20,7 +20,7 @@
    </sizepolicy>
   </property>
   <property name="windowIcon">
-   <iconset resource="icons.qrc">
+   <iconset resource="../resources/icons.qrc">
     <normaloff>:/icons/main-icon/RespeQt.ico</normaloff>:/icons/main-icon/RespeQt.ico</iconset>
   </property>
   <property name="styleSheet">
@@ -161,7 +161,7 @@
      <x>0</x>
      <y>0</y>
      <width>587</width>
-     <height>26</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Disk">
@@ -243,7 +243,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/silk-icons/icons/control_eject.png</normaloff>:/icons/silk-icons/icons/control_eject.png</iconset>
    </property>
    <property name="text">
@@ -261,7 +261,7 @@
   </action>
   <action name="actionOptions">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/other-icons/run.ico</normaloff>:/icons/other-icons/run.ico</iconset>
    </property>
    <property name="text">
@@ -285,7 +285,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/silk-icons/icons/disconnect.png</normaloff>
      <normalon>:/icons/silk-icons/icons/connect.png</normalon>:/icons/silk-icons/icons/disconnect.png</iconset>
    </property>
@@ -318,7 +318,7 @@
   </action>
   <action name="actionMountDisk">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/oxygen-icons/16x16/devices/3floppy_unmount.png</normaloff>:/icons/oxygen-icons/16x16/devices/3floppy_unmount.png</iconset>
    </property>
    <property name="text">
@@ -336,7 +336,7 @@
   </action>
   <action name="actionMountFolder">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
    </property>
    <property name="text">
@@ -354,7 +354,7 @@
   </action>
   <action name="actionNewImage">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/oxygen-icons/16x16/devices/media_floppy.png</normaloff>:/icons/oxygen-icons/16x16/devices/media_floppy.png</iconset>
    </property>
    <property name="text">
@@ -375,7 +375,7 @@
   </action>
   <action name="actionSaveSession">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/silk-icons/icons/monitor_go.png</normaloff>:/icons/silk-icons/icons/monitor_go.png</iconset>
    </property>
    <property name="text">
@@ -393,7 +393,7 @@
   </action>
   <action name="actionOpenSession">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/silk-icons/icons/monitor.png</normaloff>:/icons/silk-icons/icons/monitor.png</iconset>
    </property>
    <property name="text">
@@ -411,7 +411,7 @@
   </action>
   <action name="actionBootExe">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/other-icons/Atari.png</normaloff>:/icons/other-icons/Atari.png</iconset>
    </property>
    <property name="text">
@@ -438,7 +438,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/silk-icons/icons/drive_disk.png</normaloff>:/icons/silk-icons/icons/drive_disk.png</iconset>
    </property>
    <property name="text">
@@ -456,7 +456,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/oxygen-icons/16x16/devices/printer1.png</normaloff>:/icons/oxygen-icons/16x16/devices/printer1.png</iconset>
    </property>
    <property name="text">
@@ -474,7 +474,7 @@
   </action>
   <action name="actionPlaybackCassette">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/oxygen-icons/16x16/devices/media_tape.png</normaloff>:/icons/oxygen-icons/16x16/devices/media_tape.png</iconset>
    </property>
    <property name="text">
@@ -492,7 +492,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/oxygen-icons/16x16/actions/exit.png</normaloff>:/icons/oxygen-icons/16x16/actions/exit.png</iconset>
    </property>
    <property name="text">
@@ -507,7 +507,7 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/oxygen-icons/16x16/actions/help_about.png</normaloff>:/icons/oxygen-icons/16x16/actions/help_about.png</iconset>
    </property>
    <property name="text">
@@ -540,7 +540,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/oxygen-icons/16x16/actions/help_contents.png</normaloff>:/icons/oxygen-icons/16x16/actions/help_contents.png</iconset>
    </property>
    <property name="text">
@@ -558,7 +558,7 @@
   </action>
   <action name="actionDefaultImageGroup">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/oxygen-icons/16x16/actions/document_save_all.png</normaloff>:/icons/oxygen-icons/16x16/actions/document_save_all.png</iconset>
    </property>
    <property name="text">
@@ -573,7 +573,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/silk-icons/icons/printer.png</normaloff>:/icons/silk-icons/icons/printer.png</iconset>
    </property>
    <property name="text">
@@ -588,7 +588,7 @@
   </action>
   <action name="actionHideShowDrives">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/silk-icons/icons/drive_add.png</normaloff>:/icons/silk-icons/icons/drive_add.png</iconset>
    </property>
    <property name="text">
@@ -600,7 +600,7 @@
   </action>
   <action name="actionToggleMiniMode">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/other-icons/MiniCooper 22.ico</normaloff>:/icons/other-icons/MiniCooper 22.ico</iconset>
    </property>
    <property name="text">
@@ -615,7 +615,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/other-icons/fade.png</normaloff>:/icons/other-icons/fade.png</iconset>
    </property>
    <property name="text">
@@ -627,7 +627,7 @@
   </action>
   <action name="actionLogWindow">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/silk-icons/icons/page_white_text.png</normaloff>:/icons/silk-icons/icons/page_white_text.png</iconset>
    </property>
    <property name="text">
@@ -670,7 +670,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="icons.qrc"/>
+  <include location="../resources/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

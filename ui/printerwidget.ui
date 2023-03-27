@@ -152,7 +152,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/silk-icons/icons/control_eject.png</normaloff>:/icons/silk-icons/icons/control_eject.png</iconset>
    </property>
    <property name="text">
@@ -167,7 +167,7 @@
   </action>
   <action name="actionConnectPrinter">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../resources/icons.qrc">
      <normaloff>:/icons/oxygen-icons/16x16/devices/printer1.png</normaloff>:/icons/oxygen-icons/16x16/devices/printer1.png</iconset>
    </property>
    <property name="text">
@@ -179,7 +179,7 @@
   </action>
  </widget>
  <resources>
-  <include location="icons.qrc"/>
+  <include location="../resources/icons.qrc"/>
  </resources>
  <connections/>
 </ui>
