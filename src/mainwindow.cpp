@@ -1317,8 +1317,8 @@ void MainWindow::mountFileWithDefaultProtection(int no, const QString &fileName)
     }
   }
 
-  const RespeqtSettings::ImageSettings *imgSetting = RespeqtSettings::instance()->getImageSettingsFromName(atariFileName);
-  bool prot = (imgSetting != nullptr) && imgSetting->isWriteProtected;
+  const auto imgSetting{RespeqtSettings::instance()->getImageSettingsFromName(atariFileName)};
+  auto prot = (!imgSetting.fileName.isEmpty()) && imgSetting.isWriteProtected;
   mountFile(no, atariFileName, prot);
 }
 

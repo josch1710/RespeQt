@@ -15,6 +15,7 @@
 //#include "mainwindow.h"
 
 #include <memory>
+#include <QApplication>
 
 std::unique_ptr<RespeqtSettings> RespeqtSettings::sInstance;
 
@@ -23,148 +24,12 @@ RespeqtSettings::RespeqtSettings() {
 
   mIsFirstTime = mSettings->value("FirstTime", true).toBool();
   mSettings->setValue("FirstTime", false);
-
-  // Set Window Position/Size defaults //
-  mMainX = mSettings->value("MainX", 20).toInt();
-  mMainY = mSettings->value("MainY", 40).toInt();
-  mMainW = mSettings->value("MainW", 688).toInt();
-  mMainH = mSettings->value("MainH", 426).toInt();
-  mMiniX = mSettings->value("MiniX", 8).toInt();
-  mMiniY = mSettings->value("MiniY", 30).toInt();
-  mPrtX = mSettings->value("PrtX", 25).toInt();
-  mPrtY = mSettings->value("PrtY", 45).toInt();
-  mPrtW = mSettings->value("PrtW", 600).toInt();
-  mPrtH = mSettings->value("PrtH", 486).toInt();
-
-  /* Standard serial port backend */
-  mSerialPortName = mSettings->value("SerialPortName", StandardSerialPortBackend::defaultPortName()).toString();
-  /* old rergistry entries contain SERIAL_PORT_LOCATION at the front of the serial port name, so we skip them now */
-  if (mSerialPortName.startsWith(SERIAL_PORT_LOCATION, Qt::CaseInsensitive)) {
-    mSerialPortName.remove(0, strlen(SERIAL_PORT_LOCATION));
-  }
-  mSerialPortHandshakingMethod = mSettings->value("HandshakingMethod", 0).toInt();
-  mSerialPortTriggerOnFallingEdge = mSettings->value("FallingEdge", false).toBool();
-  mSerialPortDTRControlEnable = mSettings->value("DTRControlEnable", false).toBool();
-  mSerialPortWriteDelay = mSettings->value("WriteDelay", 1).toInt();
-#ifdef Q_OS_WIN
-  mSerialPortCompErrDelay = mSettings->value("CompErrDelay", 300).toInt();// default is 300us for windows
-#else
-  mSerialPortCompErrDelay = mSettings->value("CompErrDelay", 800).toInt();// default value of 800us works OK with FTDI USB on linux/OSX
-#endif
-  mSerialPortMaximumSpeed = mSettings->value("MaximumSerialPortSpeed", 2).toInt();
-  mSerialPortUsePokeyDivisors = mSettings->value("SerialPortUsePokeyDivisors", false).toBool();
-  mSerialPortPokeyDivisor = mSettings->value("SerialPortPokeyDivisor", 6).toInt();
-
-  /* AtariSIO backend */
-  mAtariSioDriverName = mSettings->value("AtariSioDriverName", AtariSioBackend::defaultPortName()).toString();
-  /* old rergistry entries contain SERIAL_PORT_LOCATION at the front of the serial port name, so we skip them now */
-  if (mAtariSioDriverName.startsWith(SERIAL_PORT_LOCATION, Qt::CaseInsensitive)) {
-    mAtariSioDriverName.remove(0, strlen(SERIAL_PORT_LOCATION));
-  }
-  mAtariSioHandshakingMethod = mSettings->value("AtariSioHandshakingMethod", 0).toInt();
-
-  mBackend = static_cast<SerialBackend>(mSettings->value("Backend", 0).toInt());
-  if (mBackend == SerialBackend::TEST) {
-    mBackend = SerialBackend::STANDARD;
-  }
-
-  mUseHighSpeedExeLoader = mSettings->value("UseHighSpeedExeLoader", false).toBool();
-  mPrinterEmulation = mSettings->value("PrinterEmulation", true).toBool();
-
-  mUseCustomCasBaud = mSettings->value("UseCustomCasBaud", false).toBool();
-  mCustomCasBaud = mSettings->value("CustomCasBaud", 875).toInt();
-
-  int i;
-
-  mSettings->beginReadArray("MountedImageSettings");
-
-  for (i = 0; i < 15; i++) {//
-    mSettings->setArrayIndex(i);
-    mMountedImageSettings[i].fileName = mSettings->value("FileName", QString()).toString();
-    mMountedImageSettings[i].isWriteProtected = mSettings->value("IsWriteProtected", false).toBool();
-  }
-  mSettings->endArray();
-
-  mSettings->beginReadArray("RecentImageSettings");
-  for (i = 0; i < NUM_RECENT_FILES; i++) {
-    mSettings->setArrayIndex(i);
-    mRecentImageSettings[i].fileName = mSettings->value("FileName", QString()).toString();
-    mRecentImageSettings[i].isWriteProtected = mSettings->value("IsWriteProtected", false).toBool();
-  }
-  mSettings->endArray();
-
-  mLastDiskImageDir = mSettings->value("LastDiskImageDir", "").toString();
-  mLastFolderImageDir = mSettings->value("LastFolderImageDir", "").toString();
-  mLastSessionDir = mSettings->value("LastSessionDir", "").toString();
-  mLastExeDir = mSettings->value("LastExeDir", "").toString();
-  mLastExtractDir = mSettings->value("LastExtractDir", "").toString();
-  mLastPrinterTextDir = mSettings->value("LastPrinterTextDir", "").toString();
-  mLastCasDir = mSettings->value("LastCasDir", "").toString();
-
-  mI18nLanguage = mSettings->value("I18nLanguage", "auto").toString();
-  mRclDir = mSettings->value("LastRclDir", "").toString();
-  mMinimizeToTray = mSettings->value("MinimizeToTray", false).toBool();
-  msaveWindowsPos = mSettings->value("SaveWindowsPosSize", true).toBool();
-  mFilterUnderscore = mSettings->value("FilterUnderscore", true).toBool();
-  mLimitFileEntries = mSettings->value("LimitFileEntries", true).toBool();
-  mUseCapitalLettersInPCLINK = mSettings->value("CapitalLettersInPCLINK", false).toBool();
-  mUseURLSubmit = mSettings->value("URLSubmit", false).toBool();
-  mSpyMode = mSettings->value("SpyMode", false).toBool();
-  mCommandName = mSettings->value("CommandName", false).toBool();
-  mTrackLayout = mSettings->value("TrackLayout", false).toBool();
-  msaveDiskVis = mSettings->value("SaveDiskVisibility", true).toBool();
-  mdVis = mSettings->value("D9DOVisible", true).toBool();
-  if (mMainW < 688 && mdVis) mMainW = 688;
-  if (mMainH < 426 && mdVis) mMainH = 426;
-  mUseLargeFont = mSettings->value("UseLargeFont", false).toBool();
-  mExplorerOnTop = mSettings->value("ExplorerOnTop", false).toBool();
-  mEnableShade = mSettings->value("EnableShadeByDefault", true).toBool();
-
-  // Printer specific settings
-  mAtariFixedFontName = mSettings->value("AtariFixedFontFamily", "Courier").toString();
-  mSettings->beginReadArray("ConnectedPrinterSettings");
-  for (i = 0; i < PRINTER_COUNT; i++) {
-    mSettings->setArrayIndex(i);
-    mPrinterSettings[i].printerName = mSettings->value("PrinterName", "").toString();
-    mPrinterSettings[i].outputName = mSettings->value("OutputName", "").toString();
-  }
-  mSettings->endArray();
-  mPrinterSpyMode = mSettings->value("PrinterSpyMode", false).toBool();
-  mDisplayGraphicsInstructions = mSettings->value("DisplayGraphicsInstructions", true).toBool();
-  mClearOnStatus = mSettings->value("ClearOnStatus", false).toBool();
-
-  mDisplayTransmission = mSettings->value("DisplayTransmission", false).toBool();
-  mDisplayDriveHead = mSettings->value("DisplayDriveHead", false).toBool();
-  mDisplayFdcCommands = mSettings->value("DisplayFdcCommands", false).toBool();
-  mDisplayIndexPulse = mSettings->value("DisplayIndexPulse", false).toBool();
-  mDisplayMotorOnOff = mSettings->value("DisplayMotorOnOff", false).toBool();
-  mDisplayIDAddressMarks = mSettings->value("DisplayIDAddressMarks", false).toBool();
-  mDisplayTrackInformation = mSettings->value("DisplayTrackInformation", false).toBool();
-  mDisassembleUploadedCode = mSettings->value("DisassembleUploadedCode", false).toBool();
-  mTranslatorAutomaticDetection = mSettings->value("TranslatorAutomaticDetection", false).toBool();
-  mTranslatorDiskImagePath = mSettings->value("TranslatorDiskImagePath", "").toString();
-  mSioAutoReconnect = mSettings->value("SioAutoReconnect", false).toBool();
-  mHideChipMode = mSettings->value("HideChipMode", false).toBool();
-  mHideHappyMode = mSettings->value("HideHappyMode", false).toBool();
-  mHideNextImage = mSettings->value("HideNextImage", false).toBool();
-  mHideOSBMode = mSettings->value("HideOSBMode", false).toBool();
-  mHideToolDisk = mSettings->value("HideToolDisk", false).toBool();
-  mToolDiskImagePath = mSettings->value("ToolDiskImagePath", "").toString();
-  mActivateChipModeWithTool = mSettings->value("ActivateChipModeWithTool", false).toBool();
-  mActivateHappyModeWithTool = mSettings->value("ActivateHappyModeWithTool", false).toBool();
-  mDisplayCpuInstructions = mSettings->value("DisplayCpuInstructions", false).toBool();
-  mTraceFilename = mSettings->value("TraceFilename", "").toString();
-  mDebugMenuVisible = mSettings->value("DebugMenuVisible", false).toBool();
-
-#ifdef Q_OS_MAC
-  mNativeMenu = mSettings->value("NativeMenu", false).toBool();
-#endif
-  mRawPrinterName = mSettings->value("RawPrinterName", "").toString();
 }
 
 RespeqtSettings::~RespeqtSettings() {
   delete mSettings;
 }
+
 // Get session file name from Mainwindow //
 void RespeqtSettings::setSessionFile(const QString &g_sessionFile, const QString &g_sessionFilePath) {
   mSessionFileName = g_sessionFile;
@@ -177,83 +42,83 @@ void RespeqtSettings::saveSessionToFile(const QString &fileName) {
   QSettings s(fileName, QSettings::IniFormat);
 
   s.beginGroup("RespeQt");
-  s.setValue("Backend", static_cast<int>(mBackend));
-  s.setValue("AtariSioDriverName", mAtariSioDriverName);
-  s.setValue("AtariSioHandshakingMethod", mAtariSioHandshakingMethod);
-  s.setValue("SerialPortName", mSerialPortName);
-  s.setValue("HandshakingMethod", mSerialPortHandshakingMethod);
-  s.setValue("FallingEdge", mSerialPortTriggerOnFallingEdge);
-  s.setValue("DTRControlEnable", mSerialPortDTRControlEnable);
-  s.setValue("WriteDelay", mSerialPortWriteDelay);
-  s.setValue("CompErrDelay", mSerialPortCompErrDelay);
-  s.setValue("MaximumSerialPortSpeed", mSerialPortMaximumSpeed);
-  s.setValue("SerialPortUsePokeyDivisors", mSerialPortUsePokeyDivisors);
-  s.setValue("SerialPortPokeyDivisor", mSerialPortPokeyDivisor);
-  s.setValue("UseHighSpeedExeLoader", mUseHighSpeedExeLoader);
-  s.setValue("PrinterEmulation", mPrinterEmulation);
-  s.setValue("CustomCasBaud", mCustomCasBaud);
-  s.setValue("UseCustomCasBaud", mUseCustomCasBaud);
-  s.setValue("I18nLanguage", mI18nLanguage);
-  s.setValue("SaveWindowsPosSize", msaveWindowsPos);
-  s.setValue("SaveDiskVisibility", msaveDiskVis);
-  s.setValue("D9DOVisible", mdVis);
+  s.setValue("Backend", static_cast<int>(backend()));
+  s.setValue("AtariSioDriverName", atariSioDriverName());
+  s.setValue("AtariSioHandshakingMethod", atariSioHandshakingMethod());
+  s.setValue("SerialPortName", serialPortName());
+  s.setValue("HandshakingMethod", serialPortHandshakingMethod());
+  s.setValue("FallingEdge", serialPortTriggerOnFallingEdge());
+  s.setValue("DTRControlEnable", serialPortDTRControlEnable());
+  s.setValue("WriteDelay", serialPortWriteDelay());
+  s.setValue("CompErrDelay", serialPortCompErrDelay());
+  s.setValue("MaximumSerialPortSpeed", serialPortMaximumSpeed());
+  s.setValue("SerialPortUsePokeyDivisors", serialPortUsePokeyDivisors());
+  s.setValue("SerialPortPokeyDivisor", serialPortPokeyDivisor());
+  s.setValue("UseHighSpeedExeLoader", useHighSpeedExeLoader());
+  s.setValue("PrinterEmulation", printerEmulation());
+  s.setValue("CustomCasBaud", customCasBaud());
+  s.setValue("UseCustomCasBaud", useCustomCasBaud());
+  s.setValue("I18nLanguage", i18nLanguage());
+  s.setValue("SaveWindowsPosSize", saveWindowsPos());
+  s.setValue("SaveDiskVisibility", saveDiskVis());
+  s.setValue("D9DOVisible", D9DOVisible());
   if (g_miniMode) {
-    s.setValue("MiniX", mMiniX);
-    s.setValue("MiniY", mMiniY);
+    s.setValue("MiniX", lastMiniHorizontalPos());
+    s.setValue("MiniY", lastMiniVerticalPos());
   } else {
-    s.setValue("MainX", mMainX);
-    s.setValue("MainY", mMainY);
-    s.setValue("MainW", mMainW);
-    s.setValue("MainH", mMainH);
+    s.setValue("MainX", lastHorizontalPos());
+    s.setValue("MainY", lastVerticalPos());
+    s.setValue("MainW", lastWidth());
+    s.setValue("MainH", lastHeight());
   }
-  s.setValue("PrtX", mPrtX);
-  s.setValue("PrtY", mPrtY);
-  s.setValue("PrtW", mPrtW);
-  s.setValue("PrtH", mPrtH);
-  s.setValue("FilterUnderscore", mFilterUnderscore);
-  s.setValue("LimitFileEntries", mLimitFileEntries);
-  s.setValue("CapitalLettersInPCLINK", mUseCapitalLettersInPCLINK);
-  s.setValue("URLSubmit", mUseURLSubmit);
-  s.setValue("SpyMode", mSpyMode);
-  s.setValue("CommandName", mCommandName);
-  s.setValue("TrackLayout", mTrackLayout);
-  s.setValue("UseLargeFont", mUseLargeFont);
-  s.setValue("ExplorerOnTop", mExplorerOnTop);
-  s.setValue("EnableShadeByDefault", mEnableShade);
-  s.setValue("PrinterSpyMode", mPrinterSpyMode);
-  s.setValue("DisplayGraphicsInstructions", mDisplayGraphicsInstructions);
-  s.setValue("ClearOnStatus", mClearOnStatus);
-  s.setValue("DisplayTransmission", mDisplayTransmission);
-  s.setValue("DisplayFdcCommands", mDisplayFdcCommands);
-  s.setValue("DisplayIndexPulse", mDisplayIndexPulse);
-  s.setValue("DisplayMotorOnOff", mDisplayMotorOnOff);
-  s.setValue("DisplayIDAddressMarks", mDisplayIDAddressMarks);
-  s.setValue("DisplayTrackInformation", mDisplayTrackInformation);
-  s.setValue("DisassembleUploadedCode", mDisassembleUploadedCode);
-  s.setValue("TranslatorAutomaticDetection", mTranslatorAutomaticDetection);
-  s.setValue("TranslatorDiskImagePath", mTranslatorDiskImagePath);
-  s.setValue("SioAutoReconnect", mSioAutoReconnect);
-  s.setValue("HideChipMode", mHideChipMode);
-  s.setValue("HideHappyMode", mHideHappyMode);
-  s.setValue("HideNextImage", mHideNextImage);
-  s.setValue("HideOSBMode", mHideOSBMode);
-  s.setValue("HideToolDisk", mHideToolDisk);
-  s.setValue("ToolDiskImagePath", mToolDiskImagePath);
-  s.setValue("ActivateChipModeWithTool", mActivateChipModeWithTool);
-  s.setValue("ActivateHappyModeWithTool", mActivateHappyModeWithTool);
-  s.setValue("DisplayCpuInstructions", mDisplayCpuInstructions);
-  s.setValue("TraceFilename", mTraceFilename);
-  s.setValue("RawPrinterName", mRawPrinterName);
-  s.setValue("LastRclDir", mRclDir);
-  s.setValue("DebugMenuVisible", mDebugMenuVisible);
+  s.setValue("PrtX", lastPrtHorizontalPos());
+  s.setValue("PrtY", lastPrtVerticalPos());
+  s.setValue("PrtW", lastPrtWidth());
+  s.setValue("PrtH", lastPrtHeight());
+  s.setValue("FilterUnderscore", filterUnderscore());
+  s.setValue("LimitFileEntries", limitFileEntries());
+  s.setValue("CapitalLettersInPCLINK", capitalLettersInPCLINK());
+  s.setValue("URLSubmit", isURLSubmitEnabled());
+  s.setValue("SpyMode", isSpyMode());
+  s.setValue("CommandName", isCommandName());
+  s.setValue("TrackLayout", isTrackLayout());
+  s.setValue("UseLargeFont", useLargeFont());
+  s.setValue("ExplorerOnTop", explorerOnTop());
+  s.setValue("EnableShadeByDefault", enableShade());
+  s.setValue("PrinterSpyMode", isPrinterSpyMode());
+  s.setValue("DisplayGraphicsInstructions", displayGraphicsInstructions());
+  s.setValue("ClearOnStatus", clearOnStatus());
+  s.setValue("DisplayTransmission", displayTransmission());
+  s.setValue("DisplayFdcCommands", displayFdcCommands());
+  s.setValue("DisplayIndexPulse", displayIndexPulse());
+  s.setValue("DisplayMotorOnOff", displayMotorOnOff());
+  s.setValue("DisplayIDAddressMarks", displayIDAddressMarks());
+  s.setValue("DisplayTrackInformation", displayTrackInformation());
+  s.setValue("DisassembleUploadedCode", disassembleUploadedCode());
+  s.setValue("TranslatorAutomaticDetection", translatorAutomaticDetection());
+  s.setValue("TranslatorDiskImagePath", translatorDiskImagePath());
+  s.setValue("SioAutoReconnect", sioAutoReconnect());
+  s.setValue("HideChipMode", hideChipMode());
+  s.setValue("HideHappyMode", hideHappyMode());
+  s.setValue("HideNextImage", hideNextImage());
+  s.setValue("HideOSBMode", hideOSBMode());
+  s.setValue("HideToolDisk", hideToolDisk());
+  s.setValue("ToolDiskImagePath", toolDiskImagePath());
+  s.setValue("ActivateChipModeWithTool", activateChipModeWithTool());
+  s.setValue("ActivateHappyModeWithTool", activateHappyModeWithTool());
+  s.setValue("DisplayCpuInstructions", displayCpuInstructions());
+  s.setValue("TraceFilename", traceFilename());
+  s.setValue("RawPrinterName", rawPrinterName());
+  s.setValue("LastRclDir", lastRclDir());
+  s.setValue("DebugMenuVisible", debugMenuVisible());
 #ifdef Q_OS_MAC
-  s.setValue("NativeMenu", mNativeMenu);
+  s.setValue("NativeMenu", nativeMenu());
 #endif
   s.endGroup();
   //
   s.beginWriteArray("MountedImageSettings");
-  for (int i = 0; i < 15; i++) {//
-    ImageSettings &is = mMountedImageSettings[i];
+  for (auto i = 0; i < 15; i++) {//
+    auto is = mountedImageSetting(i);
     s.setArrayIndex(i);
     s.setValue("FileName", is.fileName);
     s.setValue("IsWriteProtected", is.isWriteProtected);
@@ -261,104 +126,103 @@ void RespeqtSettings::saveSessionToFile(const QString &fileName) {
   s.endArray();
 
   s.beginWriteArray("ConnectedPrinterSettings");
-  for (int i = 0; i < PRINTER_COUNT; i++) {
-    PrinterSettings ps = mPrinterSettings[i];
+  for (auto i = 0; i < PRINTER_COUNT; i++) {
+    PrinterSettings ps = printerSettings(i);
     s.setArrayIndex(i);
     s.setValue("PrinterName", ps.printerName);
-    s.setValue("OutputName", ps.outputName);
   }
   s.endArray();
 }
+
 // Get all session related settings, so that a session could be fully restored //
 void RespeqtSettings::loadSessionFromFile(const QString &fileName) {
   QSettings s(fileName, QSettings::IniFormat);
   s.beginGroup("RespeQt");
-  mBackend = static_cast<SerialBackend>(s.value("Backend", 0).toInt());
-  mAtariSioDriverName = s.value("AtariSioDriverName", AtariSioBackend::defaultPortName()).toString();
-  mAtariSioHandshakingMethod = s.value("AtariSioHandshakingMethod", 0).toInt();
-  mSerialPortName = s.value("SerialPortName", StandardSerialPortBackend::defaultPortName()).toString();
-  mSerialPortHandshakingMethod = s.value("HandshakingMethod", 0).toInt();
-  mSerialPortTriggerOnFallingEdge = s.value("FallingEdge", false).toBool();
-  mRclDir = mSettings->value("LastRclDir", "").toString();
-  mSerialPortDTRControlEnable = s.value("DTRControlEnable", false).toBool();
-  mSerialPortWriteDelay = s.value("WriteDelay", 1).toInt();
-  mSerialPortCompErrDelay = s.value("CompErrDelay", 1).toInt();
-  mSerialPortMaximumSpeed = s.value("MaximumSerialPortSpeed", 2).toInt();
-  mSerialPortUsePokeyDivisors = s.value("SerialPortUsePokeyDivisors", false).toBool();
-  mSerialPortPokeyDivisor = s.value("SerialPortPokeyDivisor", 6).toInt();
-  mUseHighSpeedExeLoader = s.value("UseHighSpeedExeLoader", false).toBool();
-  mPrinterEmulation = s.value("PrinterEmulation", true).toBool();
-  mCustomCasBaud = s.value("CustomCasBaud", 875).toInt();
-  mUseCustomCasBaud = s.value("UseCustomCasBaud", false).toBool();
-  mI18nLanguage = s.value("I18nLanguage").toString();
-  msaveWindowsPos = s.value("SaveWindowsPosSize", true).toBool();
-  msaveDiskVis = s.value("SaveDiskVisibility", true).toBool();
-  mdVis = s.value("D9DOVisible", true).toBool();
-  mMainX = s.value("MainX", 20).toInt();
-  mMainY = s.value("MainY", 40).toInt();
-  mMainW = s.value("MainW", 688).toInt();
-  mMainH = s.value("MainH", 426).toInt();
-  if (mMainW < 688 && mdVis) mMainW = 688;
-  if (mMainH < 426 && mdVis) mMainH = 426;
-  mMiniX = s.value("MiniX", 8).toInt();
-  mMiniY = s.value("MiniY", 30).toInt();
-  mPrtX = s.value("PrtX", 20).toInt();
-  mPrtY = s.value("PrtY", 40).toInt();
-  mPrtW = s.value("PrtW", 600).toInt();
-  mPrtH = s.value("PrtH", 486).toInt();
-  mFilterUnderscore = s.value("FilterUnderscore", true).toBool();
-  mLimitFileEntries = s.value("LimitFileEntries", true).toBool();
-  mUseCapitalLettersInPCLINK = s.value("CapitalLettersInPCLINK", false).toBool();
-  mUseURLSubmit = s.value("URLSubmit", false).toBool();
-  mSpyMode = s.value("SpyMode", false).toBool();
-  mCommandName = s.value("CommandName", false).toBool();
-  mTrackLayout = s.value("TrackLayout", false).toBool();
-  mUseLargeFont = s.value("UseLargeFont", false).toBool();
-  mExplorerOnTop = s.value("ExplorerOnTop", false).toBool();
-  mEnableShade = s.value("EnableShadeByDefault", true).toBool();
-  mDisplayTransmission = s.value("DisplayTransmission", false).toBool();
-  mDisplayDriveHead = s.value("DisplayDriveHead", false).toBool();
-  mDisplayFdcCommands = s.value("DisplayFdcCommands", false).toBool();
-  mDisplayIndexPulse = s.value("DisplayIndexPulse", false).toBool();
-  mDisplayMotorOnOff = s.value("DisplayMotorOnOff", false).toBool();
-  mDisplayIDAddressMarks = s.value("DisplayIDAddressMarks", false).toBool();
-  mDisplayTrackInformation = s.value("DisplayTrackInformation", false).toBool();
-  mDisassembleUploadedCode = s.value("DisassembleUploadedCode", false).toBool();
-  mTranslatorAutomaticDetection = s.value("TranslatorAutomaticDetection", false).toBool();
-  mTranslatorDiskImagePath = s.value("TranslatorDiskImagePath", false).toString();
-  mSioAutoReconnect = s.value("SioAutoReconnect", false).toBool();
-  mHideChipMode = s.value("HideChipMode", false).toBool();
-  mHideHappyMode = s.value("HideHappyMode", false).toBool();
-  mHideNextImage = s.value("HideNextImage", false).toBool();
-  mHideOSBMode = s.value("HideOSBMode", false).toBool();
-  mHideToolDisk = s.value("HideToolDisk", false).toBool();
-  mToolDiskImagePath = s.value("ToolDiskImagePath", false).toString();
-  mActivateChipModeWithTool = s.value("ActivateChipModeWithTool", false).toBool();
-  mActivateHappyModeWithTool = s.value("ActivateHappyModeWithTool", false).toBool();
-  mDisplayCpuInstructions = s.value("DisplayCpuInstructions", false).toBool();
-  mTraceFilename = s.value("TraceFilename", false).toBool();
-  mRawPrinterName = s.value("RawPrinterName", "").toString();
-  mPrinterSpyMode = s.value("PrinterSpyMode", false).toBool();
-  mDisplayGraphicsInstructions = s.value("DisplayGraphicsInstructions", true).toBool();
-  mClearOnStatus = s.value("ClearOnStatus", false).toBool();
-  mDebugMenuVisible = s.value("DebugMenuVisible", false).toBool();
+  setBackend(static_cast<SerialBackend>(s.value("Backend", 0).toInt()));
+  setAtariSioDriverName(s.value("AtariSioDriverName", AtariSioBackend::defaultPortName()).toString());
+  setAtariSioHandshakingMethod(s.value("AtariSioHandshakingMethod", 0).toInt());
+  setSerialPortName(s.value("SerialPortName", StandardSerialPortBackend::defaultPortName()).toString());
+  setSerialPortHandshakingMethod(s.value("HandshakingMethod", 0).toInt());
+  setSerialPortTriggerOnFallingEdge(s.value("FallingEdge", false).toBool());
+  setRclDir(mSettings->value("LastRclDir", "").toString());
+  setSerialPortDTRControlEnable(s.value("DTRControlEnable", false).toBool());
+  setSerialPortWriteDelay(s.value("WriteDelay", 1).toInt());
+  setSerialPortCompErrDelay(s.value("CompErrDelay", 1).toInt());
+  setSerialPortMaximumSpeed(s.value("MaximumSerialPortSpeed", 2).toInt());
+  setSerialPortUsePokeyDivisors(s.value("SerialPortUsePokeyDivisors", false).toBool());
+  setSerialPortPokeyDivisor(s.value("SerialPortPokeyDivisor", 6).toInt());
+  setUseHighSpeedExeLoader(s.value("UseHighSpeedExeLoader", false).toBool());
+  setPrinterEmulation(s.value("PrinterEmulation", true).toBool());
+  setCustomCasBaud(s.value("CustomCasBaud", 875).toInt());
+  setUseCustomCasBaud(s.value("UseCustomCasBaud", false).toBool());
+  setI18nLanguage(s.value("I18nLanguage").toString());
+  setsaveWindowsPos(s.value("SaveWindowsPosSize", true).toBool());
+  setsaveDiskVis(s.value("SaveDiskVisibility", true).toBool());
+  setD9DOVisible(s.value("D9DOVisible", true).toBool());
+  setLastHorizontalPos(s.value("MainX", 20).toInt());
+  setLastVerticalPos(s.value("MainY", 40).toInt());
+  setLastWidth(s.value("MainW", 688).toInt());
+  setLastHeight(s.value("MainH", 426).toInt());
+  //if (mMainW < 688 && mdVis) mMainW = 688;
+  //if (mMainH < 426 && mdVis) mMainH = 426;
+  setLastMiniHorizontalPos(s.value("MiniX", 8).toInt());
+  setLastMiniVerticalPos(s.value("MiniY", 30).toInt());
+  setLastPrtHorizontalPos(s.value("PrtX", 20).toInt());
+  setLastPrtVerticalPos(s.value("PrtY", 40).toInt());
+  setLastPrtWidth(s.value("PrtW", 600).toInt());
+  setLastPrtHeight(s.value("PrtH", 486).toInt());
+  setfilterUnderscore(s.value("FilterUnderscore", true).toBool());
+  setlimitFileEntries(s.value("LimitFileEntries", true).toBool());
+  setCapitalLettersInPCLINK(s.value("CapitalLettersInPCLINK", false).toBool());
+  setURLSubmit(s.value("URLSubmit", false).toBool());
+  setSpyMode(s.value("SpyMode", false).toBool());
+  setCommandName(s.value("CommandName", false).toBool());
+  setTrackLayout(s.value("TrackLayout", false).toBool());
+  setUseLargeFont(s.value("UseLargeFont", false).toBool());
+  setExplorerOnTop(s.value("ExplorerOnTop", false).toBool());
+  setEnableShade(s.value("EnableShadeByDefault", true).toBool());
+  setDisplayTransmission(s.value("DisplayTransmission", false).toBool());
+  setDisplayDriveHead(s.value("DisplayDriveHead", false).toBool());
+  setDisplayFdcCommands(s.value("DisplayFdcCommands", false).toBool());
+  setDisplayIndexPulse(s.value("DisplayIndexPulse", false).toBool());
+  setDisplayMotorOnOff(s.value("DisplayMotorOnOff", false).toBool());
+  setDisplayIDAddressMarks(s.value("DisplayIDAddressMarks", false).toBool());
+  setDisplayTrackInformation(s.value("DisplayTrackInformation", false).toBool());
+  setDisassembleUploadedCode(s.value("DisassembleUploadedCode", false).toBool());
+  setTranslatorAutomaticDetection(s.value("TranslatorAutomaticDetection", false).toBool());
+  setTranslatorDiskImagePath(s.value("TranslatorDiskImagePath", false).toString());
+  setSioAutoReconnect(s.value("SioAutoReconnect", false).toBool());
+  setHideChipMode(s.value("HideChipMode", false).toBool());
+  setHideHappyMode(s.value("HideHappyMode", false).toBool());
+  setHideNextImage(s.value("HideNextImage", false).toBool());
+  setHideOSBMode(s.value("HideOSBMode", false).toBool());
+  setHideToolDisk(s.value("HideToolDisk", false).toBool());
+  setToolDiskImagePath(s.value("ToolDiskImagePath", false).toString());
+  setActivateChipModeWithTool(s.value("ActivateChipModeWithTool", false).toBool());
+  setActivateHappyModeWithTool(s.value("ActivateHappyModeWithTool", false).toBool());
+  setDisplayCpuInstructions(s.value("DisplayCpuInstructions", false).toBool());
+  setTraceFilename(s.value("TraceFilename", "").toString());
+  setRawPrinterName(s.value("RawPrinterName", "").toString());
+  setPrinterSpyMode(s.value("PrinterSpyMode", false).toBool());
+  setDisplayGraphicsInstructions(s.value("DisplayGraphicsInstructions", true).toBool());
+  setClearOnStatus(s.value("ClearOnStatus", false).toBool());
+  setDebugMenuVisible(s.value("DebugMenuVisible", false).toBool());
 
 #ifdef Q_OS_MAC
-  mNativeMenu = s.value("NativeMenu", false).toBool();
+  setNativeMenu(s.value("NativeMenu", false).toBool());
 #endif
   s.endGroup();
   //
   s.beginReadArray("MountedImageSettings");
-  for (int i = 0; i < 15; i++) {//
+  for (auto i = 0; i < 15; i++) {//
     s.setArrayIndex(i);
     setMountedImageSetting(i, s.value("FileName", "").toString(), s.value("IsWriteProtected", false).toBool());
   }
   s.endArray();
 
   s.beginReadArray("ConnectedPrinterSettings");
-  for (int i = 0; i < PRINTER_COUNT; i++) {
+  for (auto i = 0; i < PRINTER_COUNT; i++) {
     s.setArrayIndex(i);
-    setOutputName(i, s.value("OutputName", "").toString());
     setPrinterName(i, s.value("PrinterName", "").toString());
   }
 }
@@ -508,71 +372,98 @@ void RespeqtSettings::setCustomCasBaud(int baud) {
   mSettings->setValue("CustomCasBaud", baud);
 }
 
-// TODO References
-const RespeqtSettings::ImageSettings *RespeqtSettings::getImageSettingsFromName(const QString &fileName) {
-  for (int i = 0; i < 15; i++) {//
-    if (mMountedImageSettings[i].fileName == fileName) {
-      return &mMountedImageSettings[i];
+RespeqtSettings::ImageSettings RespeqtSettings::getImageSettingsFromName(const QString &fileName) {
+  mSettings->beginReadArray("MountedImageSettings");
+  for (int i = 0; i < 15; i++) {
+    mSettings->setArrayIndex(i);
+    if (mSettings->value("fileName").toString() == fileName) {
+      ImageSettings image;
+      image.fileName = mSettings->value("fileName").toString();
+      image.isWriteProtected = mSettings->value("isWriteProtected").toBool();
+      mSettings->endArray();
+      return image;
     }
   }
+  mSettings->endArray();
+
   // We didn't found anything in the list of mounted images
+  mSettings->beginReadArray("RecentImageSettings");
   for (int i = 0; i < NUM_RECENT_FILES; i++) {
-    if (mRecentImageSettings[i].fileName == fileName) {
-      return &mRecentImageSettings[i];
+    mSettings->setArrayIndex(i);
+    if (mSettings->value("fileName").toString() == fileName) {
+      ImageSettings image;
+      image.fileName = mSettings->value("fileName").toString();
+      image.isWriteProtected = mSettings->value("isWriteProtected").toBool();
+      mSettings->endArray();
+      return image;
     }
   }
+  mSettings->endArray();
 
-  return nullptr;
+  return ImageSettings{};
 }
 
-const RespeqtSettings::ImageSettings &RespeqtSettings::mountedImageSetting(int no) {
-  return mMountedImageSettings[no];
+RespeqtSettings::ImageSettings RespeqtSettings::mountedImageSetting(int no) {
+  return mSettings->value(QString("MountedImageSettings/%1").arg(no)).value<ImageSettings>();
 }
 
-const RespeqtSettings::ImageSettings &RespeqtSettings::recentImageSetting(int no) {
-  return mRecentImageSettings[no];
+RespeqtSettings::ImageSettings RespeqtSettings::recentImageSetting(int no) {
+  return mSettings->value(QString("RecentImageSettings/%1").arg(no)).value<ImageSettings>();
 }
 
 void RespeqtSettings::setMountedImageProtection(int no, bool prot) {
-  mSettings->setValue(QString("MountedImageSettings/%1/IsWriteProtected").arg(no + 1), prot);
+  mSettings->setValue(QString("MountedImageSettings/%1/IsWriteProtected").arg(no), prot);
 }
 
 void RespeqtSettings::setMountedImageSetting(int no, const QString &fileName, bool prot) {
-  mSettings->setValue(QString("MountedImageSettings/%1/FileName").arg(no + 1), fileName);
-  mSettings->setValue(QString("MountedImageSettings/%1/IsWriteProtected").arg(no + 1), prot);
+  mSettings->setValue(QString("MountedImageSettings/%1/FileName").arg(no), fileName);
+  mSettings->setValue(QString("MountedImageSettings/%1/IsWriteProtected").arg(no), prot);
 }
 
-// TODO Build stack?
 void RespeqtSettings::mountImage(int no, const QString &fileName, bool prot) {
   if (fileName.isEmpty()) {
     return;
   }
+
   int i;
   bool found = false;
+  mSettings->beginReadArray("RecentImageSettings");
   for (i = 0; i < NUM_RECENT_FILES; i++) {
-    if (mRecentImageSettings[i].fileName == fileName) {
+    mSettings->setArrayIndex(i);
+    if (mSettings->value("fileName").toString() == fileName) {
       found = true;
       break;
     }
   }
+  mSettings->endArray();
+
   if (found) {
+    mSettings->beginWriteArray("RecentImageSettings");
     for (int j = i; j < (NUM_RECENT_FILES - 1); j++) {
-      mRecentImageSettings[j] = mRecentImageSettings[j + 1];
+      mSettings->setArrayIndex(j);
+      auto image = mSettings->value(QString("RecentImageSettings/%1").arg(j + 1)).value<ImageSettings>();
+      // TODO
+      mSettings->setValue("FileName", image.fileName);
+      mSettings->setValue("IsWriteProtected", image.isWriteProtected);
     }
-    mRecentImageSettings[(NUM_RECENT_FILES - 1)].fileName = "";
-    writeRecentImageSettings();
+    mSettings->endArray();
+    mSettings->setValue(QString("RecentImageSettings/%1/FileName").arg(NUM_RECENT_FILES - 1), "");
   }
+
   setMountedImageSetting(no, fileName, prot);
 }
 
 void RespeqtSettings::unmountImage(int no) {
-  ImageSettings is = mMountedImageSettings[no];
+  auto is = mSettings->value(QString("MountedImageSettings/%1").arg(no)).value<ImageSettings>();
 
   for (int i = (NUM_RECENT_FILES - 1); i > 0; i--) {
-    mRecentImageSettings[i] = mRecentImageSettings[i - 1];
+    auto image = mSettings->value(QString("RecentImageSettings/%1").arg(no)).value<ImageSettings>();
+    mSettings->setValue(QString("RecentImageSettings/%1/FileName").arg(no), image.fileName);
+    mSettings->setValue(QString("RecentImageSettings/%1/IsWriteProtected").arg(no), image.isWriteProtected);
   }
-  mRecentImageSettings[0] = is;
-  writeRecentImageSettings();
+
+  mSettings->setValue("RecentImageSettings/0/FileName", is.fileName);
+  mSettings->setValue("RecentImageSettings/0/IsWriteProtected", is.isWriteProtected);
 
   setMountedImageSetting(no, "", false);
 }
@@ -630,563 +521,457 @@ void RespeqtSettings::setExplorerOnTop(bool expOnTop) {
 
 // Save/return last main window position/size option //
 bool RespeqtSettings::saveWindowsPos() {
-  return msaveWindowsPos;
+  return mSettings->value("SaveWindowsPosSize").toBool();
 }
 
 void RespeqtSettings::setsaveWindowsPos(bool saveMwp) {
-  msaveWindowsPos = saveMwp;
-  if (mSessionFileName == "")
-    mSettings->setValue("SaveWindowsPosSize", msaveWindowsPos);
+  mSettings->setValue("SaveWindowsPosSize", saveMwp);
 }
 // Last main window position/size (No Session File) //
 
 int RespeqtSettings::lastHorizontalPos() {
-  return mMainX;
+  return mSettings->value("MainX").toInt();
 }
 
 void RespeqtSettings::setLastHorizontalPos(int lastHpos) {
-  mMainX = lastHpos;
-  if (mSessionFileName == "")
-    mSettings->setValue("MainX", mMainX);
+  mSettings->setValue("MainX", lastHpos);
 }
+
 int RespeqtSettings::lastVerticalPos() {
-  return mMainY;
+  return mSettings->value("MainY").toInt();
 }
 
 void RespeqtSettings::setLastVerticalPos(int lastVpos) {
-  mMainY = lastVpos;
-  if (mSessionFileName == "")
-    mSettings->setValue("MainY", mMainY);
+  mSettings->setValue("MainY", lastVpos);
 }
 int RespeqtSettings::lastWidth() {
-  return mMainW;
+  return mSettings->value("MainW").toInt();
 }
 
 void RespeqtSettings::setLastWidth(int lastW) {
-  mMainW = lastW;
-  if (mSessionFileName == "")
-    mSettings->setValue("MainW", mMainW);
+  mSettings->setValue("MainW", lastW);
 }
+
 int RespeqtSettings::lastHeight() {
-  return mMainH;
+  return mSettings->value("MainH").toInt();
 }
 
 void RespeqtSettings::setLastHeight(int lastH) {
-  mMainH = lastH;
-  if (mSessionFileName == "")
-    mSettings->setValue("MainH", mMainH);
+  mSettings->setValue("MainH", lastH);
 }
-// Last mini window position (No Session File) //
 
+// Last mini window position (No Session File) //
 int RespeqtSettings::lastMiniHorizontalPos() {
-  return mMiniX;
+  return mSettings->value("MiniX").toInt();
 }
 
 void RespeqtSettings::setLastMiniHorizontalPos(int lastMHpos) {
-  mMiniX = lastMHpos;
-  if (mSessionFileName == "")
-    mSettings->setValue("MiniX", mMiniX);
+  mSettings->setValue("MiniX", lastMHpos);
 }
+
 int RespeqtSettings::lastMiniVerticalPos() {
-  return mMiniY;
+  return mSettings->value("MiniY").toInt();
 }
 
 void RespeqtSettings::setLastMiniVerticalPos(int lastMVpos) {
-  mMiniY = lastMVpos;
-  if (mSessionFileName == "")
-    mSettings->setValue("MiniY", mMiniY);
+  mSettings->setValue("MiniY", lastMVpos);
 }
 
 // Last print window position/size (No Session File) //
-
 int RespeqtSettings::lastPrtHorizontalPos() {
-  return mPrtX;
+  return mSettings->value("PrtX").toInt();
 }
 
 void RespeqtSettings::setLastPrtHorizontalPos(int lastPrtHpos) {
-  mPrtX = lastPrtHpos;
-  if (mSessionFileName == "")
-    mSettings->setValue("PrtX", mPrtX);
+  mSettings->setValue("PrtX", lastPrtHpos);
 }
+
 int RespeqtSettings::lastPrtVerticalPos() {
-  return mPrtY;
+  return mSettings->value("PrtY").toInt();
 }
 
 void RespeqtSettings::setLastPrtVerticalPos(int lastPrtVpos) {
-  mPrtY = lastPrtVpos;
-  if (mSessionFileName == "")
-    mSettings->setValue("PrtY", mPrtY);
+  mSettings->setValue("PrtY", lastPrtVpos);
 }
+
 int RespeqtSettings::lastPrtWidth() {
-  return mPrtW;
+  return mSettings->value("PrtW").toInt();
 }
 
 void RespeqtSettings::setLastPrtWidth(int lastPrtW) {
-  mPrtW = lastPrtW;
-  if (mSessionFileName == "")
-    mSettings->setValue("PrtW", mPrtW);
+  mSettings->setValue("PrtW", lastPrtW);
 }
+
 int RespeqtSettings::lastPrtHeight() {
-  return mPrtH;
+  return mSettings->value("PrtH").toInt();
 }
 
 void RespeqtSettings::setLastPrtHeight(int lastPrtH) {
-  mPrtH = lastPrtH;
-  if (mSessionFileName == "")
-    mSettings->setValue("PrtH", mPrtH);
+  mSettings->setValue("PrtH", lastPrtH);
 }
+
 QString RespeqtSettings::lastDiskImageDir() {
-  return mLastDiskImageDir;
+  return mSettings->value("LastDiskImageDir").toString();
 }
 
 void RespeqtSettings::setLastDiskImageDir(const QString &dir) {
-  mLastDiskImageDir = dir;
-  mSettings->setValue("LastDiskImageDir", mLastDiskImageDir);
+  mSettings->setValue("LastDiskImageDir", dir);
 }
 
 QString RespeqtSettings::lastFolderImageDir() {
-  return mLastFolderImageDir;
+  return mSettings->value("LastFolderImageDir").toString();
 }
 
 void RespeqtSettings::setLastFolderImageDir(const QString &dir) {
-  mLastFolderImageDir = dir;
-  mSettings->setValue("LastFolderImageDir", mLastFolderImageDir);
+  mSettings->setValue("LastFolderImageDir", dir);
 }
 
 QString RespeqtSettings::lastSessionDir() {
-  return mLastSessionDir;
+  return mSettings->value("LastSessionDir").toString();
 }
 
 void RespeqtSettings::setLastSessionDir(const QString &dir) {
-  mLastSessionDir = dir;
-  //    mSettings->setValue("LastSessionDir", mLastFolderImageDir);  //
-  mSettings->setValue("LastSessionDir", mLastSessionDir);
+  mSettings->setValue("LastSessionDir", dir);
 }
 
 QString RespeqtSettings::lastExeDir() {
-  return mLastExeDir;
+  return mSettings->value("LastExeDir").toString();
 }
 
 void RespeqtSettings::setLastExeDir(const QString &dir) {
-  mLastExeDir = dir;
-  mSettings->setValue("LastExeDir", mLastExeDir);
+  mSettings->setValue("LastExeDir", dir);
 }
 
 QString RespeqtSettings::lastExtractDir() {
-  return mLastExtractDir;
+  return mSettings->value("LastExtractDir").toString();
 }
 
 void RespeqtSettings::setLastExtractDir(const QString &dir) {
-  mLastExtractDir = dir;
-  mSettings->setValue("LastExtractDir", mLastExeDir);
+  mSettings->setValue("LastExtractDir", dir);
 }
 
 QString RespeqtSettings::lastPrinterTextDir() {
-  return mLastPrinterTextDir;
+  return mSettings->value("LastPrinterTextDir").toString();
 }
 
 void RespeqtSettings::setLastPrinterTextDir(const QString &dir) {
-  mLastPrinterTextDir = dir;
-  mSettings->setValue("LastPrinterTextDir", mLastPrinterTextDir);
+  mSettings->setValue("LastPrinterTextDir", dir);
 }
 
 QString RespeqtSettings::lastCasDir() {
-  return mLastCasDir;
+  return mSettings->value("LastCasDir").toString();
 }
 
 void RespeqtSettings::setLastCasDir(const QString &dir) {
-  mLastCasDir = dir;
-  mSettings->setValue("LastCasDir", mLastCasDir);
+  mSettings->setValue("LastCasDir", dir);
 }
 
 QString RespeqtSettings::i18nLanguage() {
-  return mI18nLanguage;
+  return mSettings->value("I18nLanguage").toString();
 }
 
 void RespeqtSettings::setI18nLanguage(const QString &lang) {
-
-  mI18nLanguage = lang;
-  if (mSessionFileName == "")
-    mSettings->setValue("I18nLanguage", mI18nLanguage);
+  mSettings->setValue("I18nLanguage", lang);
 }
 
 bool RespeqtSettings::minimizeToTray() {
-  return mMinimizeToTray;
+  return mSettings->value("MinimizeToTray").toBool();
 }
 
 void RespeqtSettings::setMinimizeToTray(bool tray) {
-  mMinimizeToTray = tray;
-  mSettings->setValue("MinimizeToTray", mMinimizeToTray);
+  mSettings->setValue("MinimizeToTray", tray);
 }
 
 bool RespeqtSettings::filterUnderscore() {
-  return mFilterUnderscore;
+  return mSettings->value("FilterUnderscore").toBool();
 }
 
 void RespeqtSettings::setfilterUnderscore(bool filter) {
-  mFilterUnderscore = filter;
-  mSettings->setValue("FilterUnderscore", mFilterUnderscore);
+  mSettings->setValue("FilterUnderscore", filter);
 }
 
 bool RespeqtSettings::limitFileEntries() {
-  return mLimitFileEntries;
+  return mSettings->value("LimitFileEntries").toBool();
 }
 
 void RespeqtSettings::setlimitFileEntries(bool limit) {
-  mLimitFileEntries = limit;
-  mSettings->setValue("LimitFileEntries", mLimitFileEntries);
+  mSettings->setValue("LimitFileEntries", limit);
 }
 
 bool RespeqtSettings::capitalLettersInPCLINK() {
-  return mUseCapitalLettersInPCLINK;
+  return mSettings->value("CapitalLettersInPCLINK").toBool();
 }
 
 void RespeqtSettings::setCapitalLettersInPCLINK(bool caps) {
-  mUseCapitalLettersInPCLINK = caps;
-  mSettings->setValue("CapitalLettersInPCLINK", mUseCapitalLettersInPCLINK);
+  mSettings->setValue("CapitalLettersInPCLINK", caps);
 }
 
 bool RespeqtSettings::isURLSubmitEnabled() {
-  return mUseURLSubmit;
+  return mSettings->value("URLSubmit").toBool();
 }
 
 void RespeqtSettings::setURLSubmit(bool enabled) {
-  mUseURLSubmit = enabled;
-  mSettings->setValue("URLSubmit", mUseURLSubmit);
+  mSettings->setValue("URLSubmit", enabled);
 }
 
 bool RespeqtSettings::isSpyMode() {
-  return mSpyMode;
+  return mSettings->value("SpyMode").toBool();
 }
 
 void RespeqtSettings::setSpyMode(bool enabled) {
-  mSpyMode = enabled;
-  mSettings->setValue("SpyMode", mSpyMode);
+  mSettings->setValue("SpyMode", enabled);
 }
 
 bool RespeqtSettings::isCommandName() {
-  return mCommandName;
+  return mSettings->value("CommandName").toBool();
 }
 
 void RespeqtSettings::setCommandName(bool enabled) {
-  mCommandName = enabled;
-  mSettings->setValue("CommandName", mCommandName);
+  mSettings->setValue("CommandName", enabled);
 }
 
 bool RespeqtSettings::isTrackLayout() {
-  return mTrackLayout;
+  return mSettings->value("TrackLayout").toBool();
 }
 
 void RespeqtSettings::setTrackLayout(bool enabled) {
-  mTrackLayout = enabled;
-  mSettings->setValue("TrackLayout", mTrackLayout);
-}
-
-void RespeqtSettings::writeRecentImageSettings() {
-  mSettings->beginWriteArray("RecentImageSettings");
-  for (int i = 0; i < NUM_RECENT_FILES; i++) {
-    mSettings->setArrayIndex(i);
-    mSettings->setValue("FileName", mRecentImageSettings[i].fileName);
-    mSettings->setValue("IsWriteProtected", mRecentImageSettings[i].isWriteProtected);
-  }
-  mSettings->endArray();
+  mSettings->setValue("TrackLayout", enabled);
 }
 
 void RespeqtSettings::setPrinterName(int no, const QString &printerName) {
-  mPrinterSettings[no].printerName = printerName;
-  if (mSessionFileName == "")
-    mSettings->setValue(QString("ConnectedPrinterSettings/%1/PrinterName").arg(no + 1), printerName);
+  mSettings->setValue(QString("ConnectedPrinterSettings/%1/PrinterName").arg(no), printerName);
 }
 
-const QString &RespeqtSettings::printerName(int no) const {
-  return mPrinterSettings[no].printerName;
+QString RespeqtSettings::printerName(int no) const {
+  return mSettings->value(QString("ConnectedPrinterSettings/%1/PrinterName").arg(no)).toString();
 }
 
-void RespeqtSettings::setOutputName(int no, const QString &outputName) {
-  mPrinterSettings[no].outputName = outputName;
-  if (mSessionFileName == "")
-    mSettings->setValue(QString("ConnectedPrinterSettings/%1/OutputName").arg(no + 1), outputName);
-}
-
-const QString &RespeqtSettings::outputName(int no) const {
-  return mPrinterSettings[no].outputName;
-}
-
-const RespeqtSettings::PrinterSettings &RespeqtSettings::printerSettings(int no) const {
-  return mPrinterSettings[no];
+RespeqtSettings::PrinterSettings RespeqtSettings::printerSettings(int no) const {
+  return mSettings->value(QString("ConnectedPrinterSettings/%1").arg(no)).value<RespeqtSettings::PrinterSettings>();
 }
 
 QString RespeqtSettings::atariFixedFontFamily() {
-  return mAtariFixedFontName;
+  return mSettings->value("AtariFixedFontFamily").toString();
 }
 
 void RespeqtSettings::setAtariFixedFontFamily(QString fontFamily) {
-  mAtariFixedFontName = fontFamily;
   mSettings->setValue("AtariFixedFontFamily", fontFamily);
 }
 
 bool RespeqtSettings::isPrinterSpyMode() {
-  return mPrinterSpyMode;
+  return mSettings->value("PrinterSpyMode").toBool();
 }
 
 void RespeqtSettings::setPrinterSpyMode(bool enabled) {
-  mPrinterSpyMode = enabled;
-  mSettings->setValue("PrinterSpyMode", mPrinterSpyMode);
+  mSettings->setValue("PrinterSpyMode", enabled);
 }
 
 bool RespeqtSettings::displayGraphicsInstructions() {
-  return mDisplayGraphicsInstructions;
+  return mSettings->value("DisplayGraphicsInstructions").toBool();
 }
 
 void RespeqtSettings::setDisplayGraphicsInstructions(bool enabled) {
-  mDisplayGraphicsInstructions = enabled;
-  mSettings->setValue("DisplayGraphicsInstructions", mDisplayGraphicsInstructions);
+  mSettings->setValue("DisplayGraphicsInstructions", enabled);
 }
 
 bool RespeqtSettings::clearOnStatus() {
-  return mClearOnStatus;
+  return mSettings->value("ClearOnStatus").toBool();
 }
 
 void RespeqtSettings::setClearOnStatus(bool enabled) {
-  mClearOnStatus = enabled;
-  mSettings->setValue("ClearOnStatus", mClearOnStatus);
+  mSettings->setValue("ClearOnStatus", enabled);
 }
 
 bool RespeqtSettings::displayTransmission() {
-  return mDisplayTransmission;
+  return mSettings->value("DisplayTransmission").toBool();
 }
 
 void RespeqtSettings::setDisplayTransmission(bool displayTransmission) {
-  mDisplayTransmission = displayTransmission;
-  if (mSessionFileName == "")
-    mSettings->setValue("DisplayTransmission", mDisplayTransmission);
+  mSettings->setValue("DisplayTransmission", displayTransmission);
 }
 
 bool RespeqtSettings::displayDriveHead() {
-  return mDisplayDriveHead;
+  return mSettings->value("DisplayDriveHead").toBool();
 }
 
 void RespeqtSettings::setDisplayDriveHead(bool displayDriveHead) {
-  mDisplayDriveHead = displayDriveHead;
-  if (mSessionFileName == "")
-    mSettings->setValue("DisplayDriveHead", mDisplayDriveHead);
+  mSettings->setValue("DisplayDriveHead", displayDriveHead);
 }
 
 bool RespeqtSettings::displayFdcCommands() {
-  return mDisplayFdcCommands;
+  return mSettings->value("displayFdcCommands").toBool();
 }
 
 void RespeqtSettings::setDisplayFdcCommands(bool displayFdcCommands) {
-  mDisplayFdcCommands = displayFdcCommands;
-  if (mSessionFileName == "")
-    mSettings->setValue("DisplayFdcCommands", mDisplayFdcCommands);
+  mSettings->setValue("DisplayFdcCommands", displayFdcCommands);
 }
 
 bool RespeqtSettings::displayIndexPulse() {
-  return mDisplayIndexPulse;
+  return mSettings->value("DisplayIndexPulse").toBool();
 }
 
 void RespeqtSettings::setDisplayIndexPulse(bool displayIndexPulse) {
-  mDisplayIndexPulse = displayIndexPulse;
-  if (mSessionFileName == "")
-    mSettings->setValue("DisplayIndexPulse", mDisplayIndexPulse);
+  mSettings->setValue("DisplayIndexPulse", displayIndexPulse);
 }
 
 bool RespeqtSettings::displayMotorOnOff() {
-  return mDisplayMotorOnOff;
+  return mSettings->value("DisplayMotorOnOff").toBool();
 }
 
 void RespeqtSettings::setDisplayMotorOnOff(bool displayMotorOnOff) {
-  mDisplayMotorOnOff = displayMotorOnOff;
-  if (mSessionFileName == "")
-    mSettings->setValue("DisplayMotorOnOff", mDisplayMotorOnOff);
+  mSettings->setValue("DisplayMotorOnOff", displayMotorOnOff);
 }
 
 bool RespeqtSettings::displayIDAddressMarks() {
-  return mDisplayIDAddressMarks;
+  return mSettings->value("DisplayIDAddressMarks").toBool();
 }
 
 void RespeqtSettings::setDisplayIDAddressMarks(bool displayIDAddressMarks) {
-  mDisplayIDAddressMarks = displayIDAddressMarks;
-  if (mSessionFileName == "")
-    mSettings->setValue("DisplayIDAddressMarks", mDisplayIDAddressMarks);
+  mSettings->setValue("DisplayIDAddressMarks", displayIDAddressMarks);
 }
 
 bool RespeqtSettings::displayTrackInformation() {
-  return mDisplayTrackInformation;
+  return mSettings->value("DisplayTrackInformation").toBool();
 }
 
 void RespeqtSettings::setDisplayTrackInformation(bool displayTrackInformation) {
-  mDisplayTrackInformation = displayTrackInformation;
-  if (mSessionFileName == "")
-    mSettings->setValue("DisplayTrackInformation", mDisplayTrackInformation);
+  mSettings->setValue("DisplayTrackInformation", displayTrackInformation);
 }
 
 bool RespeqtSettings::disassembleUploadedCode() {
-  return mDisassembleUploadedCode;
+  return mSettings->value("DisassembleUploadedCode").toBool();
 }
 
 void RespeqtSettings::setDisassembleUploadedCode(bool disassembleUploadedCode) {
-  mDisassembleUploadedCode = disassembleUploadedCode;
-  if (mSessionFileName == "")
-    mSettings->setValue("DisassembleUploadedCode", mDisassembleUploadedCode);
+  mSettings->setValue("DisassembleUploadedCode", disassembleUploadedCode);
 }
 
 bool RespeqtSettings::translatorAutomaticDetection() {
-  return mTranslatorAutomaticDetection;
+  return mSettings->value("TranslatorAutomaticDetection").toBool();
 }
 
 void RespeqtSettings::setTranslatorAutomaticDetection(bool translatorAutomaticDetection) {
-  mTranslatorAutomaticDetection = translatorAutomaticDetection;
-  if (mSessionFileName == "")
-    mSettings->setValue("TranslatorAutomaticDetection", mTranslatorAutomaticDetection);
+  mSettings->setValue("TranslatorAutomaticDetection", translatorAutomaticDetection);
 }
 
 bool RespeqtSettings::sioAutoReconnect() {
-  return mSioAutoReconnect;
+  return mSettings->value("SioAutoReconnect").toBool();
 }
 
 void RespeqtSettings::setSioAutoReconnect(bool sioAutoReconnect) {
-  mSioAutoReconnect = sioAutoReconnect;
-  if (mSessionFileName == "")
-    mSettings->setValue("SioAutoReconnect", mSioAutoReconnect);
+  mSettings->setValue("SioAutoReconnect", sioAutoReconnect);
 }
 
 bool RespeqtSettings::hideChipMode() {
-  return mHideChipMode;
+  return mSettings->value("HideChipMode").toBool();
 }
 
 void RespeqtSettings::setHideChipMode(bool hidden) {
-  mHideChipMode = hidden;
-  if (mSessionFileName == "")
-    mSettings->setValue("HideChipMode", mHideChipMode);
+  mSettings->setValue("HideChipMode", hidden);
 }
 
 bool RespeqtSettings::hideHappyMode() {
-  return mHideHappyMode;
+  return mSettings->value("HideHappyMode").toBool();
 }
 
 void RespeqtSettings::setHideHappyMode(bool hidden) {
-  mHideHappyMode = hidden;
-  if (mSessionFileName == "")
-    mSettings->setValue("HideHappyMode", mHideHappyMode);
+  mSettings->setValue("HideHappyMode", hidden);
 }
 
 bool RespeqtSettings::hideNextImage() {
-  return mHideNextImage;
+  return mSettings->value("HideNextImage").toBool();
 }
 
 void RespeqtSettings::setHideNextImage(bool hidden) {
-  mHideNextImage = hidden;
-  if (mSessionFileName == "")
-    mSettings->setValue("HideNextImage", mHideNextImage);
+  mSettings->setValue("HideNextImage", hidden);
 }
 
 bool RespeqtSettings::hideOSBMode() {
-  return mHideOSBMode;
+  return mSettings->value("HideOSBMode").toBool();
 }
 
 void RespeqtSettings::setHideOSBMode(bool hidden) {
-  mHideOSBMode = hidden;
-  if (mSessionFileName == "")
-    mSettings->setValue("HideOSBMode", mHideOSBMode);
+  mSettings->setValue("HideOSBMode", hidden);
 }
 
 bool RespeqtSettings::hideToolDisk() {
-  return mHideToolDisk;
+  return mSettings->value("HideToolDisk").toBool();
 }
 
 void RespeqtSettings::setHideToolDisk(bool hidden) {
-  mHideToolDisk = hidden;
-  if (mSessionFileName == "")
-    mSettings->setValue("HideToolDisk", mHideToolDisk);
+  mSettings->setValue("HideToolDisk", hidden);
 }
 
 QString RespeqtSettings::translatorDiskImagePath() {
-  return mTranslatorDiskImagePath;
+  return mSettings->value("TranslatorDiskImagePath").toString();
 }
 
 void RespeqtSettings::setTranslatorDiskImagePath(const QString &diskImage) {
-  mTranslatorDiskImagePath = diskImage;
-  if (mSessionFileName == "")
-    mSettings->setValue("TranslatorDiskImagePath", mTranslatorDiskImagePath);
+  mSettings->setValue("TranslatorDiskImagePath", diskImage);
 }
 
 QString RespeqtSettings::toolDiskImagePath() {
-  return mToolDiskImagePath;
+  return mSettings->value("ToolDiskImagePath").toString();
 }
 
 void RespeqtSettings::setToolDiskImagePath(const QString &diskImage) {
-  mToolDiskImagePath = diskImage;
-  if (mSessionFileName == "")
-    mSettings->setValue("ToolDiskImagePath", mToolDiskImagePath);
+  mSettings->setValue("ToolDiskImagePath", diskImage);
 }
 
 bool RespeqtSettings::activateChipModeWithTool() {
-  return mActivateChipModeWithTool;
+  return mSettings->value("ActivateChipModeWithTool").toBool();
 }
 
 void RespeqtSettings::setActivateChipModeWithTool(bool activate) {
-  mActivateChipModeWithTool = activate;
-  if (mSessionFileName == "")
-    mSettings->setValue("ActivateChipModeWithTool", mActivateChipModeWithTool);
+  mSettings->setValue("ActivateChipModeWithTool", activate);
 }
 
 bool RespeqtSettings::activateHappyModeWithTool() {
-  return mActivateHappyModeWithTool;
+  return mSettings->value("ActivateHappyModeWithTool").toBool();
 }
 
 void RespeqtSettings::setActivateHappyModeWithTool(bool activate) {
-  mActivateHappyModeWithTool = activate;
-  if (mSessionFileName == "")
-    mSettings->setValue("ActivateHappyModeWithTool", mActivateHappyModeWithTool);
+  mSettings->setValue("ActivateHappyModeWithTool", activate);
 }
 
 bool RespeqtSettings::displayCpuInstructions() {
-  return mDisplayCpuInstructions;
+  return mSettings->value("DisplayCpuInstructions").toBool();
 }
 
 void RespeqtSettings::setDisplayCpuInstructions(bool displayCpuInstructions) {
-  mDisplayCpuInstructions = displayCpuInstructions;
-  if (mSessionFileName == "")
-    mSettings->setValue("DisplayCpuInstructions", mDisplayCpuInstructions);
+  mSettings->setValue("DisplayCpuInstructions", displayCpuInstructions);
 }
 
 QString RespeqtSettings::traceFilename() {
-  return mTraceFilename;
+  return mSettings->value("TraceFilename").toString();
 }
 
 void RespeqtSettings::setTraceFilename(const QString &filename) {
-  mTraceFilename = filename;
-  if (mSessionFileName == "")
-    mSettings->setValue("TraceFilename", mTraceFilename);
+  mSettings->setValue("TraceFilename", filename);
 }
 
 #ifdef Q_OS_MAC
 void RespeqtSettings::setNativeMenu(bool nativeMenu) {
-  mNativeMenu = nativeMenu;
   mSettings->setValue("NativeMenu", nativeMenu);
 }
 
 bool RespeqtSettings::nativeMenu() {
-  return mNativeMenu;
+  return mSettings->value("NativeMenu").toBool();
 }
 #endif
 
 void RespeqtSettings::setRawPrinterName(const QString &name) {
-  mRawPrinterName = name;
   mSettings->setValue("RawPrinterName", name);
 }
 
 QString RespeqtSettings::rawPrinterName() const {
-  return mRawPrinterName;
+  return mSettings->value("RawPrinterName").toString();
 }
 
 bool RespeqtSettings::debugMenuVisible() const {
-  return mDebugMenuVisible;
+  return mSettings->value("DebugMenuVisible").toBool();
 }
 
 void RespeqtSettings::setDebugMenuVisible(bool menuVisible) {
-  mDebugMenuVisible = menuVisible;
-  mSettings->setValue("DebugMenuVisible", mDebugMenuVisible);
+  mSettings->setValue("DebugMenuVisible", menuVisible);
 }

@@ -187,10 +187,6 @@ void PrinterWidget::disconnectPrinter() {
   ui->actionConnectPrinter->setEnabled(true);
 }
 
-void PrinterWidget::outputSelectionChanged(const QString &outputName) {
-  RespeqtSettings::instance()->setOutputName(printerNo_, outputName);
-}
-
 void PrinterWidget::printerSelectionChanged(const QString &printerName) {
   RespeqtSettings::instance()->setPrinterName(printerNo_, printerName);
 }

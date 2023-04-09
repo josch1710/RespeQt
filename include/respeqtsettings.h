@@ -26,13 +26,12 @@ class RespeqtSettings final {
 public:
   class ImageSettings {
   public:
-    QString fileName;
-    bool isWriteProtected;
+    QString fileName{};
+    bool isWriteProtected{false};
   };
   class PrinterSettings {
   public:
-    QString printerName;
-    QString outputName;
+    QString printerName{};
   };
 
   ~RespeqtSettings();
@@ -87,13 +86,12 @@ public:
   int customCasBaud();
   void setCustomCasBaud(int baud);
 
-  const ImageSettings *getImageSettingsFromName(const QString &fileName);
-
-  const ImageSettings &mountedImageSetting(int no);
+  ImageSettings getImageSettingsFromName(const QString &fileName);
+  ImageSettings mountedImageSetting(int no);
+  ImageSettings recentImageSetting(int no);
 
   void setMountedImageSetting(int no, const QString &fileName, bool prot);
   void setMountedImageProtection(int no, bool prot);
-  const ImageSettings &recentImageSetting(int no);
 
   void mountImage(int no, const QString &fileName, bool prot);
 
@@ -239,11 +237,9 @@ public:
   void setClearOnStatus(bool enabled);
 
   // Methods for setting and getting the Printer emulation settings.
-  void setOutputName(int no, const QString &outputName);
-  const QString &outputName(int no) const;
   void setPrinterName(int no, const QString &printerInfo);
-  const QString &printerName(int no) const;
-  const PrinterSettings &printerSettings(int no) const;
+  QString printerName(int no) const;
+  PrinterSettings printerSettings(int no) const;
 
   QString atariFixedFontFamily();
   void setAtariFixedFontFamily(QString fontFamily);
@@ -313,14 +309,15 @@ private:
 
   static std::unique_ptr<RespeqtSettings> sInstance;
 
+public:
   QSettings *mSettings;
-
-  void writeRecentImageSettings();
+private:
+  //void writeRecentImageSettings();
 
   bool mIsFirstTime;
 
   // To pass values from Mainwindow //
-  int mMainX;
+  /*int mMainX;
   int mMainY;
   int mMainW;
   int mMainH;
@@ -333,12 +330,12 @@ private:
 
   bool msaveWindowsPos;
   bool msaveDiskVis;
-  bool mdVis;
+  bool mdVis; */
   QString mSessionFileName;
   QString mSessionFilePath;
   QString mMainWindowTitle;
   //
-  QString mSerialPortName;
+  /*QString mSerialPortName;
   int mSerialPortHandshakingMethod;
   bool mSerialPortTriggerOnFallingEdge;
   bool mSerialPortDTRControlEnable;
@@ -359,14 +356,14 @@ private:
   SerialBackend mBackend;
 
   bool mUseCustomCasBaud;
-  int mCustomCasBaud;
+  int mCustomCasBaud; */
 
   // TODO Vectors and Constant
-  ImageSettings mMountedImageSettings[16];//
+  //ImageSettings mMountedImageSettings[16];//
   PrinterSettings mPrinterSettings[PRINTER_COUNT];
 
-  ImageSettings mRecentImageSettings[NUM_RECENT_FILES];
-  QString mLastDiskImageDir;
+  //ImageSettings mRecentImageSettings[NUM_RECENT_FILES];
+  /*QString mLastDiskImageDir;
   QString mLastFolderImageDir;
   QString mLastSessionDir;
   QString mLastExeDir;
@@ -420,6 +417,10 @@ private:
   bool mNativeMenu;
 #endif
   QString mRawPrinterName;
+   */
 };
+
+Q_DECLARE_METATYPE(RespeqtSettings::PrinterSettings)
+Q_DECLARE_METATYPE(RespeqtSettings::ImageSettings)
 
 #endif// RESPEQTSETTINGS_H
