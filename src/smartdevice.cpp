@@ -59,7 +59,7 @@ void SmartDevice::handleCommand(const quint8 command, const quint8 aux1, const q
         }
 
         QByteArray data(aux, 0);
-        data = sio->port()->readDataFrame(aux);
+        data = sio->port()->readDataFrame(aux, false);
         if (data.isEmpty()) {
           qCritical() << "!e" << tr("[%1] Read data frame failed").arg(deviceName());
           sio->port()->writeDataNak();

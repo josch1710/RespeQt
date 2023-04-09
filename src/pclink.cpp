@@ -541,8 +541,7 @@ int PCLINK::check_dos_name(char *newpath, struct dirent *dp, struct stat *sb) {
   /* stat() the file (fetches the length) */
   snprintf(temp_fspec, 1024, "%s/%s", newpath, fname);
 
-  if (D)
-    qDebug() << "!n" << tr("%1: stat '%2'").arg(__extension__ __FUNCTION__).arg(dp->d_name);
+  if (D) qDebug() << "!n" << tr("%1: stat '%2'").arg(__extension__ __FUNCTION__).arg(dp->d_name);
 
   if (stat(temp_fspec, sb))
     return 1;
@@ -1001,7 +1000,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
 
     memset(&pbuf, 0, sizeof(PARBUF));
 
-    QByteArray data = sio->port()->readDataFrame(parsize);
+    QByteArray data = sio->port()->readDataFrame(parsize, false);
 
     device[cunit].status.stat &= ~0x02;
 
@@ -1196,7 +1195,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
 
     mem = (uchar *) malloc(blk_size);
 
-    QByteArray data = sio->port()->readDataFrame(blk_size);
+    QByteArray data = sio->port()->readDataFrame(blk_size, false);
 
     sio->port()->writeDataAck(); /* ack the block of data */
 

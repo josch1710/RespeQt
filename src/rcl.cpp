@@ -43,7 +43,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
       quint8 offset = aux1;
 
       if (!list) {
-        QByteArray ddata = sio->port()->readDataFrame(32);
+        QByteArray ddata = sio->port()->readDataFrame(32, false);
         if (ddata.isEmpty()) {
           qCritical() << "!e" << tr("[%1] Read data frame failed").arg(deviceName());
           sio->port()->writeDataNak();
@@ -254,7 +254,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
       }
       if (aux1 == 0 && aux2 == 0) {
         QByteArray data(len, 0);
-        data = sio->port()->readDataFrame(static_cast<uint>(len));
+        data = sio->port()->readDataFrame(static_cast<uint>(len), false);
 
         if (data.isEmpty()) {
           qCritical() << "!e" << tr("[%1] Read data frame failed").arg(deviceName());
@@ -474,7 +474,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
 
 
       QByteArray data(12, 0);
-      data = sio->port()->readDataFrame(12);
+      data = sio->port()->readDataFrame(12, false);
       if (data.isEmpty()) {
         qCritical() << "!e" << tr("[%1] Read data frame failed").arg(deviceName());
         sio->port()->writeDataNak();

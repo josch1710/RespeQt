@@ -68,7 +68,7 @@ private:
   PrinterWidget *printerWidgets[PRINTER_COUNT];//
   DriveWidget *diskWidgets[DISK_COUNT];        //
   // InfoWidget* infoWidget;
-  Tests::SioRecorder *mRecorder{nullptr};
+  SioRecorder *mRecorder{nullptr};
   QString mTestfile{};
 
   QLabel *speedLabel, *onOffLabel, *prtOnOffLabel, *netLabel, *clearMessagesLabel, *limitEntriesLabel;//

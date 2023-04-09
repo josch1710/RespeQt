@@ -3036,7 +3036,7 @@ bool SimpleDiskImage::writeError() {
 }
 
 QByteArray SimpleDiskImage::readDataFrame(uint size) {
-  QByteArray data = sio->port()->readDataFrame(size);
+  QByteArray data = sio->port()->readDataFrame(size, false);
   if (m_dumpDataFrame) {
     qDebug() << "!u" << tr("[%1] Receiving %2 bytes from Atari").arg(deviceName()).arg(data.length());
     dumpBuffer((unsigned char *) data.data(), data.length());

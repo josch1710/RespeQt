@@ -1927,7 +1927,7 @@ void MainWindow::connectUISignal() {
 
 void MainWindow::toggleSnapshotCapture(bool toggle) {
   if (sio) {
-    auto recorder = Tests::SioRecorder::instance();
+    auto recorder = SioRecorder::instance();
 
     if (!recorder->isSnapshotRunning()) {
       recorder->startSIOSnapshot();
@@ -1957,7 +1957,7 @@ void MainWindow::replaySnapshot() {
                                                tr("Save test Json File"), QString(), tr("Json Files (*.json)"));
   QFile file{fileName};
   file.open(QFile::ReadOnly);
-  auto recorder = Tests::SioRecorder::instance();
+  auto recorder = SioRecorder::instance();
   recorder->prepareReplaySnapshot(&file, RespeqtSettings::instance()->backend());
   file.close();
   // Now set SioRecorder to be the serial port and start the connection again.

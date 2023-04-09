@@ -82,7 +82,7 @@ void SioWorker::start(Priority p) {
       mPort = std::make_shared<AtariSioBackend>(this);
       break;
     case SerialBackend::TEST:
-      mPort = Tests::SioRecorder::instance();
+      mPort = SioRecorder::instance();
       break;
   }
 
@@ -674,7 +674,7 @@ void CassetteWorker::start(Priority p) {
       mPort = std::make_shared<AtariSioBackend>(this);
       break;
     case SerialBackend::TEST:
-      mPort = Tests::SioRecorder::instance();
+      mPort = SioRecorder::instance();
       break;
   }
   QThread::start(p);

@@ -40,7 +40,6 @@ public slots:
 
 private slots:
   void connectPrinter();
-  void outputSelectionChanged(const QString &outputName);
   void printerSelectionChanged(const QString &printerName);
 
 private:

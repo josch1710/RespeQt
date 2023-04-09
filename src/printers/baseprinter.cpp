@@ -68,7 +68,7 @@ namespace Printers {
             return;
           }
 
-          QByteArray data = readDataFrame(len);
+          QByteArray data = readDataFrame(len, false);
           if (data.isEmpty()) {
             qCritical() << "!e" << tr("[%1] Print: data frame failed").arg(deviceName());
             sio->port()->writeDataNak();
@@ -128,8 +128,8 @@ namespace Printers {
   }
 
 
-  QByteArray BasePrinter::readDataFrame(uint size) {
-    QByteArray data = sio->port()->readDataFrame(size);
+  QByteArray BasePrinter::readDataFrame(uint size, bool isCommandFrame, bool verbose) {
+    QByteArray data = sio->port()->readDataFrame(size, isCommandFrame, verbose);
     if (RespeqtSettings::instance()->isPrinterSpyMode()) {
       qDebug() << "!u" << tr("[%1] Receiving %2 bytes from Atari").arg(deviceName()).arg(data.length());
       dumpBuffer((unsigned char *) data.data(), data.length());

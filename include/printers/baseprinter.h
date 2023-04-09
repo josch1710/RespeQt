@@ -50,7 +50,7 @@ namespace Printers {
     //NativeOutputPtr mOutput;
     OutputWindowPtr mOutputWindow;
 
-    QByteArray readDataFrame(uint size);
+    QByteArray readDataFrame(uint size, bool isCommandFrame, bool verbose = true);
     bool writeDataFrame(QByteArray data);
     void dumpBuffer(unsigned char *buf, int len);
     void fillBuffer(char *line, unsigned char *buf, int len, int ofs, bool dumpAscii);

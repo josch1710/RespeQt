@@ -117,7 +117,7 @@ namespace Printers {
        * There is no possibility to send different buffer size.
        */
           unsigned int len = 40;// 1020 only support 40 bytes
-          QByteArray data = readDataFrame(len);
+          QByteArray data = readDataFrame(len, false);
           if (data.isEmpty()) {
             qCritical() << "!e"
                         << tr("[%1] Print: data frame failed").arg(deviceName());
