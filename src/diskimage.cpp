@@ -3090,7 +3090,7 @@ void SimpleDiskImage::fillBuffer(char *line, unsigned char *buf, int len, int of
           car[j] = ' ';
         }
       }
-      sprintf(line, "$%04X: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X | %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c",
+      snprintf(line, 75, "$%04X: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X | %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c",
               ofs & 0xFFFF, ((unsigned int) buf[ofs + 0]) & 0xFF, ((unsigned int) buf[ofs + 1]) & 0xFF,
               ((unsigned int) buf[ofs + 2]) & 0xFF, ((unsigned int) buf[ofs + 3]) & 0xFF, ((unsigned int) buf[ofs + 4]) & 0xFF,
               ((unsigned int) buf[ofs + 5]) & 0xFF, ((unsigned int) buf[ofs + 6]) & 0xFF, ((unsigned int) buf[ofs + 7]) & 0xFF,
@@ -3099,7 +3099,7 @@ void SimpleDiskImage::fillBuffer(char *line, unsigned char *buf, int len, int of
               ((unsigned int) buf[ofs + 14]) & 0xFF, ((unsigned int) buf[ofs + 15]) & 0xFF, car[0], car[1], car[2], car[3],
               car[4], car[5], car[6], car[7], car[8], car[9], car[10], car[11], car[12], car[13], car[14], car[15]);
     } else {
-      sprintf(line, "$%04X: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X",
+      snprintf(line, 55, "$%04X: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X",
               ofs & 0xFFFF, ((unsigned int) buf[ofs + 0]) & 0xFF, ((unsigned int) buf[ofs + 1]) & 0xFF,
               ((unsigned int) buf[ofs + 2]) & 0xFF, ((unsigned int) buf[ofs + 3]) & 0xFF, ((unsigned int) buf[ofs + 4]) & 0xFF,
               ((unsigned int) buf[ofs + 5]) & 0xFF, ((unsigned int) buf[ofs + 6]) & 0xFF, ((unsigned int) buf[ofs + 7]) & 0xFF,
@@ -3111,9 +3111,9 @@ void SimpleDiskImage::fillBuffer(char *line, unsigned char *buf, int len, int of
     int nbRemaining = len - ofs;
     memset(line, ' ', 73);
     line[73] = 0;
-    sprintf(line, "$%04X:", ofs);
+    snprintf(line, 6, "$%04X:", ofs);
     for (int i = 0; i < nbRemaining; i++) {
-      sprintf(&line[strlen(line)], " %02X", ((unsigned int) buf[ofs + i]) & 0xFF);
+      snprintf(&line[strlen(line)], 3, " %02X", ((unsigned int) buf[ofs + i]) & 0xFF);
     }
     if (dumpAscii) {
       for (int i = strlen(line); i < 54; i++) {

@@ -539,9 +539,10 @@ int PCLINK::check_dos_name(char *newpath, struct dirent *dp, struct stat *sb) {
     return 1;
 
   /* stat() the file (fetches the length) */
-  sprintf(temp_fspec, "%s/%s", newpath, fname);
+  snprintf(temp_fspec, 1024, "%s/%s", newpath, fname);
 
-  if (D) qDebug() << "!n" << tr("%1: stat '%2'").arg(__extension__ __FUNCTION__).arg(dp->d_name);
+  if (D)
+    qDebug() << "!n" << tr("%1: stat '%2'").arg(__extension__ __FUNCTION__).arg(dp->d_name);
 
   if (stat(temp_fspec, sb))
     return 1;
