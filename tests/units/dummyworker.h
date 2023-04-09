@@ -10,7 +10,6 @@ namespace Tests
     {
     public:
         DummyWorker(AbstractSerialPortBackend* port): SioWorker(port) {};
-        virtual ~DummyWorker() {}
 
         void uninstallDevice(quint8) override {};
     };

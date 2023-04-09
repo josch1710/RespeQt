@@ -11,7 +11,6 @@ namespace Tests {
         NullOutput() = default;
         virtual ~NullOutput() = default;
 
-        bool setupOutput() override { return true; }
         bool beginOutput() override { return true; }
         bool endOutput() override { return true; }
         void newPage(bool) override {}
