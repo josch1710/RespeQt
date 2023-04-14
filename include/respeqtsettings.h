@@ -29,10 +29,6 @@ public:
     QString fileName{};
     bool isWriteProtected{false};
   };
-  class PrinterSettings {
-  public:
-    QString printerName{};
-  };
 
   ~RespeqtSettings();
 
@@ -239,7 +235,6 @@ public:
   // Methods for setting and getting the Printer emulation settings.
   void setPrinterName(int no, const QString &printerInfo);
   QString printerName(int no) const;
-  PrinterSettings printerSettings(int no) const;
 
   QString atariFixedFontFamily();
   void setAtariFixedFontFamily(QString fontFamily);
@@ -312,115 +307,14 @@ private:
 public:
   QSettings *mSettings;
 private:
-  //void writeRecentImageSettings();
-
   bool mIsFirstTime;
 
-  // To pass values from Mainwindow //
-  /*int mMainX;
-  int mMainY;
-  int mMainW;
-  int mMainH;
-  int mMiniX;
-  int mMiniY;
-  int mPrtX;
-  int mPrtY;
-  int mPrtW;
-  int mPrtH;
-
-  bool msaveWindowsPos;
-  bool msaveDiskVis;
-  bool mdVis; */
   QString mSessionFileName;
   QString mSessionFilePath;
   QString mMainWindowTitle;
   //
-  /*QString mSerialPortName;
-  int mSerialPortHandshakingMethod;
-  bool mSerialPortTriggerOnFallingEdge;
-  bool mSerialPortDTRControlEnable;
-  int mSerialPortWriteDelay;
-  int mSerialPortCompErrDelay;
-  int mSerialPortMaximumSpeed;
-  bool mSerialPortUsePokeyDivisors;
-  int mSerialPortPokeyDivisor;
-
-  bool mUseHighSpeedExeLoader;
-  bool mPrinterEmulation;
-
-  QString mAtariSioDriverName;
-  int mAtariSioHandshakingMethod;
-
-  QString mRclDir;
-
-  SerialBackend mBackend;
-
-  bool mUseCustomCasBaud;
-  int mCustomCasBaud; */
-
-  // TODO Vectors and Constant
-  //ImageSettings mMountedImageSettings[16];//
-  PrinterSettings mPrinterSettings[PRINTER_COUNT];
-
-  //ImageSettings mRecentImageSettings[NUM_RECENT_FILES];
-  /*QString mLastDiskImageDir;
-  QString mLastFolderImageDir;
-  QString mLastSessionDir;
-  QString mLastExeDir;
-  QString mLastExtractDir;
-  QString mLastPrinterTextDir;
-  QString mLastCasDir;
-
-  QString mI18nLanguage;
-
-  QString mAtariFixedFontName;
-
-  bool mMinimizeToTray;
-  bool mFilterUnderscore;
-  bool mLimitFileEntries{true};
-  bool mUseCapitalLettersInPCLINK;
-  bool mUseURLSubmit;
-  bool mSpyMode;
-  bool mCommandName;
-  bool mTrackLayout;
-  bool mUseLargeFont;
-  bool mExplorerOnTop;
-  bool mEnableShade;
-  bool mPrinterSpyMode;
-  bool mDisplayGraphicsInstructions;
-  bool mClearOnStatus;
-
-  bool mDisplayTransmission;
-  bool mDisplayDriveHead;
-  bool mDisplayFdcCommands;
-  bool mDisplayIndexPulse;
-  bool mDisplayMotorOnOff;
-  bool mDisplayIDAddressMarks;
-  bool mDisplayTrackInformation;
-  bool mDisassembleUploadedCode;
-  bool mTranslatorAutomaticDetection;
-  QString mTranslatorDiskImagePath;
-  bool mSioAutoReconnect;
-  bool mHideChipMode;
-  bool mHideHappyMode;
-  bool mHideNextImage;
-  bool mHideOSBMode;
-  bool mHideToolDisk;
-  QString mToolDiskImagePath;
-  bool mActivateChipModeWithTool;
-  bool mActivateHappyModeWithTool;
-  bool mDisplayCpuInstructions;
-  QString mTraceFilename;
-  bool mDebugMenuVisible;
-
-#ifdef Q_OS_MAC
-  bool mNativeMenu;
-#endif
-  QString mRawPrinterName;
-   */
 };
 
-Q_DECLARE_METATYPE(RespeqtSettings::PrinterSettings)
 Q_DECLARE_METATYPE(RespeqtSettings::ImageSettings)
 
 #endif// RESPEQTSETTINGS_H

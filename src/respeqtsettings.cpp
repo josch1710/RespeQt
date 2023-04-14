@@ -127,9 +127,8 @@ void RespeqtSettings::saveSessionToFile(const QString &fileName) {
 
   s.beginWriteArray("ConnectedPrinterSettings");
   for (auto i = 0; i < PRINTER_COUNT; i++) {
-    PrinterSettings ps = printerSettings(i);
     s.setArrayIndex(i);
-    s.setValue("PrinterName", ps.printerName);
+    s.setValue("PrinterName", printerName(i));
   }
   s.endArray();
 }
@@ -744,10 +743,6 @@ void RespeqtSettings::setPrinterName(int no, const QString &printerName) {
 
 QString RespeqtSettings::printerName(int no) const {
   return mSettings->value(QString("ConnectedPrinterSettings/%1/PrinterName").arg(no)).toString();
-}
-
-RespeqtSettings::PrinterSettings RespeqtSettings::printerSettings(int no) const {
-  return mSettings->value(QString("ConnectedPrinterSettings/%1").arg(no)).value<RespeqtSettings::PrinterSettings>();
 }
 
 QString RespeqtSettings::atariFixedFontFamily() {

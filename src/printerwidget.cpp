@@ -15,6 +15,7 @@ PrinterWidget::PrinterWidget(int printerNum, QWidget *parent)
       ,
       mSio(nullptr) {
   ui->setupUi(this);
+  setup();
 
   // Connect the printer selection combobox
   void (QComboBox::*printerSignal)(const QString &) = &QComboBox::currentIndexChanged;
@@ -26,8 +27,6 @@ PrinterWidget::PrinterWidget(int printerNum, QWidget *parent)
   // Connect widget actions to buttons
   ui->buttonDisconnectPrinter->setDefaultAction(ui->actionDisconnectPrinter);
   ui->buttonConnectPrinter->setDefaultAction(ui->actionConnectPrinter);
-
-  setup();
 }
 
 PrinterWidget::~PrinterWidget() {
@@ -38,8 +37,6 @@ PrinterWidget::~PrinterWidget() {
 void PrinterWidget::setup() {
   QString printerTxt = QString("P%1").arg(printerNo_ + 1);
   ui->printerLabel->setText(printerTxt);
-
-  RespeqtSettings::PrinterSettings ps = RespeqtSettings::instance()->printerSettings(printerNo_);
 
   ui->atariPrinters->clear();
   std::map<QString, int> list;
@@ -53,8 +50,8 @@ void PrinterWidget::setup() {
 
   // Set to default (none) and then look whether we have a settings
   ui->atariPrinters->setCurrentIndex(0);
-  if (ps.printerName != "") {
-    int index = ui->atariPrinters->findText(ps.printerName);
+  if (RespeqtSettings::instance()->printerName(printerNo_) != "") {
+    int index = ui->atariPrinters->findText(RespeqtSettings::instance()->printerName(printerNo_));
     if (index != -1) {
       ui->atariPrinters->setCurrentIndex(index);
     }
@@ -95,46 +92,13 @@ bool PrinterWidget::selectPrinter() {
   return false;
 }
 
-/*bool PrinterWidget::selectOutput()
-{
-    if (ui->outputSelection->currentText() == tr("None"))
-    {
-        return false;
-    }
-    if (!mDevice.isNull())
-    {
-        mDevice.reset();
-    }
-
-    QString label = ui->outputSelection->currentText();
-    auto output = Printers::OutputFactory::instance()->createOutput(label);
-    // Try to cast to NativePrinter, if successful set printer name;
-    auto printoutput = qSharedPointerDynamicCast<Printers::NativePrinter>(output);
-    if (printoutput)
-        printoutput->printer()->setPrinterName(label);
-
-    if (output)
-    {
-        if (output->setupOutput())
-        {
-            mDevice = output;
-            RespeqtSettings::instance()->setOutputName(printerNo_, label);
-        }
-
-        return true;
-    }
-    return false;
-}*/
-
 void PrinterWidget::connectPrinter() {
-  if (/*ui->outputSelection->currentIndex() == 0
-            ||*/
-      ui->atariPrinters->currentIndex() == 0) {
+  if (ui->atariPrinters->currentIndex() == 0) {
     QMessageBox::warning(this, tr("Printers"), tr("Please select a printer emulation."));
     return;
   }
 
-  if (!selectPrinter() /* || !selectOutput()*/) {
+  if (!selectPrinter() ) {
     disconnectPrinter();
     return;
   }
