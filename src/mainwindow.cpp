@@ -417,7 +417,8 @@ void MainWindow::createDeviceWidgets() {
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event) {
-  auto slot{containingDiskSlot(event->pos())};
+  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+  auto slot = containingDiskSlot(event->pos());
 
   if (event->button() == Qt::LeftButton && slot >= 0) {
 
@@ -450,7 +451,8 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
-  auto i{containingDiskSlot(event->pos())};
+  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+  auto i= containingDiskSlot(event->pos());
   if (i >= 0 && (event->mimeData()->hasUrls() ||
                  event->mimeData()->hasFormat("application/x-respeqt-disk-image")))
     event->setDropAction(event->proposedAction());
@@ -472,7 +474,8 @@ void MainWindow::dragLeaveEvent(QDragLeaveEvent *event) {
 }
 
 void MainWindow::dragMoveEvent(QDragMoveEvent *event) {
-  auto i{containingDiskSlot(event->pos())};
+  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+  auto i= containingDiskSlot(event->pos());
   if (i >= 0 && (event->mimeData()->hasUrls() ||
                  event->mimeData()->hasFormat("application/x-respeqt-disk-image")))
     event->setDropAction(event->proposedAction());
@@ -494,7 +497,8 @@ void MainWindow::dropEvent(QDropEvent *event) {
   for (int j = 0; j < DISK_COUNT; j++) {//
     diskWidgets[j]->setFrameShadow(QFrame::Raised);
   }
-  auto slot{containingDiskSlot(event->pos())};
+  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+  auto slot= containingDiskSlot(event->pos());
   if (!(event->mimeData()->hasUrls() ||
         event->mimeData()->hasFormat("application/x-respeqt-disk-image")) ||
       slot < 0) {
@@ -1317,7 +1321,8 @@ void MainWindow::mountFileWithDefaultProtection(int no, const QString &fileName)
     }
   }
 
-  const auto imgSetting{RespeqtSettings::instance()->getImageSettingsFromName(atariFileName)};
+  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+  const auto imgSetting= RespeqtSettings::instance()->getImageSettingsFromName(atariFileName);
   auto prot = (!imgSetting.fileName.isEmpty()) && imgSetting.isWriteProtected;
   mountFile(no, atariFileName, prot);
 }
