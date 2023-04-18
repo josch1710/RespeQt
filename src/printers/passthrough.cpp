@@ -46,6 +46,7 @@ namespace Printers {
       }
     }
 
-    return output->sendBuffer(tempbuffer, static_cast<unsigned int>(tempbuffer.size()));
+    //return output->sendBuffer(tempbuffer, static_cast<unsigned int>(tempbuffer.size()));
+    return false;
   }
 }// namespace Printers

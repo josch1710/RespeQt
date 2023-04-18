@@ -3111,9 +3111,9 @@ void SimpleDiskImage::fillBuffer(char *line, unsigned char *buf, int len, int of
     int nbRemaining = len - ofs;
     memset(line, ' ', 73);
     line[73] = 0;
-    snprintf(line, 6, "$%04X:", ofs);
+    snprintf(line, 7, "$%04X:", ofs);
     for (int i = 0; i < nbRemaining; i++) {
-      snprintf(&line[strlen(line)], 3, " %02X", ((unsigned int) buf[ofs + i]) & 0xFF);
+      snprintf(&line[strlen(line)], 4, " %02X", ((unsigned int) buf[ofs + i]) & 0xFF);
     }
     if (dumpAscii) {
       for (int i = strlen(line); i < 54; i++) {
