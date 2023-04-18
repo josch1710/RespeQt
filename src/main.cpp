@@ -13,8 +13,10 @@
 #include <memory>
 
 #ifdef Q_OS_WIN
-#include <Mmsystem.h>
+// clang-format off
 #include <windows.h>
+#include <Mmsystem.h>
+// clang-format on
 #endif
 
 int main(int argc, char *argv[]) {

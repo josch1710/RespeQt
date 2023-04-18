@@ -35,7 +35,7 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif()
 # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -fno-omit-frame-pointer -stdlib=libc++")
-set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address")
+#set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address")
 
 set(SOURCES src/siorecorder.cpp src/mainwindow.cpp src/rcl.cpp src/sdxprotocol.cpp src/sioworker.cpp src/diskimagepro.cpp src/diskimageatx.cpp
         src/optionsdialog.cpp src/aboutdialog.cpp src/diskimage.cpp src/folderimage.cpp src/createimagedialog.cpp src/diskeditdialog.cpp
@@ -67,10 +67,15 @@ if (UNIX)
     set(SOURCES ${SOURCES} src/serialport-unix.cpp src/printers/rawoutput_cups.cpp)
     set(HEADERS ${HEADERS} include/serialport-unix.h)
 endif()
-if (WINDOWS)
-    set(SOURCES ${SOURCES} src/serialport-win32.cpp src/printers/rawoutput_win.cpp)
+if (WIN32)
+    set(CMAKE_RC_COMPILER_INIT windres)
+    ENABLE_LANGUAGE(RC)
+    SET(CMAKE_RC_COMPILE_OBJECT
+            "<CMAKE_RC_COMPILER> <FLAGS> -O coff <DEFINES> -i <SOURCE> -o <OBJECT>")
+    set(SOURCES ${SOURCES} src/serialport-win32.cpp src/printers/rawoutput_win.cpp
+            resources/RespeQt.rc)
     set(HEADERS ${HEADERS} include/serialport-win32.h)
-    set(RESOURCES ${RESOURCES} resources/RespeQt.rc)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE")
 endif()
 
 find_package(Qt5 5.0...<5.7 REQUIRED
@@ -119,6 +124,6 @@ endif()
 if (UNIX)
     target_link_libraries(${TARGET} z cups)
 endif()
-if (WINDOWS)
+if (WIN32)
     target_link_libraries(${TARGET} winmm z winspool)
 endif()
