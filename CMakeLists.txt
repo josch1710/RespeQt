@@ -35,7 +35,9 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif()
 # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -fno-omit-frame-pointer -stdlib=libc++")
-#set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address")
+if (NOT WIN32)
+    set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address -fno-omit-frame-pointer")
+endif()
 
 set(SOURCES src/siorecorder.cpp src/mainwindow.cpp src/rcl.cpp src/sdxprotocol.cpp src/sioworker.cpp src/diskimagepro.cpp src/diskimageatx.cpp
         src/optionsdialog.cpp src/aboutdialog.cpp src/diskimage.cpp src/folderimage.cpp src/createimagedialog.cpp src/diskeditdialog.cpp
