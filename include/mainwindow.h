@@ -49,7 +49,7 @@ class MainWindow : public QMainWindow {
 
 public:
   MainWindow();
-  ~MainWindow();
+  ~MainWindow() override;
   QString g_sessionFile;
   QString g_sessionFilePath;
   QString g_mainWindowTitle;
@@ -58,6 +58,7 @@ public:
   static MainWindow *instance() {
     return sInstance;
   }
+  void show(); // TODO Use events
 
 private:
   static MainWindow *sInstance;
@@ -68,7 +69,7 @@ private:
   PrinterWidget *printerWidgets[PRINTER_COUNT];//
   DriveWidget *diskWidgets[DISK_COUNT];        //
   // InfoWidget* infoWidget;
-  SioRecorder *mRecorder{nullptr};
+  //SioRecorder *mRecorder{nullptr};
   QString mTestfile{};
 
   QLabel *speedLabel, *onOffLabel, *prtOnOffLabel, *netLabel, *clearMessagesLabel, *limitEntriesLabel;//
@@ -89,31 +90,31 @@ private:
 
   void setSession();//
   void updateRecentFileActions();
-  int containingDiskSlot(const QPoint &point);
+  char containingDiskSlot(const QPoint &point);
   void bootExe(const QString &fileName);
-  void mountFile(int no, const QString &fileName, bool prot);
-  void mountDiskImage(int no);
-  void mountFolderImage(int no);
-  bool ejectImage(int no, bool ask = true);
-  void loadNextSide(int no);
-  void toggleHappy(int no, bool enabled);
-  void toggleChip(int no, bool open);
-  void toggleOSB(int no, bool open);
-  void toggleToolDisk(int no, bool open);
-  void toggleWriteProtection(int no, bool protectionEnabled);
+  void mountFile(char no, const QString &fileName, bool prot);
+  void mountDiskImage(char no);
+  void mountFolderImage(char no);
+  bool ejectImage(char no, bool ask = true);
+  void loadNextSide(char no);
+  void toggleHappy(char no, bool enabled);
+  void toggleChip(char no, bool open);
+  void toggleOSB(char no, bool open);
+  void toggleToolDisk(char no, bool open);
+  void toggleWriteProtection(char no, bool protectionEnabled);
   void updateHighSpeed();
 
-  void openEditor(int no);
-  void saveDisk(int no);
-  void saveDiskAs(int no);
-  void revertDisk(int no);
-  QMessageBox::StandardButton saveImageWhenClosing(int no, QMessageBox::StandardButton previousAnswer, int number);
+  void openEditor(char no);
+  void saveDisk(char no);
+  void saveDiskAs(char no);
+  void revertDisk(char no);
+  QMessageBox::StandardButton saveImageWhenClosing(char no, QMessageBox::StandardButton previousAnswer, int number);
   void loadTranslators();
-  void autoSaveDisk(int no);//
+  void autoSaveDisk(char no);//
   void setUpPrinterEmulationWidgets(bool enabled);
 
   void createDeviceWidgets();
-  SimpleDiskImage *installDiskImage(int no);
+  //SimpleDiskImage *installDiskImage(char no);
   void changeFonts();
   void connectUISignal();
   SimpleDiskImage *installDiskImage();
@@ -133,20 +134,23 @@ protected:
   bool eventFilter(QObject *obj, QEvent *event) override;
 
 signals:
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "NotImplementedFunctions"
+#pragma ide diagnostic ignored "NotUsedFunctions"
   void logMessage(int type, const QString &msg);
-  void newSlot(int slot);
+#pragma clang diagnostic pop
+  void newSlot(char slot);
   void fileMounted(bool mounted);
-  void sendLogText(QString logText);            //
-  void sendLogTextChange(QString logTextChange);//
-  void setFont(const QFont &font);              //
+  void sendLogText(QString logText);
+  void sendLogTextChange(QString logTextChange);
+  void fontChanged(const QFont &font);
 
 public slots:
-  void show();
-  int firstEmptyDiskSlot(int startFrom = 0, bool createOne = true);    //
-  void mountFileWithDefaultProtection(int no, const QString &fileName);//
-  void autoCommit(int no, bool st);                                    //
-  void happy(int no, bool st);                                         //
-  void chip(int no, bool st);                                          //
+  char firstEmptyDiskSlot(char startFrom = 0, bool createOne = true);    //
+  void mountFileWithDefaultProtection(char no, const QString &fileName);//
+  void autoCommit(char no, bool st);                                    //
+  void happy(char no, bool st);                                         //
+  void chip(char no, bool st);                                          //
   void bootExeTriggered(const QString &fileName);
   void toggleSnapshotCapture(bool toggle);
   void replaySnapshot();
@@ -171,20 +175,20 @@ private slots:
   void toggleLimitEntriesTriggered();
 
   // Device widget events
-  void mountDiskTriggered(int deviceId);                        //
-  void mountFolderTriggered(int deviceId);                      //
-  void ejectTriggered(int deviceId);                            //
-  void nextSideTriggered(int deviceId);                         //
-  void happyToggled(int deviceId, bool enabled);                //
-  void chipToggled(int deviceId, bool open);                    //
-  void OSBToggled(int deviceId, bool open);                     //
-  void toolDiskTriggered(int deviceId, bool open);              //
-  void protectTriggered(int deviceId, bool writeProtectEnabled);//
-  void editDiskTriggered(int deviceId);                         //
-  void saveTriggered(int deviceId);                             //
-  void autoSaveTriggered(int deviceId);                         //
-  void saveAsTriggered(int deviceId);                           // MIA
-  void revertTriggered(int deviceId);                           // MIA
+  void mountDiskTriggered(char no);                        //
+  void mountFolderTriggered(char no);                      //
+  void ejectTriggered(char no);                            //
+  void nextSideTriggered(char no);                         //
+  void happyToggled(char no, bool enabled);                //
+  void chipToggled(char no, bool open);                    //
+  void OSBToggled(char no, bool open);                     //
+  void toolDiskTriggered(char no, bool open);              //
+  void protectTriggered(char no, bool writeProtectEnabled);//
+  void editDiskTriggered(char no);                         //
+  void saveTriggered(char no);                             //
+  void autoSaveTriggered(char no);                         //
+  void saveAsTriggered(char no);                           // MIA
+  void revertTriggered(char no);                           // MIA
 
 
   void bootOptionTriggered();    //
@@ -195,14 +199,14 @@ private slots:
   void showHideDrives();                //
   void sioFinished();                   //
   void sioStarted();                    //
-  void sioStatusChanged(QString status);//
-  void textPrinterWindowClosed();
+  void sioStatusChanged(const QString &status);//
+  //void textPrinterWindowClosed();
   void docDisplayWindowClosed();         //
-  void deviceStatusChanged(int deviceNo);//
-  void uiMessage(int t, const QString message);
+  void deviceStatusChanged(unsigned char deviceNo);//
+  void uiMessage(int t, QString message);
   // TODO Check on Windows and Linux
   void trayIconActivated(QSystemTrayIcon::ActivationReason reason);//
-  void keepBootExeOpen();                                          // Signal AutoBootDialog::keepOpen MIA
+  //void keepBootExeOpen();                                          // Signal AutoBootDialog::keepOpen MIA
   void saveWindowGeometry();
   void saveMiniWindowGeometry();
   void logChanged(QString text);
