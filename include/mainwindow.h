@@ -55,10 +55,8 @@ public:
   QString g_mainWindowTitle;
   void doLogMessage(int type, const QString &msg);
   static void logMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
-  static MainWindow *instance() {
-    return sInstance;
-  }
-  void show(); // TODO Use events
+  static MainWindow *instance() { return sInstance; }
+  void showEvent(QShowEvent *event) override;
 
 private:
   static MainWindow *sInstance;
@@ -66,8 +64,8 @@ private:
   Ui::MainWindow *ui;
   SioWorkerPtr sio;
   bool shownFirstTime;
-  PrinterWidget *printerWidgets[PRINTER_COUNT];//
-  DriveWidget *diskWidgets[DISK_COUNT];        //
+  std::vector<PrinterWidget *> printerWidgets{PRINTER_COUNT, nullptr};
+  std::vector<DriveWidget *> diskWidgets{DISK_COUNT, nullptr};
   // InfoWidget* infoWidget;
   //SioRecorder *mRecorder{nullptr};
   QString mTestfile{};
@@ -146,7 +144,7 @@ signals:
   void fontChanged(const QFont &font);
 
 public slots:
-  char firstEmptyDiskSlot(char startFrom = 0, bool createOne = true);    //
+  char firstEmptyDiskSlot(char startFrom = 0, bool createOne = true);   //
   void mountFileWithDefaultProtection(char no, const QString &fileName);//
   void autoCommit(char no, bool st);                                    //
   void happy(char no, bool st);                                         //
@@ -196,12 +194,12 @@ private slots:
   void toggleShadeTriggered();   //
   void showLogWindowTriggered(); //
 
-  void showHideDrives();                //
-  void sioFinished();                   //
-  void sioStarted();                    //
+  void showHideDrives();                       //
+  void sioFinished();                          //
+  void sioStarted();                           //
   void sioStatusChanged(const QString &status);//
   //void textPrinterWindowClosed();
-  void docDisplayWindowClosed();         //
+  void docDisplayWindowClosed();                   //
   void deviceStatusChanged(unsigned char deviceNo);//
   void uiMessage(int t, QString message);
   // TODO Check on Windows and Linux

@@ -20,7 +20,7 @@ class RCl : public SioDevice {
 public:
   QString g_fileFilter;
   RCl(SioWorkerPtr worker) : SioDevice(worker), mutex() {}
-  void handleCommand(quint8 command, const quint8 aux1, const quint8 aux2) override;
+  void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) override;
   QString toAtariFileName(QString dosFileName);
   QString toDosFileName(QString atariFileName);
 

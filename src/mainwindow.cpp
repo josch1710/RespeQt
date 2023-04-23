@@ -410,7 +410,7 @@ void MainWindow::createDeviceWidgets() {
     connect(this, &MainWindow::fontChanged, driveWidget, &DriveWidget::setFont);
   }
 
-  for (int i = 0; i < PRINTER_COUNT; i++) {//
+  for(int i = 0; i < PRINTER_COUNT; i++) {//
     auto printerWidget = new PrinterWidget(i);
     if (i < 2) {
       ui->leftColumn2->addWidget(printerWidget);
@@ -673,9 +673,9 @@ void MainWindow::hideEvent(QHideEvent *event) {
   QMainWindow::hideEvent(event);
 }
 
-void MainWindow::show() {
-  QMainWindow::show();
-  if (shownFirstTime) {
+void MainWindow::showEvent(QShowEvent *event) {
+
+  if (event->type() == QEvent::Show && shownFirstTime) {
     shownFirstTime = false;// Reset the flag
 
     /* Open options dialog if it's the first time */
@@ -691,6 +691,7 @@ void MainWindow::show() {
 
     ui->actionStartEmulation->trigger();
   }
+  QMainWindow::showEvent(event);
 }
 
 void MainWindow::enterEvent(QEvent *) {
@@ -721,7 +722,7 @@ void MainWindow::showLogWindowTriggered() {
     w = geometry().width();
     h = geometry().height();
     if (!g_miniMode) {
-      logWindow_->setGeometry(x + w / 1.9, y + 30, logWindow_->geometry().width(), geometry().height());
+      logWindow_->setGeometry(static_cast<int>(x + w / 1.9), y + 30, logWindow_->geometry().width(), geometry().height());
     } else {
       logWindow_->setGeometry(x + 20, y + 60, w, h * 2);
     }
@@ -896,8 +897,8 @@ void MainWindow::sioStarted() {
   onOffLabel->setPixmap(ui->actionStartEmulation->icon().pixmap(16, QIcon::Normal, QIcon::On));
   onOffLabel->setToolTip(ui->actionStartEmulation->toolTip());
   onOffLabel->setStatusTip(ui->actionStartEmulation->statusTip());
-  for (int i = 0; i < PRINTER_COUNT; i++) {
-    printerWidgets[i]->setSioWorker(sio);
+  for (auto pwidget: printerWidgets) {
+    pwidget->setSioWorker(sio);
   }
 }
 

@@ -248,7 +248,7 @@ public:
   inline Board *getBoardInfo() { return m_board.getCopy(); }
   inline void setBoardInfo(Board *info) { m_board.setFromCopy(info); }
 
-  void handleCommand(quint8 command, quint8 aux8, quint8 aux2) override;
+  void handleCommand(const quint8 command, quint8 aux8, quint8 aux2) override;
   virtual bool format(const DiskGeometry &geo);
   virtual bool readHappySectorAtPosition(int trackNumber, int sectorNumber, int afterSectorNumber, int &index, QByteArray &data);
   virtual bool readHappySkewAlignment(bool happy1050);

@@ -32,11 +32,8 @@ enum SIO_CDEVIC : quint8 {
   PCLINK_CDEVIC = 0x6F
 };
 
-enum SIO_DEVICE_COUNT : quint8 {
-  DISK_COUNT = 15,
-  PRINTER_COUNT = 4,
-  RS232_COUNT = 4
-};
+const quint8 DISK_COUNT = 15;
+const quint8 PRINTER_COUNT = 4;
 
 class SioWorker;
 using SioWorkerPtr = QSharedPointer<SioWorker>;
@@ -50,8 +47,8 @@ protected:
   SioWorkerPtr sio;
 
 public:
-  SioDevice(SioWorkerPtr worker);
-  virtual ~SioDevice();
+  explicit SioDevice(SioWorkerPtr worker);
+  ~SioDevice() override;
   virtual void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) = 0;
   virtual QString deviceName();
   inline void lock() { mLock.lock(); }
