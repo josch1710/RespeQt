@@ -19,11 +19,11 @@ class AboutDialog : public QDialog {
   Q_OBJECT
 
 public:
-  AboutDialog(QWidget *parent, QString version);
-  ~AboutDialog();
+  AboutDialog(QWidget *parent, const QString &version);
+  ~AboutDialog() override;
 
 protected:
-  void changeEvent(QEvent *e);
+  void changeEvent(QEvent *e) override;
 
 private:
   Ui::AboutDialog *m_ui;

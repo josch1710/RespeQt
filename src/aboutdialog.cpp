@@ -9,8 +9,9 @@
 #include "aboutdialog.h"
 #include "ui_aboutdialog.h"
 
-AboutDialog::AboutDialog(QWidget *parent, QString version) : QDialog(parent),
-                                                             m_ui(new Ui::AboutDialog) {
+AboutDialog::AboutDialog(QWidget *parent, const QString &version)
+    : QDialog(parent),
+      m_ui(new Ui::AboutDialog) {
   Qt::WindowFlags flags = windowFlags();
   flags = flags & (~Qt::WindowContextHelpButtonHint);
   setWindowFlags(flags);
@@ -38,6 +39,9 @@ void AboutDialog::changeEvent(QEvent *e) {
   }
 }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "readability-convert-member-functions-to-static"
 void AboutDialog::showAboutQt() {
   QApplication::aboutQt();
 }
+#pragma clang diagnostic pop

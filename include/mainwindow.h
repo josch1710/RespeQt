@@ -64,8 +64,8 @@ private:
   Ui::MainWindow *ui;
   SioWorkerPtr sio;
   bool shownFirstTime;
-  std::vector<PrinterWidget *> printerWidgets{PRINTER_COUNT, nullptr};
-  std::vector<DriveWidget *> diskWidgets{DISK_COUNT, nullptr};
+  std::vector<PrinterWidget *> printerWidgets{PRINTER_COUNT};
+  std::vector<DriveWidget *> diskWidgets{DISK_COUNT};
   // InfoWidget* infoWidget;
   //SioRecorder *mRecorder{nullptr};
   QString mTestfile{};

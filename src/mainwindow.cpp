@@ -389,7 +389,7 @@ void MainWindow::createDeviceWidgets() {
     }
 
     driveWidget->setup(RespeqtSettings::instance()->hideHappyMode(), RespeqtSettings::instance()->hideChipMode(), RespeqtSettings::instance()->hideNextImage(), RespeqtSettings::instance()->hideOSBMode(), RespeqtSettings::instance()->hideToolDisk());
-    diskWidgets[i] = driveWidget;
+    diskWidgets.push_back(driveWidget);
 
     // connect signals to slots
     connect(driveWidget, &DriveWidget::actionMountDisk, this, &MainWindow::mountDiskTriggered);
@@ -417,7 +417,7 @@ void MainWindow::createDeviceWidgets() {
     } else {
       ui->rightColumn2->addWidget(printerWidget);
     }
-    printerWidgets[i] = printerWidget;
+    printerWidgets.push_back(printerWidget);
   }
 
   changeFonts();

@@ -3,7 +3,7 @@
 
 AtasciiInternational::AtasciiInternational()
     : Atascii() {
-  AtasciiInternational::initMapping();
+  initMapping();
 }
 
 void AtasciiInternational::initMapping() {
