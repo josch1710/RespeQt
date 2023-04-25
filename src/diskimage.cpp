@@ -13,8 +13,8 @@
 #include "diskimage.h"
 #include "zlib.h"
 
-#include "atarifilesystem.h"
 #include "diskeditdialog.h"
+#include "filesystems/atarifilesystem.h"
 #include "respeqtsettings.h"
 #include <QDir>
 #include <QFileInfo>

@@ -20,7 +20,7 @@ namespace Ui {
 #include <QItemSelection>
 #include <QMimeData>
 
-#include "atarifilesystem.h"
+#include "filesystems/atarifilesystem.h"
 
 class FileModel : public QAbstractTableModel {
   Q_OBJECT
@@ -28,8 +28,8 @@ class FileModel : public QAbstractTableModel {
 public:
   FileModel(QObject *parent);
   ~FileModel();
-  QList<AtariDirEntry> entries;
-  AtariFileSystem *fileSystem;
+  QList<Filesystems::AtariDirEntry> entries;
+  Filesystems::AtariFileSystem *fileSystem;
   Qt::ItemFlags flags(const QModelIndex &index) const;
   QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
   bool setData(const QModelIndex &index, const QVariant &value, int role);
@@ -41,7 +41,7 @@ public:
   void setDirectory(int row);
   void toParent();
   void setRoot();
-  void setFileSystem(AtariFileSystem *aFileSystem);
+  void setFileSystem(Filesystems::AtariFileSystem *aFileSystem);
   QMimeData *mimeData(const QModelIndexList &indexes) const;
   QStringList mimeTypes() const;
   void insertFiles(QStringList names);

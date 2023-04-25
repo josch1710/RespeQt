@@ -57,7 +57,7 @@
 #include <memory>
 #include <typeinfo>
 
-#include "atarifilesystem.h"
+#include "filesystems/atarifilesystem.h"
 #include "miscutils.h"
 
 #include <QFontDatabase>
