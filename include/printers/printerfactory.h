@@ -47,10 +47,6 @@ namespace Printers {
       throw new std::invalid_argument("Unknown printer label given.");
     }
 
-    int numRegisteredPrinters() const {
-      return creatorFunctions.size();
-    }
-
     const QVector<QString> getPrinterNames() const {
       QVector<QString> names;
       for (const auto &it: creatorFunctions) {

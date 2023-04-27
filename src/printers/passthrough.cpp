@@ -5,7 +5,6 @@
 
 #include <QFontDatabase>
 #include <QPoint>
-#include <cmath>
 #include <stdexcept>
 #include <utility>
 namespace Printers {
