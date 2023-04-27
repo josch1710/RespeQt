@@ -22,7 +22,6 @@ namespace Filesystems {
   protected:
     SimpleDiskImage *m_image;
     bool m_textConversion;
-    bool m_isConnected;
     QByteArray bitmap;
     quint16 m_freeSectors;
     quint16 findFreeSector(quint16 from = 0);
@@ -38,8 +37,6 @@ namespace Filesystems {
     virtual QList<AtariDirEntry> getEntries(quint16 dir) = 0;
     virtual uint totalCapacity() = 0;
     virtual uint freeSpace() = 0;
-    virtual QString volumeLabel() = 0;
-    virtual bool setVolumeLabel(const QString &label) = 0;
     bool extractRecursive(QList<AtariDirEntry> &entries, const QString &target);
     bool deleteRecursive(QList<AtariDirEntry> &entries);
     QList<AtariDirEntry> insertRecursive(quint16 dir, const QStringList &files);
@@ -49,19 +46,12 @@ namespace Filesystems {
     virtual AtariDirEntry insert(quint16 dir, const QString &name) = 0;
     virtual bool erase(const AtariDirEntry &entry) = 0;
     virtual bool rename(const AtariDirEntry &entry, const QByteArray &name) = 0;
-    virtual bool setTime(const AtariDirEntry &entry, const QDateTime &time) = 0;
-    virtual bool setReadOnly(const AtariDirEntry &entry) = 0;
-    virtual bool setHidden(const AtariDirEntry &entry) = 0;
-    virtual bool setArchived(const AtariDirEntry &entry) = 0;
     inline SimpleDiskImage *image() { return m_image; }
-    inline bool textConversion() { return m_textConversion; }
     inline void setTextConversion(bool conv) { m_textConversion = conv; }
     virtual QString name() = 0;
-    virtual int fileSystemCode() = 0;
     virtual bool removeDir(const AtariDirEntry &entry) = 0;
     virtual AtariDirEntry makeDir(quint16 dir, const QString &name) = 0;
     virtual quint16 rootDir() = 0;
-    inline bool isConnected() { return m_isConnected; }
   };
 
 }// namespace Filesystems

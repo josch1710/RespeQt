@@ -50,17 +50,14 @@ FileModel::~FileModel() {
 }
 
 Qt::ItemFlags FileModel::flags(const QModelIndex &index) const {
-  if (index.column() == 1 || index.column() == 2) {
-    return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsEditable | Qt::ItemIsDropEnabled;
-  } else if (index.column() == 4) {
-    if (fileSystem->fileSystemCode() == 5) {
-      return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsEditable | Qt::ItemIsDropEnabled;
-    } else {
-      return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;
-    }
-  } else {
-    return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;
-  }
+  auto flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled
+          | Qt::ItemIsDropEnabled;
+
+  if (index.column() == 1 || index.column() == 2
+      || (index.column() == 4 && typeid(*fileSystem) == typeid(Filesystems::SpartaDosFileSystem)))
+    flags |= Qt::ItemIsEditable;
+
+  return flags;
 }
 
 QVariant FileModel::data(const QModelIndex &index, int role) const {

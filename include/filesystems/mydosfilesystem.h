@@ -18,7 +18,6 @@ namespace Filesystems {
     uint totalCapacity();
 
     QString name() { return "MyDos"; }
-    int fileSystemCode() { return 4; }
   };
-}
+}// namespace Filesystems
 #endif//MYDOSFILESYSTEM_H

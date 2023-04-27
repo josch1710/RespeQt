@@ -14,7 +14,6 @@ namespace Filesystems {
     uint totalCapacity();
 
     QString name() { return "Atari Dos 2.0"; }
-    int fileSystemCode() { return 2; }
   };
-}
+}// namespace Filesystems
 #endif//DOS20FILESYSTEM_H

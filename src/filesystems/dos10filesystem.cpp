@@ -1,4 +1,6 @@
 #include "filesystems/dos10filesystem.h"
+#include "filesystems/dos20filesystem.h"
+#include "filesystems/mydosfilesystem.h"
 #include "diskeditdialog.h"
 #include <QMessageBox>
 
@@ -41,14 +43,6 @@ namespace Filesystems {
 
   uint Dos10FileSystem::totalCapacity() {
     return 707 * 125;
-  }
-
-  QString Dos10FileSystem::volumeLabel() {
-    return QString();
-  }
-
-  bool Dos10FileSystem::setVolumeLabel(const QString &) {
-    return false;
   }
 
   bool Dos10FileSystem::extract(const AtariDirEntry &entry, const QString &target) {
@@ -173,7 +167,8 @@ namespace Filesystems {
 
     int sector, newSector;
     bool hiUsed = false;
-    bool myDos = fileSystemCode() == 3 && (vtoc.at(0) > 2);
+    bool myDos = typeid(*this) == typeid(MyDosFileSystem)
+       && (vtoc.at(0) > 2);
 
     int firstSector = findFreeSector(0);
     sector = firstSector;
@@ -229,15 +224,16 @@ namespace Filesystems {
       } else {
         data[dataSize] = (newSector / 256) | (no * 4);
         data[dataSize + 1] = newSector % 256;
-        if (fileSystemCode() != 0) {
+        // TODO WHY?
+        // Always true if (fileSystemCode() != 0) {
           data[dataSize + 2] = size;
-        } else {
+        /*} else {
           if (file.atEnd()) {
             data[dataSize + 2] = size | 128;
           } else {
             data[dataSize + 2] = 0;
           }
-        }
+        }*/
       }
       if (!m_image->writeSector(sector, data)) {
         QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot insert '%1': %2").arg(name, tr("Sector write failed.")));
@@ -258,7 +254,7 @@ namespace Filesystems {
 
     if (myDos) {
       flag = 0x47;
-    } else if (fileSystemCode() == 2 && hiUsed) {
+    } else if (typeid(*this) == typeid(Dos20FileSystem) && hiUsed) {
       flag = 0x03;
     } else {
       flag = 0x42;
@@ -414,22 +410,6 @@ namespace Filesystems {
       return false;
     }
     return true;
-  }
-
-  bool Dos10FileSystem::setTime(const AtariDirEntry &, const QDateTime &) {
-    return false;
-  }
-
-  bool Dos10FileSystem::setReadOnly(const AtariDirEntry &) {
-    return false;
-  }
-
-  bool Dos10FileSystem::setHidden(const AtariDirEntry &) {
-    return false;
-  }
-
-  bool Dos10FileSystem::setArchived(const AtariDirEntry &) {
-    return false;
   }
 
   int Dos10FileSystem::findFreeFileNo(quint16 dir) {
