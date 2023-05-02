@@ -6,7 +6,6 @@
 class AtasciiInternational : public Atascii {
 public:
   AtasciiInternational();
-  void initMapping();
 };
 
 #endif// ATASCIIINTERNATIONAL_H

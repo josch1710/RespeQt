@@ -16,10 +16,7 @@
 #include "diskeditdialog.h"
 #include "filesystems/atarifilesystem.h"
 #include "respeqtsettings.h"
-#include <QDir>
 #include <QFileInfo>
-
-#include <QtDebug>
 
 extern quint8 FDC_CRC_PATTERN[];
 
@@ -34,7 +31,7 @@ bool SimpleDiskImage::openPro(const QString &fileName) {
 
   // Try to open the source file
   if (!sourceFile->open(QFile::Unbuffered | QFile::ReadOnly)) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(sourceFile->errorString());
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, sourceFile->errorString());
     delete sourceFile;
     return false;
   }
@@ -43,7 +40,7 @@ bool SimpleDiskImage::openPro(const QString &fileName) {
   QByteArray header;
   header = sourceFile->read(16);
   if (header.size() != 16) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Cannot read the header: %1.").arg(sourceFile->errorString()));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot read the header: %1.").arg(sourceFile->errorString()));
     sourceFile->close();
     delete sourceFile;
     return false;
@@ -51,13 +48,13 @@ bool SimpleDiskImage::openPro(const QString &fileName) {
 
   // Validate the magic number
   if (header[2] != 'P') {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Not a valid PRO file."));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Not a valid PRO file."));
     sourceFile->close();
     delete sourceFile;
     return false;
   }
   if (header[3] != '3') {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Unsupported PRO file version"));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Unsupported PRO file version"));
     sourceFile->close();
     delete sourceFile;
     return false;
@@ -66,14 +63,14 @@ bool SimpleDiskImage::openPro(const QString &fileName) {
   // Validate the size
   quint16 magic = getBigIndianWord(header, 0);
   if (magic != ((sourceFile->size() - 16) / (128 + 12))) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Unsupported PRO file size"));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Unsupported PRO file size"));
     sourceFile->close();
     delete sourceFile;
     return false;
   }
   int numberOfSectors = getBigIndianWord(header, 6);
   if (numberOfSectors > 1040) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Number of sectors (%1) not supported (max 1040)").arg(numberOfSectors));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Number of sectors (%1) not supported (max 1040)").arg(numberOfSectors));
     sourceFile->close();
     delete sourceFile;
     return false;
@@ -207,14 +204,14 @@ bool SimpleDiskImage::savePro(const QString &fileName) {
   }
 
   if (!outputFile->open(QFile::WriteOnly | QFile::Truncate)) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
     delete outputFile;
     return false;
   }
 
   // Try to write the header
   if (outputFile->write(m_originalFileHeader) != 16) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
     outputFile->close();
     delete outputFile;
     return false;
@@ -236,7 +233,7 @@ bool SimpleDiskImage::savePro(const QString &fileName) {
       sectorHeader[7 + j] = m_proSectorInfo[i].duplicateOffset[j];
     }
     if (outputFile->write(sectorHeader) != 12) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
       outputFile->close();
       delete outputFile;
       return false;
@@ -246,7 +243,7 @@ bool SimpleDiskImage::savePro(const QString &fileName) {
       sectorData = QByteArray(128, 0);
     }
     if (outputFile->write(sectorData) != 128) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
       outputFile->close();
       delete outputFile;
       return false;
@@ -266,7 +263,7 @@ bool SimpleDiskImage::savePro(const QString &fileName) {
         sectorHeader[7 + j] = m_proSectorInfo[1040 + i].duplicateOffset[j];
       }
       if (outputFile->write(sectorHeader) != 12) {
-        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
         outputFile->close();
         delete outputFile;
         return false;
@@ -276,7 +273,7 @@ bool SimpleDiskImage::savePro(const QString &fileName) {
         sectorData = QByteArray(128, 0);
       }
       if (outputFile->write(sectorData) != 128) {
-        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
         outputFile->close();
         delete outputFile;
         return false;
@@ -298,7 +295,7 @@ bool SimpleDiskImage::savePro(const QString &fileName) {
 bool SimpleDiskImage::saveAsPro(const QString &fileName, FileTypes::FileType destImageType) {
   bool bareSectors = (m_originalImageType == FileTypes::Atr) || (m_originalImageType == FileTypes::AtrGz) || (m_originalImageType == FileTypes::Xfd) || (m_originalImageType == FileTypes::XfdGz);
   if ((!bareSectors) && (m_originalImageType != FileTypes::Atx) && (m_originalImageType != FileTypes::AtxGz)) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(tr("Saving Pro images from the current format is not supported yet."));
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Saving Pro images from the current format is not supported yet."));
     return false;
   }
 
@@ -1048,9 +1045,9 @@ void SimpleDiskImage::readProTrack(quint16 aux, QByteArray &data, int length) {
     if (m_sectorsInTrack == 1) {
       int uniqueSlot = -1;
       for (int i = 0; i < m_geometry.sectorsPerTrack(); i++) {
-        int sectorIndex = (track * m_geometry.sectorsPerTrack()) + i;
-        if ((m_proSectorInfo[sectorIndex].used) && (m_proSectorInfo[sectorIndex].wd1771Status & 0x10)) {
-          uniqueSlot = sectorIndex;
+        auto _sectorIndex = (track * m_geometry.sectorsPerTrack()) + i;
+        if ((m_proSectorInfo[_sectorIndex].used) && (m_proSectorInfo[_sectorIndex].wd1771Status & 0x10)) {
+          uniqueSlot = _sectorIndex;
         }
       }
       if (uniqueSlot != -1) {
@@ -1407,7 +1404,6 @@ bool SimpleDiskImage::readProSkewAlignment(quint16 aux, QByteArray &data, bool t
 
         // add the seek time
         auto seekTimeInBytes = (quint16) ((104100 + (20550 * (secondTrack - firstTrack - 1))) >> 6);
-        ;
         firstTrackByteOffset = (firstTrackByteOffset + seekTimeInBytes) % (26042 >> 3);
 
         // find the first sector at the same rotation angle in the second track
@@ -2208,7 +2204,7 @@ bool SimpleDiskImage::writeProSectorExtended(int, quint8 dataType, quint8 trackN
 bool SimpleDiskImage::fillProSectorInfo(const QString &fileName, QFile *sourceFile, quint16 slot, quint16 absoluteSector) {
   QByteArray sectorHeader = sourceFile->read(12);
   if ((sectorHeader.length() != 12) || sourceFile->atEnd()) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Cannot read from file: %1.").arg(sourceFile->errorString()));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot read from file: %1.").arg(sourceFile->errorString()));
     return false;
   }
 
@@ -2239,7 +2235,7 @@ bool SimpleDiskImage::fillProSectorInfo(const QString &fileName, QFile *sourceFi
   int bufsize = 128;
   m_proSectorInfo[slot].sectorData = sourceFile->read(bufsize);
   if (m_proSectorInfo[slot].sectorData.length() != bufsize) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Cannot read from file: %1.").arg(sourceFile->errorString()));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot read from file: %1.").arg(sourceFile->errorString()));
     return false;
   }
 

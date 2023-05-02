@@ -23,7 +23,10 @@ public:
   QString atariName;
   QString atariExt;
   QString longName;
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
   int lastSector;
+#pragma clang diagnostic pop
   quint64 pos;
   int sectPass;
 };
@@ -33,7 +36,6 @@ class FolderImage : public SimpleDiskImage {
 
 protected:
   QDir dir;
-  bool mReadOnly;
   void buildDirectory();
   QVector<AtariFile> atariFiles;
   int atariFileNo;
@@ -48,11 +50,9 @@ public:
   bool readSector(quint16 sector, QByteArray &data);
   bool writeSector(quint16 sector, const QByteArray &data);
   bool format(const DiskGeometry &geo);
-  QString longName(QString &lastMountedFolder, QString &atariFileName);//
+  __attribute__((unused)) QString longName(QString &lastMountedFolder, QString &atariFileName);
 
   virtual QString description() const { return tr("Folder image"); }
 };
-
-extern FolderImage *folderImage;
 
 #endif// FOLDERIMAGE_H

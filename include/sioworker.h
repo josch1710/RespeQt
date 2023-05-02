@@ -68,7 +68,6 @@ class SioWorker : public QThread {
   Q_OBJECT
 
 private:
-  quint8 sioChecksum(const QByteArray &data, uint size);
   QMutex *deviceMutex;
   SioDevice *devices[256];
   AbstractSerialPortBackendPtr mPort;
@@ -78,7 +77,6 @@ private:
 
 public:
   AbstractSerialPortBackendPtr port() { return mPort; }
-  int maxSpeed;
 
   SioWorker();
 #ifdef RESPEQT_TEST
@@ -91,7 +89,7 @@ public:
 #endif
   virtual ~SioWorker();
 
-  bool wait(unsigned long time = ULONG_MAX);
+  bool waitOnPort(unsigned long time = ULONG_MAX);
 
   void run();
 

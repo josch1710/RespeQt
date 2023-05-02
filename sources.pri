@@ -38,7 +38,6 @@ SOURCES += \
     src/printers/atari1027.cpp \
     src/atascii.cpp \
     src/drivewidget.cpp \
-    src/infowidget.cpp \
     src/atasciiinternational.cpp \
     src/printerwidget.cpp \
     src/printers/atariprinter.cpp \
@@ -99,7 +98,6 @@ HEADERS += \
     include/printers/atari1027.h \
     include/atascii.h \
     include/drivewidget.h \
-    include/infowidget.h \
     include/printerwidget.h \
     include/atasciiinternational.h \
     include/printers/atariprinter.h \
@@ -138,7 +136,6 @@ FORMS += \
     ui/bootoptionsdialog.ui \
     ui/logdisplaydialog.ui \
     ui/drivewidget.ui \
-    ui/infowidget.ui \
     ui/printers/outputwindow.ui \
     ui/printerwidget.ui \
     ui/printers/textprinterwindow.ui

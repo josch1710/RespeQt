@@ -57,14 +57,10 @@ void AutoBoot::handleCommand(const quint8 command, const quint8 aux1, const quin
           started = true;
         }
         QByteArray data;
-        if (readSector(aux, data)) {
-          sio->port()->writeComplete();
-          sio->port()->writeDataFrame(data);
-          qDebug() << "!n" << tr("[%1] Read sector %2 (%3 bytes).").arg(deviceName()).arg(aux).arg(data.size());
-        } else {
-          sio->port()->writeError();
-          qCritical() << "!e" << tr("[%1] Read sector %2 failed.").arg(deviceName()).arg(aux);
-        }
+        readSector(aux, data);
+        sio->port()->writeComplete();
+        sio->port()->writeDataFrame(data);
+        qDebug() << "!n" << tr("[%1] Read sector %2 (%3 bytes).").arg(deviceName()).arg(aux).arg(data.size());
       } else {
         passToOldHandler(command, aux1, aux2);
       }
@@ -141,7 +137,6 @@ void AutoBoot::handleCommand(const quint8 command, const quint8 aux1, const quin
     default:
       passToOldHandler(command, aux1, aux2);
       return;
-      break;
   }
 }
 
@@ -149,7 +144,7 @@ bool AutoBoot::readExecutable(const QString &fileName) {
   QFile file(fileName);
 
   if (!file.open(QFile::ReadOnly)) {
-    qCritical() << "!e" << tr("Cannot open file '%1': %2").arg(fileName).arg(file.errorString());
+    qCritical() << "!e" << tr("Cannot open file '%1': %2").arg(fileName, file.errorString());
     return false;
   }
 
@@ -166,13 +161,13 @@ bool AutoBoot::readExecutable(const QString &fileName) {
     } else {
       error = file.errorString();
     }
-    qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName).arg(error);
+    qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName, error);
     return false;
   }
   start = (quint8) data.at(0) + (quint8) data.at(1) * 256;
   if (start != 0xffff) {
     QString error;
-    qCritical() << "!e" << tr("Cannot load file '%1': The file doesn't seem to be an Atari DOS executable.").arg(fileName).arg(error);
+    qCritical() << "!e" << tr("Cannot load file '%1': The file doesn't seem to be an Atari DOS executable.").arg(fileName, error);
     return false;
   }
 
@@ -185,7 +180,7 @@ bool AutoBoot::readExecutable(const QString &fileName) {
     } else {
       error = file.errorString();
     }
-    qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName).arg(error);
+    qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName, error);
     return false;
   }
   start = (quint8) data.at(0) + (quint8) data.at(1) * 256;
@@ -204,7 +199,7 @@ bool AutoBoot::readExecutable(const QString &fileName) {
           break;
         }
       } else {
-        qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName).arg(file.errorString());
+        qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName, file.errorString());
         return false;
       }
     }
@@ -226,7 +221,7 @@ bool AutoBoot::readExecutable(const QString &fileName) {
       if (file.atEnd()) {
         qWarning() << "!w" << tr("The executable '%1' is broken: Unexpected end of file, needed %2 more.").arg(fileName).arg(size - data.size());
       } else {
-        qWarning() << "!w" << tr("Cannot read from file '%1': %2.").arg(fileName).arg(file.errorString());
+        qWarning() << "!w" << tr("Cannot read from file '%1': %2.").arg(fileName, file.errorString());
         return false;
       }
     }
@@ -252,7 +247,7 @@ bool AutoBoot::readExecutable(const QString &fileName) {
         qWarning() << "!w" << tr("The executable '%1' is broken: Unexpected end of file, needed %2 more.").arg(fileName).arg(2 - data.size());
         break;
       } else {
-        qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName).arg(file.errorString());
+        qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName, file.errorString());
         return false;
       }
     }
@@ -266,7 +261,7 @@ bool AutoBoot::readExecutable(const QString &fileName) {
           qWarning() << "!w" << tr("The executable '%1' is broken: Unexpected end of file, needed %2 more.").arg(fileName).arg(2 - data.size());
           break;
         } else {
-          qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName).arg(file.errorString());
+          qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName, file.errorString());
           return false;
         }
       }
@@ -302,10 +297,9 @@ bool AutoBoot::open(const QString &fileName, bool highSpeed) {
 void AutoBoot::close() {
 }
 
-bool AutoBoot::readSector(quint16 sector, QByteArray &data) {
+void AutoBoot::readSector(quint16 sector, QByteArray &data) {
   data = bootSectors.mid((sector - 1) * 128, 128);
   data.resize(128);
-  return true;
 }
 
 QString AutoBoot::deviceName() {

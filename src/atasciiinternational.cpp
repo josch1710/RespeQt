@@ -3,11 +3,6 @@
 
 AtasciiInternational::AtasciiInternational()
     : Atascii() {
-  initMapping();
-}
-
-void AtasciiInternational::initMapping() {
-  Atascii::initMapping();
 
   mapping[0x00] = QChar(0x00E1);
   mapping[0x01] = QChar(0x00F9);

@@ -11,7 +11,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_AUTOUIC_SEARCH_PATHS} ui ui/printers)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_AUTOUIC_SEARCH_PATHS} ui ui/printers ui/filesystems)
 add_definitions(-DQT_DEPRECATED_WARNINGS -DQT_DISABLE_DEPRECATED_BEFORE=0x050000)
 add_definitions(-DVERSION=\"v${PROJECT_VERSION}_${RC_VERSION}\")
 
@@ -28,7 +28,7 @@ else()
     set(TARGET RespeQt)
 endif()
 
-include_directories(include headers tests)
+include_directories(include headers tests tools)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
@@ -68,7 +68,6 @@ set(SOURCES
         src/printers/atari1027.cpp
         src/atascii.cpp
         src/drivewidget.cpp
-        src/infowidget.cpp
         src/atasciiinternational.cpp
         src/printerwidget.cpp
         src/printers/atariprinter.cpp
@@ -129,7 +128,6 @@ set(HEADERS
         include/printers/atari1027.h
         include/atascii.h
         include/drivewidget.h
-        include/infowidget.h
         include/printerwidget.h
         include/atasciiinternational.h
         include/printers/atariprinter.h
@@ -169,7 +167,6 @@ set(FORMS
         ui/bootoptionsdialog.ui
         ui/logdisplaydialog.ui
         ui/drivewidget.ui
-        ui/infowidget.ui
         ui/printers/outputwindow.ui
         ui/printerwidget.ui
         ui/printers/textprinterwindow.ui

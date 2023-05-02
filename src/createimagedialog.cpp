@@ -9,6 +9,8 @@
 #include "createimagedialog.h"
 #include "ui_createimagedialog.h"
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 CreateImageDialog::CreateImageDialog(QWidget *parent) : QDialog(parent),
                                                         m_ui(new Ui::CreateImageDialog) {
   Qt::WindowFlags flags = windowFlags();
@@ -28,6 +30,7 @@ CreateImageDialog::CreateImageDialog(QWidget *parent) : QDialog(parent),
   connect(m_ui->stdSingleButton, &QRadioButton::toggled, this, &CreateImageDialog::standardSingleToggled);
   connect(m_ui->stdEnhancedButton, &QRadioButton::toggled, this, &CreateImageDialog::standardEnhancedToggled);
 }
+#pragma clang diagnostic pop
 
 CreateImageDialog::~CreateImageDialog() {
   delete m_ui;

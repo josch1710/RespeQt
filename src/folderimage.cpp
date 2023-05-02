@@ -47,7 +47,7 @@ bool FolderImage::format(const DiskGeometry &) {
 
 // Return the long file name of a short Atari file name from a given (last mounted) Folder Image
 
-QString FolderImage::longName(QString &lastMountedFolder, QString &atariFileName) {
+__attribute__((unused)) QString FolderImage::longName(QString &lastMountedFolder, QString &atariFileName) {
   if (FolderImage::open(lastMountedFolder, FileTypes::Dir)) {
     for (auto file: atariFiles) {
       if (file.atariName + "." + file.atariExt == atariFileName)

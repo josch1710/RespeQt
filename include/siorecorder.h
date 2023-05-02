@@ -6,11 +6,12 @@
 #include <QFile>
 #include <QJsonArray>
 #include <QObject>
+#include <QSharedPointer>
 #include <memory>
 #include <vector>
 
 class SioRecorder;
-using SioRecorderPtr = std::shared_ptr<SioRecorder>;
+using SioRecorderPtr = QSharedPointer<SioRecorder>;
 
 class SioRecorder final : public AbstractSerialPortBackend {
 public:
@@ -53,10 +54,10 @@ public:
 
 protected:
   bool readPauseTag();
-  void forwardXml();
 
 private:
   bool mSnapshotRunning{false};
+  // QJsonArray is not a QObject, so we can't use QPointer
   std::unique_ptr<QJsonArray> mSnapshotData{nullptr};
   std::vector<char> mTestData{};
   int mReadIndex{0};

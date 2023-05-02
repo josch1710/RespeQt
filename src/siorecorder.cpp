@@ -4,12 +4,11 @@
 #include "respeqtsettings.h"
 
 #include <QDataStream>
-#include <QFileDialog>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 
-SioRecorderPtr SioRecorder::sInstance = std::make_shared<SioRecorder>();
+SioRecorderPtr SioRecorder::sInstance = SioRecorderPtr(new SioRecorder());
 
 SioRecorder::SioRecorder(QObject *parent)
     : AbstractSerialPortBackend(parent) {}

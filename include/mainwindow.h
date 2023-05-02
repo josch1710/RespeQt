@@ -29,7 +29,6 @@
 #include "diskeditdialog.h"
 #include "docdisplaywindow.h"
 #include "drivewidget.h"
-#include "infowidget.h"
 #include "logdisplaydialog.h"
 #include "network.h"
 #include "optionsdialog.h"

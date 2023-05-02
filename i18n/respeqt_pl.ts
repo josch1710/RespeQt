@@ -2432,14 +2432,6 @@ Kiedy usłyszysz sygnał, naciśnij przycisk OK poniżej i jednocześnie naciśn
     </message>
 </context>
 <context>
-    <name>InfoWidget</name>
-    <message>
-        <location filename="../infowidget.ui" line="26"/>
-        <source>Form</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>LogDisplayDialog</name>
     <message>
         <location filename="../logdisplaydialog.ui" line="14"/>

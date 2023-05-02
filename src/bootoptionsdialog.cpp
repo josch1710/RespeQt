@@ -19,7 +19,7 @@
 extern QString g_respeQtAppPath;
 extern bool g_disablePicoHiSpeed;
 
-QString selectedDOS, bootDir;
+QString selectedDOS;
 
 BootOptionsDialog::BootOptionsDialog(const QString &bootFolderPath, QWidget *parent) : QDialog(parent),
                                                                                        bootFolderPath_(bootFolderPath),
@@ -64,8 +64,6 @@ void BootOptionsDialog::accept() {
     selectedDOS = "$bootpic";
     g_disablePicoHiSpeed = m_ui->disablePicoHiSpeed->isChecked();
   }
-
-  bootDir = g_respeQtAppPath + "/" + selectedDOS;
 
   // First delete existing boot files in the Folder Image
   // then copy new boot files from the appropriate DOS directory

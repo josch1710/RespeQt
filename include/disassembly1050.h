@@ -19,7 +19,7 @@ public:
 
   // enable/disable traces (unused)
   virtual void Trace(int, bool, const char *, ...) {}
-  virtual void Dump(char *, int) {}
+  __attribute__((unused)) virtual void Dump(char *, int) {}
   virtual bool IsAddressSkipped(unsigned short) { return false; }
 
   virtual char *GetAddressLabel(unsigned short addr);

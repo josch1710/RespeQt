@@ -20,19 +20,17 @@ class GzFile : public QFile {
 
 public:
   GzFile(const QString &path);
-  ~GzFile();
 
-  bool open(OpenMode mode);
-  void close();
-  bool seek(qint64 pos);
-  bool isSequential() const;
-  bool atEnd() const;
+  bool open(OpenMode mode) override;
+  void close() override;
+  bool seek(qint64 pos) override;
+  bool isSequential() const override;
+  bool atEnd() const override;
 
 protected:
   gzFile mHandle;
-  QString mPath;
-  qint64 readData(char *data, qint64 maxSize);
-  qint64 writeData(const char *data, qint64 maxSize);
+  qint64 readData(char *data, qint64 maxSize) override;
+  qint64 writeData(const char *data, qint64 maxSize) override;
 };
 
 class FileTypes : public QObject {
@@ -60,7 +58,7 @@ public:
     XexGz
   };
   static FileType getFileType(const QString &fileName);
-  static QString getFileTypeName(FileType type);
+  __attribute__((unused)) static QString getFileTypeName(FileType type);
 };
 
 

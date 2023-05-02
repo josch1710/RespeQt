@@ -1287,14 +1287,6 @@ Tiempo restante estimado: %1:%2</translation>
     </message>
 </context>
 <context>
-    <name>InfoWidget</name>
-    <message>
-        <location filename="../infowidget.ui" line="26"/>
-        <source>Form</source>
-        <translation>Información</translation>
-    </message>
-</context>
-<context>
     <name>LogDisplayDialog</name>
     <message>
         <location filename="../logdisplaydialog.ui" line="14"/>

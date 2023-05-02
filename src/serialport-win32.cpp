@@ -387,13 +387,13 @@ QByteArray StandardSerialPortBackend::readCommandFrame() {
             return data;
           }
           if (x == WAIT_FAILED) {
-            qCritical() << "!e" << tr("Cannot wait for serial port event: %1").arg(lastErrorMessage());
+            qCritical() << "!e" << tr("Cannot waitOnPort for serial port event: %1").arg(lastErrorMessage());
             data.clear();
             return data;
           }
         } else {
           CloseHandle(ov.hEvent);
-          qCritical() << "!e" << tr("Cannot wait for serial port event: %1").arg(lastErrorMessage());
+          qCritical() << "!e" << tr("Cannot waitOnPort for serial port event: %1").arg(lastErrorMessage());
           return data;
         }
       }

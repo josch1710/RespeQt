@@ -92,20 +92,20 @@ QVariant FileModel::data(const QModelIndex &index, int role) const {
   switch (index.column()) {
     case 0:
       return entries.at(index.row()).no;
-      break;
+
     case 1:
       return entries.at(index.row()).baseName();
-      break;
+
     case 2:
       return entries.at(index.row()).suffix();
-      break;
+
     case 3:
       if (entries.at(index.row()).size >= 0) {
         return entries.at(index.row()).size;
       } else {
         return QVariant();
       }
-      break;
+
     case 4:
       if (time.isValid()) {
         return time;
@@ -114,14 +114,11 @@ QVariant FileModel::data(const QModelIndex &index, int role) const {
         return QString("n/a");
       }
       return QVariant();
-      break;
+
     case 5:
       return entries.at(index.row()).attributeNames();
-      break;
-    default:
-      return QVariant();
-      break;
   }
+
   return QVariant();
 }
 
@@ -163,8 +160,8 @@ bool FileModel::setData(const QModelIndex &index, const QVariant &value, int rol
       } else {
         return false;
       }
-      break;
     }
+
     case 2: {
       QString s = value.toString();
       if (s.isEmpty()) {
@@ -199,12 +196,12 @@ bool FileModel::setData(const QModelIndex &index, const QVariant &value, int rol
       } else {
         return false;
       }
-      break;
     }
+
     case 4:
       return false;
-      break;
   }
+
   return false;
 }
 
@@ -238,26 +235,24 @@ QVariant FileModel::headerData(int section, Qt::Orientation orientation, int rol
   switch (section) {
     case 0:
       return tr("No");
-      break;
+
     case 1:
       return tr("Name");
-      break;
+
     case 2:
       return tr("Extension");
-      break;
+
     case 3:
       return tr("Size");
-      break;
+
     case 4:
       return tr("Time");
-      break;
+
     case 5:
       return tr("Notes");
-      break;
-    default:
-      return QVariant();
-      break;
   }
+
+  return QVariant();
 }
 
 int FileModel::rowCount(const QModelIndex & /*parent*/) const {
@@ -282,43 +277,44 @@ void FileModel::sort(int column, Qt::SortOrder order) {
         } else {
           return e1.no > e2.no;
         }
-        break;
+
       case 1:
         if (order == Qt::AscendingOrder) {
           return e1.baseName() < e2.baseName();
         } else {
           return e1.baseName() > e2.baseName();
         }
-        break;
+
       case 2:
         if (order == Qt::AscendingOrder) {
           return e1.suffix() < e2.suffix();
         } else {
           return e1.suffix() > e2.suffix();
         }
-        break;
+
       case 3:
         if (order == Qt::AscendingOrder) {
           return e1.size < e2.size;
         } else {
           return e1.size > e2.size;
         }
-        break;
+
       case 4:
         if (order == Qt::AscendingOrder) {
           return e1.dateTime < e2.dateTime;
         } else {
           return e1.dateTime > e2.dateTime;
         }
-        break;
+
       case 5:
         if (order == Qt::AscendingOrder) {
           return e1.attributeNames() < e2.attributeNames();
         } else {
           return e1.attributeNames() > e2.attributeNames();
         }
-        break;
+
     }
+
     return false;
   };
   std::stable_sort(entries.begin(), entries.end(), sorting);

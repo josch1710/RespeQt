@@ -285,7 +285,7 @@ void DriveWidget::setLabelToolTips(const QString &one, const QString &two, const
 }
 
 
-void DriveWidget::setFont(const QFont &font) {
+void DriveWidget::setLabelFont(const QFont &font) {
   ui->labelFileName->setFont(font);
 }
 

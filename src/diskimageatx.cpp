@@ -4,15 +4,11 @@
 //
 
 #include "diskimage.h"
-#include "zlib.h"
 
 #include "diskeditdialog.h"
 #include "filesystems/atarifilesystem.h"
 #include "respeqtsettings.h"
-#include <QDir>
 #include <QFileInfo>
-
-#include <QtDebug>
 
 extern quint8 FDC_CRC_PATTERN[];
 
@@ -31,7 +27,7 @@ bool SimpleDiskImage::openAtx(const QString &fileName) {
 
   // Try to open the source file
   if (!sourceFile->open(QFile::Unbuffered | QFile::ReadOnly)) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(sourceFile->errorString());
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, sourceFile->errorString());
     delete sourceFile;
     return false;
   }
@@ -40,7 +36,7 @@ bool SimpleDiskImage::openAtx(const QString &fileName) {
   QByteArray header;
   header = sourceFile->read(48);
   if (header.size() != 48) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Cannot read the header: %1.").arg(sourceFile->errorString()));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot read the header: %1.").arg(sourceFile->errorString()));
     sourceFile->close();
     delete sourceFile;
     return false;
@@ -49,7 +45,7 @@ bool SimpleDiskImage::openAtx(const QString &fileName) {
   // Validate the magic number
   QByteArray magic = QByteArray(header.data(), 4);
   if (magic != "AT8X") {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Not a valid ATX file."));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Not a valid ATX file."));
     sourceFile->close();
     delete sourceFile;
     return false;
@@ -73,7 +69,7 @@ bool SimpleDiskImage::openAtx(const QString &fileName) {
         densityStr = tr("Unknown (%1)").arg(density);
         break;
     }
-    qDebug() << "!n" << tr("Track layout for %1. Density is %2").arg(fileName).arg(densityStr);
+    qDebug() << "!n" << tr("Track layout for %1. Density is %2").arg(fileName, densityStr);
   }
   auto nextPos = (qint64) getLittleIndianLong(header, 28);
   for (int track = 0; track < 40; track++) {
@@ -82,7 +78,7 @@ bool SimpleDiskImage::openAtx(const QString &fileName) {
     // get information about track
     quint64 pos = nextPos;
     if (!sourceFile->seek(pos)) {
-      qCritical() << "!e" << tr("[%1] Cannot seek to track header #%2: %3").arg(deviceName()).arg(track).arg(sourceFile->error());
+      qCritical() << "!e" << tr("[%1] Cannot seek to track header #%2: %3").arg(deviceName(), QString::number(track, 10), QString::number(sourceFile->error(), 10));
       sourceFile->close();
       delete sourceFile;
       return false;
@@ -185,12 +181,12 @@ bool SimpleDiskImage::openAtx(const QString &fileName) {
       }
     }
     if (m_displayTrackLayout) {
-      qDebug() << "!u" << tr("track $%1 (%2): %3").arg(track, 2, 16, QChar('0')).arg(mfm ? "MFM" : "FM").arg(secBuf.constData());
+      qDebug() << "!u" << tr("track $%1 (%2): %3").arg(track, 2, 16, QChar('0')).arg(mfm ? "MFM" : "FM", secBuf.constData());
     }
 
     // read extended attributes
-    for (int sector = 0; sector < nbExtended; sector++) {
-      quint64 currentSectorOffset = pos + maxData + (8 * sector);
+    for (int sectorNumber = 0; sectorNumber < nbExtended; sectorNumber++) {
+      quint64 currentSectorOffset = pos + maxData + (8 * sectorNumber);
       if (!sourceFile->seek(currentSectorOffset)) {
         qCritical() << "!e" << tr("[%1] Cannot seek to extended sector data of track $%2: %3").arg(deviceName()).arg(track, 2, 16, QChar('0')).arg(sourceFile->error());
         sourceFile->close();
@@ -264,7 +260,7 @@ bool SimpleDiskImage::saveAtx(const QString &fileName) {
   }
 
   if (!outputFile->open(QFile::WriteOnly | QFile::Truncate)) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
     outputFile->close();
     delete outputFile;
     return false;
@@ -272,7 +268,7 @@ bool SimpleDiskImage::saveAtx(const QString &fileName) {
 
   // Try to write the header
   if (outputFile->write(m_originalFileHeader) != 48) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
     outputFile->close();
     delete outputFile;
     return false;
@@ -302,7 +298,7 @@ bool SimpleDiskImage::saveAtx(const QString &fileName) {
 
     // Try to write the track header
     if (outputFile->write(trackHeader) != 32) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
       outputFile->close();
       delete outputFile;
       return false;
@@ -329,7 +325,7 @@ bool SimpleDiskImage::saveAtx(const QString &fileName) {
 
     // Try to write the sector list
     if (outputFile->write(sectorList) != sectorListSize) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
       outputFile->close();
       delete outputFile;
       return false;
@@ -339,7 +335,7 @@ bool SimpleDiskImage::saveAtx(const QString &fileName) {
     QByteArray dataSizeChunk(dataSizeChunkSize, 0);
     setLittleIndianLong(dataSizeChunk, 0, dataSize);
     if (outputFile->write(dataSizeChunk) != dataSizeChunk.size()) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
       outputFile->close();
       delete outputFile;
       return false;
@@ -351,7 +347,7 @@ bool SimpleDiskImage::saveAtx(const QString &fileName) {
       if ((sectorInfo->sectorStatus() & 0x10) == 0) {
         QByteArray data = sectorInfo->sectorData();
         if (outputFile->write(data, m_geometry.bytesPerSector()) != m_geometry.bytesPerSector()) {
-          qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+          qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
           outputFile->close();
           delete outputFile;
           return false;
@@ -370,7 +366,7 @@ bool SimpleDiskImage::saveAtx(const QString &fileName) {
           extendedData[5] = (quint8) sector;
           setLittleIndianWord(extendedData, 6, sectorInfo->sectorWeakOffset());
           if (outputFile->write(extendedData) != 8) {
-            qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+            qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
             outputFile->close();
             delete outputFile;
             return false;
@@ -382,7 +378,7 @@ bool SimpleDiskImage::saveAtx(const QString &fileName) {
     // Try saving an empty chunk
     QByteArray emptyChunk(emptyChunkSize, 0);
     if (outputFile->write(emptyChunk) != emptyChunk.size()) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
       outputFile->close();
       delete outputFile;
       return false;
@@ -395,7 +391,7 @@ bool SimpleDiskImage::saveAtx(const QString &fileName) {
 
   // Try to overwrite the header
   if (outputFile->write(m_originalFileHeader) != 48) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
     outputFile->close();
     delete outputFile;
     return false;
@@ -415,7 +411,7 @@ bool SimpleDiskImage::saveAtx(const QString &fileName) {
 bool SimpleDiskImage::saveAsAtx(const QString &fileName, FileTypes::FileType destImageType) {
   bool bareSectors = (m_originalImageType == FileTypes::Atr) || (m_originalImageType == FileTypes::AtrGz) || (m_originalImageType == FileTypes::Xfd) || (m_originalImageType == FileTypes::XfdGz);
   if ((!bareSectors) && (m_originalImageType != FileTypes::Pro) && (m_originalImageType != FileTypes::ProGz)) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(tr("Saving Atx images from the current format is not supported yet."));
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Saving Atx images from the current format is not supported yet."));
     return false;
   }
 
@@ -1794,7 +1790,7 @@ quint8 AtxSectorInfo::byteAt(int pos) {
   return m_sectorData[pos];
 }
 
-quint8 AtxSectorInfo::rawByteAt(int pos) {
+__attribute__((unused)) quint8 AtxSectorInfo::rawByteAt(int pos) {
   // same as byteAt but does not interpret weak bits
   if (pos >= m_sectorData.size()) {
     return 0;
@@ -1831,7 +1827,7 @@ void AtxSectorInfo::setSectorWeakOffset(quint16 sectorWeakOffet) {
   }
 }
 
-int AtxSectorInfo::dataMarkOffset(int headerOffset, int shift) {
+__attribute__((unused)) int AtxSectorInfo::dataMarkOffset(int headerOffset, int shift) {
   // skip the header size
   int index = headerOffset + 6;
   // after the sector header, we should find at least 6 $00 bytes and then a DATA address mark.
@@ -1942,7 +1938,7 @@ int AtxTrackInfo::duplicateIndex(AtxSectorInfo *sectorInfo, int sectorNumber) {
   return 1;
 }
 
-int AtxTrackInfo::shortSectorSize(int track, int sectorIndex, int *bitShift) {
+__attribute__((unused)) int AtxTrackInfo::shortSectorSize(int track, int sectorIndex, int *bitShift) {
   if ((sectorIndex < 0) || (sectorIndex >= size())) {
     return 0;
   }

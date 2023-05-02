@@ -7,7 +7,7 @@
  */
 
 #ifndef DISKIMAGE_H
-#define DISKIMAGE_H
+#define DISKIMAGE_H 1
 
 #include <QElapsedTimer>
 #include <QFile>
@@ -22,16 +22,15 @@
 #include "miscutils.h"
 #include "sioworker.h"
 
-#define DISK_CRC_MARK 0xF7
-#define DISK_DATA_ADDR_MARK1 0xF8
-#define DISK_DATA_ADDR_MARK2 0xF9
-#define DISK_DATA_ADDR_MARK3 0xFA
-#define DISK_DATA_ADDR_MARK4 0xFB
-#define DISK_INDEX_ADDR_MARK 0xFC
-#define DISK_SPARE_MARK 0xFD
-#define DISK_ID_ADDR_MARK 0xFE
+__attribute__((unused)) static const quint8 DISK_CRC_MARK{0xF7};
+static const quint8 DISK_DATA_ADDR_MARK1{0xF8};
+static const quint8 DISK_DATA_ADDR_MARK2{0xF9};
+static const quint8 DISK_DATA_ADDR_MARK3{0xFA};
+static const quint8 DISK_DATA_ADDR_MARK4{0xFB};
+__attribute__((unused)) static const quint8 DISK_INDEX_ADDR_MARK{0xFC};
+__attribute__((unused)) static const quint8 DISK_SPARE_MARK{0xFD};
+static const quint8 DISK_ID_ADDR_MARK{0xFE};
 
-class AtariFileSystem;
 class DiskEditDialog;
 
 class DiskGeometry : public QObject {
@@ -80,7 +79,10 @@ struct ProSectorInfo {
   quint8 duplicateOffset[5];
   quint8 driveStatus;
   quint8 wd1771Status;
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
   quint8 reservedByte;
+#pragma clang diagnostic pop
   quint16 absoluteSector;
   bool notEmpty;
   quint8 fillByte;
@@ -114,9 +116,9 @@ public:
   quint8 sectorStatus() { return m_sectorStatus; }
   quint16 sectorPosition() { return m_sectorPosition; }
   QByteArray sectorData();
-  QByteArray rawSectorData() { return m_sectorData; }
+  __attribute__((unused)) QByteArray rawSectorData() { return m_sectorData; }
   quint8 byteAt(int pos);
-  quint8 rawByteAt(int pos);
+  __attribute__((unused)) __attribute__((unused)) quint8 rawByteAt(int pos);
   quint8 fillByte();
   int size() { return (((wd1771Status() & 0x06) == 0) && ((wd1771Status() & 0x08) != 0)) ? m_sectorData.size() * 2 : m_sectorData.size(); }
   void setSectorData(QByteArray &sectorData) { m_sectorData = sectorData; }
@@ -126,7 +128,7 @@ public:
   quint8 driveStatus() { return 0x10; }
   quint8 wd1771Status() { return (~m_sectorStatus & 0x3E) | 0xC1; }
   void setWd1771Status(quint8 status) { m_sectorStatus |= ~status & 0x3E; }
-  int dataMarkOffset(int headerOffset, int shift);
+  __attribute__((unused)) int dataMarkOffset(int headerOffset, int shift);
 };
 
 class AtxTrackInfo : public QObject {
@@ -147,7 +149,7 @@ public:
   AtxSectorInfo *at(int pos) { return m_sectors.at(pos); }
   AtxSectorInfo *find(quint8 sectorNumber, quint16 distance);
   int duplicateIndex(AtxSectorInfo *sectorInfo, int sectorNumber);
-  int shortSectorSize(int track, int sectorIndex, int *bitShift);
+  __attribute__((unused)) int shortSectorSize(int track, int sectorIndex, int *bitShift);
 };
 
 enum BOOT_STATE {
@@ -220,18 +222,18 @@ public:
 
   virtual bool open(const QString &fileName, FileTypes::FileType type);
   virtual bool create(int untitledName);
-  virtual void reopen();
+  __attribute__((unused)) virtual void reopen();
   virtual void close();
   virtual bool save();
-  virtual bool saveAs(const QString &fileName);
+  __attribute__((unused)) virtual bool saveAs(const QString &fileName);
   inline bool isOpen() const { return file.isOpen(); }
   inline bool isReadOnly() const { return m_isReadOnly; }
   inline void setReadOnly(bool readOnly) { m_isReadOnly = readOnly; }
   inline bool isLeverOpen() const { return m_isLeverOpen; }
-  virtual void setLeverOpen(bool open);
+  __attribute__((unused)) __attribute__((unused)) virtual void setLeverOpen(bool open);
   inline bool isModified() const { return m_isModified; }
   inline bool isUnmodifiable() const { return m_isUnmodifiable; }
-  inline bool isUnnamed() const { return m_isUnnamed; }
+  __attribute__((unused)) inline bool isUnnamed() const { return m_isUnnamed; }
   inline bool isReady() const { return m_isReady; }
   inline bool isHappyEnabled() const { return m_board.isHappyEnabled(); }
   inline bool isChipOpen() const { return m_board.isChipOpen(); }
@@ -239,13 +241,13 @@ public:
   inline bool isToolDiskActive() const { return m_board.isToolDiskActive(); }
   inline bool hasSeveralSides() const { return m_numberOfSides > 1; }
   virtual QString getNextSideLabel();
-  inline QString getNextSideFilename() { return m_nextSideFilename; }
+  __attribute__((unused)) inline QString getNextSideFilename() { return m_nextSideFilename; }
   inline void setEditDialog(DiskEditDialog *aDialog) {
     m_editDialog = aDialog;
     emit statusChanged(m_deviceNo);
   }
   inline DiskEditDialog *editDialog() { return m_editDialog; }
-  inline Board *getBoardInfo() { return m_board.getCopy(); }
+  __attribute__((unused)) inline Board *getBoardInfo() { return m_board.getCopy(); }
   inline void setBoardInfo(Board *info) { m_board.setFromCopy(info); }
 
   void handleCommand(const quint8 command, quint8 aux8, quint8 aux2) override;
@@ -257,20 +259,20 @@ public:
   virtual bool readSectorUsingIndex(quint16 aux, QByteArray &data);
   virtual bool readSector(quint16 aux, QByteArray &data);
   virtual bool readSkewAlignment(quint16 aux, QByteArray &data, bool timingOnly);
-  virtual bool resetTrack(quint16 aux);
+  __attribute__((unused)) virtual bool resetTrack(quint16 aux);
   virtual bool writeTrack(quint16 aux, const QByteArray &data);
   virtual bool writeTrackWithSkew(quint16 aux, const QByteArray &data);
   virtual bool writeSectorUsingIndex(quint16 aux, const QByteArray &data, bool fuzzy);
   virtual bool writeFuzzySector(quint16 aux, const QByteArray &data);
   virtual bool writeSector(quint16 aux, const QByteArray &data);
-  virtual bool writeSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8 sideNumber, quint8 sectorNumber, quint8 sectorSize, const QByteArray &data, bool crcError, int weakOffset);
+  __attribute__((unused)) __attribute__((unused)) __attribute__((unused)) __attribute__((unused)) virtual bool writeSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8 sideNumber, quint8 sectorNumber, quint8 sectorSize, const QByteArray &data, bool crcError, int weakOffset);
   virtual void getStatus(QByteArray &status);
   virtual int sectorsInCurrentTrack();
   virtual void setReady(bool bReady);
   virtual void setChipMode(bool enable);
   virtual void setHappyMode(bool enable);
   virtual void setOSBMode(bool enable);
-  virtual void setToolDiskMode(bool enable);
+  __attribute__((unused)) __attribute__((unused)) virtual void setToolDiskMode(bool enable);
   virtual void setDisplayTransmission(bool active);
   virtual void setSpyMode(bool enable);
   virtual void setTrackLayout(bool enable);
@@ -302,7 +304,10 @@ protected:
   QString m_originalFileName;
   QByteArray m_originalFileHeader;
   FileTypes::FileType m_originalImageType;
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
   bool m_gzipped;
+#pragma clang diagnostic pop
   DiskEditDialog *m_editDialog;
   int m_currentSide;
   int m_numberOfSides;

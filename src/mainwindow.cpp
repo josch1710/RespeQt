@@ -25,7 +25,6 @@
 #include "cassettedialog.h"
 #include "drivewidget.h"
 #include "folderimage.h"
-//#include "infowidget.h"
 #include "logdisplaydialog.h"
 #include "pclink.h"
 #include "printers/printerfactory.h"
@@ -407,7 +406,7 @@ void MainWindow::createDeviceWidgets() {
     connect(driveWidget, &DriveWidget::actionRevert, this, &MainWindow::revertTriggered);
     connect(driveWidget, &DriveWidget::actionSaveAs, this, &MainWindow::saveAsTriggered);
     connect(driveWidget, &DriveWidget::actionBootOptions, this, &MainWindow::bootOptionTriggered);
-    connect(this, &MainWindow::fontChanged, driveWidget, &DriveWidget::setFont);
+    connect(this, &MainWindow::fontChanged, driveWidget, &DriveWidget::setLabelFont);
   }
 
   for(int i = 0; i < PRINTER_COUNT; i++) {//
@@ -552,7 +551,7 @@ void MainWindow::dropEvent(QDropEvent *event) {
     restart = ui->actionStartEmulation->isChecked();
     if (restart) {
       ui->actionStartEmulation->trigger();
-      sio->wait();
+      sio->waitOnPort();
       qApp->processEvents();
     }
 
@@ -885,7 +884,7 @@ void MainWindow::startEmulationTriggered() {
     sio->start(QThread::TimeCriticalPriority);
   } else {
     sio->setPriority(QThread::NormalPriority);
-    sio->wait();
+    sio->waitOnPort();
     qApp->processEvents();
   }
 }
@@ -1085,7 +1084,7 @@ void MainWindow::showOptionsTriggered() {
   auto restart = ui->actionStartEmulation->isChecked();
   if (restart) {
     ui->actionStartEmulation->trigger();
-    sio->wait();
+    sio->waitOnPort();
     qApp->processEvents();
   }
   OptionsDialog optionsDialog(this);
@@ -1119,14 +1118,12 @@ void MainWindow::showOptionsTriggered() {
 void MainWindow::changeFonts() {
   QFont font = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
   if (RespeqtSettings::instance()->useLargeFont()) {
-    //QFont font("Arial Black", 9, QFont::Normal);
-    font.setPointSize(9);
+    font.setPointSize(10);
     emit fontChanged(font);
   } else {
     font.setPointSize(8);
-    //QFont font("MS Shell Dlg 2,8", 8, QFont::Normal);
-    emit fontChanged(font);
   }
+  emit fontChanged(font);
 }
 
 void MainWindow::showAboutTriggered() {
@@ -1151,7 +1148,7 @@ void MainWindow::setSession() {
   restart = ui->actionStartEmulation->isChecked();
   if (restart) {
     ui->actionStartEmulation->trigger();
-    sio->wait();
+    sio->waitOnPort();
     qApp->processEvents();
   }
 
@@ -1870,7 +1867,7 @@ void MainWindow::cassettePlaybackTriggered() {
   restart = ui->actionStartEmulation->isChecked();
   if (restart) {
     ui->actionStartEmulation->trigger();
-    sio->wait();
+    sio->waitOnPort();
     qApp->processEvents();
   }
 

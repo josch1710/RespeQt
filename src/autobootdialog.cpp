@@ -10,22 +10,24 @@
 #include "mainwindow.h"
 #include "ui_autobootdialog.h"
 
-#include <QDebug>
 #include <QTime>
 
 extern QString g_exefileName;
 bool reload;
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 AutoBootDialog::AutoBootDialog(QWidget *parent) : QDialog(parent),
                                                   ui(new Ui::AutoBootDialog) {
   ui->setupUi(this);
   ui->progressBar->setVisible(false);
-  connect(ui->reloadButton, SIGNAL(clicked()), this, SLOT(reject()));
-  connect(ui->buttonBox, SIGNAL(clicked(QAbstractButton *)), this, SLOT(close()));
-  connect(ui->reloadButton, SIGNAL(clicked()), this, SLOT(reloadExe));
+  connect(ui->reloadButton, &QPushButton::clicked, this, &AutoBootDialog::reject);
+  connect(ui->buttonBox, &QDialogButtonBox::clicked, this, &AutoBootDialog::close);
+  connect(ui->reloadButton, &QPushButton::clicked, this, &AutoBootDialog::reloadExe);
   reload = false;
   ui->progressBar->setVisible(true);
 }
+#pragma clang diagnostic pop
 
 AutoBootDialog::~AutoBootDialog() {
   delete ui;
@@ -62,12 +64,17 @@ void AutoBootDialog::blockRead(int current, int all) {
 void AutoBootDialog::loaderDone() {
   accept();
 }
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
+// TODO Is it used?
 void AutoBootDialog::onClick(QAbstractButton *button) {
   if (button->text() == "Cancel") {
     g_exefileName = "";
     return;
   }
 }
+#pragma clang diagnostic pop
 
 void AutoBootDialog::reloadExe() {
   reload = true;

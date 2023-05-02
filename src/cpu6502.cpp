@@ -1239,7 +1239,7 @@ void Cpu6502::Xas(unsigned short addr) {
   WriteByte(addr, (m_SP & UNDOC_MASK));// not sure
 }
 
-int Cpu6502::Step(void) {
+__attribute__((unused)) int Cpu6502::Step(void) {
   int nClockCount;
   unsigned char val;
   unsigned short addr;
