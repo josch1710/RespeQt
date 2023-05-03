@@ -12,7 +12,6 @@
 #include "respeqtsettings.h"
 #include "ui_docdisplaywindow.h"
 
-#include <QFileDialog>
 #include <QPrintDialog>
 #include <QPrinter>
 

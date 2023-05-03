@@ -13,7 +13,6 @@
 #include "windows.h"
 #endif
 
-#include "mainwindow.h"
 #include "respeqtsettings.h"
 #include "smartdevice.h"
 
@@ -21,7 +20,6 @@
 #include <QDateTime>
 #include <QDesktopServices>
 #include <QUrl>
-#include <QtDebug>
 
 //SmartDevice (ApeTime + URL submit)
 
@@ -46,7 +44,7 @@ void SmartDevice::handleCommand(const quint8 command, const quint8 aux1, const q
       sio->port()->writeComplete();
       sio->port()->writeDataFrame(data);
 
-      qDebug() << "!n" << tr("[%1] Read date/time (%2).").arg(deviceName()).arg(dateTime.toString(Qt::SystemLocaleShortDate));
+      qDebug() << "!n" << tr("[%1] Read date/time (%2).").arg(deviceName(), dateTime.toString(Qt::SystemLocaleShortDate));
       break;
     }
 

@@ -8,19 +8,14 @@
 
 #include "mainwindow.h"
 #include <QApplication>
-#include <QLibraryInfo>
 #include <QTextCodec>
 #include <memory>
 
 #ifdef Q_OS_WIN
-// clang-format off
 #include <windows.h>
-#include <Mmsystem.h>
-// clang-format on
 #endif
 
 int main(int argc, char *argv[]) {
-  int ret = 0;
 #ifdef Q_OS_WIN
   timeBeginPeriod(1);
 #endif
@@ -29,7 +24,7 @@ int main(int argc, char *argv[]) {
   QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
   auto w = new MainWindow;
   w->show();
-  ret = a.exec();
+  auto ret = a.exec();
 #ifdef Q_OS_WIN
   timeEndPeriod(1);
 #endif

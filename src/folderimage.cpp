@@ -14,7 +14,6 @@
 #include "respeqtsettings.h"
 
 #include <QFileInfoList>
-#include <QtDebug>
 
 // CIRCULAR SECTORS USED FOR SERVING FILES FROM FOLDER IMAGES
 // ==========================================================
@@ -32,13 +31,11 @@ FolderImage::FolderImage(SioWorkerPtr worker, int maxEntries) : SimpleDiskImage(
 }
 
 FolderImage::~FolderImage() {
-  close();
+  atariFiles.clear();
 }
 
 void FolderImage::close() {
   atariFiles.clear();
-
-  return;
 }
 
 bool FolderImage::format(const DiskGeometry &) {
@@ -66,8 +63,11 @@ void FolderImage::buildDirectory() {
 
   atariFiles.clear();
   auto count = infos.count();
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "UnusedValue"
   if (maxEntries > 0 && count > maxEntries)
     count = maxEntries;
+#pragma clang diagnostic pop
 
   for (auto info: infos) {
     longName = info.completeBaseName();
@@ -91,7 +91,7 @@ void FolderImage::buildDirectory() {
     ext = ext.left(3);
 
     // Check, whether we have to shorten the filename because of duplicates, and record them.
-    auto completeName = QString("%1.%2").arg(name).arg(ext);
+    auto completeName = QString("%1.%2").arg(name, ext);
     if (!knownNames.contains(completeName))
       knownNames.push_back(completeName);
     else
@@ -114,7 +114,7 @@ void FolderImage::buildDirectory() {
     auto i = 1;
     for (auto j = 0; j < atariFiles.count(); j++) {
       auto file = atariFiles[j];
-      auto completeName = QString("%1.%2").arg(file.atariName).arg(file.atariExt);
+      auto completeName = QString("%1.%2").arg(file.atariName, file.atariExt);
       if (QString::compare(duplicate, completeName) != 0)
         continue;  // Not a duplicate
       if (i == 1) {// First filename doesn't need to be fixed.
@@ -190,7 +190,6 @@ bool FolderImage::readSector(quint16 sector, QByteArray &data) {
           bootFileSector = 369 + i;
           if (g_disablePicoHiSpeed) {
             data[15] = 0;
-            QFile boot(dir.path() + "/$boot.bin");
             QByteArray speed;
             boot.open(QFile::ReadWrite);
             boot.seek(15);
@@ -208,21 +207,21 @@ bool FolderImage::readSector(quint16 sector, QByteArray &data) {
           QByteArray nameLine;
           nameLine.append(dir.dirName() + '\x9B');
           picoName.write(nameLine);
-          for (int i = 0; i < maxEntries; i++) {
-            if (atariFiles[i].exists) {
-              if (atariFiles[i].longName != "$boot.bin") {
+          for (int j = 0; j < maxEntries; j++) {
+            if (atariFiles[j].exists) {
+              if (atariFiles[j].longName != "$boot.bin") {
                 nameLine.clear();
-                nameLine.append(atariFiles[i].atariName);
+                nameLine.append(atariFiles[j].atariName);
                 QByteArray space;
                 int size;
-                size = atariFiles[i].atariName.size();
-                for (int j = 0; j <= 8 - size - 1; j++) {
-                  space[j] = '\x20';
+                size = atariFiles[j].atariName.size();
+                for (int k = 0; k <= 8 - size - 1; k++) {
+                  space[k] = '\x20';
                 }
                 nameLine.append(space);
-                nameLine.append(atariFiles[i].atariExt);
+                nameLine.append(atariFiles[j].atariExt);
                 nameLine.append('\x20');
-                nameLine.append(atariFiles[i].longName.mid(0, atariFiles[i].longName.indexOf(".", -1) - 1));
+                nameLine.append(atariFiles[j].longName.mid(0, atariFiles[j].longName.indexOf(".", -1) - 1));
                 nameLine.append('\x9B');
                 picoName.write(nameLine);
               }
@@ -317,7 +316,7 @@ bool FolderImage::readSector(quint16 sector, QByteArray &data) {
         entry = "";
         entry[0] = 0x42;
         QFileInfo info = atariFiles[i].original;
-        ;
+
         int size = (info.size() + 124) / 125;
         if (size > 999) {
           size = 999;
