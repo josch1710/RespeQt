@@ -43,7 +43,7 @@ install "$1/atari_8-bit_Menu/"* "${deploydir}/rcl/menu"
 
 cd "$2" || exit 2
 test -f "RespeQt_${longversion}.zip" && rm "RespeQt_${longversion}.zip"
-zip -9r -D "RespeQt_${longversion}.zip" $(basename "${deploydir}")
+zip -9r -D "RespeQt_${longversion}.zip" "$(basename "${deploydir}")"
 test -f "RespeQt_${longversion}.dmg" && rm "RespeQt_${longversion}.dmg"
 
 /opt/homebrew/bin/create-dmg --volname "RespeQt_${longversion}" \

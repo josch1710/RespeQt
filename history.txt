@@ -4,6 +4,8 @@ release 5.4
         * Drag and drop fixed (issue #7)
         * You can record the SIO communication and replay it for debugging (Debug menu, issue #4)
         * Fixed an issue with ATR images with more that 256 sectors (PR #6)
+        * Replaced deprecated function sprintf with snprintf.
+        * Refactoring.
 
 release 5
 	* PRO and ATX images support in read/write mode with accurate (I hope so) protection emulation.

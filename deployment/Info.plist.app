@@ -21,6 +21,6 @@
 	<key>CFBundleShortVersionString</key>
 	<string>@SHORTVERSION@</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>(C) 2023 http://github.com/RespeQt</string>
+	<string>(C) 2023 https://github.com/RespeQt</string>
 </dict>
 </plist>

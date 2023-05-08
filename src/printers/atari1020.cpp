@@ -5,7 +5,6 @@
 #include <QFontDatabase>
 #include <QPoint>
 #include <cmath>
-#include <utility>
 
 static struct GRAPHICS_COMMAND ALLOWED_GRAPHICS_COMMANDS[] = {
         {'A', 0, false, AUTOMATA_END},
