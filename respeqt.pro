@@ -24,7 +24,7 @@ TARGET = RespeQt
 TEMPLATE = app
 
 CONFIG += qt c++11 strict_c++
-QT += core gui network widgets printsupport serialport svg
+QT += core gui network widgets printsupport serialport svg qml quick
 INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib include headers tools
 
 # Warnings for Deprecated functions

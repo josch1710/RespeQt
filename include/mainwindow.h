@@ -22,6 +22,8 @@
 #include <QTextEdit>
 #include <QTranslator>
 #include <QtDebug>
+#include <QSharedPointer>
+#include <QQmlEngine>
 #include <memory>
 
 #include "aboutdialog.h"
@@ -58,6 +60,7 @@ public:
   void showEvent(QShowEvent *event) override;
 
 private:
+  QSharedPointer<QQmlEngine> qmlEngine;
   static MainWindow *sInstance;
   int untitledName;
   Ui::MainWindow *ui;

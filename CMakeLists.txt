@@ -178,6 +178,7 @@ set(RESOURCES
         resources/i18n.qrc
         resources/documentation.qrc
         resources/fonts.qrc
+        resources/qml.qrc
     )
 
 if (UNIX)
@@ -196,7 +197,7 @@ if (WIN32)
 endif()
 
 find_package(Qt5 5.0...<5.7 REQUIRED
-        COMPONENTS Core Widgets Gui Network PrintSupport SerialPort Svg LinguistTools)
+        COMPONENTS Core Widgets Gui Network PrintSupport SerialPort Svg LinguistTools Qml Quick)
 if (MAKE_TEST)
     find_package(Qt5 5.0...<5.7 REQUIRED COMPONENTS Test)
 endif()
@@ -234,6 +235,8 @@ target_link_libraries(${TARGET} Qt5::Network)
 target_link_libraries(${TARGET} Qt5::PrintSupport)
 target_link_libraries(${TARGET} Qt5::SerialPort)
 target_link_libraries(${TARGET} Qt5::Svg)
+target_link_libraries(${TARGET} Qt5::Qml)
+target_link_libraries(${TARGET} Qt5::Quick)
 if (MAKE_TEST)
     target_link_libraries(${TARGET} Qt5::Test)
 endif()

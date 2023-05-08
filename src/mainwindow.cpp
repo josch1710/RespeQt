@@ -28,28 +28,23 @@
 #include "logdisplaydialog.h"
 #include "pclink.h"
 #include "printers/printerfactory.h"
+#include "printers/printers.h"
 #include "printerwidget.h"
 #include "rcl.h"
-#include "smartdevice.h"
-//#include "printers/outputfactory.h"
-#include "printers/printers.h"
-//#include "printers/outputs.h"
 #include "respeqtsettings.h"
+#include "smartdevice.h"
 
 #include <QDesktopWidget>
 #include <QDrag>
 #include <QDragEnterEvent>
-//#include <QDropEvent>
 #include <QEvent>
 #include <QFont>
 #include <QHBoxLayout>
 #include <QMessageBox>
-//#include <QPrintDialog>
-//#include <QPrinter>
-//#include <QPrinterInfo>
+#include <QQmlComponent>
+#include <QQuickWindow>
 #include <QScrollBar>
 #include <QToolButton>
-#include <QTranslator>
 #include <QUrl>
 #include <QWidget>
 #include <QtDebug>
@@ -146,6 +141,9 @@ MainWindow::MainWindow()
 
   /* Setup the logging system */
   sInstance = this;
+  /* Set up QML */
+  qmlEngine = QSharedPointer<QQmlEngine>(new QQmlEngine());
+
   g_respeQtAppPath = QCoreApplication::applicationDirPath();
   g_disablePicoHiSpeed = false;
   logFile = new QFile(QDir::temp().absoluteFilePath("respeqt.log"));
@@ -409,7 +407,7 @@ void MainWindow::createDeviceWidgets() {
     connect(this, &MainWindow::fontChanged, driveWidget, &DriveWidget::setLabelFont);
   }
 
-  for(int i = 0; i < PRINTER_COUNT; i++) {//
+  for (int i = 0; i < PRINTER_COUNT; i++) {//
     auto printerWidget = new PrinterWidget(i);
     if (i < 2) {
       ui->leftColumn2->addWidget(printerWidget);
@@ -1127,8 +1125,21 @@ void MainWindow::changeFonts() {
 }
 
 void MainWindow::showAboutTriggered() {
-  AboutDialog aboutDialog(this, VERSION);
-  aboutDialog.exec();
+  QQmlComponent component(qmlEngine.data(), QUrl("qrc:/qml/about"));
+  while (component.isLoading())
+    QThread::usleep(100);
+
+  if (component.isError())
+    qDebug() << "!e" << component.errorString();
+
+  auto about = qobject_cast<QQuickWindow *>(component.create());
+  if (about) {
+    about->show();
+  }
+  return;
+
+  //AboutDialog aboutDialog(this, VERSION);
+  //aboutDialog.exec();
 }
 //
 void MainWindow::showDocumentationTriggered() {
@@ -1404,8 +1415,7 @@ void MainWindow::mountFile(char no, const QString &fileName, bool /*prot*/) {
       filenamelabel = fileName.right(fileName.size() - i);
     }
 
-    qDebug() << "!n" << tr("[%1] Mounted '%2' as '%3'.")
-                                .arg(disk->deviceName(), filenamelabel, disk->description());
+    qDebug() << "!n" << tr("[%1] Mounted '%2' as '%3'.").arg(disk->deviceName(), filenamelabel, disk->description());
 
     if (g_rclFileName.left(1) == "*") emit fileMounted(true);//
   }
@@ -1787,8 +1797,7 @@ void MainWindow::newImageTriggered() {
 
   sio->installDevice(DISK_BASE_CDEVIC + no, disk);
   deviceStatusChanged(DISK_BASE_CDEVIC + no);
-  qDebug() << "!n" << tr("[%1] Mounted '%2' as '%3'.")
-                              .arg(disk->deviceName(), disk->originalFileName(), disk->description());
+  qDebug() << "!n" << tr("[%1] Mounted '%2' as '%3'.").arg(disk->deviceName(), disk->originalFileName(), disk->description());
 }
 
 void MainWindow::openSessionTriggered() {

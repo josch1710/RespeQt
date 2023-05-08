@@ -116,6 +116,7 @@ HEADERS += \
     include/crc16.h \
     include/cpu6502.h \
     headers/atarisio.h \
+    tools/make_unique.h \
     include/filesystems/ataridirentry.h \
     include/filesystems/atarifilesystem.h \
     include/filesystems/dos10filesystem.h \
@@ -171,6 +172,5 @@ unix {
                src/printers/rawoutput_cups.cpp
     HEADERS += include/serialport-unix.h
 }
-
 
 
