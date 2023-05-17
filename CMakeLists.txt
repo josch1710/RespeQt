@@ -102,7 +102,7 @@ set(HEADERS
         include/printers/outputwindow.h
         include/printers/rawoutput.h
         include/siorecorder.h
-        include/make_unique.h
+        tools/make_unique.h
         include/printers/printers.h
         include/rcl.h
         include/sdxprotocol.h
