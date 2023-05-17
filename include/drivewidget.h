@@ -23,7 +23,7 @@ public:
   explicit DriveWidget(int driveNum, QWidget *parent = 0);
   ~DriveWidget();
 
-  int getDriveNumber() { return driveNo_; }
+  __attribute__((unused)) int getDriveNumber() { return driveNo_; }
   void setup(bool happyShown, bool chipShown, bool nextSideShown, bool OSBShown, bool toolDiskShown);
 
 
@@ -52,7 +52,7 @@ signals:
   void actionToggleOSB(int deviceId, bool open);
   void actionToolDisk(int deviceId, bool open);
   void actionWriteProtect(int deviceId, bool state);
-  void actionMountRecent(int deviceId, const QString &fileName);
+  __attribute__((unused)) void actionMountRecent(int deviceId, const QString &fileName);
   void actionEditDisk(int deviceId);
   void actionSave(int deviceId);
   void actionAutoSave(int deviceId, bool enabled);
@@ -61,7 +61,7 @@ signals:
   void actionBootOptions(int deviceId);
 
 public slots:
-  void setFont(const QFont &font);
+  void setLabelFont(const QFont &font);
 
 private slots:
   void mountFolderTriggered();

@@ -102,7 +102,7 @@ FileTypes::FileType FileTypes::getFileType(const QString &fileName) {
   return result;
 }
 
-QString FileTypes::getFileTypeName(FileType type) {
+__attribute__((unused)) QString FileTypes::getFileTypeName(FileType type) {
   switch (type) {
     case Atr:
       return tr("ATR disk image");
@@ -145,12 +145,7 @@ QString FileTypes::getFileTypeName(FileType type) {
 
 GzFile::GzFile(const QString &path)
     : QFile(path) {
-  mPath = path;
   mHandle = 0;
-}
-
-GzFile::~GzFile() {
-  close();
 }
 
 bool GzFile::open(OpenMode mode) {

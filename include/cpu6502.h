@@ -291,7 +291,7 @@ public:
   }
 
   // execute one instruction and returns the number of cycles.
-  virtual int Step(void);
+  __attribute__((unused)) virtual int Step(void);
 
   // build a trace of the next instruction. Buffer should be at least 128 bytes
   virtual unsigned short BuildTrace(char *buffer);
@@ -299,16 +299,16 @@ public:
   virtual char *GetAddressLabel(unsigned short addr);
   virtual char *GetAddressLabelAllBanks(unsigned short addr);
   virtual void Trace(int module, bool debug, const char *msg, ...) = 0;
-  virtual bool HasTrace(void) { return m_traceOn; }
-  virtual void SetTrace(bool traceOn) {
+  __attribute__((unused)) virtual bool HasTrace(void) { return m_traceOn; }
+  __attribute__((unused)) virtual void SetTrace(bool traceOn) {
     m_traceOn = traceOn;
     m_instructionsSkipped = 0;
   }
 
   // trigger an interrupt line and returns the number of cycles.
   int Reset(void);
-  int Nmi(void);
-  int Irq(void);
+  __attribute__((unused)) int Nmi(void);
+  __attribute__((unused)) int Irq(void);
 
   // read/write a byte in memory
   virtual unsigned char ReadByte(unsigned short addr) = 0;

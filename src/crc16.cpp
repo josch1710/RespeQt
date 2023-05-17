@@ -40,22 +40,15 @@ static constexpr unsigned short crcTable[256] = {
         0x6e17, 0x7e36, 0x4e55, 0x5e74, 0x2e93, 0x3eb2, 0x0ed1, 0x1ef0};
 
 Crc16::Crc16() {
-  m_bytesInCrc = 0;
   m_crc = 0xFFFF;
 }
 
 void Crc16::Reset(void) {
-  m_bytesInCrc = 0;
   m_crc = 0xFFFF;
 }
 
 unsigned char Crc16::Add(unsigned char data) {
-  m_bytesInCrc++;
   m_crc = ((m_crc << 8) ^ crcTable[((m_crc >> 8) ^ data) & 0xff]) & 0xffff;
   return data;
 }
 
-void Crc16::Abort(void) {
-  m_bytesInCrc = 0;
-  m_crc = 0xFF00;
-}

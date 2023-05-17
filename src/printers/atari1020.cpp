@@ -4,7 +4,7 @@
 
 #include <QFontDatabase>
 #include <QPoint>
-#include <cmath>
+#include <utility>
 
 static struct GRAPHICS_COMMAND ALLOWED_GRAPHICS_COMMANDS[] = {
         {'A', 0, false, AUTOMATA_END},
@@ -592,8 +592,7 @@ namespace Printers {
               qDebug()
                       << "!n"
                       << tr("[%1] Scale command ignored (%2 should be in range 0-63)")
-                                 .arg(deviceName())
-                                 .arg(QString(mFirstNumber));
+                                 .arg(deviceName(), QString(mFirstNumber));
             }
           }
         } break;
@@ -625,7 +624,7 @@ namespace Printers {
             if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
               qDebug()
                       << "!n"
-                      << tr("[%1] Set color to %2").arg(deviceName()).arg(colorName);
+                      << tr("[%1] Set color to %2").arg(deviceName(), colorName);
             }
             mPen.setColor(temp);
           } else {
@@ -633,8 +632,7 @@ namespace Printers {
               qDebug() << "!n"
                        << tr("[%1] Set color command ignored (%2 should be in "
                              "range 0-3)")
-                                  .arg(deviceName())
-                                  .arg(QString(mFirstNumber));
+                                  .arg(deviceName(), QString(mFirstNumber));
             }
           }
         } break;
@@ -646,9 +644,9 @@ namespace Printers {
             if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
               qDebug() << "!n"
                        << tr("[%1] Set line mode to %2")
-                                  .arg(deviceName())
-                                  .arg(line == 0 ? tr("solid")
-                                                 : tr("dashed %1").arg(line));
+                                  .arg(deviceName(),
+                                       line == 0 ? tr("solid") : tr("dashed %1").arg(line)
+                                  );
             }
             if (line == 0) {
               mPen.setStyle(Qt::SolidLine);
@@ -789,8 +787,7 @@ namespace Printers {
               qDebug() << "!n"
                        << tr("[%1] Set text orientation command ignored (%2 should "
                              "be in range 0-3)")
-                                  .arg(deviceName())
-                                  .arg(QString(mFirstNumber));
+                                  .arg(deviceName(), QString(mFirstNumber));
             }
           }
         } break;
@@ -800,8 +797,7 @@ namespace Printers {
           if (RespeqtSettings::instance()->displayGraphicsInstructions()) {
             qDebug() << "!n"
                      << tr("[%1] Print '%2' in Graphics mode")
-                                .arg(deviceName())
-                                .arg(QString(mPrintText));
+                                .arg(deviceName(), QString(mPrintText));
           }
           drawText();
         } break;

@@ -13,7 +13,6 @@
 #include "mainwindow.h"
 #include "ui_logdisplaydialog.h"
 
-#include <QDir>
 #include <QMessageBox>
 #include <QTranslator>
 
@@ -27,8 +26,9 @@ LogDisplayDialog::LogDisplayDialog(QWidget *parent) : QDialog(parent),
 
   l_ui->setupUi(this);
 
-  connect(l_ui->listByDisk, SIGNAL(currentIndexChanged(QString)), this, SLOT(diskFilter()));
-  connect(l_ui->buttonBox, SIGNAL(clicked(QAbstractButton *)), this, SLOT(onClick(QAbstractButton *)));
+  void (QComboBox::*diskFilterChanged)(int) = &QComboBox::currentIndexChanged;
+  connect(l_ui->listByDisk, diskFilterChanged, this, &LogDisplayDialog::diskFilter);
+  connect(l_ui->buttonBox, &QDialogButtonBox::clicked, this, &LogDisplayDialog::onClick);
 }
 
 LogDisplayDialog::~LogDisplayDialog() {

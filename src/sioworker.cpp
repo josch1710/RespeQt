@@ -14,10 +14,6 @@
 #include "siorecorder.h"
 #include <QDateTime>
 #include <QFile>
-#include <QtDebug>
-#ifndef QT_NO_DEBUG
-#include <QFileDialog>
-#endif
 
 /* SioDevice */
 SioDevice::SioDevice(SioWorkerPtr worker)
@@ -44,7 +40,7 @@ SioWorker::SioWorker()
   for (int i = 0; i <= 255; i++) {
     devices[i] = nullptr;
   }
-  mPort = nullptr;
+  mPort.reset();
 }
 
 SioWorker::~SioWorker() {
@@ -56,7 +52,7 @@ SioWorker::~SioWorker() {
   delete deviceMutex;
 }
 
-bool SioWorker::wait(unsigned long time) {
+bool SioWorker::waitOnPort(unsigned long time) {
   mustTerminate = true;
 
   if (mPort) {
@@ -75,12 +71,16 @@ bool SioWorker::wait(unsigned long time) {
 void SioWorker::start(Priority p) {
   switch (RespeqtSettings::instance()->backend()) {
     default:
-    case SerialBackend::STANDARD:
-      mPort = std::make_shared<StandardSerialPortBackend>(this);
+    case SerialBackend::STANDARD: {
+      auto temp = QSharedPointer<StandardSerialPortBackend>(new StandardSerialPortBackend(this));
+      mPort = qSharedPointerDynamicCast<AbstractSerialPortBackend>(temp);
       break;
-    case SerialBackend::SIO_DRIVER:
-      mPort = std::make_shared<AtariSioBackend>(this);
+    }
+    case SerialBackend::SIO_DRIVER: {
+      auto temp = QSharedPointer<AtariSioBackend>(new AtariSioBackend(this));
+      mPort = qSharedPointerDynamicCast<AbstractSerialPortBackend>(temp);
       break;
+    }
     case SerialBackend::TEST:
       mPort = SioRecorder::instance();
       break;
@@ -103,7 +103,7 @@ void SioWorker::setAutoReconnect(bool autoReconnect) {
 }
 
 void SioWorker::run() {
-  connect(mPort.get(), SIGNAL(statusChanged(QString)), this, SIGNAL(statusChanged(QString)));
+  connect(mPort.data(), SIGNAL(statusChanged(QString)), this, SIGNAL(statusChanged(QString)));
 
   /* Open serial port */
   if (!mPort->open()) {
@@ -502,7 +502,7 @@ QString SioWorker::deviceName(int device) {
 
 CassetteWorker::CassetteWorker()
     : QThread() {
-  mPort = nullptr;
+  mPort.reset();
   mustTerminate.lock();
 }
 
@@ -515,7 +515,7 @@ bool CassetteWorker::loadCasImage(const QString &fileName) {
   QFile casFile(fileName);
 
   if (!casFile.open(QFile::ReadOnly)) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(casFile.errorString());
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, casFile.errorString());
     return false;
   }
 
@@ -526,18 +526,16 @@ bool CassetteWorker::loadCasImage(const QString &fileName) {
   header = casFile.read(8);
 
   if (header.length() != 8) {
-    qCritical() << "!e" << tr("Cannot read '%1': %2").arg(fileName).arg(casFile.errorString());
+    qCritical() << "!e" << tr("Cannot read '%1': %2").arg(fileName, casFile.errorString());
     return false;
   }
 
   magic = (quint8) header.at(0) + (quint8) header.at(1) * 256 + (quint8) header.at(2) * 65536 + (quint8) header.at(3) * 16777216;
   length = (quint8) header.at(4) + (quint8) header.at(5) * 256;
-  aux = (quint8) header.at(6) + (quint8) header.at(7) * 256;
-
 
   data = casFile.read(length);
   if (data.length() != length) {
-    qCritical() << "!e" << tr("Cannot read '%1': %2").arg(fileName).arg(casFile.errorString());
+    qCritical() << "!e" << tr("Cannot read '%1': %2").arg(fileName, casFile.errorString());
     return false;
   }
 
@@ -559,7 +557,7 @@ bool CassetteWorker::loadCasImage(const QString &fileName) {
     header = casFile.read(8);
 
     if (header.length() != 8) {
-      qCritical() << "!e" << tr("Cannot read '%1': %2").arg(fileName).arg(casFile.errorString());
+      qCritical() << "!e" << tr("Cannot read '%1': %2").arg(fileName, casFile.errorString());
       return false;
     }
 
@@ -569,7 +567,7 @@ bool CassetteWorker::loadCasImage(const QString &fileName) {
 
     data = casFile.read(length);
     if (data.length() != length) {
-      qCritical() << "!e" << tr("Cannot read '%1': %2").arg(fileName).arg(casFile.errorString());
+      qCritical() << "!e" << tr("Cannot read '%1': %2").arg(fileName, casFile.errorString());
       return false;
     }
 
@@ -667,12 +665,18 @@ void CassetteWorker::run() {
 void CassetteWorker::start(Priority p) {
   switch (RespeqtSettings::instance()->backend()) {
     default:
-    case SerialBackend::STANDARD:
-      mPort = std::make_shared<StandardSerialPortBackend>(this);
+    case SerialBackend::STANDARD: {
+      auto temp = QSharedPointer<StandardSerialPortBackend>(new StandardSerialPortBackend(this));
+      mPort = qSharedPointerDynamicCast<AbstractSerialPortBackend>(temp);
       break;
-    case SerialBackend::SIO_DRIVER:
-      mPort = std::make_shared<AtariSioBackend>(this);
+    }
+
+    case SerialBackend::SIO_DRIVER: {
+      auto temp = QSharedPointer<AtariSioBackend>(new AtariSioBackend(this));
+      mPort = qSharedPointerDynamicCast<AbstractSerialPortBackend>(temp);
       break;
+    }
+
     case SerialBackend::TEST:
       mPort = SioRecorder::instance();
       break;

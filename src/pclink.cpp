@@ -14,7 +14,6 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/time.h>
-#include <unistd.h>
 #include <utime.h>
 
 // The order matters
@@ -38,10 +37,10 @@
 /* SDX set attribute mask */
 #define SA_PROTECT 0x01
 #define SA_UNPROTECT 0x10
-#define SA_HIDE 0x02
+/*#define SA_HIDE 0x02
 #define SA_UNHIDE 0x20
 #define SA_ARCHIVE 0x04
-#define SA_UNARCHIVE 0x40
+#define SA_UNARCHIVE 0x40 */
 #define SA_SUBDIR 0x08   /* illegal mode */
 #define SA_UNSUBDIR 0x80 /* illegal mode */
 
@@ -57,7 +56,7 @@
 #define HOST_SEPARATOR_CHAR '/'
 #endif
 
-#define SDX_CURRENT_DIR_CHAR ':'
+//#define SDX_CURRENT_DIR_CHAR ':'
 #define SDX_GO_UP_DIR_CHAR '<'
 
 /* Atari SIO status block */
@@ -533,7 +532,7 @@ int PCLINK::check_dos_name(char *newpath, struct dirent *dp, struct stat *sb) {
     memcpy(dp->d_name, (dp->d_name) + 1, strlen(dp->d_name) + 1);
   }
 
-  if (D) qDebug() << "!n" << tr("%1: got fname '%2'").arg(__extension__ __FUNCTION__).arg(dp->d_name);
+  if (D) qDebug() << "!n" << tr("%1: got fname '%2'").arg(__extension__ __FUNCTION__, dp->d_name);
 
   if (validate_dos_name(dp->d_name))
     return 1;
@@ -541,7 +540,7 @@ int PCLINK::check_dos_name(char *newpath, struct dirent *dp, struct stat *sb) {
   /* stat() the file (fetches the length) */
   snprintf(temp_fspec, 1024, "%s/%s", newpath, fname);
 
-  if (D) qDebug() << "!n" << tr("%1: stat '%2'").arg(__extension__ __FUNCTION__).arg(dp->d_name);
+  if (D) qDebug() << "!n" << tr("%1: stat '%2'").arg(__extension__ __FUNCTION__, dp->d_name);
 
   if (stat(temp_fspec, sb))
     return 1;
@@ -1435,7 +1434,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
   if ((fno == 0x09) || (fno == 0x0a)) /* FOPEN/FFIRST */
   {
     if (ccom == 'P') {
-      if (D) qDebug() << "!n" << tr("mode: $%1, atr1: $%2, atr2: $%3, path: '%4', name: '%5'").arg(device[cunit].parbuf.fmode, 0, 16).arg(device[cunit].parbuf.fatr1, 0, 16).arg(device[cunit].parbuf.fatr2, 0, 16).arg(QString((const char *) device[cunit].parbuf.path)).arg(QString((const char *) device[cunit].parbuf.name));
+      if (D) qDebug() << "!n" << tr("mode: $%1, atr1: $%2, atr2: $%3, path: '%4', name: '%5'").arg(device[cunit].parbuf.fmode, 0, 16).arg(device[cunit].parbuf.fatr1, 0, 16).arg(device[cunit].parbuf.fatr2, 0, 16).arg(QString((const char *) device[cunit].parbuf.path), QString((const char *) device[cunit].parbuf.name));
 
       device[cunit].status.err = 1;
 
@@ -1601,7 +1600,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
       }
 
       if (iodesc[i].fps.file == nullptr) {
-        if (D) qDebug() << "!n" << tr("FOPEN: cannot open '%1', %2 (%3)").arg(newpath).arg(strerror(errno)).arg(errno);
+        if (D) qDebug() << "!n" << tr("FOPEN: cannot open '%1', %2 (%3)").arg(newpath, strerror(errno), QString::number(errno));
         if (device[cunit].parbuf.fmode & 0x04)
           device[cunit].status.err = 170;
         else
@@ -1775,7 +1774,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
         }
         strcat(xpath2, newname);
 
-        if (D) qDebug() << "!n" << tr("RENAME: renaming '%1' -> '%2'").arg(dp->d_name).arg(newname);
+        if (D) qDebug() << "!n" << tr("RENAME: renaming '%1' -> '%2'").arg(dp->d_name, newname);
 
         if (stat(xpath2, &dummy) == 0) {
           if (D) qDebug() << "!n" << tr("RENAME: '%1' already exists").arg(xpath2);
@@ -2081,7 +2080,8 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
     device[cunit].status.err = 1;
 
     if (rmdir(newpath)) {
-      if (D) qDebug() << "!n" << tr("RMDIR: cannot del '%1', %2 (%3)").arg(newpath).arg(strerror(errno)).arg(errno);
+      if (D)
+        qDebug() << "!n" << tr("RMDIR: cannot del '%1', %2 (%3)").arg(newpath, strerror(errno), QString::number(errno));
       if (errno == ENOTEMPTY)
         device[cunit].status.err = 167;
       else
@@ -2113,7 +2113,8 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
     (void) getcwd(oldwd, sizeof(oldwd));
 
     if (chdir(newpath)) {
-      if (D) qDebug() << "!n" << tr("cannot access '%1', %2").arg(newpath).arg(strerror(errno));
+      if (D)
+        qDebug() << "!n" << tr("cannot access '%1', %2").arg(newpath, strerror(errno), QString::number(errno));
       device[cunit].status.err = 150;
       goto complete;
     }

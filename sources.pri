@@ -25,7 +25,6 @@ SOURCES += \
     src/diskeditdialog.cpp \
     src/autoboot.cpp \
     src/autobootdialog.cpp \
-    src/atarifilesystem.cpp \
     src/miscutils.cpp \
     src/printers/textprinterwindow.cpp \
     src/cassettedialog.cpp \
@@ -39,7 +38,6 @@ SOURCES += \
     src/printers/atari1027.cpp \
     src/atascii.cpp \
     src/drivewidget.cpp \
-    src/infowidget.cpp \
     src/atasciiinternational.cpp \
     src/printerwidget.cpp \
     src/printers/atariprinter.cpp \
@@ -59,7 +57,14 @@ SOURCES += \
     src/printers/passthrough.cpp \
     src/printers/graphicsprimitive.cpp \
     src/crc16.cpp \
-    src/cpu6502.cpp
+    src/cpu6502.cpp \
+    src/filesystems/ataridirentry.cpp \
+    src/filesystems/atarifilesystem.cpp \
+    src/filesystems/dos10filesystem.cpp \
+    src/filesystems/dos20filesystem.cpp \
+    src/filesystems/dos25filesystem.cpp \
+    src/filesystems/mydosfilesystem.cpp \
+    src/filesystems/spartadosfilesystem.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -80,7 +85,6 @@ HEADERS += \
     include/diskeditdialog.h \
     include/autoboot.h \
     include/autobootdialog.h \
-    include/atarifilesystem.h \
     include/miscutils.h \
     include/printers/textprinterwindow.h \
     include/cassettedialog.h \
@@ -94,7 +98,6 @@ HEADERS += \
     include/printers/atari1027.h \
     include/atascii.h \
     include/drivewidget.h \
-    include/infowidget.h \
     include/printerwidget.h \
     include/atasciiinternational.h \
     include/printers/atariprinter.h \
@@ -112,7 +115,14 @@ HEADERS += \
     include/printers/graphicsprimitive.h \
     include/crc16.h \
     include/cpu6502.h \
-    headers/atarisio.h
+    headers/atarisio.h \
+    include/filesystems/ataridirentry.h \
+    include/filesystems/atarifilesystem.h \
+    include/filesystems/dos10filesystem.h \
+    include/filesystems/dos20filesystem.h \
+    include/filesystems/dos25filesystem.h \
+    include/filesystems/mydosfilesystem.h \
+    include/filesystems/spartadosfilesystem.h
 
 FORMS += \
     ui/mainwindow.ui \
@@ -126,7 +136,6 @@ FORMS += \
     ui/bootoptionsdialog.ui \
     ui/logdisplaydialog.ui \
     ui/drivewidget.ui \
-    ui/infowidget.ui \
     ui/printers/outputwindow.ui \
     ui/printerwidget.ui \
     ui/printers/textprinterwindow.ui

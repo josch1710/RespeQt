@@ -11,15 +11,13 @@
  */
 
 #include "diskimage.h"
-#include "zlib.h"
 
-#include "atarifilesystem.h"
 #include "diskeditdialog.h"
+#include "filesystems/atarifilesystem.h"
 #include "respeqtsettings.h"
 #include <QDir>
 #include <QFileInfo>
 
-#include <QtDebug>
 
 extern quint16 ATX_SECTOR_POSITIONS_SD[];
 extern quint16 ATX_SECTOR_POSITIONS_ED[];
@@ -37,7 +35,7 @@ bool SimpleDiskImage::openAtr(const QString &fileName) {
 
   // Try to open the source file
   if (!sourceFile->open(QFile::ReadOnly)) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(sourceFile->errorString());
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, sourceFile->errorString());
     delete sourceFile;
     return false;
   }
@@ -46,7 +44,7 @@ bool SimpleDiskImage::openAtr(const QString &fileName) {
   QByteArray header;
   header = sourceFile->read(16);
   if (header.size() != 16) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Cannot read the header: %1.").arg(sourceFile->errorString()));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot read the header: %1.").arg(sourceFile->errorString()));
     sourceFile->close();
     delete sourceFile;
     return false;
@@ -55,7 +53,7 @@ bool SimpleDiskImage::openAtr(const QString &fileName) {
   // Validate the magic number
   quint16 magic = static_cast<quint8>(header[0]) + static_cast<quint8>(header[1]) * 256;
   if (magic != 0x0296) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Not a valid ATR file."));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Not a valid ATR file."));
     sourceFile->close();
     delete sourceFile;
     return false;
@@ -70,7 +68,7 @@ bool SimpleDiskImage::openAtr(const QString &fileName) {
   // Try to create the temporary file
   file.setFileTemplate(QDir::temp().absoluteFilePath("respeqt-temp-XXXXXX"));
   if (!file.open()) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Cannot create temporary file '%1': %2").arg(file.fileName()).arg(file.errorString()));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot create temporary file '%1': %2").arg(file.fileName(), file.errorString()));
     sourceFile->close();
     delete sourceFile;
     return false;
@@ -81,14 +79,14 @@ bool SimpleDiskImage::openAtr(const QString &fileName) {
     int bufsize = 16777216;
     QByteArray buffer = sourceFile->read(bufsize);
     if (buffer.length() != bufsize && !sourceFile->atEnd()) {
-      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Cannot read from file: %1.").arg(sourceFile->errorString()));
+      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot read from file: %1.").arg(sourceFile->errorString()));
       sourceFile->close();
       delete sourceFile;
       file.close();
       return false;
     }
     if (file.write(buffer) != buffer.length()) {
-      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Cannot write to temporary file '%1': %2").arg(file.fileName()).arg(file.errorString()));
+      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot write to temporary file '%1': %2").arg(file.fileName(), file.errorString()));
       sourceFile->close();
       delete sourceFile;
       file.close();
@@ -101,14 +99,14 @@ bool SimpleDiskImage::openAtr(const QString &fileName) {
   // Check if the reported image size is consistent with the actual size
   //
   if (size != imageSize) {
-    qWarning() << "!w" << tr("Image size of '%1' is reported as %2 bytes in the header but it's actually %3.").arg(fileName).arg(size).arg(imageSize);
+    qWarning() << "!w" << tr("Image size of '%1' is reported as %2 bytes in the header but it's actually %3.").arg(fileName, QString::number(size, 10), QString(imageSize, 10));
     size = imageSize;
     repaired = true;
   }
 
   // Validate sector size
   if (secSize != 128 && secSize != 256 && secSize != 512 && secSize != 8192) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Unknown sector size (%1).").arg(secSize));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Unknown sector size (%1).").arg(secSize));
     sourceFile->close();
     delete sourceFile;
     file.close();
@@ -154,7 +152,7 @@ bool SimpleDiskImage::openAtr(const QString &fileName) {
 
 
   if (!sizeValid) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Invalid image size (%1).").arg(size));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Invalid image size (%1).").arg(size));
     sourceFile->close();
     delete sourceFile;
     file.close();
@@ -165,7 +163,7 @@ bool SimpleDiskImage::openAtr(const QString &fileName) {
   DiskGeometry geometry;
   geometry.initialize(size, secSize);
   if (geometry.sectorCount() > 65535) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Too many sectors in the image (%1).").arg(geometry.sectorCount()));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Too many sectors in the image (%1).").arg(geometry.sectorCount()));
     sourceFile->close();
     delete sourceFile;
     file.close();
@@ -178,7 +176,7 @@ bool SimpleDiskImage::openAtr(const QString &fileName) {
   }
 
   if (!file.resize(size)) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Cannot resize temporary file '%1': %2").arg(file.fileName()).arg(file.errorString()));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot resize temporary file '%1': %2").arg(file.fileName(), file.errorString()));
     sourceFile->close();
     delete sourceFile;
     file.close();
@@ -211,14 +209,14 @@ bool SimpleDiskImage::openXfd(const QString &fileName) {
   }
 
   if (!sourceFile->open(QFile::ReadOnly)) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(sourceFile->errorString());
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, sourceFile->errorString());
     delete sourceFile;
     return false;
   }
 
   file.setFileTemplate(QDir::temp().absoluteFilePath("respeqt-temp-XXXXXX"));
   if (!file.open()) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Cannot create temporary file '%1': %2").arg(file.fileName()).arg(file.errorString()));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot create temporary file '%1': %2").arg(file.fileName(), file.errorString()));
     sourceFile->close();
     delete sourceFile;
     return false;
@@ -228,14 +226,14 @@ bool SimpleDiskImage::openXfd(const QString &fileName) {
     int bufsize = 16777216;
     QByteArray buffer = sourceFile->read(bufsize);
     if (buffer.length() != bufsize && !sourceFile->atEnd()) {
-      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Cannot read from file: %1.").arg(sourceFile->errorString()));
+      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot read from file: %1.").arg(sourceFile->errorString()));
       sourceFile->close();
       delete sourceFile;
       file.close();
       return false;
     }
     if (file.write(buffer) != buffer.length()) {
-      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Cannot write to temporary file '%1': %2").arg(file.fileName()).arg(file.errorString()));
+      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot write to temporary file '%1': %2").arg(file.fileName(), file.errorString()));
       sourceFile->close();
       delete sourceFile;
       file.close();
@@ -246,7 +244,7 @@ bool SimpleDiskImage::openXfd(const QString &fileName) {
   auto size = static_cast<quint64>(file.size());
 
   if ((size % 128) != 0) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Invalid image size (%1).").arg(size));
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Invalid image size (%1).").arg(size));
     sourceFile->close();
     delete sourceFile;
     file.close();
@@ -295,7 +293,7 @@ bool SimpleDiskImage::saveAtr(const QString &fileName) {
   }
 
   if (!outputFile->open(QFile::WriteOnly | QFile::Truncate)) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
     outputFile->close();
     delete outputFile;
     return false;
@@ -303,7 +301,7 @@ bool SimpleDiskImage::saveAtr(const QString &fileName) {
 
   // Try to write the header
   if (outputFile->write(m_originalFileHeader) != 16) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
     outputFile->close();
     delete outputFile;
     return false;
@@ -311,7 +309,7 @@ bool SimpleDiskImage::saveAtr(const QString &fileName) {
 
   // Try to copy the temporary file back
   if (!file.reset()) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(tr("Cannot rewind temporary file '%1': %2").arg(file.fileName()).arg(file.errorString()));
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Cannot rewind temporary file '%1': %2").arg(file.fileName(), file.errorString()));
     outputFile->close();
     delete outputFile;
     return false;
@@ -324,13 +322,13 @@ bool SimpleDiskImage::saveAtr(const QString &fileName) {
     }
     QByteArray buffer = file.read(bufsize);
     if (buffer.length() != bufsize) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(tr("Cannot read from temporary file %1: %2").arg(file.fileName()).arg(file.errorString()));
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Cannot read from temporary file %1: %2").arg(file.fileName(), file.errorString()));
       outputFile->close();
       delete outputFile;
       return false;
     }
     if (outputFile->write(buffer) != bufsize) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
       outputFile->close();
       delete outputFile;
       return false;
@@ -377,13 +375,13 @@ bool SimpleDiskImage::saveXfd(const QString &fileName) {
   }
 
   if (!outputFile->open(QFile::WriteOnly | QFile::Truncate)) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
     return false;
   }
 
   // Try to copy the temporary file back
   if (!file.reset()) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(tr("Cannot rewind temporary file '%1': %2").arg(file.fileName()).arg(file.errorString()));
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Cannot rewind temporary file '%1': %2").arg(file.fileName(), file.errorString()));
     outputFile->close();
     return false;
   }
@@ -395,12 +393,12 @@ bool SimpleDiskImage::saveXfd(const QString &fileName) {
     }
     QByteArray buffer = file.read(bufsize);
     if (buffer.length() != bufsize) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(tr("Cannot read from temporary file %1: %2").arg(file.fileName()).arg(file.errorString()));
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Cannot read from temporary file %1: %2").arg(file.fileName(), file.errorString()));
       outputFile->close();
       return false;
     }
     if (outputFile->write(buffer) != bufsize) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
       outputFile->close();
       return false;
     }
@@ -420,7 +418,7 @@ bool SimpleDiskImage::saveXfd(const QString &fileName) {
 
 bool SimpleDiskImage::saveAsAtr(const QString &fileName, FileTypes::FileType destImageType) {
   if ((m_originalImageType != FileTypes::Pro) && (m_originalImageType != FileTypes::ProGz) && (m_originalImageType != FileTypes::Atx) && (m_originalImageType != FileTypes::AtxGz)) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(tr("Saving Atr images from the current format is not supported yet."));
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Saving Atr images from the current format is not supported yet."));
     return false;
   }
 
@@ -450,14 +448,14 @@ bool SimpleDiskImage::saveAsAtr(const QString &fileName, FileTypes::FileType des
   }
 
   if (!outputFile->open(QFile::WriteOnly | QFile::Truncate)) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
     delete outputFile;
     return false;
   }
 
   // Try to write the header
   if (outputFile->write(m_originalFileHeader) != 16) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
     delete outputFile;
     return false;
   }
@@ -479,7 +477,7 @@ bool SimpleDiskImage::saveAsAtr(const QString &fileName, FileTypes::FileType des
 
     // Try to write the header
     if (outputFile->write(data) != m_geometry.bytesPerSector()) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(outputFile->errorString());
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
       delete outputFile;
       return false;
     }
@@ -505,7 +503,7 @@ bool SimpleDiskImage::saveAsAtr(const QString &fileName, FileTypes::FileType des
 bool SimpleDiskImage::createAtr(int untitledName) {
   file.setFileTemplate(QDir::temp().absoluteFilePath("respeqt-temp-XXXXXX"));
   if (!file.open()) {
-    qCritical() << "!e" << tr("Cannot create new image: Cannot create temporary file '%2': %3.").arg(file.fileName()).arg(file.errorString());
+    qCritical() << "!e" << tr("Cannot create new image: Cannot create temporary file '%2': %3.").arg(file.fileName(), file.errorString());
     return false;
   }
 
@@ -538,12 +536,12 @@ bool SimpleDiskImage::readHappyAtrSectorAtPosition(int trackNumber, int sectorNu
 bool SimpleDiskImage::readHappyAtrSkewAlignment(bool happy1050) {
   quint8 previousTrack = 0xFF - m_board.m_happyRam[0x3C9];
   if (previousTrack > 39) {
-    qWarning() << "!w" << tr("[%1] Invalid previous track number %2 ($%3) for skew alignment").arg(deviceName()).arg(previousTrack).arg(previousTrack, 2, 16, QChar('0'));
+    qWarning() << "!w" << tr("[%1] Invalid previous track number %2 ($%3) for skew alignment").arg(deviceName(), previousTrack).arg(previousTrack, 2, 16, QChar('0'));
     return false;
   }
   quint8 currentTrack = 0xFF - m_board.m_happyRam[0x3CB];
   if (currentTrack > 39) {
-    qWarning() << "!w" << tr("[%1] Invalid current track number %2 ($%3) for skew alignment").arg(deviceName()).arg(previousTrack).arg(previousTrack, 2, 16, QChar('0'));
+    qWarning() << "!w" << tr("[%1] Invalid current track number %2 ($%3) for skew alignment").arg(deviceName(), previousTrack).arg(previousTrack, 2, 16, QChar('0'));
     return false;
   }
 
@@ -699,7 +697,7 @@ bool SimpleDiskImage::writeHappyAtrSectors(int trackNumber, int, bool happy1050)
 
 bool SimpleDiskImage::formatAtr(const DiskGeometry &geo) {
   if ((!file.resize(0)) || (!file.resize(geo.totalSize()))) {
-    qCritical() << "!e" << tr("[%1] Cannot format: %2").arg(deviceName()).arg(file.errorString());
+    qCritical() << "!e" << tr("[%1] Cannot format: %2").arg(deviceName(), file.errorString());
   }
   m_geometry.initialize(geo);
   m_newGeometry.initialize(geo);

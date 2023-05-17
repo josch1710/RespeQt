@@ -13,13 +13,11 @@
 #include "ui_outputwindow.h"
 
 #include <QFileDialog>
-#include <QGraphicsEllipseItem>
 #include <QPrintDialog>
 #include <QPrinter>
 #include <memory>
 
 // Includes, Globals and various additional class declarations //
-#include <QFontComboBox>
 #include <QMessageBox>
 #include <QPainter>
 #include <QSharedPointer>

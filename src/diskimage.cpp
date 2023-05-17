@@ -13,14 +13,11 @@
 #include "diskimage.h"
 #include "zlib.h"
 
-#include "atarifilesystem.h"
 #include "diskeditdialog.h"
+#include "filesystems/atarifilesystem.h"
 #include "respeqtsettings.h"
 #include <QDir>
 #include <QFileInfo>
-
-#include <QtDebug>
-
 #include <algorithm>
 
 // pattern to write when Super Archiver formats a track with $08 as a fill byte in a sector ($08 is interpreted as the CRC byte by FDC)
@@ -232,10 +229,13 @@ DiskGeometry::DiskGeometry()
   m_sectorCount = 0;
 }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 DiskGeometry::DiskGeometry(const DiskGeometry &other)
     : QObject() {
   initialize(other);
 }
+#pragma clang diagnostic pop
 
 void DiskGeometry::initialize(const DiskGeometry &other) {
   m_isDoubleSided = other.isDoubleSided();
@@ -529,7 +529,7 @@ SimpleDiskImage::~SimpleDiskImage() {
   closeTranslator();
   closeToolDisk();
   if (isOpen()) {
-    close();
+    SimpleDiskImage::close();
   }
 }
 
@@ -654,7 +654,7 @@ bool SimpleDiskImage::translatorDiskImageAvailable() {
   auto translatorFile = new QFile(m_translatorDiskImagePath);
   if (!translatorFile->open(QFile::ReadOnly)) {
     delete translatorFile;
-    qWarning() << "!w" << tr("[%1] Translator '%2' not found. Please, check settings in menu Disk images>OS-B emulation.").arg(deviceName()).arg(m_translatorDiskImagePath);
+    qWarning() << "!w" << tr("[%1] Translator '%2' not found. Please, check settings in menu Disk images>OS-B emulation.").arg(deviceName(), m_translatorDiskImagePath);
     return false;
   }
   translatorFile->close();
@@ -662,7 +662,7 @@ bool SimpleDiskImage::translatorDiskImageAvailable() {
   return true;
 }
 
-void SimpleDiskImage::setToolDiskMode(bool enable) {
+__attribute__((unused)) void SimpleDiskImage::setToolDiskMode(bool enable) {
   m_toolDiskMode = enable;
   setToolDiskActive();
 }
@@ -693,7 +693,7 @@ bool SimpleDiskImage::toolDiskImageAvailable() {
   auto toolDiskFile = new QFile(m_toolDiskImagePath);
   if (!toolDiskFile->open(QFile::ReadOnly)) {
     delete toolDiskFile;
-    qWarning() << "!w" << tr("[%1] Tool disk '%2' not found. Please, check settings in menu Disk images>Favorite tool disk.").arg(deviceName()).arg(m_toolDiskImagePath);
+    qWarning() << "!w" << tr("[%1] Tool disk '%2' not found. Please, check settings in menu Disk images>Favorite tool disk.").arg(deviceName(), m_toolDiskImagePath);
     return false;
   }
   toolDiskFile->close();
@@ -739,7 +739,7 @@ void SimpleDiskImage::setActivateHappyModeWithTool(bool activate) {
   m_activateHappyModeWithTool = activate;
 }
 
-void SimpleDiskImage::setLeverOpen(bool open) {
+__attribute__((unused)) void SimpleDiskImage::setLeverOpen(bool open) {
   if (m_isLeverOpen != open) {
     m_isLeverOpen = open;
     if (open) {
@@ -751,12 +751,12 @@ void SimpleDiskImage::setLeverOpen(bool open) {
 }
 
 bool SimpleDiskImage::openDcm(const QString &fileName) {
-  qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("DCM images are not supported yet."));
+  qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("DCM images are not supported yet."));
   return false;
 }
 
 bool SimpleDiskImage::openDi(const QString &fileName) {
-  qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("DI images are not supported yet."));
+  qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("DI images are not supported yet."));
   return false;
 }
 
@@ -792,7 +792,7 @@ bool SimpleDiskImage::open(const QString &fileName, FileTypes::FileType type) {
       bResult = openAtx(fileName);
       break;
     default:
-      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName).arg(tr("Unknown file type."));
+      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Unknown file type."));
       break;
   }
   if (bResult) {
@@ -887,12 +887,12 @@ bool SimpleDiskImage::sameSoftware(const QString &fileName, const QString &other
 }
 
 bool SimpleDiskImage::saveDcm(const QString &fileName) {
-  qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(tr("Saving DCM images is not supported yet."));
+  qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Saving DCM images is not supported yet."));
   return false;
 }
 
 bool SimpleDiskImage::saveDi(const QString &fileName) {
-  qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(tr("Saving DI images is not supported yet."));
+  qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Saving DI images is not supported yet."));
   return false;
 }
 
@@ -923,12 +923,12 @@ bool SimpleDiskImage::save() {
       return saveAtx(m_originalFileName);
       break;
     default:
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName).arg(tr("Unknown file type."));
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, tr("Unknown file type."));
       return false;
   }
 }
 
-bool SimpleDiskImage::saveAs(const QString &fileName) {
+__attribute__((unused)) bool SimpleDiskImage::saveAs(const QString &fileName) {
   m_currentSide = 1;
   m_numberOfSides = 1;
   m_nextSideFilename.clear();
@@ -1003,7 +1003,7 @@ bool SimpleDiskImage::saveAs(const QString &fileName) {
     }
     return saveAsAtx(fileName, destinationImageType);
   } else {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName).arg(tr("Unknown file extension."));
+    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Unknown file extension."));
     return false;
   }
 }
@@ -1018,7 +1018,7 @@ bool SimpleDiskImage::create(int untitledName) {
   return createAtr(untitledName);
 }
 
-void SimpleDiskImage::reopen() {
+__attribute__((unused)) void SimpleDiskImage::reopen() {
   close();
   open(m_originalFileName, m_originalImageType);
 }
@@ -1356,7 +1356,7 @@ bool SimpleDiskImage::readSkewAlignment(quint16 aux, QByteArray &data, bool timi
   return readAtrSkewAlignment(aux, data, timingOnly);
 }
 
-bool SimpleDiskImage::resetTrack(quint16 aux) {
+__attribute__((unused)) bool SimpleDiskImage::resetTrack(quint16 aux) {
   if (!m_isModified) {
     m_isModified = true;
     emit statusChanged(m_deviceNo);
@@ -1420,7 +1420,7 @@ bool SimpleDiskImage::writeSector(quint16 aux, const QByteArray &data) {
   return writeAtrSector(aux, data);
 }
 
-bool SimpleDiskImage::writeSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8 sideNumber, quint8 sectorNumber, quint8 sectorSize, const QByteArray &data, bool crcError, int weakOffset) {
+__attribute__((unused)) bool SimpleDiskImage::writeSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8 sideNumber, quint8 sectorNumber, quint8 sectorSize, const QByteArray &data, bool crcError, int weakOffset) {
   if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
     return writeProSectorExtended(bitNumber, dataType, trackNumber, sideNumber, sectorNumber, sectorSize, data, crcError, weakOffset);
   }
@@ -1492,13 +1492,13 @@ void SimpleDiskImage::handleCommand(const quint8 command, const quint8 aux1, con
             m_board.setTranslatorActive(false);
           } else {
             m_board.setTranslatorState(FIRST_SECTOR_1);
-            qWarning() << "!i" << tr("[%1] Booting Translator '%2' first").arg(deviceName()).arg(m_translatorDiskImagePath);
+            qWarning() << "!i" << tr("[%1] Booting Translator '%2' first").arg(deviceName(), m_translatorDiskImagePath);
           }
         } else if (m_board.getTranslatorState() == READ_OTHER_SECTOR) {
           m_board.setTranslatorState(SECOND_SECTOR_1);
           m_board.setTranslatorActive(false);
           setTranslatorActive(false);
-          qWarning() << "!i" << tr("[%1] Removing Translator to boot on '%2'").arg(deviceName()).arg(m_originalFileName);
+          qWarning() << "!i" << tr("[%1] Removing Translator to boot on '%2'").arg(deviceName(), m_originalFileName);
         }
       } else if ((sector != 1) && (m_board.getTranslatorState() == FIRST_SECTOR_1)) {
         m_board.setTranslatorState(READ_OTHER_SECTOR);
@@ -1529,7 +1529,7 @@ void SimpleDiskImage::handleCommand(const quint8 command, const quint8 aux1, con
         if (!m_toolDisk->open(m_toolDiskImagePath, type)) {
           m_board.setToolDiskActive(false);
         } else {
-          qWarning() << "!i" << tr("[%1] Booting tool disk '%2' first").arg(deviceName()).arg(m_toolDiskImagePath);
+          qWarning() << "!i" << tr("[%1] Booting tool disk '%2' first").arg(deviceName(), m_toolDiskImagePath);
         }
       }
       if (m_board.isToolDiskActive() && (m_toolDisk != nullptr)) {
@@ -1681,8 +1681,7 @@ void SimpleDiskImage::handleCommand(const quint8 command, const quint8 aux1, con
           if (!writeCommandAck()) {
             break;
           }
-          int trackNumber = (int) (0xFF - (aux & 0xFF));
-          int aux2 = (aux >> 8) & 0xFF;
+          int trackNumber = static_cast<int>(0xFF - aux1);
           int afterSectorNumber = (aux2 == 0) ? 0 : 0xFF - aux2;
           if (afterSectorNumber == 0) {
             qDebug() << "!n" << tr("[%1] Happy Read Sectors of track %2 ($%3)").arg(deviceName()).arg(trackNumber).arg(trackNumber, 2, 16, QChar('0'));
@@ -1899,8 +1898,7 @@ void SimpleDiskImage::handleCommand(const quint8 command, const quint8 aux1, con
           if (!writeCommandAck()) {
             break;
           }
-          int trackNumber = (int) (0xFF - (aux & 0xFF));
-          int aux2 = (aux >> 8) & 0xFF;
+          int trackNumber = static_cast<int>(0xFF - aux1);
           int afterSectorNumber = (aux2 == 0) ? 0 : 0xFF - aux2;
           if (afterSectorNumber == 0) {
             qDebug() << "!n" << tr("[%1] Happy Write Sectors of track %2 ($%3)").arg(deviceName()).arg(trackNumber).arg(trackNumber, 2, 16, QChar('0'));
@@ -2093,7 +2091,7 @@ void SimpleDiskImage::handleCommand(const quint8 command, const quint8 aux1, con
         break;
       }
       QByteArray percom = m_newGeometry.toPercomBlock();
-      qDebug() << "!n" << tr("[%1] Get PERCOM block (%2).").arg(deviceName()).arg(m_newGeometry.humanReadable());
+      qDebug() << "!n" << tr("[%1] Get PERCOM block (%2).").arg(deviceName(), m_newGeometry.humanReadable());
       writeComplete();
       writeDataFrame(percom);
       break;
@@ -2111,12 +2109,12 @@ void SimpleDiskImage::handleCommand(const quint8 command, const quint8 aux1, con
           emit statusChanged(m_deviceNo);
           qDebug() << "!n" << tr("[%1] Open CHIP with code aux1 %2, aux2 %2").arg(deviceName()).arg(aux1, 2, 16, QChar('0')).arg(aux2, 2, 16, QChar('0'));
         } else {
-          qWarning() << "!w" << tr("[%1] Open CHIP denied on disk %2").arg(deviceName()).arg(m_newGeometry.humanReadable());
+          qWarning() << "!w" << tr("[%1] Open CHIP denied on disk %2").arg(deviceName(), m_newGeometry.humanReadable());
         }
         writeComplete();
         break;
       }
-      qDebug() << "!n" << tr("[%1] Set PERCOM block (%2).").arg(deviceName()).arg(m_newGeometry.humanReadable());
+      qDebug() << "!n" << tr("[%1] Set PERCOM block (%2).").arg(deviceName(), m_newGeometry.humanReadable());
       QByteArray percom = readDataFrame(12);
       if (percom.isEmpty()) {
         writeDataNak();
@@ -2190,7 +2188,7 @@ void SimpleDiskImage::handleCommand(const quint8 command, const quint8 aux1, con
             break;
           }
           m_board.setHappy1050(true);
-          qDebug() << "!n" << tr("[%1] Happy %2Write memory at $%3").arg(deviceName()).arg((command == 0x70) || (command == 0x77) ? tr("High Speed ") : "").arg(aux, 4, 16, QChar('0'));
+          qDebug() << "!n" << tr("[%1] Happy %2Write memory at $%3").arg(deviceName(), (command == 0x70) || (command == 0x77) ? tr("High Speed ") : "").arg(aux, 4, 16, QChar('0'));
           // We should set high speed for data with Happy 1050 Rev.7 but it does not work.
           // A patched version of Happy Warp Speed Software V7.1.atr has been prepared to send data at normal speed to RespeQt
           // The original version is not compatible with RespeQt.
@@ -2235,9 +2233,9 @@ void SimpleDiskImage::handleCommand(const quint8 command, const quint8 aux1, con
         int track = (sector - 1) / m_geometry.sectorsPerTrack();
         int relativeSector = ((sector - 1) % m_geometry.sectorsPerTrack()) + 1;
         if (aux != sector) {
-          qDebug() << "!n" << tr("[%1] %2Write Sector %3 ($%4) #%5 in track %6 ($%7) with AUX=$%8").arg(deviceName()).arg((command == 0x70) || (command == 0x77) ? tr("Happy High Speed ") : "").arg(sector).arg(sector, 3, 16, QChar('0')).arg(relativeSector).arg(track).arg(track, 2, 16, QChar('0')).arg(aux, 4, 16, QChar('0'));
+          qDebug() << "!n" << tr("[%1] %2Write Sector %3 ($%4) #%5 in track %6 ($%7) with AUX=$%8").arg(deviceName()).arg((command == 0x70) || (command == 0x77) ? tr("Happy High Speed ") : "").arg(sector).arg(sector, 3, 16, QChar('0')).arg(relativeSector).arg(track).arg(track, 2, 16, QChar('0')).arg(aux, 4, 16, QChar('0'));// clazy:exclude=qstring-arg
         } else {
-          qDebug() << "!n" << tr("[%1] %2Write Sector %3 ($%4) #%5 in track %6 ($%7)").arg(deviceName()).arg((command == 0x70) || (command == 0x77) ? tr("Happy High Speed ") : "").arg(sector).arg(sector, 3, 16, QChar('0')).arg(relativeSector).arg(track).arg(track, 2, 16, QChar('0'));
+          qDebug() << "!n" << tr("[%1] %2Write Sector %3 ($%4) #%5 in track %6 ($%7)").arg(deviceName()).arg((command == 0x70) || (command == 0x77) ? tr("Happy High Speed ") : "").arg(sector).arg(sector, 3, 16, QChar('0')).arg(relativeSector).arg(track).arg(track, 2, 16, QChar('0'));// clazy:exclude=qstring-arg
         }
         // We should set high speed for data with Happy 1050 Rev.7 but it does not work.
         // A patched version of Happy Warp Speed Software V7.1.atr has been prepared to send data at normal speed to RespeQt
@@ -2361,7 +2359,7 @@ void SimpleDiskImage::handleCommand(const quint8 command, const quint8 aux1, con
           if (!writeCommandAck()) {
             break;
           }
-          qDebug() << "!n" << tr("[%1] Happy %2Read memory at $%3").arg(deviceName()).arg((command == 0x72) ? tr("High Speed ") : "").arg(aux, 4, 16, QChar('0'));
+          qDebug() << "!n" << tr("[%1] Happy %2Read memory at $%3").arg(deviceName()).arg((command == 0x72) ? tr("High Speed ") : "").arg(aux, 4, 16, QChar('0'));// clazy:exclude=qstring-arg
           if (command == 0x72) {
             QThread::usleep(150);
             sio->port()->setSpeed(findNearestSpeed(38400) + 1);// +1 (odd number) is a trick to set 2 stop bits (needed by Happy 810)
@@ -2380,9 +2378,9 @@ void SimpleDiskImage::handleCommand(const quint8 command, const quint8 aux1, con
         int track = (sector - 1) / m_geometry.sectorsPerTrack();
         int relativeSector = ((sector - 1) % m_geometry.sectorsPerTrack()) + 1;
         if (aux != sector) {
-          qDebug() << "!n" << tr("[%1]%2 Read Sector %3 ($%4) #%5 in track %6 ($%7) with AUX=$%8").arg(deviceName()).arg((command == 0x72) ? tr("Happy High Speed ") : "").arg(sector).arg(sector, 3, 16, QChar('0')).arg(relativeSector).arg(track).arg(track, 2, 16, QChar('0')).arg(aux, 4, 16, QChar('0'));
+          qDebug() << "!n" << tr("[%1]%2 Read Sector %3 ($%4) #%5 in track %6 ($%7) with AUX=$%8").arg(deviceName()).arg((command == 0x72) ? tr("Happy High Speed ") : "").arg(sector).arg(sector, 3, 16, QChar('0')).arg(relativeSector).arg(track).arg(track, 2, 16, QChar('0')).arg(aux, 4, 16, QChar('0'));// clazy:exclude=qstring-arg
         } else {
-          qDebug() << "!n" << tr("[%1] %2Read Sector %3 ($%4) #%5 in track %6 ($%7)").arg(deviceName()).arg((command == 0x72) ? tr("Happy High Speed ") : "").arg(sector).arg(sector, 3, 16, QChar('0')).arg(relativeSector).arg(track).arg(track, 2, 16, QChar('0'));
+          qDebug() << "!n" << tr("[%1] %2Read Sector %3 ($%4) #%5 in track %6 ($%7)").arg(deviceName()).arg((command == 0x72) ? tr("Happy High Speed ") : "").arg(sector).arg(sector, 3, 16, QChar('0')).arg(relativeSector).arg(track).arg(track, 2, 16, QChar('0'));// clazy:exclude=qstring-arg
         }
         if (command == 0x72) {
           QThread::usleep(150);
@@ -3111,9 +3109,9 @@ void SimpleDiskImage::fillBuffer(char *line, unsigned char *buf, int len, int of
     int nbRemaining = len - ofs;
     memset(line, ' ', 73);
     line[73] = 0;
-    snprintf(line, 6, "$%04X:", ofs);
+    snprintf(line, 7, "$%04X:", ofs);
     for (int i = 0; i < nbRemaining; i++) {
-      snprintf(&line[strlen(line)], 3, " %02X", ((unsigned int) buf[ofs + i]) & 0xFF);
+      snprintf(&line[strlen(line)], 4, " %02X", ((unsigned int) buf[ofs + i]) & 0xFF);
     }
     if (dumpAscii) {
       for (int i = strlen(line); i < 54; i++) {
@@ -3137,7 +3135,7 @@ void SimpleDiskImage::dumpBuffer(unsigned char *buf, int len) {
     char line[80];
     int ofs = i << 4;
     fillBuffer(line, buf, len, ofs, false);
-    qDebug() << "!u" << tr("[%1] §%2").arg(deviceName()).arg(line);
+    qDebug() << "!u" << tr("[%1] §%2").arg(deviceName(), line);
   }
 }
 
@@ -3212,7 +3210,7 @@ void SimpleDiskImage::disassembleCode(QByteArray &data, unsigned short address, 
     if (lenOpCode == -1) {
       break;
     } else {
-      qDebug() << "!u" << tr("[%1] §%2").arg(deviceName()).arg(buf);
+      qDebug() << "!u" << tr("[%1] §%2").arg(deviceName(), buf);
     }
     offset += lenOpCode;
   }

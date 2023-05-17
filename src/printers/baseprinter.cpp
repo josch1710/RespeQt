@@ -150,7 +150,7 @@ namespace Printers {
       char line[80];
       int ofs = i << 4;
       fillBuffer(line, buf, len, ofs, true);
-      qDebug() << "!u" << tr("[%1] §%2").arg(deviceName()).arg(line);
+      qDebug() << "!u" << tr("[%1] §%2").arg(deviceName(), line);
     }
   }
 

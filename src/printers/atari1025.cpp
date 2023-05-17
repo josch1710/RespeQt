@@ -1,6 +1,5 @@
 #include "printers/atari1025.h"
 #include "respeqtsettings.h"
-#include <cstdlib>
 #include <utility>
 namespace Printers {
   Atari1025::Atari1025(SioWorkerPtr worker)
@@ -151,24 +150,13 @@ namespace Printers {
     setupFont();
   }
 
-  float Atari1025::charsPI() const {
-    return mCPI;
-  }
-
   void Atari1025::setLineChars(unsigned char chars) {
     mLineChars = chars;
     setupFont();
-  }
-
-  unsigned char Atari1025::lineChars() const {
-    return mLineChars;
   }
 
   void Atari1025::setLinesPI(unsigned char lines) {
     mLPI = lines;
   }
 
-  unsigned char Atari1025::linesPI() const {
-    return mLPI;
-  }
 }// namespace Printers

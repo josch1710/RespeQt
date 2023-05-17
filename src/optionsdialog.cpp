@@ -16,7 +16,6 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QFontDialog>
-#include <QPrintDialog>
 #include <QTranslator>
 #include <QtSerialPort>
 

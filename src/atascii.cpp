@@ -3,10 +3,7 @@
 
 std::map<unsigned char, QChar> Atascii::mapping;
 Atascii::Atascii() {
-  initMapping();
-}
 
-void Atascii::initMapping() {
   // Table (C) 2006 by kalm, All rights reserved.
   // You can use, modify, distribute this table freely.
   // http://funktor.org/dist/ucstable/atascii.txt

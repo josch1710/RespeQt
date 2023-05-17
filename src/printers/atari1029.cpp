@@ -1,6 +1,5 @@
 #include "printers/atari1029.h"
 #include "respeqtsettings.h"
-#include <cstdlib>
 #include <qglobal.h>
 #include <utility>
 
@@ -194,7 +193,6 @@ namespace Printers {
 
       case GraphicsMode::NOT_GRAPHICS://Should not happen.
         Q_ASSERT(false);
-        break;
     }
 
     return true;

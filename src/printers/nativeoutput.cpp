@@ -1,7 +1,6 @@
 #include "printers/nativeoutput.h"
 #include "logdisplaydialog.h"
 #include <cmath>
-#include <utility>
 
 template<typename T>
 class TD;

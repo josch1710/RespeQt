@@ -32,11 +32,8 @@ enum SIO_CDEVIC : quint8 {
   PCLINK_CDEVIC = 0x6F
 };
 
-enum SIO_DEVICE_COUNT : quint8 {
-  DISK_COUNT = 15,
-  PRINTER_COUNT = 4,
-  RS232_COUNT = 4
-};
+const quint8 DISK_COUNT = 15;
+const quint8 PRINTER_COUNT = 4;
 
 class SioWorker;
 using SioWorkerPtr = QSharedPointer<SioWorker>;
@@ -50,8 +47,8 @@ protected:
   SioWorkerPtr sio;
 
 public:
-  SioDevice(SioWorkerPtr worker);
-  virtual ~SioDevice();
+  explicit SioDevice(SioWorkerPtr worker);
+  ~SioDevice() override;
   virtual void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) = 0;
   virtual QString deviceName();
   inline void lock() { mLock.lock(); }
@@ -71,7 +68,6 @@ class SioWorker : public QThread {
   Q_OBJECT
 
 private:
-  quint8 sioChecksum(const QByteArray &data, uint size);
   QMutex *deviceMutex;
   SioDevice *devices[256];
   AbstractSerialPortBackendPtr mPort;
@@ -81,7 +77,6 @@ private:
 
 public:
   AbstractSerialPortBackendPtr port() { return mPort; }
-  int maxSpeed;
 
   SioWorker();
 #ifdef RESPEQT_TEST
@@ -94,7 +89,7 @@ public:
 #endif
   virtual ~SioWorker();
 
-  bool wait(unsigned long time = ULONG_MAX);
+  bool waitOnPort(unsigned long time = ULONG_MAX);
 
   void run();
 

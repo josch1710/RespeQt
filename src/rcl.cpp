@@ -28,7 +28,6 @@ char RCl::rclSlotNo;
 void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) {
   QByteArray data(6, 0);
   QByteArray fdata(21, 0);
-  QByteArray ddata(255, 0);
   QDateTime dateTime = QDateTime::currentDateTime();
 
   switch (command) {
@@ -54,8 +53,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
         sio->port()->writeDataAck();
         sio->port()->writeComplete();
         g_fileFilter = ddata;
-        qCritical() << "!i" << tr("[%1] List filter set: [%2]").arg(deviceName()).arg(g_fileFilter);
-        return;
+        qCritical() << "!i" << tr("[%1] List filter set: [%2]").arg(deviceName(), g_fileFilter);
       } else {
         QByteArray ddata(255, 0);
         quint8 index = 0;
@@ -73,7 +71,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
                                                 : filters << (fileFilter + ".atr") << (fileFilter + ".xfd") << (fileFilter + ".atx") << (fileFilter + "+.pro") << (fileFilter + ".xex") << (fileFilter + "+.exe") << (fileFilter + "+.com");
 
         dir.setNameFilters(filters);
-        QFileInfoList list = dir.entryInfoList();
+        QFileInfoList filelist = dir.entryInfoList();
 
         QByteArray fn = ("Path: " + pth).toUtf8();
         for (int n = 0; n < fn.length() && n < 37; n++)
@@ -81,15 +79,15 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
 
         ddata[index++] = 155;
 
-        for (quint8 i = offset; i < list.size() && i < 250; ++i) {
-          QFileInfo fileInfo = list.at(i);
+        for (quint8 i = offset; i < filelist.size() && i < 250; ++i) {
+          QFileInfo fileInfo = filelist.at(i);
           QString dosfilname = fileInfo.fileName();
           QString atarifilname = toAtariFileName(dosfilname);
           QString atariFilenum = QString(QChar::fromLatin1(i - offset + 0x41));
-          QByteArray fn = (" " + atariFilenum + " " + atarifilname).toUtf8();
-          if (index + fn.length() < 252 && i - offset < 16) {
-            for (int n = 0; n < fn.length(); n++)
-              ddata[index++] = fn[n] & 0xff;
+          QByteArray fnumber = (" " + atariFilenum + " " + atarifilname).toUtf8();
+          if (index + fnumber.length() < 252 && i - offset < 16) {
+            for (int n = 0; n < fnumber.length(); n++)
+              ddata[index++] = fnumber[n] & 0xff;
             ddata[index++] = 155;
             ddata[254] = 0x00;
           } else {
@@ -101,10 +99,9 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
         for (int n = index; n < 253; n++) ddata[index++] = 0x00;
         sio->port()->writeComplete();
         sio->port()->writeDataFrame(ddata);
-        return;
       }
-    } break;
-
+      return;
+    }
 
     case 0x92:// get slots filename
     {
@@ -120,8 +117,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
         auto img = qobject_cast<SimpleDiskImage *>(sio->getDevice(deviceNo - 1 + DISK_BASE_CDEVIC));
         QString filename = "";
         if (img) {
-          int i = -1;
-          i = img->originalFileName().lastIndexOf("/");
+          auto i = img->originalFileName().lastIndexOf("/");
           if ((i != -1) || (img->originalFileName().mid(0, 14) == "Untitled image"))
             filename = " " + img->originalFileName().right(img->originalFileName().size() - ++i);
         }
@@ -151,7 +147,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
       data[3] = static_cast<char>(dateTime.time().hour());
       data[4] = static_cast<char>(dateTime.time().minute());
       data[5] = static_cast<char>(dateTime.time().second());
-      qDebug() << "!n" << tr("[%1] Date/time sent to client (%2).").arg(deviceName()).arg(dateTime.toString(Qt::SystemLocaleShortDate));
+      qDebug() << "!n" << tr("[%1] Date/time sent to client (%2).").arg(deviceName(), dateTime.toString(Qt::SystemLocaleShortDate));
 
       sio->port()->writeComplete();
       sio->port()->writeDataFrame(data);
@@ -253,21 +249,21 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
         len = 14;
       }
       if (aux1 == 0 && aux2 == 0) {
-        QByteArray data(len, 0);
-        data = sio->port()->readDataFrame(static_cast<uint>(len), false);
+        QByteArray _data(len, 0);
+        _data = sio->port()->readDataFrame(static_cast<uint>(len), false);
 
-        if (data.isEmpty()) {
+        if (_data.isEmpty()) {
           qCritical() << "!e" << tr("[%1] Read data frame failed").arg(deviceName());
           sio->port()->writeDataNak();
           sio->port()->writeError();
           return;
         }
-        imageFileName = data;
+        imageFileName = _data;
         if (command == 0x97) {// Create new image file first
           int i, type;
           bool ok;
           i = imageFileName.lastIndexOf(".");
-          type = imageFileName.mid(i + 1).toInt(&ok, 10);
+          type = imageFileName.midRef(i + 1).toInt(&ok, 10);
           if (ok && (type < 1 || type > 6)) ok = false;
           if (!ok) {
             qCritical() << "!e" << tr("[%1] Invalid image file attribute: %2").arg(deviceName()).arg(type);
@@ -278,7 +274,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
           imageFileName = imageFileName.left(i);
           QFile file(RespeqtSettings::instance()->lastRclDir() + "/" + imageFileName);
           if (!file.open(QIODevice::WriteOnly)) {
-            qCritical() << "!e" << tr("[%1] Can not create PC File: %2").arg(deviceName()).arg(imageFileName);
+            qCritical() << "!e" << tr("[%1] Can not create PC File: %2").arg(deviceName(), imageFileName);
             sio->port()->writeDataNak();
             sio->port()->writeError();
             return;
@@ -370,11 +366,11 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
 
         if (mutex.tryLock()) {
           // Return the last mounted drive number
-          QByteArray data(1, 0);
-          data[0] = rclSlotNo;
+          QByteArray _data(1, 0);
+          _data[0] = rclSlotNo;
           mutex.unlock();
           sio->port()->writeComplete();
-          sio->port()->writeDataFrame(data);
+          sio->port()->writeDataFrame(_data);
         } else {
           sio->port()->writeCommandNak();
         }
@@ -460,7 +456,6 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
         return;
       }
 
-      auto isDiskImage = aux2 ? false : true;
       // If no Folder Image has ever been mounted abort the command as we won't
       // know which folder to use to remotely create/mount an image file.
       if (RespeqtSettings::instance()->lastRclDir() == "") {
@@ -473,9 +468,9 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
       // Get the name of the image file
 
 
-      QByteArray data(12, 0);
-      data = sio->port()->readDataFrame(12, false);
-      if (data.isEmpty()) {
+      QByteArray _data(12, 0);
+      _data = sio->port()->readDataFrame(12, false);
+      if (_data.isEmpty()) {
         qCritical() << "!e" << tr("[%1] Read data frame failed").arg(deviceName());
         sio->port()->writeDataNak();
         sio->port()->writeError();
@@ -485,9 +480,9 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
       sio->port()->writeDataAck();
       sio->port()->writeComplete();
 
-      imageFileName = data;
+      imageFileName = _data;
       imageFileName = imageFileName.trimmed();
-      isDiskImage = (imageFileName.endsWith("XEX") || imageFileName.endsWith("EXE") || imageFileName.endsWith("COM")) ? false : true;
+      auto isDiskImage = !(imageFileName.endsWith("XEX") || imageFileName.endsWith("EXE") || imageFileName.endsWith("COM"));
 
       if (isDiskImage) {
         imageFileName = "*" + toDosFileName(imageFileName);
@@ -573,7 +568,7 @@ void RCl::gotNewSlot(int slot) {
 void RCl::fileMounted(bool mounted) {
   if (mounted) {
     sio->port()->writeComplete();
-    qDebug() << "!n" << tr("[%1] Image %2 mounted").arg(deviceName()).arg(imageFileName.mid(1, imageFileName.size() - 1));
+    qDebug() << "!n" << tr("[%1] Image %2 mounted").arg(deviceName(), imageFileName.mid(1, imageFileName.size() - 1));
   } else {
     sio->port()->writeDataNak();
   }

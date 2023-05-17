@@ -1239,7 +1239,7 @@ void Cpu6502::Xas(unsigned short addr) {
   WriteByte(addr, (m_SP & UNDOC_MASK));// not sure
 }
 
-int Cpu6502::Step(void) {
+__attribute__((unused)) int Cpu6502::Step(void) {
   int nClockCount;
   unsigned char val;
   unsigned short addr;
@@ -3525,7 +3525,7 @@ int Cpu6502::GetOpCodeLength(unsigned char opCode) {
 
 char *Cpu6502::GetAddressLabel(unsigned short addr) {
   static char buffer[6];
-  snprintf(buffer, 5, "$%04X", ((int) addr) & 0xFFFF);
+  snprintf(buffer, 6, "$%04X", ((int) addr) & 0xFFFF);
   return buffer;
 }
 
@@ -3567,7 +3567,7 @@ unsigned short Cpu6502::BuildTrace(char *buffer) {
   int lenOpCode = GetOpCodeLength(opCode);
   snprintf(p, 28, "A=%02X X=%02X Y=%02X P=%02X SP=%02X  ", ((int) m_A) & 0xFF, ((int) m_X) & 0xFF, ((int) m_Y) & 0xFF, ((int) m_SR) & 0xFF, ((int) m_SP) & 0xFF);
   p += strlen(p);
-  snprintf(p, 5, "%04X:", ((int) m_PC) & 0xFFFF);
+  snprintf(p, 6, "%04X:", ((int) m_PC) & 0xFFFF);
   p += strlen(p);
   unsigned char opCodes[3];
   for (int i = 0; i < lenOpCode; i++) {
@@ -3601,7 +3601,7 @@ unsigned short Cpu6502::BuildTrace(char *buffer) {
   MODE_ENUM wMode = m_cpuType == CPU_6502 ? tabOpcode02[opCode].wMode : tabOpcodeC02[opCode].wMode;
   switch (wMode) {
     case MODE_IMMEDIATE:
-      snprintf(p, 5, "#$%02X ", ((int) opCodes[1]) & 0xFF);
+      snprintf(p, 7, "#$%02X ", ((int) opCodes[1]) & 0xFF);
       p += strlen(p);
       break;
     case MODE_ZERO_PAGE:
@@ -3683,7 +3683,7 @@ unsigned short Cpu6502::BuildTrace(char *buffer) {
       if (secondLabel != nullptr) {
         strcpy(p, secondLabel);
       } else {
-        snprintf(p, 5, "$%04X", ((int) addr) & 0xFFFF);
+        snprintf(p, 7, "$%04X", ((int) addr) & 0xFFFF);
       }
       p += strlen(p);
       *p++ = ')';
@@ -3710,7 +3710,7 @@ unsigned short Cpu6502::BuildTrace(char *buffer) {
       p += strlen(p);
       break;
     case MODE_IMMEDIATE_WORD:
-      snprintf(p, 6, "#$%04X ", (((unsigned short) opCodes[1]) & 0x00FF) | ((((unsigned short) opCodes[2]) << 8) & 0xFF00));
+      snprintf(p, 8, "#$%04X ", (((unsigned short) opCodes[1]) & 0x00FF) | ((((unsigned short) opCodes[2]) << 8) & 0xFF00));
       p += strlen(p);
       break;
     default:
@@ -3748,7 +3748,7 @@ int Cpu6502::BuildInstruction(char *buffer, unsigned char *data, int lenData, un
   unsigned char opCodes[3];
   for (int i = 0; i < lenOpCode; i++) {
     opCodes[i] = data[i];
-    snprintf(p, 3, "%02X ", ((int) opCodes[i]) & 0xFF);
+    snprintf(p, 4, "%02X ", ((int) opCodes[i]) & 0xFF);
     p += 3;
   }
   for (int i = lenOpCode; i < 3; i++) {

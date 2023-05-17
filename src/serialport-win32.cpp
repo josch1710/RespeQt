@@ -123,7 +123,7 @@ bool StandardSerialPortBackend::open() {
   }
 
   /* Notify the user that emulation is started */
-  qWarning() << "!i" << tr("Emulation started through standard serial port backend on '%1' with %2 handshaking").arg(RespeqtSettings::instance()->serialPortName()).arg(m);
+  qWarning() << "!i" << tr("Emulation started through standard serial port backend on '%1' with %2 handshaking").arg(RespeqtSettings::instance()->serialPortName(), m);
   return true;
 }
 
@@ -387,13 +387,13 @@ QByteArray StandardSerialPortBackend::readCommandFrame() {
             return data;
           }
           if (x == WAIT_FAILED) {
-            qCritical() << "!e" << tr("Cannot wait for serial port event: %1").arg(lastErrorMessage());
+            qCritical() << "!e" << tr("Cannot waitOnPort for serial port event: %1").arg(lastErrorMessage());
             data.clear();
             return data;
           }
         } else {
           CloseHandle(ov.hEvent);
-          qCritical() << "!e" << tr("Cannot wait for serial port event: %1").arg(lastErrorMessage());
+          qCritical() << "!e" << tr("Cannot waitOnPort for serial port event: %1").arg(lastErrorMessage());
           return data;
         }
       }
@@ -423,7 +423,7 @@ QByteArray StandardSerialPortBackend::readCommandFrame() {
 
       //        qDebug() << "!d" << tr("DBG -- Serial Port, just about to readDataFrame...");
 
-      data = readDataFrame(4, false);
+      data = readDataFrame(4, true, false);
 
       if (!data.isEmpty()) {
 
@@ -459,7 +459,7 @@ QByteArray StandardSerialPortBackend::readCommandFrame() {
   return data;
 }
 
-QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool verbose) {
+QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool isCommandFrame, bool verbose) {
   //    qDebug() << "!d" << tr("DBG -- Serial Port readDataFrame...");
 
   QByteArray data = readRawFrame(size + 1, verbose);
@@ -471,14 +471,14 @@ QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool verbose) {
   if (expected == got) {
     data.resize(size);
 
-#ifndef QT_NO_DEBUG
-    /*try {
-        SioWorker *sio = dynamic_cast<SioWorker*>(parent());
-        if (sio) {
-            sio->writeSnapshotDataFrame(data);
-        }
-    } catch(...) {}*/
-#endif
+    auto recorder = SioRecorder::instance();
+    if (recorder->isSnapshotRunning()) {
+      if (isCommandFrame) {
+        recorder->writeSnapshotCommandFrame(data[0], data[1], data[2], data[3]);
+      } else {
+        recorder->writeSnapshotDataFrame(data);
+      }
+    }
 
     return data;
   } else {
@@ -692,7 +692,7 @@ void AtariSioBackend::close() {}
 void AtariSioBackend::cancel() {}
 int AtariSioBackend::speedByte() { return 0; }
 QByteArray AtariSioBackend::readCommandFrame() { return QByteArray(); }
-QByteArray AtariSioBackend::readDataFrame(uint, bool) { return QByteArray(); }
+QByteArray AtariSioBackend::readDataFrame(uint, bool, bool) { return QByteArray(); }
 bool AtariSioBackend::writeDataFrame(const QByteArray &) { return false; }
 bool AtariSioBackend::writeCommandAck() { return false; }
 bool AtariSioBackend::writeCommandNak() { return false; }

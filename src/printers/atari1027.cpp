@@ -1,7 +1,7 @@
 #include "printers/atari1027.h"
 #include "respeqtsettings.h"
-#include <cstdlib>
 #include <utility>
+
 namespace Printers {
   Atari1027::Atari1027(SioWorkerPtr worker)
       : AtariPrinter(std::move(worker)),

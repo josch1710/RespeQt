@@ -24,16 +24,10 @@ namespace Printers {
   protected:
     // set char count per inch
     void setCharsPI(float chars);
-    //get char count per inch
-    float charsPI() const;
     // set char count per line
     void setLineChars(unsigned char chars);
-    // get char count per line
-    unsigned char lineChars() const;
     // set lines per inch
     void setLinesPI(unsigned char lines);
-    // get lines per inch
-    unsigned char linesPI() const;
 
   private:
     bool mESC;
