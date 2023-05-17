@@ -1,3 +1,5 @@
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 ### RespeQt CMAKE version
 cmake_minimum_required(VERSION 3.1.0)
 set(CMAKE_OSX_ARCHITECTURES x86_64)
@@ -244,3 +246,5 @@ endif()
 if (WIN32)
     target_link_libraries(${TARGET} winmm z winspool)
 endif()
+
+add_subdirectory(docs)
