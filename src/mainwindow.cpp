@@ -1134,6 +1134,7 @@ void MainWindow::showAboutTriggered() {
 
   auto about = qobject_cast<QQuickWindow *>(component.create());
   if (about) {
+    about->setProperty("aboutText", QString("Test"));
     about->show();
   }
   return;

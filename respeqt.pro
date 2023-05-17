@@ -81,3 +81,4 @@ linux {
 
 DISTFILES += \
     deployment/lindeploy.sh
+

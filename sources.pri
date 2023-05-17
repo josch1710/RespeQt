@@ -116,7 +116,7 @@ HEADERS += \
     include/crc16.h \
     include/cpu6502.h \
     headers/atarisio.h \
-    tools/make_unique.h \
+    include/make_unique.h \
     include/filesystems/ataridirentry.h \
     include/filesystems/atarifilesystem.h \
     include/filesystems/dos10filesystem.h \
@@ -146,7 +146,8 @@ RESOURCES += \
     resources/atarifiles.qrc \
     resources/i18n.qrc \
     resources/documentation.qrc \
-    resources/fonts.qrc
+    resources/fonts.qrc \
+    resources/qml.qrc
 
 # To update translations:
 # lupdate respeqt.pro; lrelease i18n/respeqt_*.ts

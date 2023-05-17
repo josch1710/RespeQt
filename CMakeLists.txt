@@ -38,6 +38,7 @@ endif()
 if (NOT WIN32)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address -fno-omit-frame-pointer")
 endif()
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -DDECLARATIVE_DEBUG -DQT_QML_DEBUG")
 
 set(SOURCES
         src/siorecorder.cpp
@@ -101,7 +102,7 @@ set(HEADERS
         include/printers/outputwindow.h
         include/printers/rawoutput.h
         include/siorecorder.h
-        tools/make_unique.h
+        include/make_unique.h
         include/printers/printers.h
         include/rcl.h
         include/sdxprotocol.h

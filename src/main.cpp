@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
 #endif
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QApplication a(argc, argv);
-  //a.setFont(QFont("MS Shell Dlg"));
+  a.setFont(a.font("QMenu"));
   QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
   auto w = new MainWindow;
   w->show();
