@@ -42,145 +42,145 @@ if (NOT WIN32)
 endif()
 
 set(SOURCES
-        src/siorecorder.cpp
-        src/mainwindow.cpp
-        src/rcl.cpp
-        src/sdxprotocol.cpp
-        src/sioworker.cpp
-        src/diskimagepro.cpp
-        src/diskimageatx.cpp
-        src/optionsdialog.cpp
-        src/aboutdialog.cpp
-        src/diskimage.cpp
-        src/folderimage.cpp
-        src/createimagedialog.cpp
-        src/diskeditdialog.cpp
-        src/autoboot.cpp
-        src/autobootdialog.cpp
-        src/miscutils.cpp
-        src/printers/textprinterwindow.cpp
-        src/cassettedialog.cpp
-        src/docdisplaywindow.cpp
-        src/bootoptionsdialog.cpp
-        src/network.cpp
-        src/logdisplaydialog.cpp
-        src/respeqtsettings.cpp
-        src/pclink.cpp
-        src/printers/baseprinter.cpp
-        src/printers/atari1027.cpp
-        src/atascii.cpp
-        src/drivewidget.cpp
-        src/atasciiinternational.cpp
-        src/printerwidget.cpp
-        src/printers/atariprinter.cpp
-        src/printers/atari1020.cpp
-        src/smartdevice.cpp
-        src/printers/nativeoutput.cpp
-        src/printers/outputwindow.cpp
-        src/printers/centronics.cpp
-        src/printers/escp.cpp
-        src/printers/atari1029.cpp
-        src/diskimageatr.cpp
-        src/disassembly810.cpp
-        src/disassembly1050.cpp
-        src/printers/printerfactory.cpp
-        src/printers/atari1025.cpp
-        src/printers/passthrough.cpp
-        src/printers/graphicsprimitive.cpp
-        src/crc16.cpp
-        src/cpu6502.cpp
-        src/filesystems/ataridirentry.cpp
-        src/filesystems/atarifilesystem.cpp
-        src/filesystems/dos10filesystem.cpp
-        src/filesystems/dos20filesystem.cpp
-        src/filesystems/dos25filesystem.cpp
-        src/filesystems/mydosfilesystem.cpp
-        src/filesystems/spartadosfilesystem.cpp
-        )
+    src/siorecorder.cpp
+    src/mainwindow.cpp
+    src/rcl.cpp
+    src/sdxprotocol.cpp
+    src/sioworker.cpp
+    src/diskimagepro.cpp
+    src/diskimageatx.cpp
+    src/optionsdialog.cpp
+    src/aboutdialog.cpp
+    src/diskimage.cpp
+    src/folderimage.cpp
+    src/createimagedialog.cpp
+    src/diskeditdialog.cpp
+    src/autoboot.cpp
+    src/autobootdialog.cpp
+    src/miscutils.cpp
+    src/printers/textprinterwindow.cpp
+    src/cassettedialog.cpp
+    src/docdisplaywindow.cpp
+    src/bootoptionsdialog.cpp
+    src/network.cpp
+    src/logdisplaydialog.cpp
+    src/respeqtsettings.cpp
+    src/pclink.cpp
+    src/printers/baseprinter.cpp
+    src/printers/atari1027.cpp
+    src/atascii.cpp
+    src/drivewidget.cpp
+    src/atasciiinternational.cpp
+    src/printerwidget.cpp
+    src/printers/atariprinter.cpp
+    src/printers/atari1020.cpp
+    src/smartdevice.cpp
+    src/printers/nativeoutput.cpp
+    src/printers/outputwindow.cpp
+    src/printers/centronics.cpp
+    src/printers/escp.cpp
+    src/printers/atari1029.cpp
+    src/diskimageatr.cpp
+    src/disassembly810.cpp
+    src/disassembly1050.cpp
+    src/printers/printerfactory.cpp
+    src/printers/atari1025.cpp
+    src/printers/passthrough.cpp
+    src/printers/graphicsprimitive.cpp
+    src/crc16.cpp
+    src/cpu6502.cpp
+    src/filesystems/ataridirentry.cpp
+    src/filesystems/atarifilesystem.cpp
+    src/filesystems/dos10filesystem.cpp
+    src/filesystems/dos20filesystem.cpp
+    src/filesystems/dos25filesystem.cpp
+    src/filesystems/mydosfilesystem.cpp
+    src/filesystems/spartadosfilesystem.cpp
+)
 
 set(HEADERS
-        include/mainwindow.h
-        include/printers/outputwindow.h
-        include/printers/rawoutput.h
-        include/siorecorder.h
-        tools/make_unique.h
-        include/printers/printers.h
-        include/rcl.h
-        include/sdxprotocol.h
-        include/serialport.h
-        include/sioworker.h
-        include/optionsdialog.h
-        include/aboutdialog.h
-        include/diskimage.h
-        include/folderimage.h
-        include/createimagedialog.h
-        include/diskeditdialog.h
-        include/autoboot.h
-        include/autobootdialog.h
-        include/miscutils.h
-        include/printers/textprinterwindow.h
-        include/cassettedialog.h
-        include/docdisplaywindow.h
-        include/bootoptionsdialog.h
-        include/network.h
-        include/logdisplaydialog.h
-        include/respeqtsettings.h
-        include/pclink.h
-        include/printers/baseprinter.h
-        include/printers/atari1027.h
-        include/atascii.h
-        include/drivewidget.h
-        include/printerwidget.h
-        include/atasciiinternational.h
-        include/printers/atariprinter.h
-        include/printers/atari1020.h
-        include/printers/nativeoutput.h
-        include/printers/centronics.h
-        include/printers/escp.h
-        include/printers/atari1029.h
-        include/disassembly810.h
-        include/disassembly1050.h
-        include/printers/printerfactory.h
-        include/printers/atari1025.h
-        include/printers/passthrough.h
-        include/smartdevice.h
-        include/printers/graphicsprimitive.h
-        include/crc16.h
-        include/cpu6502.h
-        headers/atarisio.h
-        include/filesystems/ataridirentry.h
-        include/filesystems/atarifilesystem.h
-        include/filesystems/dos10filesystem.h
-        include/filesystems/dos20filesystem.h
-        include/filesystems/dos25filesystem.h
-        include/filesystems/mydosfilesystem.h
-        include/filesystems/spartadosfilesystem.h
-        )
+    include/mainwindow.h
+    include/printers/outputwindow.h
+    include/printers/rawoutput.h
+    include/siorecorder.h
+    tools/make_unique.h
+    include/printers/printers.h
+    include/rcl.h
+    include/sdxprotocol.h
+    include/serialport.h
+    include/sioworker.h
+    include/optionsdialog.h
+    include/aboutdialog.h
+    include/diskimage.h
+    include/folderimage.h
+    include/createimagedialog.h
+    include/diskeditdialog.h
+    include/autoboot.h
+    include/autobootdialog.h
+    include/miscutils.h
+    include/printers/textprinterwindow.h
+    include/cassettedialog.h
+    include/docdisplaywindow.h
+    include/bootoptionsdialog.h
+    include/network.h
+    include/logdisplaydialog.h
+    include/respeqtsettings.h
+    include/pclink.h
+    include/printers/baseprinter.h
+    include/printers/atari1027.h
+    include/atascii.h
+    include/drivewidget.h
+    include/printerwidget.h
+    include/atasciiinternational.h
+    include/printers/atariprinter.h
+    include/printers/atari1020.h
+    include/printers/nativeoutput.h
+    include/printers/centronics.h
+    include/printers/escp.h
+    include/printers/atari1029.h
+    include/disassembly810.h
+    include/disassembly1050.h
+    include/printers/printerfactory.h
+    include/printers/atari1025.h
+    include/printers/passthrough.h
+    include/smartdevice.h
+    include/printers/graphicsprimitive.h
+    include/crc16.h
+    include/cpu6502.h
+    headers/atarisio.h
+    include/filesystems/ataridirentry.h
+    include/filesystems/atarifilesystem.h
+    include/filesystems/dos10filesystem.h
+    include/filesystems/dos20filesystem.h
+    include/filesystems/dos25filesystem.h
+    include/filesystems/mydosfilesystem.h
+    include/filesystems/spartadosfilesystem.h
+)
 
 set(FORMS
-        ui/mainwindow.ui
-        ui/optionsdialog.ui
-        ui/aboutdialog.ui
-        ui/createimagedialog.ui
-        ui/diskeditdialog.ui
-        ui/autobootdialog.ui
-        ui/cassettedialog.ui
-        ui/docdisplaywindow.ui
-        ui/bootoptionsdialog.ui
-        ui/logdisplaydialog.ui
-        ui/drivewidget.ui
-        ui/printers/outputwindow.ui
-        ui/printerwidget.ui
-        ui/printers/textprinterwindow.ui
-    )
+    ui/mainwindow.ui
+    ui/optionsdialog.ui
+    ui/aboutdialog.ui
+    ui/createimagedialog.ui
+    ui/diskeditdialog.ui
+    ui/autobootdialog.ui
+    ui/cassettedialog.ui
+    ui/docdisplaywindow.ui
+    ui/bootoptionsdialog.ui
+    ui/logdisplaydialog.ui
+    ui/drivewidget.ui
+    ui/printers/outputwindow.ui
+    ui/printerwidget.ui
+    ui/printers/textprinterwindow.ui
+)
 
 set(RESOURCES
-        resources/icons.qrc
-        resources/atarifiles.qrc
-        resources/i18n.qrc
-        resources/documentation.qrc
-        resources/fonts.qrc
-    )
+    resources/icons.qrc
+    resources/atarifiles.qrc
+    resources/i18n.qrc
+    resources/documentation.qrc
+    resources/fonts.qrc
+)
 
 if (UNIX)
     set(SOURCES ${SOURCES} src/serialport-unix.cpp src/printers/rawoutput_cups.cpp)
@@ -198,9 +198,17 @@ if (WIN32)
 endif()
 
 find_package(Qt5 5.0...<5.7 REQUIRED
-        COMPONENTS Core Widgets Gui Network PrintSupport SerialPort Svg LinguistTools)
+    COMPONENTS Core Widgets Gui Network PrintSupport SerialPort Svg LinguistTools
+)
 if (MAKE_TEST)
     find_package(Qt5 5.0...<5.7 REQUIRED COMPONENTS Test)
+endif()
+if (APPLE)
+    find_package(Qt5 5.0...<5.7 COMPONENTS MacExtras)
+elseif(UNIX)
+    find_package(Qt5 5.0...<5.7 COMPONENTS X11Extras)
+elseif(WIN32)
+    find_package(Qt5 5.0...<5.7 COMPONENTS WinExtras)
 endif()
 
 # Translations
@@ -238,6 +246,20 @@ target_link_libraries(${TARGET} Qt5::SerialPort)
 target_link_libraries(${TARGET} Qt5::Svg)
 if (MAKE_TEST)
     target_link_libraries(${TARGET} Qt5::Test)
+endif()
+
+# Include platform extras
+if (APPLE AND Qt5MacExtras_FOUND)
+    message(STATUS "Found Mac Extras")
+    target_link_libraries(${TARGET} Qt5::MacExtras)
+endif()
+if (UNIX AND Qt5X11Extras_FOUND)
+    message(STATUS "Found X11 Extras")
+    target_link_libraries(${TARGET} Qt5::X11Extras)
+endif()
+if (WIN32 AND Qt5WinExtras_FOUND)
+    message(STATUS "Found Win Extras")
+    target_link_libraries(${TARGET} Qt5::WinExtras)
 endif()
 
 if (UNIX)
