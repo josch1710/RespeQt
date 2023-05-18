@@ -39,7 +39,7 @@ install "$1/atari/rcl_SpartaDos/"* "${deploydir}/rcl/spartados"
 install -d "${deploydir}/rcl/realdos"
 install "$1/atari/rcl_RealDos/"* "${deploydir}/rcl/realdos"
 install -d "${deploydir}/rcl/menu"
-install "$1/atari_8-bit_Menu/"* "${deploydir}/rcl/menu"
+install "$1/atari/atari_8-bit_Menu/"* "${deploydir}/rcl/menu"
 
 cd "$2" || exit 2
 test -f "RespeQt_${longversion}.zip" && rm "RespeQt_${longversion}.zip"
