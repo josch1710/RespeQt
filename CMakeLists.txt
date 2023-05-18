@@ -270,3 +270,8 @@ if (WIN32)
 endif()
 
 add_subdirectory(docs)
+
+# Deployment
+if (LINUX)
+    add_custom_target(deploy deployment/lindeploy.sh )
+endif()
