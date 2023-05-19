@@ -14,12 +14,10 @@
 namespace Printers {
   class BasePrinter;
   using BasePrinterPtr = QSharedPointer<BasePrinter>;
-  //using BasePrinterWPtr = QWeakPointer<BasePrinter>;
 }// namespace Printers
 
 #include "atascii.h"
 #include "sioworker.h"
-//#include "nativeoutput.h"
 #include "outputwindow.h"
 
 namespace Printers {
@@ -37,23 +35,31 @@ namespace Printers {
     OutputWindowPtr outputWindow() const { return mOutputWindow; }
     void setOutputWindow(OutputWindowPtr outputWindow);
     void resetOutputWindow();
-    //void resetOutput();
     virtual void setupFont() {}
-    //virtual void setupOutput();
+    virtual const QRectF getSceneRect() const;
 
     static QString typeName() {
       throw new std::invalid_argument("Not implemented");
     }
 
+  signals:
+    void setSceneRect(const QRect &rect);
+
   protected:
     Atascii mAtascii;
-    //NativeOutputPtr mOutput;
     OutputWindowPtr mOutputWindow;
 
     QByteArray readDataFrame(uint size, bool isCommandFrame, bool verbose = true);
     bool writeDataFrame(QByteArray data);
     void dumpBuffer(unsigned char *buf, int len);
     void fillBuffer(char *line, unsigned char *buf, int len, int ofs, bool dumpAscii);
+    void executeGraphicsPrimitive(GraphicsPrimitive *primitive);
+
+    QFont mFont;
+    QString buffer{};
+    bool mClearPane;
+    QPoint mPenPoint;
+    QPen mPen;
 
   private:
     char m_lastOperation;

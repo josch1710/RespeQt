@@ -30,10 +30,12 @@ namespace Printers {
   public:
     Atari1020(SioWorkerPtr sio);
 
-    virtual void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) override;
-    virtual bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
-    //virtual void setupFont() override;
-    //virtual void setupOutput() override;
+    void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) override;
+    bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
+    // void setupFont() override;
+    // void setupOutput() override;
+
+    const QRectF getSceneRect() const override;
 
     static QString typeName() {
       return "Atari 1020";
@@ -43,9 +45,6 @@ namespace Printers {
     bool mEsc;
     bool mStartOfLogicalLine;
     bool mGraphicsMode;
-    QPoint mPenPoint;
-    QPen mPen;
-    QFont mFont;
     int mTextOrientation;
     QByteArray mPrintText;
     enum AUTOMATA_STATES mAutomataState;
@@ -58,12 +57,10 @@ namespace Printers {
     QByteArray mFirstNumber;
     QByteArray mSecondNumber;
     QByteArray mThirdNumber;
-    bool mClearPane;
 
     void executeGraphicsCommand();
     void resetGraphics();
     void executeAndRepeatCommand();
-    void executeGraphicsPrimitive(GraphicsPrimitive *primitive);
     bool checkGraphicsCommand(const unsigned char b);
     void handleGraphicsCodes(const unsigned char b);
     bool handlePrintableCodes(const unsigned char b);

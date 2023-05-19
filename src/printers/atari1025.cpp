@@ -10,16 +10,10 @@ namespace Printers {
         mLPI(6) {}
 
   void Atari1025::setupFont() {
-    /*if (mOutput)
-        {
-            auto font = std::make_shared<QFont>(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
-            if (font)
-            {
-                font->setUnderline(false);
-                mOutput->setFont(font);
-            }
-            mOutput->calculateFixedFontSize(mLineChars);
-        }*/
+    mFont = QFont(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
+    mFont.setUnderline(false);
+    mPenPoint.setX(10);
+    mPenPoint.setY(10);
   }
 
   bool Atari1025::handleBuffer(const QByteArray &buffer, const unsigned int len) {
@@ -139,9 +133,25 @@ namespace Printers {
     return false;
   }
 
-  bool Atari1025::handlePrintableCodes(const unsigned char /*b*/) {
-    //QChar qb = translateAtascii(b & 127); // Masking inverse characters.
-    //mOutput->printChar(qb);
+  bool Atari1025::handlePrintableCodes(const unsigned char b) {
+    QChar qb = translateAtascii(b & 127); // Masking inverse characters.
+    buffer.push_back(qb);
+    if (buffer.size() >= mLineChars || b == 192 /* EOL */) {
+      executeGraphicsPrimitive(
+        new GraphicsDrawText(mPenPoint, mPen, 0, mFont, buffer)
+      );
+
+      // update head position
+      QFontMetrics metrics(mFont);
+      QSize size = metrics.size(Qt::TextSingleLine, buffer);
+      int nbPixel = size.width();
+      mPenPoint.setX(mPenPoint.x() + nbPixel);
+      while (mPenPoint.x() > mOutputWindow->width()) {
+        mPenPoint.setX(mOutputWindow->width() - mPenPoint.x());
+        mPenPoint.setY(mPenPoint.y() + size.height());
+      }
+      buffer.clear();
+    }
     return true;
   }
 

@@ -103,43 +103,21 @@ void PrinterWidget::connectPrinter() {
     return;
   }
 
-  if (mPrinter /* && mDevice*/) {
-    /* TBD Raw Printer disabled for now
-         * try {
-            auto ptemp = qSharedPointerDynamicCast<Printers::Passthrough>(mPrinter);
-            //auto otemp = qSharedPointerDynamicCast<Printers::RawOutput>(mDevice);
-            if ((!ptemp.isNull() && otemp.isNull()) || (!otemp.isNull() && ptemp.isNull()))
-            {
-                QMessageBox::critical(this, tr("Printer emulation"), tr("You are not allowed to use the passthrough emulation without an raw output."));
-                disconnectPrinter();
-                return;
-            }
-        } catch(...) {}*/
-
-    mOutputWindow = std::make_shared<Printers::OutputWindow>(new Printers::OutputWindow(this));
-    connect(mOutputWindow.get(), &Printers::OutputWindow::closed, this, &PrinterWidget::disconnectPrinter);
+  if (mPrinter) {
+    mOutputWindow = QSharedPointer<Printers::OutputWindow>(new Printers::OutputWindow(this));
+    connect(mOutputWindow.data(), &Printers::OutputWindow::closed, this, &PrinterWidget::disconnectPrinter);
 
     mOutputWindow->show();
     mPrinter->setOutputWindow(mOutputWindow);
-    /*mDevice->setPrinter(mPrinter);
-        if (!mDevice->beginOutput())
-        {
-            QMessageBox::critical(this, tr("Beginning output"), tr("The output device couldn't start."));
-            return;
-        }*/
     mConnected = true;
     ui->atariPrinters->setEnabled(false);
     ui->actionDisconnectPrinter->setEnabled(true);
     ui->actionConnectPrinter->setEnabled(false);
+    emit printerActivated(printerNo_, mPrinter);
   }
 }
 
 void PrinterWidget::disconnectPrinter() {
-  /*    if (mDevice)
-    {
-        mDevice->endOutput();
-        mDevice.reset();
-    }*/
   if (mOutputWindow) {
     mOutputWindow->close();
     mOutputWindow.reset();
@@ -149,6 +127,7 @@ void PrinterWidget::disconnectPrinter() {
   ui->atariPrinters->setEnabled(true);
   ui->actionDisconnectPrinter->setEnabled(false);
   ui->actionConnectPrinter->setEnabled(true);
+  emit printerDeactivated(printerNo_, mPrinter);
 }
 
 void PrinterWidget::printerSelectionChanged(const QString &printerName) {

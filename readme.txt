@@ -30,10 +30,10 @@ Some features
 
 License (see license.txt file for more details)
 ===============================================
-RespeQt fork Copyright 2015,2016 by Joseph Zatarski, Copyright 2015 DrVenkman, and Copyright 2016 TheMontezuma, Copyright 2016, 2017 by Jochen Schäfer (josch1710), and Copyright 2017 by blind.
+RespeQt fork Copyright 2015,2016 by Joseph Zatarski, Copyright 2015 DrVenkman, and Copyright 2016 TheMontezuma, Copyright 2016, 2017 by Jochen SchÃ¤fer (josch1710), and Copyright 2017 by blind.
 RespeQt enhancements Copyright 2018 by ebiguy.
 RespeQt is based on AspeQt 1.0.0-preview7
-Original AspeQt code up to version 0.6.0 Copyright 2009 by Fatih Aygün. 
+Original AspeQt code up to version 0.6.0 Copyright 2009 by Fatih AygÃ¼n. 
 Updates to AspeQt since v0.6.0 to 1.0.0-preview7 Copyright 2012 by Ray Ataergin.
 
 You can freely copy, use, modify and distribute it under the GPL 2.0

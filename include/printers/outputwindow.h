@@ -13,7 +13,6 @@
 #include <QMainWindow>
 #include <QString>
 #include <memory>
-//#include "nativeoutput.h"
 #include "graphicsprimitive.h"
 
 namespace Ui {
@@ -35,10 +34,8 @@ namespace Printers {
     //virtual bool setupOutput() override;
     virtual void executeGraphicsPrimitive(GraphicsPrimitive *primitive);
 
-    /*static QString typeName()
-    {
-        return QObject::tr("Graphics printer");
-    }*/
+  public slots:
+    void setSceneRect(const QRectF &sceneRect);
 
   protected:
     void changeEvent(QEvent *e) override;
@@ -64,7 +61,7 @@ namespace Printers {
     void graphicsPrint(GraphicsPrimitive *primitive);
   };
 
-  using OutputWindowPtr = std::shared_ptr<OutputWindow>;
+  using OutputWindowPtr = QSharedPointer<OutputWindow>;
 
 }// namespace Printers
 #endif// OUTPUTWINDOW_H

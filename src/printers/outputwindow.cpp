@@ -30,7 +30,6 @@ namespace Printers {
                                                 ui(new Ui::OutputWindow) {
     ui->setupUi(this);
 
-    mGraphicsScene.setSceneRect(0, -499, 480, 1499);
     ui->printerGraphics->setScene(&mGraphicsScene);
 
     connect(this, &OutputWindow::textPrint, this, &OutputWindow::print);
@@ -146,6 +145,10 @@ bool OutputWindow::setupOutput()
 
   void OutputWindow::executeGraphicsPrimitive(GraphicsPrimitive *primitive) {
     emit graphicsPrint(primitive);
+  }
+
+  void OutputWindow::setSceneRect(const QRectF &sceneRect) {
+    mGraphicsScene.setSceneRect(sceneRect);
   }
 
 }// namespace Printers

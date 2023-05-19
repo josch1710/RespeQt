@@ -167,7 +167,7 @@ MainWindow::MainWindow()
   }
 
   QCoreApplication::setOrganizationName("ZeeSoft");
-  QCoreApplication::setOrganizationDomain("https://github.com/jzatarski/RespeQt");
+  QCoreApplication::setOrganizationDomain("org.respeqt");
   QCoreApplication::setApplicationName("RespeQt");
 
   /* Load translators */
@@ -205,6 +205,8 @@ MainWindow::MainWindow()
 
   /* Initialize diskWidgets array and tool button actions */
   createDeviceWidgets();
+  // Configure debug menu
+  setupDebugItems();
 
   /* Parse command line arguments:
       arg(1): session file (xxxxxxxx.respeqt)   */
@@ -1905,18 +1907,6 @@ void MainWindow::bootOptionTriggered() {
   bod.exec();
 }
 
-/*void MainWindow::closeTextPrinterWindow(const Printers::TextPrinterWindow *window)
-{
-    for(auto i = 0; i < PRINTER_COUNT; i++)
-    {
-        if (printerWidgets[i]->connected() && printerWidgets[i]->device() == window)
-        {
-            printerWidgets[i]->disconnectPrinter();
-            break;
-        }
-    }
-}*/
-
 // This connect the signal from UI to slots
 void MainWindow::connectUISignal() {
   connect(ui->actionPlaybackCassette, &QAction::triggered, this, &MainWindow::cassettePlaybackTriggered);
@@ -1975,8 +1965,10 @@ void MainWindow::replaySnapshot() {
   auto recorder = SioRecorder::instance();
   recorder->prepareReplaySnapshot(&file, RespeqtSettings::instance()->backend());
   file.close();
+  // If SIO is connected aka running, then first disconnect
+  if (sio->isRunning())
+    ui->actionStartEmulation->trigger();
   // Now set SioRecorder to be the serial port and start the connection again.
-  ui->actionStartEmulation->trigger();
   RespeqtSettings::instance()->setBackend(SerialBackend::TEST);
   ui->actionStartEmulation->trigger();
 }

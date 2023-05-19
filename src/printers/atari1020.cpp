@@ -31,14 +31,11 @@ namespace Printers {
     mFont.setPixelSize(18);
   }
 
-  /*    void Atari1020::setupOutput()
-    {
-        AtariPrinter::setupOutput();
-        if (mOutput && mOutput->painter()) {
-            mOutput->painter()->setWindow(QRect(0, -999, 800, 1000));
-        }
-    }
+  const QRectF Atari1020::getSceneRect() const {
+    return QRectF(0, -499, 480, 1499);
+  }
 
+  /*
     void Atari1020::setupFont()
     {
         if (mOutput) {
@@ -804,16 +801,6 @@ namespace Printers {
       }
     }
     mCurrentCommand = 0;// to prevent execution of this command a second time !
-  }
-
-  void Atari1020::executeGraphicsPrimitive(GraphicsPrimitive *primitive) {
-    if (mOutputWindow) {
-      if (mClearPane) {
-        mClearPane = false;
-        mOutputWindow->executeGraphicsPrimitive(new GraphicsClearPane());
-      }
-      mOutputWindow->executeGraphicsPrimitive(primitive);
-    }
   }
 
   int Atari1020::getNumber(const QString number, const bool negative,

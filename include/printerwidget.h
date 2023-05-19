@@ -26,7 +26,6 @@ public:
 
   void setSioWorker(SioWorkerPtr sio);
 
-  //Printers::NativeOutputPtr device() { return mDevice; }
   Printers::OutputWindowPtr outputWindow() { return mOutputWindow; }
 
   bool connected() const { return mConnected; }
@@ -34,6 +33,8 @@ public:
 signals:
   void actionEject(int deviceId);
   void actionConnectPrinter(int deviceId);
+  void printerActivated(int deviceId, Printers::BasePrinterPtr printer);
+  void printerDeactivated(int deviceId, Printers::BasePrinterPtr printer);
 
 public slots:
   void disconnectPrinter();
@@ -45,8 +46,6 @@ private slots:
 private:
   void setup();
   bool selectPrinter();
-
-  //bool selectOutput();
 
   Ui::PrinterWidget *ui;
   int printerNo_;
