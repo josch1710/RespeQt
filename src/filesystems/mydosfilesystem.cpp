@@ -3,7 +3,7 @@
 namespace Filesystems {
 
 
-  MyDosFileSystem::MyDosFileSystem(SimpleDiskImage *image)
+  MyDosFileSystem::MyDosFileSystem(DiskImages::SimpleDiskImage *image)
       : Dos20FileSystem(image) {
     int xvtocCount;
     if (m_image->geometry().bytesPerSector() == 256) {

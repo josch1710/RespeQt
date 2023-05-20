@@ -1,9 +1,9 @@
 #ifndef SPARTADOSFILESYSTEM_H
 #define SPARTADOSFILESYSTEM_H
 
-#include "diskimage.h"
 #include "filesystems/ataridirentry.h"
 #include "filesystems/atarifilesystem.h"
+#include "include/diskimages/diskimage.h"
 #include <QByteArray>
 #include <QDateTime>
 #include <QList>
@@ -39,7 +39,7 @@ namespace Filesystems {
     QByteArray m_volumeName;
 
   public:
-    SpartaDosFileSystem(SimpleDiskImage *image);
+    SpartaDosFileSystem(DiskImages::SimpleDiskImage *image);
     QList<AtariDirEntry> getEntries(quint16 dir);
 
     uint totalCapacity();

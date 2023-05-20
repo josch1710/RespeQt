@@ -493,7 +493,7 @@ void DiskEditDialog::changeEvent(QEvent *e) {
   }
 }
 
-void DiskEditDialog::go(SimpleDiskImage *image, int fileSystem) {
+void DiskEditDialog::go(DiskImages::SimpleDiskImage *image, int fileSystem) {
   m_disk = image;
   m_disk->lock();
   m_disk->setEditDialog(this);

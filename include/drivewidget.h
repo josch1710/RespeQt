@@ -14,7 +14,9 @@ namespace Ui {
   class DriveWidget;
 }
 
-class SimpleDiskImage;
+namespace DiskImages {
+  class SimpleDiskImage;
+}
 
 class DriveWidget : public QFrame {
   Q_OBJECT
@@ -32,7 +34,7 @@ public:
   void showAsImageMounted(const QString &fileName, const QString &description, bool editEnabled, bool enableSave, bool leverOpen, bool happyEnabled, bool chipOpen,
                           bool translatorActive, bool toolDiskActive, bool severalSides, bool happyShown, bool chipShown, bool nextSideShown, bool OSBShown, bool toolDiskShown);
 
-  void updateFromImage(SimpleDiskImage *diskImage, bool happyShown, bool chipShown, bool nextSideShown, bool OSBShown, bool toolDiskShown);
+  void updateFromImage(DiskImages::SimpleDiskImage *diskImage, bool happyShown, bool chipShown, bool nextSideShown, bool OSBShown, bool toolDiskShown);
   bool isAutoSaveEnabled();
   bool isHappyEnabled();
   bool isChipEnabled();

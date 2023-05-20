@@ -13,7 +13,7 @@ namespace Filesystems {
     bool writeBitmap();
 
   public:
-    MyDosFileSystem(SimpleDiskImage *image);
+    MyDosFileSystem(DiskImages::SimpleDiskImage *image);
 
     uint totalCapacity();
 

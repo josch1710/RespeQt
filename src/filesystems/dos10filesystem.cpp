@@ -6,7 +6,7 @@
 
 namespace Filesystems {
 
-  Dos10FileSystem::Dos10FileSystem(SimpleDiskImage *image)
+  Dos10FileSystem::Dos10FileSystem(DiskImages::SimpleDiskImage *image)
       : AtariFileSystem(image) {
     m_image->readSector(360, vtoc);
     bitmap = vtoc.mid(10, 90);

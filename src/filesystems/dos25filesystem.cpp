@@ -2,7 +2,7 @@
 
 namespace Filesystems {
 
-  Dos25FileSystem::Dos25FileSystem(SimpleDiskImage *image)
+  Dos25FileSystem::Dos25FileSystem(DiskImages::SimpleDiskImage *image)
       : Dos20FileSystem(image) {
     m_freeSectors = (quint8) vtoc.at(3) + (quint8) vtoc.at(4) * 256;
     if (m_image->readSector(1024, vtoc2)) {

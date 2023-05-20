@@ -63,7 +63,7 @@ class DiskEditDialog : public QMainWindow {
 public:
   DiskEditDialog(QWidget *parent = 0);
   ~DiskEditDialog();
-  void go(SimpleDiskImage *image, int fileSystem = -1);
+  void go(DiskImages::SimpleDiskImage *image, int fileSystem = -1);
 
 protected:
   FileModel *model;
@@ -71,7 +71,7 @@ protected:
 
 private:
   Ui::DiskEditDialog *m_ui;
-  SimpleDiskImage *m_disk;
+  DiskImages::SimpleDiskImage *m_disk;
   QComboBox *m_fileSystemBox;
 
 private slots:

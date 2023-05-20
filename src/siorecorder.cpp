@@ -37,7 +37,7 @@ QByteArray SioRecorder::stopSIOSnapshot() {
   return result;
 }
 
-void SioRecorder::writeSnapshotCommandFrame(const qint8 no, const qint8 command, const qint8 aux1, const qint8 aux2) {
+void SioRecorder::writeSnapshotCommandFrame(const quint8 no, const quint8 command, const quint8 aux1, const quint8 aux2) {
   // Record the command frame, if the snapshot is running
   if (mSnapshotRunning && mSnapshotData) {
     QJsonObject commandframe{};

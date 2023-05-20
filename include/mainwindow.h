@@ -114,7 +114,7 @@ private:
   //SimpleDiskImage *installDiskImage(char no);
   void changeFonts();
   void connectUISignal();
-  SimpleDiskImage *installDiskImage();
+  DiskImages::SimpleDiskImage *installDiskImage();
 
   void setupDebugItems();
 

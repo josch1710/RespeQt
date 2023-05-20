@@ -9,7 +9,7 @@ namespace Filesystems {
     Q_OBJECT
 
   public:
-    Dos20FileSystem(SimpleDiskImage *image);
+    Dos20FileSystem(DiskImages::SimpleDiskImage *image);
 
     uint totalCapacity();
 

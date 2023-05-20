@@ -1,11 +1,12 @@
 release 5.4
         * Lots of fixes
-        * You can deactivate the 64 item limit on a mounted directory by clicking on the lock icon in the status bar (issue #14)
+        * You can now deactivate the 64 item limit on a mounted directory by clicking on the lock icon in the status bar (issue #14)
         * Drag and drop fixed (issue #7)
         * You can record the SIO communication and replay it for debugging (Debug menu, issue #4)
         * Fixed an issue with ATR images with more that 256 sectors (PR #6)
         * Replaced deprecated function sprintf with snprintf.
-        * Refactoring.
+        * Refactoring. Lots.
+        * Fixed a crash in the disk edit dialog when switching to DOS 2.5/MyDos when the image is SD.
 
 release 5
 	* PRO and ATX images support in read/write mode with accurate (I hope so) protection emulation.

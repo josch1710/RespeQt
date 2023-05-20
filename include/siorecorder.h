@@ -24,7 +24,7 @@ public:
   void startSIOSnapshot();
   QByteArray stopSIOSnapshot();
   bool isSnapshotRunning() const { return mSnapshotRunning; }
-  void writeSnapshotCommandFrame(const qint8 no, const qint8 command, const qint8 aux1, const qint8 aux2);
+  void writeSnapshotCommandFrame(const quint8 no, const quint8 command, const quint8 aux1, const quint8 aux2);
   void writeSnapshotDataFrame(const QByteArray &data);
 
   void prepareReplaySnapshot(QFile *file, SerialBackend prevSerialBackend);

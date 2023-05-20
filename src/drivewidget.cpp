@@ -6,7 +6,7 @@
  */
 
 #include "drivewidget.h"
-#include "diskimage.h"
+#include "include/diskimages/diskimage.h"
 #include "ui_drivewidget.h"
 
 DriveWidget::DriveWidget(int driveNum, QWidget *parent)
@@ -108,7 +108,7 @@ void DriveWidget::setup(bool happyHidden, bool chipHidden, bool nextSideHidden, 
   connect(ui->actionBootOption, &QAction::triggered, this, &DriveWidget::bootOptionTriggered);
 }
 
-void DriveWidget::updateFromImage(SimpleDiskImage *diskImage, bool happyHidden, bool chipHidden, bool nextSideHidden, bool OSBHidden, bool toolDiskHidden) {
+void DriveWidget::updateFromImage(DiskImages::SimpleDiskImage *diskImage, bool happyHidden, bool chipHidden, bool nextSideHidden, bool OSBHidden, bool toolDiskHidden) {
   if (diskImage == nullptr) {
     showAsEmpty(happyHidden, chipHidden, nextSideHidden, OSBHidden, toolDiskHidden);
     return;

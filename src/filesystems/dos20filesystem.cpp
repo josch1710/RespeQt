@@ -2,7 +2,7 @@
 
 namespace Filesystems {
 
-  Dos20FileSystem::Dos20FileSystem(SimpleDiskImage *image)
+  Dos20FileSystem::Dos20FileSystem(DiskImages::SimpleDiskImage *image)
       : Dos10FileSystem(image) {
   }
 

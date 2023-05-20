@@ -16,6 +16,7 @@
 #include "mainwindow.h"
 #include "rcl.h"
 #include "respeqtsettings.h"
+#include "diskimages/diskimage.h"
 
 #include <QDateTime>
 #include <QDesktopServices>
@@ -114,7 +115,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
       deviceNo = (deviceNo > 9) ? (deviceNo - 16) : deviceNo;
 
       if (deviceNo >= 0x0 && deviceNo <= 0xF) {
-        auto img = qobject_cast<SimpleDiskImage *>(sio->getDevice(deviceNo - 1 + DISK_BASE_CDEVIC));
+        auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(deviceNo - 1 + DISK_BASE_CDEVIC));
         QString filename = "";
         if (img) {
           auto i = img->originalFileName().lastIndexOf("/");
@@ -185,14 +186,14 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
           // Eject All disks
           int toBeSaved = 0;
           for (int i = 0; i <= 14; i++) {//
-            auto img = qobject_cast<SimpleDiskImage *>(sio->getDevice(static_cast<quint8>(i + DISK_BASE_CDEVIC)));
+            auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(static_cast<quint8>(i + DISK_BASE_CDEVIC)));
             if (img && img->isModified()) {
               toBeSaved++;
             }
           }
           if (!toBeSaved) {
             for (int i = 14; i >= 0; i--) {
-              auto img = qobject_cast<SimpleDiskImage *>(sio->getDevice(static_cast<quint8>(i + DISK_BASE_CDEVIC)));
+              auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(static_cast<quint8>(i + DISK_BASE_CDEVIC)));
               sio->uninstallDevice(static_cast<quint8>(i + DISK_BASE_CDEVIC));
               delete img;
               RespeqtSettings::instance()->unmountImage(i);
@@ -206,7 +207,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
           }
         } else {
           // Single Disk Eject
-          auto img = qobject_cast<SimpleDiskImage *>(sio->getDevice(static_cast<quint8>(unmountDisk - 1 + DISK_BASE_CDEVIC)));
+          auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(static_cast<quint8>(unmountDisk - 1 + DISK_BASE_CDEVIC)));
 
           if (img && img->isModified()) {
             sio->port()->writeCommandNak();
@@ -421,7 +422,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
           // Eject All disks
 
           for (int i = 0; i <= 14; i++) {//
-            auto img = qobject_cast<SimpleDiskImage *>(sio->getDevice(i + DISK_BASE_CDEVIC));
+            auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i + DISK_BASE_CDEVIC));
             if (img && img->isModified() && !img->isUnnamed()) {
               img->save();
               qDebug() << "!n" << tr("[%1] Saved disk %2").arg(deviceName()).arg(i + 1);
@@ -431,7 +432,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
 
         } else {
           // Single Disk save
-          auto img = qobject_cast<SimpleDiskImage *>(sio->getDevice(deviceNo - 1 + DISK_BASE_CDEVIC));
+          auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(deviceNo - 1 + DISK_BASE_CDEVIC));
 
           if (img && img->isModified() && !img->isUnnamed()) {
             img->save();
