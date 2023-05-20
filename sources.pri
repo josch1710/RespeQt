@@ -19,8 +19,8 @@ SOURCES += \
     src/sioworker.cpp \
     src/optionsdialog.cpp \
     src/aboutdialog.cpp \
-    src/diskimage.cpp \
-    src/folderimage.cpp \
+    src/diskimages/diskimage.cpp \
+    src/diskimages/folderimage.cpp \
     src/createimagedialog.cpp \
     src/diskeditdialog.cpp \
     src/autoboot.cpp \
@@ -47,24 +47,29 @@ SOURCES += \
     src/printers/centronics.cpp \
     src/printers/escp.cpp \
     src/printers/atari1029.cpp \
-    src/diskimagepro.cpp \
-    src/diskimageatx.cpp \
-    src/diskimageatr.cpp \
-    src/disassembly810.cpp \
-    src/disassembly1050.cpp \
+    src/diskimages/diskimagepro.cpp \
+    src/diskimages/diskimageatx.cpp \
+    src/diskimages/diskimageatr.cpp \
+    src/diskimages/disassembly810.cpp \
+    src/diskimages/disassembly1050.cpp \
     src/printers/printerfactory.cpp \
     src/printers/atari1025.cpp \
     src/printers/passthrough.cpp \
     src/printers/graphicsprimitive.cpp \
     src/crc16.cpp \
-    src/cpu6502.cpp \
+    src/diskimages/cpu6502.cpp \
     src/filesystems/ataridirentry.cpp \
     src/filesystems/atarifilesystem.cpp \
     src/filesystems/dos10filesystem.cpp \
     src/filesystems/dos20filesystem.cpp \
     src/filesystems/dos25filesystem.cpp \
     src/filesystems/mydosfilesystem.cpp \
-    src/filesystems/spartadosfilesystem.cpp
+    src/filesystems/spartadosfilesystem.cpp \
+    src/diskimages/atxsectorinfo.cpp \
+    src/diskimages/atxtrackinfo.cpp \
+    src/diskimages/board.cpp \
+    src/diskimages/prosectorinfo.cpp \
+    src/diskimages/diskgeometry.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -79,8 +84,8 @@ HEADERS += \
     include/sioworker.h \
     include/optionsdialog.h \
     include/aboutdialog.h \
-    include/diskimage.h \
-    include/folderimage.h \
+    include/diskimages/diskimage.h \
+    include/diskimages/folderimage.h \
     include/createimagedialog.h \
     include/diskeditdialog.h \
     include/autoboot.h \
@@ -106,15 +111,15 @@ HEADERS += \
     include/printers/centronics.h \
     include/printers/escp.h \
     include/printers/atari1029.h \
-    include/disassembly810.h \
-    include/disassembly1050.h \
+    include/diskimages/disassembly810.h \
+    include/diskimages/disassembly1050.h \
     include/printers/printerfactory.h \
     include/printers/atari1025.h \
     include/printers/passthrough.h \
     include/smartdevice.h  \
     include/printers/graphicsprimitive.h \
     include/crc16.h \
-    include/cpu6502.h \
+    include/diskimages/cpu6502.h \
     headers/atarisio.h \
     include/filesystems/ataridirentry.h \
     include/filesystems/atarifilesystem.h \
@@ -122,7 +127,12 @@ HEADERS += \
     include/filesystems/dos20filesystem.h \
     include/filesystems/dos25filesystem.h \
     include/filesystems/mydosfilesystem.h \
-    include/filesystems/spartadosfilesystem.h
+    include/filesystems/spartadosfilesystem.h \
+    include/diskimages/atxsectorinfo.h \
+    include/diskimages/atxtrackinfo.h \
+    include/diskimages/board.h \
+    include/diskimages/prosectorinfo.h \
+    include/diskimages/diskgeometry.h
 
 FORMS += \
     ui/mainwindow.ui \

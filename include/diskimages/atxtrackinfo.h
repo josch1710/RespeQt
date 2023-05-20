@@ -4,6 +4,8 @@
 #include <QtGlobal>
 #include <QObject>
 
+#include "diskimages/atxsectorinfo.h"
+
 namespace DiskImages {
   class AtxTrackInfo : public QObject {
     Q_OBJECT
