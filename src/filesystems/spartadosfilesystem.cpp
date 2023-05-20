@@ -72,10 +72,6 @@ namespace Filesystems {
     QList<AtariDirEntry> list;
 
     SpartaDosFile sf(this, dir);
-
-    QByteArray firstMap;
-    m_image->readSector(dir, firstMap);
-
     QByteArray dosEntry = sf.read(23);
 
     if (dosEntry.size() < 6) {

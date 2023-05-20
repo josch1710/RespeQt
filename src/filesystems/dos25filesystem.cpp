@@ -4,10 +4,11 @@ namespace Filesystems {
 
   Dos25FileSystem::Dos25FileSystem(SimpleDiskImage *image)
       : Dos20FileSystem(image) {
-    m_image->readSector(1024, vtoc2);
-    bitmap.append(vtoc2.mid(84, 38));
-    m_freeSectors = (quint8) vtoc.at(3) + (quint8) vtoc.at(4) * 256 +
-                    (quint8) vtoc2.at(122) + (quint8) vtoc2.at(123) * 256;
+    m_freeSectors = (quint8) vtoc.at(3) + (quint8) vtoc.at(4) * 256;
+    if (m_image->readSector(1024, vtoc2)) {
+      bitmap.append(vtoc2.mid(84, 38));
+      m_freeSectors += (quint8) vtoc2.at(122) + (quint8) vtoc2.at(123) * 256;
+    }
   }
 
   bool Dos25FileSystem::writeBitmap() {

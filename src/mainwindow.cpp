@@ -322,8 +322,7 @@ MainWindow::MainWindow()
 
   /* Restore application state */
   for (char i = 0; i < DISK_COUNT; i++) {
-    RespeqtSettings::ImageSettings is;
-    is = RespeqtSettings::instance()->mountedImageSetting(i);
+    RespeqtSettings::ImageSettings is { RespeqtSettings::instance()->mountedImageSetting(i) };
     mountFile(i, is.fileName, is.isWriteProtected);
   }
   updateRecentFileActions();
@@ -1433,22 +1432,19 @@ void MainWindow::mountDiskImage(char no) {
   if (no < 0) {
     no = firstEmptyDiskSlot(0, true);
   }
-  // Always mount from "last image dir" //
-  //    if (diskWidgets[no].fileNameLabel->text().isEmpty()) {
   dir = RespeqtSettings::instance()->lastDiskImageDir();
-  //    } else {
-  //        dir = QFileInfo(diskWidgets[no].fileNameLabel->text()).absolutePath();
-  //    }
   QString fileName = QFileDialog::getOpenFileName(this,
-                                                  tr("Open a disk image"),
-                                                  dir,
-                                                  tr(
-                                                          "All Atari disk images (*.atr *.xfd *.atx *.pro);;"
-                                                          "SIO2PC ATR images (*.atr);;"
-                                                          "XFormer XFD images (*.xfd);;"
-                                                          "ATX images (*.atx);;"
-                                                          "Pro images (*.pro);;"
-                                                          "All files (*)"));
+    tr("Open a disk image"),
+    dir,
+    tr(
+            "All Atari disk images (*.atr *.xfd *.atx *.pro);;"
+            "SIO2PC ATR images (*.atr);;"
+            "XFormer XFD images (*.xfd);;"
+            "ATX images (*.atx);;"
+            "Pro images (*.pro);;"
+            "All files (*)"
+        )
+    );
   if (fileName.isEmpty()) {
     return;
   }

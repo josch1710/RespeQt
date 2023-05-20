@@ -373,7 +373,7 @@ void RespeqtSettings::setCustomCasBaud(int baud) {
 
 RespeqtSettings::ImageSettings RespeqtSettings::getImageSettingsFromName(const QString &fileName) {
   mSettings->beginReadArray("MountedImageSettings");
-  for (int i = 0; i < 15; i++) {
+  for (int i = 0; i < DISK_COUNT; i++) {
     mSettings->setArrayIndex(i);
     if (mSettings->value("fileName").toString() == fileName) {
       ImageSettings image;
@@ -403,11 +403,17 @@ RespeqtSettings::ImageSettings RespeqtSettings::getImageSettingsFromName(const Q
 }
 
 RespeqtSettings::ImageSettings RespeqtSettings::mountedImageSetting(int no) {
-  return mSettings->value(QString("MountedImageSettings/%1").arg(no)).value<ImageSettings>();
+  RespeqtSettings::ImageSettings is;
+  is.fileName = mSettings->value(QString("MountedImageSettings/%1/FileName").arg(no)).toString();
+  is.isWriteProtected = mSettings->value(QString("MountedImageSettings/%1/IsWriteProtected").arg(no)).toBool();
+  return is;
 }
 
 RespeqtSettings::ImageSettings RespeqtSettings::recentImageSetting(int no) {
-  return mSettings->value(QString("RecentImageSettings/%1").arg(no)).value<ImageSettings>();
+  ImageSettings is;
+  is.fileName = mSettings->value(QString("RecentImageSettings/%1/FileName").arg(no)).toString();
+  is.isWriteProtected = mSettings->value(QString("RecentImageSettings/%1/IsWriteProtected").arg(no)).toBool();
+  return is;
 }
 
 void RespeqtSettings::setMountedImageProtection(int no, bool prot) {
@@ -419,7 +425,7 @@ void RespeqtSettings::setMountedImageSetting(int no, const QString &fileName, bo
   mSettings->setValue(QString("MountedImageSettings/%1/IsWriteProtected").arg(no), prot);
 }
 
-void RespeqtSettings::mountImage(int no, const QString &fileName, bool prot) {
+void RespeqtSettings::mountImage(int no, const QString &fileName, bool isWriteProtected) {
   if (fileName.isEmpty()) {
     return;
   }
@@ -429,7 +435,7 @@ void RespeqtSettings::mountImage(int no, const QString &fileName, bool prot) {
   mSettings->beginReadArray("RecentImageSettings");
   for (i = 0; i < NUM_RECENT_FILES; i++) {
     mSettings->setArrayIndex(i);
-    if (mSettings->value("fileName").toString() == fileName) {
+    if (mSettings->value("FileName").toString() == fileName) {
       found = true;
       break;
     }
@@ -438,18 +444,31 @@ void RespeqtSettings::mountImage(int no, const QString &fileName, bool prot) {
 
   if (found) {
     mSettings->beginWriteArray("RecentImageSettings");
-    for (int j = i; j < (NUM_RECENT_FILES - 1); j++) {
+    for (int j = i; j < NUM_RECENT_FILES - 1; j++) {
       mSettings->setArrayIndex(j);
       auto image = mSettings->value(QString("RecentImageSettings/%1").arg(j + 1)).value<ImageSettings>();
-      // TODO
       mSettings->setValue("FileName", image.fileName);
       mSettings->setValue("IsWriteProtected", image.isWriteProtected);
     }
     mSettings->endArray();
-    mSettings->setValue(QString("RecentImageSettings/%1/FileName").arg(NUM_RECENT_FILES - 1), "");
+    i = NUM_RECENT_FILES - 1;
+  }
+  else {
+    mSettings->beginReadArray("RecentImageSettings");
+    for(quint8 j = 0; j < NUM_RECENT_FILES; j++) {
+      mSettings->setArrayIndex(i);
+      if (!mSettings->value("FileName").toString().isEmpty())
+        continue;
+
+      i = j;
+    }
+    mSettings->endArray();
   }
 
-  setMountedImageSetting(no, fileName, prot);
+  mSettings->setValue(QString("RecentImageSettings/%1/FileName").arg(i), fileName);
+  mSettings->setValue(QString("RecentImageSettings/%1/IsWriteProtected").arg(i), isWriteProtected);
+
+  setMountedImageSetting(no, fileName, isWriteProtected);
 }
 
 void RespeqtSettings::unmountImage(int no) {
