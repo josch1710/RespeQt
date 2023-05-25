@@ -17,7 +17,7 @@ namespace Printers {
       return QSharedPointer<TDerived>::create(worker);
     }
 
-    // Instanciation maps
+    // Instantiation maps
     using Creator = BasePrinterPtr(SioWorkerPtr worker);
     using CreatorPair = std::pair<QString, Creator *>;
     using CreatorVector = std::vector<CreatorPair>;

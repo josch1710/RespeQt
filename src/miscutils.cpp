@@ -33,12 +33,12 @@ void deltree(const QString &name) {
 
 FileTypes::FileType FileTypes::getFileType(const QString &fileName) {
   QByteArray header;
-  FileType result = Unknown;
+  FileType result = FileType::Unknown;
 
   /* Check if it is a folder */
 
   if (QFileInfo(fileName).isDir()) {
-    return Dir;
+    return FileType::Dir;
   }
 
   /* Read the file header */
@@ -78,63 +78,63 @@ FileTypes::FileType FileTypes::getFileType(const QString &fileName) {
   /* Determine the file type */
 
   if (b0 == 'A' && b1 == 'T' && b2 == '8' && b3 == 'X') {
-    result = Atx;
+    result = FileType::Atx;
   } else if (b0 == 'F' && b1 == 'U' && b2 == 'J' && b3 == 'I') {
-    result = Cas;
+    result = FileType::Cas;
   } else if (b0 == 0x96 && b1 == 0x02) {
-    result = Atr;
+    result = FileType::Atr;
   } else if (b0 == 0xF9 || b0 == 0xFA) {
-    result = Dcm;
+    result = FileType::Dcm;
   } else if (b0 == 0xFF && b1 == 0xFF) {
-    result = Xex;
+    result = FileType::Xex;
   } else if (b0 == 'D' && b1 == 'I') {
-    result = Di;
+    result = FileType::Di;
   } else if (b2 == 'P' && (b3 == '2' || b3 == '3')) {
-    result = Pro;
+    result = FileType::Pro;
   } else if (fileName.endsWith(".XFD", Qt::CaseInsensitive) || fileName.endsWith(".XFZ", Qt::CaseInsensitive) || fileName.endsWith(".XFD.GZ", Qt::CaseInsensitive)) {
-    result = Xfd;
+    result = FileType::Xfd;
   }
 
-  if (result != Unknown && gz) {
-    result = (FileType) (result + 1);
+  if (result != FileType::Unknown && gz) {
+    result = static_cast<FileType>(static_cast<quint8>(result) + 1);
   }
 
   return result;
 }
 
-__attribute__((unused)) QString FileTypes::getFileTypeName(FileType type) {
+QString FileTypes::getFileTypeName(FileType type) {
   switch (type) {
-    case Atr:
+    case FileType::Atr:
       return tr("ATR disk image");
-    case AtrGz:
+    case FileType::AtrGz:
       return tr("gzipped ATR disk image");
-    case Xfd:
+    case FileType::Xfd:
       return tr("XFD disk image");
-    case XfdGz:
+    case FileType::XfdGz:
       return tr("gziped XFD disk image");
-    case Dcm:
+    case FileType::Dcm:
       return tr("DCM disk image");
-    case DcmGz:
+    case FileType::DcmGz:
       return tr("gzipped DCM disk image");
-    case Di:
+    case FileType::Di:
       return tr("DI disk image");
-    case DiGz:
+    case FileType::DiGz:
       return tr("gzipped DI disk image");
-    case Pro:
+    case FileType::Pro:
       return tr("PRO disk image");
-    case ProGz:
+    case FileType::ProGz:
       return tr("gzipped PRO disk image");
-    case Atx:
+    case FileType::Atx:
       return tr("VAPI (ATX) disk image");
-    case AtxGz:
+    case FileType::AtxGz:
       return tr("gzipped VAPI (ATX) disk image");
-    case Cas:
+    case FileType::Cas:
       return tr("CAS cassette image");
-    case CasGz:
+    case FileType::CasGz:
       return tr("gzipped CAS cassette image");
-    case Xex:
+    case FileType::Xex:
       return tr("Atari executable");
-    case XexGz:
+    case FileType::XexGz:
       return tr("gzipped Atari executable");
     default:
       return tr("unknown file type");

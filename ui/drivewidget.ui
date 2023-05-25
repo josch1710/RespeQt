@@ -414,14 +414,6 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="font">
-        <font>
-         <family>MS Shell Dlg 2</family>
-         <pointsize>8</pointsize>
-         <italic>false</italic>
-         <bold>false</bold>
-        </font>
-       </property>
        <property name="autoFillBackground">
         <bool>false</bool>
        </property>
@@ -510,6 +502,9 @@
           </colorrole>
          </disabled>
         </palette>
+       </property>
+       <property name="text">
+        <string/>
        </property>
        <property name="textFormat">
         <enum>Qt::PlainText</enum>

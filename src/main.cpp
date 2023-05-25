@@ -7,7 +7,7 @@
  */
 
 #include "mainwindow.h"
-#include <QApplication>
+#include "RespeQtApplication.h"
 #include <QTextCodec>
 #include <memory>
 
@@ -20,8 +20,8 @@ int main(int argc, char *argv[]) {
   timeBeginPeriod(1);
 #endif
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-  QApplication a(argc, argv);
-  a.setFont(a.font("QMenu"));
+  RespeQtApplication a(argc, argv);
+
   QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
   auto w = new MainWindow;
   w->show();

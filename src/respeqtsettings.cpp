@@ -20,6 +20,25 @@
 std::unique_ptr<RespeqtSettings> RespeqtSettings::sInstance;
 
 RespeqtSettings::RespeqtSettings() {
+#if 0 && defined(Q_OS_MAC)
+  // We need to look for an old config file, because Mac-Qt will respect the organization domain.
+  // We changed that, so we copy everything over.
+  QApplication::setOrganizationDomain("https://github.com/jzatarski/RespeQt");
+  auto oldSettings = new QSettings();
+  QApplication::setOrganizationDomain("respeqt.org");
+
+  // When FirstTime auf false steht, dann wurden die Settings schon mal laufengelassen.
+  if (!oldSettings->value("FirstTime", true).toBool()) {
+    auto newSettings = new QSettings();
+    QString newLocation = newSettings->fileName();
+    QString oldLocation = oldSettings->fileName();
+    delete newSettings;
+    delete oldSettings;
+
+    auto settingsFile = new QFile(oldLocation);
+    settingsFile->copy(newLocation);
+  }
+#endif
   mSettings = new QSettings();//uses QApplication's info to determine setting to use
 
   mIsFirstTime = mSettings->value("FirstTime", true).toBool();

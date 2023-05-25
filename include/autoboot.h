@@ -10,6 +10,7 @@
 #define AUTOBOOT_H
 
 #include <QFile>
+#include <QSharedPointer>
 
 #include "sioworker.h"
 
@@ -26,12 +27,12 @@ private:
   QByteArray bootSectors;
   QList<AtariExeChunk> chunks;
   int sectorCount;
-  SioDevice *oldDevice;
+  SioDevicePtr oldDevice;
   bool started, loaded;
   bool readExecutable(const QString &fileName);
 
 public:
-  AutoBoot(SioWorkerPtr worker, SioDevice *aOldDevice) : SioDevice(worker) {
+  AutoBoot(SioWorkerPtr worker, SioDevicePtr aOldDevice) : SioDevice(worker) {
     oldDevice = aOldDevice;
     started = loaded = false;
   }
@@ -48,5 +49,7 @@ signals:
   void blockRead(int current, int all);
   void loaderDone();
 };
+
+using AutoBootPtr = QSharedPointer<AutoBoot>;
 
 #endif// AUTOBOOT_H

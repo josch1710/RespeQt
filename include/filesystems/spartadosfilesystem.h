@@ -39,7 +39,7 @@ namespace Filesystems {
     QByteArray m_volumeName;
 
   public:
-    SpartaDosFileSystem(DiskImages::SimpleDiskImage *image);
+    SpartaDosFileSystem(DiskImages::DiskImagePtr image);
     QList<AtariDirEntry> getEntries(quint16 dir);
 
     uint totalCapacity();

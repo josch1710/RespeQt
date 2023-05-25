@@ -10,7 +10,11 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include "include/diskimages/diskimage.h"
+#include "diskimages/diskimage.h"
+#include "diskimages/simplediskimage.h"
+#include "diskimages/diskimageatx.h"
+#include "diskimages/diskimagepro.h"
+#include "diskimages/diskimagefactory.h"
 #include "zlib.h"
 
 #include "diskeditdialog.h"
@@ -20,10 +24,11 @@
 #include <QFileInfo>
 #include <algorithm>
 
-/* SimpleDiskImage */
+/* DiskImage */
 namespace DiskImages {
-  SimpleDiskImage::SimpleDiskImage(SioWorkerPtr worker)
-      : SioDevice(worker) {
+  DiskImage::DiskImage(SioWorkerPtr worker, bool gzipped)
+      : SioDevice(worker),
+        m_gzipped(gzipped) {
     m_editDialog = 0;
     m_displayTransmission = false;
     m_dumpDataFrame = false;
@@ -36,40 +41,40 @@ namespace DiskImages {
     m_translatorAutomaticDetection = false;
     m_OSBMode = false;
     m_toolDiskMode = false;
-    m_translatorDisk = nullptr;
-    m_toolDisk = nullptr;
+    m_translatorDisk.reset();
+    m_toolDisk.reset();
   }
 
-  SimpleDiskImage::~SimpleDiskImage() {
+  DiskImage::~DiskImage() {
     closeTranslator();
     closeToolDisk();
     if (isOpen()) {
-      SimpleDiskImage::close();
+      DiskImage::close();
     }
   }
 
-  void SimpleDiskImage::closeTranslator() {
+  void DiskImage::closeTranslator() {
     if (m_translatorDisk != nullptr) {
       m_translatorDisk->close();
-      m_translatorDisk = nullptr;
+      m_translatorDisk.reset();
     }
   }
 
-  void SimpleDiskImage::closeToolDisk() {
+  void DiskImage::closeToolDisk() {
     if (m_toolDisk != nullptr) {
       m_toolDisk->close();
-      m_toolDisk = nullptr;
+      m_toolDisk.reset();
     }
   }
 
-  QString SimpleDiskImage::originalFileName() const {
+  QString DiskImage::originalFileName() const {
     if (m_board.isToolDiskActive()) {
       return m_toolDiskImagePath;
     }
     return m_originalFileName;
   }
 
-  QString SimpleDiskImage::description() const {
+  QString DiskImage::description() const {
     if (m_board.isToolDiskActive()) {
       if (m_activateChipModeWithTool || m_board.isChipOpen()) {
         return QString(tr("Favorite tool disk")).append(" - ").append(tr("CHIP mode"));
@@ -92,7 +97,7 @@ namespace DiskImages {
     }
   }
 
-  QString SimpleDiskImage::getNextSideLabel() {
+  QString DiskImage::getNextSideLabel() {
     int nextSide = m_currentSide + 1;
     if (nextSide > m_numberOfSides) {
       nextSide = 1;
@@ -100,11 +105,11 @@ namespace DiskImages {
     return QString(tr("Load image %1 of %2:\n%3").arg(nextSide).arg(m_numberOfSides).arg(m_nextSideFilename));
   }
 
-  void SimpleDiskImage::refreshNewGeometry() {
+  void DiskImage::refreshNewGeometry() {
     m_newGeometry.initialize(m_geometry);
   }
 
-  void SimpleDiskImage::setChipMode(bool enable) {
+  void DiskImage::setChipMode(bool enable) {
     m_board.setChipOpen(enable);
     m_board.setLastArchiverUploadCrc16(0);
     if (m_board.isChipOpen()) {
@@ -113,7 +118,7 @@ namespace DiskImages {
     emit statusChanged(m_deviceNo);
   }
 
-  void SimpleDiskImage::setHappyMode(bool enable) {
+  void DiskImage::setHappyMode(bool enable) {
     m_board.setHappyEnabled(enable);
     m_board.setLastHappyUploadCrc16(0);
     if (m_board.isHappyEnabled()) {
@@ -135,12 +140,12 @@ namespace DiskImages {
     emit statusChanged(m_deviceNo);
   }
 
-  void SimpleDiskImage::setOSBMode(bool enable) {
+  void DiskImage::setOSBMode(bool enable) {
     m_OSBMode = enable;
     setTranslatorActive(true);
   }
 
-  void SimpleDiskImage::setTranslatorActive(bool resetTranslatorState) {
+  void DiskImage::setTranslatorActive(bool resetTranslatorState) {
     bool oldState = m_board.isTranslatorActive();
     bool enable = m_OSBMode && ((m_deviceNo == -1) || (m_deviceNo == 0x31));
     if (enable) {
@@ -161,7 +166,7 @@ namespace DiskImages {
     }
   }
 
-  bool SimpleDiskImage::translatorDiskImageAvailable() {
+  bool DiskImage::translatorDiskImageAvailable() {
     if (m_translatorDiskImagePath.isEmpty()) {
       qWarning() << "!w" << tr("[%1] No Translator disk image defined. Please, check settings in menu Disk images>OS-B emulation.").arg(deviceName());
       return false;
@@ -177,12 +182,12 @@ namespace DiskImages {
     return true;
   }
 
-  __attribute__((unused)) void SimpleDiskImage::setToolDiskMode(bool enable) {
+  __attribute__((unused)) void DiskImage::setToolDiskMode(bool enable) {
     m_toolDiskMode = enable;
     setToolDiskActive();
   }
 
-  void SimpleDiskImage::setToolDiskActive() {
+  void DiskImage::setToolDiskActive() {
     bool oldState = m_board.isToolDiskActive();
     bool enable = m_toolDiskMode && (m_deviceNo == 0x31);
     if (enable) {
@@ -200,7 +205,7 @@ namespace DiskImages {
     }
   }
 
-  bool SimpleDiskImage::toolDiskImageAvailable() {
+  bool DiskImage::toolDiskImageAvailable() {
     if (m_toolDiskImagePath.isEmpty()) {
       qWarning() << "!w" << tr("[%1] No tool disk image defined. Please, check settings in menu Disk images>Favorite tool disk.").arg(deviceName());
       return false;
@@ -216,45 +221,45 @@ namespace DiskImages {
     return true;
   }
 
-  void SimpleDiskImage::setDisplayTransmission(bool active) {
+  void DiskImage::setDisplayTransmission(bool active) {
     m_displayTransmission = active;
   }
 
-  void SimpleDiskImage::setSpyMode(bool enable) {
+  void DiskImage::setSpyMode(bool enable) {
     m_dumpDataFrame = enable;
   }
 
-  void SimpleDiskImage::setTrackLayout(bool enable) {
+  void DiskImage::setTrackLayout(bool enable) {
     m_displayTrackLayout = enable;
   }
 
-  void SimpleDiskImage::setDisassembleUploadedCode(bool enable) {
+  void DiskImage::setDisassembleUploadedCode(bool enable) {
     m_disassembleUploadedCode = enable;
   }
 
-  void SimpleDiskImage::setTranslatorAutomaticDetection(bool enable) {
+  void DiskImage::setTranslatorAutomaticDetection(bool enable) {
     m_translatorAutomaticDetection = enable;
   }
 
-  void SimpleDiskImage::setTranslatorDiskImagePath(const QString &filename) {
+  void DiskImage::setTranslatorDiskImagePath(const QString &filename) {
     m_translatorDiskImagePath = filename;
     setTranslatorActive(false);
   }
 
-  void SimpleDiskImage::setToolDiskImagePath(const QString &filename) {
+  void DiskImage::setToolDiskImagePath(const QString &filename) {
     m_toolDiskImagePath = filename;
     setToolDiskActive();
   }
 
-  void SimpleDiskImage::setActivateChipModeWithTool(bool activate) {
+  void DiskImage::setActivateChipModeWithTool(bool activate) {
     m_activateChipModeWithTool = activate;
   }
 
-  void SimpleDiskImage::setActivateHappyModeWithTool(bool activate) {
+  void DiskImage::setActivateHappyModeWithTool(bool activate) {
     m_activateHappyModeWithTool = activate;
   }
 
-  __attribute__((unused)) void SimpleDiskImage::setLeverOpen(bool open) {
+  __attribute__((unused)) void DiskImage::setLeverOpen(bool open) {
     if (m_isLeverOpen != open) {
       m_isLeverOpen = open;
       if (open) {
@@ -265,51 +270,11 @@ namespace DiskImages {
     }
   }
 
-  bool SimpleDiskImage::openDcm(const QString &fileName) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("DCM images are not supported yet."));
-    return false;
-  }
-
-  bool SimpleDiskImage::openDi(const QString &fileName) {
-    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("DI images are not supported yet."));
-    return false;
-  }
-
-  bool SimpleDiskImage::open(const QString &fileName, FileTypes::FileType type) {
-    m_originalImageType = type;
+  bool DiskImage::open(const QString &fileName) {
     m_currentSide = 1;
     m_numberOfSides = 1;
     m_nextSideFilename.clear();
-    bool bResult = false;
-    switch (type) {
-      case FileTypes::Atr:
-      case FileTypes::AtrGz:
-        bResult = openAtr(fileName);
-        break;
-      case FileTypes::Xfd:
-      case FileTypes::XfdGz:
-        bResult = openXfd(fileName);
-        break;
-      case FileTypes::Dcm:
-      case FileTypes::DcmGz:
-        bResult = openDcm(fileName);
-        break;
-      case FileTypes::Di:
-      case FileTypes::DiGz:
-        bResult = openDi(fileName);
-        break;
-      case FileTypes::Pro:
-      case FileTypes::ProGz:
-        bResult = openPro(fileName);
-        break;
-      case FileTypes::Atx:
-      case FileTypes::AtxGz:
-        bResult = openAtx(fileName);
-        break;
-      default:
-        qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Unknown file type."));
-        break;
-    }
+    auto bResult = openImage(fileName);
     if (bResult) {
       QFileInfo fileInfo(fileName);
       QString baseName = fileInfo.completeBaseName();
@@ -320,15 +285,9 @@ namespace DiskImages {
       if (baseName.contains("Side", Qt::CaseInsensitive) || baseName.contains("Disk", Qt::CaseInsensitive)) {
         QStringList imageList;
         imageList << fileInfo.absoluteDir().absoluteFilePath(fileInfo.fileName());
-        QStringList images = fileInfo.absoluteDir().entryList(QStringList() << "*.xfd"
-                                                                            << "*.XFD"
-                                                                            << "*.atr"
-                                                                            << "*.ATR"
-                                                                            << "*.pro"
-                                                                            << "*.PRO"
-                                                                            << "*.atx"
-                                                                            << "*.ATX",
-                                                              QDir::Files);
+        QStringList images = fileInfo.absoluteDir().entryList(
+          QStringList()  << "*.xfd" << "*.XFD" << "*.atr" << "*.ATR" << "*.pro" << "*.PRO" << "*.atx" << "*.ATX",
+          QDir::Files);
         foreach (QString otherFileName, images) {
           QFileInfo otherFileInfo(otherFileName);
           QString otherBaseName = otherFileInfo.completeBaseName();
@@ -360,7 +319,7 @@ namespace DiskImages {
     return bResult;
   }
 
-  bool SimpleDiskImage::sameSoftware(const QString &fileName, const QString &otherFileName) {
+  bool DiskImage::sameSoftware(const QString &fileName, const QString &otherFileName) {
     int same = 0;
     int minLength = fileName.length() < otherFileName.length() ? fileName.length() : otherFileName.length();
     QChar c1, c2;
@@ -401,144 +360,83 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::saveDcm(const QString &fileName) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Saving DCM images is not supported yet."));
-    return false;
-  }
-
-  bool SimpleDiskImage::saveDi(const QString &fileName) {
-    qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Saving DI images is not supported yet."));
-    return false;
-  }
-
-  bool SimpleDiskImage::save() {
-    switch (m_originalImageType) {
-      case FileTypes::Atr:
-      case FileTypes::AtrGz:
-        return saveAtr(m_originalFileName);
-        break;
-      case FileTypes::Xfd:
-      case FileTypes::XfdGz:
-        return saveXfd(m_originalFileName);
-        break;
-      case FileTypes::Dcm:
-      case FileTypes::DcmGz:
-        return saveDcm(m_originalFileName);
-        break;
-      case FileTypes::Di:
-      case FileTypes::DiGz:
-        return saveDi(m_originalFileName);
-        break;
-      case FileTypes::Pro:
-      case FileTypes::ProGz:
-        return savePro(m_originalFileName);
-        break;
-      case FileTypes::Atx:
-      case FileTypes::AtxGz:
-        return saveAtx(m_originalFileName);
-        break;
-      default:
-        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, tr("Unknown file type."));
-        return false;
-    }
-  }
-
-  __attribute__((unused)) bool SimpleDiskImage::saveAs(const QString &fileName) {
-    m_currentSide = 1;
+  __attribute__((unused)) bool DiskImage::saveAs(const QString &fileName) {
+/*    m_currentSide = 1;
     m_numberOfSides = 1;
     m_nextSideFilename.clear();
     if (fileName.endsWith(".ATR", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::Atr;
-      if ((m_originalImageType == FileTypes::Atr) || (m_originalImageType == FileTypes::AtrGz) || (m_originalImageType == FileTypes::Xfd) || (m_originalImageType == FileTypes::XfdGz)) {
+      FileTypes::FileType destinationImageType = FileTypes::FileType::Atr;
+      if (false) {
         // almost same format but different name
-        m_originalImageType = destinationImageType;
         return saveAtr(fileName);
       }
       return saveAsAtr(fileName, destinationImageType);
     } else if (fileName.endsWith(".ATZ", Qt::CaseInsensitive) || fileName.endsWith(".ATR.GZ", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::AtrGz;
-      if ((m_originalImageType == FileTypes::Atr) || (m_originalImageType == FileTypes::AtrGz) || (m_originalImageType == FileTypes::Xfd) || (m_originalImageType == FileTypes::XfdGz)) {
+      FileTypes::FileType destinationImageType = FileTypes::FileType::AtrGz;
+      if (false) {
         // almost same format but different name
-        m_originalImageType = destinationImageType;
         return saveAtr(fileName);
       }
       return saveAsAtr(fileName, destinationImageType);
     } else if (fileName.endsWith(".XFD", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::Xfd;
-      if ((m_originalImageType == FileTypes::Atr) || (m_originalImageType == FileTypes::AtrGz) || (m_originalImageType == FileTypes::Xfd) || (m_originalImageType == FileTypes::XfdGz)) {
+      FileTypes::FileType destinationImageType = FileTypes::FileType::Xfd;
+      if (false) {
         // almost same format but different name
-        m_originalImageType = destinationImageType;
         return saveXfd(fileName);
       }
       return saveAsAtr(fileName, destinationImageType);
     } else if (fileName.endsWith(".XFZ", Qt::CaseInsensitive) || fileName.endsWith(".XFD.GZ", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::XfdGz;
-      if ((m_originalImageType == FileTypes::Atr) || (m_originalImageType == FileTypes::AtrGz) || (m_originalImageType == FileTypes::Xfd) || (m_originalImageType == FileTypes::XfdGz)) {
+      FileTypes::FileType destinationImageType = FileTypes::FileType::XfdGz;
+      if (false) {
         // almost same format but different name
-        m_originalImageType = destinationImageType;
         return saveXfd(fileName);
       }
       return saveAsAtr(fileName, destinationImageType);
     } else if (fileName.endsWith(".DCM", Qt::CaseInsensitive)) {
-      m_originalImageType = FileTypes::Dcm;
       return saveDcm(fileName);
     } else if (fileName.endsWith(".DI", Qt::CaseInsensitive)) {
-      m_originalImageType = FileTypes::Di;
       return saveDi(fileName);
     } else if (fileName.endsWith(".PRO", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::Pro;
-      if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
+      FileTypes::FileType destinationImageType = FileTypes::FileType::Pro;
+      if (false) {
         // same format but different name
-        m_originalImageType = destinationImageType;
         return savePro(fileName);
       }
       return saveAsPro(fileName, destinationImageType);
     } else if (fileName.endsWith(".PRO.GZ", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::ProGz;
-      if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
+      FileTypes::FileType destinationImageType = FileTypes::FileType::ProGz;
+      if (false) {
         // same format but different name
-        m_originalImageType = destinationImageType;
         return savePro(fileName);
       }
       return saveAsPro(fileName, destinationImageType);
     } else if (fileName.endsWith(".ATX", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::Atx;
-      if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
+      FileTypes::FileType destinationImageType = FileTypes::FileType::Atx;
+      if (false) {
         // same format but different name
-        m_originalImageType = destinationImageType;
         return saveAtx(fileName);
       }
       return saveAsAtx(fileName, destinationImageType);
     } else if (fileName.endsWith(".ATX.GZ", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::AtxGz;
-      if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
+      FileTypes::FileType destinationImageType = FileTypes::FileType::AtxGz;
+      if (false) {
         // same format but different name
-        m_originalImageType = destinationImageType;
         return saveAtx(fileName);
       }
       return saveAsAtx(fileName, destinationImageType);
     } else {
       qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Unknown file extension."));
       return false;
-    }
+    }*/
+    return false;
   }
 
-  bool SimpleDiskImage::create(int untitledName) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return createPro(untitledName);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return createAtx(untitledName);
-    }
-    return createAtr(untitledName);
-  }
-
-  __attribute__((unused)) void SimpleDiskImage::reopen() {
+  __attribute__((unused)) void DiskImage::reopen() {
     close();
-    open(m_originalFileName, m_originalImageType);
+    open(m_originalFileName);
   }
 
-  void SimpleDiskImage::close() {
+  void DiskImage::close() {
     closeTranslator();
     closeToolDisk();
     m_currentSide = 1;
@@ -547,18 +445,17 @@ namespace DiskImages {
     if (m_editDialog) {
       delete m_editDialog;
     }
-    if ((m_originalImageType == FileTypes::Atr) || (m_originalImageType == FileTypes::AtrGz) ||
-        (m_originalImageType == FileTypes::Xfd) || (m_originalImageType == FileTypes::XfdGz)) {
+    if (false /* simplediskimage*/) {
       file.close();
     }
     setReady(false);
   }
 
-  void SimpleDiskImage::setReady(bool bReady) {
+  void DiskImage::setReady(bool bReady) {
     m_isReady = bReady;
   }
 
-  bool SimpleDiskImage::executeArchiverCode(quint16 aux, QByteArray &data) {
+  bool DiskImage::executeArchiverCode(quint16 aux, QByteArray &data) {
     bool ok = true;
     if (((quint8) data[0] == 0x18) && ((quint8) data[1] == 0x60)) {// Super Archiver 3.12 command to check if chip is open
       qDebug() << "!u" << tr("[%1] Uploaded code is: Check if drive is a Super Archiver").arg(deviceName());
@@ -638,7 +535,7 @@ namespace DiskImages {
     return ok;
   }
 
-  void SimpleDiskImage::readHappyTrack(int trackNumber, bool happy1050) {
+  void DiskImage::readHappyTrack(int trackNumber, bool happy1050) {
     Crc16 crc;
     QByteArray data;
     readTrack(0xEA00 | (quint8) trackNumber, data, 256);
@@ -694,7 +591,7 @@ namespace DiskImages {
     }
   }
 
-  QByteArray SimpleDiskImage::readHappySectors(int trackNumber, int afterSectorNumber, bool happy1050) {
+  QByteArray DiskImage::readHappySectors(int trackNumber, int afterSectorNumber, bool happy1050) {
     int baseOffset = happy1050 ? 0xC80 : 0x280;
     bool rev50 = happy1050 ? false : (quint8) m_board.m_happyRam[0x14D] == 0x18;
     quint8 fdcMask = rev50 ? 0x18 : m_board.m_happyRam[baseOffset + 0x01];
@@ -772,190 +669,7 @@ namespace DiskImages {
     return status;
   }
 
-  bool SimpleDiskImage::readHappySectorAtPosition(int trackNumber, int sectorNumber, int afterSectorNumber, int &index, QByteArray &data) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return readHappyProSectorAtPosition(trackNumber, sectorNumber, afterSectorNumber, index, data);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return readHappyAtxSectorAtPosition(trackNumber, sectorNumber, afterSectorNumber, index, data);
-    }
-    return readHappyAtrSectorAtPosition(trackNumber, sectorNumber, afterSectorNumber, index, data);
-  }
-
-  bool SimpleDiskImage::readHappySkewAlignment(bool happy1050) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return readHappyProSkewAlignment(happy1050);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return readHappyAtxSkewAlignment(happy1050);
-    }
-    return readHappyAtrSkewAlignment(happy1050);
-  }
-
-  bool SimpleDiskImage::writeHappyTrack(int trackNumber, bool happy1050) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return writeHappyProTrack(trackNumber, happy1050);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return writeHappyAtxTrack(trackNumber, happy1050);
-    }
-    return writeHappyAtrTrack(trackNumber, happy1050);
-  }
-
-  bool SimpleDiskImage::writeHappySectors(int trackNumber, int afterSectorNumber, bool happy1050) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return writeHappyProSectors(trackNumber, afterSectorNumber, happy1050);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return writeHappyAtxSectors(trackNumber, afterSectorNumber, happy1050);
-    }
-    return writeHappyAtrSectors(trackNumber, afterSectorNumber, happy1050);
-  }
-
-  bool SimpleDiskImage::format(const DiskGeometry &geo) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return formatPro(geo);
-    } else if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return formatAtx(geo);
-    }
-    return formatAtr(geo);
-  }
-
-  void SimpleDiskImage::readTrack(quint16 aux, QByteArray &data, int length) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      readProTrack(aux, data, length);
-    } else if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      readAtxTrack(aux, data, length);
-    } else {
-      readAtrTrack(aux, data, length);
-    }
-  }
-
-  bool SimpleDiskImage::readSectorStatuses(QByteArray &data) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return readProSectorStatuses(data);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return readAtxSectorStatuses(data);
-    }
-    return readAtrSectorStatuses(data);
-  }
-
-  bool SimpleDiskImage::readSectorUsingIndex(quint16 aux, QByteArray &data) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return readProSectorUsingIndex(aux, data);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return readAtxSectorUsingIndex(aux, data);
-    }
-    return readAtrSectorUsingIndex(aux, data);
-  }
-
-  bool SimpleDiskImage::readSector(quint16 aux, QByteArray &data) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return readProSector(aux, data);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return readAtxSector(aux, data);
-    }
-    return readAtrSector(aux, data);
-  }
-
-  bool SimpleDiskImage::readSkewAlignment(quint16 aux, QByteArray &data, bool timingOnly) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return readProSkewAlignment(aux, data, timingOnly);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return readAtxSkewAlignment(aux, data, timingOnly);
-    }
-    return readAtrSkewAlignment(aux, data, timingOnly);
-  }
-
-  __attribute__((unused)) bool SimpleDiskImage::resetTrack(quint16 aux) {
-    if (!m_isModified) {
-      m_isModified = true;
-      emit statusChanged(m_deviceNo);
-    }
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return resetProTrack(aux);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return resetAtxTrack(aux);
-    }
-    return resetAtrTrack(aux);
-  }
-
-  bool SimpleDiskImage::writeTrack(quint16 aux, const QByteArray &data) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return writeProTrack(aux, data);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return writeAtxTrack(aux, data);
-    }
-    return writeAtrTrack(aux, data);
-  }
-
-  bool SimpleDiskImage::writeTrackWithSkew(quint16 aux, const QByteArray &data) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return writeProTrackWithSkew(aux, data);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return writeAtxTrackWithSkew(aux, data);
-    }
-    return writeAtrTrackWithSkew(aux, data);
-  }
-
-  bool SimpleDiskImage::writeSectorUsingIndex(quint16 aux, const QByteArray &data, bool fuzzy) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return writeProSectorUsingIndex(aux, data, fuzzy);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return writeAtxSectorUsingIndex(aux, data, fuzzy);
-    }
-    return writeAtrSectorUsingIndex(aux, data, fuzzy);
-  }
-
-  bool SimpleDiskImage::writeFuzzySector(quint16 aux, const QByteArray &data) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return writeFuzzyProSector(aux, data);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return writeFuzzyAtxSector(aux, data);
-    }
-    return writeFuzzyAtrSector(aux, data);
-  }
-
-  bool SimpleDiskImage::writeSector(quint16 aux, const QByteArray &data) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return writeProSector(aux, data);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return writeAtxSector(aux, data);
-    }
-    return writeAtrSector(aux, data);
-  }
-
-  __attribute__((unused)) bool SimpleDiskImage::writeSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8 sideNumber, quint8 sectorNumber, quint8 sectorSize, const QByteArray &data, bool crcError, int weakOffset) {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return writeProSectorExtended(bitNumber, dataType, trackNumber, sideNumber, sectorNumber, sectorSize, data, crcError, weakOffset);
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return writeAtxSectorExtended(bitNumber, dataType, trackNumber, sideNumber, sectorNumber, sectorSize, data, crcError, weakOffset);
-    }
-    return writeAtrSectorExtended(bitNumber, dataType, trackNumber, sideNumber, sectorNumber, sectorSize, data, crcError, weakOffset);
-  }
-
-  int SimpleDiskImage::sectorsInCurrentTrack() {
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      return sectorsInCurrentProTrack();
-    }
-    if ((m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
-      return sectorsInCurrentAtxTrack();
-    }
-    return sectorsInCurrentAtrTrack();
-  }
-
-  int SimpleDiskImage::findNearestSpeed(int speed) {
+  int DiskImage::findNearestSpeed(int speed) {
     if (speed < 20000) {
       return 19200;
     }
@@ -976,7 +690,7 @@ namespace DiskImages {
     return bestSpeed;
   }
 
-  void SimpleDiskImage::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) {
+  void DiskImage::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) {
     if ((!isReady()) || isLeverOpen()) {
       if ((command != 0x4E) && (command != 0x4F) && (command != 0x53)) {
         qWarning() << "!w" << tr("[%1] command: $%2, aux: $%3 ignored because the drive is not ready.").arg(deviceName()).arg(command, 2, 16, QChar('0')).arg(aux1, 2, 16, QChar('0')).arg(aux2, 2, 16, QChar('0'));
@@ -993,7 +707,8 @@ namespace DiskImages {
         if (sector == 1) {
           if (m_board.getTranslatorState() == BOOT_STATE::NOT_BOOTED) {
             closeTranslator();
-            m_translatorDisk = new SimpleDiskImage(sio);
+
+            m_translatorDisk = DiskImageFactory::instance()->createDiskImage(m_translatorDiskImagePath, sio);
             m_translatorDisk->setReadOnly(true);
             m_translatorDisk->setDeviceNo(0x31);
             m_translatorDisk->setDisplayTransmission(false);
@@ -1002,8 +717,7 @@ namespace DiskImages {
             m_translatorDisk->setDisassembleUploadedCode(false);
             m_translatorDisk->setTranslatorAutomaticDetection(false);
             m_translatorDisk->setReady(true);
-            FileTypes::FileType type = FileTypes::getFileType(m_translatorDiskImagePath);
-            if (!m_translatorDisk->open(m_translatorDiskImagePath, type)) {
+            if (!m_translatorDisk->open(m_translatorDiskImagePath)) {
               m_board.setTranslatorActive(false);
             } else {
               m_board.setTranslatorState(BOOT_STATE::FIRST_SECTOR_1);
@@ -1023,8 +737,8 @@ namespace DiskImages {
           return;
         }
       } else if (m_board.isToolDiskActive()) {
-        if (m_toolDisk == nullptr) {
-          m_toolDisk = new SimpleDiskImage(sio);
+/* TODO        if (m_toolDisk == nullptr) {
+          m_toolDisk = new DiskImage(sio);
           m_toolDisk->setReadOnly(true);
           m_toolDisk->setDeviceNo(0x31);
           m_toolDisk->setDisplayTransmission(false);
@@ -1046,7 +760,7 @@ namespace DiskImages {
           } else {
             qWarning() << "!i" << tr("[%1] Booting tool disk '%2' first").arg(deviceName(), m_toolDiskImagePath);
           }
-        }
+        } */
         if (m_board.isToolDiskActive() && (m_toolDisk != nullptr)) {
           m_toolDisk->handleCommand(command, aux1, aux2);
           return;
@@ -2427,11 +2141,10 @@ namespace DiskImages {
     }
   }
 
-  void SimpleDiskImage::getStatus(QByteArray &status) {
+  void DiskImage::getStatus(QByteArray &status) {
     quint8 motorSpinning = 0x10;
     quint8 readOnlyStatus = isReadOnly() || isLeverOpen() ? 0x08 : 0;// if lever not open, the disk is reported as read-only in the status byte
-    if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz) ||
-        (m_originalImageType == FileTypes::Atx) || (m_originalImageType == FileTypes::AtxGz)) {
+    if (typeid(this) == typeid(DiskImageAtx) || typeid(this) == typeid(DiskImagePro)) {
       status[0] = motorSpinning | readOnlyStatus | m_driveStatus;
     } else {
       status[0] = motorSpinning | readOnlyStatus |
@@ -2449,7 +2162,7 @@ namespace DiskImages {
     status[3] = 0;
   }
 
-  quint8 SimpleDiskImage::computeVersionByte() {
+  quint8 DiskImage::computeVersionByte() {
     const char *str = VERSION;
     int index = 0;
     if (str[index] == 'r') {
@@ -2464,7 +2177,7 @@ namespace DiskImages {
     return (quint8) ((major << 4) + minor);
   }
 
-  int SimpleDiskImage::defaultFileSystem() {
+  int DiskImage::defaultFileSystem() {
     if (m_geometry.sectorCount() < 1) {
       return 0;
     }
@@ -2512,43 +2225,43 @@ namespace DiskImages {
     }
   }
 
-  bool SimpleDiskImage::writeCommandAck() {
+  bool DiskImage::writeCommandAck() {
     if (m_displayTransmission) {
       qDebug() << "!u" << tr("[%1] Sending [COMMAND ACK] to Atari").arg(deviceName());
     }
     return sio->port()->writeCommandAck();
   }
 
-  bool SimpleDiskImage::writeDataAck() {
+  bool DiskImage::writeDataAck() {
     if (m_displayTransmission) {
       qDebug() << "!u" << tr("[%1] Sending [DATA ACK] to Atari").arg(deviceName());
     }
     return sio->port()->writeDataAck();
   }
 
-  bool SimpleDiskImage::writeCommandNak() {
+  bool DiskImage::writeCommandNak() {
     qWarning() << "!w" << tr("[%1] Sending [COMMAND NAK] to Atari").arg(deviceName());
     return sio->port()->writeCommandNak();
   }
 
-  bool SimpleDiskImage::writeDataNak() {
+  bool DiskImage::writeDataNak() {
     qWarning() << "!w" << tr("[%1] Sending [DATA NAK] to Atari").arg(deviceName());
     return sio->port()->writeDataNak();
   }
 
-  bool SimpleDiskImage::writeComplete() {
+  bool DiskImage::writeComplete() {
     if (m_displayTransmission) {
       qDebug() << "!u" << tr("[%1] Sending [COMPLETE] to Atari").arg(deviceName());
     }
     return sio->port()->writeComplete();
   }
 
-  bool SimpleDiskImage::writeError() {
+  bool DiskImage::writeError() {
     qWarning() << "!w" << tr("[%1] Sending [ERROR] to Atari").arg(deviceName());
     return sio->port()->writeError();
   }
 
-  QByteArray SimpleDiskImage::readDataFrame(uint size) {
+  QByteArray DiskImage::readDataFrame(uint size) {
     QByteArray data = sio->port()->readDataFrame(size, false);
     if (m_dumpDataFrame) {
       qDebug() << "!u" << tr("[%1] Receiving %2 bytes from Atari").arg(deviceName()).arg(data.length());
@@ -2557,7 +2270,7 @@ namespace DiskImages {
     return data;
   }
 
-  bool SimpleDiskImage::writeDataFrame(QByteArray data) {
+  bool DiskImage::writeDataFrame(QByteArray data) {
     if (m_dumpDataFrame) {
       qDebug() << "!u" << tr("[%1] Sending %2 bytes to Atari").arg(deviceName()).arg(data.length());
       dumpBuffer((unsigned char *) data.data(), data.length());
@@ -2565,31 +2278,31 @@ namespace DiskImages {
     return sio->port()->writeDataFrame(data);
   }
 
-  quint16 SimpleDiskImage::getBigEndianWord(QByteArray &array, int offset) {
+  quint16 DiskImage::getBigEndianWord(QByteArray &array, int offset) {
     return (((quint16) array[offset + 1]) & 0xFF) + ((((quint16) array[offset]) << 8) & 0xFF00);
   }
 
-  quint16 SimpleDiskImage::getLittleEndianWord(QByteArray &array, int offset) {
+  quint16 DiskImage::getLittleEndianWord(QByteArray &array, int offset) {
     return (((quint16) array[offset]) & 0xFF) + ((((quint16) array[offset + 1]) << 8) & 0xFF00);
   }
 
-  quint32 SimpleDiskImage::getLittleEndianLong(QByteArray &array, int offset) {
+  quint32 DiskImage::getLittleEndianLong(QByteArray &array, int offset) {
     return (((quint32) array[offset]) & 0xFF) + ((((quint32) array[offset + 1]) << 8) & 0xFF00) + ((((quint32) array[offset + 2]) << 16) & 0xFF0000) + ((((quint32) array[offset + 3]) << 24) & 0xFF000000);
   }
 
-  void SimpleDiskImage::setLittleEndianWord(QByteArray &array, int offset, quint16 value) {
+  void DiskImage::setLittleEndianWord(QByteArray &array, int offset, quint16 value) {
     array[offset] = (quint8) (value & 0xFF);
     array[offset + 1] = (quint8) ((value >> 8) & 0xFF);
   }
 
-  void SimpleDiskImage::setLittleEndianLong(QByteArray &array, int offset, quint32 value) {
+  void DiskImage::setLittleEndianLong(QByteArray &array, int offset, quint32 value) {
     array[offset] = (quint8) (value & 0xFF);
     array[offset + 1] = (quint8) ((value >> 8) & 0xFF);
     array[offset + 2] = (quint8) ((value >> 16) & 0xFF);
     array[offset + 3] = (quint8) ((value >> 24) & 0xFF);
   }
 
-  void SimpleDiskImage::fillBuffer(char *line, unsigned char *buf, int len, int ofs, bool dumpAscii) {
+  void DiskImage::fillBuffer(char *line, unsigned char *buf, int len, int ofs, bool dumpAscii) {
     *line = 0;
     if ((len - ofs) >= 16) {
       if (dumpAscii) {
@@ -2645,7 +2358,7 @@ namespace DiskImages {
     }
   }
 
-  void SimpleDiskImage::dumpBuffer(unsigned char *buf, int len) {
+  void DiskImage::dumpBuffer(unsigned char *buf, int len) {
     for (int i = 0; i < ((len + 15) >> 4); i++) {
       char line[80];
       int ofs = i << 4;
@@ -2654,7 +2367,7 @@ namespace DiskImages {
     }
   }
 
-  int SimpleDiskImage::getUploadCodeStartAddress(quint8 command, quint16 aux, QByteArray &) {
+  int DiskImage::getUploadCodeStartAddress(quint8 command, quint16 aux, QByteArray &) {
     if (m_board.isChipOpen()) {
       if (command == 0x4D) {
         return 0x0080;
@@ -2675,7 +2388,7 @@ namespace DiskImages {
     return -1;
   }
 
-  void SimpleDiskImage::disassembleCode(QByteArray &data, unsigned short address, bool drive1050, bool happy) {
+  void DiskImage::disassembleCode(QByteArray &data, unsigned short address, bool drive1050, bool happy) {
     // CRC16 is not a good hash but this is only for very few "upload and execute code" commands so this is OK
     // This CRC is used to implement these commands at SIO level in diskimage.cpp.
     // This is useful to make Fuzzy sectors with Super Archiver when hardware emulation level.
@@ -2734,4 +2447,29 @@ namespace DiskImages {
       m_remainingBytes.append(code.right(len - offset));
     }
   }
+
+ bool DiskImage::writeHappyTrack(int trackNumber, bool happy1050) {
+   return false;
+ }
+
+ bool DiskImage::seekToSector(quint16 sector) {
+   if (sector < 1 || sector > m_geometry.sectorCount()) {
+      qCritical() << "!e" << tr("[%1] Cannot seek to sector %2: %3").arg(deviceName()).arg(sector).arg(tr("Sector number is out of bounds."));
+   }
+   qint64 pos = (sector - 1) * m_geometry.bytesPerSector();
+   // all sectors in a XFD file have the same size (this is the difference with the ATR format).
+   // For example, XFD files are used to store CP/M disk images with 256 bytes boot sectors for Indus GT with RamCharger (not possible with ATR files).
+   if ((m_geometry.bytesPerSector() == 256)) {
+      if (sector <= 3) {
+        pos = (sector - 1) * 128;
+      } else {
+        pos -= 384;
+      }
+   }
+   if (!file.seek(pos)) {
+      qCritical() << "!e" << tr("[%1] Cannot seek to sector %2: %3").arg(deviceName()).arg(sector).arg(file.errorString());
+      return false;
+   }
+   return true;
+ }
 }

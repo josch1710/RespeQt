@@ -5456,7 +5456,7 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
 </context>
 <context>
-    <name>SimpleDiskImage</name>
+    <name>DiskImage</name>
     <message>
         <location filename="../diskimage.cpp" line="656"/>
         <location filename="../diskimage.cpp" line="662"/>

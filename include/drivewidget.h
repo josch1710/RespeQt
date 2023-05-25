@@ -9,13 +9,10 @@
 #define DRIVEWIDGET_H
 
 #include <QFrame>
+#include "diskimages/diskimage.h"
 
 namespace Ui {
   class DriveWidget;
-}
-
-namespace DiskImages {
-  class SimpleDiskImage;
 }
 
 class DriveWidget : public QFrame {
@@ -34,7 +31,7 @@ public:
   void showAsImageMounted(const QString &fileName, const QString &description, bool editEnabled, bool enableSave, bool leverOpen, bool happyEnabled, bool chipOpen,
                           bool translatorActive, bool toolDiskActive, bool severalSides, bool happyShown, bool chipShown, bool nextSideShown, bool OSBShown, bool toolDiskShown);
 
-  void updateFromImage(DiskImages::SimpleDiskImage *diskImage, bool happyShown, bool chipShown, bool nextSideShown, bool OSBShown, bool toolDiskShown);
+  void updateFromImage(DiskImages::DiskImagePtr diskImage, bool happyShown, bool chipShown, bool nextSideShown, bool OSBShown, bool toolDiskShown);
   bool isAutoSaveEnabled();
   bool isHappyEnabled();
   bool isChipEnabled();

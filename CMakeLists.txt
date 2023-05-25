@@ -80,7 +80,7 @@ set(SOURCES
     src/printers/centronics.cpp
     src/printers/escp.cpp
     src/printers/atari1029.cpp
-        src/diskimages/diskimageatr.cpp
+        src/diskimages/simplediskimage.cpp
         src/diskimages/disassembly810.cpp
         src/diskimages/disassembly1050.cpp
     src/printers/printerfactory.cpp
@@ -97,7 +97,7 @@ set(SOURCES
     src/filesystems/mydosfilesystem.cpp
     src/filesystems/spartadosfilesystem.cpp
     src/diskimages/diskgeometry.cpp
-        src/diskimages/prosectorinfo.cpp src/diskimages/atxsectorinfo.cpp src/diskimages/atxtrackinfo.cpp src/diskimages/board.cpp)
+        src/diskimages/prosectorinfo.cpp src/diskimages/atxsectorinfo.cpp src/diskimages/atxtrackinfo.cpp src/diskimages/board.cpp src/diskimages/diskimagefactory.cpp src/RespeQtApplication.cpp include/RespeQtApplication.h)
 
 set(HEADERS
     include/mainwindow.h
@@ -157,7 +157,7 @@ set(HEADERS
     include/filesystems/mydosfilesystem.h
     include/filesystems/spartadosfilesystem.h
     include/diskimages/diskgeometry.h
-        include/diskimages/prosectorinfo.h include/diskimages/atxsectorinfo.h include/diskimages/atxtrackinfo.h include/diskimages/board.h)
+        include/diskimages/prosectorinfo.h include/diskimages/atxsectorinfo.h include/diskimages/atxtrackinfo.h include/diskimages/board.h include/diskimages/simplediskimage.h include/diskimages/diskimagepro.h include/diskimages/diskimageatx.h include/diskimages/diskimagefactory.h src/RespeQtApplication.cpp include/RespeQtApplication.h)
 
 set(FORMS
     ui/mainwindow.ui
@@ -224,7 +224,7 @@ qt5_add_resources(UI_RESOURCES ${RESOURCES})
 
 if (APPLE)
     set(MACOSX_BUNDLE_ICON_FILE RespeQt.icns)
-    set(APP_ICON resources/RespeQt.icns)
+    set(APP_ICON resources/RespeQt.icns src/diskimages/diskimagefactory.cpp)
     set_source_files_properties(${APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     add_executable(${TARGET} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES} ${APP_ICON})
 

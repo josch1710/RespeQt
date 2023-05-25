@@ -37,7 +37,7 @@ class FileTypes : public QObject {
   Q_OBJECT
 
 public:
-  enum FileType {
+  enum class FileType: quint8 {
     Unknown,
     Dir,
     Atr,
@@ -58,7 +58,7 @@ public:
     XexGz
   };
   static FileType getFileType(const QString &fileName);
-  __attribute__((unused)) static QString getFileTypeName(FileType type);
+  static QString getFileTypeName(FileType type);
 };
 
 

@@ -5131,7 +5131,7 @@ Do you want to open the options dialog?</source>
     </message>
 </context>
 <context>
-    <name>SimpleDiskImage</name>
+    <name>DiskImage</name>
     <message>
         <location filename="../diskimage.cpp" line="656"/>
         <location filename="../diskimage.cpp" line="662"/>

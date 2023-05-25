@@ -46,6 +46,7 @@ OTHER_FILES += \
 
 win32 {
     LIBS += -lwinmm -lz -lwinspool
+    QT += winextras
 }
 
 unix {
@@ -53,6 +54,10 @@ unix {
     #QMAKE_CXXFLAGS += -Werror
     CONFIG -= warn_on
     QMAKE_CXXFLAGS += $$QMAKE_CXXFLAGS_WARN_ON -Wno-deprecated-copy
+}
+
+linux {
+    QT += x11extras
 }
 
 macx {
@@ -69,6 +74,7 @@ macx {
 
     deploy.commands = $$PWD/deployment/macdeploy.sh $$PWD $$OUT_PWD "$$VERSION" "$$RC_VERSION"
     QMAKE_EXTRA_TARGETS += deploy
+    QT += macextras
 }
 win32 {
     deploy.commands = $$PWD/deployment/windeploy.bat "$$OUT_PWD/release/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$$VERSION_$$RC_VERSION"

@@ -20,7 +20,7 @@ namespace Filesystems {
     Q_OBJECT
 
   protected:
-    DiskImages::SimpleDiskImage *m_image;
+    DiskImages::DiskImagePtr m_image;
     bool m_textConversion;
     QByteArray bitmap;
     quint16 m_freeSectors;
@@ -30,7 +30,7 @@ namespace Filesystems {
     bool sectorIsFree(quint16 sector);
 
   public:
-    AtariFileSystem(DiskImages::SimpleDiskImage *image) {
+    AtariFileSystem(DiskImages::DiskImagePtr image) {
       m_image = image;
       m_textConversion = false;
     }
@@ -46,7 +46,7 @@ namespace Filesystems {
     virtual AtariDirEntry insert(quint16 dir, const QString &name) = 0;
     virtual bool erase(const AtariDirEntry &entry) = 0;
     virtual bool rename(const AtariDirEntry &entry, const QByteArray &name) = 0;
-    inline DiskImages::SimpleDiskImage *image() { return m_image; }
+    inline DiskImages::DiskImagePtr image() { return m_image; }
     inline void setTextConversion(bool conv) { m_textConversion = conv; }
     virtual QString name() = 0;
     virtual bool removeDir(const AtariDirEntry &entry) = 0;

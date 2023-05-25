@@ -51,7 +51,7 @@ namespace Filesystems {
     return false;
   }
 
-  SpartaDosFileSystem::SpartaDosFileSystem(DiskImages::SimpleDiskImage *image)
+  SpartaDosFileSystem::SpartaDosFileSystem(DiskImages::DiskImagePtr image)
       : AtariFileSystem(image) {
     QByteArray boot;
     m_image->readSector(1, boot);

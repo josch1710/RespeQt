@@ -83,7 +83,7 @@ bool PrinterWidget::selectPrinter() {
   if (mSio) {
     auto newPrinter = Printers::PrinterFactory::instance()->createPrinter(ui->atariPrinters->currentText(), mSio);
     if (newPrinter) {
-      mSio->installDevice(static_cast<quint8>(PRINTER_BASE_CDEVIC + printerNo_), newPrinter.data());
+      mSio->installDevice(static_cast<quint8>(PRINTER_BASE_CDEVIC + printerNo_), newPrinter);
       mPrinter = newPrinter;
       RespeqtSettings::instance()->setPrinterName(printerNo_, ui->atariPrinters->currentText());
       return true;

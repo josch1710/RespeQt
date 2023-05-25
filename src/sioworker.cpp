@@ -38,7 +38,7 @@ SioWorker::SioWorker()
     : QThread() {
   deviceMutex = new QMutex(QMutex::Recursive);
   for (int i = 0; i <= 255; i++) {
-    devices[i] = nullptr;
+    devices[i].reset();
   }
   mPort.reset();
 }
@@ -46,7 +46,7 @@ SioWorker::SioWorker()
 SioWorker::~SioWorker() {
   for (int i = 0; i <= 255; i++) {
     if (devices[i]) {
-      delete devices[i];
+      devices[i].reset();
     }
   }
   delete deviceMutex;
@@ -380,10 +380,11 @@ QString SioWorker::guessDiskCommand(const quint8 command, const quint8 aux1, con
 #endif
 }
 
-void SioWorker::installDevice(quint8 no, SioDevice *device) {
+void SioWorker::installDevice(quint8 no, SioDevicePtr device) {
+  qDebug() << "!d" << "installDevice(" << no << ", " << device << ")";
   deviceMutex->lock();
   if (devices[no]) {
-    delete devices[no];
+    devices[no].reset();
   }
   devices[no] = device;
   device->setDeviceNo(no);
@@ -400,11 +401,12 @@ void SioWorker::installDevice(quint8 no, SioDevice *device) {
 }
 
 void SioWorker::uninstallDevice(quint8 no) {
+  qDebug() << "!d" << "uninstallDevice(" << no << ")";
   deviceMutex->lock();
   if (devices[no]) {
     devices[no]->setDeviceNo(-1);
   }
-  devices[no] = 0;
+  devices[no].reset();
   deviceMutex->unlock();
   if (mPort) {
     QByteArray data;
@@ -418,11 +420,9 @@ void SioWorker::uninstallDevice(quint8 no) {
 }
 
 void SioWorker::swapDevices(quint8 d1, quint8 d2) {
-  SioDevice *t1, *t2;
-
   deviceMutex->lock();
-  t1 = devices[d1];
-  t2 = devices[d2];
+  auto t1 = devices[d1];
+  auto t2 = devices[d2];
   uninstallDevice(d1);
   uninstallDevice(d2);
   if (t2) {
@@ -434,10 +434,9 @@ void SioWorker::swapDevices(quint8 d1, quint8 d2) {
   deviceMutex->unlock();
 }
 
-SioDevice *SioWorker::getDevice(quint8 no) {
-  SioDevice *result;
+SioDevicePtr SioWorker::getDevice(quint8 no) {
   deviceMutex->lock();
-  result = devices[no];
+  auto result = devices[no];
   deviceMutex->unlock();
   return result;
 }

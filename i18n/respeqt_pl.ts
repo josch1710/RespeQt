@@ -5486,7 +5486,7 @@ Czy chcesz otworzyć opcje?</translation>
     </message>
 </context>
 <context>
-    <name>SimpleDiskImage</name>
+    <name>DiskImage</name>
     <message>
         <location filename="../diskimageatr.cpp" line="113"/>
         <source>Image size of &apos;%1&apos; is reported as %2 bytes in the header but it&apos;s actually %3.</source>

@@ -12,14 +12,17 @@
 #ifndef SIOWORKER_H
 #define SIOWORKER_H
 
+#include "serialport.h"
+
 #include <QMutex>
 #include <QSharedPointer>
 #include <QThread>
 #ifndef QT_NO_DEBUG
 #include <QFile>
 #endif
+#include <QVector>
+#include <QSharedPointer>
 
-#include "serialport.h"
 #include <atomic>
 #include <memory>
 
@@ -64,12 +67,14 @@ signals:
   void statusChanged(int deviceNo);
 };
 
+using SioDevicePtr = QSharedPointer<SioDevice>;
+
 class SioWorker : public QThread {
   Q_OBJECT
 
 private:
   QMutex *deviceMutex;
-  SioDevice *devices[256];
+  QVector<SioDevicePtr> devices{256};
   AbstractSerialPortBackendPtr mPort;
   std::atomic_bool mustTerminate;
   bool displayCommandName;
@@ -94,10 +99,10 @@ public:
   void run();
 
   void setAutoReconnect(bool autoReconnect);
-  void installDevice(quint8 no, SioDevice *device);
+  void installDevice(quint8 no, SioDevicePtr device);
   virtual void uninstallDevice(quint8 no);
   void swapDevices(quint8 d1, quint8 d2);
-  SioDevice *getDevice(quint8 no);
+  SioDevicePtr getDevice(quint8 no);
 
   QString guessDiskCommand(const quint8 command, const quint8 aux1, const quint8 aux2);
   QString deviceName(int device);

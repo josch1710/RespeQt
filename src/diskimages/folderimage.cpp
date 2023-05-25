@@ -28,8 +28,8 @@ namespace DiskImages {
   static QString g_respeQtAppPath;
   static bool g_disablePicoHiSpeed;
 
-  FolderImage::FolderImage(SioWorkerPtr worker, int maxEntries) : SimpleDiskImage(worker), maxEntries(maxEntries) {
-  }
+  FolderImage::FolderImage(SioWorkerPtr worker, bool)
+      : DiskImage(worker, false) {}
 
   FolderImage::~FolderImage() {
     atariFiles.clear();
@@ -45,7 +45,7 @@ namespace DiskImages {
 
   // Return the long file name of a short Atari file name from a given (last mounted) Folder Image
   __attribute__((unused)) QString FolderImage::longName(QString &lastMountedFolder, QString &atariFileName) {
-    if (FolderImage::open(lastMountedFolder, FileTypes::Dir)) {
+    if (FolderImage::open(lastMountedFolder)) {
       for (auto file: atariFiles) {
         if (file.atariName + "." + file.atariExt == atariFileName)
           return file.longName;
@@ -54,6 +54,11 @@ namespace DiskImages {
     return nullptr;
   }
 
+  void FolderImage::setMaxEntries(int limitEntries) {
+    auto old = mMaxEntries;
+    mMaxEntries = limitEntries;
+    emit maxEntriesChanged(old, mMaxEntries);
+  }
 
   void FolderImage::buildDirectory() {
     QFileInfoList infos = dir.entryInfoList(QDir::Files, QDir::Name);
@@ -65,8 +70,8 @@ namespace DiskImages {
     auto count = infos.count();
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "UnusedValue"
-    if (maxEntries > 0 && count > maxEntries)
-      count = maxEntries;
+    if (mMaxEntries > 0 && count > mMaxEntries)
+      count = mMaxEntries;
 #pragma clang diagnostic pop
 
     for (auto info: infos) {
@@ -137,7 +142,7 @@ namespace DiskImages {
     }
   }
 
-  bool FolderImage::open(const QString &fileName, FileTypes::FileType /* type */) {
+  bool FolderImage::open(const QString &fileName) {
     if (dir.exists(fileName)) {
       dir.setPath(fileName);
 
@@ -177,7 +182,7 @@ namespace DiskImages {
       } else {
         data = boot.read(128);
         buildDirectory();
-        for (int i = 0; i < maxEntries; i++) {
+        for (int i = 0; i < mMaxEntries; i++) {
           // AtariDOS, MyDos, SmartDOS  and DosXL
           if (atariFiles[i].longName.toUpper() == "DOS.SYS") {
             bootFileSector = 369 + i;
@@ -207,7 +212,7 @@ namespace DiskImages {
             QByteArray nameLine;
             nameLine.append(dir.dirName() + '\x9B');
             picoName.write(nameLine);
-            for (int j = 0; j < maxEntries; j++) {
+            for (int j = 0; j < mMaxEntries; j++) {
               if (atariFiles[j].exists) {
                 if (atariFiles[j].longName != "$boot.bin") {
                   nameLine.clear();
@@ -398,5 +403,27 @@ namespace DiskImages {
 
   bool FolderImage::writeSector(quint16, const QByteArray &) {
     return false;
+  }
+
+  bool FolderImage::openImage(const QString &fileName) {
+    return true;
+  }
+  bool FolderImage::resetTrack(quint16 aux) {
+    return false;
+  }
+  bool FolderImage::writeHappyTrack(int trackNumber, bool happy1050) {
+    return false;
+  }
+  QByteArray FolderImage::readHappySectors(int trackNumber, int afterSectorNumber, bool happy1050) {
+    return QByteArray();
+  }
+  bool FolderImage::writeHappySectors(int trackNumber, int afterSectorNumber, bool happy1050) {
+    return false;
+  }
+  bool FolderImage::writeSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8 sideNumber, quint8 sectorNumber, quint8 sectorSize, const QByteArray &data, bool crcError, int weakOffset) {
+    return false;
+  }
+  quint8 FolderImage::writeSectorHeader(quint8 dataSize, quint16 sectorSlot, quint8 postDataCrc, quint8 preIDField, quint8 postIDCrc, quint8 track, quint8 index, quint8 nextSector) {
+    return 0;
   }
 }

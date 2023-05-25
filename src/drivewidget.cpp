@@ -28,12 +28,12 @@ void DriveWidget::setup(bool happyHidden, bool chipHidden, bool nextSideHidden, 
   QString driveTxt;
   if (driveNo_ < 9) {
     driveTxt = QString("%1").arg(driveNo_ + 1);
-    ui->driveLabel->setText(driveTxt);
+    //ui->driveLabel->setText(driveTxt);
   } else {
     driveTxt = QString("%1").arg((char) ((char) (driveNo_ - 9) + 'J'));
   }
 
-  ui->driveLabel->setText(QString("%1:").arg(driveTxt));
+  //ui->driveLabel->setText(QString("%1:").arg(driveTxt));
 
   // Fixup status tips (Note: not all of these have an %1 in the status tip
   FormatStatusTip(ui->actionBootOption, driveTxt);
@@ -108,7 +108,7 @@ void DriveWidget::setup(bool happyHidden, bool chipHidden, bool nextSideHidden, 
   connect(ui->actionBootOption, &QAction::triggered, this, &DriveWidget::bootOptionTriggered);
 }
 
-void DriveWidget::updateFromImage(DiskImages::SimpleDiskImage *diskImage, bool happyHidden, bool chipHidden, bool nextSideHidden, bool OSBHidden, bool toolDiskHidden) {
+void DriveWidget::updateFromImage(DiskImages::DiskImagePtr diskImage, bool happyHidden, bool chipHidden, bool nextSideHidden, bool OSBHidden, bool toolDiskHidden) {
   if (diskImage == nullptr) {
     showAsEmpty(happyHidden, chipHidden, nextSideHidden, OSBHidden, toolDiskHidden);
     return;
@@ -139,7 +139,6 @@ void DriveWidget::updateFromImage(DiskImages::SimpleDiskImage *diskImage, bool h
   bool enableEdit = diskImage->editDialog() != nullptr;
   ui->actionEditDisk->setChecked(enableEdit);
 
-
   // Update save/revert
   bool modified = diskImage->isModified();
   ui->actionSave->setEnabled(!modified);
@@ -165,8 +164,8 @@ void DriveWidget::triggerChipClickIfEnabled() {
 
 void DriveWidget::showAsEmpty(bool happyHidden, bool chipHidden, bool nextSideHidden, bool OSBHidden, bool toolDiskHidden) {
   ui->actionSave->setEnabled(false);
-  ui->labelFileName->clear();
-  ui->labelImageProperties->clear();
+  //ui->labelFileName->clear();
+  //ui->labelImageProperties->clear();
   ui->actionEject->setEnabled(false);
   ui->buttonNextSide->setVisible(!nextSideHidden);
   ui->actionNextSide->setEnabled(false);

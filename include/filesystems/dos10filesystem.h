@@ -13,7 +13,7 @@ namespace Filesystems {
     virtual bool writeBitmap();
 
   public:
-    Dos10FileSystem(DiskImages::SimpleDiskImage *image);
+    Dos10FileSystem(DiskImages::DiskImagePtr image);
     QList<AtariDirEntry> getEntries(quint16 dir);
     uint totalCapacity();
     int findFreeFileNo(quint16 dir);

@@ -10,11 +10,14 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include "include/diskimages/diskimage.h"
+#include "diskimages/simplediskimage.h"
 
 #include "diskeditdialog.h"
+#include "diskimages/diskgeometry.h"
 #include "filesystems/atarifilesystem.h"
 #include "respeqtsettings.h"
+#include "diskimages/diskimage.h"
+
 #include <QDir>
 #include <QFileInfo>
 
@@ -23,10 +26,375 @@ namespace DiskImages {
   extern quint16 ATX_SECTOR_POSITIONS_SD[];
   extern quint16 ATX_SECTOR_POSITIONS_ED[];
 
-  bool SimpleDiskImage::openAtr(const QString &fileName) {
+  SimpleDiskImage::SimpleDiskImage(SioWorkerPtr worker, bool gzipped) : DiskImage(worker, gzipped) {}
+
+  quint8 SimpleDiskImage::writeSectorHeader(quint8 dataSize, quint16 sectorSlot, quint8 postDataCrc, quint8 preIDField, quint8 postIDCrc, quint8 track, quint8 index, quint8 nextSector) {
+    return 0;
+  }
+  /*bool SimpleDiskImage::open(const QString &fileName) {
     QFile *sourceFile;
 
-    if (m_originalImageType == FileTypes::Atr) {
+    if (!m_gzipped) {
+      sourceFile = new QFile(fileName);
+    } else {
+      sourceFile = new GzFile(fileName);
+    }
+
+    if (!sourceFile->open(QFile::ReadOnly)) {
+      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, sourceFile->errorString());
+      delete sourceFile;
+      return false;
+    }
+
+    file.setFileTemplate(QDir::temp().absoluteFilePath("respeqt-temp-XXXXXX"));
+    if (!file.open()) {
+      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot create temporary file '%1': %2").arg(file.fileName(), file.errorString()));
+      sourceFile->close();
+      delete sourceFile;
+      return false;
+    }
+
+    while (!sourceFile->atEnd()) {
+      int bufsize = 16777216;
+      QByteArray buffer = sourceFile->read(bufsize);
+      if (buffer.length() != bufsize && !sourceFile->atEnd()) {
+        qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot read from file: %1.").arg(sourceFile->errorString()));
+        sourceFile->close();
+        delete sourceFile;
+        file.close();
+        return false;
+      }
+      if (file.write(buffer) != buffer.length()) {
+        qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot write to temporary file '%1': %2").arg(file.fileName(), file.errorString()));
+        sourceFile->close();
+        delete sourceFile;
+        file.close();
+        return false;
+      }
+    }
+
+    auto size = static_cast<quint64>(file.size());
+
+    if ((size % 128) != 0) {
+      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Invalid image size (%1).").arg(size));
+      sourceFile->close();
+      delete sourceFile;
+      file.close();
+      return false;
+    }
+
+    m_geometry.initialize(size);
+    refreshNewGeometry();
+    m_originalFileHeader = QByteArray(16, 0);
+    m_isReadOnly = sourceFile->isWritable();
+    m_originalFileName = fileName;
+    m_isModified = false;
+    m_isUnmodifiable = false;
+    m_isUnnamed = false;
+    m_trackNumber = 0;
+    setReady(true);
+    sourceFile->close();
+    delete sourceFile;
+    return true;
+  }
+
+  bool SimpleDiskImage::save(const QString &fileName) {
+    DiskGeometry guess;
+    guess.initialize(m_geometry.totalSize());
+
+    if (!guess.isEqual(m_geometry)) {
+      if (guess.bytesPerSector() == m_geometry.bytesPerSector()) {
+        qWarning() << "!w" << tr("Detailed disk geometry information will be lost when reopening '%1' due to XFD file format limitations.").arg(fileName);
+      } else {
+        qCritical() << "!e" << tr("XFD file format cannot handle this disk geometry. Try saving '%1' as ATR.").arg(fileName);
+        return false;
+      }
+    }
+
+    // Try to open the output file
+    QFile *outputFile;
+
+    if (!m_gzipped) {
+      outputFile = new QFile(fileName);
+    } else {
+      outputFile = new GzFile(fileName);
+    }
+
+    if (!outputFile->open(QFile::WriteOnly | QFile::Truncate)) {
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+      return false;
+    }
+
+    // Try to copy the temporary file back
+    if (!file.reset()) {
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Cannot rewind temporary file '%1': %2").arg(file.fileName(), file.errorString()));
+      outputFile->close();
+      return false;
+    }
+
+    while (file.bytesAvailable() != 0) {
+      int bufsize = 16777216;
+      if (bufsize > file.bytesAvailable()) {
+        bufsize = file.bytesAvailable();
+      }
+      QByteArray buffer = file.read(bufsize);
+      if (buffer.length() != bufsize) {
+        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Cannot read from temporary file %1: %2").arg(file.fileName(), file.errorString()));
+        outputFile->close();
+        return false;
+      }
+      if (outputFile->write(buffer) != bufsize) {
+        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+        outputFile->close();
+        return false;
+      }
+    }
+
+    m_originalFileName = fileName;
+    m_originalFileHeader.clear();
+    m_isModified = false;
+    m_isUnmodifiable = false;
+    m_isUnnamed = false;
+    emit statusChanged(m_deviceNo);
+    outputFile->close();
+    delete outputFile;
+    return true;
+  } */
+
+  /*__attribute__((unused)) bool DiskImage::saveAsAtr(const QString &fileName, FileTypes::FileType destImageType) {
+    if ((destImageType == FileTypes::FileType::Atr) || (destImageType == FileTypes::FileType::AtrGz)) {
+      m_originalFileHeader = QByteArray(16, 0);
+
+      // Put signature
+      m_originalFileHeader[0] = 0x96;
+      m_originalFileHeader[1] = 0x02;
+
+      // Encode meta data
+      m_originalFileHeader[2] = (m_geometry.totalSize() >> 4) % 256;
+      m_originalFileHeader[3] = (m_geometry.totalSize() >> 12) % 256;
+      m_originalFileHeader[4] = m_geometry.bytesPerSector() % 256;
+      m_originalFileHeader[5] = m_geometry.bytesPerSector() / 256;
+      m_originalFileHeader[6] = (m_geometry.totalSize() >> 20) % 256;
+      m_originalFileHeader[7] = (m_geometry.totalSize() >> 28) % 256;
+    }
+
+    // Try to open the output file
+    QFile *outputFile;
+
+    if (!m_gzipped) {
+      outputFile = new QFile(fileName);
+    } else {
+      outputFile = new GzFile(fileName);
+    }
+
+    if (!outputFile->open(QFile::WriteOnly | QFile::Truncate)) {
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+      delete outputFile;
+      return false;
+    }
+
+    // Try to write the header
+    if (outputFile->write(m_originalFileHeader) != 16) {
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+      delete outputFile;
+      return false;
+    }
+
+    bool warningDone = false;
+    for (quint16 sector = 1; sector <= m_geometry.sectorCount(); sector++) {
+      QByteArray data;
+      m_conversionInProgress = true;
+      readSector(sector, data);
+      m_conversionInProgress = false;
+      int sectorSize = (sector <= 3) ? 128 : m_geometry.bytesPerSector();
+      if (data.size() < sectorSize) {
+        data.fill(0, sectorSize);
+      }
+      if ((m_wd1771Status != 0xFF) && (!warningDone)) {
+        warningDone = true;
+        qWarning() << "!w" << tr("Some sector information is lost due to destination file format limitations.");
+      }
+
+      // Try to write the header
+      if (outputFile->write(data) != m_geometry.bytesPerSector()) {
+        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+        delete outputFile;
+        return false;
+      }
+    }
+
+    DiskGeometry guess;
+    guess.initialize(m_geometry.totalSize(), m_geometry.bytesPerSector());
+
+    if (!guess.isEqual(m_geometry)) {
+      qWarning() << "!w" << tr("Detailed geometry information will be lost when reopening '%1' due to ATR file format limitations.").arg(fileName);
+    }
+
+    m_originalFileName = fileName;
+    m_isModified = false;
+    m_isUnmodifiable = false;
+    m_isUnnamed = false;
+    emit statusChanged(m_deviceNo);
+
+    delete outputFile;
+    return true;
+  }*/
+
+  bool SimpleDiskImage::create(int untitledName) {
+    file.setFileTemplate(QDir::temp().absoluteFilePath("respeqt-temp-XXXXXX"));
+    if (!file.open()) {
+      qCritical() << "!e" << tr("Cannot create new image: Cannot create temporary file '%2': %3.").arg(file.fileName(), file.errorString());
+      return false;
+    }
+
+    m_geometry.initialize(file.size());
+    refreshNewGeometry();
+    m_originalFileHeader.clear();
+    m_isReadOnly = false;
+    m_originalFileName = tr("Untitled image %1").arg(untitledName);
+    m_isModified = false;
+    m_isUnmodifiable = false;
+    m_isUnnamed = true;
+    setReady(true);
+
+    return true;
+  }
+
+  bool SimpleDiskImage::writeHappyTrack(int trackNumber, bool happy1050) {
+    int absoluteSector = trackNumber * m_geometry.sectorsPerTrack();
+    for (int i = 0; i < m_geometry.sectorsPerTrack(); i++) {
+      QByteArray empty(m_geometry.bytesPerSector(), 0);
+      writeSector(absoluteSector + i + 1, empty);
+    }
+    bool notNormal = false;
+    int nbSectors = 0;
+    int startOffset = happy1050 ? 0xD00 : 0x300;
+    int offset = startOffset;
+    auto invertedTrack = (quint8) (0xFF - trackNumber);
+    while (offset < (startOffset + 0x100)) {
+      quint8 code = m_board.m_happyRam[offset++];
+      if (code == 0) {
+        break;
+      }
+      if (code < 128) {
+        nbSectors++;
+        if ((quint8) m_board.m_happyRam[offset++] != invertedTrack) {
+          notNormal = true;
+          break;
+        }
+        if ((quint8) m_board.m_happyRam[offset++] != (quint8) 0xFF) {
+          notNormal = true;
+          break;
+        }
+        if ((quint8) m_board.m_happyRam[offset++] < 0xED) {
+          notNormal = true;
+          break;
+        }
+        if ((quint8) m_board.m_happyRam[offset++] != (quint8) 0xFF) {
+          notNormal = true;
+          break;
+        }
+        if ((quint8) m_board.m_happyRam[offset++] != (quint8) 0x08) {
+          notNormal = true;
+          break;
+        }
+      } else {
+        offset++;
+      }
+    }
+    if (nbSectors != m_geometry.sectorsPerTrack()) {
+      notNormal = true;
+    }
+    if (notNormal) {
+      qWarning() << "!w" << tr("[%1] Write track can not write a non standard track with this kind of image.").arg(deviceName());
+      return false;
+    }
+    return true;
+  }
+
+  bool SimpleDiskImage::writeHappySectors(int trackNumber, int, bool happy1050) {
+    int startOffset = happy1050 ? 0xC80 : 0x280;
+    int startData = startOffset + 128;
+    int lastIndex = (int) (quint8) m_board.m_happyRam[startOffset + 0x0F];
+    int index = 17;
+    while (index >= lastIndex) {
+      quint8 sectorNumber = 0xFF - (quint8) m_board.m_happyRam[startOffset + 0x38 + index];
+      m_board.m_happyRam[startOffset + 0x14 + index] = 0xFF;
+      if ((sectorNumber > 0) && (sectorNumber <= m_geometry.sectorsPerTrack())) {
+        int dataOffset = startData + (index * 128);
+        int absoluteSector = (trackNumber * m_geometry.sectorsPerTrack()) + sectorNumber;
+        bool result = writeSector(absoluteSector, m_board.m_happyRam.mid(dataOffset, 128));
+        if (!result) {
+          return false;
+        }
+        quint8 writeCommand = m_board.m_happyRam[startOffset + 0x4A + index];
+        if (writeCommand != 0x57) {
+          qWarning() << "!w" << tr("[%1] command $%2 not supported for sector %3 ($%4) with this kind of image. Ignored.").arg(deviceName()).arg(writeCommand).arg(sectorNumber).arg(sectorNumber, 2, 16, QChar('0'));
+        }
+      } else {
+        qWarning() << "!w" << tr("[%1] write unused sector %2 ($%3). Ignored.").arg(deviceName()).arg(sectorNumber).arg(sectorNumber, 2, 16, QChar('0'));
+      }
+      index--;
+    }
+    if (!happy1050) {
+      for (int i = 0; i < 5; i++) {
+        m_board.m_happyRam[startOffset + 0x05 + i] = 0x80;
+      }
+      m_board.m_happyRam[startOffset + 0x0A] = 0x00;
+      m_board.m_happyRam[startOffset + 0x0B] = 0x08;
+      m_board.m_happyRam[startOffset + 0x0C] = 0x08;
+      m_board.m_happyRam[startOffset + 0x0D] = 0x43;
+      m_board.m_happyRam[startOffset + 0x10] = 0xFF;
+      m_board.m_happyRam[startOffset + 0x13] = 0xEE;
+    }
+    return true;
+  }
+
+  bool SimpleDiskImage::resetTrack(quint16 aux) {
+    int trackNumber = aux & 0x3F;
+    int absoluteSector = trackNumber * m_geometry.sectorsPerTrack();
+    QByteArray empty(m_geometry.bytesPerSector(), 0);
+    for (int i = 0; i < m_geometry.sectorsPerTrack(); i++) {
+      if (!writeSector(absoluteSector + i + 1, empty)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool SimpleDiskImage::writeSectorExtended(int, quint8, quint8 trackNumber, quint8, quint8 sectorNumber, quint8, const QByteArray &data, bool, int) {
+    if ((sectorNumber < 1) || (sectorNumber > m_geometry.sectorsPerTrack())) {
+      return true;
+    }
+    int absoluteSector = (trackNumber * m_geometry.sectorsPerTrack()) + sectorNumber;
+    return writeSector(absoluteSector, data);
+  }
+/*
+  bool DiskImage::openDcm(const QString &fileName) {
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("DCM images are not supported yet."));
+    return false;
+  }
+
+  bool DiskImage::openDi(const QString &fileName) {
+    qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("DI images are not supported yet."));
+    return false;
+  }
+  bool DiskImage::saveDcm(const QString &fileName) {
+qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Saving DCM images is not supported yet."));
+return false;
+}
+
+bool DiskImage::saveDi(const QString &fileName) {
+qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Saving DI images is not supported yet."));
+return false;
+}
+
+*/
+
+  bool SimpleDiskImage::openImage(const QString &fileName) {
+    QFile *sourceFile;
+
+    if (!m_gzipped) {
       sourceFile = new QFile(fileName);
     } else {
       sourceFile = new GzFile(fileName);
@@ -200,74 +568,7 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::openXfd(const QString &fileName) {
-    QFile *sourceFile;
-
-    if (m_originalImageType == FileTypes::Xfd) {
-      sourceFile = new QFile(fileName);
-    } else {
-      sourceFile = new GzFile(fileName);
-    }
-
-    if (!sourceFile->open(QFile::ReadOnly)) {
-      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, sourceFile->errorString());
-      delete sourceFile;
-      return false;
-    }
-
-    file.setFileTemplate(QDir::temp().absoluteFilePath("respeqt-temp-XXXXXX"));
-    if (!file.open()) {
-      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot create temporary file '%1': %2").arg(file.fileName(), file.errorString()));
-      sourceFile->close();
-      delete sourceFile;
-      return false;
-    }
-
-    while (!sourceFile->atEnd()) {
-      int bufsize = 16777216;
-      QByteArray buffer = sourceFile->read(bufsize);
-      if (buffer.length() != bufsize && !sourceFile->atEnd()) {
-        qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot read from file: %1.").arg(sourceFile->errorString()));
-        sourceFile->close();
-        delete sourceFile;
-        file.close();
-        return false;
-      }
-      if (file.write(buffer) != buffer.length()) {
-        qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot write to temporary file '%1': %2").arg(file.fileName(), file.errorString()));
-        sourceFile->close();
-        delete sourceFile;
-        file.close();
-        return false;
-      }
-    }
-
-    auto size = static_cast<quint64>(file.size());
-
-    if ((size % 128) != 0) {
-      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Invalid image size (%1).").arg(size));
-      sourceFile->close();
-      delete sourceFile;
-      file.close();
-      return false;
-    }
-
-    m_geometry.initialize(size);
-    refreshNewGeometry();
-    m_originalFileHeader = QByteArray(16, 0);
-    m_isReadOnly = sourceFile->isWritable();
-    m_originalFileName = fileName;
-    m_isModified = false;
-    m_isUnmodifiable = false;
-    m_isUnnamed = false;
-    m_trackNumber = 0;
-    setReady(true);
-    sourceFile->close();
-    delete sourceFile;
-    return true;
-  }
-
-  bool SimpleDiskImage::saveAtr(const QString &fileName) {
+  bool SimpleDiskImage::save() {
     if (m_originalFileHeader.size() != 16) {
       m_originalFileHeader = QByteArray(16, 0);
     }
@@ -287,14 +588,14 @@ namespace DiskImages {
     // Try to open the output file
     QFile *outputFile;
 
-    if (m_originalImageType == FileTypes::Atr) {
-      outputFile = new QFile(fileName);
+    if (!m_gzipped) {
+      outputFile = new QFile(m_originalFileName);
     } else {
-      outputFile = new GzFile(fileName);
+      outputFile = new GzFile(m_originalFileName);
     }
 
     if (!outputFile->open(QFile::WriteOnly | QFile::Truncate)) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, outputFile->errorString());
       outputFile->close();
       delete outputFile;
       return false;
@@ -302,7 +603,7 @@ namespace DiskImages {
 
     // Try to write the header
     if (outputFile->write(m_originalFileHeader) != 16) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, outputFile->errorString());
       outputFile->close();
       delete outputFile;
       return false;
@@ -310,7 +611,7 @@ namespace DiskImages {
 
     // Try to copy the temporary file back
     if (!file.reset()) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Cannot rewind temporary file '%1': %2").arg(file.fileName(), file.errorString()));
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, tr("Cannot rewind temporary file '%1': %2").arg(file.fileName(), file.errorString()));
       outputFile->close();
       delete outputFile;
       return false;
@@ -323,13 +624,13 @@ namespace DiskImages {
       }
       QByteArray buffer = file.read(bufsize);
       if (buffer.length() != bufsize) {
-        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Cannot read from temporary file %1: %2").arg(file.fileName(), file.errorString()));
+        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, tr("Cannot read from temporary file %1: %2").arg(file.fileName(), file.errorString()));
         outputFile->close();
         delete outputFile;
         return false;
       }
       if (outputFile->write(buffer) != bufsize) {
-        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, outputFile->errorString());
         outputFile->close();
         delete outputFile;
         return false;
@@ -340,10 +641,9 @@ namespace DiskImages {
     guess.initialize(m_geometry.totalSize(), m_geometry.bytesPerSector());
 
     if (!guess.isEqual(m_geometry)) {
-      qWarning() << "!w" << tr("Detailed geometry information will be lost when reopening '%1' due to ATR file format limitations.").arg(fileName);
+      qWarning() << "!w" << tr("Detailed geometry information will be lost when reopening '%1' due to ATR file format limitations.").arg(m_originalFileName);
     }
 
-    m_originalFileName = fileName;
     m_isModified = false;
     m_isUnmodifiable = false;
     m_isUnnamed = false;
@@ -353,176 +653,19 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::saveXfd(const QString &fileName) {
-    DiskGeometry guess;
-    guess.initialize(m_geometry.totalSize());
-
-    if (!guess.isEqual(m_geometry)) {
-      if (guess.bytesPerSector() == m_geometry.bytesPerSector()) {
-        qWarning() << "!w" << tr("Detailed disk geometry information will be lost when reopening '%1' due to XFD file format limitations.").arg(fileName);
-      } else {
-        qCritical() << "!e" << tr("XFD file format cannot handle this disk geometry. Try saving '%1' as ATR.").arg(fileName);
-        return false;
-      }
+  bool SimpleDiskImage::format(const DiskGeometry &geo) {
+    if ((!file.resize(0)) || (!file.resize(geo.totalSize()))) {
+      qCritical() << "!e" << tr("[%1] Cannot format: %2").arg(deviceName(), file.errorString());
     }
-
-    // Try to open the output file
-    QFile *outputFile;
-
-    if (m_originalImageType == FileTypes::Atr) {
-      outputFile = new QFile(fileName);
-    } else {
-      outputFile = new GzFile(fileName);
-    }
-
-    if (!outputFile->open(QFile::WriteOnly | QFile::Truncate)) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
-      return false;
-    }
-
-    // Try to copy the temporary file back
-    if (!file.reset()) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Cannot rewind temporary file '%1': %2").arg(file.fileName(), file.errorString()));
-      outputFile->close();
-      return false;
-    }
-
-    while (file.bytesAvailable() != 0) {
-      int bufsize = 16777216;
-      if (bufsize > file.bytesAvailable()) {
-        bufsize = file.bytesAvailable();
-      }
-      QByteArray buffer = file.read(bufsize);
-      if (buffer.length() != bufsize) {
-        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Cannot read from temporary file %1: %2").arg(file.fileName(), file.errorString()));
-        outputFile->close();
-        return false;
-      }
-      if (outputFile->write(buffer) != bufsize) {
-        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
-        outputFile->close();
-        return false;
-      }
-    }
-
-    m_originalFileName = fileName;
-    m_originalImageType = FileTypes::Xfd;
+    m_geometry.initialize(geo);
+    m_newGeometry.initialize(geo);
     m_originalFileHeader.clear();
-    m_isModified = false;
-    m_isUnmodifiable = false;
-    m_isUnnamed = false;
+    m_isModified = true;
     emit statusChanged(m_deviceNo);
-    outputFile->close();
-    delete outputFile;
     return true;
   }
 
-  bool SimpleDiskImage::saveAsAtr(const QString &fileName, FileTypes::FileType destImageType) {
-    if ((m_originalImageType != FileTypes::Pro) && (m_originalImageType != FileTypes::ProGz) && (m_originalImageType != FileTypes::Atx) && (m_originalImageType != FileTypes::AtxGz)) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Saving Atr images from the current format is not supported yet."));
-      return false;
-    }
-
-    if ((destImageType == FileTypes::Atr) || (destImageType == FileTypes::AtrGz)) {
-      m_originalFileHeader = QByteArray(16, 0);
-
-      // Put signature
-      m_originalFileHeader[0] = 0x96;
-      m_originalFileHeader[1] = 0x02;
-
-      // Encode meta data
-      m_originalFileHeader[2] = (m_geometry.totalSize() >> 4) % 256;
-      m_originalFileHeader[3] = (m_geometry.totalSize() >> 12) % 256;
-      m_originalFileHeader[4] = m_geometry.bytesPerSector() % 256;
-      m_originalFileHeader[5] = m_geometry.bytesPerSector() / 256;
-      m_originalFileHeader[6] = (m_geometry.totalSize() >> 20) % 256;
-      m_originalFileHeader[7] = (m_geometry.totalSize() >> 28) % 256;
-    }
-
-    // Try to open the output file
-    QFile *outputFile;
-
-    if (m_originalImageType == FileTypes::Atr) {
-      outputFile = new QFile(fileName);
-    } else {
-      outputFile = new GzFile(fileName);
-    }
-
-    if (!outputFile->open(QFile::WriteOnly | QFile::Truncate)) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
-      delete outputFile;
-      return false;
-    }
-
-    // Try to write the header
-    if (outputFile->write(m_originalFileHeader) != 16) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
-      delete outputFile;
-      return false;
-    }
-
-    bool warningDone = false;
-    for (quint16 sector = 1; sector <= m_geometry.sectorCount(); sector++) {
-      QByteArray data;
-      m_conversionInProgress = true;
-      readSector(sector, data);
-      m_conversionInProgress = false;
-      int sectorSize = (sector <= 3) ? 128 : m_geometry.bytesPerSector();
-      if (data.size() < sectorSize) {
-        data.fill(0, sectorSize);
-      }
-      if ((m_wd1771Status != 0xFF) && (!warningDone)) {
-        warningDone = true;
-        qWarning() << "!w" << tr("Some sector information is lost due to destination file format limitations.");
-      }
-
-      // Try to write the header
-      if (outputFile->write(data) != m_geometry.bytesPerSector()) {
-        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
-        delete outputFile;
-        return false;
-      }
-    }
-
-    DiskGeometry guess;
-    guess.initialize(m_geometry.totalSize(), m_geometry.bytesPerSector());
-
-    if (!guess.isEqual(m_geometry)) {
-      qWarning() << "!w" << tr("Detailed geometry information will be lost when reopening '%1' due to ATR file format limitations.").arg(fileName);
-    }
-
-    m_originalFileName = fileName;
-    m_isModified = false;
-    m_isUnmodifiable = false;
-    m_isUnnamed = false;
-    emit statusChanged(m_deviceNo);
-
-    delete outputFile;
-    return true;
-  }
-
-  bool SimpleDiskImage::createAtr(int untitledName) {
-    file.setFileTemplate(QDir::temp().absoluteFilePath("respeqt-temp-XXXXXX"));
-    if (!file.open()) {
-      qCritical() << "!e" << tr("Cannot create new image: Cannot create temporary file '%2': %3.").arg(file.fileName(), file.errorString());
-      return false;
-    }
-
-    m_geometry.initialize(file.size());
-    refreshNewGeometry();
-    m_originalFileHeader.clear();
-    m_isReadOnly = false;
-    m_originalFileName = tr("Untitled image %1").arg(untitledName);
-    m_originalImageType = FileTypes::Atr;
-    m_isModified = false;
-    m_isUnmodifiable = false;
-    m_isUnnamed = true;
-    setReady(true);
-
-    return true;
-  }
-
-  bool SimpleDiskImage::readHappyAtrSectorAtPosition(int trackNumber, int sectorNumber, int, int &index, QByteArray &data) {
+  bool SimpleDiskImage::readHappySectorAtPosition(int trackNumber, int sectorNumber, int afterSectorNumber, int &index, QByteArray &data) {
     // compute sector index for the sector number
     int startHalf = (sectorNumber & 0x01) != 0 ? 0 : (m_geometry.sectorsPerTrack() >> 1);
     int indexInHalf = ((sectorNumber - 1) >> 1);
@@ -534,7 +677,7 @@ namespace DiskImages {
     return readSector(absoluteSector, data);
   }
 
-  bool SimpleDiskImage::readHappyAtrSkewAlignment(bool happy1050) {
+  bool SimpleDiskImage::readHappySkewAlignment(bool happy1050) {
     quint8 previousTrack = 0xFF - m_board.m_happyRam[0x3C9];
     if (previousTrack > 39) {
       qWarning() << "!w" << tr("[%1] Invalid previous track number %2 ($%3) for skew alignment").arg(deviceName(), previousTrack).arg(previousTrack, 2, 16, QChar('0'));
@@ -606,130 +749,7 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::writeHappyAtrTrack(int trackNumber, bool happy1050) {
-    int absoluteSector = trackNumber * m_geometry.sectorsPerTrack();
-    for (int i = 0; i < m_geometry.sectorsPerTrack(); i++) {
-      QByteArray empty(m_geometry.bytesPerSector(), 0);
-      writeAtrSector(absoluteSector + i + 1, empty);
-    }
-    bool notNormal = false;
-    int nbSectors = 0;
-    int startOffset = happy1050 ? 0xD00 : 0x300;
-    int offset = startOffset;
-    auto invertedTrack = (quint8) (0xFF - trackNumber);
-    while (offset < (startOffset + 0x100)) {
-      quint8 code = m_board.m_happyRam[offset++];
-      if (code == 0) {
-        break;
-      }
-      if (code < 128) {
-        nbSectors++;
-        if ((quint8) m_board.m_happyRam[offset++] != invertedTrack) {
-          notNormal = true;
-          break;
-        }
-        if ((quint8) m_board.m_happyRam[offset++] != (quint8) 0xFF) {
-          notNormal = true;
-          break;
-        }
-        if ((quint8) m_board.m_happyRam[offset++] < 0xED) {
-          notNormal = true;
-          break;
-        }
-        if ((quint8) m_board.m_happyRam[offset++] != (quint8) 0xFF) {
-          notNormal = true;
-          break;
-        }
-        if ((quint8) m_board.m_happyRam[offset++] != (quint8) 0x08) {
-          notNormal = true;
-          break;
-        }
-      } else {
-        offset++;
-      }
-    }
-    if (nbSectors != m_geometry.sectorsPerTrack()) {
-      notNormal = true;
-    }
-    if (notNormal) {
-      qWarning() << "!w" << tr("[%1] Write track can not write a non standard track with this kind of image.").arg(deviceName());
-      return false;
-    }
-    return true;
-  }
-
-  bool SimpleDiskImage::writeHappyAtrSectors(int trackNumber, int, bool happy1050) {
-    int startOffset = happy1050 ? 0xC80 : 0x280;
-    int startData = startOffset + 128;
-    int lastIndex = (int) (quint8) m_board.m_happyRam[startOffset + 0x0F];
-    int index = 17;
-    while (index >= lastIndex) {
-      quint8 sectorNumber = 0xFF - (quint8) m_board.m_happyRam[startOffset + 0x38 + index];
-      m_board.m_happyRam[startOffset + 0x14 + index] = 0xFF;
-      if ((sectorNumber > 0) && (sectorNumber <= m_geometry.sectorsPerTrack())) {
-        int dataOffset = startData + (index * 128);
-        int absoluteSector = (trackNumber * m_geometry.sectorsPerTrack()) + sectorNumber;
-        bool result = writeAtrSector(absoluteSector, m_board.m_happyRam.mid(dataOffset, 128));
-        if (!result) {
-          return false;
-        }
-        quint8 writeCommand = m_board.m_happyRam[startOffset + 0x4A + index];
-        if (writeCommand != 0x57) {
-          qWarning() << "!w" << tr("[%1] command $%2 not supported for sector %3 ($%4) with this kind of image. Ignored.").arg(deviceName()).arg(writeCommand).arg(sectorNumber).arg(sectorNumber, 2, 16, QChar('0'));
-        }
-      } else {
-        qWarning() << "!w" << tr("[%1] write unused sector %2 ($%3). Ignored.").arg(deviceName()).arg(sectorNumber).arg(sectorNumber, 2, 16, QChar('0'));
-      }
-      index--;
-    }
-    if (!happy1050) {
-      for (int i = 0; i < 5; i++) {
-        m_board.m_happyRam[startOffset + 0x05 + i] = 0x80;
-      }
-      m_board.m_happyRam[startOffset + 0x0A] = 0x00;
-      m_board.m_happyRam[startOffset + 0x0B] = 0x08;
-      m_board.m_happyRam[startOffset + 0x0C] = 0x08;
-      m_board.m_happyRam[startOffset + 0x0D] = 0x43;
-      m_board.m_happyRam[startOffset + 0x10] = 0xFF;
-      m_board.m_happyRam[startOffset + 0x13] = 0xEE;
-    }
-    return true;
-  }
-
-  bool SimpleDiskImage::formatAtr(const DiskGeometry &geo) {
-    if ((!file.resize(0)) || (!file.resize(geo.totalSize()))) {
-      qCritical() << "!e" << tr("[%1] Cannot format: %2").arg(deviceName(), file.errorString());
-    }
-    m_geometry.initialize(geo);
-    m_newGeometry.initialize(geo);
-    m_originalFileHeader.clear();
-    m_isModified = true;
-    emit statusChanged(m_deviceNo);
-    return true;
-  }
-
-  bool SimpleDiskImage::seekToSector(quint16 sector) {
-    if (sector < 1 || sector > m_geometry.sectorCount()) {
-      qCritical() << "!e" << tr("[%1] Cannot seek to sector %2: %3").arg(deviceName()).arg(sector).arg(tr("Sector number is out of bounds."));
-    }
-    qint64 pos = (sector - 1) * m_geometry.bytesPerSector();
-    // all sectors in a XFD file have the same size (this is the difference with the ATR format).
-    // For example, XFD files are used to store CP/M disk images with 256 bytes boot sectors for Indus GT with RamCharger (not possible with ATR files).
-    if ((m_geometry.bytesPerSector() == 256) && (m_originalImageType != FileTypes::Xfd) && (m_originalImageType != FileTypes::XfdGz)) {
-      if (sector <= 3) {
-        pos = (sector - 1) * 128;
-      } else {
-        pos -= 384;
-      }
-    }
-    if (!file.seek(pos)) {
-      qCritical() << "!e" << tr("[%1] Cannot seek to sector %2: %3").arg(deviceName()).arg(sector).arg(file.errorString());
-      return false;
-    }
-    return true;
-  }
-
-  void SimpleDiskImage::readAtrTrack(quint16 aux, QByteArray &data, int length) {
+  void SimpleDiskImage::readTrack(quint16 aux, QByteArray &data, int length) {
     m_trackNumber = aux & 0x3F;
     bool useCount = (aux & 0x40) ? true : false;
     bool longHeader = (aux & 0x8000) ? true : false;
@@ -794,7 +814,7 @@ namespace DiskImages {
     }
   }
 
-  bool SimpleDiskImage::readAtrSectorStatuses(QByteArray &data) {
+  bool SimpleDiskImage::readSectorStatuses(QByteArray &data) {
     data.resize(128);
     int nbSectors = m_board.m_chipRam[0];
     if (nbSectors > 31) {
@@ -827,14 +847,14 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::readAtrSectorUsingIndex(quint16 aux, QByteArray &data) {
+  bool SimpleDiskImage::readSectorUsingIndex(quint16 aux, QByteArray &data) {
     quint16 index = aux & 0x1F;
     int indexInTrack = index % m_geometry.sectorsPerTrack();
     int absoluteSector = (m_trackNumber * m_geometry.sectorsPerTrack()) + m_board.m_chipRam[indexInTrack + 1];
     return readSector(absoluteSector, data);
   }
 
-  bool SimpleDiskImage::readAtrSector(quint16 aux, QByteArray &data) {
+  bool SimpleDiskImage::readSector(quint16 aux, QByteArray &data) {
     quint16 sector = m_board.isChipOpen() ? aux & 0x3FF : aux;
     if (!seekToSector(sector)) {
       return false;
@@ -847,7 +867,7 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::readAtrSkewAlignment(quint16 aux, QByteArray &data, bool timingOnly) {
+  bool SimpleDiskImage::readSkewAlignment(quint16 aux, QByteArray &data, bool timingOnly) {
     // skew alignment is not useful for ATR. Return default values
     m_board.m_trackData.clear();
     m_board.m_trackData.append(data);
@@ -906,19 +926,7 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::resetAtrTrack(quint16 aux) {
-    int trackNumber = aux & 0x3F;
-    int absoluteSector = trackNumber * m_geometry.sectorsPerTrack();
-    QByteArray empty(m_geometry.bytesPerSector(), 0);
-    for (int i = 0; i < m_geometry.sectorsPerTrack(); i++) {
-      if (!writeAtrSector(absoluteSector + i + 1, empty)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  bool SimpleDiskImage::writeAtrTrack(quint16 aux, const QByteArray &data) {
+  bool SimpleDiskImage::writeTrack(quint16 aux, const QByteArray &data) {
     m_trackNumber = aux & 0x3F;
     for (int i = 0; i < 32; i++) {
       m_board.m_chipRam[i] = data[i];
@@ -933,7 +941,7 @@ namespace DiskImages {
         }
       }
       QByteArray empty(m_geometry.bytesPerSector(), fillByte);
-      writeAtrSector(absoluteSector + i + 1, empty);
+      writeSector(absoluteSector + i + 1, empty);
     }
     bool notNormal = false;
     quint8 nbSector = data[0];
@@ -962,27 +970,27 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::writeAtrTrackWithSkew(quint16 aux, const QByteArray &) {
+  bool SimpleDiskImage::writeTrackWithSkew(quint16 aux, const QByteArray &data) {
     // skew alignment not supported
-    return writeAtrTrack((aux & 0x3F) | 0xF000, m_board.m_trackData);
+    return writeTrack((aux & 0x3F) | 0xF000, m_board.m_trackData);
   }
 
-  bool SimpleDiskImage::writeAtrSectorUsingIndex(quint16 aux, const QByteArray &data, bool) {
+  bool SimpleDiskImage::writeSectorUsingIndex(quint16 aux, const QByteArray &data, bool fuzzy) {
     quint16 index = aux & 0x1F;
     int indexInTrack = index % m_geometry.sectorsPerTrack();
 
     // write the sector
     int absoluteSector = (m_trackNumber * m_geometry.sectorsPerTrack()) + m_board.m_chipRam[indexInTrack + 1];
-    return writeAtrSector(absoluteSector, data);
+    return writeSector(absoluteSector, data);
   }
 
-  bool SimpleDiskImage::writeFuzzyAtrSector(quint16 aux, const QByteArray &data) {
+  bool SimpleDiskImage::writeFuzzySector(quint16 aux, const QByteArray &data) {
     // Fussy sectors are not supported so we write the sector as if it was a standard Write Sector command
     qWarning() << "!w" << tr("[%1] Fuzzy sectors are not supported with Atr/Xfd file format").arg(deviceName());
-    return writeAtrSector(aux & 0x3FF, data);
+    return writeSector(aux & 0x3FF, data);
   }
 
-  bool SimpleDiskImage::writeAtrSector(quint16 aux, const QByteArray &data) {
+  bool SimpleDiskImage::writeSector(quint16 aux, const QByteArray &data) {
     quint16 sector = m_board.isChipOpen() ? aux & 0x3FF : aux;
     if (!seekToSector(sector)) {
       return false;
@@ -998,18 +1006,15 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::writeAtrSectorExtended(int, quint8, quint8 trackNumber, quint8, quint8 sectorNumber, quint8, const QByteArray &data, bool, int) {
-    if ((sectorNumber < 1) || (sectorNumber > m_geometry.sectorsPerTrack())) {
-      return true;
-    }
-    int absoluteSector = (trackNumber * m_geometry.sectorsPerTrack()) + sectorNumber;
-    return writeAtrSector(absoluteSector, data);
-  }
-
-  int SimpleDiskImage::sectorsInCurrentAtrTrack() {
+  int SimpleDiskImage::sectorsInCurrentTrack() {
     if (m_trackNumber <= 39) {
       return m_geometry.sectorsPerTrack();
     }
     return 0;
   }
+
+  QByteArray SimpleDiskImage::readHappySectors(int trackNumber, int afterSectorNumber, bool happy1050) {
+    return QByteArray();
+  }
+
 }

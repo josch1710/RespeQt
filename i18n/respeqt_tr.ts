@@ -5590,7 +5590,7 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
 </context>
 <context>
-    <name>SimpleDiskImage</name>
+    <name>DiskImage</name>
     <message>
         <location filename="../diskimage.cpp" line="656"/>
         <location filename="../diskimage.cpp" line="662"/>

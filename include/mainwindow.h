@@ -111,10 +111,10 @@ private:
   void setUpPrinterEmulationWidgets(bool enabled);
 
   void createDeviceWidgets();
-  //SimpleDiskImage *installDiskImage(char no);
+  //DiskImage *installDiskImage(char no);
   void changeFonts();
   void connectUISignal();
-  DiskImages::SimpleDiskImage *installDiskImage();
+  DiskImages::DiskImagePtr installDiskImage(const QString &);
 
   void setupDebugItems();
 

@@ -3,9 +3,10 @@
 // (c) 2018 Eric BACHER
 //
 
-#include "diskimages/diskimage.h"
+#include "diskimages/diskimageatx.h"
 
 #include "diskeditdialog.h"
+#include "diskimages/diskgeometry.h"
 #include "filesystems/atarifilesystem.h"
 #include "respeqtsettings.h"
 #include <QFileInfo>
@@ -17,10 +18,311 @@ namespace DiskImages {
   quint16 ATX_SECTOR_POSITIONS_SD[] = {810, 2165, 3519, 4866, 6222, 7575, 8920, 10281, 11632, 12984, 14336, 15684, 17028, 20115, 21456, 22806, 24160, 25500};
   quint16 ATX_SECTOR_POSITIONS_ED[] = {540, 1443, 2346, 3244, 4148, 5050, 5946, 6854, 7754, 8656, 9557, 10456, 11352, 13410, 14304, 15204, 16106, 17000, 17898, 18796, 19694, 20592, 21490, 22388, 23286, 24184};
 
-  bool SimpleDiskImage::openAtx(const QString &fileName) {
+  DiskImageAtx::DiskImageAtx(SioWorkerPtr worker, bool gzipped) : DiskImage(worker, gzipped) {}
+
+  /*__attribute__((unused)) bool DiskImage::saveAsAtx(const QString &fileName, FileTypes::FileType destImageType) {
+    bool bareSectors = false;
+    if (false) {
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Saving Atx images from the current format is not supported yet."));
+      return false;
+    }
+
+    if (bareSectors) {
+      for (int track = 0; track < 40; track++) {
+        m_atxTrackInfo[track].clear();
+        for (quint8 index = 0; index < m_geometry.sectorsPerTrack(); index++) {
+
+          // compute sector number for the sector index
+          int sectorIndex = ((index + 1) << 1);
+          if (index >= (m_geometry.sectorsPerTrack() >> 1)) {
+            sectorIndex -= m_geometry.sectorsPerTrack() - 1;
+          }
+          quint8 sector = sectorIndex - 1;
+
+          // read sector and store it in Atx objects
+          QByteArray data;
+          int absoluteSector = (m_geometry.sectorsPerTrack() * track) + sector;
+          readSector(absoluteSector, data);
+          AtxSectorInfo *sectorInfo = m_atxTrackInfo[track].add(sector, 0, m_geometry.isStandardED() ? ATX_SECTOR_POSITIONS_ED[index] : ATX_SECTOR_POSITIONS_SD[index]);
+          sectorInfo->copySectorData(data);
+        }
+      }
+    } else if (false) {
+      for (int track = 0; track < 40; track++) {
+        m_atxTrackInfo[track].clear();
+
+        // sort sectors in track
+        QByteArray dummy(m_geometry.bytesPerSector(), 0);
+        readTrack(track, dummy, 128);
+        if (m_sectorsInTrack > 0) {
+          int sectorDistance = 26048 / m_sectorsInTrack;
+          for (int sector = 0; sector < m_sectorsInTrack; sector++) {
+
+            // compute a sector position.
+            // This is not accurate and could be improved a lot by looking at m_proSectorInfo[indexInPro].shortSectorSize
+            quint16 position = sector * sectorDistance;
+
+            // get sector and store it in Atx objects
+            quint16 indexInPro = m_trackContent[sector];
+            quint8 status = ~m_proSectorInfo[indexInPro].wd1771Status & 0x3E;
+            quint16 weakOffset = m_proSectorInfo[indexInPro].weakBits;
+            if (weakOffset != 0xFFFF) {
+              status |= 0x40;
+            }
+            AtxSectorInfo *sectorInfo = m_atxTrackInfo[track].add(m_proSectorInfo[indexInPro].sectorNumber, status, position);
+            sectorInfo->setSectorWeakOffset(weakOffset);
+            sectorInfo->copySectorData(m_proSectorInfo[indexInPro].sectorData);
+          }
+        }
+      }
+    }
+
+    // save the Atx objects in a file
+    m_originalFileHeader.resize(0);
+    return saveAtx(fileName);
+  } */
+
+  bool DiskImageAtx::writeHappyTrack(int trackNumber, bool happy1050) {
+    // reset track data
+    if (!m_isModified) {
+      m_isModified = true;
+      emit statusChanged(m_deviceNo);
+    }
+    m_atxTrackInfo[trackNumber].clear();
+    m_trackNumber = trackNumber;
+
+    // browse track data
+    quint16 sectorPosition = 100;
+    int startOffset = happy1050 ? 0xD00 : 0x300;
+    int offset = startOffset;
+    auto invertedTrack = (quint8) (0xFF - trackNumber);
+    while (offset < (startOffset + 0x100)) {
+      quint8 code = m_board.m_happyRam[offset++];
+      if (code == 0) {
+        break;
+      }
+      if (code < 128) {
+        if (((quint8) m_board.m_happyRam[offset] == invertedTrack) && ((quint8) m_board.m_happyRam[offset + 1] == (quint8) 0xFF) && ((quint8) m_board.m_happyRam[offset + 2] >= 0xED) && ((quint8) m_board.m_happyRam[offset + 2] != 0xFF) && ((quint8) m_board.m_happyRam[offset + 4] == 0x08)) {
+          quint8 sector = 0xFF - (quint8) m_board.m_happyRam[offset + 2];
+          quint8 normalSize = (quint8) m_board.m_happyRam[offset + 3] == (quint8) 0xFF;
+
+          // fill corresponding slot
+          AtxSectorInfo *sectorInfo = m_atxTrackInfo[trackNumber].add(sector, 0, sectorPosition << 3);
+          QByteArray sectorData;
+          sectorData.resize(128);
+          sectorInfo->copySectorData(sectorData);
+          if (normalSize) {
+            sectorInfo->setWd1771Status(0xFF);
+          } else {
+            sectorInfo->setWd1771Status(0xF1);
+          }
+          sectorPosition += (quint16) (6 + 7 + 17);
+          if (sectorPosition > (quint16) 3600) {
+            qWarning() << "!w" << tr("[%1] Too many sectors in this track. Ignored.").arg(deviceName());
+            return false;
+          }
+        } else if (((quint8) m_board.m_happyRam[offset] == (quint8) 0xB7) && ((quint8) m_board.m_happyRam[offset + 2] >= (quint8) 0x9B) && ((quint8) m_board.m_happyRam[offset + 3] == (quint8) 0x4B)) {
+          qWarning() << "!w" << tr("[%1] Special sync header at position %2. Ignored.").arg(deviceName()).arg(sectorPosition);
+          return false;
+        } else {
+          quint8 track = 0xFF - (quint8) m_board.m_happyRam[offset];
+          quint8 sector = 0xFF - (quint8) m_board.m_happyRam[offset + 2];
+          qWarning() << "!w" << tr("[%1] Header has out of range values: Track=$%2 Sector=$%3. Ignored.").arg(deviceName()).arg(track, 2, 16, QChar('0')).arg(sector, 2, 16, QChar('0'));
+        }
+        offset += 5;
+      } else {
+        offset++;
+        sectorPosition += (quint16) (0xFF - code) + 1;
+      }
+    }
+    return true;
+  }
+
+  bool DiskImageAtx::writeHappySectors(int trackNumber, int afterSectorNumber, bool happy1050) {
+    int startOffset = happy1050 ? 0xC80 : 0x280;
+    int startData = startOffset + 128;
+    bool sync = (quint8) m_board.m_happyRam[startOffset] == 0;
+    // find the first index to start with.
+    int position = 0;
+    if (sync && (afterSectorNumber != 0)) {
+      // try to find the index of the specified sector in the track
+      for (int i = 0; i < m_atxTrackInfo[trackNumber].size(); i++) {
+        AtxSectorInfo *sectorInfo = m_atxTrackInfo[trackNumber].at(i);
+        if ((sectorInfo != nullptr) && (sectorInfo->sectorNumber() == afterSectorNumber)) {
+          position = sectorInfo->sectorPosition();
+          break;
+        }
+      }
+    }
+    int lastIndex = (int) (quint8) m_board.m_happyRam[startOffset + 0x0F];
+    bool twoPasses = (quint8) m_board.m_happyRam[startOffset + 0x69] == 0;
+    int maxPass = twoPasses ? 2 : 1;
+    for (int passNumber = 1; passNumber <= maxPass; passNumber++) {
+      int index = 18 - passNumber;
+      while (index >= lastIndex) {
+        quint8 sectorNumber = 0xFF - (quint8) m_board.m_happyRam[startOffset + 0x38 + index];
+        m_board.m_happyRam[startOffset + 0x14 + index] = 0xEF;
+        if ((sectorNumber > 0) && (sectorNumber <= m_geometry.sectorsPerTrack())) {
+          AtxSectorInfo *sectorInfo = m_atxTrackInfo[trackNumber].find(sectorNumber, position);
+          if (sectorInfo != nullptr) {
+            quint8 writeCommand = m_board.m_happyRam[startOffset + 0x4A + index];
+            int dataOffset = startData + (index * 128);
+            quint8 dataMark = (writeCommand << 5) | 0x9F;
+            sectorInfo->copySectorData(m_board.m_happyRam.mid(dataOffset, 128));
+            quint8 fdcStatus = sectorInfo->wd1771Status() & dataMark;// use the data mark given in the command
+            if (writeCommand & 0x08) {                               // non-IBM format generates a CRC error
+              fdcStatus &= ~0x08;
+            }
+            sectorInfo->setWd1771Status(fdcStatus);
+            m_board.m_happyRam[startOffset + 0x14 + index] = fdcStatus;
+            position = sectorInfo->sectorPosition();
+          } else {
+            qWarning() << "!w" << tr("[%1] sector %2 ($%3) not found. Ignored.").arg(deviceName()).arg(sectorNumber).arg(sectorNumber, 2, 16, QChar('0'));
+          }
+        } else {
+          qWarning() << "!w" << tr("[%1] write unused sector %2 ($%3). Ignored.").arg(deviceName()).arg(sectorNumber).arg(sectorNumber, 2, 16, QChar('0'));
+        }
+        if (twoPasses) {
+          index--;
+        }
+        index--;
+      }
+    }
+    if (!happy1050) {
+      for (int i = 0; i < 5; i++) {
+        m_board.m_happyRam[startOffset + 0x05 + i] = 0x80;
+      }
+      m_board.m_happyRam[startOffset + 0x0A] = 0x00;
+      m_board.m_happyRam[startOffset + 0x0B] = 0x08;
+      m_board.m_happyRam[startOffset + 0x0C] = 0x08;
+      m_board.m_happyRam[startOffset + 0x0D] = 0x43;
+      m_board.m_happyRam[startOffset + 0x10] = 0xFF;
+      m_board.m_happyRam[startOffset + 0x13] = 0xEE;
+    }
+    return true;
+  }
+
+  bool DiskImageAtx::resetTrack(quint16 aux) {
+    int trackNumber = aux & 0x3F;
+    m_atxTrackInfo[trackNumber].clear();
+    return true;
+  }
+
+  quint8 DiskImageAtx::writeSectorHeader(quint8 dataSize, QByteArray &sectorData, quint8 postDataCrc, quint8 preIDField, quint8 postIDCrc,
+                                         quint8 track, quint8 index, quint8 nextSector) {
+    for (quint8 j = 0; j < postDataCrc && dataSize < (quint8) 128; j++) {
+      sectorData[dataSize++] = 0xFF;
+    }
+#ifdef CHIP_810
+    // these 3 zero bytes are written by CHIP 810 but not by Super Archiver 1050.
+    for (quint8 j = 0; j < 3 && dataSize < (quint8) 128; j++) {
+      sectorData[dataSize++] = 0;
+    }
+#endif
+    for (quint8 j = 0; j < preIDField && dataSize < (quint8) 128; j++) {
+      sectorData[dataSize++] = 0xFF;
+    }
+    Crc16 crc16;
+    crc16.Reset();
+    if (dataSize < (quint8) 128) {
+      crc16.Add((unsigned char) DISK_ID_ADDR_MARK);
+      sectorData[dataSize++] = (0xFF - DISK_ID_ADDR_MARK);
+    }
+    if (dataSize < (quint8) 128) {
+      crc16.Add((unsigned char) (track & 0xFF));
+      sectorData[dataSize++] = (quint8) (0xFF - (track & 0xFF));
+    }
+    if (dataSize < (quint8) 128) {
+      crc16.Add((unsigned char) (index << 2));
+#ifdef CHIP_810
+      sectorData[dataSize++] = 0xFF - (quint8) (index << 2);
+#else
+      sectorData[dataSize++] = 0xFF;
+#endif
+    }
+    if (dataSize < (quint8) 128) {
+      crc16.Add((unsigned char) nextSector);
+      sectorData[dataSize++] = 0xFF - nextSector;
+    }
+    if (dataSize < (quint8) 128) {
+      crc16.Add((unsigned char) 0);
+      sectorData[dataSize++] = 0xFF;
+    }
+    if (dataSize < (quint8) 128) {
+      sectorData[dataSize++] = (quint8) (((0xFFFF - crc16.GetCrc()) >> 8) & 0xFF);
+    }
+    if (dataSize < (quint8) 128) {
+      sectorData[dataSize++] = (quint8) ((0xFFFF - crc16.GetCrc()) & 0xFF);
+    }
+    for (quint8 j = 0; j < postIDCrc && dataSize < (quint8) 128; j++) {
+      sectorData[dataSize++] = 0xFF;
+    }
+    return dataSize;
+  }
+
+  bool DiskImageAtx::writeSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8, quint8 sectorNumber, quint8, const QByteArray &data, bool crcError, int weakOffset) {
+    if ((sectorNumber < 1) || (sectorNumber > m_geometry.sectorsPerTrack())) {
+      return true;
+    }
+    quint8 sectorStatus = (crcError) ? 0x08 : 0;
+    if ((dataType & 0x01) == 0) {
+      sectorStatus |= 0x20;
+    }
+    if (weakOffset != 0xFFFF) {
+      sectorStatus |= 0x40;
+    }
+    AtxSectorInfo *sectorInfo = m_atxTrackInfo[trackNumber].add(sectorNumber, sectorStatus, (quint16) bitNumber);
+
+    // write sector
+    if (!m_isModified) {
+      m_isModified = true;
+      emit statusChanged(m_deviceNo);
+    }
+    sectorInfo->setSectorWeakOffset(weakOffset);
+    sectorInfo->copySectorData(data);
+    return true;
+  }
+
+  bool DiskImage::findMappingInAtxTrack(int nbSectors, QByteArray &mapping) {
+    int sectorsInTrack = m_atxTrackInfo[m_trackNumber].size();
+    if ((nbSectors == 0) || (sectorsInTrack == 0)) {
+      return false;
+    }
+    for (int sectorStartIndex = 0; sectorStartIndex < nbSectors; sectorStartIndex++) {
+      for (int currentIndexInTrack = 0; currentIndexInTrack < sectorsInTrack; currentIndexInTrack++) {
+        bool match = true;
+        int indexInTrack = currentIndexInTrack;
+        for (int sectorIndex = 0; sectorIndex < nbSectors; sectorIndex++) {
+          int indexInRam = (sectorStartIndex + sectorIndex) % nbSectors;
+          AtxSectorInfo *sectorInfo = m_atxTrackInfo[m_trackNumber].at(indexInTrack);
+          if (sectorInfo == nullptr) {
+            match = false;
+            break;
+          }
+          quint8 sectorNumber = sectorInfo->sectorNumber();
+          if (m_board.m_chipRam[indexInRam + 1] != sectorNumber) {
+            match = false;
+            break;
+          }
+          indexInTrack = (indexInTrack + 1) % sectorsInTrack;
+        }
+        if (match) {
+          for (int sectorIndex = 0; sectorIndex < nbSectors; sectorIndex++) {
+            int indexInRam = (sectorStartIndex + sectorIndex) % nbSectors;
+            mapping[indexInRam] = currentIndexInTrack;
+            currentIndexInTrack = (currentIndexInTrack + 1) % sectorsInTrack;
+          }
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  bool DiskImageAtx::openImage(const QString &fileName) {
     QFile *sourceFile;
 
-    if (m_originalImageType == FileTypes::Atx) {
+    if (!m_gzipped) {
       sourceFile = new QFile(fileName);
     } else {
       sourceFile = new GzFile(fileName);
@@ -238,7 +540,28 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::saveAtx(const QString &fileName) {
+  bool DiskImageAtx::create(int untitledName) {
+    m_geometry.initialize(false, 40, 18, 128);
+    refreshNewGeometry();
+    m_originalFileHeader.clear();
+    m_isReadOnly = false;
+    m_originalFileName = tr("Untitled image %1").arg(untitledName);
+    m_isModified = false;
+    m_isUnmodifiable = false;
+    m_isUnnamed = true;
+
+    // initialize the array containing the sector headers
+    for (int track = 0; track < 40; track++) {
+      m_atxTrackInfo[track].clear();
+      for (quint8 sector = 0; sector <= (sizeof(ATX_SECTOR_POSITIONS_SD) / sizeof(quint16)); sector++) {
+        m_atxTrackInfo[track].add(sector + 1, 0, ATX_SECTOR_POSITIONS_SD[sector]);
+      }
+    }
+    setReady(true);
+    return true;
+  }
+
+  bool DiskImageAtx::save() {
     if (m_originalFileHeader.size() != 48) {
       m_originalFileHeader = QByteArray(48, 0);
     }
@@ -254,14 +577,14 @@ namespace DiskImages {
     // Try to open the output file
     QFile *outputFile;
 
-    if (m_originalImageType == FileTypes::Atx) {
-      outputFile = new QFile(fileName);
+    if (!m_gzipped) {
+      outputFile = new QFile(m_originalFileName);
     } else {
-      outputFile = new GzFile(fileName);
+      outputFile = new GzFile(m_originalFileName);
     }
 
     if (!outputFile->open(QFile::WriteOnly | QFile::Truncate)) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, outputFile->errorString());
       outputFile->close();
       delete outputFile;
       return false;
@@ -269,7 +592,7 @@ namespace DiskImages {
 
     // Try to write the header
     if (outputFile->write(m_originalFileHeader) != 48) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, outputFile->errorString());
       outputFile->close();
       delete outputFile;
       return false;
@@ -299,7 +622,7 @@ namespace DiskImages {
 
       // Try to write the track header
       if (outputFile->write(trackHeader) != 32) {
-        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, outputFile->errorString());
         outputFile->close();
         delete outputFile;
         return false;
@@ -326,7 +649,7 @@ namespace DiskImages {
 
       // Try to write the sector list
       if (outputFile->write(sectorList) != sectorListSize) {
-        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, outputFile->errorString());
         outputFile->close();
         delete outputFile;
         return false;
@@ -336,7 +659,7 @@ namespace DiskImages {
       QByteArray dataSizeChunk(dataSizeChunkSize, 0);
       setLittleEndianLong(dataSizeChunk, 0, dataSize);
       if (outputFile->write(dataSizeChunk) != dataSizeChunk.size()) {
-        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, outputFile->errorString());
         outputFile->close();
         delete outputFile;
         return false;
@@ -348,7 +671,7 @@ namespace DiskImages {
         if ((sectorInfo->sectorStatus() & 0x10) == 0) {
           QByteArray data = sectorInfo->sectorData();
           if (outputFile->write(data, m_geometry.bytesPerSector()) != m_geometry.bytesPerSector()) {
-            qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+            qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, outputFile->errorString());
             outputFile->close();
             delete outputFile;
             return false;
@@ -367,7 +690,7 @@ namespace DiskImages {
             extendedData[5] = (quint8) sector;
             setLittleEndianWord(extendedData, 6, sectorInfo->sectorWeakOffset());
             if (outputFile->write(extendedData) != 8) {
-              qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+              qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, outputFile->errorString());
               outputFile->close();
               delete outputFile;
               return false;
@@ -379,7 +702,7 @@ namespace DiskImages {
       // Try saving an empty chunk
       QByteArray emptyChunk(emptyChunkSize, 0);
       if (outputFile->write(emptyChunk) != emptyChunk.size()) {
-        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+        qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, outputFile->errorString());
         outputFile->close();
         delete outputFile;
         return false;
@@ -392,13 +715,12 @@ namespace DiskImages {
 
     // Try to overwrite the header
     if (outputFile->write(m_originalFileHeader) != 48) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, outputFile->errorString());
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, outputFile->errorString());
       outputFile->close();
       delete outputFile;
       return false;
     }
 
-    m_originalFileName = fileName;
     m_isModified = false;
     m_isUnmodifiable = false;
     m_isUnnamed = false;
@@ -409,92 +731,40 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::saveAsAtx(const QString &fileName, FileTypes::FileType destImageType) {
-    bool bareSectors = (m_originalImageType == FileTypes::Atr) || (m_originalImageType == FileTypes::AtrGz) || (m_originalImageType == FileTypes::Xfd) || (m_originalImageType == FileTypes::XfdGz);
-    if ((!bareSectors) && (m_originalImageType != FileTypes::Pro) && (m_originalImageType != FileTypes::ProGz)) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Saving Atx images from the current format is not supported yet."));
+  bool DiskImageAtx::format(const DiskGeometry &geo) {
+    if (geo.bytesPerSector() != 128) {
+      qCritical() << "!e" << tr("Can not format ATX image: %1").arg(tr("Sector size (%1) not supported (should be 128)").arg(geo.bytesPerSector()));
+      return false;
+    }
+    if (geo.sectorCount() > 1040) {
+      qCritical() << "!e" << tr("Can not format ATX image: %1").arg(tr("Number of sectors (%1) not supported (max 1040)").arg(geo.sectorCount()));
       return false;
     }
 
-    if (bareSectors) {
-      for (int track = 0; track < 40; track++) {
-        m_atxTrackInfo[track].clear();
-        for (quint8 index = 0; index < m_geometry.sectorsPerTrack(); index++) {
-
-          // compute sector number for the sector index
-          int sectorIndex = ((index + 1) << 1);
-          if (index >= (m_geometry.sectorsPerTrack() >> 1)) {
-            sectorIndex -= m_geometry.sectorsPerTrack() - 1;
-          }
-          quint8 sector = sectorIndex - 1;
-
-          // read sector and store it in Atx objects
-          QByteArray data;
-          int absoluteSector = (m_geometry.sectorsPerTrack() * track) + sector;
-          readSector(absoluteSector, data);
-          AtxSectorInfo *sectorInfo = m_atxTrackInfo[track].add(sector, 0, m_geometry.isStandardED() ? ATX_SECTOR_POSITIONS_ED[index] : ATX_SECTOR_POSITIONS_SD[index]);
-          sectorInfo->copySectorData(data);
-        }
-      }
-    } else if ((m_originalImageType == FileTypes::Pro) || (m_originalImageType == FileTypes::ProGz)) {
-      for (int track = 0; track < 40; track++) {
-        m_atxTrackInfo[track].clear();
-
-        // sort sectors in track
-        QByteArray dummy(m_geometry.bytesPerSector(), 0);
-        readProTrack(track, dummy, 128);
-        if (m_sectorsInTrack > 0) {
-          int sectorDistance = 26048 / m_sectorsInTrack;
-          for (int sector = 0; sector < m_sectorsInTrack; sector++) {
-
-            // compute a sector position.
-            // This is not accurate and could be improved a lot by looking at m_proSectorInfo[indexInPro].shortSectorSize
-            quint16 position = sector * sectorDistance;
-
-            // get sector and store it in Atx objects
-            quint16 indexInPro = m_trackContent[sector];
-            quint8 status = ~m_proSectorInfo[indexInPro].wd1771Status & 0x3E;
-            quint16 weakOffset = m_proSectorInfo[indexInPro].weakBits;
-            if (weakOffset != 0xFFFF) {
-              status |= 0x40;
-            }
-            AtxSectorInfo *sectorInfo = m_atxTrackInfo[track].add(m_proSectorInfo[indexInPro].sectorNumber, status, position);
-            sectorInfo->setSectorWeakOffset(weakOffset);
-            sectorInfo->copySectorData(m_proSectorInfo[indexInPro].sectorData);
-          }
-        }
-      }
-    }
-
-    // save the Atx objects in a file
-    m_originalFileHeader.resize(0);
-    m_originalImageType = destImageType;
-    return saveAtx(fileName);
-  }
-
-  bool SimpleDiskImage::createAtx(int untitledName) {
-    m_geometry.initialize(false, 40, 18, 128);
-    refreshNewGeometry();
-    m_originalFileHeader.clear();
-    m_isReadOnly = false;
-    m_originalFileName = tr("Untitled image %1").arg(untitledName);
-    m_originalImageType = FileTypes::Atx;
-    m_isModified = false;
-    m_isUnmodifiable = false;
-    m_isUnnamed = true;
-
     // initialize the array containing the sector headers
+    quint16 *sectorPositions = geo.sectorsPerTrack() == 26 ? ATX_SECTOR_POSITIONS_ED : ATX_SECTOR_POSITIONS_SD;
     for (int track = 0; track < 40; track++) {
       m_atxTrackInfo[track].clear();
-      for (quint8 sector = 0; sector <= (sizeof(ATX_SECTOR_POSITIONS_SD) / sizeof(quint16)); sector++) {
-        m_atxTrackInfo[track].add(sector + 1, 0, ATX_SECTOR_POSITIONS_SD[sector]);
+      for (quint8 index = 0; index < geo.sectorsPerTrack(); index++) {
+
+        // compute sector number for the sector index
+        int sectorIndex = ((index + 1) << 1);
+        if (index >= (m_geometry.sectorsPerTrack() >> 1)) {
+          sectorIndex -= m_geometry.sectorsPerTrack() - 1;
+        }
+        quint8 sector = sectorIndex - 1;
+        m_atxTrackInfo[track].add(sector, 0, sectorPositions[index]);
       }
     }
-    setReady(true);
+    m_geometry.initialize(geo);
+    m_newGeometry.initialize(geo);
+    m_originalFileHeader.clear();
+    m_isModified = true;
+    emit statusChanged(m_deviceNo);
     return true;
   }
 
-  bool SimpleDiskImage::readHappyAtxSectorAtPosition(int trackNumber, int sectorNumber, int afterSectorNumber, int &index, QByteArray &data) {
+  bool DiskImageAtx::readHappySectorAtPosition(int trackNumber, int sectorNumber, int afterSectorNumber, int &index, QByteArray &data) {
     // find the first index to start with.
     if (afterSectorNumber != 0) {
       // try to find the index of the specified sector in the track
@@ -538,7 +808,7 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::readHappyAtxSkewAlignment(bool happy1050) {
+  bool DiskImageAtx::readHappySkewAlignment(bool happy1050) {
     quint8 previousTrack = 0xFF - m_board.m_happyRam[0x3C9];
     if (previousTrack > 39) {
       qWarning() << "!w" << tr("[%1] Invalid previous track number %2 ($%3) for skew alignment").arg(deviceName()).arg(previousTrack).arg(previousTrack, 2, 16, QChar('0'));
@@ -610,160 +880,7 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::writeHappyAtxTrack(int trackNumber, bool happy1050) {
-    // reset track data
-    if (!m_isModified) {
-      m_isModified = true;
-      emit statusChanged(m_deviceNo);
-    }
-    m_atxTrackInfo[trackNumber].clear();
-    m_trackNumber = trackNumber;
-
-    // browse track data
-    quint16 sectorPosition = 100;
-    int startOffset = happy1050 ? 0xD00 : 0x300;
-    int offset = startOffset;
-    auto invertedTrack = (quint8) (0xFF - trackNumber);
-    while (offset < (startOffset + 0x100)) {
-      quint8 code = m_board.m_happyRam[offset++];
-      if (code == 0) {
-        break;
-      }
-      if (code < 128) {
-        if (((quint8) m_board.m_happyRam[offset] == invertedTrack) && ((quint8) m_board.m_happyRam[offset + 1] == (quint8) 0xFF) && ((quint8) m_board.m_happyRam[offset + 2] >= 0xED) && ((quint8) m_board.m_happyRam[offset + 2] != 0xFF) && ((quint8) m_board.m_happyRam[offset + 4] == 0x08)) {
-          quint8 sector = 0xFF - (quint8) m_board.m_happyRam[offset + 2];
-          quint8 normalSize = (quint8) m_board.m_happyRam[offset + 3] == (quint8) 0xFF;
-
-          // fill corresponding slot
-          AtxSectorInfo *sectorInfo = m_atxTrackInfo[trackNumber].add(sector, 0, sectorPosition << 3);
-          QByteArray sectorData;
-          sectorData.resize(128);
-          sectorInfo->copySectorData(sectorData);
-          if (normalSize) {
-            sectorInfo->setWd1771Status(0xFF);
-          } else {
-            sectorInfo->setWd1771Status(0xF1);
-          }
-          sectorPosition += (quint16) (6 + 7 + 17);
-          if (sectorPosition > (quint16) 3600) {
-            qWarning() << "!w" << tr("[%1] Too many sectors in this track. Ignored.").arg(deviceName());
-            return false;
-          }
-        } else if (((quint8) m_board.m_happyRam[offset] == (quint8) 0xB7) && ((quint8) m_board.m_happyRam[offset + 2] >= (quint8) 0x9B) && ((quint8) m_board.m_happyRam[offset + 3] == (quint8) 0x4B)) {
-          qWarning() << "!w" << tr("[%1] Special sync header at position %2. Ignored.").arg(deviceName()).arg(sectorPosition);
-          return false;
-        } else {
-          quint8 track = 0xFF - (quint8) m_board.m_happyRam[offset];
-          quint8 sector = 0xFF - (quint8) m_board.m_happyRam[offset + 2];
-          qWarning() << "!w" << tr("[%1] Header has out of range values: Track=$%2 Sector=$%3. Ignored.").arg(deviceName()).arg(track, 2, 16, QChar('0')).arg(sector, 2, 16, QChar('0'));
-        }
-        offset += 5;
-      } else {
-        offset++;
-        sectorPosition += (quint16) (0xFF - code) + 1;
-      }
-    }
-    return true;
-  }
-
-  bool SimpleDiskImage::writeHappyAtxSectors(int trackNumber, int afterSectorNumber, bool happy1050) {
-    int startOffset = happy1050 ? 0xC80 : 0x280;
-    int startData = startOffset + 128;
-    bool sync = (quint8) m_board.m_happyRam[startOffset] == 0;
-    // find the first index to start with.
-    int position = 0;
-    if (sync && (afterSectorNumber != 0)) {
-      // try to find the index of the specified sector in the track
-      for (int i = 0; i < m_atxTrackInfo[trackNumber].size(); i++) {
-        AtxSectorInfo *sectorInfo = m_atxTrackInfo[trackNumber].at(i);
-        if ((sectorInfo != nullptr) && (sectorInfo->sectorNumber() == afterSectorNumber)) {
-          position = sectorInfo->sectorPosition();
-          break;
-        }
-      }
-    }
-    int lastIndex = (int) (quint8) m_board.m_happyRam[startOffset + 0x0F];
-    bool twoPasses = (quint8) m_board.m_happyRam[startOffset + 0x69] == 0;
-    int maxPass = twoPasses ? 2 : 1;
-    for (int passNumber = 1; passNumber <= maxPass; passNumber++) {
-      int index = 18 - passNumber;
-      while (index >= lastIndex) {
-        quint8 sectorNumber = 0xFF - (quint8) m_board.m_happyRam[startOffset + 0x38 + index];
-        m_board.m_happyRam[startOffset + 0x14 + index] = 0xEF;
-        if ((sectorNumber > 0) && (sectorNumber <= m_geometry.sectorsPerTrack())) {
-          AtxSectorInfo *sectorInfo = m_atxTrackInfo[trackNumber].find(sectorNumber, position);
-          if (sectorInfo != nullptr) {
-            quint8 writeCommand = m_board.m_happyRam[startOffset + 0x4A + index];
-            int dataOffset = startData + (index * 128);
-            quint8 dataMark = (writeCommand << 5) | 0x9F;
-            sectorInfo->copySectorData(m_board.m_happyRam.mid(dataOffset, 128));
-            quint8 fdcStatus = sectorInfo->wd1771Status() & dataMark;// use the data mark given in the command
-            if (writeCommand & 0x08) {                               // non-IBM format generates a CRC error
-              fdcStatus &= ~0x08;
-            }
-            sectorInfo->setWd1771Status(fdcStatus);
-            m_board.m_happyRam[startOffset + 0x14 + index] = fdcStatus;
-            position = sectorInfo->sectorPosition();
-          } else {
-            qWarning() << "!w" << tr("[%1] sector %2 ($%3) not found. Ignored.").arg(deviceName()).arg(sectorNumber).arg(sectorNumber, 2, 16, QChar('0'));
-          }
-        } else {
-          qWarning() << "!w" << tr("[%1] write unused sector %2 ($%3). Ignored.").arg(deviceName()).arg(sectorNumber).arg(sectorNumber, 2, 16, QChar('0'));
-        }
-        if (twoPasses) {
-          index--;
-        }
-        index--;
-      }
-    }
-    if (!happy1050) {
-      for (int i = 0; i < 5; i++) {
-        m_board.m_happyRam[startOffset + 0x05 + i] = 0x80;
-      }
-      m_board.m_happyRam[startOffset + 0x0A] = 0x00;
-      m_board.m_happyRam[startOffset + 0x0B] = 0x08;
-      m_board.m_happyRam[startOffset + 0x0C] = 0x08;
-      m_board.m_happyRam[startOffset + 0x0D] = 0x43;
-      m_board.m_happyRam[startOffset + 0x10] = 0xFF;
-      m_board.m_happyRam[startOffset + 0x13] = 0xEE;
-    }
-    return true;
-  }
-
-  bool SimpleDiskImage::formatAtx(const DiskGeometry &geo) {
-    if (geo.bytesPerSector() != 128) {
-      qCritical() << "!e" << tr("Can not format ATX image: %1").arg(tr("Sector size (%1) not supported (should be 128)").arg(geo.bytesPerSector()));
-      return false;
-    }
-    if (geo.sectorCount() > 1040) {
-      qCritical() << "!e" << tr("Can not format ATX image: %1").arg(tr("Number of sectors (%1) not supported (max 1040)").arg(geo.sectorCount()));
-      return false;
-    }
-
-    // initialize the array containing the sector headers
-    quint16 *sectorPositions = geo.sectorsPerTrack() == 26 ? ATX_SECTOR_POSITIONS_ED : ATX_SECTOR_POSITIONS_SD;
-    for (int track = 0; track < 40; track++) {
-      m_atxTrackInfo[track].clear();
-      for (quint8 index = 0; index < geo.sectorsPerTrack(); index++) {
-
-        // compute sector number for the sector index
-        int sectorIndex = ((index + 1) << 1);
-        if (index >= (m_geometry.sectorsPerTrack() >> 1)) {
-          sectorIndex -= m_geometry.sectorsPerTrack() - 1;
-        }
-        quint8 sector = sectorIndex - 1;
-        m_atxTrackInfo[track].add(sector, 0, sectorPositions[index]);
-      }
-    }
-    m_geometry.initialize(geo);
-    m_newGeometry.initialize(geo);
-    m_originalFileHeader.clear();
-    m_isModified = true;
-    emit statusChanged(m_deviceNo);
-    return true;
-  }
-
-  void SimpleDiskImage::readAtxTrack(quint16 aux, QByteArray &data, int length) {
+  void DiskImageAtx::readTrack(quint16 aux, QByteArray &data, int length) {
     quint16 track = aux & 0x3F;
     bool useCount = (aux & 0x40) ? true : false;
     bool longHeader = (aux & 0x8000) ? true : false;
@@ -838,7 +955,7 @@ namespace DiskImages {
     }
   }
 
-  bool SimpleDiskImage::readAtxSectorStatuses(QByteArray &data) {
+  bool DiskImageAtx::readSectorStatuses(QByteArray &data) {
     data.resize(128);
     int nbSectors = m_board.m_chipRam[0];
     if (nbSectors > 31) {
@@ -864,7 +981,7 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::readAtxSectorUsingIndex(quint16 aux, QByteArray &data) {
+  bool DiskImageAtx::readSectorUsingIndex(quint16 aux, QByteArray &data) {
     data.resize(128);
     quint16 index = aux & 0x1F;
     int nbSectors = m_board.m_chipRam[0];
@@ -909,7 +1026,7 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::readAtxSector(quint16 aux, QByteArray &data) {
+  bool DiskImageAtx::readSector(quint16 aux, QByteArray &data) {
     // chipFlags contains the CHIP copy flags in AUX2. If not 0, it means that the Atari is running Archiver 1.0.
     // Archiver 1.0 always sends flags in AUX2 but Super Archiver 3.02 fills flags in AUX2 only if sector is bad.
     // So we assume that we have Super Archiver 3.02 if speed is greater than 20000 in CHIP mode.
@@ -1073,7 +1190,7 @@ namespace DiskImages {
     return true;
   }
 
-  bool SimpleDiskImage::readAtxSkewAlignment(quint16 aux, QByteArray &data, bool timingOnly) {
+  bool DiskImageAtx::readSkewAlignment(quint16 aux, QByteArray &data, bool timingOnly) {
     int firstTrack = aux & 0xFF;
     int secondTrack = (aux >> 8) & 0xFF;
 
@@ -1291,13 +1408,7 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
     }
   }
 
-  bool SimpleDiskImage::resetAtxTrack(quint16 aux) {
-    int trackNumber = aux & 0x3F;
-    m_atxTrackInfo[trackNumber].clear();
-    return true;
-  }
-
-  bool SimpleDiskImage::writeAtxTrack(quint16 aux, const QByteArray &data) {
+  bool DiskImageAtx::writeTrack(quint16 aux, const QByteArray &data) {
     quint16 firstTrack = aux & 0x3F;
     quint8 nbTracks = aux & 0x40 ? data[0x76] : 1;
     bool useSectorList = (aux & 0x2000) != 0;
@@ -1391,7 +1502,7 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
               }
               nextSector = sectorIndex;
             }
-            dataSize = writeAtxSectorHeader(dataSize, sectorData, postDataCrc, preIDField, postIDCrc, track, nextIndex, nextSector);
+            dataSize = writeSectorHeader(dataSize, sectorData, postDataCrc, preIDField, postIDCrc, track, nextIndex, nextSector);
             if (dataSize < (quint8) 128) {
               Crc16 crc16;
               crc16.Reset();
@@ -1436,72 +1547,21 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
           sectorInfo->copySectorData(sectorData);
         }
         if (sectorPosition > (quint16) 3600) {
-          break;// two many sectors in this track
+          break;// too many sectors in this track
         }
       }
     }
     return true;
   }
 
-  quint8 SimpleDiskImage::writeAtxSectorHeader(quint8 dataSize, QByteArray &sectorData, quint8 postDataCrc, quint8 preIDField, quint8 postIDCrc,
-                                               quint8 track, quint8 index, quint8 nextSector) {
-    for (quint8 j = 0; j < postDataCrc && dataSize < (quint8) 128; j++) {
-      sectorData[dataSize++] = 0xFF;
-    }
-#ifdef CHIP_810
-    // these 3 zero bytes are written by CHIP 810 but not by Super Archiver 1050.
-    for (quint8 j = 0; j < 3 && dataSize < (quint8) 128; j++) {
-      sectorData[dataSize++] = 0;
-    }
-#endif
-    for (quint8 j = 0; j < preIDField && dataSize < (quint8) 128; j++) {
-      sectorData[dataSize++] = 0xFF;
-    }
-    Crc16 crc16;
-    crc16.Reset();
-    if (dataSize < (quint8) 128) {
-      crc16.Add((unsigned char) DISK_ID_ADDR_MARK);
-      sectorData[dataSize++] = (0xFF - DISK_ID_ADDR_MARK);
-    }
-    if (dataSize < (quint8) 128) {
-      crc16.Add((unsigned char) (track & 0xFF));
-      sectorData[dataSize++] = (quint8) (0xFF - (track & 0xFF));
-    }
-    if (dataSize < (quint8) 128) {
-      crc16.Add((unsigned char) (index << 2));
-#ifdef CHIP_810
-      sectorData[dataSize++] = 0xFF - (quint8) (index << 2);
-#else
-      sectorData[dataSize++] = 0xFF;
-#endif
-    }
-    if (dataSize < (quint8) 128) {
-      crc16.Add((unsigned char) nextSector);
-      sectorData[dataSize++] = 0xFF - nextSector;
-    }
-    if (dataSize < (quint8) 128) {
-      crc16.Add((unsigned char) 0);
-      sectorData[dataSize++] = 0xFF;
-    }
-    if (dataSize < (quint8) 128) {
-      sectorData[dataSize++] = (quint8) (((0xFFFF - crc16.GetCrc()) >> 8) & 0xFF);
-    }
-    if (dataSize < (quint8) 128) {
-      sectorData[dataSize++] = (quint8) ((0xFFFF - crc16.GetCrc()) & 0xFF);
-    }
-    for (quint8 j = 0; j < postIDCrc && dataSize < (quint8) 128; j++) {
-      sectorData[dataSize++] = 0xFF;
-    }
-    return dataSize;
-  }
-
-  bool SimpleDiskImage::writeAtxTrackWithSkew(quint16 aux, const QByteArray & /*data*/) {
+  bool DiskImageAtx::writeTrackWithSkew(quint16 aux, const QByteArray &data) {
     //    int firstTrack = data[3];
     //    int secondTrack = aux & 0x3F;
     return writeTrack((aux & 0x3F) | 0xF000, m_board.m_trackData);
+
   }
 
-  bool SimpleDiskImage::writeAtxSectorUsingIndex(quint16 aux, const QByteArray &data, bool fuzzy) {
+  bool DiskImageAtx::writeSectorUsingIndex(quint16 aux, const QByteArray &data, bool fuzzy) {
     quint16 chipFlags = m_board.isChipOpen() ? (aux >> 8) & 0xFC : 0;
     quint16 index = aux & 0x1F;
     int nbSectors = m_board.m_chipRam[0];
@@ -1565,7 +1625,7 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
     return true;
   }
 
-  bool SimpleDiskImage::writeFuzzyAtxSector(quint16 aux, const QByteArray &data) {
+  bool DiskImageAtx::writeFuzzySector(quint16 aux, const QByteArray &data) {
     // Fuzzy sectors are supported but from the fuzzed bytes always extend to the end of the sector.
     quint8 weakOffset = data[126];
     quint16 chipFlags = (aux >> 8) & 0xFC;
@@ -1638,7 +1698,7 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
     return true;
   }
 
-  bool SimpleDiskImage::writeAtxSector(quint16 aux, const QByteArray &data) {
+  bool DiskImageAtx::writeSector(quint16 aux, const QByteArray &data) {
     // 1 disk rotation = 208333us
     // Compute the relative head position since the last read command (assume disk never stops spinning)
     qint64 newTime = QDateTime::currentMSecsSinceEpoch();
@@ -1713,69 +1773,20 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
     return false;
   }
 
-  bool SimpleDiskImage::writeAtxSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8, quint8 sectorNumber, quint8, const QByteArray &data, bool crcError, int weakOffset) {
-    if ((sectorNumber < 1) || (sectorNumber > m_geometry.sectorsPerTrack())) {
-      return true;
-    }
-    quint8 sectorStatus = (crcError) ? 0x08 : 0;
-    if ((dataType & 0x01) == 0) {
-      sectorStatus |= 0x20;
-    }
-    if (weakOffset != 0xFFFF) {
-      sectorStatus |= 0x40;
-    }
-    AtxSectorInfo *sectorInfo = m_atxTrackInfo[trackNumber].add(sectorNumber, sectorStatus, (quint16) bitNumber);
-
-    // write sector
-    if (!m_isModified) {
-      m_isModified = true;
-      emit statusChanged(m_deviceNo);
-    }
-    sectorInfo->setSectorWeakOffset(weakOffset);
-    sectorInfo->copySectorData(data);
-    return true;
-  }
-
-  bool SimpleDiskImage::findMappingInAtxTrack(int nbSectors, QByteArray &mapping) {
-    int sectorsInTrack = m_atxTrackInfo[m_trackNumber].size();
-    if ((nbSectors == 0) || (sectorsInTrack == 0)) {
-      return false;
-    }
-    for (int sectorStartIndex = 0; sectorStartIndex < nbSectors; sectorStartIndex++) {
-      for (int currentIndexInTrack = 0; currentIndexInTrack < sectorsInTrack; currentIndexInTrack++) {
-        bool match = true;
-        int indexInTrack = currentIndexInTrack;
-        for (int sectorIndex = 0; sectorIndex < nbSectors; sectorIndex++) {
-          int indexInRam = (sectorStartIndex + sectorIndex) % nbSectors;
-          AtxSectorInfo *sectorInfo = m_atxTrackInfo[m_trackNumber].at(indexInTrack);
-          if (sectorInfo == nullptr) {
-            match = false;
-            break;
-          }
-          quint8 sectorNumber = sectorInfo->sectorNumber();
-          if (m_board.m_chipRam[indexInRam + 1] != sectorNumber) {
-            match = false;
-            break;
-          }
-          indexInTrack = (indexInTrack + 1) % sectorsInTrack;
-        }
-        if (match) {
-          for (int sectorIndex = 0; sectorIndex < nbSectors; sectorIndex++) {
-            int indexInRam = (sectorStartIndex + sectorIndex) % nbSectors;
-            mapping[indexInRam] = currentIndexInTrack;
-            currentIndexInTrack = (currentIndexInTrack + 1) % sectorsInTrack;
-          }
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  int SimpleDiskImage::sectorsInCurrentAtxTrack() {
+  int DiskImageAtx::sectorsInCurrentTrack() {
     if (m_trackNumber <= 39) {
       return m_atxTrackInfo[m_trackNumber].size();
     }
     return 0;
   }
-}
+
+  QByteArray DiskImageAtx::readHappySectors(int trackNumber, int afterSectorNumber, bool happy1050) {
+    return QByteArray();
+  }
+
+  quint8 DiskImageAtx::writeSectorHeader(quint8 dataSize, quint16 sectorSlot, quint8 postDataCrc, quint8 preIDField, quint8 postIDCrc, quint8 track, quint8 index, quint8 nextSector) {
+    return 0;
+  }
+
+
+}// namespace DiskImages
