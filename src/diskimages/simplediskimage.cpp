@@ -31,7 +31,8 @@ namespace DiskImages {
   quint8 SimpleDiskImage::writeSectorHeader(quint8 dataSize, quint16 sectorSlot, quint8 postDataCrc, quint8 preIDField, quint8 postIDCrc, quint8 track, quint8 index, quint8 nextSector) {
     return 0;
   }
-  /*bool SimpleDiskImage::open(const QString &fileName) {
+
+  /*bool SimpleDiskImage::openImage(const QString &fileName) {
     QFile *sourceFile;
 
     if (!m_gzipped) {
@@ -96,9 +97,9 @@ namespace DiskImages {
     sourceFile->close();
     delete sourceFile;
     return true;
-  }
+  }*/
 
-  bool SimpleDiskImage::save(const QString &fileName) {
+/*  bool SimpleDiskImage::save(const QString &fileName) {
     DiskGeometry guess;
     guess.initialize(m_geometry.totalSize());
 

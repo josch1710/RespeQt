@@ -1341,7 +1341,7 @@ void MainWindow::mountFile(char no, const QString &fileName, bool /*prot*/) {
     return;
   }
 
-  auto disk{DiskImages::DiskImageFactory::instance()->createDiskImage(fileName, sio)};
+  auto disk = DiskImages::DiskImageFactory::instance()->createDiskImage(fileName, sio);
 
   if (disk) {
     auto oldDisk = qobject_cast<DiskImages::DiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));

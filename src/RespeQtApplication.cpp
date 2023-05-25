@@ -9,7 +9,7 @@
 RespeQtApplication::RespeQtApplication(int &argc, char **argv, int i)
     : QApplication(argc, argv, i) {
 
-  auto font_{font("QMenu")};
+  auto font_= font("QMenu");
   setFont(font_);
 
   setOrganizationName("ZeeSoft");
