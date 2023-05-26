@@ -536,15 +536,15 @@ void MainWindow::dropEvent(QDropEvent *event) {
     return;
   }
 
-  FileTypes::FileType type = FileTypes::getFileType(files.at(0));
+  FileType type = getFileType(files.at(0));
 
-  if (type == FileTypes::FileType::Xex) {
+  if (type == FileType::Xex) {
     g_exefileName = files.at(0);//
     bootExe(files.at(0));
     return;
   }
 
-  if (type == FileTypes::FileType::Cas) {
+  if (type == FileType::Cas) {
     bool restart;
     restart = ui->actionStartEmulation->isChecked();
     if (restart) {
@@ -1344,23 +1344,23 @@ void MainWindow::mountFile(char no, const QString &fileName, bool /*prot*/) {
   auto disk = DiskImages::DiskImageFactory::instance()->createDiskImage(fileName, sio);
 
   if (disk) {
-    auto oldDisk = qobject_cast<DiskImages::DiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
-    if (oldDisk != nullptr && oldDisk->originalFileName() != disk->originalFileName()) {
-      DiskImages::Board *board = oldDisk->getBoardInfo();
-      if (g_rclFileName.left(1) == "*")
-        ask = false;
-      if (!disk->open(fileName) || !ejectImage(no, ask)) {
-        RespeqtSettings::instance()->unmountImage(no);
-        disk.reset();
-        delete board;
+    auto oldDisk = qSharedPointerCast<DiskImages::DiskImage>(sio->getDevice(no + DISK_BASE_CDEVIC));
 
-        if (g_rclFileName.left(1) == "*")
-          emit fileMounted(false);
-        return;
-      } else if (board != nullptr) {
-        disk->setBoardInfo(board);
-        delete board;
-      }
+    DiskImages::Board *board = !oldDisk.isNull() ? oldDisk->getBoardInfo() : nullptr;
+    if (g_rclFileName.left(1) == "*")
+      ask = false;
+    if (!disk->open(fileName) ||
+        (!oldDisk.isNull() && oldDisk->originalFileName() != disk->originalFileName() && !ejectImage(no, ask))) {
+      RespeqtSettings::instance()->unmountImage(no);
+      disk.reset();
+      delete board;
+
+      if (g_rclFileName.left(1) == "*")
+        emit fileMounted(false);
+      return;
+    } else if (board != nullptr) {
+      disk->setBoardInfo(board);
+      delete board;
     }
 
     sio->installDevice(DISK_BASE_CDEVIC + no, disk);

@@ -1277,38 +1277,8 @@ Estimated time left: %1:%2</source>
     </message>
     <message>
         <location filename="../miscutils.cpp" line="121"/>
-        <source>gziped XFD disk image</source>
+        <source>gzipped XFD disk image</source>
         <translation>Сжатый образ диска XFD</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="123"/>
-        <source>DCM disk image</source>
-        <translation>Образ диска DCM</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="125"/>
-        <source>gzipped DCM disk image</source>
-        <translation>Сжатый образ диска DCM</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="127"/>
-        <source>SCP disk image</source>
-        <translation>Образ диска SCP</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="129"/>
-        <source>gzipped SCP disk image</source>
-        <translation>Сжатый образ диска SCP</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="131"/>
-        <source>DI disk image</source>
-        <translation>Образ диска DI</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="133"/>
-        <source>gzipped DI disk image</source>
-        <translation>Сжатый образ диска DI</translation>
     </message>
     <message>
         <location filename="../miscutils.cpp" line="135"/>
@@ -5290,20 +5260,6 @@ Do you want to open the options dialog?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../diskimage.cpp" line="656"/>
-        <source>DCM images are not supported yet.</source>
-        <translation>DCM-образы пока не поддерживаются.</translation>
-    </message>
-    <message>
-        <source>SCP images are not supported yet.</source>
-        <translation type="vanished">SCP-образы пока не поддерживаются.</translation>
-    </message>
-    <message>
-        <location filename="../diskimage.cpp" line="662"/>
-        <source>DI images are not supported yet.</source>
-        <translation>DI-образы пока не поддерживаются.</translation>
-    </message>
-    <message>
         <location filename="../diskimage.cpp" line="793"/>
         <location filename="../diskimage.cpp" line="799"/>
         <location filename="../diskimage.cpp" line="835"/>
@@ -5367,11 +5323,6 @@ Do you want to open the options dialog?</source>
         <location filename="../diskimageatr.cpp" line="406"/>
         <source>XFD file format cannot handle this disk geometry. Try saving &apos;%1&apos; as ATR.</source>
         <translation>Формат XFD не поддерживает такую геометрию диска. Попробуйте сохранить &apos;%1&apos; как ATR.</translation>
-    </message>
-    <message>
-        <location filename="../diskimage.cpp" line="793"/>
-        <source>Saving DCM images is not supported yet.</source>
-        <translation>Сохранение DCM-образов пока не поддерживается.</translation>
     </message>
     <message>
         <location filename="../diskimagescp.cpp" line="39"/>

@@ -16,7 +16,7 @@ namespace DiskImages {
 
     // Instantiation maps
     using Creator = DiskImagePtr(SioWorkerPtr worker, bool gzipped);
-    using CreatorPair = std::pair<FileTypes::FileType, Creator *>;
+    using CreatorPair = std::pair<FileType, Creator *>;
     using CreatorVector = std::vector<CreatorPair>;
     CreatorVector creatorFunctions;
 
@@ -29,23 +29,18 @@ namespace DiskImages {
     }
 
     template<class TDerived>
-    void registerDiskImage(FileTypes::FileType type) {
+    void registerDiskImage(FileType type) {
       static_assert(std::is_base_of<DiskImage, TDerived>::value, "DiskImageFactory::registerDiskImage doesn't accept this type because it doesn't derive from base class");
       creatorFunctions.push_back(CreatorPair(type, &creator<TDerived>));
     }
 
     DiskImagePtr createDiskImage(const QString &fileName, const SioWorkerPtr &worker) const {
-      auto type = FileTypes::getFileType(fileName);
-      auto gzipped = type == FileTypes::FileType::AtxGz ||
-             type == FileTypes::FileType::AtrGz ||
-             type == FileTypes::FileType::ProGz ||
-             type == FileTypes::FileType::DcmGz ||
-             type == FileTypes::FileType::DiGz ||
-             type == FileTypes::FileType::XfdGz;
-        for (const auto &it: creatorFunctions) {
+      auto type = getFileType(fileName);
+
+      for (const auto &it: creatorFunctions) {
         if (it.first == type) {
           // This is a call to the function pointed to by it.second.
-          return it.second(worker, gzipped);
+          return it.second(worker, isArchive(type));
         }
       }
       return DiskImagePtr{};
@@ -54,7 +49,7 @@ namespace DiskImages {
     const QVector<QString> getDiskImageNames() const {
       QVector<QString> names;
       for (const auto &it: creatorFunctions) {
-        auto name = FileTypes::getFileTypeName(it.first);
+        auto name = getFileTypeName(it.first);
         names.append(name);
       }
       return names;

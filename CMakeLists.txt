@@ -271,8 +271,6 @@ if (WIN32)
     target_link_libraries(${TARGET} winmm z winspool)
 endif()
 
-add_subdirectory(docs)
-
 # Deployment
 if (LINUX)
     add_custom_target(deploy deployment/lindeploy.sh )

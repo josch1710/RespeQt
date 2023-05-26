@@ -1555,38 +1555,8 @@ Kalan süre: %1:%2</translation>
     </message>
     <message>
         <location filename="../miscutils.cpp" line="121"/>
-        <source>gziped XFD disk image</source>
+        <source>gzipped XFD disk image</source>
         <translation>gzi XFD disk imajı</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="123"/>
-        <source>DCM disk image</source>
-        <translation>DCM disk imajı</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="125"/>
-        <source>gzipped DCM disk image</source>
-        <translation>gzip DCM disk imajı</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="127"/>
-        <source>SCP disk image</source>
-        <translation>SCP disk imajı</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="129"/>
-        <source>gzipped SCP disk image</source>
-        <translation>gzip SCP disk imajı</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="131"/>
-        <source>DI disk image</source>
-        <translation>DI disk imajı</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="133"/>
-        <source>gzipped DI disk image</source>
-        <translation>gzip DI disk imajı</translation>
     </message>
     <message>
         <location filename="../miscutils.cpp" line="135"/>
@@ -5749,20 +5719,6 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../diskimage.cpp" line="656"/>
-        <source>DCM images are not supported yet.</source>
-        <translation>DCM imajları henüz desteklenmiyor.</translation>
-    </message>
-    <message>
-        <source>SCP images are not supported yet.</source>
-        <translation type="vanished">SCP imajları henüz desteklenmiyor.</translation>
-    </message>
-    <message>
-        <location filename="../diskimage.cpp" line="662"/>
-        <source>DI images are not supported yet.</source>
-        <translation>DI imajları henüz desteklenmiyor.</translation>
-    </message>
-    <message>
         <location filename="../diskimage.cpp" line="793"/>
         <location filename="../diskimage.cpp" line="799"/>
         <location filename="../diskimage.cpp" line="835"/>
@@ -5826,11 +5782,6 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
         <location filename="../diskimageatr.cpp" line="406"/>
         <source>XFD file format cannot handle this disk geometry. Try saving &apos;%1&apos; as ATR.</source>
         <translation>XFD dosya sınırlamaları nedeniyle &apos;%1&apos; yeniden açıldığında detay geometri bilgileri kaybolacak.</translation>
-    </message>
-    <message>
-        <location filename="../diskimage.cpp" line="793"/>
-        <source>Saving DCM images is not supported yet.</source>
-        <translation>DCM imaj kaydetme işlemi henüz desteklenmiyor.</translation>
     </message>
     <message>
         <location filename="../diskimagescp.cpp" line="39"/>

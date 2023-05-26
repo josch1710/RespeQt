@@ -33,33 +33,26 @@ protected:
   qint64 writeData(const char *data, qint64 maxSize) override;
 };
 
-class FileTypes : public QObject {
-  Q_OBJECT
 
-public:
-  enum class FileType: quint8 {
-    Unknown,
-    Dir,
-    Atr,
-    AtrGz,
-    Xfd,
-    XfdGz,
-    Dcm,
-    DcmGz,
-    Di,
-    DiGz,
-    Pro,
-    ProGz,
-    Atx,
-    AtxGz,
-    Cas,
-    CasGz,
-    Xex,
-    XexGz
-  };
-  static FileType getFileType(const QString &fileName);
-  static QString getFileTypeName(FileType type);
+enum class FileType: quint8 {
+  Unknown,
+  Dir,
+  Atr,
+  AtrGz,
+  Xfd,
+  XfdGz,
+  Pro,
+  ProGz,
+  Atx,
+  AtxGz,
+  Cas,
+  CasGz,
+  Xex,
+  XexGz
 };
 
+FileType getFileType(const QString &fileName);
+QString getFileTypeName(FileType type);
+bool isArchive(FileType type);
 
 #endif// MISCUTILS_H

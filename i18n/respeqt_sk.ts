@@ -1342,38 +1342,8 @@ Zostávajúci čas: %1: %2</translation>
     </message>
     <message>
         <location filename="../miscutils.cpp" line="121"/>
-        <source>gziped XFD disk image</source>
+        <source>gzipped XFD disk image</source>
         <translation>gzippovaný XFD diskový obraz</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="123"/>
-        <source>DCM disk image</source>
-        <translation>DCM diskový obraz</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="125"/>
-        <source>gzipped DCM disk image</source>
-        <translation>gzippovaný DCM diskový obraz</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="127"/>
-        <source>SCP disk image</source>
-        <translation>SCP diskový obraz</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="129"/>
-        <source>gzipped SCP disk image</source>
-        <translation>gzippovaný SCP diskový obraz</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="131"/>
-        <source>DI disk image</source>
-        <translation>DI diskový obraz</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="133"/>
-        <source>gzipped DI disk image</source>
-        <translation>gzippovaný DI diskový obraz</translation>
     </message>
     <message>
         <location filename="../miscutils.cpp" line="135"/>
@@ -5615,20 +5585,6 @@ Prajete si otvoriť Nastavenia?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../diskimage.cpp" line="656"/>
-        <source>DCM images are not supported yet.</source>
-        <translation>DCM obrazy momentálne nie su podporované.</translation>
-    </message>
-    <message>
-        <source>SCP images are not supported yet.</source>
-        <translation type="vanished">SCP obrazy momentálne nie su podporované.</translation>
-    </message>
-    <message>
-        <location filename="../diskimage.cpp" line="662"/>
-        <source>DI images are not supported yet.</source>
-        <translation>DI obrazy momentálne nie su podporované.</translation>
-    </message>
-    <message>
         <location filename="../diskimage.cpp" line="793"/>
         <location filename="../diskimage.cpp" line="799"/>
         <location filename="../diskimage.cpp" line="835"/>
@@ -5692,11 +5648,6 @@ Prajete si otvoriť Nastavenia?</translation>
         <location filename="../diskimageatr.cpp" line="406"/>
         <source>XFD file format cannot handle this disk geometry. Try saving &apos;%1&apos; as ATR.</source>
         <translation>XFD formát nemôže zvládnuť túto geometriu disku. Skúste uložiť &apos;%1&apos; ako ATR.</translation>
-    </message>
-    <message>
-        <location filename="../diskimage.cpp" line="793"/>
-        <source>Saving DCM images is not supported yet.</source>
-        <translation>Ukladanie DCM obrazov nie je momentálne podporované.</translation>
     </message>
     <message>
         <location filename="../diskimagescp.cpp" line="39"/>

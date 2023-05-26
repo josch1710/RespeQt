@@ -9,21 +9,17 @@ namespace DiskImages {
   std::shared_ptr<DiskImageFactory> DiskImageFactory::sInstance = std::shared_ptr<DiskImageFactory>(new DiskImageFactory);
 
   DiskImageFactory::DiskImageFactory() {
-    registerDiskImage<SimpleDiskImage>(FileTypes::FileType::Atr);
-    registerDiskImage<SimpleDiskImage>(FileTypes::FileType::AtrGz);
-    registerDiskImage<SimpleDiskImage>(FileTypes::FileType::Xfd);
-    registerDiskImage<SimpleDiskImage>(FileTypes::FileType::XfdGz);
-    registerDiskImage<SimpleDiskImage>(FileTypes::FileType::Di);
-    registerDiskImage<SimpleDiskImage>(FileTypes::FileType::DiGz);
-    registerDiskImage<SimpleDiskImage>(FileTypes::FileType::Dcm);
-    registerDiskImage<SimpleDiskImage>(FileTypes::FileType::DcmGz);
+    registerDiskImage<SimpleDiskImage>(FileType::Atr);
+    registerDiskImage<SimpleDiskImage>(FileType::AtrGz);
+    registerDiskImage<SimpleDiskImage>(FileType::Xfd);
+    registerDiskImage<SimpleDiskImage>(FileType::XfdGz);
 
-    registerDiskImage<DiskImageAtx>(FileTypes::FileType::Atx);
-    registerDiskImage<DiskImageAtx>(FileTypes::FileType::AtxGz);
+    registerDiskImage<DiskImageAtx>(FileType::Atx);
+    registerDiskImage<DiskImageAtx>(FileType::AtxGz);
 
-    registerDiskImage<DiskImagePro>(FileTypes::FileType::Pro);
-    registerDiskImage<DiskImagePro>(FileTypes::FileType::ProGz);
+    registerDiskImage<DiskImagePro>(FileType::Pro);
+    registerDiskImage<DiskImagePro>(FileType::ProGz);
 
-    registerDiskImage<FolderImage>(FileTypes::FileType::Dir);
+    registerDiskImage<FolderImage>(FileType::Dir);
   }
 }

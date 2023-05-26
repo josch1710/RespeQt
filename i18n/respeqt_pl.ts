@@ -1459,38 +1459,8 @@ Kiedy usłyszysz sygnał, naciśnij przycisk OK poniżej i jednocześnie naciśn
     </message>
     <message>
         <location filename="../miscutils.cpp" line="121"/>
-        <source>gziped XFD disk image</source>
+        <source>gzipped XFD disk image</source>
         <translation>Obraz dysku XFD (gzip)</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="123"/>
-        <source>DCM disk image</source>
-        <translation>Obraz dysku DCM</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="125"/>
-        <source>gzipped DCM disk image</source>
-        <translation>Obraz dysku DCM (gzip)</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="127"/>
-        <source>SCP disk image</source>
-        <translation>Obraz dysku SCP</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="129"/>
-        <source>gzipped SCP disk image</source>
-        <translation>Obraz dysku SCP (gzip)</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="131"/>
-        <source>DI disk image</source>
-        <translation>Obraz dysku DI</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="133"/>
-        <source>gzipped DI disk image</source>
-        <translation>Obraz dysku DI (gzip)</translation>
     </message>
     <message>
         <location filename="../miscutils.cpp" line="135"/>
@@ -5515,20 +5485,6 @@ Czy chcesz otworzyć opcje?</translation>
         <translation>Nie można zmienić rozmiaru tymczasowego pliku &apos;%1&apos;: %2</translation>
     </message>
     <message>
-        <location filename="../diskimage.cpp" line="656"/>
-        <source>DCM images are not supported yet.</source>
-        <translation>Obrazy DCM nie są jeszcze wspierane.</translation>
-    </message>
-    <message>
-        <source>SCP images are not supported yet.</source>
-        <translation type="vanished">Obrazy SCP nie są jeszcze wspierane.</translation>
-    </message>
-    <message>
-        <location filename="../diskimage.cpp" line="662"/>
-        <source>DI images are not supported yet.</source>
-        <translation>Obrazy DI nie są jeszcze wspierane.</translation>
-    </message>
-    <message>
         <location filename="../diskimageatr.cpp" line="349"/>
         <location filename="../diskimageatr.cpp" line="431"/>
         <source>Cannot rewind temporary file &apos;%1&apos;: %2</source>
@@ -5553,11 +5509,6 @@ Czy chcesz otworzyć opcje?</translation>
         <location filename="../diskimageatr.cpp" line="406"/>
         <source>XFD file format cannot handle this disk geometry. Try saving &apos;%1&apos; as ATR.</source>
         <translation>Format XFD nie obsługuje takiej geometrii dysku. Spróbuj zapisać &apos;%1&apos; jako ATR.</translation>
-    </message>
-    <message>
-        <location filename="../diskimage.cpp" line="793"/>
-        <source>Saving DCM images is not supported yet.</source>
-        <translation>Zapis obrazów DCM nie jest jeszcze wspierany.</translation>
     </message>
     <message>
         <location filename="../diskimagescp.cpp" line="39"/>

@@ -1186,28 +1186,8 @@ Tiempo restante estimado: %1:%2</translation>
     </message>
     <message>
         <location filename="../miscutils.cpp" line="117"/>
-        <source>gziped XFD disk image</source>
-        <translation>imagen de disco XFD gziped</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="119"/>
-        <source>DCM disk image</source>
-        <translation>Imagen de disco de DCM</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="121"/>
-        <source>gzipped DCM disk image</source>
-        <translation>imagen de disco de DCM comprimida con gzip</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="123"/>
-        <source>DI disk image</source>
-        <translation>Imagen de disco DI</translation>
-    </message>
-    <message>
-        <location filename="../miscutils.cpp" line="125"/>
-        <source>gzipped DI disk image</source>
-        <translation>imagen de disco DI comprimida con gzip</translation>
+        <source>gzipped XFD disk image</source>
+        <translation>imagen de disco XFD con gzip</translation>
     </message>
     <message>
         <location filename="../miscutils.cpp" line="127"/>
@@ -4042,16 +4022,6 @@ Do you want to open the options dialog?</source>
         <translation>No se puede abrir &apos;%1&apos;: %2</translation>
     </message>
     <message>
-        <location filename="../diskimage.cpp" line="831"/>
-        <source>DCM images are not supported yet.</source>
-        <translation>Las imágenes de DCM aún no son compatibles.</translation>
-    </message>
-    <message>
-        <location filename="../diskimage.cpp" line="837"/>
-        <source>DI images are not supported yet.</source>
-        <translation>Las imágenes DI aún no son compatibles.</translation>
-    </message>
-    <message>
         <location filename="../diskimage.cpp" line="874"/>
         <location filename="../diskimage.cpp" line="1007"/>
         <source>Unknown file type.</source>
@@ -4104,16 +4074,6 @@ Do you want to open the options dialog?</source>
         <location filename="../diskimagepro.cpp" line="324"/>
         <source>Cannot save &apos;%1&apos;: %2</source>
         <translation>No se puede guardar &apos;%1&apos;:%2</translation>
-    </message>
-    <message>
-        <location filename="../diskimage.cpp" line="969"/>
-        <source>Saving DCM images is not supported yet.</source>
-        <translation>Aún no se admite guardar imágenes de DCM.</translation>
-    </message>
-    <message>
-        <location filename="../diskimage.cpp" line="975"/>
-        <source>Saving DI images is not supported yet.</source>
-        <translation>Aún no se admite guardar imágenes DI.</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1088"/>
