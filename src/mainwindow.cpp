@@ -72,11 +72,7 @@ static QMutex *logMutex;
 QString g_exefileName;
 static QString g_rclFileName;
 QString g_respeQtAppPath;
-static QRect g_savedGeometry;
 bool g_disablePicoHiSpeed;
-static bool g_D9DOVisible = true;
-bool g_miniMode = false;
-static bool g_shadeMode = false;
 //SimpleDiskImage *g_translator = nullptr;
 //static int g_savedWidth;
 
@@ -291,8 +287,6 @@ MainWindow::MainWindow()
 
   ui->textEdit->installEventFilter(this);
   changeFonts();
-  g_D9DOVisible = RespeqtSettings::instance()->D9DOVisible();
-  showHideDrives();
 
   /* Connect to the network */
   QString netInterface;
@@ -588,16 +582,12 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   isClosing = true;
 
   // Save various session settings  //
-  if (RespeqtSettings::instance()->saveWindowsPos()) {
-    if (g_miniMode) {
-      saveMiniWindowGeometry();
-    } else {
-      saveWindowGeometry();
-    }
-  }
+  RespeqtSettings::instance()->saveGeometry(geometry());
+  RespeqtSettings::instance()->setD9DOVisible(isD9DOVisible);
+  RespeqtSettings::instance()->setMiniMode(isMiniMode);
+
   if (g_sessionFile != "")
     RespeqtSettings::instance()->saveSessionToFile(g_sessionFilePath + "/" + g_sessionFile);
-  RespeqtSettings::instance()->setD9DOVisible(g_D9DOVisible);
   bool wasRunning = ui->actionStartEmulation->isChecked();
   QMessageBox::StandardButton answer = QMessageBox::No;
 
@@ -674,34 +664,49 @@ void MainWindow::hideEvent(QHideEvent *event) {
 }
 
 void MainWindow::showEvent(QShowEvent *event) {
+  static bool shownThisTime = true;
 
-  if (event->type() == QEvent::Show && shownFirstTime) {
-    shownFirstTime = false;// Reset the flag
+  if (event->type() == QEvent::Show) {
+    if (shownFirstTime) {
+      shownFirstTime = false;// Reset the flag
 
-    /* Open options dialog if it's the first time */
-    if (RespeqtSettings::instance()->isFirstTime()) {
-      if (QMessageBox::Yes == QMessageBox::question(this, tr("First run"),
-          tr("You are running RespeQt for the first time.\n\nDo you want to open the options dialog?"),
-          QMessageBox::Yes, QMessageBox::No)) {
-        ui->actionOptions->trigger();
+      /* Open options dialog if it's the first time */
+      if (RespeqtSettings::instance()->isFirstTime()) {
+        if (QMessageBox::Yes == QMessageBox::question(this, tr("First run"),
+            tr("You are running RespeQt for the first time.\n\nDo you want to open the options dialog?"),
+            QMessageBox::Yes, QMessageBox::No)) {
+          ui->actionOptions->trigger();
+        }
+        qDebug() << "!d"
+                 << "Starting emulation";
+
+        ui->actionStartEmulation->trigger();
       }
     }
-    qDebug() << "!d"
-             << "Starting emulation";
+    if (shownThisTime) {
+        shownThisTime = false;
 
-    ui->actionStartEmulation->trigger();
+        // check if mini-mode was last used
+        isMiniMode = RespeqtSettings::instance()->miniMode();
+        if (isMiniMode) {
+            isMiniMode = false;                     // reset now so we can toggle it ON
+            ui->actionToggleMiniMode->trigger();    // trigger mini-mode toggle action
+        }
+        isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
+        showHideDrives();
+    }
   }
   QMainWindow::showEvent(event);
 }
 
 void MainWindow::enterEvent(QEvent *) {
-  if (g_miniMode && g_shadeMode) {
+  if (isMiniMode && isShadeMode) {
     setWindowOpacity(1.0);
   }
 }
 
 void MainWindow::leaveEvent(QEvent *) {
-  if (g_miniMode && g_shadeMode) {
+  if (isMiniMode && isShadeMode) {
     setWindowOpacity(0.25);
   }
 }
@@ -721,7 +726,7 @@ void MainWindow::showLogWindowTriggered() {
     y = geometry().y();
     w = geometry().width();
     h = geometry().height();
-    if (!g_miniMode) {
+    if (!isMiniMode) {
       logWindow_->setGeometry(static_cast<int>(x + w / 1.9), y + 30, logWindow_->geometry().width(), geometry().height());
     } else {
       logWindow_->setGeometry(x + 20, y + 60, w, h * 2);
@@ -738,96 +743,90 @@ void MainWindow::logChanged(QString text) {
   emit sendLogTextChange(std::move(text));
 }
 
-void MainWindow::saveWindowGeometry() {
-  RespeqtSettings::instance()->setLastHorizontalPos(geometry().x());
-  RespeqtSettings::instance()->setLastVerticalPos(geometry().y());
-  RespeqtSettings::instance()->setLastWidth(geometry().width());
-  RespeqtSettings::instance()->setLastHeight(geometry().height());
-}
-
-void MainWindow::saveMiniWindowGeometry() {
-  RespeqtSettings::instance()->setLastMiniHorizontalPos(geometry().x());
-  RespeqtSettings::instance()->setLastMiniVerticalPos(geometry().y());
-}
-
 void MainWindow::toggleShadeTriggered() {
-  if (g_shadeMode) {
-    setWindowFlags(Qt::WindowSystemMenuHint);
+  if (isShadeMode) {
+    setWindowFlags(Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
     setWindowOpacity(1.0);
-    g_shadeMode = false;
+    isShadeMode = false;
     QMainWindow::show();
   } else {
     setWindowFlags(Qt::FramelessWindowHint);
     setWindowOpacity(0.25);
-    g_shadeMode = true;
+    isShadeMode = true;
     QMainWindow::show();
   }
 }
 
 // Toggle Mini Mode //
 void MainWindow::toggleMiniModeTriggered() {
-  g_miniMode = !g_miniMode;
+  isMiniMode = !isMiniMode;
 
   int i;
   for (i = 1; i < 8; ++i) {
-    diskWidgets[i]->setVisible(!g_miniMode);
+    diskWidgets[i]->setVisible(!isMiniMode);
   }
 
   for (; i < DISK_COUNT; ++i) {
-    diskWidgets[i]->setVisible(!g_miniMode && g_D9DOVisible);
+    diskWidgets[i]->setVisible(!isMiniMode && isD9DOVisible);
   }
 
-  if (!g_miniMode) {
-    /*if (g_D9DOVisible) {
-            setMinimumWidth(688);
-        } else
-        {
-            setMinimumWidth(344);
-        }*/
+  for (i = 0; i < PRINTER_COUNT; ++i) {
+    printerWidgets[i]->setVisible(!isMiniMode);
+  }
 
-    setMinimumHeight(426);
+  ui->line->setVisible(!isMiniMode);
+
+  if (!isMiniMode) {  // Full Window Mode:
+
+    setMinimumHeight(RespeqtSettings::instance()->DefaultFullModeSize.height());
     setMaximumHeight(QWIDGETSIZE_MAX);
     ui->textEdit->setVisible(true);
     ui->actionHideShowDrives->setEnabled(true);
-    saveMiniWindowGeometry();
-    setGeometry(g_savedGeometry);
+    if (!savedGeometry.isEmpty()) {
+      setGeometry(savedGeometry);
+    } else {
+      setGeometry(RespeqtSettings::instance()->lastHorizontalPos(), RespeqtSettings::instance()->lastVerticalPos(),
+                  RespeqtSettings::instance()->lastWidth(), RespeqtSettings::instance()->lastHeight());
+    }
     setWindowOpacity(1.0);
     setWindowFlags(Qt::WindowSystemMenuHint);
     ui->actionToggleShade->setDisabled(true);
-    QMainWindow::show();
-    g_shadeMode = false;
-  } else {
-    g_savedGeometry = geometry();
+    isShadeMode = false;
+
+  } else {  // Mini-mode Window:
+
+    savedGeometry = geometry();
     ui->textEdit->setVisible(false);
-    setMinimumWidth(400);
-    setMinimumHeight(100);
-    setMaximumHeight(100);
+    int height = diskWidgets[0]->sizeHint().height() + ui->menuBar->height() + ui->statusBar->height();
+    setMinimumWidth(RespeqtSettings::instance()->DefaultMiniModeSize.width());
+    setMinimumHeight(height);
+    setMaximumHeight(height);
     setGeometry(RespeqtSettings::instance()->lastMiniHorizontalPos(), RespeqtSettings::instance()->lastMiniVerticalPos(),
-                minimumWidth(), minimumHeight());
+                RespeqtSettings::instance()->lastMiniWidth(), height);
     ui->actionHideShowDrives->setDisabled(true);
     ui->actionToggleShade->setEnabled(true);
     if (RespeqtSettings::instance()->enableShade()) {
       setWindowOpacity(0.25);
       setWindowFlags(Qt::FramelessWindowHint);
-      g_shadeMode = true;
+      isShadeMode = true;
     } else {
-      g_shadeMode = false;
+      isShadeMode = false;
     }
-    QMainWindow::show();
   }
+  QMainWindow::show();
 }
 
 void MainWindow::showHideDrives() {
   for (int i = 8; i < DISK_COUNT; ++i) {
-    diskWidgets[i]->setVisible(g_D9DOVisible);
+    diskWidgets[i]->setVisible(isD9DOVisible);
   }
   for (int i = 2; i < PRINTER_COUNT; ++i) {
-    printerWidgets[i]->setVisible(g_D9DOVisible);
+    printerWidgets[i]->setVisible(isD9DOVisible);
   }
 
-  // infoWidget->setVisible(g_D9DOVisible);
+  // infoWidget->setVisible(isD9DOVisible);
 
-  if (g_D9DOVisible) {
+  if (isD9DOVisible) {
     ui->actionHideShowDrives->setText(QApplication::translate("MainWindow", "Hide drives D9-DO", nullptr));
     ui->actionHideShowDrives->setStatusTip(QApplication::translate("MainWindow", "Hide drives D9-DO", nullptr));
     ui->actionHideShowDrives->setIcon(QIcon(":/icons/silk-icons/icons/drive_add.png").pixmap(16, 16, QIcon::Normal, QIcon::On));
@@ -842,13 +841,12 @@ void MainWindow::showHideDrives() {
 
 // Toggle Hide/Show drives D9-DO  //
 void MainWindow::hideShowTriggered() {
-  g_D9DOVisible = !g_D9DOVisible;
-  g_miniMode = false;
+  isD9DOVisible = !isD9DOVisible;
+  isMiniMode = isShadeMode = false;
 
   showHideDrives();
 
   //setGeometry(geometry().x(), geometry().y(), 0, geometry().height());
-  saveWindowGeometry();
 }
 
 // Toggle printer Emulation ON/OFF //
@@ -1088,8 +1086,10 @@ void MainWindow::showOptionsTriggered() {
     sio->waitOnPort();
     qApp->processEvents();
   }
+
   OptionsDialog optionsDialog(this);
-  optionsDialog.exec();
+  if (optionsDialog.exec() != QDialog::Accepted)
+    return;
 
   // Change drive slot description fonts
   changeFonts();
@@ -1099,6 +1099,9 @@ void MainWindow::showOptionsTriggered() {
 
   // retranslate Designer Form
   ui->retranslateUi(this);
+
+  // fix Hide/Show disks D9-DO menu item
+  showHideDrives();
 
   setupDebugItems();
 
@@ -1820,8 +1823,8 @@ void MainWindow::openSessionTriggered() {
     is = RespeqtSettings::instance()->mountedImageSetting(i);
     mountFile(i, is.fileName, is.isWriteProtected);
   }
-  g_D9DOVisible = RespeqtSettings::instance()->D9DOVisible();
-  hideShowTriggered();
+  isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
+  showHideDrives();
   setSession();
 }
 void MainWindow::saveSessionTriggered() {
@@ -1837,12 +1840,7 @@ void MainWindow::saveSessionTriggered() {
   RespeqtSettings::instance()->setLastSessionDir(QFileInfo(fileName).absolutePath());
 
   // Save mainwindow position and size to session file //
-  if (RespeqtSettings::instance()->saveWindowsPos()) {
-    RespeqtSettings::instance()->setLastHorizontalPos(geometry().x());
-    RespeqtSettings::instance()->setLastVerticalPos(geometry().y());
-    RespeqtSettings::instance()->setLastWidth(geometry().width());
-    RespeqtSettings::instance()->setLastHeight(geometry().height());
-  }
+  RespeqtSettings::instance()->saveGeometry(geometry());
   RespeqtSettings::instance()->saveSessionToFile(fileName);
 }
 
@@ -1855,7 +1853,6 @@ void MainWindow::cassettePlaybackTriggered() {
                                                tr("Open a cassette image"),
                                                RespeqtSettings::instance()->lastCasDir(),
                                                tr("CAS images (*.cas);;All files (*)"));
-
   if (fileName.isEmpty()) {
     return;
   }

@@ -12,3 +12,8 @@ Makefile
 180!.cas
 .idea
 Testing
+*.bak
+*.o
+*.exe
+*.Debug
+*.Release

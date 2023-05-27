@@ -354,8 +354,8 @@ void OptionsDialog::saveSettings() {
   RespeqtSettings::instance()->setUseCustomCasBaud(m_ui->emulationUseCustomCasBaudBox->isChecked());
   RespeqtSettings::instance()->setCustomCasBaud(m_ui->emulationCustomCasBaudSpin->value());
   RespeqtSettings::instance()->setMinimizeToTray(m_ui->minimizeToTrayBox->isChecked());
-  RespeqtSettings::instance()->setsaveWindowsPos(m_ui->saveWinPosBox->isChecked());
-  RespeqtSettings::instance()->setsaveDiskVis(m_ui->saveDiskVisBox->isChecked());
+  RespeqtSettings::instance()->setSaveWindowsPos(m_ui->saveWinPosBox->isChecked());
+  RespeqtSettings::instance()->setSaveDiskVis(m_ui->saveDiskVisBox->isChecked());
   RespeqtSettings::instance()->setfilterUnderscore(m_ui->filterUscore->isChecked());
   RespeqtSettings::instance()->setlimitFileEntries(m_ui->limitFileEntries->isChecked());
   RespeqtSettings::instance()->setCapitalLettersInPCLINK(m_ui->capitalLettersPCLINK->isChecked());

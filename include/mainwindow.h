@@ -85,6 +85,12 @@ private:
 
   QList<QAction *> recentFilesActions_;
 
+  QRect savedGeometry;
+
+  bool isD9DOVisible = true;    // column 2 disks visible
+  bool isMiniMode    = false;   // mini mode disk 1 only
+  bool isShadeMode   = false;   // mini shade mode main win
+
   void setSession();//
   void updateRecentFileActions();
   char containingDiskSlot(const QPoint &point);
@@ -204,8 +210,6 @@ private slots:
   // TODO Check on Windows and Linux
   void trayIconActivated(QSystemTrayIcon::ActivationReason reason);//
   //void keepBootExeOpen();                                          // Signal AutoBootDialog::keepOpen MIA
-  void saveWindowGeometry();
-  void saveMiniWindowGeometry();
   void logChanged(QString text);
 };
 
