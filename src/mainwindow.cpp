@@ -745,7 +745,7 @@ void MainWindow::logChanged(QString text) {
 
 void MainWindow::toggleShadeTriggered() {
   if (isShadeMode) {
-    setWindowFlags(Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
+    setWindowFlags(Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
     setWindowOpacity(1.0);
     isShadeMode = false;
     QMainWindow::show();
@@ -789,7 +789,7 @@ void MainWindow::toggleMiniModeTriggered() {
                   RespeqtSettings::instance()->lastWidth(), RespeqtSettings::instance()->lastHeight());
     }
     setWindowOpacity(1.0);
-    setWindowFlags(Qt::WindowSystemMenuHint);
+    setWindowFlags(Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
     ui->actionToggleShade->setDisabled(true);
     isShadeMode = false;
 
