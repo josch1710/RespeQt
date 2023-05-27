@@ -17,18 +17,15 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_AUTOUIC_SEARCH_PATHS} ui ui/printers ui/f
 add_definitions(-DQT_DEPRECATED_WARNINGS -DQT_DISABLE_DEPRECATED_BEFORE=0x050000)
 add_definitions(-DVERSION=\"v${PROJECT_VERSION}_${RC_VERSION}\")
 
-option(MAKE_TEST "Build the test application" OFF)
-message(STATUS "Build tests ${MAKE_TEST}")
-if (MAKE_TEST)
-    message(STATUS "Build test application")
-    set(TARGET_SOURCES tests/units/siorecordertest.cpp tests/units/tests.cpp)
-    set(TARGET RespeQtTest)
-    add_definitions(-DRESPEQT_TEST)
-else()
-    message(STATUS "Build main application")
-    set(TARGET_SOURCES src/main.cpp)
-    set(TARGET RespeQt)
-endif()
+
+
+message(STATUS "Build main application")
+set(TARGET_SOURCES src/main.cpp)
+set(TARGET RespeQt)
+
+message(STATUS "Build test application")
+set(TARGETTEST_SOURCES tests/units/siorecordertest.cpp tests/units/tests.cpp)
+set(TARGETTEST RespeQtTest)
 
 include_directories(include headers tests tools)
 
@@ -47,12 +44,12 @@ set(SOURCES
     src/rcl.cpp
     src/sdxprotocol.cpp
     src/sioworker.cpp
-        src/diskimages/diskimagepro.cpp
-        src/diskimages/diskimageatx.cpp
+    src/diskimages/diskimagepro.cpp
+    src/diskimages/diskimageatx.cpp
     src/optionsdialog.cpp
     src/aboutdialog.cpp
-        src/diskimages/diskimage.cpp
-        src/diskimages/folderimage.cpp
+    src/diskimages/diskimage.cpp
+    src/diskimages/folderimage.cpp
     src/createimagedialog.cpp
     src/diskeditdialog.cpp
     src/autoboot.cpp
@@ -80,15 +77,15 @@ set(SOURCES
     src/printers/centronics.cpp
     src/printers/escp.cpp
     src/printers/atari1029.cpp
-        src/diskimages/simplediskimage.cpp
-        src/diskimages/disassembly810.cpp
-        src/diskimages/disassembly1050.cpp
+    src/diskimages/simplediskimage.cpp
+    src/diskimages/disassembly810.cpp
+    src/diskimages/disassembly1050.cpp
     src/printers/printerfactory.cpp
     src/printers/atari1025.cpp
     src/printers/passthrough.cpp
     src/printers/graphicsprimitive.cpp
     src/crc16.cpp
-        src/diskimages/cpu6502.cpp
+    src/diskimages/cpu6502.cpp
     src/filesystems/ataridirentry.cpp
     src/filesystems/atarifilesystem.cpp
     src/filesystems/dos10filesystem.cpp
@@ -97,7 +94,13 @@ set(SOURCES
     src/filesystems/mydosfilesystem.cpp
     src/filesystems/spartadosfilesystem.cpp
     src/diskimages/diskgeometry.cpp
-        src/diskimages/prosectorinfo.cpp src/diskimages/atxsectorinfo.cpp src/diskimages/atxtrackinfo.cpp src/diskimages/board.cpp src/diskimages/diskimagefactory.cpp src/RespeQtApplication.cpp include/RespeQtApplication.h)
+    src/diskimages/prosectorinfo.cpp
+    src/diskimages/atxsectorinfo.cpp
+    src/diskimages/atxtrackinfo.cpp
+    src/diskimages/board.cpp
+    src/diskimages/diskimagefactory.cpp
+    src/RespeQtApplication.cpp
+)
 
 set(HEADERS
     include/mainwindow.h
@@ -112,8 +115,8 @@ set(HEADERS
     include/sioworker.h
     include/optionsdialog.h
     include/aboutdialog.h
-        include/diskimages/diskimage.h
-        include/diskimages/folderimage.h
+    include/diskimages/diskimage.h
+    include/diskimages/folderimage.h
     include/createimagedialog.h
     include/diskeditdialog.h
     include/autoboot.h
@@ -139,15 +142,15 @@ set(HEADERS
     include/printers/centronics.h
     include/printers/escp.h
     include/printers/atari1029.h
-        include/diskimages/disassembly810.h
-        include/diskimages/disassembly1050.h
+    include/diskimages/disassembly810.h
+    include/diskimages/disassembly1050.h
     include/printers/printerfactory.h
     include/printers/atari1025.h
     include/printers/passthrough.h
     include/smartdevice.h
     include/printers/graphicsprimitive.h
     include/crc16.h
-        include/diskimages/cpu6502.h
+    include/diskimages/cpu6502.h
     headers/atarisio.h
     include/filesystems/ataridirentry.h
     include/filesystems/atarifilesystem.h
@@ -157,7 +160,16 @@ set(HEADERS
     include/filesystems/mydosfilesystem.h
     include/filesystems/spartadosfilesystem.h
     include/diskimages/diskgeometry.h
-        include/diskimages/prosectorinfo.h include/diskimages/atxsectorinfo.h include/diskimages/atxtrackinfo.h include/diskimages/board.h include/diskimages/simplediskimage.h include/diskimages/diskimagepro.h include/diskimages/diskimageatx.h include/diskimages/diskimagefactory.h src/RespeQtApplication.cpp include/RespeQtApplication.h)
+    include/diskimages/prosectorinfo.h
+    include/diskimages/atxsectorinfo.h
+    include/diskimages/atxtrackinfo.h
+    include/diskimages/board.h
+    include/diskimages/simplediskimage.h
+    include/diskimages/diskimagepro.h
+    include/diskimages/diskimageatx.h
+    include/diskimages/diskimagefactory.h
+    include/RespeQtApplication.h
+)
 
 set(FORMS
     ui/mainwindow.ui
@@ -202,9 +214,9 @@ endif()
 find_package(Qt5 5.0...<5.7 REQUIRED
     COMPONENTS Core Widgets Gui Network PrintSupport SerialPort Svg LinguistTools
 )
-if (MAKE_TEST)
-    find_package(Qt5 5.0...<5.7 REQUIRED COMPONENTS Test)
-endif()
+
+find_package(Qt5 5.0...<5.7 REQUIRED COMPONENTS Test)
+
 if (APPLE)
     find_package(Qt5 5.0...<5.7 COMPONENTS MacExtras)
 elseif(UNIX)
@@ -227,16 +239,20 @@ if (APPLE)
     set(APP_ICON resources/RespeQt.icns src/diskimages/diskimagefactory.cpp)
     set_source_files_properties(${APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     add_executable(${TARGET} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES} ${APP_ICON})
+    add_executable(${TARGETTEST} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGETTEST_SOURCES} ${APP_ICON})
 
     add_custom_target(deploy ${CMAKE_SOURCE_DIR}/deployment/macdeploy.sh "\"${CMAKE_SOURCE_DIR}\"" "\"${CMAKE_BINARY_DIR}\"" "${PROJECT_VERSION}" "${RC_VERSION}")
 else()
     add_executable(${TARGET} ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES})
+    add_executable(${TARGETTEST} ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGETTEST_SOURCES})
 endif()
+
 
 find_package(ZLIB REQUIRED)
 if (ZLIB_FOUND)
     include_directories( ${ZLIB_INCLUDE_DIRS} )
     target_link_libraries(${TARGET} ${ZLIB_LIBRARIES})
+    target_link_libraries(${TARGETTEST} ${ZLIB_LIBRARIES})
 endif()
 
 target_link_libraries(${TARGET} Qt5::Core)
@@ -246,22 +262,29 @@ target_link_libraries(${TARGET} Qt5::Network)
 target_link_libraries(${TARGET} Qt5::PrintSupport)
 target_link_libraries(${TARGET} Qt5::SerialPort)
 target_link_libraries(${TARGET} Qt5::Svg)
-if (MAKE_TEST)
-    target_link_libraries(${TARGET} Qt5::Test)
-endif()
+
+target_link_libraries(${TARGETTEST} Qt5::Core)
+target_link_libraries(${TARGETTEST} Qt5::Widgets)
+target_link_libraries(${TARGETTEST} Qt5::Gui)
+target_link_libraries(${TARGETTEST} Qt5::Network)
+target_link_libraries(${TARGETTEST} Qt5::PrintSupport)
+target_link_libraries(${TARGETTEST} Qt5::SerialPort)
+target_link_libraries(${TARGETTEST} Qt5::Svg)
+target_link_libraries(${TARGETTEST} Qt5::Test)
 
 # Include platform extras
 if (APPLE AND Qt5MacExtras_FOUND)
     message(STATUS "Found Mac Extras")
     target_link_libraries(${TARGET} Qt5::MacExtras)
+    target_link_libraries(${TARGETTEST} Qt5::MacExtras)
 endif()
 if (UNIX AND Qt5X11Extras_FOUND)
     message(STATUS "Found X11 Extras")
-    target_link_libraries(${TARGET} Qt5::X11Extras)
+    target_link_libraries(${TARGETTEST} Qt5::X11Extras)
 endif()
 if (WIN32 AND Qt5WinExtras_FOUND)
     message(STATUS "Found Win Extras")
-    target_link_libraries(${TARGET} Qt5::WinExtras)
+    target_link_libraries(${TARGETTEST} Qt5::WinExtras)
 endif()
 
 if (UNIX)
@@ -275,3 +298,5 @@ endif()
 if (LINUX)
     add_custom_target(deploy deployment/lindeploy.sh )
 endif()
+
+target_compile_definitions(${TARGETTEST} PUBLIC -DRESPEQT_TEST)

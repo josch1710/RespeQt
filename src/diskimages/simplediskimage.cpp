@@ -401,6 +401,13 @@ return false;
       sourceFile = new GzFile(fileName);
     }
 
+    FileType type = getFileType(fileName);
+
+    QByteArray header;
+    quint16 sizeLo{0};
+    quint16 secSize{0};
+    quint32 sizeHi{0};
+    quint64 size{0};
     bool repaired = false;
 
     // Try to open the source file
@@ -410,30 +417,36 @@ return false;
       return false;
     }
 
-    // Try to read the header
-    QByteArray header;
-    header = sourceFile->read(16);
-    if (header.size() != 16) {
-      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot read the header: %1.").arg(sourceFile->errorString()));
-      sourceFile->close();
-      delete sourceFile;
-      return false;
-    }
+    if (type == FileType::Atr || type == FileType::AtrGz) {
+      // Try to read the header for a ATR file
+      header = sourceFile->read(16);
+      if (header.size() != 16) {
+        qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot read the header: %1.").arg(sourceFile->errorString()));
+        sourceFile->close();
+        delete sourceFile;
+        return false;
+      }
 
-    // Validate the magic number
-    quint16 magic = static_cast<quint8>(header[0]) + static_cast<quint8>(header[1]) * 256;
-    if (magic != 0x0296) {
-      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Not a valid ATR file."));
-      sourceFile->close();
-      delete sourceFile;
-      return false;
-    }
+      // Validate the magic number
+      quint16 magic = static_cast<quint8>(header[0]) + static_cast<quint8>(header[1]) * 256;
+      if (magic != 0x0296) {
+        qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Not a valid ATR file."));
+        sourceFile->close();
+        delete sourceFile;
+        return false;
+      }
 
-    // Decode image meta-data
-    quint16 sizeLo = static_cast<quint8>(header[2]) + static_cast<quint8>(header[3]) * 256;
-    quint16 secSize = static_cast<quint8>(header[4]) + static_cast<quint8>(header[5]) * 256;
-    quint32 sizeHi = static_cast<quint8>(header[6]) + static_cast<quint8>(header[7]) * 256;
-    quint64 size = (sizeLo + sizeHi * 65536) * 16;
+      // Decode image meta-data
+      sizeLo = static_cast<quint8>(header[2]) + static_cast<quint8>(header[3]) * 256;
+      secSize = static_cast<quint8>(header[4]) + static_cast<quint8>(header[5]) * 256;
+      sizeHi = static_cast<quint8>(header[6]) + static_cast<quint8>(header[7]) * 256;
+      size = (sizeLo + sizeHi * 65536) * 16;
+    }
+    // XFD format
+    else {
+      secSize = 128;
+      header = QByteArray(16, 0);
+    }
 
     // Try to create the temporary file
     file.setFileTemplate(QDir::temp().absoluteFilePath("respeqt-temp-XXXXXX"));
@@ -468,65 +481,78 @@ return false;
 
     // Check if the reported image size is consistent with the actual size
     //
-    if (size != imageSize) {
-      qWarning() << "!w" << tr("Image size of '%1' is reported as %2 bytes in the header but it's actually %3.").arg(fileName, QString::number(size, 10), QString(imageSize, 10));
-      size = imageSize;
-      repaired = true;
-    }
-
-    // Validate sector size
-    if (secSize != 128 && secSize != 256 && secSize != 512 && secSize != 8192) {
-      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Unknown sector size (%1).").arg(secSize));
-      sourceFile->close();
-      delete sourceFile;
-      file.close();
-      return false;
-    }
-
-    // Some .atr file sizes are larger than the reported size
-    // in the header. This may be due to extraneous bytes added to the end
-    // of the file by various file conversion utilities
-    // Those files usually still work fine when loaded to a drive.
-    // So only reject a file if the actual size of the file is < size specified
-    // in .atr file header ---
-
-    // Validate the image size
-    bool sizeValid = true;
-    if (secSize == 256) {
-      // Handle double density images
-      if (size <= 384) {
-        // Handle double density images with less than 4 sectors
-        if (size % 128 != 0) {
-          sizeValid = false;
-        }
-      } else {
-        // Handle double density images with 4 or more sectors
-        if ((size - 384) % 256 != 0 && ((size + 384) / 256) % 720 != 0) {
-          sizeValid = false;
-        }
+    if (type == FileType::Atr || type == FileType::AtrGz) {
+      if (size != imageSize) {
+        qWarning() << "!w" << tr("Image size of '%1' is reported as %2 bytes in the header but it's actually %3.").arg(fileName, QString::number(size, 10), QString(imageSize, 10));
+        size = imageSize;
+        repaired = true;
       }
-    } else {
-      // Handle non-double density images
-      if (size % secSize != 0) {
-        // Single Density
-        if ((size < 133120) && (size / secSize < 720)) {
-          sizeValid = false;
+
+      // Validate sector size
+      if (secSize != 128 && secSize != 256 && secSize != 512 && secSize != 8192) {
+        qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Unknown sector size (%1).").arg(secSize));
+        sourceFile->close();
+        delete sourceFile;
+        file.close();
+        return false;
+      }
+
+      // Some .atr file sizes are larger than the reported size
+      // in the header. This may be due to extraneous bytes added to the end
+      // of the file by various file conversion utilities
+      // Those files usually still work fine when loaded to a drive.
+      // So only reject a file if the actual size of the file is < size specified
+      // in .atr file header ---
+
+      // Validate the image size
+      bool sizeValid = true;
+      if (secSize == 256) {
+        // Handle double density images
+        if (size <= 384) {
+          // Handle double density images with less than 4 sectors
+          if (size % 128 != 0) {
+            sizeValid = false;
+          }
         } else {
-          // Enhanced Density
-          if ((size >= 133120) && (size / secSize < 1040)) {
+          // Handle double density images with 4 or more sectors
+          if ((size - 384) % 256 != 0 && ((size + 384) / 256) % 720 != 0) {
             sizeValid = false;
           }
         }
+      } else {
+        // Handle non-double density images
+        if (size % secSize != 0) {
+          // Single Density
+          if ((size < 133120) && (size / secSize < 720)) {
+            sizeValid = false;
+          } else {
+            // Enhanced Density
+            if ((size >= 133120) && (size / secSize < 1040)) {
+              sizeValid = false;
+            }
+          }
+        }
+      }
+
+
+      if (!sizeValid) {
+        qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Invalid image size (%1).").arg(size));
+        sourceFile->close();
+        delete sourceFile;
+        file.close();
+        return false;
       }
     }
-
-
-    if (!sizeValid) {
-      qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Invalid image size (%1).").arg(size));
-      sourceFile->close();
-      delete sourceFile;
-      file.close();
-      return false;
+    // XFD support
+    else {
+      size = imageSize;
+      if ((size % 128) != 0) {
+        qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Invalid image size (%1).").arg(size));
+        sourceFile->close();
+        delete sourceFile;
+        file.close();
+        return false;
+      }
     }
 
     // Validate disk geometry
@@ -540,9 +566,11 @@ return false;
       return false;
     }
 
-    // Check unsupported ATR extensions
-    if (header[8] || header[9] || header[9] || header[10] || header[11] || header[12] || header[13] || header[14] || header[15]) {
-      qWarning() << "!u" << tr("The file '%1' has some unrecognized fields in its header.").arg(fileName);
+    if (type == FileType::Atr || type == FileType::AtrGz) {
+      // Check unsupported ATR extensions
+      if (header[8] || header[9] || header[9] || header[10] || header[11] || header[12] || header[13] || header[14] || header[15]) {
+        qWarning() << "!u" << tr("The file '%1' has some unrecognized fields in its header.").arg(fileName);
+      }
     }
 
     if (!file.resize(size)) {

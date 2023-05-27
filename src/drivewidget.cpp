@@ -164,8 +164,8 @@ void DriveWidget::triggerChipClickIfEnabled() {
 
 void DriveWidget::showAsEmpty(bool happyHidden, bool chipHidden, bool nextSideHidden, bool OSBHidden, bool toolDiskHidden) {
   ui->actionSave->setEnabled(false);
-  //ui->labelFileName->clear();
-  //ui->labelImageProperties->clear();
+  ui->labelFileName->clear();
+  ui->labelImageProperties->clear();
   ui->actionEject->setEnabled(false);
   ui->buttonNextSide->setVisible(!nextSideHidden);
   ui->actionNextSide->setEnabled(false);
