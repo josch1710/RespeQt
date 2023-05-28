@@ -666,35 +666,33 @@ void MainWindow::hideEvent(QHideEvent *event) {
 void MainWindow::showEvent(QShowEvent *event) {
   static bool shownThisTime = true;
 
-  if (event->type() == QEvent::Show) {
-    if (shownFirstTime) {
-      shownFirstTime = false;// Reset the flag
+  if (event->type() == QEvent::Show && shownFirstTime) {
+    shownFirstTime = false;// Reset the flag
 
-      /* Open options dialog if it's the first time */
-      if (RespeqtSettings::instance()->isFirstTime()) {
-        if (QMessageBox::Yes == QMessageBox::question(this, tr("First run"),
-            tr("You are running RespeQt for the first time.\n\nDo you want to open the options dialog?"),
-            QMessageBox::Yes, QMessageBox::No)) {
-          ui->actionOptions->trigger();
-        }
-        qDebug() << "!d"
-                 << "Starting emulation";
-
-        ui->actionStartEmulation->trigger();
+    /* Open options dialog if it's the first time */
+    if (RespeqtSettings::instance()->isFirstTime()) {
+      if (QMessageBox::Yes == QMessageBox::question(this, tr("First run"),
+          tr("You are running RespeQt for the first time.\n\nDo you want to open the options dialog?"),
+          QMessageBox::Yes, QMessageBox::No)) {
+        ui->actionOptions->trigger();
       }
     }
-    if (shownThisTime) {
-        shownThisTime = false;
+    qDebug() << "!d"
+             << "Starting emulation";
 
-        // check if mini-mode was last used
-        isMiniMode = RespeqtSettings::instance()->miniMode();
-        if (isMiniMode) {
-            isMiniMode = false;                     // reset now so we can toggle it ON
-            ui->actionToggleMiniMode->trigger();    // trigger mini-mode toggle action
-        }
-        isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
-        showHideDrives();
+    ui->actionStartEmulation->trigger();
+  }
+  if (event->type() == QEvent::Show && shownThisTime) {
+    shownThisTime = false;
+
+    // check if mini-mode was last used
+    isMiniMode = RespeqtSettings::instance()->miniMode();
+    if (isMiniMode) {
+        isMiniMode = false;                     // reset now so we can toggle it ON
+        ui->actionToggleMiniMode->trigger();    // trigger mini-mode toggle action
     }
+    isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
+    showHideDrives();
   }
   QMainWindow::showEvent(event);
 }
