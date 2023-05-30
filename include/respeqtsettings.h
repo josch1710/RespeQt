@@ -139,7 +139,7 @@ public:
 
   // Set and restore last mini-window position //
   const QPoint DefaultMiniModePos  = { 8, 50 };
-  const QSize  DefaultMiniModeSize = { 500, 100 };
+  const QSize  DefaultMiniModeSize = { 600, 100 };
 
   bool miniMode();
   void setMiniMode(bool miniMode);
