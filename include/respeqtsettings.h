@@ -123,7 +123,7 @@ public:
 
   // Set and restore last mainwindow position and size //
   const QPoint DefaultFullModePos  = { 100, 100 };
-  const QSize  DefaultFullModeSize = { 700, 600 };
+  const QSize  DefaultFullModeSize = { 800, 650 };
 
   int lastVerticalPos();
   void setLastVerticalPos(int lastVpos);
