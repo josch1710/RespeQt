@@ -35,7 +35,7 @@ namespace DiskImages {
     }
 
     DiskImagePtr createDiskImage(const QString &fileName, const SioWorkerPtr &worker) const {
-      auto type = getFileType(fileName);
+      auto type = !fileName.isEmpty() ? getFileType(fileName) : FileType::Atr;
 
       for (const auto &it: creatorFunctions) {
         if (it.first == type) {

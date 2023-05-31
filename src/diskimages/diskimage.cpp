@@ -11,7 +11,6 @@
  */
 
 #include "diskimages/diskimage.h"
-#include "diskimages/simplediskimage.h"
 #include "diskimages/diskimageatx.h"
 #include "diskimages/diskimagepro.h"
 #include "diskimages/diskimagefactory.h"
@@ -182,7 +181,7 @@ namespace DiskImages {
     return true;
   }
 
-  __attribute__((unused)) void DiskImage::setToolDiskMode(bool enable) {
+  void DiskImage::setToolDiskMode(bool enable) {
     m_toolDiskMode = enable;
     setToolDiskActive();
   }
@@ -360,78 +359,17 @@ namespace DiskImages {
     return true;
   }
 
-  __attribute__((unused)) bool DiskImage::saveAs(const QString &fileName) {
-/*    m_currentSide = 1;
+bool DiskImage::saveAs(const QString &fileName) {
+    m_currentSide = 1;
     m_numberOfSides = 1;
     m_nextSideFilename.clear();
-    if (fileName.endsWith(".ATR", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::FileType::Atr;
-      if (false) {
-        // almost same format but different name
-        return saveAtr(fileName);
-      }
-      return saveAsAtr(fileName, destinationImageType);
-    } else if (fileName.endsWith(".ATZ", Qt::CaseInsensitive) || fileName.endsWith(".ATR.GZ", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::FileType::AtrGz;
-      if (false) {
-        // almost same format but different name
-        return saveAtr(fileName);
-      }
-      return saveAsAtr(fileName, destinationImageType);
-    } else if (fileName.endsWith(".XFD", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::FileType::Xfd;
-      if (false) {
-        // almost same format but different name
-        return saveXfd(fileName);
-      }
-      return saveAsAtr(fileName, destinationImageType);
-    } else if (fileName.endsWith(".XFZ", Qt::CaseInsensitive) || fileName.endsWith(".XFD.GZ", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::FileType::XfdGz;
-      if (false) {
-        // almost same format but different name
-        return saveXfd(fileName);
-      }
-      return saveAsAtr(fileName, destinationImageType);
-    } else if (fileName.endsWith(".DCM", Qt::CaseInsensitive)) {
-      return saveDcm(fileName);
-    } else if (fileName.endsWith(".DI", Qt::CaseInsensitive)) {
-      return saveDi(fileName);
-    } else if (fileName.endsWith(".PRO", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::FileType::Pro;
-      if (false) {
-        // same format but different name
-        return savePro(fileName);
-      }
-      return saveAsPro(fileName, destinationImageType);
-    } else if (fileName.endsWith(".PRO.GZ", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::FileType::ProGz;
-      if (false) {
-        // same format but different name
-        return savePro(fileName);
-      }
-      return saveAsPro(fileName, destinationImageType);
-    } else if (fileName.endsWith(".ATX", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::FileType::Atx;
-      if (false) {
-        // same format but different name
-        return saveAtx(fileName);
-      }
-      return saveAsAtx(fileName, destinationImageType);
-    } else if (fileName.endsWith(".ATX.GZ", Qt::CaseInsensitive)) {
-      FileTypes::FileType destinationImageType = FileTypes::FileType::AtxGz;
-      if (false) {
-        // same format but different name
-        return saveAtx(fileName);
-      }
-      return saveAsAtx(fileName, destinationImageType);
-    } else {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Unknown file extension."));
-      return false;
-    }*/
+
+    auto newImage = DiskImageFactory::instance()->createDiskImage(fileName, sio);
+    newImage->saveImageAs();
     return false;
   }
 
-  __attribute__((unused)) void DiskImage::reopen() {
+  void DiskImage::reopen() {
     close();
     open(m_originalFileName);
   }
@@ -2053,9 +1991,10 @@ namespace DiskImages {
         // this is the code for the speed check (item 5 of Super Archiver menu then Check drive RPM)
         if (m_board.getLastArchiverUploadCrc16() == 0xFD2E) {
           qDebug() << "!n" << tr("[%1] Super Archiver Read memory (Speed check)").arg(deviceName());
-          ARCHIVER_SPEED_CHECK[2] = m_board.getLastArchiverSpeed();
-          ARCHIVER_SPEED_CHECK[248] = m_board.getLastArchiverSpeed() == 2 ? 0xCC : 0xD8;
-          writeDataFrame(QByteArray((const char *) ARCHIVER_SPEED_CHECK, sizeof(ARCHIVER_SPEED_CHECK)));
+          auto frame = QByteArray((const char *) ARCHIVER_SPEED_CHECK, sizeof(ARCHIVER_SPEED_CHECK));
+          frame[2] = m_board.getLastArchiverSpeed();
+          frame[248] = m_board.getLastArchiverSpeed() == 2 ? 0xCC : 0xD8;
+          writeDataFrame(frame);
         }
         // this is the code for the diagnostic test (Archiver memory, 6532, 6810, Archiver version and rom checksum)
         else if ((m_board.getLastArchiverUploadCrc16() == 0x61F6) || (m_board.getLastArchiverUploadCrc16() == 0xBFE7)) {

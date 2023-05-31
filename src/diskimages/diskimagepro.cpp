@@ -20,17 +20,17 @@
 #include <QFileInfo>
 
 namespace DiskImages {
-  extern quint8 FDC_CRC_PATTERN[];
 
-  DiskImagePro::DiskImagePro(SioWorkerPtr worker, bool gzipped) : DiskImage(worker, gzipped) {}
+  DiskImagePro::DiskImagePro(SioWorkerPtr worker, bool gzipped)
+      : DiskImage(worker, gzipped) {}
 
   QByteArray DiskImagePro::readHappySectors(int trackNumber, int afterSectorNumber, bool happy1050) {
     return QByteArray();
   }
 
-  /*__attribute__((unused)) bool DiskImage::saveAsPro(const QString &fileName, FileTypes::FileType destImageType) {
+  bool DiskImagePro::saveImageAs() {
     if (false) {
-      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(fileName, tr("Saving Pro images from the current format is not supported yet."));
+      qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, tr("Saving Pro images from the current format is not supported yet."));
       return false;
     }
 
@@ -148,7 +148,7 @@ namespace DiskImages {
         }
       }
       if (((quint8) m_proSectorInfo[slot].wd1771Status & 0x10) != 0) {
-        guessWeakSectorInPro(slot);
+        guessWeakSector(slot);
       }
       nextPhantomSlot += m_proSectorInfo[slot].totalDuplicate;
 
@@ -171,8 +171,8 @@ namespace DiskImages {
 
     // save the Pro structure in a file
     m_originalFileHeader.resize(0);
-    return savePro(fileName);
-  } */
+    return save();
+  }
 
   bool DiskImagePro::writeHappyTrack(int trackNumber, bool happy1050) {
     // reset track data
@@ -545,7 +545,7 @@ namespace DiskImages {
     return true;
   }
 
-  bool DiskImage::fillProSectorInfo(const QString &fileName, QFile *sourceFile, quint16 slot, quint16 absoluteSector) {
+  bool DiskImagePro::fillSectorInfo(const QString &fileName, QFile *sourceFile, quint16 slot, quint16 absoluteSector) {
     QByteArray sectorHeader = sourceFile->read(12);
     if ((sectorHeader.length() != 12) || sourceFile->atEnd()) {
       qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot read from file: %1.").arg(sourceFile->errorString()));
@@ -598,7 +598,7 @@ namespace DiskImages {
     return true;
   }
 
-  void DiskImage::guessWeakSectorInPro(int slot) {
+  void DiskImagePro::guessWeakSector(int slot) {
     // check if we have a weak sector. The following (arbitrary) conditions are verified
     // - at least 4 alternate sectors
     // - all sectors have a CRC error
@@ -648,7 +648,7 @@ namespace DiskImages {
     }
   }
 
-  quint16 DiskImage::findPositionInProTrack(int track, int indexInProSector, bool withoutData) {
+  quint16 DiskImagePro::findPositionInTrack(int track, int indexInProSector, bool withoutData) {
     m_proSectorInfo[indexInProSector].shortSectorSize = 0;
     if (m_proSectorInfo[indexInProSector].weakBits == 0xFFFF) {
       quint8 invertedTrack = (0xFF - (quint8) track) & 0xFF;
@@ -756,9 +756,9 @@ namespace DiskImages {
     return 0xFFFF;
   }
 
-  bool DiskImage::findMappingInProTrack(int nbSectors, QByteArray &mapping) {
+  bool DiskImagePro::findMappingInTrack(int nbSectors, QByteArray &mapping) {
     if ((nbSectors == 0) || (m_sectorsInTrack == 0)) {
-      return -1;
+      return false;
     }
     for (int sectorStartIndex = 0; sectorStartIndex < nbSectors; sectorStartIndex++) {
       for (int currentIndexInTrack = 0; currentIndexInTrack < m_sectorsInTrack; currentIndexInTrack++) {
@@ -859,7 +859,7 @@ namespace DiskImages {
     // Load all sectors in memory.
     // Sector Headers are kept in memory and phantom sectors also.
     for (quint16 nbSectors = 0; (nbSectors < numberOfSectors) && (!sourceFile->atEnd()); nbSectors++) {
-      if (!fillProSectorInfo(fileName, sourceFile, nbSectors, nbSectors + 1)) {
+      if (!fillSectorInfo(fileName, sourceFile, nbSectors, nbSectors + 1)) {
         sourceFile->close();
         delete sourceFile;
         return false;
@@ -869,7 +869,7 @@ namespace DiskImages {
     // the remaining sectors are phantom sectors.
     // Load them in memory
     for (quint16 nbPhantoms = 0; (nbPhantoms < 256) && (!sourceFile->atEnd()); nbPhantoms++) {
-      if (!fillProSectorInfo(fileName, sourceFile, 1040 + nbPhantoms, 0xFFFF)) {
+      if (!fillSectorInfo(fileName, sourceFile, 1040 + nbPhantoms, 0xFFFF)) {
         sourceFile->close();
         delete sourceFile;
         return false;
@@ -890,7 +890,7 @@ namespace DiskImages {
           }
         }
         if (((quint8) m_proSectorInfo[nbSectors].wd1771Status & 0x10) != 0) {
-          guessWeakSectorInPro(nbSectors);
+          guessWeakSector(nbSectors);
         }
       }
     }
@@ -1328,7 +1328,7 @@ namespace DiskImages {
           m_proSectorInfo[slot].firstPass = true;
           if (m_proSectorInfo[slot].weakBits == 0xFFFF) {
             // try to find a position if the data contains both an ID Address Mark and a Data Address Mark
-            m_proSectorInfo[slot].beforeSlot = findPositionInProTrack(track, slot, false);
+            m_proSectorInfo[slot].beforeSlot = findPositionInTrack(track, slot, false);
           }
           trackContent[m_sectorsInTrack++] = slot;
         }
@@ -1372,7 +1372,7 @@ namespace DiskImages {
             quint16 phantomSlot = 1040 + m_proSectorInfo[indexInProSector].duplicateOffset[j] - 1;
             m_proSectorInfo[phantomSlot].firstPass = false;
             // try to find a position if the data contains both an ID Address Mark and a Data Address Mark
-            m_proSectorInfo[phantomSlot].beforeSlot = findPositionInProTrack(track, phantomSlot, false);
+            m_proSectorInfo[phantomSlot].beforeSlot = findPositionInTrack(track, phantomSlot, false);
             insertionPoint = (insertionPoint + increment) % m_sectorsInTrack;
             for (int k = m_sectorsInTrack - 1; k >= insertionPoint; k--) {
               trackContent[k + 1] = trackContent[k];
@@ -1402,7 +1402,7 @@ namespace DiskImages {
       for (int i = 0; i < m_sectorsInTrack; i++) {
         quint16 slot = trackContent[i];
         if (m_proSectorInfo[slot].beforeSlot == 0xFFFF) {
-          m_proSectorInfo[slot].beforeSlot = findPositionInProTrack(track, slot, true);
+          m_proSectorInfo[slot].beforeSlot = findPositionInTrack(track, slot, true);
         }
       }
 
@@ -1561,7 +1561,7 @@ namespace DiskImages {
       nbSectors = 31;
     }
     QByteArray mapping(nbSectors, 0);
-    if (!findMappingInProTrack(nbSectors, mapping)) {
+    if (!findMappingInTrack(nbSectors, mapping)) {
       qWarning() << "!w" << tr("[%1] sector layout does not map to track layout").arg(deviceName());
       for (int i = 0; i < 128; i++) {
         data[i] = 0;
@@ -1588,7 +1588,7 @@ namespace DiskImages {
       nbSectors = 31;
     }
     QByteArray mapping(nbSectors, 0);
-    if (!findMappingInProTrack(nbSectors, mapping)) {
+    if (!findMappingInTrack(nbSectors, mapping)) {
       qWarning() << "!w" << tr("[%1] sector layout does not map to track layout").arg(deviceName());
       for (int i = 0; i < 128; i++) {
         data[i] = 0;
@@ -2193,7 +2193,7 @@ namespace DiskImages {
       nbSectors = 31;
     }
     QByteArray mapping(nbSectors, 0);
-    if (!findMappingInProTrack(nbSectors, mapping)) {
+    if (!findMappingInTrack(nbSectors, mapping)) {
       qWarning() << "!w" << tr("[%1] sector layout does not map to track layout").arg(deviceName());
       return false;
     }

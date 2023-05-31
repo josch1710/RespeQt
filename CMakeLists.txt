@@ -169,7 +169,7 @@ set(HEADERS
     include/diskimages/diskimageatx.h
     include/diskimages/diskimagefactory.h
     include/RespeQtApplication.h
-)
+        include/diskimages/constvalues.h)
 
 set(FORMS
     ui/mainwindow.ui

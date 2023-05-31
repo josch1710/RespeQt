@@ -63,9 +63,10 @@ namespace DiskImages {
     virtual QByteArray readHappySectors(int trackNumber, int afterSectorNumber, bool happy1050) = 0;
     virtual bool writeHappySectors(int trackNumber, int afterSectorNumber, bool happy1050) = 0;
     virtual bool writeSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8 sideNumber, quint8 sectorNumber, quint8 sectorSize, const QByteArray &data, bool crcError, int weakOffset) = 0;
-    virtual bool saveAs(const QString &fileName);
+    virtual bool saveAs(const QString &fileName) final;
+    virtual bool saveImageAs() = 0;
     virtual quint8 writeSectorHeader(quint8 dataSize, quint16 sectorSlot, quint8 postDataCrc, quint8 preIDField, quint8 postIDCrc, quint8 track, quint8 index, quint8 nextSector) = 0;
-
+    virtual bool findMappingInTrack(int nbSectors, QByteArray &mapping) = 0;
 
     void readHappyTrack(int trackNumber, bool happy1050);
     virtual void close();
@@ -113,12 +114,12 @@ namespace DiskImages {
 
     int defaultFileSystem();
 
-    __attribute__((unused)) virtual void reopen();
+   virtual void reopen();
     __attribute__((unused)) virtual void setLeverOpen(bool open);
-    __attribute__((unused)) inline bool isUnnamed() const { return m_isUnnamed; }
-    __attribute__((unused)) inline QString getNextSideFilename() { return m_nextSideFilename; }
-    __attribute__((unused)) inline Board *getBoardInfo() { return m_board.getCopy(); }
-    __attribute__((unused)) virtual void setToolDiskMode(bool enable);
+    inline bool isUnnamed() const { return m_isUnnamed; }
+    inline QString getNextSideFilename() { return m_nextSideFilename; }
+    inline Board *getBoardInfo() { return m_board.getCopy(); }
+    virtual void setToolDiskMode(bool enable);
 
   protected:
     DiskGeometry m_geometry, m_newGeometry;
@@ -159,11 +160,7 @@ namespace DiskImages {
     disassembly1050 m_disassembly1050;
     int m_remainingAddress;
     QByteArray m_remainingBytes;
-    // Pro specific data
-    ProSectorInfo m_proSectorInfo[1040 + 256];// to support an enhanced density PRO file + 256 phantom sectors
     quint16 m_trackContent[200];
-    // Atx specific data
-    AtxTrackInfo m_atxTrackInfo[40];
     // data for Happy or Archiver
     Board m_board;
     // Translator and tool disk
@@ -176,11 +173,6 @@ namespace DiskImages {
     void refreshNewGeometry();
     bool sameSoftware(const QString &fileName, const QString &otherFileName);
 
-    bool fillProSectorInfo(const QString &fileName, QFile *sourceFile, quint16 slot, quint16 absoluteSector);
-    quint16 findPositionInProTrack(int track, int indexInProSector, bool withoutData);
-    void guessWeakSectorInPro(int slot);
-    bool findMappingInProTrack(int nbSectors, QByteArray &mapping);
-    bool findMappingInAtxTrack(int nbSectors, QByteArray &mapping);
     bool writeCommandAck();
     bool writeDataAck();
     bool writeCommandNak();

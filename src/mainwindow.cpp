@@ -924,7 +924,6 @@ void MainWindow::deviceStatusChanged(unsigned char deviceNo) {
     auto img = qobject_cast<DiskImages::DiskImage *>(device);
 
     DriveWidget *diskWidget = diskWidgets[deviceNo - DISK_BASE_CDEVIC];
-    qDebug() << "!e" << deviceNo << "Device: " << device;
 
     if (img) {
 
@@ -1341,7 +1340,7 @@ void MainWindow::mountFile(char no, const QString &fileName, bool /*prot*/) {
     return;
   }
 
-  auto disk = DiskImages::DiskImageFactory::instance()->createDiskImage(fileName, sio);
+  auto disk = installDiskImage(fileName);
 
   if (disk) {
     auto oldDisk = qSharedPointerCast<DiskImages::DiskImage>(sio->getDevice(no + DISK_BASE_CDEVIC));

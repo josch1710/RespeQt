@@ -426,4 +426,8 @@ namespace DiskImages {
   quint8 FolderImage::writeSectorHeader(quint8 dataSize, quint16 sectorSlot, quint8 postDataCrc, quint8 preIDField, quint8 postIDCrc, quint8 track, quint8 index, quint8 nextSector) {
     return 0;
   }
+
+  bool FolderImage::findMappingInTrack(int nbSectors, QByteArray &mapping) {
+    return false;
+  }
 }

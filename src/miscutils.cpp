@@ -29,6 +29,24 @@ void deltree(const QString &name) {
   }
 }
 
+quint8 sioChecksum(const QByteArray &data, uint size) {
+  //    qDebug() << "!d" << tr("DBG -- Serial Port sioChecksum...");
+
+  uint i;
+  uint sum = 0;
+
+  for (i = 0; i < size; i++) {
+    sum += (quint8) data.at(i);
+    if (sum > 255) {
+      sum -= 255;
+    }
+  }
+
+  return sum;
+}
+
+
+
 /* FileTypes */
 
 FileType getFileType(const QString &fileName) {

@@ -56,7 +56,7 @@ private:
 
   bool setNormalSpeed();
   bool setHighSpeed();
-  quint8 sioChecksum(const QByteArray &data, uint size);
+
   QByteArray readRawFrame(uint size, bool verbose = true);
   QString lastErrorMessage();
 };

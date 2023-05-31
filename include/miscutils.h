@@ -14,6 +14,7 @@
 #include <QString>
 
 void deltree(const QString &name);
+quint8 sioChecksum(const QByteArray &data, uint size);
 
 class GzFile : public QFile {
   Q_OBJECT
