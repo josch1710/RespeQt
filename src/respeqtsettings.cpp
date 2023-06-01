@@ -135,7 +135,6 @@ void RespeqtSettings::saveSessionToFile(const QString &fileName) {
 void RespeqtSettings::loadSessionFromFile(const QString &fileName) {
   QSettings s(fileName, QSettings::IniFormat);
   s.beginGroup("RespeQt");
-  // danc: TBD - remove hard-coded 'magic' numbers from this code block
   setBackend(static_cast<SerialBackend>(s.value("Backend", 0).toInt()));
   setAtariSioDriverName(s.value("AtariSioDriverName", AtariSioBackend::defaultPortName()).toString());
   setAtariSioHandshakingMethod(s.value("AtariSioHandshakingMethod", 0).toInt());

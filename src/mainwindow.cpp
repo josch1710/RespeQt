@@ -1097,7 +1097,7 @@ void MainWindow::showOptionsTriggered() {
   // retranslate Designer Form
   ui->retranslateUi(this);
 
-  // fix Hide/Show disks D9-DO menu item
+  // fix Hide/Show D9-DO menu (retranslate sets menu text to 'Hide...')
   showHideDrives();
 
   setupDebugItems();
