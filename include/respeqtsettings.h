@@ -34,7 +34,7 @@ public:
 
   bool isFirstTime();
 
-  void saveGeometry(const QRect& geometry);
+  void saveGeometry(const QRect& geometry, bool miniMode);
 
   QString serialPortName();
   void setSerialPortName(const QString &name);

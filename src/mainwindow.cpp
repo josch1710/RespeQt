@@ -582,9 +582,8 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   isClosing = true;
 
   // Save various session settings  //
-  RespeqtSettings::instance()->saveGeometry(geometry());
+  RespeqtSettings::instance()->saveGeometry(geometry(), isMiniMode);
   RespeqtSettings::instance()->setD9DOVisible(isD9DOVisible);
-  RespeqtSettings::instance()->setMiniMode(isMiniMode);
 
   if (g_sessionFile != "")
     RespeqtSettings::instance()->saveSessionToFile(g_sessionFilePath + "/" + g_sessionFile);
@@ -684,15 +683,16 @@ void MainWindow::showEvent(QShowEvent *event) {
   }
   if (event->type() == QEvent::Show && shownThisTime) {
     shownThisTime = false;
+    isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
+    isMiniMode = RespeqtSettings::instance()->miniMode();
 
     // check if mini-mode was last used
-    isMiniMode = RespeqtSettings::instance()->miniMode();
     if (isMiniMode) {
         isMiniMode = false;                     // reset now so we can toggle it ON
         ui->actionToggleMiniMode->trigger();    // trigger mini-mode toggle action
+    } else {
+        showHideDrives();
     }
-    isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
-    showHideDrives();
   }
   QMainWindow::showEvent(event);
 }
@@ -759,18 +759,10 @@ void MainWindow::toggleShadeTriggered() {
 void MainWindow::toggleMiniModeTriggered() {
   isMiniMode = !isMiniMode;
 
-  int i;
-  for (i = 1; i < 8; ++i) {
-    diskWidgets[i]->setVisible(!isMiniMode);
-  }
+  // set asside current geometry before doing anything
+  auto geometryBeforeToggle = geometry();
 
-  for (; i < DISK_COUNT; ++i) {
-    diskWidgets[i]->setVisible(!isMiniMode && isD9DOVisible);
-  }
-
-  for (i = 0; i < PRINTER_COUNT; ++i) {
-    printerWidgets[i]->setVisible(!isMiniMode);
-  }
+  showHideDrives();
 
   ui->line->setVisible(!isMiniMode);
 
@@ -780,11 +772,13 @@ void MainWindow::toggleMiniModeTriggered() {
     setMaximumHeight(QWIDGETSIZE_MAX);
     ui->textEdit->setVisible(true);
     ui->actionHideShowDrives->setEnabled(true);
-    if (!savedGeometry.isEmpty()) {
-      setGeometry(savedGeometry);
-    } else {
+    if (savedGeometry.isEmpty()) {
+      // on first toggle, pull values from our last persisted setting or defaults
       setGeometry(RespeqtSettings::instance()->lastHorizontalPos(), RespeqtSettings::instance()->lastVerticalPos(),
                   RespeqtSettings::instance()->lastWidth(), RespeqtSettings::instance()->lastHeight());
+    } else {
+      // use saved geometry for both mini and full
+      setGeometry(savedGeometry);
     }
     setWindowOpacity(1.0);
     setWindowFlags(Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
@@ -793,14 +787,19 @@ void MainWindow::toggleMiniModeTriggered() {
 
   } else {  // Mini-mode Window:
 
-    savedGeometry = geometry();
     ui->textEdit->setVisible(false);
     int height = diskWidgets[0]->sizeHint().height() + ui->menuBar->height() + ui->statusBar->height();
     setMinimumWidth(RespeqtSettings::instance()->DefaultMiniModeSize.width());
     setMinimumHeight(height);
     setMaximumHeight(height);
-    setGeometry(RespeqtSettings::instance()->lastMiniHorizontalPos(), RespeqtSettings::instance()->lastMiniVerticalPos(),
-                RespeqtSettings::instance()->lastMiniWidth(), height);
+    if (savedGeometry.isEmpty()) {
+      // on first toggle, pull values from our last persisted setting or defaults
+      setGeometry(RespeqtSettings::instance()->lastMiniHorizontalPos(), RespeqtSettings::instance()->lastMiniVerticalPos(),
+                  RespeqtSettings::instance()->lastMiniWidth(), height);
+    } else {
+      // use saved geometry for both mini and full
+      setGeometry(savedGeometry);
+    }
     ui->actionHideShowDrives->setDisabled(true);
     ui->actionToggleShade->setEnabled(true);
     if (RespeqtSettings::instance()->enableShade()) {
@@ -811,18 +810,18 @@ void MainWindow::toggleMiniModeTriggered() {
       isShadeMode = false;
     }
   }
+  savedGeometry = geometryBeforeToggle;
+
   QMainWindow::show();
 }
 
 void MainWindow::showHideDrives() {
-  for (int i = 8; i < DISK_COUNT; ++i) {
-    diskWidgets[i]->setVisible(isD9DOVisible);
+  for (int i = 1; i < DISK_COUNT; ++i) {
+    diskWidgets[i]->setVisible(!isMiniMode && (isD9DOVisible || (i < 8)));
   }
-  for (int i = 2; i < PRINTER_COUNT; ++i) {
-    printerWidgets[i]->setVisible(isD9DOVisible);
+  for (int i = 0; i < PRINTER_COUNT; ++i) {
+    printerWidgets[i]->setVisible(!isMiniMode && (isD9DOVisible || (i < 2)));
   }
-
-  // infoWidget->setVisible(isD9DOVisible);
 
   if (isD9DOVisible) {
     ui->actionHideShowDrives->setText(QApplication::translate("MainWindow", "Hide drives D9-DO", nullptr));
@@ -1825,6 +1824,7 @@ void MainWindow::openSessionTriggered() {
   showHideDrives();
   setSession();
 }
+
 void MainWindow::saveSessionTriggered() {
   auto dir = RespeqtSettings::instance()->lastSessionDir();
   auto fileName = QFileDialog::getSaveFileName(this, tr("Save session as"),
@@ -1838,7 +1838,7 @@ void MainWindow::saveSessionTriggered() {
   RespeqtSettings::instance()->setLastSessionDir(QFileInfo(fileName).absolutePath());
 
   // Save mainwindow position and size to session file //
-  RespeqtSettings::instance()->saveGeometry(geometry());
+  RespeqtSettings::instance()->saveGeometry(geometry(), isMiniMode);
   RespeqtSettings::instance()->saveSessionToFile(fileName);
 }
 

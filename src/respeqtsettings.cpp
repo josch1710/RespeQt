@@ -236,9 +236,10 @@ bool RespeqtSettings::isFirstTime() {
   return mIsFirstTime;
 }
 
-void RespeqtSettings::saveGeometry(const QRect &geometry) {
+void RespeqtSettings::saveGeometry(const QRect &geometry, bool isMiniMode) {
   if (saveWindowsPos()) {
-    if (miniMode()) {
+    setMiniMode(isMiniMode);
+    if (isMiniMode) {
       setLastMiniHorizontalPos(geometry.x());
       setLastMiniVerticalPos(geometry.y());
       setLastMiniWidth(geometry.width());
