@@ -18,7 +18,7 @@ namespace DiskImages {
   class SimpleDiskImage;
 }
 
-class DriveWidget : public QFrame {
+class DriveWidget : public QWidget {
   Q_OBJECT
 
 public:

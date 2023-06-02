@@ -10,7 +10,7 @@
 #include "ui_drivewidget.h"
 
 DriveWidget::DriveWidget(int driveNum, QWidget *parent)
-    : QFrame(parent), ui(new Ui::DriveWidget), driveNo_(driveNum) {
+    : QWidget(parent), ui(new Ui::DriveWidget), driveNo_(driveNum) {
   ui->setupUi(this);
 }
 
