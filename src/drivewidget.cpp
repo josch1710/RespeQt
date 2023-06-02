@@ -289,6 +289,10 @@ void DriveWidget::setLabelFont(const QFont &font) {
   ui->labelFileName->setFont(font);
 }
 
+void DriveWidget::setDropTarget(bool target) {
+  ui->driveFrame->setFrameShadow(target ? QFrame::Sunken : QFrame::Raised);
+}
+
 void DriveWidget::mountFolderTriggered() { emit actionMountFolder(driveNo_); }
 void DriveWidget::mountDiskTriggered() { emit actionMountDisk(driveNo_); }
 void DriveWidget::ejectTriggered() { emit actionEject(driveNo_); }

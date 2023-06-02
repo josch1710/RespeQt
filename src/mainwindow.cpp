@@ -417,36 +417,46 @@ void MainWindow::createDeviceWidgets() {
   changeFonts();
 }
 
-void MainWindow::mousePressEvent(QMouseEvent *event) {
-  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
-  auto slot = containingDiskSlot(event->pos());
-
-  if (event->button() == Qt::LeftButton && slot >= 0) {
-
-    auto drag = new QDrag((QWidget *) this);
-    auto mimeData = new QMimeData;
-
-    mimeData->setData("application/x-respeqt-disk-image", QByteArray(1, slot));
-    drag->setMimeData(mimeData);
-
-    drag->exec();
+void MainWindow::mouseMoveEvent(QMouseEvent *event) {
+  if (isMiniMode && isShadeMode) {
+    auto delta = QPoint(event->globalPos() - savedPosition);
+    move(x() + delta.x(), y() + delta.y());
+    savedPosition = event->globalPos();
   }
+}
 
-  if (event->button() == Qt::LeftButton && onOffLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
+void MainWindow::mousePressEvent(QMouseEvent *event) {
+
+  if (event->button() != Qt::LeftButton)    // check for LEFT mouse button
+    return;                                // EXIT NOW if NOT!
+
+  if (isMiniMode && isShadeMode) {
+    savedPosition = event->globalPos();
+  } else {
+    char slot = containingDiskSlot(event->pos());
+    if (slot >= 0) {
+      auto drag = new QDrag((QWidget *) this);
+      auto mimeData = new QMimeData;
+
+      mimeData->setData("application/x-respeqt-disk-image", QByteArray(1, slot));
+      drag->setMimeData(mimeData);
+      drag->exec();
+    }
+  }
+  if (onOffLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
     ui->actionStartEmulation->trigger();
   }
-
-  if (event->button() == Qt::LeftButton && prtOnOffLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
+  if (prtOnOffLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
     ui->actionPrinterEmulation->trigger();//
   }
-  if (event->button() == Qt::LeftButton && clearMessagesLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
+  if (clearMessagesLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
     ui->textEdit->clear();
     emit sendLogText("");
   }
-  if (event->button() == Qt::LeftButton && !speedLabel->isHidden() && speedLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
+  if (!speedLabel->isHidden() && speedLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
     ui->actionOptions->trigger();
   }
-  if (event->button() == Qt::LeftButton && limitEntriesLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
+  if (limitEntriesLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
     ui->actionLimitFileEntries->trigger();
   }
 }
@@ -461,12 +471,8 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
     event->setDropAction(Qt::IgnoreAction);
 
   event->accept();
-  for (int j = 0; j < DISK_COUNT; j++) {//
-    if (i == j) {
-      diskWidgets[j]->setFrameShadow(QFrame::Sunken);
-    } else {
-      diskWidgets[j]->setFrameShadow(QFrame::Raised);
-    }
+  for (int j = 0; j < DISK_COUNT; j++) {
+    diskWidgets[j]->setDropTarget(i == j);
   }
 }
 
@@ -485,18 +491,14 @@ void MainWindow::dragMoveEvent(QDragMoveEvent *event) {
 
   event->accept();
 
-  for (int j = 0; j < DISK_COUNT; j++) {//
-    if (i == j) {
-      diskWidgets[j]->setFrameShadow(QFrame::Sunken);
-    } else {
-      diskWidgets[j]->setFrameShadow(QFrame::Raised);
-    }
+  for (int j = 0; j < DISK_COUNT; j++) {
+      diskWidgets[j]->setDropTarget(i == j);
   }
 }
 
 void MainWindow::dropEvent(QDropEvent *event) {
-  for (int j = 0; j < DISK_COUNT; j++) {//
-    diskWidgets[j]->setFrameShadow(QFrame::Raised);
+  for (int j = 0; j < DISK_COUNT; j++) {
+    diskWidgets[j]->setDropTarget(false);
   }
   /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
   auto slot = containingDiskSlot(event->pos());

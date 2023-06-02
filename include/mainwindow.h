@@ -85,7 +85,8 @@ private:
 
   QList<QAction *> recentFilesActions_;
 
-  QRect savedGeometry;
+  QRect savedGeometry;          // for mini mode toggle
+  QPoint savedPosition;         // for mini frameless move
 
   bool isD9DOVisible = true;    // column 2 disks visible
   bool isMiniMode    = false;   // mini mode disk 1 only
@@ -126,6 +127,7 @@ private:
 
 protected:
   void mousePressEvent(QMouseEvent *event) override;
+  void mouseMoveEvent(QMouseEvent *event) override;
   void dragEnterEvent(QDragEnterEvent *event) override;
   void dragLeaveEvent(QDragLeaveEvent *event) override;
   void dragMoveEvent(QDragMoveEvent *event) override;
