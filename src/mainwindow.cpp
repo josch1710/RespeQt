@@ -433,7 +433,9 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
   if (isMiniMode && isShadeMode) {
     savedPosition = event->globalPos();
   } else {
-    char slot = containingDiskSlot(event->pos());
+    // auto slot {containingDiskSlot(event->pos())};  do not use
+    // Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+    auto slot = containingDiskSlot(event->pos());   // should be OK with all compilers
     if (slot >= 0) {
       auto drag = new QDrag((QWidget *) this);
       auto mimeData = new QMimeData;
