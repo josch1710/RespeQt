@@ -446,17 +446,17 @@ namespace DiskImages {
         // display only one word (the most important) to keep the line as compact as possible
         if (sectorStatus & 0x40) {
           nbExtended++;
-          secBuf.append("(WEAK)");
+          secBuf.append(" (WEAK)");
         } else if (sectorStatus & 0x20) {
-          secBuf.append("(DEL)");
+          secBuf.append(" (DEL)");
         } else if (sectorStatus & 0x10) {
-          secBuf.append("(RNF)");
+          secBuf.append(" (RNF)");
         } else if (sectorStatus & 0x08) {
-          secBuf.append("(CRC)");
+          secBuf.append(" (CRC)");
         } else if (m_atxTrackInfo[track].count(sectorNumber) > 0) {
-          secBuf.append("(DUP)");
+          secBuf.append(" (DUP)");
         } else if ((sectorStatus & 0x06) == 0x06) {
-          secBuf.append("(LONG)");
+          secBuf.append(" (LONG)");
         }
         quint16 sectorPosition = getLittleEndianWord(sectorList, ofs + 2);
         AtxSectorInfo *sectorInfo = m_atxTrackInfo[track].add(sectorNumber, sectorStatus, sectorPosition);
@@ -481,6 +481,9 @@ namespace DiskImages {
           }
           sectorInfo->setSectorData(data);
           maxData += 128;
+          secBuf.append("(CHK ");
+          secBuf.append(QString::number(sioChecksum(data, data.size()), 16));
+          secBuf.append(")");
         }
       }
       if (m_displayTrackLayout) {

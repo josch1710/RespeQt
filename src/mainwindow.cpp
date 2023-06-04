@@ -46,7 +46,7 @@
 #include "bootoptionsdialog.h"
 #include "cassettedialog.h"
 #include "drivewidget.h"
-#include "include/diskimages/folderimage.h"
+#include "diskimages/folderimage.h"
 #include "logdisplaydialog.h"
 #include "pclink.h"
 #include "printers/printerfactory.h"
@@ -421,7 +421,7 @@ void MainWindow::createDeviceWidgets() {
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event) {
-  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+  /// C++11 uses initialization braces as std::initializer_list, when auto is used, so we use =
   auto slot = containingDiskSlot(event->pos());
 
   if (event->button() == Qt::LeftButton && slot >= 0) {
@@ -455,7 +455,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
-  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+  /// C++11 uses initialization braces as std::initializer_list, when auto is used, so we use =
   auto i = containingDiskSlot(event->pos());
   if (i >= 0 && (event->mimeData()->hasUrls() ||
                  event->mimeData()->hasFormat("application/x-respeqt-disk-image")))
@@ -478,7 +478,7 @@ void MainWindow::dragLeaveEvent(QDragLeaveEvent *event) {
 }
 
 void MainWindow::dragMoveEvent(QDragMoveEvent *event) {
-  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+  /// C++11 uses initialization braces as std::initializer_list, when auto is used, so we use =
   auto i = containingDiskSlot(event->pos());
   if (i >= 0 && (event->mimeData()->hasUrls() ||
                  event->mimeData()->hasFormat("application/x-respeqt-disk-image")))
@@ -501,7 +501,7 @@ void MainWindow::dropEvent(QDropEvent *event) {
   for (int j = 0; j < DISK_COUNT; j++) {//
     diskWidgets[j]->setFrameShadow(QFrame::Raised);
   }
-  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+  /// C++11 uses initialization braces as std::initializer_list, when auto is used, so we use =
   auto slot = containingDiskSlot(event->pos());
   if (!(event->mimeData()->hasUrls() ||
         event->mimeData()->hasFormat("application/x-respeqt-disk-image")) ||
@@ -1325,7 +1325,7 @@ void MainWindow::mountFileWithDefaultProtection(char no, const QString &fileName
     }
   }
 
-  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+  /// C++11 uses initialization braces as std::initializer_list, when auto is used, so we use =
   const auto imgSetting = RespeqtSettings::instance()->getImageSettingsFromName(atariFileName);
   auto prot = (!imgSetting.fileName.isEmpty()) && imgSetting.isWriteProtected;
   mountFile(no, atariFileName, prot);

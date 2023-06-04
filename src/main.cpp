@@ -7,7 +7,7 @@
  */
 
 #include "mainwindow.h"
-#include "RespeQtApplication.h"
+#include "respeqtapplication.h"
 #include <QTextCodec>
 #include <memory>
 
