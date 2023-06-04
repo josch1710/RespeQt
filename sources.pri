@@ -22,6 +22,8 @@ SOURCES += \
     src/aboutdialog.cpp \
     src/diskimages/diskimage.cpp \
     src/diskimages/folderimage.cpp \
+    src/folderdisks.cpp \
+    src/folderdisksdlg.cpp \
     src/createimagedialog.cpp \
     src/diskeditdialog.cpp \
     src/autoboot.cpp \
@@ -86,6 +88,8 @@ HEADERS += \
     include/aboutdialog.h \
     include/diskimages/diskimage.h \
     include/diskimages/folderimage.h \
+    include/folderdisks.h \
+    include/folderdisksdlg.h \
     include/createimagedialog.h \
     include/diskeditdialog.h \
     include/autoboot.h \
@@ -138,6 +142,7 @@ FORMS += \
     ui/mainwindow.ui \
     ui/optionsdialog.ui \
     ui/aboutdialog.ui \
+    ui/folderdisksdlg.ui \
     ui/createimagedialog.ui \
     ui/diskeditdialog.ui \
     ui/autobootdialog.ui \

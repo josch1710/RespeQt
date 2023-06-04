@@ -1024,3 +1024,99 @@ bool RespeqtSettings::debugMenuVisible() const {
 void RespeqtSettings::setDebugMenuVisible(bool menuVisible) {
   mSettings->setValue("DebugMenuVisible", menuVisible);
 }
+
+QString RespeqtSettings::mostRecentFolderDisks() {
+  QStringList folderDisks = recentFolderDisks();
+
+  if (!folderDisks.isEmpty())
+    return folderDisks.front();
+
+  return QString();
+}
+
+QStringList RespeqtSettings::recentFolderDisks() {
+  QStringList folderDisks;
+
+  int size = mSettings->beginReadArray("RecentFolderDisks");
+  for (int i = 0; i < size; i++) {
+    mSettings->setArrayIndex(i);
+    QString value = mSettings->value("FolderDisks").toString();
+    folderDisks.append(value);
+  }
+  mSettings->endArray();
+
+  return folderDisks;
+}
+
+void RespeqtSettings::setMostRecentFolderDisks(const QString& name) {
+  if (mostRecentFolderDisks() == name)
+    return;
+
+  auto fileInfo = QFileInfo(name);
+
+  if (!fileInfo.exists())
+    return;
+
+  QString path = fileInfo.isFile() ? fileInfo.path() : name;
+
+  QStringList folderDisks = recentFolderDisks();
+
+  for (int i = 0; i < folderDisks.size(); ++i) {
+    QString text = folderDisks.at(i);
+    QFileInfo fi = QFileInfo(text);
+    QString test = fi.isFile() ? fi.path() : text;
+    if (test == path)
+      folderDisks.removeAt(i);
+  }
+  folderDisks.insert(0, name);
+
+  if (folderDisks.count() > maxRecentFolderDisks)
+    folderDisks.removeLast();
+
+  writeRecentFolderDisks(folderDisks);
+}
+
+void RespeqtSettings::writeRecentFolderDisks(const QStringList& folderDisks) {
+  int index = 0;
+
+  mSettings->beginWriteArray("RecentFolderDisks");
+  foreach (QString folderDisk, folderDisks) {
+    auto fileInfo = QFileInfo(folderDisk);
+    if (!fileInfo.exists()) {
+      if (fileInfo.isFile())
+        folderDisk = fileInfo.path();
+      else
+        continue;
+
+      if (!QFileInfo::exists(folderDisk))
+        continue;
+    }
+    mSettings->setArrayIndex(index++);
+    mSettings->setValue("FolderDisks", folderDisk);
+  }
+  mSettings->endArray();
+}
+
+bool RespeqtSettings::showFolderDisks() {
+  return mSettings->value("ShowFolderDisks").toBool();
+}
+
+void RespeqtSettings::setShowFolderDisks(bool show /*= true*/) {
+  mSettings->setValue("ShowFolderDisks", show);
+}
+
+QRect RespeqtSettings::folderDisksRect() {
+  return mSettings->value("FolderDisksRect").toRect();
+}
+
+void RespeqtSettings::setFolderDisksRect(QRect rect) {
+  mSettings->setValue("FolderDisksRect", rect);
+}
+
+int RespeqtSettings::folderDisksSplitPos() {
+  return mSettings->value("FolderDisksSplitPos").toInt();
+}
+
+void RespeqtSettings::setFolderDisksSplitPos(int pos) {
+  mSettings->setValue("FolderDisksSplitPos", pos);
+}

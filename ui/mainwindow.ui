@@ -228,6 +228,7 @@
     <addaction name="actionToggleMiniMode"/>
     <addaction name="actionToggleShade"/>
     <addaction name="actionLogWindow"/>
+    <addaction name="actionFolderDisks"/>
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="layoutDirection">
@@ -680,6 +681,24 @@
    </property>
    <property name="toolTip">
     <string>Limit file entries to 64</string>
+   </property>
+  </action>
+  <action name="actionFolderDisks">
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open folder disks</string>
+   </property>
+   <property name="toolTip">
+    <string>Open folder of disk images</string>
+   </property>
+   <property name="statusTip">
+    <string>Open folder of disk images</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+D</string>
    </property>
   </action>
  </widget>

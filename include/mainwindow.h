@@ -38,6 +38,8 @@
 #include "serialport.h"
 #include "siorecorder.h"
 #include "sioworker.h"
+#include "folderdisks.h"
+#include "folderdisksdlg.h"
 
 namespace Ui {
   class MainWindow;
@@ -78,6 +80,7 @@ private:
   Qt::WindowStates oldWindowStates;
   QString lastMessage;
   int lastMessageRepeat;
+  FolderDisksDlg* folderDisksDlg;
 
   bool isClosing;
 
@@ -200,6 +203,9 @@ private slots:
   void toggleMiniModeTriggered();//
   void toggleShadeTriggered();   //
   void showLogWindowTriggered(); //
+
+  void folderDisksTriggered();
+  void openFolderDisks();
 
   void showHideDrives();                       //
   void sioFinished();                          //

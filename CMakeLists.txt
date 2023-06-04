@@ -53,6 +53,8 @@ set(SOURCES
     src/aboutdialog.cpp
         src/diskimages/diskimage.cpp
         src/diskimages/folderimage.cpp
+    src/folderdisks.cpp
+    src/folderdisksdlg.cpp
     src/createimagedialog.cpp
     src/diskeditdialog.cpp
     src/autoboot.cpp
@@ -114,6 +116,8 @@ set(HEADERS
     include/aboutdialog.h
         include/diskimages/diskimage.h
         include/diskimages/folderimage.h
+    include/folderdisks.h
+    include/folderdisksdlg.h
     include/createimagedialog.h
     include/diskeditdialog.h
     include/autoboot.h
@@ -174,6 +178,7 @@ set(FORMS
     ui/printers/outputwindow.ui
     ui/printerwidget.ui
     ui/printers/textprinterwindow.ui
+    ui/folderdisksdlg.ui
 )
 
 set(RESOURCES

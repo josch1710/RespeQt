@@ -152,6 +152,7 @@ MainWindow::MainWindow()
   qDebug() << "!d" << tr("RespeQt started at %1.").arg(QDateTime::currentDateTime().toString());
 
   logWindow_ = nullptr;
+  folderDisksDlg = nullptr;
 
   /* Remove old temporaries */
   QDir tempDir = QDir::temp();
@@ -587,6 +588,15 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
   // Save various session settings  //
   RespeqtSettings::instance()->saveGeometry(geometry(), isMiniMode);
+
+  if (folderDisksDlg) {
+    RespeqtSettings::instance()->setShowFolderDisks(folderDisksDlg->isVisible());
+    RespeqtSettings::instance()->setFolderDisksRect(folderDisksDlg->geometry());
+    RespeqtSettings::instance()->setFolderDisksSplitPos(folderDisksDlg->getSplitPos());
+  } else {
+    RespeqtSettings::instance()->setShowFolderDisks(false);
+  }
+
   RespeqtSettings::instance()->setD9DOVisible(isD9DOVisible);
 
   if (g_sessionFile != "")
@@ -1826,6 +1836,13 @@ void MainWindow::openSessionTriggered() {
   }
   isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
   showHideDrives();
+
+  if (RespeqtSettings::instance()->showFolderDisks() && !(folderDisksDlg && folderDisksDlg->isVisible()))
+    openFolderDisks();
+
+  if (folderDisksDlg)
+    folderDisksDlg->setGeometry(RespeqtSettings::instance()->folderDisksRect());
+
   setSession();
 }
 
@@ -1843,6 +1860,16 @@ void MainWindow::saveSessionTriggered() {
 
   // Save mainwindow position and size to session file //
   RespeqtSettings::instance()->saveGeometry(geometry(), isMiniMode);
+
+  if (folderDisksDlg) {
+    RespeqtSettings::instance()->setShowFolderDisks(folderDisksDlg->isVisible());
+    RespeqtSettings::instance()->setFolderDisksRect(folderDisksDlg->geometry());
+    RespeqtSettings::instance()->setFolderDisksSplitPos(folderDisksDlg->getSplitPos());
+  }
+  else {
+    RespeqtSettings::instance()->setShowFolderDisks(false);
+  }
+
   RespeqtSettings::instance()->saveSessionToFile(fileName);
 }
 
@@ -1902,6 +1929,18 @@ void MainWindow::bootOptionTriggered() {
   bod.exec();
 }
 
+void MainWindow::folderDisksTriggered() {
+  openFolderDisks();
+}
+
+void MainWindow::openFolderDisks() {
+  if (!folderDisksDlg) {
+    folderDisksDlg = new FolderDisksDlg(sio, this);
+  }
+
+  folderDisksDlg->showNormal();
+}
+
 // This connect the signal from UI to slots
 void MainWindow::connectUISignal() {
   connect(ui->actionPlaybackCassette, &QAction::triggered, this, &MainWindow::cassettePlaybackTriggered);
@@ -1921,6 +1960,7 @@ void MainWindow::connectUISignal() {
   connect(ui->actionToggleMiniMode, &QAction::triggered, this, &MainWindow::toggleMiniModeTriggered);
   connect(ui->actionToggleShade, &QAction::triggered, this, &MainWindow::toggleShadeTriggered);
   connect(ui->actionLogWindow, &QAction::triggered, this, &MainWindow::showLogWindowTriggered);
+  connect(ui->actionFolderDisks, &QAction::triggered, this, &MainWindow::folderDisksTriggered);
   connect(ui->actionCaptureSnapshot, &QAction::toggled, this, &MainWindow::toggleSnapshotCapture);
   connect(ui->actionReplaySnapshot, &QAction::triggered, this, &MainWindow::replaySnapshot);
 }
