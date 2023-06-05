@@ -148,48 +148,59 @@ void FolderDisksDlg::onDiskChanged()
     QString   imagePath = fiDisk.absolutePath() + "/" + fiDisk.completeBaseName() + ".png";
     QFileInfo fiPreview = QFileInfo(imagePath);
 
-    if (fiPreview.exists())
+    if (!fiPreview.exists())
+        imagePath = ":/icons/other-icons/floppy1.png";
+
+    QPixmap* pixMap = new QPixmap(imagePath);
+    ui->lblPreview->setPixmap(*pixMap);
+    delete pixMap;
+
+    // TBD 1. allow drop target or paste image, show hint text
+    // TBD 2. interop with emulator code, boot it and show screen
+
+    // get a list of files to show in the file list pane
+
+    QString fileList;
+
+    if (sio)
     {
-        QPixmap* pixMap = new QPixmap(imagePath);
-        ui->lblPreview->setPixmap(*pixMap);
-        delete pixMap;
+        const int deviceNo = 0;
+        auto img = qobject_cast <DiskImages::SimpleDiskImage*>(sio->getDevice(deviceNo + DISK_BASE_CDEVIC));
+        int fs = img->defaultFileSystem();
+        Filesystems::AtariFileSystem* atariFs = nullptr;
+
+        switch (fs)
+        {
+            case 1: atariFs = new Filesystems::Dos10FileSystem(img); break;
+            case 2: atariFs = new Filesystems::Dos20FileSystem(img); break;
+            case 3: atariFs = new Filesystems::Dos25FileSystem(img); break;
+            case 4: atariFs = new Filesystems::MyDosFileSystem(img); break;
+            case 5: atariFs = new Filesystems::SpartaDosFileSystem(img); break;
+            default: break;
+        }
+
+        if (atariFs)
+        {
+            int     dir     = atariFs->rootDir();
+            auto    entries = atariFs->getEntries(dir);
+
+            foreach (const Filesystems::AtariDirEntry& entry, entries)
+                fileList += entry.name() + "\n";
+
+            if (fileList.isEmpty())
+                fileList = "\nRoot dir empty:\nNo Files";
+        }
+        else
+        {
+            fileList = "\nFile system not recognized:\nNo Files";
+        }
     }
     else
     {
-        // no preview: get a list of files
-
-        ui->lblPreview->clear();
-
-        if (sio)
-        {
-            const int deviceNo = 0;
-            auto img = qobject_cast <DiskImages::SimpleDiskImage*>(sio->getDevice(deviceNo + DISK_BASE_CDEVIC));
-            int fs = img->defaultFileSystem();
-            Filesystems::AtariFileSystem* atariFs = nullptr;
-
-            switch (fs)
-            {
-                case 1: atariFs = new Filesystems::Dos10FileSystem(img); break;
-                case 2: atariFs = new Filesystems::Dos20FileSystem(img); break;
-                case 3: atariFs = new Filesystems::Dos25FileSystem(img); break;
-                case 4: atariFs = new Filesystems::MyDosFileSystem(img); break;
-                case 5: atariFs = new Filesystems::SpartaDosFileSystem(img); break;
-                default: break;
-            }
-
-            if (atariFs)
-            {
-                int     dir     = atariFs->rootDir();
-                auto    entries = atariFs->getEntries(dir);
-                QString list;
-
-                foreach (const Filesystems::AtariDirEntry& entry, entries)
-                    list += entry.name() + "\n";
-
-                ui->lblPreview->setText(list);
-            }
-        }
+        fileList = "\nSIO device not available:\nNo Files";
     }
+
+    ui->lblFileList->setText(fileList);
 }
 
 QString FolderDisksDlg::getRecentDisk(QString folder)
@@ -206,14 +217,14 @@ QString FolderDisksDlg::getRecentDisk(QString folder)
 
 int FolderDisksDlg::getSplitPos()
 {
-    return ui->splitter->sizes().at(0);
+    return ui->splitLeftAtrRightDirPng->sizes().at(0);
 }
 
 void FolderDisksDlg::setSplitPos(int pos)
 {
-    QList<int> sizes = ui->splitter->sizes();
+    QList<int> sizes = ui->splitLeftAtrRightDirPng->sizes();
     int total = sizes.at(0) + sizes.at(1);
     sizes.clear();
     sizes << pos << (total - pos);
-    ui->splitter->setSizes(sizes);
+    ui->splitLeftAtrRightDirPng->setSizes(sizes);
 }

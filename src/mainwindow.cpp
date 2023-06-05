@@ -707,6 +707,11 @@ void MainWindow::showEvent(QShowEvent *event) {
     } else {
         showHideDrives();
     }
+    if (RespeqtSettings::instance()->showFolderDisks() && !(folderDisksDlg && folderDisksDlg->isVisible())) {
+      openFolderDisks();
+      folderDisksDlg->setGeometry(RespeqtSettings::instance()->folderDisksRect());
+      folderDisksDlg->setSplitPos(RespeqtSettings::instance()->folderDisksSplitPos());
+    }
   }
   QMainWindow::showEvent(event);
 }
