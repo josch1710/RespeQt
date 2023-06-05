@@ -31,8 +31,6 @@ INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib include headers tools
 DEFINES += QT_DEPRECATED_WARNINGS
 # Errors for QT4 deprecated functions
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x050000
-# No unknown pragmas
-QMAKE_CXXFLAGS += -Wno-unknown-pragmas
 
 include(sources.pri)
 
@@ -87,3 +85,5 @@ linux {
 
 DISTFILES += \
     deployment/lindeploy.sh
+
+QMAKE_CXXFLAGS += -Wno-unknown-pragmas

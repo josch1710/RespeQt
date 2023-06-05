@@ -15,6 +15,24 @@
  * TODO Fix startup setting for Debug menu, Lock icon
  */
 
+#include <memory>
+#include <typeinfo>
+#include <utility>
+
+#include <QScrollBar>
+#include <QToolButton>
+#include <QTranslator>
+#include <QUrl>
+#include <QWidget>
+#include <QtDebug>
+#include <QFontDatabase>
+#include <QDesktopWidget>
+#include <QDrag>
+#include <QDragEnterEvent>
+#include <QEvent>
+#include <QFont>
+#include <QHBoxLayout>
+#include <QMessageBox>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -262,7 +280,7 @@ MainWindow::MainWindow()
 
   ui->textEdit->installEventFilter(this);
   changeFonts();
-  g_D9DOVisible = RespeqtSettings::instance()->D9DOVisible();
+  isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
   showHideDrives();
 
   /* Connect to the network */

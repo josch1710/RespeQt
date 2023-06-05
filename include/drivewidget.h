@@ -15,7 +15,7 @@ namespace Ui {
   class DriveWidget;
 }
 
-class DriveWidget : public QFrame {
+class DriveWidget : public QWidget {
   Q_OBJECT
 
 public:

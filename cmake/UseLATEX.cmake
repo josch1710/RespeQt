@@ -897,7 +897,7 @@ endfunction(latex_check_important_warnings)
 
 function(latex_needit VAR NAME)
   if(NOT ${VAR})
-    message(SEND_ERROR "I need the ${NAME} command.")
+    message(STATUS "I need the ${NAME} command.")
   endif()
 endfunction(latex_needit)
 
