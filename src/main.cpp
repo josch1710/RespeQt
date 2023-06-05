@@ -22,13 +22,15 @@ int main(int argc, char *argv[]) {
 #ifdef Q_OS_WIN
   timeBeginPeriod(1);
 #endif
-#if defined(Q_OS_LINUX) && defined(QT_X11EXTRAS_LIB)
-  int dpi;
-  if (QX11Info::isPlatformX11())
-    dpi = QX11Info::appDpiX();
+#if false && defined(Q_OS_LINUX) && defined(QT_X11EXTRAS_LIB)
+  auto dpi{QX11Info::appDpiX()};
 
-#endif
+  if (dpi != 0 && dpi > 90)
+    QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+#else
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
   RespeQtApplication a(argc, argv);
 
   QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));

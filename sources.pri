@@ -42,22 +42,15 @@ SOURCES += \
     src/printers/atariprinter.cpp \
     src/printers/atari1020.cpp \
     src/smartdevice.cpp \
-    src/crc16.cpp \
     src/printers/nativeoutput.cpp \
     src/printers/centronics.cpp \
     src/printers/escp.cpp \
     src/printers/atari1029.cpp \
-    src/diskimagepro.cpp \
-    src/diskimageatx.cpp \
-    src/diskimageatr.cpp \
-    src/disassembly810.cpp \
-    src/disassembly1050.cpp \
     src/printers/printerfactory.cpp \
     src/printers/atari1025.cpp \
     src/printers/passthrough.cpp \
     src/printers/graphicsprimitive.cpp \
     src/crc16.cpp \
-    src/cpu6502.cpp \
     src/filesystems/ataridirentry.cpp \
     src/filesystems/atarifilesystem.cpp \
     src/filesystems/dos10filesystem.cpp \
@@ -119,8 +112,6 @@ HEADERS += \
     include/printers/centronics.h \
     include/printers/escp.h \
     include/printers/atari1029.h \
-    include/disassembly810.h \
-    include/disassembly1050.h \
     include/printers/printerfactory.h \
     include/printers/atari1025.h \
     include/printers/passthrough.h \
