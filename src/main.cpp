@@ -11,6 +11,9 @@
 #include <QTextCodec>
 #include <memory>
 
+#if defined(Q_OS_LINUX) && defined(QT_X11EXTRAS_LIB)
+#include <QX11Info>
+#endif
 #ifdef Q_OS_WIN
 #include <windows.h>
 #endif
@@ -18,6 +21,12 @@
 int main(int argc, char *argv[]) {
 #ifdef Q_OS_WIN
   timeBeginPeriod(1);
+#endif
+#if defined(Q_OS_LINUX) && defined(QT_X11EXTRAS_LIB)
+  int dpi;
+  if (QX11Info::isPlatformX11())
+    dpi = QX11Info::appDpiX();
+
 #endif
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   RespeQtApplication a(argc, argv);

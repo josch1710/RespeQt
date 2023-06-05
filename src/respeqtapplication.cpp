@@ -2,7 +2,7 @@
 // Created by Jochen Schäfer on 25.05.23.
 //
 
-#include "RespeQtApplication.h"
+#include "respeqtapplication.h"
 
 #include <QFont>
 

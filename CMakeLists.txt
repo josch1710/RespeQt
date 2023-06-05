@@ -99,7 +99,7 @@ set(SOURCES
     src/diskimages/atxtrackinfo.cpp
     src/diskimages/board.cpp
     src/diskimages/diskimagefactory.cpp
-    src/RespeQtApplication.cpp
+    src/respeqtapplication.cpp
 )
 
 set(HEADERS
@@ -168,8 +168,9 @@ set(HEADERS
     include/diskimages/diskimagepro.h
     include/diskimages/diskimageatx.h
     include/diskimages/diskimagefactory.h
-    include/RespeQtApplication.h
-        include/diskimages/constvalues.h)
+    include/respeqtapplication.h
+    include/diskimages/constvalues.h
+)
 
 set(FORMS
     ui/mainwindow.ui
