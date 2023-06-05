@@ -38,7 +38,6 @@ void RespeqtSettings::setSessionFile(const QString &g_sessionFile, const QString
 
 // Save all session related settings, so that a session could be fully restored later //
 void RespeqtSettings::saveSessionToFile(const QString &fileName) {
-  extern bool g_miniMode;
   QSettings s(fileName, QSettings::IniFormat);
 
   s.beginGroup("RespeQt");
@@ -62,15 +61,14 @@ void RespeqtSettings::saveSessionToFile(const QString &fileName) {
   s.setValue("SaveWindowsPosSize", saveWindowsPos());
   s.setValue("SaveDiskVisibility", saveDiskVis());
   s.setValue("D9DOVisible", D9DOVisible());
-  if (g_miniMode) {
-    s.setValue("MiniX", lastMiniHorizontalPos());
-    s.setValue("MiniY", lastMiniVerticalPos());
-  } else {
-    s.setValue("MainX", lastHorizontalPos());
-    s.setValue("MainY", lastVerticalPos());
-    s.setValue("MainW", lastWidth());
-    s.setValue("MainH", lastHeight());
-  }
+  s.setValue("MiniMode", miniMode());
+  s.setValue("MiniX", lastMiniHorizontalPos());
+  s.setValue("MiniY", lastMiniVerticalPos());
+  s.setValue("MiniW", lastMiniWidth());
+  s.setValue("MainX", lastHorizontalPos());
+  s.setValue("MainY", lastVerticalPos());
+  s.setValue("MainW", lastWidth());
+  s.setValue("MainH", lastHeight());
   s.setValue("PrtX", lastPrtHorizontalPos());
   s.setValue("PrtY", lastPrtVerticalPos());
   s.setValue("PrtW", lastPrtWidth());
@@ -155,17 +153,19 @@ void RespeqtSettings::loadSessionFromFile(const QString &fileName) {
   setCustomCasBaud(s.value("CustomCasBaud", 875).toInt());
   setUseCustomCasBaud(s.value("UseCustomCasBaud", false).toBool());
   setI18nLanguage(s.value("I18nLanguage").toString());
-  setsaveWindowsPos(s.value("SaveWindowsPosSize", true).toBool());
-  setsaveDiskVis(s.value("SaveDiskVisibility", true).toBool());
+  setSaveWindowsPos(s.value("SaveWindowsPosSize", true).toBool());
+  setSaveDiskVis(s.value("SaveDiskVisibility", true).toBool());
+  setMiniMode(s.value("MiniMode", false).toBool());
   setD9DOVisible(s.value("D9DOVisible", true).toBool());
   setLastHorizontalPos(s.value("MainX", 20).toInt());
   setLastVerticalPos(s.value("MainY", 40).toInt());
-  setLastWidth(s.value("MainW", 688).toInt());
-  setLastHeight(s.value("MainH", 426).toInt());
+  setLastWidth(s.value("MainW", DefaultFullModeSize.width()).toInt());
+  setLastHeight(s.value("MainH", DefaultFullModeSize.height()).toInt());
   //if (mMainW < 688 && mdVis) mMainW = 688;
   //if (mMainH < 426 && mdVis) mMainH = 426;
-  setLastMiniHorizontalPos(s.value("MiniX", 8).toInt());
-  setLastMiniVerticalPos(s.value("MiniY", 30).toInt());
+  setLastMiniHorizontalPos(s.value("MiniX", DefaultMiniModePos.x()).toInt());
+  setLastMiniVerticalPos(s.value("MiniY", DefaultMiniModePos.y()).toInt());
+  setLastMiniWidth(s.value("MiniW", DefaultMiniModeSize.width()).toInt());
   setLastPrtHorizontalPos(s.value("PrtX", 20).toInt());
   setLastPrtVerticalPos(s.value("PrtY", 40).toInt());
   setLastPrtWidth(s.value("PrtW", 600).toInt());
@@ -233,6 +233,22 @@ void RespeqtSettings::setMainWindowTitle(const QString &g_mainWindowTitle) {
 
 bool RespeqtSettings::isFirstTime() {
   return mIsFirstTime;
+}
+
+void RespeqtSettings::saveGeometry(const QRect &geometry, bool isMiniMode) {
+  if (saveWindowsPos()) {
+    setMiniMode(isMiniMode);
+    if (isMiniMode) {
+      setLastMiniHorizontalPos(geometry.x());
+      setLastMiniVerticalPos(geometry.y());
+      setLastMiniWidth(geometry.width());
+    } else {
+      setLastHorizontalPos(geometry.x());
+      setLastVerticalPos(geometry.y());
+      setLastWidth(geometry.width());
+      setLastHeight(geometry.height());
+    }
+  }
 }
 
 QString RespeqtSettings::serialPortName() {
@@ -495,24 +511,27 @@ void RespeqtSettings::swapImages(int no1, int no2) {
 
 // Save drive visibility status //
 bool RespeqtSettings::saveDiskVis() {
-  return mSettings->value("SaveDiskVisibility").toBool();
+  return mSettings->value("SaveDiskVisibility", true).toBool();
 }
 
-void RespeqtSettings::setsaveDiskVis(bool saveDvis) {
+void RespeqtSettings::setSaveDiskVis(bool saveDvis) {
   mSettings->setValue("SaveDiskVisibility", saveDvis);
 }
 
 // Drive visibility status //
 bool RespeqtSettings::D9DOVisible() {
-  return mSettings->value("D9DOVisible").toBool();
+  return mSettings->value("D9DOVisible", true).toBool();
 }
 
 void RespeqtSettings::setD9DOVisible(bool dVis) {
-  mSettings->setValue("D9DOVisible", dVis);
+  if (saveDiskVis()) {
+    mSettings->setValue("D9DOVisible", dVis);
+  }
 }
+
 // Shade Mode Enable //
 bool RespeqtSettings::enableShade() {
-  return mSettings->value("EnableShadeByDefault").toBool();
+  return mSettings->value("EnableShadeByDefault", false).toBool();
 }
 
 void RespeqtSettings::setEnableShade(bool shade) {
@@ -521,7 +540,7 @@ void RespeqtSettings::setEnableShade(bool shade) {
 
 // Use Large Font //
 bool RespeqtSettings::useLargeFont() {
-  return mSettings->value("UseLargeFont").toBool();
+  return mSettings->value("UseLargeFont", false).toBool();
 }
 
 void RespeqtSettings::setUseLargeFont(bool largeFont) {
@@ -539,16 +558,16 @@ void RespeqtSettings::setExplorerOnTop(bool expOnTop) {
 
 // Save/return last main window position/size option //
 bool RespeqtSettings::saveWindowsPos() {
-  return mSettings->value("SaveWindowsPosSize").toBool();
+  return mSettings->value("SaveWindowsPosSize", true).toBool();
 }
 
-void RespeqtSettings::setsaveWindowsPos(bool saveMwp) {
+void RespeqtSettings::setSaveWindowsPos(bool saveMwp) {
   mSettings->setValue("SaveWindowsPosSize", saveMwp);
 }
 // Last main window position/size (No Session File) //
 
 int RespeqtSettings::lastHorizontalPos() {
-  return mSettings->value("MainX").toInt();
+  return mSettings->value("MainX", DefaultFullModePos.x()).toInt();
 }
 
 void RespeqtSettings::setLastHorizontalPos(int lastHpos) {
@@ -556,14 +575,14 @@ void RespeqtSettings::setLastHorizontalPos(int lastHpos) {
 }
 
 int RespeqtSettings::lastVerticalPos() {
-  return mSettings->value("MainY").toInt();
+  return mSettings->value("MainY", DefaultFullModePos.y()).toInt();
 }
 
 void RespeqtSettings::setLastVerticalPos(int lastVpos) {
   mSettings->setValue("MainY", lastVpos);
 }
 int RespeqtSettings::lastWidth() {
-  return mSettings->value("MainW").toInt();
+  return mSettings->value("MainW", DefaultFullModeSize.width()).toInt();
 }
 
 void RespeqtSettings::setLastWidth(int lastW) {
@@ -571,16 +590,24 @@ void RespeqtSettings::setLastWidth(int lastW) {
 }
 
 int RespeqtSettings::lastHeight() {
-  return mSettings->value("MainH").toInt();
+  return mSettings->value("MainH", DefaultFullModeSize.height()).toInt();
 }
 
 void RespeqtSettings::setLastHeight(int lastH) {
   mSettings->setValue("MainH", lastH);
 }
 
-// Last mini window position (No Session File) //
+// mini mode and it's specific window position and width
+bool RespeqtSettings::miniMode() {
+  return mSettings->value("MiniMode", false).toBool();
+}
+
+void RespeqtSettings::setMiniMode(bool miniMode) {
+  mSettings->setValue("MiniMode", miniMode);
+}
+
 int RespeqtSettings::lastMiniHorizontalPos() {
-  return mSettings->value("MiniX").toInt();
+  return mSettings->value("MiniX", DefaultMiniModePos.x()).toInt();
 }
 
 void RespeqtSettings::setLastMiniHorizontalPos(int lastMHpos) {
@@ -588,11 +615,19 @@ void RespeqtSettings::setLastMiniHorizontalPos(int lastMHpos) {
 }
 
 int RespeqtSettings::lastMiniVerticalPos() {
-  return mSettings->value("MiniY").toInt();
+  return mSettings->value("MiniY", DefaultMiniModePos.y()).toInt();
 }
 
 void RespeqtSettings::setLastMiniVerticalPos(int lastMVpos) {
   mSettings->setValue("MiniY", lastMVpos);
+}
+
+int RespeqtSettings::lastMiniWidth() {
+  return mSettings->value("MiniW", DefaultMiniModeSize.width()).toInt();
+}
+
+void RespeqtSettings::setLastMiniWidth(int lastWidth) {
+  mSettings->setValue("MiniW", lastWidth);
 }
 
 // Last print window position/size (No Session File) //

@@ -271,7 +271,8 @@ if (WIN32)
     target_link_libraries(${TARGET} winmm z winspool)
 endif()
 
-add_subdirectory(docs)
+# Process Documents using LaTex
+# add_subdirectory(docs) # commented out (experimental)
 
 # Deployment
 if (LINUX)
