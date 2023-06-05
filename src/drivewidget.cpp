@@ -10,7 +10,7 @@
 #include "ui_drivewidget.h"
 
 DriveWidget::DriveWidget(int driveNum, QWidget *parent)
-    : QFrame(parent), ui(new Ui::DriveWidget), driveNo_(driveNum) {
+    : QWidget(parent), ui(new Ui::DriveWidget), driveNo_(driveNum) {
   ui->setupUi(this);
 }
 
@@ -286,6 +286,10 @@ void DriveWidget::setLabelToolTips(const QString &one, const QString &two, const
 
 void DriveWidget::setLabelFont(const QFont &font) {
   ui->labelFileName->setFont(font);
+}
+
+void DriveWidget::setDropTarget(bool target) {
+  ui->driveFrame->setFrameShadow(target ? QFrame::Sunken : QFrame::Raised);
 }
 
 void DriveWidget::mountFolderTriggered() { emit actionMountFolder(driveNo_); }

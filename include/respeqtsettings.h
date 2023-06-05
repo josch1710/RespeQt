@@ -34,6 +34,8 @@ public:
 
   bool isFirstTime();
 
+  void saveGeometry(const QRect& geometry, bool miniMode);
+
   QString serialPortName();
   void setSerialPortName(const QString &name);
 
@@ -120,6 +122,9 @@ public:
   void setRclDir(const QString &dir);
 
   // Set and restore last mainwindow position and size //
+  const QPoint DefaultFullModePos  = { 100, 100 };
+  const QSize  DefaultFullModeSize = { 800, 650 };
+
   int lastVerticalPos();
   void setLastVerticalPos(int lastVpos);
 
@@ -133,11 +138,20 @@ public:
   void setLastHeight(int lastH);
 
   // Set and restore last mini-window position //
+  const QPoint DefaultMiniModePos  = { 8, 50 };
+  const QSize  DefaultMiniModeSize = { 600, 100 };
+
+  bool miniMode();
+  void setMiniMode(bool miniMode);
+
   int lastMiniVerticalPos();
   void setLastMiniVerticalPos(int lastMVpos);
 
   int lastMiniHorizontalPos();
   void setLastMiniHorizontalPos(int lastMHpos);
+
+  int lastMiniWidth();
+  void setLastMiniWidth(int lastWidth);
 
   // Set and restore last printwindow position and size //
   int lastPrtVerticalPos();
@@ -160,11 +174,11 @@ public:
 
   // Save window positions and sizes option //
   bool saveWindowsPos();
-  void setsaveWindowsPos(bool saveMwp);
+  void setSaveWindowsPos(bool saveMwp);
 
   // Save drive visibility option //
   bool saveDiskVis();
-  void setsaveDiskVis(bool saveDvis);
+  void setSaveDiskVis(bool saveDvis);
 
   // To pass session file name/path  //
   void setSessionFile(const QString &g_sessionFile, const QString &g_sessionFilePath);
