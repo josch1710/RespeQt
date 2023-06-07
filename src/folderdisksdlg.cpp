@@ -149,7 +149,7 @@ void FolderDisksDlg::onDiskChanged()
     QFileInfo fiPreview = QFileInfo(imagePath);
 
     if (!fiPreview.exists())
-        imagePath = ":/icons/other-icons/floppy1.png";
+        imagePath = ":/icons/other-icons/floppy336x224.png";
 
     QPixmap* pixMap = new QPixmap(imagePath);
     ui->lblPreview->setPixmap(*pixMap);

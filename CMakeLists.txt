@@ -55,6 +55,7 @@ set(SOURCES
         src/diskimages/folderimage.cpp
     src/folderdisks.cpp
     src/folderdisksdlg.cpp
+    src/picsplitter.cpp
     src/createimagedialog.cpp
     src/diskeditdialog.cpp
     src/autoboot.cpp
@@ -118,6 +119,7 @@ set(HEADERS
         include/diskimages/folderimage.h
     include/folderdisks.h
     include/folderdisksdlg.h
+    include/picsplitter.h
     include/createimagedialog.h
     include/diskeditdialog.h
     include/autoboot.h

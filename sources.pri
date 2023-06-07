@@ -71,7 +71,8 @@ SOURCES += \
     src/diskimages/prosectorinfo.cpp \
     src/diskimages/atxsectorinfo.cpp \
     src/diskimages/atxtrackinfo.cpp \
-    src/diskimages/board.cpp
+    src/diskimages/board.cpp \
+    $$PWD/src/picsplitter.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -136,7 +137,8 @@ HEADERS += \
     include/diskimages/prosectorinfo.h \
     include/diskimages/atxsectorinfo.h \
     include/diskimages/atxtrackinfo.h \
-    include/diskimages/board.h
+    include/diskimages/board.h \
+    $$PWD/include/picsplitter.h
 
 FORMS += \
     ui/mainwindow.ui \

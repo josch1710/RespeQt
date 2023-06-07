@@ -54,7 +54,7 @@
        </sizepolicy>
       </property>
      </widget>
-     <widget class="QSplitter" name="splitTopDirBotPng">
+     <widget class="PicSplitter" name="splitTopDirBotPng">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
@@ -82,8 +82,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>85</width>
-          <height>162</height>
+          <width>49</width>
+          <height>173</height>
          </rect>
         </property>
         <property name="font">
@@ -159,6 +159,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PicSplitter</class>
+   <extends>QSplitter</extends>
+   <header>include/picsplitter.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

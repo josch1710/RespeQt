@@ -57,7 +57,6 @@ public:
   void doLogMessage(int type, const QString &msg);
   static void logMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
   static MainWindow *instance() { return sInstance; }
-  void showEvent(QShowEvent *event) override;
 
 private:
   static MainWindow *sInstance;
@@ -129,6 +128,7 @@ private:
   void setupDebugItems();
 
 protected:
+  void showEvent(QShowEvent *event) override;
   void mousePressEvent(QMouseEvent *event) override;
   void mouseMoveEvent(QMouseEvent *event) override;
   void dragEnterEvent(QDragEnterEvent *event) override;
