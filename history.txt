@@ -8,7 +8,7 @@ release 5.4
         * Refactoring. Lots.
         * Fixed a crash in the disk edit dialog when switching to DOS 2.5/MyDos when the image is SD.
         * Fixed multiple issues with mini-mode and persistence of main window GUI
-        * allow drag/move of mini-mode window while in shade mode
+        * Allow drag/move of mini-mode window while in shade mode
 
 release 5
 	* PRO and ATX images support in read/write mode with accurate (I hope so) protection emulation.
