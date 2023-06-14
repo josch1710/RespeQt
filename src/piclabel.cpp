@@ -58,15 +58,12 @@ void PicLabel::setText(const QString& text, bool center)
             _lblText->setWordWrap(true);
         }
         _lblText->setText(text);
-        moveText();
+        update();
     }
 }
 
-void PicLabel::moveText()
+void PicLabel::moveLabels()
 {
-    if (_lblText == nullptr)
-        return;
-
     QSizeF szPic = (_pixmap ? _pixmap->size() : QSizeF(336, 224));
 
     int X = (int)round(150.0 * width() / szPic.width());
@@ -75,10 +72,25 @@ void PicLabel::moveText()
     int H = (int)round(48.0 * height() / szPic.height());
 
     _lblText->setGeometry(X, Y, W, H);
+}
 
+void PicLabel::scaleFonts()
+{
     QFont font = _lblText->font();
-    font.setPixelSize((int)round((double)H / 3.5));
+    double pix = round((double)_lblText->size().height() / 3.5);
+
+    font.setPixelSize((int)pix);
+
     _lblText->setFont(font);
+}
+
+void PicLabel::update()
+{
+    if (_lblText)
+    {
+        moveLabels();
+        scaleFonts();
+    }
 }
 
 double PicLabel::ratio()
@@ -105,7 +117,7 @@ void PicLabel::paintEvent(QPaintEvent* event)
 void PicLabel::resizeEvent(QResizeEvent *event)
 {
     QLabel::resizeEvent(event);
-    moveText();
+    update();
 }
 
 QSize PicLabel::sizeHint() const

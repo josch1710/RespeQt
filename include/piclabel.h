@@ -24,10 +24,13 @@ protected:
 
 private:
     QString  _picPath;
-    QPixmap* _pixmap  = nullptr;
-    QLabel*  _lblText = nullptr;
+    QPixmap* _pixmap    = nullptr;
+    QLabel*  _lblText   = nullptr;
+    QLabel*  _lblNoText = nullptr;
 
-    void moveText();
+    void moveLabels();
+    void scaleFonts();
+    void update();
 };
 
 #endif // PICLABEL_H
