@@ -1113,10 +1113,18 @@ void RespeqtSettings::setFolderDisksRect(QRect rect) {
   mSettings->setValue("FolderDisksRect", rect);
 }
 
-int RespeqtSettings::folderDisksSplitPos() {
-  return mSettings->value("FolderDisksSplitPos").toInt();
+int RespeqtSettings::folderDisksHorzSplitPos() {
+  return mSettings->value("FolderDisksHorzSplitPos", -1).toInt();
 }
 
-void RespeqtSettings::setFolderDisksSplitPos(int pos) {
-  mSettings->setValue("FolderDisksSplitPos", pos);
+int RespeqtSettings::folderDisksVertSplitPos() {
+  return mSettings->value("FolderDisksVertSplitPos", -1).toInt();
+}
+
+void RespeqtSettings::setFolderDisksHorzSplitPos(int pos) {
+  mSettings->setValue("FolderDisksHorzSplitPos", pos);
+}
+
+void RespeqtSettings::setFolderDisksVertSplitPos(int pos) {
+  mSettings->setValue("FolderDisksVertSplitPos", pos);
 }

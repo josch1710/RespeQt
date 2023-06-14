@@ -86,6 +86,14 @@ MainWindow *MainWindow::sInstance{nullptr};
 // Important       (blue)          "!i"
 // Warning         (brown)         "!w"
 // Error           (red)           "!e"
+//
+// Note to the original programmer(s):
+// The above information needs to be somewhere better.
+// As a new contributer, it took me way too long to figure out why my
+// qDebug() messages were being dropped. Also, talk about spaghetti code,
+// follow the path of a single log entry. Does it really need to be this complicated?
+// - Dan C. (my 2 cents)
+//
 void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*context*/, const QString &msg) {
   logMutex->lock();
   logFile->write(QString::number((quint64) QThread::currentThreadId(), 16).toLatin1());
@@ -149,7 +157,7 @@ MainWindow::MainWindow()
   logMutex = new QMutex();
   connect(this, &MainWindow::logMessage, this, &MainWindow::uiMessage, Qt::QueuedConnection);
   qInstallMessageHandler(MainWindow::logMessageOutput);
-  qDebug() << "!d" << tr("RespeQt started at %1.").arg(QDateTime::currentDateTime().toString());
+  qDebug() << "!d" << tr("RespeQt started @ %1.").arg(QDateTime::currentDateTime().toString());
 
   logWindow_ = nullptr;
   folderDisksDlg = nullptr;
@@ -592,7 +600,8 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   if (folderDisksDlg) {
     RespeqtSettings::instance()->setShowFolderDisks(folderDisksDlg->isVisible());
     RespeqtSettings::instance()->setFolderDisksRect(folderDisksDlg->geometry());
-    RespeqtSettings::instance()->setFolderDisksSplitPos(folderDisksDlg->getSplitPos());
+    RespeqtSettings::instance()->setFolderDisksHorzSplitPos(folderDisksDlg->getHorzSplitPos());
+    RespeqtSettings::instance()->setFolderDisksVertSplitPos(folderDisksDlg->getVertSplitPos());
   } else {
     RespeqtSettings::instance()->setShowFolderDisks(false);
   }
@@ -710,7 +719,8 @@ void MainWindow::showEvent(QShowEvent *event) {
     if (RespeqtSettings::instance()->showFolderDisks() && !(folderDisksDlg && folderDisksDlg->isVisible())) {
       openFolderDisks();
       folderDisksDlg->setGeometry(RespeqtSettings::instance()->folderDisksRect());
-      folderDisksDlg->setSplitPos(RespeqtSettings::instance()->folderDisksSplitPos());
+      folderDisksDlg->setHorzSplitPos(RespeqtSettings::instance()->folderDisksHorzSplitPos());
+      folderDisksDlg->setVertSplitPos(RespeqtSettings::instance()->folderDisksVertSplitPos());
     }
   }
   QMainWindow::showEvent(event);
@@ -1869,7 +1879,8 @@ void MainWindow::saveSessionTriggered() {
   if (folderDisksDlg) {
     RespeqtSettings::instance()->setShowFolderDisks(folderDisksDlg->isVisible());
     RespeqtSettings::instance()->setFolderDisksRect(folderDisksDlg->geometry());
-    RespeqtSettings::instance()->setFolderDisksSplitPos(folderDisksDlg->getSplitPos());
+    RespeqtSettings::instance()->setFolderDisksHorzSplitPos(folderDisksDlg->getHorzSplitPos());
+    RespeqtSettings::instance()->setFolderDisksVertSplitPos(folderDisksDlg->getVertSplitPos());
   }
   else {
     RespeqtSettings::instance()->setShowFolderDisks(false);

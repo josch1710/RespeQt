@@ -72,7 +72,8 @@ SOURCES += \
     src/diskimages/atxsectorinfo.cpp \
     src/diskimages/atxtrackinfo.cpp \
     src/diskimages/board.cpp \
-    $$PWD/src/picsplitter.cpp
+    src/picsplitter.cpp \
+    src/piclabel.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -138,7 +139,8 @@ HEADERS += \
     include/diskimages/atxsectorinfo.h \
     include/diskimages/atxtrackinfo.h \
     include/diskimages/board.h \
-    $$PWD/include/picsplitter.h
+    include/picsplitter.h \
+    include/piclabel.h
 
 FORMS += \
     ui/mainwindow.ui \

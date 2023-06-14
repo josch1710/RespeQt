@@ -17,8 +17,10 @@ public:
     explicit FolderDisksDlg(SioWorkerPtr pSio, QWidget *parent = nullptr);
     ~FolderDisksDlg();
 
-    int getSplitPos();
-    void setSplitPos(int pos);
+    int getHorzSplitPos();
+    int getVertSplitPos();
+    void setHorzSplitPos(int pos);
+    void setVertSplitPos(int pos);
 
 private:
     void refreshFoldersCombobox();

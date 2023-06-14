@@ -242,8 +242,10 @@ public:
   void setShowFolderDisks(bool show = true);
   QRect folderDisksRect();
   void  setFolderDisksRect(QRect rect);
-  int   folderDisksSplitPos();
-  void  setFolderDisksSplitPos(int pos);
+  int   folderDisksHorzSplitPos();
+  int   folderDisksVertSplitPos();
+  void  setFolderDisksHorzSplitPos(int pos);
+  void  setFolderDisksVertSplitPos(int pos);
 
   // Printer Spy Mode
   bool isPrinterSpyMode();

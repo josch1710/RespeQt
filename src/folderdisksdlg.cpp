@@ -21,6 +21,9 @@ FolderDisksDlg::FolderDisksDlg(SioWorkerPtr pSio, QWidget *parent) :
 
     ui->setupUi(this);
 
+    ui->splitTopDirBotPng->setOther(ui->splitLeftAtrRightDirPng);
+    ui->splitLeftAtrRightDirPng->setOther(ui->splitTopDirBotPng);
+
     connect(ui->btnBrowse, SIGNAL(clicked()), this, SLOT(onBrowseFolder()));
     connect(ui->listDisks, SIGNAL(itemSelectionChanged()), this, SLOT(onDiskChanged()));
     connect(ui->cboFolderPath, SIGNAL(currentTextChanged(QString)), this, SLOT(onFolderChanged(QString)));
@@ -144,16 +147,28 @@ void FolderDisksDlg::onDiskChanged()
 
     MainWindow::instance()->mountFileWithDefaultProtection(0, fullName);
 
-    // look for a preview/thumbnail with diskname.png
+    // 1. look for a preview/thumbnail with diskname.png
     QString   imagePath = fiDisk.absolutePath() + "/" + fiDisk.completeBaseName() + ".png";
     QFileInfo fiPreview = QFileInfo(imagePath);
+    const QString BUILT_IN_FLOPPY_PNG = ":/icons/other-icons/floppy336x224.png";
 
     if (!fiPreview.exists())
-        imagePath = ":/icons/other-icons/floppy336x224.png";
+    {
+        // 2. use a generic name for default thumbnail
+        imagePath = fiDisk.absolutePath() + "/FolderDisks.png";
+        fiPreview = QFileInfo(imagePath);
+    }
+    if (!fiPreview.exists())
+    {
+        // 3. load built-in image of a 5 1/2-inch floppy disk
+        imagePath = BUILT_IN_FLOPPY_PNG;
+    }
 
-    QPixmap* pixMap = new QPixmap(imagePath);
-    ui->lblPreview->setPixmap(*pixMap);
-    delete pixMap;
+    // now we can load the thumbnail/preview into the corner
+    ui->lblPreview->setPicPath(imagePath);
+    double ratio = ui->lblPreview->ratio();
+    ui->splitTopDirBotPng->setRatio(ratio);
+    ui->splitLeftAtrRightDirPng->setRatio(ratio);
 
     // TBD 1. allow drop target or paste image, show hint text
     // TBD 2. interop with emulator code, boot it and show screen
@@ -161,6 +176,7 @@ void FolderDisksDlg::onDiskChanged()
     // get a list of files to show in the file list pane
 
     QString fileList;
+    QString labelText;
 
     if (sio)
     {
@@ -188,18 +204,34 @@ void FolderDisksDlg::onDiskChanged()
                 fileList += entry.name() + "\n";
 
             if (fileList.isEmpty())
-                fileList = "\nRoot dir empty:\nNo Files";
+                fileList = "!Root dir empty:\nNo Files";
         }
         else
         {
-            fileList = "\nFile system not recognized:\nNo Files";
+            fileList = "!File system not recognized:\nNo Files";
         }
     }
     else
     {
-        fileList = "\nSIO device not available:\nNo Files";
+        fileList = "!SIO device not available:\nNo Files";
     }
 
+    if (fileList[0] == '!') // detected error/annomally parsing filesystem above
+    {
+        qDebug() << fileList;
+        fileList[0] = '\n';
+
+        // show a '?' over the floppy disk image's label (if shown)
+        if (imagePath == BUILT_IN_FLOPPY_PNG)
+            labelText = "?";
+    }
+    else if (imagePath == BUILT_IN_FLOPPY_PNG)
+    {
+        // no error, show the disk base file name
+        labelText = fiDisk.completeBaseName();
+    }
+
+    ui->lblPreview->setText(labelText, labelText == "?");
     ui->lblFileList->setText(fileList);
 }
 
@@ -215,16 +247,36 @@ QString FolderDisksDlg::getRecentDisk(QString folder)
     return QString();
 }
 
-int FolderDisksDlg::getSplitPos()
+int FolderDisksDlg::getHorzSplitPos()
 {
     return ui->splitLeftAtrRightDirPng->sizes().at(0);
 }
 
-void FolderDisksDlg::setSplitPos(int pos)
+int FolderDisksDlg::getVertSplitPos()
 {
+    return ui->splitTopDirBotPng->sizes().at(0);
+}
+
+void FolderDisksDlg::setHorzSplitPos(int pos)
+{
+    if (pos == -1)
+        return;
+
     QList<int> sizes = ui->splitLeftAtrRightDirPng->sizes();
     int total = sizes.at(0) + sizes.at(1);
     sizes.clear();
     sizes << pos << (total - pos);
     ui->splitLeftAtrRightDirPng->setSizes(sizes);
+}
+
+void FolderDisksDlg::setVertSplitPos(int pos)
+{
+    if (pos == -1)
+        return;
+
+    QList<int> sizes = ui->splitTopDirBotPng->sizes();
+    int total = sizes.at(0) + sizes.at(1);
+    sizes.clear();
+    sizes << pos << (total - pos);
+    ui->splitTopDirBotPng->setSizes(sizes);
 }

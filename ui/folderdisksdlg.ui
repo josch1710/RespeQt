@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>540</width>
-    <height>297</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -42,7 +42,13 @@
     </layout>
    </item>
    <item>
-    <widget class="QSplitter" name="splitLeftAtrRightDirPng">
+    <widget class="PicSplitter" name="splitLeftAtrRightDirPng">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -55,6 +61,12 @@
       </property>
      </widget>
      <widget class="PicSplitter" name="splitTopDirBotPng">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
@@ -82,8 +94,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>49</width>
-          <height>173</height>
+          <width>85</width>
+          <height>468</height>
          </rect>
         </property>
         <property name="font">
@@ -115,11 +127,25 @@
         </property>
        </widget>
       </widget>
-      <widget class="QLabel" name="lblPreview">
+      <widget class="PicLabel" name="lblPreview">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="font">
         <font>
-         <family>Courier10 BT</family>
-         <pointsize>10</pointsize>
+         <family>Arial</family>
+         <pointsize>24</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
         </font>
        </property>
        <property name="autoFillBackground">
@@ -131,8 +157,11 @@
        <property name="text">
         <string/>
        </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
        <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        <set>Qt::AlignCenter</set>
        </property>
        <property name="wordWrap">
         <bool>false</bool>
@@ -165,6 +194,11 @@
    <extends>QSplitter</extends>
    <header>include/picsplitter.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PicLabel</class>
+   <extends>QLabel</extends>
+   <header>include/piclabel.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
