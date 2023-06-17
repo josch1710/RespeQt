@@ -1,6 +1,10 @@
 #include "include/piclabel.h"
 #include <QPaintEvent>
 #include <QPainter>
+#include <QRegularExpression>
+#include <QFileInfo>
+#include <QDebug>
+
 
 PicLabel::PicLabel(QWidget* parent) : QLabel(parent)
 {
@@ -13,11 +17,59 @@ PicLabel::~PicLabel()
         delete _pixmap;
         _pixmap = nullptr;
     }
-    if (_lblText)
+}
+
+bool PicLabel::isFloppyPng()
+{
+    return (!_picPath.isEmpty() && (_picPath.at(0) == ':'));
+}
+
+void PicLabel::setDiskName(const QString &diskName)
+{
+    QFileInfo fiDisk = QFileInfo(diskName);
+    if (!fiDisk.exists())
+        return;
+
+    // 1. look for a preview/thumbnail with diskname.png
+    QString   fileName  = fiDisk.completeBaseName();
+    QString   imagePath = fiDisk.absolutePath() + "/" + fileName + ".png";
+    QFileInfo fiPreview = QFileInfo(imagePath);
+
+    setText(fileName);
+
+    if (!fiPreview.exists())
     {
-        delete _lblText;
-        _lblText = nullptr;
+        // 2. use a generic name for default thumbnail
+        imagePath = fiDisk.absolutePath() + "/FolderDisks.png";
+        fiPreview = QFileInfo(imagePath);
     }
+    if (!fiPreview.exists())
+    {
+        // 3. load built-in image of a 5 1/2-inch floppy disk
+        if (_isSideA)
+            imagePath = FLOPPY_INDEXED_PNG;
+        else if (_isSideB)
+            imagePath = FLOPPY_BACKSIDE_PNG;
+        else
+            imagePath = FLOPPY_336x224_PNG;
+    }
+    else
+    {
+        _title.clear();
+        _diskNo.clear();
+    }
+
+    setPicPath(imagePath);  // load the thumbnail/preview into the pixmap
+
+    if (isFloppyPng() && _diskErr)
+        QLabel::setText("?");
+
+    update();
+}
+
+void PicLabel::setDiskError(bool error)
+{
+    _diskErr = error;
 }
 
 void PicLabel::setPicPath(const QString& picPath)
@@ -32,65 +84,86 @@ void PicLabel::setPicPath(const QString& picPath)
 
     _pixmap = new QPixmap(_picPath);
 
-    update();
+    Q_ASSERT(_pixmap && !_pixmap->isNull());
 }
 
-void PicLabel::setText(const QString& text, bool center)
+void PicLabel::setText(const QString& text)
 {
-    if (center)
-    {
-        QLabel::setText(text);
+    clear();
+    _title.clear();
+    _diskNo.clear();
 
-        if (_lblText)
-            _lblText->clear();
-    }
-    else
-    {
-        QLabel::setText("");
+    QRegularExpression re("(^\\d+)( )(.*)");
+    auto rem = re.match(text); 
+    _isSideA = rem.hasMatch();
+    _isSideB = false;
 
-        if (_lblText == nullptr)
-        {
-            _lblText = new QLabel(this);
-            QFont font("Ink Free");
-            font.setPointSize(12);
-            _lblText->setFont(font);
-            _lblText->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-            _lblText->setWordWrap(true);
-        }
-        _lblText->setText(text);
-        update();
+    if (!_isSideA)
+    {
+        re.setPattern("(^\\d+)([b|B] )(.*)");
+        rem = re.match(text);
+        _isSideB = rem.hasMatch();
     }
+    if (rem.hasMatch())
+    {
+        _diskNo.setText(rem.captured(1));
+        _title.setText(rem.captured(3));
+    }
+    if (_title.isEmpty())
+        _title.setText(text);
+}
+
+QRect PicLabel::scaleRect(const QRectF& rect, const QSizeF& szChild, const QSizeF& szFrame)
+{
+    int X = (int)round(rect.x() * szChild.width() / szFrame.width());
+    int Y = (int)round(rect.y() * szChild.height() / szFrame.height());
+    int W = (int)round(rect.width() * szChild.width() / szFrame.width());
+    int H = (int)round(rect.height() * szChild.height() / szFrame.height());
+
+    return QRect {QPoint{X,Y}, QSize{W,H}};
 }
 
 void PicLabel::moveLabels()
 {
-    QSizeF szPic = (_pixmap ? _pixmap->size() : QSizeF(336, 224));
+    bool useSmallLabel = !(_isSideA || _isSideB) && (_title.text().length() < 20);
 
-    int X = (int)round(150.0 * width() / szPic.width());
-    int Y = (int)round(25.0 * height() / szPic.height());
-    int W = (int)round(110.0 * width() / szPic.width());
-    int H = (int)round(48.0 * height() / szPic.height());
+    QSizeF szPic = (_pixmap ? _pixmap->size() : QSizeF(336,224));
 
-    _lblText->setGeometry(X, Y, W, H);
+    const int lblPtX = useSmallLabel ? 150 : 117;
+    const int lblSzW = useSmallLabel ? 110 : 140;
+    const QRectF LABEL_RECT {QPointF{lblPtX,25}, QSizeF{lblSzW,48}};
+    const QRect scaledRect = scaleRect(LABEL_RECT, size(), QSizeF{szPic.width(),szPic.height()});
+
+    _title.setGeometry(scaledRect);
+
+    const QRectF INDEX_RECT {QPointF{80,25}, QSizeF{20,20}};
+    const QRect indexRect = scaleRect(INDEX_RECT, size(), QSizeF{szPic.width(),szPic.height()});
+
+    _diskNo.setGeometry(indexRect);
 }
 
 void PicLabel::scaleFonts()
 {
-    QFont font = _lblText->font();
-    double pix = round((double)_lblText->size().height() / 3.5);
+    QFont font = _title.font();
+    double pix = round((double)_title.size().height() / 3.5);
 
     font.setPixelSize((int)pix);
 
-    _lblText->setFont(font);
+    _title.setFont(font);
+
+    font = _diskNo.font();
+    pix = round((double)_diskNo.size().height() / 2.0);
+
+    font.setPixelSize((int)pix);
+
+    _diskNo.setFont(font);
 }
 
 void PicLabel::update()
 {
-    if (_lblText)
-    {
-        moveLabels();
-        scaleFonts();
-    }
+    moveLabels();
+    scaleFonts();
+    QLabel::update();
 }
 
 double PicLabel::ratio()
@@ -126,4 +199,20 @@ QSize PicLabel::sizeHint() const
         return QSize(200,130);  // TBD: why isn't this 1:1 with pixel ruler? (on a 4k monitor)
 
     return QSize(_pixmap->width(), _pixmap->height());
+}
+
+Title::Title(QWidget* parent) : QLabel(parent)
+{
+    QFont font("Ink Free");
+    font.setPointSize(12);
+    setFont(font);
+    setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    setWordWrap(true);
+}
+
+DiskNo::DiskNo(QWidget* parent) : QLabel(parent)
+{
+    QFont font("Courier New");
+    font.setPointSize(12);
+    setFont(font);
 }

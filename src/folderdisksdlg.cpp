@@ -144,39 +144,9 @@ void FolderDisksDlg::onDiskChanged()
     }
 
     RespeqtSettings::instance()->setMostRecentFolderDisks(fullName);
-
     MainWindow::instance()->mountFileWithDefaultProtection(0, fullName);
 
-    // 1. look for a preview/thumbnail with diskname.png
-    QString   imagePath = fiDisk.absolutePath() + "/" + fiDisk.completeBaseName() + ".png";
-    QFileInfo fiPreview = QFileInfo(imagePath);
-    const QString BUILT_IN_FLOPPY_PNG = ":/icons/other-icons/floppy336x224.png";
-
-    if (!fiPreview.exists())
-    {
-        // 2. use a generic name for default thumbnail
-        imagePath = fiDisk.absolutePath() + "/FolderDisks.png";
-        fiPreview = QFileInfo(imagePath);
-    }
-    if (!fiPreview.exists())
-    {
-        // 3. load built-in image of a 5 1/2-inch floppy disk
-        imagePath = BUILT_IN_FLOPPY_PNG;
-    }
-
-    // now we can load the thumbnail/preview into the corner
-    ui->lblPreview->setPicPath(imagePath);
-    double ratio = ui->lblPreview->ratio();
-    ui->splitTopDirBotPng->setRatio(ratio);
-    ui->splitLeftAtrRightDirPng->setRatio(ratio);
-
-    // TBD 1. allow drop target or paste image, show hint text
-    // TBD 2. interop with emulator code, boot it and show screen
-
-    // get a list of files to show in the file list pane
-
-    QString fileList;
-    QString labelText;
+    QString fileList;   // get a list of files to show in the file list pane
 
     if (sio)
     {
@@ -216,23 +186,25 @@ void FolderDisksDlg::onDiskChanged()
         fileList = "!SIO device not available:\nNo Files";
     }
 
+    bool hasFileError = false;
     if (fileList[0] == '!') // detected error/annomally parsing filesystem above
     {
         qDebug() << fileList;
         fileList[0] = '\n';
-
-        // show a '?' over the floppy disk image's label (if shown)
-        if (imagePath == BUILT_IN_FLOPPY_PNG)
-            labelText = "?";
-    }
-    else if (imagePath == BUILT_IN_FLOPPY_PNG)
-    {
-        // no error, show the disk base file name
-        labelText = fiDisk.completeBaseName();
+        hasFileError = true;
     }
 
-    ui->lblPreview->setText(labelText, labelText == "?");
     ui->lblFileList->setText(fileList);
+
+    ui->lblPreview->setDiskError(hasFileError);
+    ui->lblPreview->setDiskName(fullName);
+
+    double ratio = ui->lblPreview->ratio();
+    ui->splitTopDirBotPng->setRatio(ratio);
+    ui->splitLeftAtrRightDirPng->setRatio(ratio);
+
+    // TBD 1. allow drop target or paste image, show hint text
+    // TBD 2. interop with emulator code, boot it and show screen
 }
 
 QString FolderDisksDlg::getRecentDisk(QString folder)

@@ -116,15 +116,22 @@ void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*c
       logFile->write(": [Fatal]    ");
       break;
   }
-  QByteArray localMsg = msg.toLocal8Bit();
+  QString nonConstMsg(msg);
+  if (msg.startsWith("ASSERT"))
+      nonConstMsg = "123" + msg;
+  QByteArray localMsg = nonConstMsg.toLocal8Bit();
   QByteArray displayMsg = localMsg.mid(3);
   logFile->write(displayMsg);
   logFile->write("\n");
   if (type == QtFatalMsg) {
     logFile->close();
+#if defined(QT_NO_DEBUG) // allow debugger to survive fatal error
     abort();
+#elif defined (Q_OS_WIN)
+    __debugbreak();
+#endif
   }
-  logMutex->unlock();
+  logMutex->unlock();   // QtCreator breaks *here* on fatal error, crash or assert.
 
   if (msg[0] == '!') {
 #ifdef QT_NO_DEBUG

@@ -72,5 +72,7 @@
         <file>silk-icons/icons/shield.png</file>
         <file>silk-icons/icons/shield_go.png</file>
         <file>other-icons/floppy336x224.png</file>
+        <file>other-icons/floppy336x224-back-no.png</file>
+        <file>other-icons/floppy336x224-no.png</file>
     </qresource>
 </RCC>
