@@ -34,10 +34,10 @@ void PicLabel::setDiskName(const QString& fileName)
     QString picPath = findImage();  // find a custom or built-in pic
     loadPixmap(picPath);            // load the pixmap from the new path name/resource
 
-    if (picPath[0] != ':')          // built-in pic resource?
+    if (picPath[0] != ':')          // custom pic?...
     {
-        _diskNo.clear();
-        _title.clear();
+        _diskNo.clear();            // no number overlay
+        _title.clear();             // no title overlay
     }
 
     update();
