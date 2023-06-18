@@ -186,17 +186,13 @@ void FolderDisksDlg::onDiskChanged()
         fileList = "!SIO device not available:\nNo Files";
     }
 
-    bool hasFileError = false;
     if (fileList[0] == '!') // detected error/annomally parsing filesystem above
     {
         qDebug() << fileList;
         fileList[0] = '\n';
-        hasFileError = true;
     }
 
     ui->lblFileList->setText(fileList);
-
-    ui->lblPreview->setDiskError(hasFileError);
     ui->lblPreview->setDiskName(fullName);
 
     double ratio = ui->lblPreview->ratio();

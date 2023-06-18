@@ -4,6 +4,9 @@
 #include <QRegularExpression>
 #include <QFileInfo>
 #include <QDebug>
+#include <QDir>
+#include <QFileInfo>
+#include <QImageReader>
 
 
 PicLabel::PicLabel(QWidget* parent) : QLabel(parent)
@@ -19,60 +22,28 @@ PicLabel::~PicLabel()
     }
 }
 
-bool PicLabel::isFloppyPng()
+void PicLabel::setDiskName(const QString& fileName)
 {
-    return (!_picPath.isEmpty() && (_picPath.at(0) == ':'));
-}
-
-void PicLabel::setDiskName(const QString &diskName)
-{
-    QFileInfo fiDisk = QFileInfo(diskName);
-    if (!fiDisk.exists())
+    if ((_diskName == fileName) || !QFileInfo(fileName).exists())
         return;
 
-    // 1. look for a preview/thumbnail with diskname.png
-    QString   fileName  = fiDisk.completeBaseName();
-    QString   imagePath = fiDisk.absolutePath() + "/" + fileName + ".png";
-    QFileInfo fiPreview = QFileInfo(imagePath);
+    _diskName = fileName;
 
-    setText(fileName);
+    parseName();    // splits index | b-side | title (TBD: re-think side effects)
 
-    if (!fiPreview.exists())
+    QString picPath = findImage();  // find a custom or built-in pic
+    loadPixmap(picPath);            // load the pixmap from the new path name/resource
+
+    if (picPath[0] != ':')          // built-in pic resource?
     {
-        // 2. use a generic name for default thumbnail
-        imagePath = fiDisk.absolutePath() + "/FolderDisks.png";
-        fiPreview = QFileInfo(imagePath);
-    }
-    if (!fiPreview.exists())
-    {
-        // 3. load built-in image of a 5 1/2-inch floppy disk
-        if (_isSideA)
-            imagePath = FLOPPY_INDEXED_PNG;
-        else if (_isSideB)
-            imagePath = FLOPPY_BACKSIDE_PNG;
-        else
-            imagePath = FLOPPY_336x224_PNG;
-    }
-    else
-    {
-        _title.clear();
         _diskNo.clear();
+        _title.clear();
     }
-
-    setPicPath(imagePath);  // load the thumbnail/preview into the pixmap
-
-    if (isFloppyPng() && _diskErr)
-        QLabel::setText("?");
 
     update();
 }
 
-void PicLabel::setDiskError(bool error)
-{
-    _diskErr = error;
-}
-
-void PicLabel::setPicPath(const QString& picPath)
+void PicLabel::loadPixmap(const QString& picPath)
 {
     if (_picPath == picPath)
         return;
@@ -87,30 +58,92 @@ void PicLabel::setPicPath(const QString& picPath)
     Q_ASSERT(_pixmap && !_pixmap->isNull());
 }
 
-void PicLabel::setText(const QString& text)
+void PicLabel::parseName()
 {
-    clear();
+    clear();                        // clear parent label text (not used)
     _title.clear();
     _diskNo.clear();
+    _isSideA = _isSideB = false;    // either of these implies the disk is number indexed
 
-    QRegularExpression re("(^\\d+)( )(.*)");
-    auto rem = re.match(text); 
-    _isSideA = rem.hasMatch();
-    _isSideB = false;
+    auto fileInfo = QFileInfo {_diskName};
 
-    if (!_isSideA)
-    {
-        re.setPattern("(^\\d+)([b|B] )(.*)");
-        rem = re.match(text);
-        _isSideB = rem.hasMatch();
-    }
+    Q_ASSERT(fileInfo.exists());    // validated prior to this call
+
+    QString baseName = fileInfo.completeBaseName();
+
+    QRegularExpression re("(^\\d+)([b|B]?)(\\.?)(.*)");
+    auto rem = re.match(baseName);
+
     if (rem.hasMatch())
     {
         _diskNo.setText(rem.captured(1));
-        _title.setText(rem.captured(3));
+        _title.setText(rem.captured(4));
+
+        _isSideB = rem.captured(2).toUpper() == "B";
+        _isSideA = !_isSideB;
     }
-    if (_title.isEmpty())
-        _title.setText(text);
+    else
+    {
+        _title.setText(baseName);
+    }
+}
+
+static QStringList toFileTypes(const QList<QByteArray>& list)
+{
+    QStringList strings;
+
+    foreach (const QByteArray& item, list)
+    {
+        QString fileSpec = "*." + QString::fromLocal8Bit(item);
+        strings.append(fileSpec);
+    }
+
+    return strings;
+}
+
+QString PicLabel::findImage()
+{
+    auto fileInfo = QFileInfo {_diskName};
+    auto pathName = fileInfo.absolutePath();
+
+    // 1. check for same index prefixed image file in the disk folder
+    // ex: disk name = 12b.Title of Disk.ATR
+    //     image file = 12b.Menu Screen.PNG (TBD: use mid string as tooltip?)
+    // or: image file = 12b.PNG
+
+    if (!_diskNo.isEmpty())     // check if current disk has index prefix NN. or NNb.
+    {
+        QDir dir {pathName};
+        auto formats = QImageReader::supportedImageFormats();
+        auto entries = dir.entryList(toFileTypes(formats));
+        auto bsidexp = _isSideB ? QString("[b|B]") : QString();
+        auto sregexp = QString("^%1%2\\..*").arg(_diskNo.text()).arg(bsidexp);
+        auto qregexp = QRegularExpression {sregexp};
+
+        for (QString entry : entries)
+        {
+            auto matcher = qregexp.match(entry);
+            if (matcher.hasMatch())
+                return pathName + "/" + entry;
+        }
+    }
+
+    // 2. use generic name for default thumbnail
+
+    auto imagePath = pathName + "/FolderDisks.png"; // TBD: support any image type
+    auto fiPreview = QFileInfo(imagePath);
+
+    if (fiPreview.exists())
+        return imagePath;
+
+    // 3. load built-in image of a 5 1/2-inch floppy disk
+
+    if (_isSideA)
+        return FLOPPY_INDEXED_PNG;  // has 2 labels: (small) disk no./index & (large) title/content
+    if (_isSideB)
+        return FLOPPY_BACKSIDE_PNG; // same 2 labels but flip-side of double-sided floppy
+
+    return FLOPPY_336x224_PNG;      // used if all else fails
 }
 
 QRect PicLabel::scaleRect(const QRectF& rect, const QSizeF& szChild, const QSizeF& szFrame)
@@ -125,7 +158,7 @@ QRect PicLabel::scaleRect(const QRectF& rect, const QSizeF& szChild, const QSize
 
 void PicLabel::moveLabels()
 {
-    bool useSmallLabel = !(_isSideA || _isSideB) && (_title.text().length() < 20);
+    bool useSmallLabel = !(_isSideA || _isSideB); // && (_title.text().length() < 20);
 
     QSizeF szPic = (_pixmap ? _pixmap->size() : QSizeF(336,224));
 
@@ -208,6 +241,7 @@ Title::Title(QWidget* parent) : QLabel(parent)
     setFont(font);
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
     setWordWrap(true);
+//  setFrameStyle(QFrame::Box);
 }
 
 DiskNo::DiskNo(QWidget* parent) : QLabel(parent)

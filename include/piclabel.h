@@ -25,10 +25,7 @@ public:
     PicLabel(QWidget* parent);
     virtual ~PicLabel();
 
-    void setDiskName(const QString& diskName);
-    void setPicPath(const QString& picPath);
-    void setText(const QString& text);
-    void setDiskError(bool error = true);
+    void setDiskName(const QString& fileName);
 
     double ratio();
 
@@ -39,11 +36,11 @@ protected:
     virtual void resizeEvent(QResizeEvent* event) override;
 
 private:
+    QString  _diskName;
     QString  _picPath;
     QPixmap* _pixmap  {nullptr};
     Title    _title   {this};
     DiskNo   _diskNo  {this};
-    bool     _diskErr {false};
     bool     _isSideA {false};
     bool     _isSideB {false};
 
@@ -51,12 +48,12 @@ private:
     const QString FLOPPY_INDEXED_PNG  {":/icons/other-icons/floppy336x224-no.png"};
     const QString FLOPPY_BACKSIDE_PNG {":/icons/other-icons/floppy336x224-back-no.png"};
 
-    bool isFloppyPng();
-
+    void loadPixmap(const QString& picPath);
+    void parseName();
+    QString findImage();
     void moveLabels();
     void scaleFonts();
     void update();
-
     QRect scaleRect(const QRectF& rect, const QSizeF& szChild, const QSizeF& szFrame);
 };
 
