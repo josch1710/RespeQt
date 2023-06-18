@@ -38,6 +38,7 @@ protected:
 private:
     QString  _diskName;
     QString  _picPath;
+    QString  _picTooltip;
     QPixmap* _pixmap  {nullptr};
     Title    _title   {this};
     DiskNo   _diskNo  {this};

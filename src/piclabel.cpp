@@ -117,16 +117,25 @@ QString PicLabel::findImage()
         auto formats = QImageReader::supportedImageFormats();
         auto entries = dir.entryList(toFileTypes(formats));
         auto bsidexp = _isSideB ? QString("[b|B]") : QString();
-        auto sregexp = QString("^%1%2\\..*").arg(_diskNo.text()).arg(bsidexp);
+        auto sregexp = QString("^(%1)(%2)(\\.)(.*)").arg(_diskNo.text()).arg(bsidexp);
         auto qregexp = QRegularExpression {sregexp};
 
         for (QString entry : entries)
         {
             auto matcher = qregexp.match(entry);
             if (matcher.hasMatch())
+            {
+                QString tip = matcher.captured(4);
+                int pos = tip.lastIndexOf('.');
+                if (pos >= 0)
+                    tip.truncate(pos);
+                setToolTip(tip);
                 return pathName + "/" + entry;
+            }
         }
     }
+
+    setToolTip("");
 
     // 2. use generic name for default thumbnail
 
