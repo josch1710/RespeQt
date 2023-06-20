@@ -269,6 +269,25 @@ Title::Title(QWidget* parent) : QLabel(parent)
 //  setFrameStyle(QFrame::Box);
 }
 
+void Title::setLineHeight(int height)
+{
+    _lineHeight = height;
+}
+
+void Title::setText(const QString& text)
+{
+    QString html
+    {
+        "<html><head/><body>"
+        "<p style=\"line-height:%1\">"
+        "<span>%2</span></p>"
+        "</body></html>"
+    };
+
+    QString fmtStr = html.arg(_lineHeight).arg(text);
+    QLabel::setText(fmtStr);
+}
+
 DiskNo::DiskNo(QWidget* parent) : QLabel(parent)
 {
     QFont font("Courier New");

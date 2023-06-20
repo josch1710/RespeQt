@@ -17,6 +17,10 @@ class Title : public QLabel
 public:
     Title(QWidget* parent);
     bool isEmpty() { return text().isEmpty(); }
+    void setText(const QString& text);
+    void setLineHeight(int height);
+private:
+    int _lineHeight = 70;
 };
 
 class PicLabel : public QLabel
