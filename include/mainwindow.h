@@ -39,7 +39,7 @@
 #include "siorecorder.h"
 #include "sioworker.h"
 #include "folderdisks.h"
-#include "folderdisksdlg.h"
+#include "diskbrowserdlg.h"
 
 namespace Ui {
   class MainWindow;
@@ -79,7 +79,7 @@ private:
   Qt::WindowStates oldWindowStates;
   QString lastMessage;
   int lastMessageRepeat;
-  FolderDisksDlg* folderDisksDlg;
+  DiskBrowserDlg* diskBrowserDlg;
 
   bool isClosing;
 
@@ -204,8 +204,8 @@ private slots:
   void toggleShadeTriggered();   //
   void showLogWindowTriggered(); //
 
-  void folderDisksTriggered();
-  void openFolderDisks();
+  void diskBrowserTriggered();
+  void openDiskBrowser();
 
   void showHideDrives();                       //
   void sioFinished();                          //

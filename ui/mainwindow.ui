@@ -228,7 +228,7 @@
     <addaction name="actionToggleMiniMode"/>
     <addaction name="actionToggleShade"/>
     <addaction name="actionLogWindow"/>
-    <addaction name="actionFolderDisks"/>
+    <addaction name="actionDiskBrowser"/>
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="layoutDirection">
@@ -683,19 +683,19 @@
     <string>Limit file entries to 64</string>
    </property>
   </action>
-  <action name="actionFolderDisks">
+  <action name="actionDiskBrowser">
    <property name="icon">
     <iconset resource="../resources/icons.qrc">
-     <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
+     <normaloff>:/icons/oxygen-icons/16x16/filesystems/folder_html.png</normaloff>:/icons/oxygen-icons/16x16/filesystems/folder_html.png</iconset>
    </property>
    <property name="text">
-    <string>Open folder disks</string>
+    <string>Open Disk Browser</string>
    </property>
    <property name="toolTip">
-    <string>Open folder of disk images</string>
+    <string>Open/Browse a folder with a collection of disk images</string>
    </property>
    <property name="statusTip">
-    <string>Open folder of disk images</string>
+    <string>Open/Browse a folder with a collection of disk images</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+D</string>

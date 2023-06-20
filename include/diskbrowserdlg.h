@@ -1,21 +1,21 @@
-#ifndef FOLDERDISKSDLG_H
-#define FOLDERDISKSDLG_H
+#ifndef DISKBROWSERDLG_H
+#define DISKBROWSERDLG_H
 
 #include <QDialog>
 #include "folderdisks.h"
 #include "sioworker.h"
 
 namespace Ui {
-class FolderDisksDlg;
+class DiskBrowserDlg;
 }
 
-class FolderDisksDlg : public QDialog
+class DiskBrowserDlg : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit FolderDisksDlg(SioWorkerPtr pSio, QWidget *parent = nullptr);
-    ~FolderDisksDlg();
+    explicit DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent = nullptr);
+    ~DiskBrowserDlg();
 
     int getHorzSplitPos();
     int getVertSplitPos();
@@ -28,7 +28,7 @@ private:
     QString getMostRecentDisk();
     QString getRecentDisk(QString folder);
 
-    Ui::FolderDisksDlg *ui;
+    Ui::DiskBrowserDlg *ui;
     FolderDisks folderDisks;
     SioWorkerPtr sio;
 
@@ -38,4 +38,4 @@ private slots:
     void onFolderChanged(QString lastDir);
 };
 
-#endif // FOLDERDISKSDLG_H
+#endif // DISKBROWSERDLG_H

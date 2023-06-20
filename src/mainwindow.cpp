@@ -167,7 +167,7 @@ MainWindow::MainWindow()
   qDebug() << "!d" << tr("RespeQt started @ %1.").arg(QDateTime::currentDateTime().toString());
 
   logWindow_ = nullptr;
-  folderDisksDlg = nullptr;
+  diskBrowserDlg = nullptr;
 
   /* Remove old temporaries */
   QDir tempDir = QDir::temp();
@@ -604,13 +604,13 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   // Save various session settings  //
   RespeqtSettings::instance()->saveGeometry(geometry(), isMiniMode);
 
-  if (folderDisksDlg) {
-    RespeqtSettings::instance()->setShowFolderDisks(folderDisksDlg->isVisible());
-    RespeqtSettings::instance()->setFolderDisksRect(folderDisksDlg->geometry());
-    RespeqtSettings::instance()->setFolderDisksHorzSplitPos(folderDisksDlg->getHorzSplitPos());
-    RespeqtSettings::instance()->setFolderDisksVertSplitPos(folderDisksDlg->getVertSplitPos());
+  if (diskBrowserDlg) {
+    RespeqtSettings::instance()->setShowDiskBrowser(diskBrowserDlg->isVisible());
+    RespeqtSettings::instance()->setDiskBrowserRect(diskBrowserDlg->geometry());
+    RespeqtSettings::instance()->setDiskBrowserHorzSplitPos(diskBrowserDlg->getHorzSplitPos());
+    RespeqtSettings::instance()->setDiskBrowserVertSplitPos(diskBrowserDlg->getVertSplitPos());
   } else {
-    RespeqtSettings::instance()->setShowFolderDisks(false);
+    RespeqtSettings::instance()->setShowDiskBrowser(false);
   }
 
   RespeqtSettings::instance()->setD9DOVisible(isD9DOVisible);
@@ -723,11 +723,11 @@ void MainWindow::showEvent(QShowEvent *event) {
     } else {
         showHideDrives();
     }
-    if (RespeqtSettings::instance()->showFolderDisks() && !(folderDisksDlg && folderDisksDlg->isVisible())) {
-      openFolderDisks();
-      folderDisksDlg->setGeometry(RespeqtSettings::instance()->folderDisksRect());
-      folderDisksDlg->setHorzSplitPos(RespeqtSettings::instance()->folderDisksHorzSplitPos());
-      folderDisksDlg->setVertSplitPos(RespeqtSettings::instance()->folderDisksVertSplitPos());
+    if (RespeqtSettings::instance()->showDiskBrowser() && !(diskBrowserDlg && diskBrowserDlg->isVisible())) {
+      openDiskBrowser();
+      diskBrowserDlg->setGeometry(RespeqtSettings::instance()->diskBrowserRect());
+      diskBrowserDlg->setHorzSplitPos(RespeqtSettings::instance()->diskBrowserHorzSplitPos());
+      diskBrowserDlg->setVertSplitPos(RespeqtSettings::instance()->diskBrowserVertSplitPos());
     }
   }
   QMainWindow::showEvent(event);
@@ -1859,11 +1859,11 @@ void MainWindow::openSessionTriggered() {
   isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
   showHideDrives();
 
-  if (RespeqtSettings::instance()->showFolderDisks() && !(folderDisksDlg && folderDisksDlg->isVisible()))
-    openFolderDisks();
+  if (RespeqtSettings::instance()->showDiskBrowser() && !(diskBrowserDlg && diskBrowserDlg->isVisible()))
+    openDiskBrowser();
 
-  if (folderDisksDlg)
-    folderDisksDlg->setGeometry(RespeqtSettings::instance()->folderDisksRect());
+  if (diskBrowserDlg)
+    diskBrowserDlg->setGeometry(RespeqtSettings::instance()->diskBrowserRect());
 
   setSession();
 }
@@ -1883,14 +1883,14 @@ void MainWindow::saveSessionTriggered() {
   // Save mainwindow position and size to session file //
   RespeqtSettings::instance()->saveGeometry(geometry(), isMiniMode);
 
-  if (folderDisksDlg) {
-    RespeqtSettings::instance()->setShowFolderDisks(folderDisksDlg->isVisible());
-    RespeqtSettings::instance()->setFolderDisksRect(folderDisksDlg->geometry());
-    RespeqtSettings::instance()->setFolderDisksHorzSplitPos(folderDisksDlg->getHorzSplitPos());
-    RespeqtSettings::instance()->setFolderDisksVertSplitPos(folderDisksDlg->getVertSplitPos());
+  if (diskBrowserDlg) {
+    RespeqtSettings::instance()->setShowDiskBrowser(diskBrowserDlg->isVisible());
+    RespeqtSettings::instance()->setDiskBrowserRect(diskBrowserDlg->geometry());
+    RespeqtSettings::instance()->setDiskBrowserHorzSplitPos(diskBrowserDlg->getHorzSplitPos());
+    RespeqtSettings::instance()->setDiskBrowserVertSplitPos(diskBrowserDlg->getVertSplitPos());
   }
   else {
-    RespeqtSettings::instance()->setShowFolderDisks(false);
+    RespeqtSettings::instance()->setShowDiskBrowser(false);
   }
 
   RespeqtSettings::instance()->saveSessionToFile(fileName);
@@ -1952,16 +1952,16 @@ void MainWindow::bootOptionTriggered() {
   bod.exec();
 }
 
-void MainWindow::folderDisksTriggered() {
-  openFolderDisks();
+void MainWindow::diskBrowserTriggered() {
+  openDiskBrowser();
 }
 
-void MainWindow::openFolderDisks() {
-  if (!folderDisksDlg) {
-    folderDisksDlg = new FolderDisksDlg(sio, this);
+void MainWindow::openDiskBrowser() {
+  if (!diskBrowserDlg) {
+    diskBrowserDlg = new DiskBrowserDlg(sio, this);
   }
 
-  folderDisksDlg->showNormal();
+  diskBrowserDlg->showNormal();
 }
 
 // This connect the signal from UI to slots
@@ -1983,7 +1983,7 @@ void MainWindow::connectUISignal() {
   connect(ui->actionToggleMiniMode, &QAction::triggered, this, &MainWindow::toggleMiniModeTriggered);
   connect(ui->actionToggleShade, &QAction::triggered, this, &MainWindow::toggleShadeTriggered);
   connect(ui->actionLogWindow, &QAction::triggered, this, &MainWindow::showLogWindowTriggered);
-  connect(ui->actionFolderDisks, &QAction::triggered, this, &MainWindow::folderDisksTriggered);
+  connect(ui->actionDiskBrowser, &QAction::triggered, this, &MainWindow::diskBrowserTriggered);
   connect(ui->actionCaptureSnapshot, &QAction::toggled, this, &MainWindow::toggleSnapshotCapture);
   connect(ui->actionReplaySnapshot, &QAction::triggered, this, &MainWindow::replaySnapshot);
 }

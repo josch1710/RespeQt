@@ -1,5 +1,5 @@
-#include "folderdisksdlg.h"
-#include "ui_folderdisksdlg.h"
+#include "diskbrowserdlg.h"
+#include "ui_diskbrowserdlg.h"
 #include "respeqtsettings.h"
 #include "filesystems/atarifilesystem.h"
 #include "filesystems/dos10filesystem.h"
@@ -13,9 +13,9 @@
 #include "mainwindow.h"
 #include <QFileDialog>
 
-FolderDisksDlg::FolderDisksDlg(SioWorkerPtr pSio, QWidget *parent) :
+DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::FolderDisksDlg)
+    ui(new Ui::DiskBrowserDlg)
 {
     sio = std::move(pSio);
 
@@ -32,14 +32,14 @@ FolderDisksDlg::FolderDisksDlg(SioWorkerPtr pSio, QWidget *parent) :
     onFolderChanged("");
 }
 
-FolderDisksDlg::~FolderDisksDlg()
+DiskBrowserDlg::~DiskBrowserDlg()
 {
     delete ui;
 }
 
-QString FolderDisksDlg::getMostRecentFolder()
+QString DiskBrowserDlg::getMostRecentFolder()
 {
-    QString   fileName = RespeqtSettings::instance()->mostRecentFolderDisks();
+    QString   fileName = RespeqtSettings::instance()->mostRecentBrowserFolder();
     QFileInfo fileInfo = QFileInfo(fileName);
 
     if (fileInfo.isFile())
@@ -48,9 +48,9 @@ QString FolderDisksDlg::getMostRecentFolder()
     return fileName;
 }
 
-QString FolderDisksDlg::getMostRecentDisk()
+QString DiskBrowserDlg::getMostRecentDisk()
 {
-    QString   fileName = RespeqtSettings::instance()->mostRecentFolderDisks();
+    QString   fileName = RespeqtSettings::instance()->mostRecentBrowserFolder();
     QFileInfo fileInfo = QFileInfo(fileName);
 
     if (fileInfo.isFile())
@@ -59,7 +59,7 @@ QString FolderDisksDlg::getMostRecentDisk()
     return fileName;
 }
 
-void FolderDisksDlg::onBrowseFolder()
+void DiskBrowserDlg::onBrowseFolder()
 {
     QString lastDir = getMostRecentFolder();
     QString dirName = QFileDialog::getExistingDirectory(this, tr("Open folder containing disk images"), lastDir);
@@ -71,7 +71,7 @@ void FolderDisksDlg::onBrowseFolder()
     onFolderChanged(dirName);
 }
 
-void FolderDisksDlg::onFolderChanged(QString folder)
+void DiskBrowserDlg::onFolderChanged(QString folder)
 {
     if (folder.isEmpty())
         folder = ui->cboFolderPath->currentText();
@@ -80,8 +80,9 @@ void FolderDisksDlg::onFolderChanged(QString folder)
 
     QString disk = getRecentDisk(folder);
     QString path = disk.isEmpty() ? folder : folder + "/" + disk;
+    // TBD: comment explaining my scheme that uses "path" for both folder and files.
 
-    RespeqtSettings::instance()->setMostRecentFolderDisks(path);
+    RespeqtSettings::instance()->setMostRecentBrowserFolder(path);
 
     refreshFoldersCombobox();
 
@@ -111,12 +112,12 @@ void FolderDisksDlg::onFolderChanged(QString folder)
     }
 }
 
-void FolderDisksDlg::refreshFoldersCombobox()
+void DiskBrowserDlg::refreshFoldersCombobox()
 {
     ui->cboFolderPath->blockSignals(true);
     ui->cboFolderPath->clear();
 
-    foreach (QString name, RespeqtSettings::instance()->recentFolderDisks())
+    foreach (const QString& name, RespeqtSettings::instance()->recentBrowserFolders())
     {
         auto fileInf = QFileInfo(name);
         QString path = fileInf.isFile() ? fileInf.path() : name;
@@ -127,7 +128,7 @@ void FolderDisksDlg::refreshFoldersCombobox()
     ui->cboFolderPath->blockSignals(false);
 }
 
-void FolderDisksDlg::onDiskChanged()
+void DiskBrowserDlg::onDiskChanged()
 {
     if (ui->listDisks->count() == 0)
         return;
@@ -143,7 +144,7 @@ void FolderDisksDlg::onDiskChanged()
         return;
     }
 
-    RespeqtSettings::instance()->setMostRecentFolderDisks(fullName);
+    RespeqtSettings::instance()->setMostRecentBrowserFolder(fullName);
     MainWindow::instance()->mountFileWithDefaultProtection(0, fullName);
 
     QString fileList;   // get a list of files to show in the file list pane
@@ -211,9 +212,9 @@ void FolderDisksDlg::onDiskChanged()
     // TBD 2. interop with emulator code, boot it and show screen
 }
 
-QString FolderDisksDlg::getRecentDisk(QString folder)
+QString DiskBrowserDlg::getRecentDisk(QString folder)
 {
-    foreach (const QString& text, RespeqtSettings::instance()->recentFolderDisks())
+    foreach (const QString& text, RespeqtSettings::instance()->recentBrowserFolders())
     {
         auto fi = QFileInfo(text);
         if (fi.isFile() && (fi.path() == folder))
@@ -223,17 +224,17 @@ QString FolderDisksDlg::getRecentDisk(QString folder)
     return QString();
 }
 
-int FolderDisksDlg::getHorzSplitPos()
+int DiskBrowserDlg::getHorzSplitPos()
 {
     return ui->splitLeftAtrRightDirPng->sizes().at(0);
 }
 
-int FolderDisksDlg::getVertSplitPos()
+int DiskBrowserDlg::getVertSplitPos()
 {
     return ui->splitTopDirBotPng->sizes().at(0);
 }
 
-void FolderDisksDlg::setHorzSplitPos(int pos)
+void DiskBrowserDlg::setHorzSplitPos(int pos)
 {
     if (pos == -1)
         return;
@@ -245,7 +246,7 @@ void FolderDisksDlg::setHorzSplitPos(int pos)
     ui->splitLeftAtrRightDirPng->setSizes(sizes);
 }
 
-void FolderDisksDlg::setVertSplitPos(int pos)
+void DiskBrowserDlg::setVertSplitPos(int pos)
 {
     if (pos == -1)
         return;

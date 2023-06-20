@@ -234,18 +234,18 @@ public:
   bool explorerOnTop();
   void setExplorerOnTop(bool expOnTop);
 
-// Folder Disks settings
-  QString mostRecentFolderDisks();
-  QStringList recentFolderDisks();
-  void setMostRecentFolderDisks(const QString& name);
-  bool showFolderDisks();
-  void setShowFolderDisks(bool show = true);
-  QRect folderDisksRect();
-  void  setFolderDisksRect(QRect rect);
-  int   folderDisksHorzSplitPos();
-  int   folderDisksVertSplitPos();
-  void  setFolderDisksHorzSplitPos(int pos);
-  void  setFolderDisksVertSplitPos(int pos);
+// Disk Browser settings
+  QString mostRecentBrowserFolder();
+  QStringList recentBrowserFolders();
+  void setMostRecentBrowserFolder(const QString& name);
+  bool showDiskBrowser();
+  void setShowDiskBrowser(bool show = true);
+  QRect diskBrowserRect();
+  void  setDiskBrowserRect(QRect rect);
+  int   diskBrowserHorzSplitPos();
+  int   diskBrowserVertSplitPos();
+  void  setDiskBrowserHorzSplitPos(int pos);
+  void  setDiskBrowserVertSplitPos(int pos);
 
   // Printer Spy Mode
   bool isPrinterSpyMode();
@@ -335,8 +335,8 @@ public:
   QSettings *mSettings;
 private:
   //void writeRecentImageSettings();
-  void writeRecentFolderDisks(const QStringList& folderDisks);
-  const int maxRecentFolderDisks = 10;
+  void writeRecentBrowserFolders(const QStringList& folders);
+  const int maxRecentBrowserFolders = 10;
 
   bool mIsFirstTime;
 

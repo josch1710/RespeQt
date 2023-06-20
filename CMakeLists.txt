@@ -54,7 +54,7 @@ set(SOURCES
         src/diskimages/diskimage.cpp
         src/diskimages/folderimage.cpp
     src/folderdisks.cpp
-    src/folderdisksdlg.cpp
+    src/diskbrowserdlg.cpp
     src/picsplitter.cpp
     src/piclabel.cpp
     src/createimagedialog.cpp
@@ -119,7 +119,7 @@ set(HEADERS
         include/diskimages/diskimage.h
         include/diskimages/folderimage.h
     include/folderdisks.h
-    include/folderdisksdlg.h
+    include/diskbrowserdlg.h
     include/picsplitter.h
     include/piclabel.h
     include/createimagedialog.h
@@ -182,7 +182,7 @@ set(FORMS
     ui/printers/outputwindow.ui
     ui/printerwidget.ui
     ui/printers/textprinterwindow.ui
-    ui/folderdisksdlg.ui
+    ui/diskbrowserdlg.ui
 )
 
 set(RESOURCES

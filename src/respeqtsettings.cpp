@@ -1025,31 +1025,31 @@ void RespeqtSettings::setDebugMenuVisible(bool menuVisible) {
   mSettings->setValue("DebugMenuVisible", menuVisible);
 }
 
-QString RespeqtSettings::mostRecentFolderDisks() {
-  QStringList folderDisks = recentFolderDisks();
+QString RespeqtSettings::mostRecentBrowserFolder() {
+  QStringList folders = recentBrowserFolders();
 
-  if (!folderDisks.isEmpty())
-    return folderDisks.front();
+  if (!folders.isEmpty())
+    return folders.front();
 
   return QString();
 }
 
-QStringList RespeqtSettings::recentFolderDisks() {
-  QStringList folderDisks;
+QStringList RespeqtSettings::recentBrowserFolders() {
+  QStringList folders;
 
-  int size = mSettings->beginReadArray("RecentFolderDisks");
+  int size = mSettings->beginReadArray("RecentBrowserFolders");
   for (int i = 0; i < size; i++) {
     mSettings->setArrayIndex(i);
-    QString value = mSettings->value("FolderDisks").toString();
-    folderDisks.append(value);
+    QString value = mSettings->value("Folder").toString();
+    folders.append(value);
   }
   mSettings->endArray();
 
-  return folderDisks;
+  return folders;
 }
 
-void RespeqtSettings::setMostRecentFolderDisks(const QString& name) {
-  if (mostRecentFolderDisks() == name)
+void RespeqtSettings::setMostRecentBrowserFolder(const QString& name) {
+  if (mostRecentBrowserFolder() == name)
     return;
 
   auto fileInfo = QFileInfo(name);
@@ -1059,72 +1059,72 @@ void RespeqtSettings::setMostRecentFolderDisks(const QString& name) {
 
   QString path = fileInfo.isFile() ? fileInfo.path() : name;
 
-  QStringList folderDisks = recentFolderDisks();
+  QStringList folders = recentBrowserFolders();
 
-  for (int i = 0; i < folderDisks.size(); ++i) {
-    QString text = folderDisks.at(i);
+  for (int i = 0; i < folders.size(); ++i) {
+    QString text = folders.at(i);
     QFileInfo fi = QFileInfo(text);
     QString test = fi.isFile() ? fi.path() : text;
     if (test == path)
-      folderDisks.removeAt(i);
+      folders.removeAt(i);
   }
-  folderDisks.insert(0, name);
+  folders.insert(0, name);
 
-  if (folderDisks.count() > maxRecentFolderDisks)
-    folderDisks.removeLast();
+  if (folders.count() > maxRecentBrowserFolders)
+    folders.removeLast();
 
-  writeRecentFolderDisks(folderDisks);
+  writeRecentBrowserFolders(folders);
 }
 
-void RespeqtSettings::writeRecentFolderDisks(const QStringList& folderDisks) {
+void RespeqtSettings::writeRecentBrowserFolders(const QStringList& folders) {
   int index = 0;
 
-  mSettings->beginWriteArray("RecentFolderDisks");
-  foreach (QString folderDisk, folderDisks) {
-    auto fileInfo = QFileInfo(folderDisk);
+  mSettings->beginWriteArray("RecentBrowserFolders");
+  foreach (QString folder, folders) {
+    auto fileInfo = QFileInfo(folder);
     if (!fileInfo.exists()) {
       if (fileInfo.isFile())
-        folderDisk = fileInfo.path();
+        folder = fileInfo.path();
       else
         continue;
 
-      if (!QFileInfo::exists(folderDisk))
+      if (!QFileInfo::exists(folder))
         continue;
     }
     mSettings->setArrayIndex(index++);
-    mSettings->setValue("FolderDisks", folderDisk);
+    mSettings->setValue("Folder", folder);
   }
   mSettings->endArray();
 }
 
-bool RespeqtSettings::showFolderDisks() {
-  return mSettings->value("ShowFolderDisks").toBool();
+bool RespeqtSettings::showDiskBrowser() {
+  return mSettings->value("ShowDiskBrowser").toBool();
 }
 
-void RespeqtSettings::setShowFolderDisks(bool show /*= true*/) {
-  mSettings->setValue("ShowFolderDisks", show);
+void RespeqtSettings::setShowDiskBrowser(bool show /*= true*/) {
+  mSettings->setValue("ShowDiskBrowser", show);
 }
 
-QRect RespeqtSettings::folderDisksRect() {
-  return mSettings->value("FolderDisksRect").toRect();
+QRect RespeqtSettings::diskBrowserRect() {
+  return mSettings->value("DiskBrowserRect").toRect();
 }
 
-void RespeqtSettings::setFolderDisksRect(QRect rect) {
-  mSettings->setValue("FolderDisksRect", rect);
+void RespeqtSettings::setDiskBrowserRect(QRect rect) {
+  mSettings->setValue("DiskBrowserRect", rect);
 }
 
-int RespeqtSettings::folderDisksHorzSplitPos() {
-  return mSettings->value("FolderDisksHorzSplitPos", -1).toInt();
+int RespeqtSettings::diskBrowserHorzSplitPos() {
+  return mSettings->value("DiskBrowserHorzSplitPos", -1).toInt();
 }
 
-int RespeqtSettings::folderDisksVertSplitPos() {
-  return mSettings->value("FolderDisksVertSplitPos", -1).toInt();
+int RespeqtSettings::diskBrowserVertSplitPos() {
+  return mSettings->value("DiskBrowserVertSplitPos", -1).toInt();
 }
 
-void RespeqtSettings::setFolderDisksHorzSplitPos(int pos) {
-  mSettings->setValue("FolderDisksHorzSplitPos", pos);
+void RespeqtSettings::setDiskBrowserHorzSplitPos(int pos) {
+  mSettings->setValue("DiskBrowserHorzSplitPos", pos);
 }
 
-void RespeqtSettings::setFolderDisksVertSplitPos(int pos) {
-  mSettings->setValue("FolderDisksVertSplitPos", pos);
+void RespeqtSettings::setDiskBrowserVertSplitPos(int pos) {
+  mSettings->setValue("DiskBrowserVertSplitPos", pos);
 }

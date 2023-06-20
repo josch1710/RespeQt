@@ -139,7 +139,7 @@ QString PicLabel::findImage()
 
     // 2. use generic name for default thumbnail
 
-    auto imagePath = pathName + "/FolderDisks.png"; // TBD: support any image type
+    auto imagePath = pathName + "/respeqt_db.png"; // TBD: support any image type
     auto fiPreview = QFileInfo(imagePath);
 
     if (fiPreview.exists())

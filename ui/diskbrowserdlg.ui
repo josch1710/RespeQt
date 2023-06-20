@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FolderDisksDlg</class>
- <widget class="QDialog" name="FolderDisksDlg">
+ <class>DiskBrowserDlg</class>
+ <widget class="QDialog" name="DiskBrowserDlg">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Folder Disks</string>
+   <string>Disk Browser</string>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
@@ -212,7 +212,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>FolderDisksDlg</receiver>
+   <receiver>DiskBrowserDlg</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -228,7 +228,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>FolderDisksDlg</receiver>
+   <receiver>DiskBrowserDlg</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
