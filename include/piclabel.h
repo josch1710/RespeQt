@@ -45,9 +45,9 @@ private:
     bool     _isSideA {false};
     bool     _isSideB {false};
 
-    const QString FLOPPY_336x224_PNG  {":/icons/other-icons/floppy336x224.png"};
-    const QString FLOPPY_INDEXED_PNG  {":/icons/other-icons/floppy336x224-no.png"};
-    const QString FLOPPY_BACKSIDE_PNG {":/icons/other-icons/floppy336x224-back-no.png"};
+    const QString FLOPPY_DEFAULT_PNG  {":/icons/other-icons/floppy.png"};
+    const QString FLOPPY_INDEXED_PNG  {":/icons/other-icons/floppy_front.png"};
+    const QString FLOPPY_BACKSIDE_PNG {":/icons/other-icons/floppy_back.png"};
 
     void loadPixmap(const QString& picPath);
     void parseName();

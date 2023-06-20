@@ -152,7 +152,7 @@ QString PicLabel::findImage()
     if (_isSideB)
         return FLOPPY_BACKSIDE_PNG; // same 2 labels but flip-side of double-sided floppy
 
-    return FLOPPY_336x224_PNG;      // used if all else fails
+    return FLOPPY_DEFAULT_PNG;      // used if all else fails
 }
 
 QRect PicLabel::scaleRect(const QRectF& rect, const QSizeF& szChild, const QSizeF& szFrame)
@@ -167,21 +167,37 @@ QRect PicLabel::scaleRect(const QRectF& rect, const QSizeF& szChild, const QSize
 
 void PicLabel::moveLabels()
 {
-    bool useSmallLabel = !(_isSideA || _isSideB); // && (_title.text().length() < 20);
+    if (!_pixmap || _pixmap->isNull())
+        return;
 
-    QSizeF szPic = (_pixmap ? _pixmap->size() : QSizeF(336,224));
+    const QRectF LABEL_RECT   {QPointF{95,24}, QSizeF{105,49}};
+    const QRectF LABEL_RECT_A {QPointF{57,24}, QSizeF{142,49}};
+    const QRectF LABEL_RECT_B {QPointF{23,24}, QSizeF{142,49}};
 
-    const int lblPtX = useSmallLabel ? 150 : 117;
-    const int lblSzW = useSmallLabel ? 110 : 140;
-    const QRectF LABEL_RECT {QPointF{lblPtX,25}, QSizeF{lblSzW,48}};
-    const QRect scaledRect = scaleRect(LABEL_RECT, size(), QSizeF{szPic.width(),szPic.height()});
+    QRectF labelRect = LABEL_RECT;
+
+    if (_isSideA)
+        labelRect = LABEL_RECT_A;
+    if (_isSideB)
+        labelRect = LABEL_RECT_B;
+
+    const QSizeF szPic {_pixmap->size()};
+    const QRect scaledRect = scaleRect(labelRect, size(), szPic);
 
     _title.setGeometry(scaledRect);
 
-    const QRectF INDEX_RECT {QPointF{80,25}, QSizeF{20,20}};
-    const QRect indexRect = scaleRect(INDEX_RECT, size(), QSizeF{szPic.width(),szPic.height()});
+    if (_isSideA || _isSideB)
+    {
+        // move the index rect
+        const double indexX = (_isSideA ? 25 : 175);
+        const QRectF INDEX_RECT {QPointF{indexX,25}, QSizeF{20,20}};
+        const QRect  indexRect = scaleRect(INDEX_RECT, size(), szPic);
 
-    _diskNo.setGeometry(indexRect);
+        _diskNo.setGeometry(indexRect);
+        _diskNo.setVisible(true);
+    }
+    else
+        _diskNo.setVisible(false);
 }
 
 void PicLabel::scaleFonts()
@@ -210,7 +226,7 @@ void PicLabel::update()
 
 double PicLabel::ratio()
 {
-    double aspectRatio = 4.0 / 3.0;     // default is 4:3
+    double aspectRatio = 0.0;
 
     if (_pixmap)
         aspectRatio = static_cast<double>(_pixmap->width()) / _pixmap->height();

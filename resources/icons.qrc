@@ -71,8 +71,8 @@
         <file>other-icons/toggleosb.png</file>
         <file>silk-icons/icons/shield.png</file>
         <file>silk-icons/icons/shield_go.png</file>
-        <file>other-icons/floppy336x224.png</file>
-        <file>other-icons/floppy336x224-back-no.png</file>
-        <file>other-icons/floppy336x224-no.png</file>
+        <file>other-icons/floppy.png</file>
+        <file>other-icons/floppy_back.png</file>
+        <file>other-icons/floppy_front.png</file>
     </qresource>
 </RCC>

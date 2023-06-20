@@ -10,7 +10,7 @@ public:
     PicSplitter(QWidget* parent);
 
     void setOther(QSplitter* other);
-    void setRatio(double ratio);
+    void setRatio(double ratio, bool moveOther = false);
 
 private slots:
     void onSplitterMoved();

@@ -192,20 +192,28 @@ void FolderDisksDlg::onDiskChanged()
         fileList[0] = '\n';
     }
 
+    double oldRatio = ui->lblPreview->ratio();
+
     ui->lblFileList->setText(fileList);
     ui->lblPreview->setDiskName(fullName);
 
-    double ratio = ui->lblPreview->ratio();
-    ui->splitTopDirBotPng->setRatio(ratio);
-    ui->splitLeftAtrRightDirPng->setRatio(ratio);
+    double newRatio = ui->lblPreview->ratio();
 
+    if (oldRatio != newRatio)
+    {
+        if (newRatio == 0.0)
+            newRatio = 1.0;     // TBD
+
+        ui->splitLeftAtrRightDirPng->setRatio(newRatio);
+        ui->splitTopDirBotPng->setRatio(newRatio, true);
+    }
     // TBD 1. allow drop target or paste image, show hint text
     // TBD 2. interop with emulator code, boot it and show screen
 }
 
 QString FolderDisksDlg::getRecentDisk(QString folder)
 {
-    foreach (QString text, RespeqtSettings::instance()->recentFolderDisks())
+    foreach (const QString& text, RespeqtSettings::instance()->recentFolderDisks())
     {
         auto fi = QFileInfo(text);
         if (fi.isFile() && (fi.path() == folder))

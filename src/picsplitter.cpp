@@ -13,9 +13,12 @@ void PicSplitter::setOther(QSplitter* other)
     _other = other;
 }
 
-void PicSplitter::setRatio(double ratio)
+void PicSplitter::setRatio(double ratio, bool moveOther)
 {
     _ratio = ratio;
+
+    if (moveOther && _other)
+        onSplitterMoved();
 }
 
 void PicSplitter::onSplitterMoved()
