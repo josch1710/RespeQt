@@ -1040,7 +1040,7 @@ QStringList RespeqtSettings::recentBrowserFolders() {
   int size = mSettings->beginReadArray("RecentBrowserFolders");
   for (int i = 0; i < size; i++) {
     mSettings->setArrayIndex(i);
-    QString value = mSettings->value("Folder").toString();
+    QString value = mSettings->value("FileFolder").toString();
     folders.append(value);
   }
   mSettings->endArray();
@@ -1092,7 +1092,7 @@ void RespeqtSettings::writeRecentBrowserFolders(const QStringList& folders) {
         continue;
     }
     mSettings->setArrayIndex(index++);
-    mSettings->setValue("Folder", folder);
+    mSettings->setValue("FileFolder", folder);
   }
   mSettings->endArray();
 }

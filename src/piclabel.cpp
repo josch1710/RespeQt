@@ -24,7 +24,7 @@ PicLabel::~PicLabel()
 
 void PicLabel::setDiskName(const QString& fileName)
 {
-    if ((_diskName == fileName) || !QFileInfo(fileName).exists())
+    if ((_diskName == fileName) || !QFileInfo::exists(fileName))
         return;
 
     _diskName = fileName;
@@ -104,46 +104,51 @@ static QStringList toFileTypes(const QList<QByteArray>& list)
 QString PicLabel::findImage()
 {
     auto fileInfo = QFileInfo {_diskName};
-    auto pathName = fileInfo.absolutePath();
+    auto diskBase = fileInfo.completeBaseName();
+    QDir dir {fileInfo.absolutePath()};
+    auto formats = QImageReader::supportedImageFormats();
+    auto entries = dir.entryInfoList(toFileTypes(formats));
+    auto bsidexp = _isSideB ? QString("[b|B]") : QString();
+    auto sregexp = QString("^(%1)(%2)(\\.)(.*)").arg(_diskNo.text(), bsidexp);
+    auto qregexp = QRegularExpression {sregexp};
 
-    // 1. check for same index prefixed image file in the disk folder
-    // ex: disk name = 12b.Title of Disk.ATR
-    //     image file = 12b.Menu Screen.PNG (TBD: use mid string as tooltip?)
-    // or: image file = 12b.PNG
-
-    if (!_diskNo.isEmpty())     // check if current disk has index prefix NN. or NNb.
+    foreach (const QFileInfo& entry, entries)
     {
-        QDir dir {pathName};
-        auto formats = QImageReader::supportedImageFormats();
-        auto entries = dir.entryList(toFileTypes(formats));
-        auto bsidexp = _isSideB ? QString("[b|B]") : QString();
-        auto sregexp = QString("^(%1)(%2)(\\.)(.*)").arg(_diskNo.text()).arg(bsidexp);
-        auto qregexp = QRegularExpression {sregexp};
+        // 1. check for basename with viable image extension
 
-        for (QString entry : entries)
+        const QString entryName {entry.completeBaseName()};
+        if (entryName == diskBase)
         {
-            auto matcher = qregexp.match(entry);
+            setToolTip(entryName);
+            return entry.absoluteFilePath();
+        }
+
+        // 2. check for same index prefixed image file in the disk folder
+        // ex: disk name = 12b.Title of Disk.ATR
+        //     image file = 12b.Menu Screen.PNG
+        // or: image file = 12b.PNG
+
+        if (!_diskNo.isEmpty())     // check if current disk has index prefix NN. or NNb.
+        {
+            auto basename = entry.completeBaseName();
+            auto matcher = qregexp.match(basename);
             if (matcher.hasMatch())
             {
-                QString tip = matcher.captured(4);
-                int pos = tip.lastIndexOf('.');
-                if (pos >= 0)
-                    tip.truncate(pos);
+                QString tip = matcher.captured(4);  // use mid string as tooltip
                 setToolTip(tip);
-                return pathName + "/" + entry;
+                return entry.absoluteFilePath();
             }
         }
+
+        // 3. use generic name for default thumbnail
+
+        auto imagePath = fileInfo.path() + "/respeqt_db." + entry.suffix();
+        if (QFileInfo::exists(imagePath))
+        {
+            setToolTip("");
+            return imagePath;
+        }
     }
-
-    setToolTip("");
-
-    // 2. use generic name for default thumbnail
-
-    auto imagePath = pathName + "/respeqt_db.png"; // TBD: support any image type
-    auto fiPreview = QFileInfo(imagePath);
-
-    if (fiPreview.exists())
-        return imagePath;
 
     // 3. load built-in image of a 5 1/2-inch floppy disk
 

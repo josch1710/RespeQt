@@ -25,6 +25,12 @@ void PicSplitter::onSplitterMoved()
 {
     QList<int> otherSizes = _other->sizes();
 
+    if (!((otherSizes.size() == 2) && otherSizes[0] && otherSizes[1]))
+    {
+        //Q_ASSERT(0);  // edge case resize failure
+        return;         // program aborted on first run after selecting a disk (?)
+    }
+
     int dim1 = sizes().at(1);
     int dim2  = (orientation() == Qt::Horizontal) ? (dim1 / _ratio) : (dim1 * _ratio);
     otherSizes[0] = otherSizes[0] + otherSizes[1] - dim2;
