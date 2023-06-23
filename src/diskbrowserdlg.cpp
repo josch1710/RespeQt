@@ -12,6 +12,7 @@
 #include "folderdisks.h"
 #include "mainwindow.h"
 #include <QFileDialog>
+#include <QObject>
 
 DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent) :
     QDialog(parent),
@@ -25,7 +26,8 @@ DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent) :
     ui->splitLeftAtrRightDirPng->setOther(ui->splitTopDirBotPng);
 
     connect(ui->btnBrowse, SIGNAL(clicked()), this, SLOT(onBrowseFolder()));
-    connect(ui->listDisks, SIGNAL(itemSelectionChanged()), this, SLOT(onDiskChanged()));
+    connect(ui->treeDisks, &QTreeWidget::itemSelectionChanged, this, &DiskBrowserDlg::itemSelectionChanged);
+    connect(ui->treeDisks, &QTreeWidget::itemDoubleClicked, this, &DiskBrowserDlg::itemDoubleClicked);
     connect(ui->cboFolderPath, SIGNAL(currentTextChanged(QString)), this, SLOT(onFolderChanged(QString)));
 
     refreshFoldersCombobox();
@@ -86,15 +88,37 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
 
     refreshFoldersCombobox();
 
-    folderDisks.load(folder);
+    _folderDisks.load(folder);
 
-    ui->listDisks->blockSignals(true);
-    ui->listDisks->clear();
+    ui->treeDisks->blockSignals(true);
+    ui->treeDisks->clear();
     ui->lblPreview->clear();
-    ui->listDisks->blockSignals(false);
+    ui->treeDisks->setColumnCount(1);
+    ui->treeDisks->setHeaderHidden(true);
+    ui->treeDisks->setRootIsDecorated(false);
+    ui->treeDisks->blockSignals(false);
 
-    QStringList disks = folderDisks.getList();
-    ui->listDisks->addItems(disks);
+    // fill in any sub-directories
+    auto folders = _folderDisks.folders();
+    foreach (const QString& subdir, folders)
+    {
+        auto item = new QTreeWidgetItem(ui->treeDisks);
+        auto icon = QIcon {":/icons/silk-icons/icons/folder_explore.png"};
+        item->setText(0, subdir);
+        item->setIcon(0, icon);
+        setItemIsFolder(item, true);
+    }
+
+    // fill in all disk image files
+    auto disks = _folderDisks.disks();
+    foreach (const QString& disk, disks)
+    {
+        auto item = new QTreeWidgetItem(ui->treeDisks);
+        auto icon = QIcon {":/icons/other-icons/floppy.png"};
+        item->setText(0, disk);
+        item->setIcon(0, icon);
+        setItemIsFolder(item, false);
+    }
 
     if (disk.isEmpty())
     {
@@ -107,8 +131,9 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
 
     if (!disk.isEmpty() && disks.contains(disk))
     {
-        int index = disks.indexOf(disk);
-        ui->listDisks->setCurrentRow(index);
+        auto items = ui->treeDisks->findItems(disk, Qt::MatchExactly);
+        QTreeWidgetItem* item = (items.length() > 0) ? items[0] : nullptr;
+        ui->treeDisks->setCurrentItem(item);
     }
 }
 
@@ -128,12 +153,21 @@ void DiskBrowserDlg::refreshFoldersCombobox()
     ui->cboFolderPath->blockSignals(false);
 }
 
-void DiskBrowserDlg::onDiskChanged()
+void DiskBrowserDlg::itemSelectionChanged()
 {
-    if (ui->listDisks->count() == 0)
+    if (!ui->treeDisks->topLevelItemCount() || !ui->treeDisks->currentItem())
         return;
 
-    QString diskName = ui->listDisks->currentItem()->text();
+    auto currentItem = ui->treeDisks->currentItem();
+
+    if (itemIsFolder(currentItem))
+    {
+        ui->lblPreview->clear();
+        ui->lblFileList->clear();
+        return;
+    }
+
+    QString diskName = currentItem->text(0);
     QString pathName = ui->cboFolderPath->currentText();
     QString fullName = pathName + QString("/") + diskName;
     QFileInfo fiDisk = QFileInfo(fullName);
@@ -256,4 +290,33 @@ void DiskBrowserDlg::setVertSplitPos(int pos)
     sizes.clear();
     sizes << pos << (total - pos);
     ui->splitTopDirBotPng->setSizes(sizes);
+}
+
+void DiskBrowserDlg::itemDoubleClicked(QTreeWidgetItem* item, int)
+{
+    QString text = item->text(0);
+    auto path = ui->cboFolderPath->currentText();
+
+    if (text == "..")
+    {
+        QDir dir(path);
+
+        if (dir.cdUp())
+            onFolderChanged(dir.absolutePath());
+    }
+    else if (itemIsFolder(item))
+    {
+        path = path + "/" + text;
+        onFolderChanged(path);
+    }
+}
+
+void DiskBrowserDlg::setItemIsFolder(QTreeWidgetItem* item, bool isFolder)
+{
+    item->setData(0, Qt::UserRole, isFolder);
+}
+
+bool DiskBrowserDlg::itemIsFolder(QTreeWidgetItem* item)
+{
+    return item->data(0, Qt::UserRole).toBool();
 }

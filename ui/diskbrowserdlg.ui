@@ -55,13 +55,21 @@
      <property name="childrenCollapsible">
       <bool>false</bool>
      </property>
-     <widget class="QListWidget" name="listDisks">
+     <widget class="QTreeWidget" name="treeDisks">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>1</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="headerHidden">
+       <bool>true</bool>
+      </property>
+      <column>
+       <property name="text">
+        <string notr="true">1</string>
+       </property>
+      </column>
      </widget>
      <widget class="PicSplitter" name="splitTopDirBotPng">
       <property name="sizePolicy">
@@ -100,8 +108,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>85</width>
-          <height>449</height>
+          <width>49</width>
+          <height>503</height>
          </rect>
         </property>
         <property name="font">
@@ -150,7 +158,6 @@
         <font>
          <family>Arial</family>
          <pointsize>24</pointsize>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>

@@ -14,10 +14,12 @@ public:
     FolderDisks();
     bool load(const QString& path);
     int count() const { return diskList.count(); }
-    QStringList getList() const { return diskList; }
+    QStringList disks() const { return diskList; }
+    QStringList folders() const { return dirList; }
 
 private:
     QDir dir;
+    QStringList dirList;
     QStringList diskList;
 };
 

@@ -22,6 +22,24 @@ PicLabel::~PicLabel()
     }
 }
 
+void PicLabel::clear()
+{
+    QLabel::clear();
+    _diskName.clear();
+    _picPath.clear();
+    _picTooltip.clear();
+    _title.clear();
+    _diskNo.clear();
+    _isSideA = false;
+    _isSideB = false;
+
+    if (_pixmap)
+    {
+        delete _pixmap;
+        _pixmap = nullptr;
+    }
+}
+
 void PicLabel::setDiskName(const QString& fileName)
 {
     if ((_diskName == fileName) || !QFileInfo::exists(fileName))
@@ -60,9 +78,9 @@ void PicLabel::loadPixmap(const QString& picPath)
 
 void PicLabel::parseName()
 {
-    clear();                        // clear parent label text (not used)
-    _title.clear();
-    _diskNo.clear();
+    QLabel::clear();                // clear parent label text (not used)
+    _title.clear();                 // side-effect #1 is to set this
+    _diskNo.clear();                // side-effect #2 is to set this
     _isSideA = _isSideB = false;    // either of these implies the disk is number indexed
 
     auto fileInfo = QFileInfo {_diskName};
@@ -71,7 +89,7 @@ void PicLabel::parseName()
 
     QString baseName = fileInfo.completeBaseName();
 
-    QRegularExpression re("(^\\d+)([b|B]?)(\\.?)(.*)");
+    static QRegularExpression re("(^\\d+)([b|B]?)(\\.?)(.*)");
     auto rem = re.match(baseName);
 
     if (rem.hasMatch())

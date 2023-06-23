@@ -30,8 +30,8 @@ public:
     virtual ~PicLabel();
 
     void setDiskName(const QString& fileName);
-
     double ratio();
+    void clear();
 
     virtual QSize sizeHint() const override;
 

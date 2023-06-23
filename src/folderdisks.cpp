@@ -15,7 +15,8 @@ bool FolderDisks::load(const QString& path)
 
         QStringList filter = QStringList() << "*.atr" << "*.ATR" << "*.pro" << "*.PRO";
         diskList = dir.entryList(filter, QDir::Files);
+        dirList = dir.entryList(QDir::AllDirs | QDir::NoDot);
     }
 
-    return !diskList.isEmpty();
+    return !diskList.isEmpty() || !dirList.isEmpty();
 }

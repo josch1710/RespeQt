@@ -75,5 +75,6 @@
         <file>other-icons/floppy_back.png</file>
         <file>other-icons/floppy_front.png</file>
         <file>oxygen-icons/16x16/filesystems/folder_html.png</file>
+        <file>silk-icons/icons/folder_explore.png</file>
     </qresource>
 </RCC>

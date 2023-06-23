@@ -2,6 +2,7 @@
 #define DISKBROWSERDLG_H
 
 #include <QDialog>
+#include <QTreeWidgetItem>
 #include "folderdisks.h"
 #include "sioworker.h"
 
@@ -23,19 +24,22 @@ public:
     void setVertSplitPos(int pos);
 
 private:
+    void setItemIsFolder(QTreeWidgetItem* item, bool isFolder = true);
+    bool itemIsFolder(QTreeWidgetItem* item);
     void refreshFoldersCombobox();
     QString getMostRecentFolder();
     QString getMostRecentDisk();
     QString getRecentDisk(QString folder);
 
     Ui::DiskBrowserDlg *ui;
-    FolderDisks folderDisks;
+    FolderDisks _folderDisks;
     SioWorkerPtr sio;
 
 private slots:
     void onBrowseFolder();
-    void onDiskChanged();
+    void itemSelectionChanged();
     void onFolderChanged(QString lastDir);
+    void itemDoubleClicked(QTreeWidgetItem* item, int col);
 };
 
 #endif // DISKBROWSERDLG_H
