@@ -2,6 +2,7 @@
 #include <QResizeEvent>
 #include <QLabel>
 #include <QtDebug>
+#include <QTimer>
 
 PicSplitter::PicSplitter(QWidget* parent) : QSplitter(parent)
 {
@@ -27,8 +28,9 @@ void PicSplitter::onSplitterMoved()
 
     if (!((otherSizes.size() == 2) && otherSizes[0] && otherSizes[1]))
     {
-        //Q_ASSERT(0);  // edge case resize failure
-        return;         // program aborted on first run after selecting a disk (?)
+        //Q_ASSERT(0);                                                  // edge case resize failure
+        QTimer::singleShot(250, this, &PicSplitter::onSplitterMoved);  // queue a deferred update
+        return;
     }
 
     int dim1 = sizes().at(1);
