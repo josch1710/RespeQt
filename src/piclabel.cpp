@@ -284,12 +284,23 @@ QSize PicLabel::sizeHint() const
 
 Title::Title(QWidget* parent) : QLabel(parent)
 {
-    QFont font("Ink Free");
-    font.setPointSize(12);
-    setFont(font);
+    QString fmt
+    {
+        "color: %1;"
+        "font-family: \"%2\";"
+        "font-weight: bold;"
+    };
+
+    QString style = fmt.arg(_fontColor, _fontFamily);
+    setStyleSheet(style);
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
     setWordWrap(true);
 //  setFrameStyle(QFrame::Box);
+
+#ifndef QT_NO_DEBUG
+    ensurePolished();
+    Q_ASSERT(font().family() == _fontFamily);
+#endif
 }
 
 void Title::setLineHeight(int height)
@@ -313,7 +324,5 @@ void Title::setText(const QString& text)
 
 DiskNo::DiskNo(QWidget* parent) : QLabel(parent)
 {
-    QFont font("Courier New");
-    font.setPointSize(12);
-    setFont(font);
+    setStyleSheet("color: black; font-family: \"Courier New\"");
 }

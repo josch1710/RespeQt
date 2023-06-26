@@ -19,8 +19,17 @@ public:
     bool isEmpty() { return text().isEmpty(); }
     void setText(const QString& text);
     void setLineHeight(int height);
+
 private:
     int _lineHeight = 70;
+    QString _fontColor {"black"};
+#if defined Q_OS_WIN
+    const QString _fontFamily {"Ink Free"};
+#elif defined Q_OS_MAC
+    const QString _fontFamily {"Marker Felt"};
+#else
+    const QString _fontFamily {"Comic Sans"};
+#endif
 };
 
 class PicLabel : public QLabel
