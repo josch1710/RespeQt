@@ -21,14 +21,19 @@ public:
     void setLineHeight(int height);
 
 private:
-    int _lineHeight = 70;
     QString _fontColor {"black"};
 #if defined Q_OS_WIN
     const QString _fontFamily {"Ink Free"};
+    bool _fontIsBold = true;
+    int _lineHeight = 70;
 #elif defined Q_OS_MAC
-    const QString _fontFamily {"Marker Felt"};
+    const QString _fontFamily {"Bradley Hand"};
+    bool _fontIsBold = false;
+    int _lineHeight = 0;      // wtf is this crap? ignored - and btw, it doesn't wrap if I don't put a percent sign after it!
 #else
     const QString _fontFamily {"Comic Sans"};
+    bool _fontIsBold = false;
+    int _lineHeight = 70;
 #endif
 };
 

@@ -1,4 +1,5 @@
 #include "include/piclabel.h"
+#include <math.h>
 #include <QPaintEvent>
 #include <QPainter>
 #include <QRegularExpression>
@@ -288,10 +289,11 @@ Title::Title(QWidget* parent) : QLabel(parent)
     {
         "color: %1;"
         "font-family: \"%2\";"
-        "font-weight: bold;"
     };
 
     QString style = fmt.arg(_fontColor, _fontFamily);
+    if (_fontIsBold)
+        style += "font-weight: bold";
     setStyleSheet(style);
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
     setWordWrap(true);
@@ -313,7 +315,7 @@ void Title::setText(const QString& text)
     QString html
     {
         "<html><head/><body>"
-        "<p style=\"line-height:%1\">"
+        "<p style=\"line-height:%1%%\">"
         "<span>%2</span></p>"
         "</body></html>"
     };
