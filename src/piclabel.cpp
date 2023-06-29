@@ -283,7 +283,7 @@ QSize PicLabel::sizeHint() const
     return QSize(_pixmap->width(), _pixmap->height());
 }
 
-Title::Title(QWidget* parent) : QLabel(parent)
+Title::Title(QWidget* parent) : QTextEdit(parent)
 {
     QString fmt
     {
@@ -296,8 +296,11 @@ Title::Title(QWidget* parent) : QLabel(parent)
         style += "font-weight: bold";
     setStyleSheet(style);
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    setWordWrap(true);
-//  setFrameStyle(QFrame::Box);
+    setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+    auto pal = palette();
+    pal.setColor(QPalette::Base, QColor(0,0,0,0));
+    setPalette(pal);
+    setFrameStyle(QFrame::NoFrame);
 
 #ifndef QT_NO_DEBUG
     ensurePolished();
@@ -312,16 +315,15 @@ void Title::setLineHeight(int height)
 
 void Title::setText(const QString& text)
 {
-    QString html
-    {
-        "<html><head/><body>"
-        "<p style=\"line-height:%1%%\">"
-        "<span>%2</span></p>"
-        "</body></html>"
-    };
+    setPlainText(text);
 
-    QString fmtStr = html.arg(_lineHeight).arg(text);
-    QLabel::setText(fmtStr);
+    QTextBlockFormat blockFmt;
+    blockFmt.setLineHeight(_lineHeight, QTextBlockFormat::ProportionalHeight);
+
+    auto theCursor = textCursor();
+    theCursor.clearSelection();
+    theCursor.select(QTextCursor::Document);
+    theCursor.mergeBlockFormat(blockFmt);
 }
 
 DiskNo::DiskNo(QWidget* parent) : QLabel(parent)

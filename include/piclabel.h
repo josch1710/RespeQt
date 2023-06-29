@@ -4,6 +4,7 @@
 #include <QLabel>
 #include <QString>
 #include <QPixmap>
+#include <QTextEdit>
 
 class DiskNo : public QLabel
 {
@@ -12,11 +13,10 @@ public:
     bool isEmpty() { return text().isEmpty(); }
 };
 
-class Title : public QLabel
+class Title : public QTextEdit
 {
 public:
     Title(QWidget* parent);
-    bool isEmpty() { return text().isEmpty(); }
     void setText(const QString& text);
     void setLineHeight(int height);
 
