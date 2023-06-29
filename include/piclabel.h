@@ -29,7 +29,7 @@ private:
 #elif defined Q_OS_MAC
     const QString _fontFamily {"Bradley Hand"};
     bool _fontIsBold = false;
-    int _lineHeight = 0;      // wtf is this crap? ignored - and btw, it doesn't wrap if I don't put a percent sign after it!
+    int _lineHeight = 65;
 #else
     const QString _fontFamily {"Comic Sans"};
     bool _fontIsBold = false;
