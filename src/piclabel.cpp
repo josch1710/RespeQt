@@ -179,14 +179,42 @@ QString PicLabel::findImage()
     return FLOPPY_DEFAULT_PNG;      // used if all else fails
 }
 
-QRect PicLabel::scaleRect(const QRectF& rect, const QSizeF& szChild, const QSizeF& szFrame)
+QRect PicLabel::scaleRect(const QRectF& rect, const QRectF& rcChild)
 {
-    int X = (int)round(rect.x() * szChild.width() / szFrame.width());
-    int Y = (int)round(rect.y() * szChild.height() / szFrame.height());
-    int W = (int)round(rect.width() * szChild.width() / szFrame.width());
-    int H = (int)round(rect.height() * szChild.height() / szFrame.height());
+    const QSizeF szPic = _pixmap->size();
+
+    int X = (int)round(rect.x() * rcChild.width() / szPic.width());
+    int Y = (int)round(rect.y() * rcChild.height() / szPic.height());
+    int W = (int)round(rect.width() * rcChild.width() / szPic.width());
+    int H = (int)round(rect.height() * rcChild.height() / szPic.height());
+
+    X += rcChild.x();
+    Y += rcChild.y();
 
     return QRect {QPoint{X,Y}, QSize{W,H}};
+}
+
+QRect PicLabel::padRect()
+{
+    QRect lblRect(rect());
+    double ratioNow = static_cast<double>(width()) / height();
+
+    if (ratio() < ratioNow)
+    {
+        // pillarbox (extra space on left/right)
+        int maxWidth = static_cast<int>(round(ratio() * height()));
+        lblRect.setX((width() - maxWidth) / 2);
+        lblRect.setWidth(maxWidth);
+    }
+    else if (ratio() > ratioNow)
+    {
+        // letterbox (extra space on top/bottom)
+        int maxHeight = static_cast<int>(round(width() / ratio()));
+        lblRect.setY((height() - maxHeight) / 2);
+        lblRect.setHeight(maxHeight);
+    }
+
+    return lblRect;
 }
 
 void PicLabel::moveLabels()
@@ -205,8 +233,8 @@ void PicLabel::moveLabels()
     if (_isSideB)
         labelRect = LABEL_RECT_B;
 
-    const QSizeF szPic {_pixmap->size()};
-    const QRect scaledRect = scaleRect(labelRect, size(), szPic);
+    QRect paddedRect = padRect();
+    QRect scaledRect = scaleRect(labelRect, paddedRect);
 
     _title.setGeometry(scaledRect);
 
@@ -215,7 +243,7 @@ void PicLabel::moveLabels()
         // move the index rect
         const double indexX = (_isSideA ? 25 : 175);
         const QRectF INDEX_RECT {QPointF{indexX,25}, QSizeF{20,20}};
-        const QRect  indexRect = scaleRect(INDEX_RECT, size(), szPic);
+        const QRect  indexRect = scaleRect(INDEX_RECT, paddedRect);
 
         _diskNo.setGeometry(indexRect);
         _diskNo.setVisible(true);
@@ -263,7 +291,8 @@ void PicLabel::paintEvent(QPaintEvent* event)
     if (_pixmap)
     {
         QPainter painter(this);
-        painter.drawPixmap(rect(), _pixmap->scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        QRect lblRect = padRect();
+        painter.drawPixmap(lblRect, _pixmap->scaled(lblRect.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     }
 
     QLabel::paintEvent(event);
@@ -301,6 +330,9 @@ Title::Title(QWidget* parent) : QTextEdit(parent)
     pal.setColor(QPalette::Base, QColor(0,0,0,0));
     setPalette(pal);
     setFrameStyle(QFrame::NoFrame);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setReadOnly(true);
 
 #ifndef QT_NO_DEBUG
     ensurePolished();

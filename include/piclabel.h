@@ -73,7 +73,8 @@ private:
     void moveLabels();
     void scaleFonts();
     void update();
-    QRect scaleRect(const QRectF& rect, const QSizeF& szChild, const QSizeF& szFrame);
+    QRect padRect();
+    QRect scaleRect(const QRectF& rect, const QRectF& rcChild);
 };
 
 #endif // PICLABEL_H
