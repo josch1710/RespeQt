@@ -12,8 +12,7 @@
 
 #include "respeqtsettings.h"
 #include "serialport.h"
-//#include "mainwindow.h"
-
+#include <QFileInfo>
 #include <memory>
 #include <QApplication>
 
@@ -1072,6 +1071,22 @@ void RespeqtSettings::setMostRecentBrowserFolder(const QString& name) {
 
   if (folders.count() > maxRecentBrowserFolders)
     folders.removeLast();
+
+  writeRecentBrowserFolders(folders);
+}
+
+void RespeqtSettings::delMostRecentBrowserFolder(const QString& name) {
+  auto fileInfo = QFileInfo(name);
+  QString path = fileInfo.isFile() ? fileInfo.path() : name;
+  QStringList folders = recentBrowserFolders();
+
+  for (int i = 0; i < folders.size(); ++i) {
+    QString text = folders.at(i);
+    QFileInfo fi = QFileInfo(text);
+    QString test = fi.isFile() ? fi.path() : text;
+    if (test == path)
+      folders.removeAt(i);
+  }
 
   writeRecentBrowserFolders(folders);
 }

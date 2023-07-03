@@ -24,12 +24,15 @@ public:
     void setVertSplitPos(int pos);
 
 private:
+    void clear();
     void setItemIsFolder(QTreeWidgetItem* item, bool isFolder = true);
     bool itemIsFolder(QTreeWidgetItem* item);
     void refreshFoldersCombobox();
+    bool isDiskImage(const QString& name);
     QString getMostRecentFolder();
     QString getMostRecentDisk();
     QString getRecentDisk(QString folder);
+    QString getParentDir(QString fileFolder);
 
     Ui::DiskBrowserDlg *ui;
     FolderDisks _folderDisks;

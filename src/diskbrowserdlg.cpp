@@ -11,6 +11,7 @@
 #include "diskimages/diskimage.h"
 #include "folderdisks.h"
 #include "mainwindow.h"
+#include "miscutils.h"
 #include <QFileDialog>
 #include <QObject>
 
@@ -31,12 +32,25 @@ DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent) :
     connect(ui->cboFolderPath, SIGNAL(currentTextChanged(QString)), this, SLOT(onFolderChanged(QString)));
 
     refreshFoldersCombobox();
-    onFolderChanged("");
+    onFolderChanged("");        // reload the current item 0 in the combo
 }
 
 DiskBrowserDlg::~DiskBrowserDlg()
 {
     delete ui;
+}
+
+void DiskBrowserDlg::clear()
+{
+    ui->lblPreview->clear();
+    ui->lblFileList->clear();
+
+    ui->treeDisks->blockSignals(true);
+    ui->treeDisks->clear();
+    ui->treeDisks->setColumnCount(1);
+    ui->treeDisks->setHeaderHidden(true);
+    ui->treeDisks->setRootIsDecorated(false);
+    ui->treeDisks->blockSignals(false);
 }
 
 QString DiskBrowserDlg::getMostRecentFolder()
@@ -80,9 +94,16 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
     if (folder.isEmpty())
         return;
 
+    if (!QFileInfo::exists(folder))
+    {
+        RespeqtSettings::instance()->delMostRecentBrowserFolder(folder);
+        refreshFoldersCombobox();
+        return;
+    }
+
     QString disk = getRecentDisk(folder);
     QString path = disk.isEmpty() ? folder : folder + "/" + disk;
-    // TBD: comment explaining my scheme that uses "path" for both folder and files.
+    // NOTE: MRU scheme uses "path" for both folder *and* files (if one is selected)
 
     RespeqtSettings::instance()->setMostRecentBrowserFolder(path);
 
@@ -90,13 +111,7 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
 
     _folderDisks.load(folder);
 
-    ui->treeDisks->blockSignals(true);
-    ui->treeDisks->clear();
-    ui->lblPreview->clear();
-    ui->treeDisks->setColumnCount(1);
-    ui->treeDisks->setHeaderHidden(true);
-    ui->treeDisks->setRootIsDecorated(false);
-    ui->treeDisks->blockSignals(false);
+    clear();    // clear disk browser contents
 
     // fill in any sub-directories
     auto folders = _folderDisks.folders();
@@ -142,13 +157,36 @@ void DiskBrowserDlg::refreshFoldersCombobox()
     ui->cboFolderPath->blockSignals(true);
     ui->cboFolderPath->clear();
 
+    QStringList folders;    // build a list of MRU folders for the dropdown list
+
     foreach (const QString& name, RespeqtSettings::instance()->recentBrowserFolders())
     {
         auto fileInf = QFileInfo(name);
-        QString path = fileInf.isFile() ? fileInf.path() : name;
-        ui->cboFolderPath->addItem(path);
+        if (fileInf.exists())
+        {
+            QString path = fileInf.isFile() ? fileInf.path() : name;    // don't want file names in dropdown
+            folders += path;
+        }
+        else if (isDiskImage(name))  // MRU missing. First check if a disk is selected
+        {
+            QString path = getParentDir(name);
+            if (QFileInfo::exists(path))
+            {
+                folders += path;    // Keep parent folder of bad disk
+            }
+            else
+            {
+                qDebug() << "!w" << tr("Disk Browser most recent list updated. '%1' not found.").arg(name);
+                RespeqtSettings::instance()->delMostRecentBrowserFolder(name);
+            }
+        }
+        else    // Simple case of missing folder
+        {
+            qDebug() << "!w" << tr("Disk Browser most recent list updated. Folder '%1' not found.").arg(name);
+            RespeqtSettings::instance()->delMostRecentBrowserFolder(name);
+        }
     }
-
+    ui->cboFolderPath->addItems(folders);
     ui->cboFolderPath->setCurrentIndex(0);
     ui->cboFolderPath->blockSignals(false);
 }
@@ -209,16 +247,16 @@ void DiskBrowserDlg::itemSelectionChanged()
                 fileList += entry.name() + "\n";
 
             if (fileList.isEmpty())
-                fileList = "!Root dir empty:\nNo Files";
+                fileList = tr("!Root dir empty:\nNo Files");
         }
         else
         {
-            fileList = "!File system not recognized:\nNo Files";
+            fileList = tr("!File system not recognized:\nNo Files");
         }
     }
     else
     {
-        fileList = "!SIO device not available:\nNo Files";
+        fileList = tr("!SIO device not available:\nNo Files");
     }
 
     if (fileList[0] == '!') // detected error/annomally parsing filesystem above
@@ -257,6 +295,27 @@ QString DiskBrowserDlg::getRecentDisk(QString folder)
 
     return QString();
 }
+
+QString DiskBrowserDlg::getParentDir(QString fileFolder)
+{
+    int lastSlash = fileFolder.lastIndexOf('/');    // TBD: what if '\'?
+    if (lastSlash >= 0)
+        fileFolder.truncate(lastSlash);
+
+    return fileFolder;
+}
+
+bool DiskBrowserDlg::isDiskImage(const QString& name)
+{
+    foreach (const QString& fileType, FileTypes::getDiskImageTypes())
+    {
+        QString ext = fileType.right(4);
+        if (name.endsWith(ext, osCaseSensitivity()))
+            return true;
+    }
+    return false;
+}
+
 
 int DiskBrowserDlg::getHorzSplitPos()
 {

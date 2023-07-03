@@ -1,4 +1,5 @@
 #include "folderdisks.h"
+#include "miscutils.h"
 #include <QDir>
 
 FolderDisks::FolderDisks() : QObject()
@@ -13,7 +14,7 @@ bool FolderDisks::load(const QString& path)
     {
         dir.setPath(targetPath);
 
-        QStringList filter = QStringList() << "*.atr" << "*.ATR" << "*.pro" << "*.PRO";
+        QStringList filter = FileTypes::getDiskImageTypes();
         diskList = dir.entryList(filter, QDir::Files);
         dirList = dir.entryList(QDir::AllDirs | QDir::NoDot);
     }

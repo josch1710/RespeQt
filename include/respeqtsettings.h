@@ -238,6 +238,7 @@ public:
   QString mostRecentBrowserFolder();
   QStringList recentBrowserFolders();
   void setMostRecentBrowserFolder(const QString& name);
+  void delMostRecentBrowserFolder(const QString& name);
   bool showDiskBrowser();
   void setShowDiskBrowser(bool show = true);
   QRect diskBrowserRect();
