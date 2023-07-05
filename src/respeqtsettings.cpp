@@ -250,6 +250,22 @@ void RespeqtSettings::saveGeometry(const QRect &geometry, bool isMiniMode) {
   }
 }
 
+bool RespeqtSettings::showLogWindow() {
+  return mSettings->value("ShowLogWindow", false).toBool();
+}
+
+void RespeqtSettings::setShowLogWindow(bool show) {
+  mSettings->setValue("ShowLogWindow", show);
+}
+
+QRect RespeqtSettings::logWindowRect() {
+  return mSettings->value("LogWindowRect").toRect();
+}
+
+void RespeqtSettings::setLogWindowRect(const QRect& rect) {
+  mSettings->setValue("LogWindowRect", rect);
+}
+
 QString RespeqtSettings::serialPortName() {
   return mSettings->value("SerialPortName").toString();
 }

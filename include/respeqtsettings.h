@@ -137,6 +137,11 @@ public:
   int lastHeight();
   void setLastHeight(int lastH);
 
+  bool  showLogWindow();
+  void  setShowLogWindow(bool show = true);
+  QRect logWindowRect();
+  void  setLogWindowRect(const QRect& rect);
+
   // Set and restore last mini-window position //
   const QPoint DefaultMiniModePos  = { 8, 50 };
   const QSize  DefaultMiniModeSize = { 600, 100 };

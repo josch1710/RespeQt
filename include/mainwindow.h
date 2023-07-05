@@ -198,15 +198,11 @@ private slots:
   void saveAsTriggered(char no);                           // MIA
   void revertTriggered(char no);                           // MIA
 
-
   void bootOptionTriggered();    //
   void toggleMiniModeTriggered();//
   void toggleShadeTriggered();   //
   void showLogWindowTriggered(); //
-
-  void diskBrowserTriggered();
-  void openDiskBrowser();
-
+  void diskBrowserTriggered();   // what are all these trailing comment markers for?
   void showHideDrives();                       //
   void sioFinished();                          //
   void sioStarted();                           //

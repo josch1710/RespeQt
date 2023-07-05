@@ -602,21 +602,35 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   isClosing = true;
 
   // Save various session settings  //
-  RespeqtSettings::instance()->saveGeometry(geometry(), isMiniMode);
 
-  if (diskBrowserDlg) {
-    RespeqtSettings::instance()->setShowDiskBrowser(diskBrowserDlg->isVisible());
-    RespeqtSettings::instance()->setDiskBrowserRect(diskBrowserDlg->geometry());
-    RespeqtSettings::instance()->setDiskBrowserHorzSplitPos(diskBrowserDlg->getHorzSplitPos());
-    RespeqtSettings::instance()->setDiskBrowserVertSplitPos(diskBrowserDlg->getVertSplitPos());
-  } else {
-    RespeqtSettings::instance()->setShowDiskBrowser(false);
+  if (RespeqtSettings::instance()->saveWindowsPos()) {
+
+    RespeqtSettings::instance()->saveGeometry(geometry(), isMiniMode);
+
+    if (diskBrowserDlg) {
+      RespeqtSettings::instance()->setShowDiskBrowser(diskBrowserDlg->isVisible());
+      RespeqtSettings::instance()->setDiskBrowserRect(diskBrowserDlg->geometry());
+      RespeqtSettings::instance()->setDiskBrowserHorzSplitPos(diskBrowserDlg->getHorzSplitPos());
+      RespeqtSettings::instance()->setDiskBrowserVertSplitPos(diskBrowserDlg->getVertSplitPos());
+    } else {
+      RespeqtSettings::instance()->setShowDiskBrowser(false);
+    }
+
+    if (logWindow_) {
+      RespeqtSettings::instance()->setShowLogWindow(logWindow_->isVisible());
+      RespeqtSettings::instance()->setLogWindowRect(logWindow_->geometry());
+    } else {
+      RespeqtSettings::instance()->setShowLogWindow(false);
+    }
   }
 
-  RespeqtSettings::instance()->setD9DOVisible(isD9DOVisible);
+  if (RespeqtSettings::instance()->saveDiskVis()) {
+    RespeqtSettings::instance()->setD9DOVisible(isD9DOVisible);
+  }
 
   if (g_sessionFile != "")
     RespeqtSettings::instance()->saveSessionToFile(g_sessionFilePath + "/" + g_sessionFile);
+
   bool wasRunning = ui->actionStartEmulation->isChecked();
   QMessageBox::StandardButton answer = QMessageBox::No;
 
@@ -713,21 +727,28 @@ void MainWindow::showEvent(QShowEvent *event) {
   }
   if (event->type() == QEvent::Show && shownThisTime) {
     shownThisTime = false;
-    isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
-    isMiniMode = RespeqtSettings::instance()->miniMode();
 
-    // check if mini-mode was last used
-    if (isMiniMode) {
+    if (RespeqtSettings::instance()->saveDiskVis()) {
+      isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
+    }
+
+    if (RespeqtSettings::instance()->saveWindowsPos())
+    {
+      isMiniMode = RespeqtSettings::instance()->miniMode();
+
+      // check if mini-mode was last used
+      if (isMiniMode) {
         isMiniMode = false;                     // reset now so we can toggle it ON
         ui->actionToggleMiniMode->trigger();    // trigger mini-mode toggle action
-    } else {
+      } else {
         showHideDrives();
-    }
-    if (RespeqtSettings::instance()->showDiskBrowser() && !(diskBrowserDlg && diskBrowserDlg->isVisible())) {
-      openDiskBrowser();
-      diskBrowserDlg->setGeometry(RespeqtSettings::instance()->diskBrowserRect());
-      diskBrowserDlg->setHorzSplitPos(RespeqtSettings::instance()->diskBrowserHorzSplitPos());
-      diskBrowserDlg->setVertSplitPos(RespeqtSettings::instance()->diskBrowserVertSplitPos());
+      }
+      if (RespeqtSettings::instance()->showDiskBrowser() && !(diskBrowserDlg && diskBrowserDlg->isVisible())) {
+        diskBrowserTriggered();
+      }
+      if (RespeqtSettings::instance()->showLogWindow() && !(logWindow_ && logWindow_->isVisible())) {
+        showLogWindowTriggered();
+      }
     }
   }
   QMainWindow::showEvent(event);
@@ -755,15 +776,23 @@ bool MainWindow::eventFilter(QObject * /*obj*/, QEvent *event) {
 void MainWindow::showLogWindowTriggered() {
   if (logWindow_ == nullptr) {
     logWindow_ = new LogDisplayDialog(this);
-    int x, y, w, h;
-    x = geometry().x();
-    y = geometry().y();
-    w = geometry().width();
-    h = geometry().height();
-    if (!isMiniMode) {
-      logWindow_->setGeometry(static_cast<int>(x + w / 1.9), y + 30, logWindow_->geometry().width(), geometry().height());
+    QRect rect;
+    if (RespeqtSettings::instance()->saveWindowsPos()) {
+      rect = RespeqtSettings::instance()->logWindowRect();
+    }
+    if (rect.isValid()) {
+      logWindow_->setGeometry(rect);
     } else {
-      logWindow_->setGeometry(x + 20, y + 60, w, h * 2);
+      int x, y, w, h;
+      x = geometry().x();
+      y = geometry().y();
+      w = geometry().width();
+      h = geometry().height();
+      if (!isMiniMode) {
+        logWindow_->setGeometry(static_cast<int>(x + w / 1.9), y + 30, logWindow_->geometry().width(), geometry().height());
+      } else {
+        logWindow_->setGeometry(x + 20, y + 60, w, h * 2);
+      }
     }
     connect(this, &MainWindow::sendLogText, logWindow_, &LogDisplayDialog::getLogText);
     connect(this, &MainWindow::sendLogTextChange, logWindow_, &LogDisplayDialog::getLogTextChange);
@@ -1860,10 +1889,10 @@ void MainWindow::openSessionTriggered() {
   showHideDrives();
 
   if (RespeqtSettings::instance()->showDiskBrowser() && !(diskBrowserDlg && diskBrowserDlg->isVisible()))
-    openDiskBrowser();
+    diskBrowserTriggered();
 
-  if (diskBrowserDlg)
-    diskBrowserDlg->setGeometry(RespeqtSettings::instance()->diskBrowserRect());
+  if (RespeqtSettings::instance()->showLogWindow() && !(logWindow_ && logWindow_->isVisible()))
+    showLogWindowTriggered();
 
   setSession();
 }
@@ -1888,9 +1917,15 @@ void MainWindow::saveSessionTriggered() {
     RespeqtSettings::instance()->setDiskBrowserRect(diskBrowserDlg->geometry());
     RespeqtSettings::instance()->setDiskBrowserHorzSplitPos(diskBrowserDlg->getHorzSplitPos());
     RespeqtSettings::instance()->setDiskBrowserVertSplitPos(diskBrowserDlg->getVertSplitPos());
-  }
-  else {
+  } else {
     RespeqtSettings::instance()->setShowDiskBrowser(false);
+  }
+
+  if (logWindow_) {
+    RespeqtSettings::instance()->setShowLogWindow(logWindow_->isVisible());
+    RespeqtSettings::instance()->setLogWindowRect(logWindow_->geometry());
+  } else {
+    RespeqtSettings::instance()->setShowLogWindow(false);
   }
 
   RespeqtSettings::instance()->saveSessionToFile(fileName);
@@ -1953,15 +1988,14 @@ void MainWindow::bootOptionTriggered() {
 }
 
 void MainWindow::diskBrowserTriggered() {
-  openDiskBrowser();
-}
-
-void MainWindow::openDiskBrowser() {
   if (!diskBrowserDlg) {
     diskBrowserDlg = new DiskBrowserDlg(sio, this);
   }
 
   diskBrowserDlg->showNormal();
+  diskBrowserDlg->setGeometry(RespeqtSettings::instance()->diskBrowserRect());
+  diskBrowserDlg->setHorzSplitPos(RespeqtSettings::instance()->diskBrowserHorzSplitPos());
+  diskBrowserDlg->setVertSplitPos(RespeqtSettings::instance()->diskBrowserVertSplitPos());
 }
 
 // This connect the signal from UI to slots
