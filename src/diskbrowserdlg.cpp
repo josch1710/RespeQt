@@ -379,3 +379,17 @@ bool DiskBrowserDlg::itemIsFolder(QTreeWidgetItem* item)
 {
     return item->data(0, Qt::UserRole).toBool();
 }
+
+void DiskBrowserDlg::closeEvent(QCloseEvent *event)
+{
+    RespeqtSettings::instance()->setDiskBrowserHorzSplitPos(getHorzSplitPos());
+    RespeqtSettings::instance()->setDiskBrowserVertSplitPos(getVertSplitPos());
+    QDialog::closeEvent(event);
+}
+
+void DiskBrowserDlg::showEvent(QShowEvent *event)
+{
+    QDialog::showEvent(event);
+    setHorzSplitPos(RespeqtSettings::instance()->diskBrowserHorzSplitPos());
+    setVertSplitPos(RespeqtSettings::instance()->diskBrowserVertSplitPos());
+}

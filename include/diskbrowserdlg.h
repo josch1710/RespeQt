@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QTreeWidgetItem>
+#include <QShowEvent>
 #include "folderdisks.h"
 #include "sioworker.h"
 
@@ -22,6 +23,10 @@ public:
     int getVertSplitPos();
     void setHorzSplitPos(int pos);
     void setVertSplitPos(int pos);
+
+protected:
+    void showEvent(QShowEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;
 
 private:
     void clear();

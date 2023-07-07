@@ -34,7 +34,8 @@ public:
 
   bool isFirstTime();
 
-  void saveGeometry(const QRect& geometry, bool miniMode);
+  bool saveMainWinGeometry(QMainWindow* window, bool miniMode);
+  bool restoreMainWinGeometry(QMainWindow* window, bool miniMode);
 
   QString serialPortName();
   void setSerialPortName(const QString &name);
@@ -124,6 +125,7 @@ public:
   // Set and restore last mainwindow position and size //
   const QPoint DefaultFullModePos  = { 100, 100 };
   const QSize  DefaultFullModeSize = { 800, 650 };
+  const QRect  DefaultFullModeRect = { DefaultFullModePos, DefaultFullModeSize };
 
   int lastVerticalPos();
   void setLastVerticalPos(int lastVpos);
@@ -139,12 +141,11 @@ public:
 
   bool  showLogWindow();
   void  setShowLogWindow(bool show = true);
-  QRect logWindowRect();
-  void  setLogWindowRect(const QRect& rect);
 
   // Set and restore last mini-window position //
   const QPoint DefaultMiniModePos  = { 8, 50 };
   const QSize  DefaultMiniModeSize = { 600, 100 };
+  const QRect  DefaultMiniModeRect = { DefaultMiniModePos, DefaultMiniModeSize };
 
   bool miniMode();
   void setMiniMode(bool miniMode);
@@ -246,12 +247,14 @@ public:
   void delMostRecentBrowserFolder(const QString& name);
   bool showDiskBrowser();
   void setShowDiskBrowser(bool show = true);
-  QRect diskBrowserRect();
-  void  setDiskBrowserRect(QRect rect);
-  int   diskBrowserHorzSplitPos();
-  int   diskBrowserVertSplitPos();
-  void  setDiskBrowserHorzSplitPos(int pos);
-  void  setDiskBrowserVertSplitPos(int pos);
+  int  diskBrowserHorzSplitPos();
+  int  diskBrowserVertSplitPos();
+  void setDiskBrowserHorzSplitPos(int pos);
+  void setDiskBrowserVertSplitPos(int pos);
+
+  // save/restore top-level widget geometry
+  bool saveWidgetGeometry(QWidget* widget, const QString& name = QString());
+  bool restoreWidgetGeometry(QWidget* widget, const QString& name = QString(), const QRect& defRect = QRect());
 
   // Printer Spy Mode
   bool isPrinterSpyMode();

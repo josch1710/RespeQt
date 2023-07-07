@@ -234,36 +234,12 @@ bool RespeqtSettings::isFirstTime() {
   return mIsFirstTime;
 }
 
-void RespeqtSettings::saveGeometry(const QRect &geometry, bool isMiniMode) {
-  if (saveWindowsPos()) {
-    setMiniMode(isMiniMode);
-    if (isMiniMode) {
-      setLastMiniHorizontalPos(geometry.x());
-      setLastMiniVerticalPos(geometry.y());
-      setLastMiniWidth(geometry.width());
-    } else {
-      setLastHorizontalPos(geometry.x());
-      setLastVerticalPos(geometry.y());
-      setLastWidth(geometry.width());
-      setLastHeight(geometry.height());
-    }
-  }
-}
-
 bool RespeqtSettings::showLogWindow() {
   return mSettings->value("ShowLogWindow", false).toBool();
 }
 
 void RespeqtSettings::setShowLogWindow(bool show) {
   mSettings->setValue("ShowLogWindow", show);
-}
-
-QRect RespeqtSettings::logWindowRect() {
-  return mSettings->value("LogWindowRect").toRect();
-}
-
-void RespeqtSettings::setLogWindowRect(const QRect& rect) {
-  mSettings->setValue("LogWindowRect", rect);
 }
 
 QString RespeqtSettings::serialPortName() {
@@ -1136,14 +1112,6 @@ void RespeqtSettings::setShowDiskBrowser(bool show /*= true*/) {
   mSettings->setValue("ShowDiskBrowser", show);
 }
 
-QRect RespeqtSettings::diskBrowserRect() {
-  return mSettings->value("DiskBrowserRect").toRect();
-}
-
-void RespeqtSettings::setDiskBrowserRect(QRect rect) {
-  mSettings->setValue("DiskBrowserRect", rect);
-}
-
 int RespeqtSettings::diskBrowserHorzSplitPos() {
   return mSettings->value("DiskBrowserHorzSplitPos", -1).toInt();
 }
@@ -1158,4 +1126,53 @@ void RespeqtSettings::setDiskBrowserHorzSplitPos(int pos) {
 
 void RespeqtSettings::setDiskBrowserVertSplitPos(int pos) {
   mSettings->setValue("DiskBrowserVertSplitPos", pos);
+}
+
+bool RespeqtSettings::saveMainWinGeometry(QMainWindow* window, bool isMiniMode) {
+  if (!window || !saveWindowsPos())
+    return false;
+
+  setMiniMode(isMiniMode);
+  QString key = isMiniMode ? "MiniWindow" : "MainWindow";
+  return saveWidgetGeometry(window, key);
+}
+
+bool RespeqtSettings::restoreMainWinGeometry(QMainWindow* window, bool isMiniMode) {
+  if (!window || !saveWindowsPos())
+    return false;
+
+  QString key = isMiniMode ? "MiniWindow" : "MainWindow";
+  QRect rcDef = isMiniMode ? DefaultMiniModeRect : DefaultFullModeRect;
+  return restoreWidgetGeometry(window, key, rcDef);
+}
+
+bool RespeqtSettings::saveWidgetGeometry(QWidget* widget, const QString& name) {
+  if (!widget || !saveWindowsPos())
+    return false;
+
+  QString key = name.isEmpty() ? widget->objectName() : name;
+  if (key.isEmpty())
+    return false;
+
+  mSettings->setValue(key + "/geometry", widget->saveGeometry());
+  return true;
+}
+
+bool RespeqtSettings::restoreWidgetGeometry(QWidget* widget, const QString& name, const QRect& defRect) {
+  if (widget == nullptr)
+    return false;
+
+  QString key = name.isEmpty() ? widget->objectName() : name;
+  if (key.isEmpty())
+    return false;
+
+  key += "/geometry";
+  if (mSettings->contains(key)) {
+    auto geoBytes = mSettings->value(key).toByteArray();
+    widget->restoreGeometry(geoBytes);
+  } else if (defRect.isValid()) {
+    widget->setGeometry(defRect);
+  }
+
+  return true;
 }
