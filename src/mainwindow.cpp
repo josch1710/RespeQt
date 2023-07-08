@@ -80,19 +80,15 @@ MainWindow *MainWindow::sInstance{nullptr};
 
 // ****************************** END OF GLOBALS ************************************//
 
+// DEV NOTE: using qDebug() requires one of the following prefix strings:
+//
 // Displayed only in debug mode    "!d"
 // Unimportant     (gray)          "!u"
 // Normal          (black)         "!n"
 // Important       (blue)          "!i"
 // Warning         (brown)         "!w"
 // Error           (red)           "!e"
-//
-// Note to the original programmer(s):
-// The above information needs to be somewhere better.
-// As a new contributer, it took me way too long to figure out why my
-// qDebug() messages were being dropped. Also, talk about spaghetti code,
-// follow the path of a single log entry. Does it really need to be this complicated?
-// - Dan C. (my 2 cents)
+// (???)           (purple)        "!"      (not used?)
 //
 void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*context*/, const QString &msg) {
   logMutex->lock();
@@ -116,13 +112,18 @@ void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*c
       logFile->write(": [Fatal]    ");
       break;
   }
+
+  // kludge: catch assert (Q_ASSERT) here - don't just silently unload the app!
   QString nonConstMsg(msg);
   if (msg.startsWith("ASSERT"))
-      nonConstMsg = "123" + msg;
+    nonConstMsg = "123" + msg;  // "123" gets removed below
+
   QByteArray localMsg = nonConstMsg.toLocal8Bit();
   QByteArray displayMsg = localMsg.mid(3);
+
   logFile->write(displayMsg);
   logFile->write("\n");
+
   if (type == QtFatalMsg) {
     logFile->close();
 #if defined(QT_NO_DEBUG) // allow debugger to survive fatal error
@@ -133,7 +134,7 @@ void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*c
   }
   logMutex->unlock();   // QtCreator breaks *here* on fatal error, crash or assert.
 
-  if (msg[0] == '!') {
+  if (msg[0] == '!') {  // '!' prefix required for ALL qDebug() insertion strings! (see DEV NOTE above)
 #ifdef QT_NO_DEBUG
     if (msg[1] == 'd') {
       return;
@@ -141,6 +142,9 @@ void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*c
 #endif
     // TODO Should be signal-slot
     sInstance->doLogMessage(localMsg.at(1), displayMsg);
+  } else {
+    Q_ASSERT(0);  // missing required '!' with qDebug() (see DEV NOTE above)
+    // IMO (Dan C) this could be an old bug
   }
 }
 

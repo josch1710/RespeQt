@@ -1,4 +1,4 @@
-#include "include/piclabel.h"
+#include "include/picpreview.h"
 #include <math.h>
 #include <QPaintEvent>
 #include <QPainter>
@@ -10,11 +10,11 @@
 #include <QImageReader>
 
 
-PicLabel::PicLabel(QWidget* parent) : QLabel(parent)
+PicPreview::PicPreview(QWidget* parent) : QLabel(parent)
 {
 }
 
-PicLabel::~PicLabel()
+PicPreview::~PicPreview()
 {
     if (_pixmap)
     {
@@ -23,7 +23,7 @@ PicLabel::~PicLabel()
     }
 }
 
-void PicLabel::clear()
+void PicPreview::clear()
 {
     QLabel::clear();
     _diskName.clear();
@@ -41,7 +41,7 @@ void PicLabel::clear()
     }
 }
 
-void PicLabel::setDiskName(const QString& fileName)
+void PicPreview::setDiskName(const QString& fileName)
 {
     if ((_diskName == fileName) || !QFileInfo::exists(fileName))
         return;
@@ -62,7 +62,7 @@ void PicLabel::setDiskName(const QString& fileName)
     update();
 }
 
-void PicLabel::loadPixmap(const QString& picPath)
+void PicPreview::loadPixmap(const QString& picPath)
 {
     if (_picPath == picPath)
         return;
@@ -77,7 +77,7 @@ void PicLabel::loadPixmap(const QString& picPath)
     Q_ASSERT(_pixmap && !_pixmap->isNull());
 }
 
-void PicLabel::parseName()
+void PicPreview::parseName()
 {
     QLabel::clear();                // clear parent label text (not used)
     _title.clear();                 // side-effect #1 is to set this
@@ -120,7 +120,7 @@ static QStringList toFileTypes(const QList<QByteArray>& list)
     return strings;
 }
 
-QString PicLabel::findImage()
+QString PicPreview::findImage()
 {
     auto fileInfo = QFileInfo {_diskName};
     auto diskBase = fileInfo.completeBaseName();
@@ -179,7 +179,7 @@ QString PicLabel::findImage()
     return FLOPPY_DEFAULT_PNG;      // used if all else fails
 }
 
-QRect PicLabel::scaleRect(const QRectF& rect, const QRectF& rcChild)
+QRect PicPreview::scaleRect(const QRectF& rect, const QRectF& rcChild)
 {
     const QSizeF szPic = _pixmap->size();
 
@@ -194,7 +194,7 @@ QRect PicLabel::scaleRect(const QRectF& rect, const QRectF& rcChild)
     return QRect {QPoint{X,Y}, QSize{W,H}};
 }
 
-QRect PicLabel::padRect()
+QRect PicPreview::padRect()
 {
     QRect lblRect(rect());
     double ratioNow = static_cast<double>(width()) / height();
@@ -217,7 +217,7 @@ QRect PicLabel::padRect()
     return lblRect;
 }
 
-void PicLabel::moveLabels()
+void PicPreview::moveLabels()
 {
     if (!_pixmap || _pixmap->isNull())
         return;
@@ -252,7 +252,7 @@ void PicLabel::moveLabels()
         _diskNo.setVisible(false);
 }
 
-void PicLabel::scaleFonts()
+void PicPreview::scaleFonts()
 {
     QFont font = _title.font();
     double pix = round((double)_title.size().height() / 3.5);
@@ -269,14 +269,14 @@ void PicLabel::scaleFonts()
     _diskNo.setFont(font);
 }
 
-void PicLabel::update()
+void PicPreview::update()
 {
     moveLabels();
     scaleFonts();
     QLabel::update();
 }
 
-double PicLabel::ratio()
+double PicPreview::ratio()
 {
     double aspectRatio = 0.0;
 
@@ -286,7 +286,7 @@ double PicLabel::ratio()
     return aspectRatio;
 }
 
-void PicLabel::paintEvent(QPaintEvent* event)
+void PicPreview::paintEvent(QPaintEvent* event)
 {
     if (_pixmap)
     {
@@ -298,13 +298,13 @@ void PicLabel::paintEvent(QPaintEvent* event)
     QLabel::paintEvent(event);
 }
 
-void PicLabel::resizeEvent(QResizeEvent *event)
+void PicPreview::resizeEvent(QResizeEvent *event)
 {
     QLabel::resizeEvent(event);
     update();
 }
 
-QSize PicLabel::sizeHint() const
+QSize PicPreview::sizeHint() const
 {
     if (_pixmap == nullptr)
         return QSize(200,130);  // TBD: why isn't this 1:1 with pixel ruler? (on a 4k monitor)

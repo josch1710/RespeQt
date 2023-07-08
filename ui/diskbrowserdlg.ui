@@ -141,7 +141,7 @@
         </property>
        </widget>
       </widget>
-      <widget class="PicLabel" name="lblPreview">
+      <widget class="PicPreview" name="picPreview">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -209,9 +209,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>PicLabel</class>
+   <class>PicPreview</class>
    <extends>QLabel</extends>
-   <header>include/piclabel.h</header>
+   <header>include/picpreview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

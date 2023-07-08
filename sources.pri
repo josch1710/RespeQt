@@ -73,7 +73,7 @@ SOURCES += \
     src/diskimages/atxtrackinfo.cpp \
     src/diskimages/board.cpp \
     src/picsplitter.cpp \
-    src/piclabel.cpp
+    src/picpreview.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -140,7 +140,7 @@ HEADERS += \
     include/diskimages/atxtrackinfo.h \
     include/diskimages/board.h \
     include/picsplitter.h \
-    include/piclabel.h
+    include/picpreview.h
 
 FORMS += \
     ui/mainwindow.ui \

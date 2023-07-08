@@ -1,5 +1,5 @@
-#ifndef PICLABEL_H
-#define PICLABEL_H
+#ifndef PICPREVIEW_H
+#define PICPREVIEW_H
 
 #include <QLabel>
 #include <QString>
@@ -37,11 +37,11 @@ private:
 #endif
 };
 
-class PicLabel : public QLabel
+class PicPreview : public QLabel
 {
 public:
-    PicLabel(QWidget* parent);
-    virtual ~PicLabel();
+    PicPreview(QWidget* parent);
+    virtual ~PicPreview();
 
     void setDiskName(const QString& fileName);
     double ratio();
@@ -77,4 +77,4 @@ private:
     QRect scaleRect(const QRectF& rect, const QRectF& rcChild);
 };
 
-#endif // PICLABEL_H
+#endif // PICPREVIEW_H

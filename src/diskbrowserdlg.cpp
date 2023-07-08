@@ -42,7 +42,7 @@ DiskBrowserDlg::~DiskBrowserDlg()
 
 void DiskBrowserDlg::clear()
 {
-    ui->lblPreview->clear();
+    ui->picPreview->clear();
     ui->lblFileList->clear();
 
     ui->treeDisks->blockSignals(true);
@@ -200,7 +200,7 @@ void DiskBrowserDlg::itemSelectionChanged()
 
     if (itemIsFolder(currentItem))
     {
-        ui->lblPreview->clear();
+        ui->picPreview->clear();
         ui->lblFileList->clear();
         return;
     }
@@ -265,12 +265,12 @@ void DiskBrowserDlg::itemSelectionChanged()
         fileList[0] = '\n';
     }
 
-    double oldRatio = ui->lblPreview->ratio();
+    double oldRatio = ui->picPreview->ratio();
 
     ui->lblFileList->setText(fileList);
-    ui->lblPreview->setDiskName(fullName);
+    ui->picPreview->setDiskName(fullName);
 
-    double newRatio = ui->lblPreview->ratio();
+    double newRatio = ui->picPreview->ratio();
 
     if (oldRatio != newRatio)
     {
