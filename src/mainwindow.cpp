@@ -115,7 +115,7 @@ void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*c
 
   // kludge: catch assert (Q_ASSERT) here - don't just silently unload the app!
   QString nonConstMsg(msg);
-  if (msg.startsWith("ASSERT"))
+  if (!msg.startsWith("!"))     // Qt/system log message? (i.e. "ASSERT")
     nonConstMsg = "123" + msg;  // "123" gets removed below
 
   QByteArray localMsg = nonConstMsg.toLocal8Bit();
@@ -128,11 +128,11 @@ void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*c
     logFile->close();
 #if defined(QT_NO_DEBUG) // allow debugger to survive fatal error
     abort();
-#elif defined (Q_OS_WIN)
+#elif defined (Q_OS_WIN) // TBD: non-windows? (QtCreator 10.x on Mojave is OK)
     __debugbreak();
 #endif
   }
-  logMutex->unlock();   // QtCreator breaks *here* on fatal error, crash or assert.
+  logMutex->unlock();   // __debugbreak() (line above) breaks *here* on fatal error, crash or assert.
 
   if (msg[0] == '!') {  // '!' prefix required for ALL qDebug() insertion strings! (see DEV NOTE above)
 #ifdef QT_NO_DEBUG
@@ -143,8 +143,8 @@ void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*c
     // TODO Should be signal-slot
     sInstance->doLogMessage(localMsg.at(1), displayMsg);
   } else {
-    Q_ASSERT(0);  // missing required '!' with qDebug() (see DEV NOTE above)
-    // IMO (Dan C) this could be an old bug
+    //Q_ASSERT(0);  // missing required '!' with qDebug() (see DEV NOTE above)
+    // use above to catch Qt warnings and unexpected assertions
   }
 }
 
