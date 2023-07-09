@@ -113,9 +113,8 @@ void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*c
       break;
   }
 
-  // kludge: catch assert (Q_ASSERT) here - don't just silently unload the app!
   QString nonConstMsg(msg);
-  if (!msg.startsWith("!"))     // Qt/system log message? (i.e. "ASSERT")
+  if (!msg.startsWith("!"))     // Qt/system log message?
     nonConstMsg = "123" + msg;  // "123" gets removed below
 
   QByteArray localMsg = nonConstMsg.toLocal8Bit();
@@ -134,18 +133,13 @@ void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*c
   }
   logMutex->unlock();   // __debugbreak() (line above) breaks *here* on fatal error, crash or assert.
 
-  if (msg[0] == '!') {  // '!' prefix required for ALL qDebug() insertion strings! (see DEV NOTE above)
 #ifdef QT_NO_DEBUG
-    if (msg[1] == 'd') {
-      return;
-    }
-#endif
-    // TODO Should be signal-slot
-    sInstance->doLogMessage(localMsg.at(1), displayMsg);
-  } else {
-    //Q_ASSERT(0);  // missing required '!' with qDebug() (see DEV NOTE above)
-    // use above to catch Qt warnings and unexpected assertions
+  // release build: filter Qt/system messages (all app generated log messages follow above DEV NOTE)
+  if ((msg[0] != '!') || (msg[1] == 'd')) {
+    return;
   }
+#endif
+  sInstance->doLogMessage(localMsg.at(1), displayMsg);
 }
 
 void MainWindow::doLogMessage(int type, const QString &msg) {

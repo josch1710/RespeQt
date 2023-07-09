@@ -20,7 +20,9 @@ DriveWidget::~DriveWidget() {
 
 
 static void FormatStatusTip(QAction *action, QString &driveNum) {
-  const QString &tip = action->statusTip().arg(driveNum);
+  QString tip = action->statusTip();
+  if (tip.contains("%1"))
+    tip = tip.arg(driveNum);
   action->setStatusTip(tip);
 }
 
