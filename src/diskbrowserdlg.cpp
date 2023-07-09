@@ -1,3 +1,8 @@
+/*
+ * diskbrowserdlg.cpp - implementation of RespeQt's DiskBrowserDlg class.
+ *
+ * Copyright 2023 D.Caputi
+ */
 #include "diskbrowserdlg.h"
 #include "ui_diskbrowserdlg.h"
 #include "respeqtsettings.h"

@@ -1,3 +1,8 @@
+/*
+ * folderdisks.h - declaration of DiskBrowserDialog's FolderDisks class.
+ *
+ * Copyright 2023 D.Caputi
+ */
 #ifndef FOLDERDISKS_H
 #define FOLDERDISKS_H
 

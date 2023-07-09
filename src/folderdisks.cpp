@@ -1,3 +1,8 @@
+/*
+ * folderdisks.cpp - implementation of DiskBrowserDialog's FolderDisks class.
+ *
+ * Copyright 2023 D.Caputi
+ */
 #include "folderdisks.h"
 #include "miscutils.h"
 #include <QDir>

@@ -1,3 +1,8 @@
+/*
+ * picsplitter.cpp - implementation of DiskBrowserDialog's PicSplitter class.
+ *
+ * Copyright 2023 D.Caputi
+ */
 #include "include/picsplitter.h"
 #include <QResizeEvent>
 #include <QLabel>

@@ -1,3 +1,8 @@
+/*
+ * picpreview.h - declaration of DiskBrowserDialog's PicPreview class.
+ *
+ * Copyright 2023 D.Caputi
+ */
 #ifndef PICPREVIEW_H
 #define PICPREVIEW_H
 

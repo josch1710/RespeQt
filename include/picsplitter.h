@@ -1,3 +1,8 @@
+/*
+ * picsplitter.h - declaration of DiskBrowserDialog's PicSplitter class.
+ *
+ * Copyright 2023 D.Caputi
+ */
 #ifndef PICSPLITTER_H
 #define PICSPLITTER_H
 

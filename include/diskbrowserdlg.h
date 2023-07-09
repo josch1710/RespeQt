@@ -1,3 +1,8 @@
+/*
+ * diskbrowserdlg.h - declaration of RespeQt's DiskBrowserDlg class.
+ *
+ * Copyright 2023 D.Caputi
+ */
 #ifndef DISKBROWSERDLG_H
 #define DISKBROWSERDLG_H
 

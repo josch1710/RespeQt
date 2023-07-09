@@ -1,3 +1,8 @@
+/*
+ * picpreview.cpp - implementation of DiskBrowserDialog's PicPreview class.
+ *
+ * Copyright 2023 D.Caputi
+ */
 #include "include/picpreview.h"
 #include <math.h>
 #include <QPaintEvent>
