@@ -161,7 +161,7 @@ void DiskBrowserDlg::refreshFoldersCombobox()
     ui->cboFolderPath->blockSignals(true);
     ui->cboFolderPath->clear();
 
-    QStringList folders;// build a list of MRU folders for the dropdown list
+    QStringList folders;    // build a list of MRU folders for the dropdown list
 
     foreach (const QString& name, RespeqtSettings::instance()->recentBrowserFolders())
     {
@@ -171,12 +171,12 @@ void DiskBrowserDlg::refreshFoldersCombobox()
             QString path = fileInf.isFile() ? fileInf.path() : name;// don't want file names in dropdown
             folders += path;
         }
-        else if (isDiskImage(name))// MRU missing. First check if a disk is selected
+        else if (isDiskImage(name)) // MRU missing. First check if a disk is selected
         {
             QString path = getParentDir(name);
             if (QFileInfo::exists(path))
             {
-                folders += path;// Keep parent folder of bad disk
+                folders += path;    // Keep parent folder of bad disk
             }
             else
             {
@@ -184,7 +184,7 @@ void DiskBrowserDlg::refreshFoldersCombobox()
                 RespeqtSettings::instance()->delMostRecentBrowserFolder(name);
             }
         }
-        else// Simple case of missing folder
+        else    // Simple case of missing folder
         {
             qDebug() << "!w" << tr("Disk Browser most recent list updated. Folder '%1' not found.").arg(name);
             RespeqtSettings::instance()->delMostRecentBrowserFolder(name);
@@ -223,7 +223,7 @@ void DiskBrowserDlg::itemSelectionChanged()
     RespeqtSettings::instance()->setMostRecentBrowserFolder(fullName);
     MainWindow::instance()->mountFileWithDefaultProtection(0, fullName);
 
-    QString fileList;// get a list of files to show in the file list pane
+    QString fileList;   // get a list of files to show in the file list pane
 
     if (sio)
     {
@@ -263,7 +263,7 @@ void DiskBrowserDlg::itemSelectionChanged()
         fileList = tr("!SIO device not available:\nNo Files");
     }
 
-    if (fileList[0] == '!')// detected error/annomally parsing filesystem above
+    if (fileList[0] == '!') // detected error/annomally parsing filesystem above
     {
         qDebug() << fileList;
         fileList[0] = '\n';
@@ -279,13 +279,11 @@ void DiskBrowserDlg::itemSelectionChanged()
     if (oldRatio != newRatio)
     {
         if (newRatio == 0.0)
-            newRatio = 1.0;// TBD
+            newRatio = 1.0;
 
         ui->splitLeftAtrRightDirPng->setRatio(newRatio);
         ui->splitTopDirBotPng->setRatio(newRatio, true);
     }
-    // TBD 1. allow drop target or paste image, show hint text
-    // TBD 2. interop with emulator code, boot it and show screen
 }
 
 QString DiskBrowserDlg::getRecentDisk(QString folder)
