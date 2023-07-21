@@ -80,6 +80,13 @@ private:
     void update();
     QRect padRect();
     QRect scaleRect(const QRectF& rect, const QRectF& rcChild);
+
+    void popupMenuReq(const QPoint& pos);
+    void actionSetPic();
+    void actionSetDefault();
+    void actionSetTitle();
+    void actionSetIndex();
+    void actionClear();
 };
 
 #endif // PICPREVIEW_H

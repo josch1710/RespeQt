@@ -10,6 +10,25 @@
 #include <QString>
 #include <QStringList>
 #include <QDir>
+#include <QSettings>
+
+struct FloppyArt
+{
+    QString pic;
+    QString title;
+    int  index;
+    bool sideB;
+};
+
+class FolderSettings : public QSettings
+{
+public:
+    explicit FolderSettings(const QString& path);
+    virtual ~FolderSettings();
+
+    void load();
+    void save();
+};
 
 class FolderDisks : public QObject
 {
@@ -26,6 +45,9 @@ private:
     QDir dir;
     QStringList dirList;
     QStringList diskList;
+    QString          _defaultPic;
+    QList<FloppyArt> _diskArt;
+    FolderSettings*  _settings;
 };
 
 #endif // FOLDERDISKS_H

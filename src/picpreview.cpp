@@ -13,10 +13,13 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QImageReader>
+#include <QMenu>
 
 
 PicPreview::PicPreview(QWidget* parent) : QLabel(parent)
 {
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this, &PicPreview::customContextMenuRequested, this, &PicPreview::popupMenuReq);
 }
 
 PicPreview::~PicPreview()
@@ -316,6 +319,48 @@ QSize PicPreview::sizeHint() const
 
     return QSize(_pixmap->width(), _pixmap->height());
 }
+
+void PicPreview::popupMenuReq(const QPoint& pos)
+{
+    QMenu menu;
+    menu.addAction(QIcon(":/icons/silk-icons/icons/image.png"), "Set Preview Default...", this, &PicPreview::actionSetDefault);
+    menu.addAction(QIcon(":/icons/silk-icons/icons/image_add.png"), "Set Disk Preview Pic...", this, &PicPreview::actionSetPic);
+    menu.addAction(QIcon(":/icons/silk-icons/icons/image_delete.png"), "Clear Preview", this, &PicPreview::actionSetPic);
+    menu.addSeparator();
+    menu.addAction(QIcon(":/icons/silk-icons/icons/font.png"), "Set Disk Title", this, &PicPreview::actionSetTitle);
+    menu.addAction(QIcon(":/icons/silk-icons/icons/text_list_numbers.png"), "Set Disk Index", this, &PicPreview::actionSetIndex);
+
+    menu.exec(mapToGlobal(pos));
+}
+
+void PicPreview::actionSetDefault()
+{
+
+}
+
+void PicPreview::actionSetPic()
+{
+
+}
+
+void PicPreview::actionSetTitle()
+{
+
+}
+
+void PicPreview::actionSetIndex()
+{
+
+}
+
+void PicPreview::actionClear()
+{
+
+}
+
+// Title class -
+// Derived from QTextEdit, this class encapsulates the floppy disk title rendered on the label (if no preview is defined).
+// I'm using a Rich Text widget Due to the buggy nature of line spacing on macOS with line spacing in a QLabel.
 
 Title::Title(QWidget* parent) : QTextEdit(parent)
 {
