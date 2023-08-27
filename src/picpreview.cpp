@@ -128,6 +128,20 @@ static QStringList toFileTypes(const QList<QByteArray>& list)
     return strings;
 }
 
+// findImage() is my first pass at a scheme for preview pics. The pics/images are placed in the folder along side disk images.
+//  (note: an "image file" in this context is a digital picture, not an ATR disk!)
+// A complex, yet flexible naming convention allows the app to grab corresponding pics and labeling data (for rendering on a blank/built in floppy pic)
+// and is organized and prioritized as follows:
+// 1. Basename with viable image extension.
+//    ex: DiskBaseName.png or *.jpg, etc... any Qt supported format can be used.
+// 2. Matching index prefixed image file in the disk folder. Note index B designates the reverse side of a floppy disk.
+//    ex: disk name = 12b.Title of Disk.ATR ("Title of Disk" appears on the mock label if no PNG present)
+//        image file = 12b.Menu Screen.PNG (screen shot of a disk that boots to a game menu)
+//    or: image file = 12b.PNG
+// 3. Use the hard-coded/generic name respeqt_db.* for default thumbnail.
+//    ex: respeqt_db.png
+// 4. Default to loading a built-in image of a 5 1/2-inch floppy disk
+//
 QString PicPreview::findImage()
 {
     auto fileInfo = QFileInfo {_diskName};
@@ -150,10 +164,7 @@ QString PicPreview::findImage()
             return entry.absoluteFilePath();
         }
 
-        // 2. check for same index prefixed image file in the disk folder
-        // ex: disk name = 12b.Title of Disk.ATR
-        //     image file = 12b.Menu Screen.PNG
-        // or: image file = 12b.PNG
+        // 2. check for matching indexing filename prefix
 
         if (!_diskNo.isEmpty())     // check if current disk has index prefix NN. or NNb.
         {
@@ -177,7 +188,9 @@ QString PicPreview::findImage()
         }
     }
 
-    // 3. load built-in image of a 5 1/2-inch floppy disk
+    // 4. TBD: check INI file scheme for an image to load
+
+    // 5. load built-in image of a 5 1/2-inch floppy disk
 
     if (_isSideA)
         return FLOPPY_INDEXED_PNG;  // has 2 labels: (small) disk no./index & (large) title/content
@@ -335,7 +348,10 @@ void PicPreview::popupMenuReq(const QPoint& pos)
 
 void PicPreview::actionSetDefault()
 {
-
+    QString fname = browsePic();
+    if (!fname.isEmpty())
+    {
+    }
 }
 
 void PicPreview::actionSetPic()
@@ -358,9 +374,14 @@ void PicPreview::actionClear()
 
 }
 
+QString PicPreview::browsePic()
+{
+    return QString();
+}
+
 // Title class -
 // Derived from QTextEdit, this class encapsulates the floppy disk title rendered on the label (if no preview is defined).
-// I'm using a Rich Text widget Due to the buggy nature of line spacing on macOS with line spacing in a QLabel.
+// I'm using a Rich Text widget Due to the buggy nature specifically on macOS with line spacing in a QLabel.
 
 Title::Title(QWidget* parent) : QTextEdit(parent)
 {

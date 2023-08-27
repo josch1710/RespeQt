@@ -75,6 +75,7 @@ private:
     void loadPixmap(const QString& picPath);
     void parseName();
     QString findImage();
+    QString browsePic();
     void moveLabels();
     void scaleFonts();
     void update();
