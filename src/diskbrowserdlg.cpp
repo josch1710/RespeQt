@@ -19,6 +19,8 @@
 #include "ui_diskbrowserdlg.h"
 #include <QFileDialog>
 #include <QObject>
+#include <QImageReader>
+#include <QMenu>
 
 DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent)
     : QDialog(parent), ui(new Ui::DiskBrowserDlg)
@@ -36,7 +38,7 @@ DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent)
     connect(ui->cboFolderPath, SIGNAL(currentTextChanged(QString)), this, SLOT(onFolderChanged(QString)));
 
     refreshFoldersCombobox();
-    onFolderChanged("");// reload the current item 0 in the combo
+    onFolderChanged(""); // reload the current item 0 in the combo
 }
 
 DiskBrowserDlg::~DiskBrowserDlg()
@@ -216,9 +218,12 @@ void DiskBrowserDlg::itemSelectionChanged()
 
     if (!fiDisk.exists())
     {
+        // TBD: remove item
         Q_ASSERT(0);
         return;
     }
+
+    _diskName = fullName;
 
     RespeqtSettings::instance()->setMostRecentBrowserFolder(fullName);
     MainWindow::instance()->mountFileWithDefaultProtection(0, fullName);
@@ -272,7 +277,11 @@ void DiskBrowserDlg::itemSelectionChanged()
     double oldRatio = ui->picPreview->ratio();
 
     ui->lblFileList->setText(fileList);
-    ui->picPreview->setDiskName(fullName);
+
+    parsePicInfo();     // sets the _picInfo (TBD: bad side effect)
+
+    ui->picPreview->setFileName(_picInfo.pic);
+    ui->picPreview->setLabel(_picInfo.label);
 
     double newRatio = ui->picPreview->ratio();
 
@@ -393,4 +402,158 @@ void DiskBrowserDlg::showEvent(QShowEvent *event)
     QDialog::showEvent(event);
     setHorzSplitPos(RespeqtSettings::instance()->diskBrowserHorzSplitPos());
     setVertSplitPos(RespeqtSettings::instance()->diskBrowserVertSplitPos());
+}
+
+void DiskBrowserDlg::parsePicInfo()
+{
+    ui->picPreview->clear();
+
+    auto fileInfo = QFileInfo {_diskName};
+
+    Q_ASSERT(fileInfo.exists());    // validated prior to this call
+
+    QString baseName = fileInfo.completeBaseName();
+
+    static QRegularExpression re("(^\\d+)([b|B]?)(\\.?)(.*)");
+    auto rem = re.match(baseName);
+
+    if (rem.hasMatch())
+    {
+        QString diskNo = rem.captured(1);
+        QString title  = rem.captured(4);
+        bool isSideB = rem.captured(2).toUpper() == "B";
+
+        DiskLabel label { title, diskNo.toInt(), isSideB };
+        ui->picPreview->setLabel(label);
+    }
+    else
+    {
+        ui->picPreview->setLabel(baseName);
+    }
+
+    _picInfo.pic = findImage();  // find a custom or built-in pic
+}
+
+static QStringList toFileTypes(const QList<QByteArray>& list)   // TBD: make this a member of something?
+{
+    QStringList strings;
+
+    foreach (const QByteArray& item, list)
+    {
+        QString fileSpec = "*." + QString::fromLocal8Bit(item);
+        strings.append(fileSpec);
+    }
+
+    return strings;
+}
+
+// findImage() is my first pass at a scheme for preview pics. The pics/images are placed in the folder along side disk images.
+//  (note: an "image file" in this context is a digital picture, not an ATR disk!)
+// A complex, yet flexible naming convention allows the app to grab corresponding pics and labeling data (for rendering on a blank/built in floppy pic)
+// and is organized and prioritized as follows:
+// 1. Basename with viable image extension.
+//    ex: DiskBaseName.png or *.jpg, etc... any Qt supported format can be used.
+// 2. Matching index prefixed image file in the disk folder. Note index B designates the reverse side of a floppy disk.
+//    ex: disk name = 12b.Title of Disk.ATR ("Title of Disk" appears on the mock label if no PNG present)
+//        image file = 12b.Menu Screen.PNG (screen shot of a disk that boots to a game menu)
+//    or: image file = 12b.PNG
+// 3. Use the hard-coded/generic name respeqt_db.* for default thumbnail.
+//    ex: respeqt_db.png
+// 4. Default to loading a built-in image of a 5 1/2-inch floppy disk
+//
+QString DiskBrowserDlg::findImage()
+{
+    auto fileInfo = QFileInfo {_diskName};
+    auto diskBase = fileInfo.completeBaseName();
+    QDir dir {fileInfo.absolutePath()};
+    auto formats = QImageReader::supportedImageFormats();
+    auto entries = dir.entryInfoList(toFileTypes(formats));
+    auto bsidexp = _picInfo.label.sideB ? QString("[b|B]") : QString();
+    auto sregexp = QString("^(%1)(%2)(\\.)(.*)").arg(_picInfo.label.index).arg(bsidexp);
+    auto qregexp = QRegularExpression {sregexp};
+
+    foreach (const QFileInfo& entry, entries)
+    {
+        // 1. check for basename with viable image extension
+
+        const QString entryName {entry.completeBaseName()};
+        if (entryName == diskBase)
+        {
+            setToolTip(entryName);
+            return entry.absoluteFilePath();
+        }
+
+        // 2. check for matching indexing filename prefix
+
+        if (_picInfo.label.index)     // check if current disk has index prefix NN. or NNb.
+        {
+            auto basename = entry.completeBaseName();
+            auto matcher = qregexp.match(basename);
+            if (matcher.hasMatch())
+            {
+                QString tip = matcher.captured(4);  // use mid string as tooltip
+                setToolTip(tip);
+                return entry.absoluteFilePath();
+            }
+        }
+
+        // 3. use generic name for default thumbnail
+
+        auto imagePath = fileInfo.path() + "/.respeqt_db." + entry.suffix();
+        if (QFileInfo::exists(imagePath))
+        {
+            setToolTip("");
+            return imagePath;
+        }
+    }
+
+    // 4. TBD: check INI file scheme for an image to load
+
+    // 5. load built-in image of a 5 1/2-inch floppy disk
+
+    if (_picInfo.label.index)
+        return FLOPPY_INDEXED_PNG;  // has 2 labels: (small) disk no./index & (large) title/content
+    if (_picInfo.label.sideB)
+        return FLOPPY_BACKSIDE_PNG; // same 2 labels but flip-side of double-sided floppy
+
+    return FLOPPY_DEFAULT_PNG;      // used if all else fails
+}
+
+void DiskBrowserDlg::popupMenuReq(const QPoint& pos)
+{
+    QMenu menu;
+    menu.addAction(QIcon(":/icons/silk-icons/icons/image.png"), "Set Preview Default...", this, &DiskBrowserDlg::actionSetDefault);
+    menu.addAction(QIcon(":/icons/silk-icons/icons/image_add.png"), "Set Disk Preview Pic...", this, &DiskBrowserDlg::actionSetPic);
+    menu.addAction(QIcon(":/icons/silk-icons/icons/image_delete.png"), "Clear Preview", this, &DiskBrowserDlg::actionSetPic);
+    menu.addSeparator();
+    menu.addAction(QIcon(":/icons/silk-icons/icons/font.png"), "Set Disk Title", this, &DiskBrowserDlg::actionSetTitle);
+    menu.addAction(QIcon(":/icons/silk-icons/icons/text_list_numbers.png"), "Set Disk Index", this, &DiskBrowserDlg::actionSetIndex);
+
+    menu.exec(mapToGlobal(pos));
+}
+
+void DiskBrowserDlg::actionSetDefault()
+{
+//    QString fname = browsePic();
+  //  if (!fname.isEmpty())
+    //{
+      //  auto set = getDbSettings();
+        //set.setDefaultPic(fname);
+//    }
+}
+
+void DiskBrowserDlg::actionSetPic()
+{
+}
+
+void DiskBrowserDlg::actionSetTitle()
+{
+}
+
+void DiskBrowserDlg::actionSetIndex()
+{
+}
+
+void DiskBrowserDlg::actionClear()
+{
 }

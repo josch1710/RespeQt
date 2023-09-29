@@ -10,6 +10,7 @@
 #include <QString>
 #include <QPixmap>
 #include <QTextEdit>
+#include "folderdisks.h"
 
 class DiskNo : public QLabel
 {
@@ -44,11 +45,16 @@ private:
 
 class PicPreview : public QLabel
 {
+    Q_OBJECT
+
 public:
     PicPreview(QWidget* parent);
     virtual ~PicPreview();
 
-    void setDiskName(const QString& fileName);
+    void setFileName(const QString& name);
+    void setLabel(const DiskLabel& label);
+    void setLabel(const QString& title, int diskNo, bool bSide);
+
     double ratio();
     void clear();
 
@@ -57,6 +63,9 @@ public:
 protected:
     virtual void paintEvent(QPaintEvent* event) override;
     virtual void resizeEvent(QResizeEvent* event) override;
+
+signals:
+    void sigPopupMenuReq(const QPoint& pos);
 
 private:
     QString  _diskName;
@@ -68,26 +77,13 @@ private:
     bool     _isSideA {false};
     bool     _isSideB {false};
 
-    const QString FLOPPY_DEFAULT_PNG  {":/icons/other-icons/floppy.png"};
-    const QString FLOPPY_INDEXED_PNG  {":/icons/other-icons/floppy_front.png"};
-    const QString FLOPPY_BACKSIDE_PNG {":/icons/other-icons/floppy_back.png"};
-
     void loadPixmap(const QString& picPath);
-    void parseName();
-    QString findImage();
-    QString browsePic();
     void moveLabels();
     void scaleFonts();
     void update();
     QRect padRect();
     QRect scaleRect(const QRectF& rect, const QRectF& rcChild);
-
     void popupMenuReq(const QPoint& pos);
-    void actionSetPic();
-    void actionSetDefault();
-    void actionSetTitle();
-    void actionSetIndex();
-    void actionClear();
 };
 
 #endif // PICPREVIEW_H

@@ -35,7 +35,8 @@ bool FolderDisks::load(const QString& path)
 // FolderSettings class -
 // Derived from QSettings, this class encapsulates DiskBrowser's pics, titles and indexing required for the PicPreview widget.
 
-FolderSettings::FolderSettings(const QString& path) : QSettings(path + ".thumbs.ini", QSettings::Format::IniFormat)
+FolderSettings::FolderSettings(const QString& path) : QSettings(path + ".respeqt_db.ini", QSettings::Format::IniFormat),
+    _path(path)
 {
     load();
 }

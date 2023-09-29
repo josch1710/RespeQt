@@ -12,12 +12,21 @@
 #include <QDir>
 #include <QSettings>
 
-struct FloppyArt
+struct DiskLabel
 {
-    QString pic;
+    DiskLabel(const QString& _title = QString(), int _index = 0, bool _sideB = false) : title(_title), index(_index), sideB(_sideB) { }
+    void clear() {title.clear(); index = 0; sideB = false;}
     QString title;
     int  index;
     bool sideB;
+};
+
+struct FloppyArt
+{
+    FloppyArt() { }
+    void clear() { pic.clear(); label.clear(); }
+    QString pic;
+    DiskLabel label;
 };
 
 class FolderSettings : public QSettings
@@ -28,6 +37,9 @@ public:
 
     void load();
     void save();
+
+private:
+    QString _path;
 };
 
 class FolderDisks : public QObject
@@ -43,8 +55,9 @@ public:
     QString defaultPic() const { return _defaultPic; }
     const FloppyArt& diskArt(int i) { return _diskArt.at(i); }
     QString diskPic(int i) { return diskArt(i).pic; }
-    QString diskTitle(int i) { return diskArt(i).title; }
+    QString diskTitle(int i) { return diskArt(i).label.title; }
     QString indexLabel(int i);
+    FolderSettings& getSettings() { return *_settings; }
 
 private:
     QDir dir;
