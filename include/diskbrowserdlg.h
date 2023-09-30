@@ -28,7 +28,7 @@ public:
     int getVertSplitPos();
     void setHorzSplitPos(int pos);
     void setVertSplitPos(int pos);
-    void parsePicInfo();
+    DiskLabel parsePicLabel();
 
 protected:
     void showEvent(QShowEvent *event) override;

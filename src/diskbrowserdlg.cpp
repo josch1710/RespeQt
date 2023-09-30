@@ -278,10 +278,13 @@ void DiskBrowserDlg::itemSelectionChanged()
 
     ui->lblFileList->setText(fileList);
 
-    parsePicInfo();     // sets the _picInfo (TBD: bad side effect)
-
+    ui->picPreview->clear();
+    _picInfo.label = parsePicLabel();
+    _picInfo.pic   = findImage();        // find a custom or built-in pic
     ui->picPreview->setFileName(_picInfo.pic);
-    ui->picPreview->setLabel(_picInfo.label);
+
+    if (_picInfo.pic[0] == ':')
+        ui->picPreview->setLabel(_picInfo.label);
 
     double newRatio = ui->picPreview->ratio();
 
@@ -404,9 +407,9 @@ void DiskBrowserDlg::showEvent(QShowEvent *event)
     setVertSplitPos(RespeqtSettings::instance()->diskBrowserVertSplitPos());
 }
 
-void DiskBrowserDlg::parsePicInfo()
+DiskLabel DiskBrowserDlg::parsePicLabel()
 {
-    ui->picPreview->clear();
+    DiskLabel label;
 
     auto fileInfo = QFileInfo {_diskName};
 
@@ -423,15 +426,14 @@ void DiskBrowserDlg::parsePicInfo()
         QString title  = rem.captured(4);
         bool isSideB = rem.captured(2).toUpper() == "B";
 
-        DiskLabel label { title, diskNo.toInt(), isSideB };
-        ui->picPreview->setLabel(label);
+        label = DiskLabel {title, diskNo.toInt(), isSideB};
     }
     else
     {
-        ui->picPreview->setLabel(baseName);
+        label = DiskLabel(baseName);
     }
 
-    _picInfo.pic = findImage();  // find a custom or built-in pic
+    return label;
 }
 
 static QStringList toFileTypes(const QList<QByteArray>& list)   // TBD: make this a member of something?
@@ -511,10 +513,10 @@ QString DiskBrowserDlg::findImage()
 
     // 5. load built-in image of a 5 1/2-inch floppy disk
 
-    if (_picInfo.label.index)
-        return FLOPPY_INDEXED_PNG;  // has 2 labels: (small) disk no./index & (large) title/content
     if (_picInfo.label.sideB)
         return FLOPPY_BACKSIDE_PNG; // same 2 labels but flip-side of double-sided floppy
+    if (_picInfo.label.index)
+        return FLOPPY_INDEXED_PNG;  // has 2 labels: (small) disk no./index & (large) title/content
 
     return FLOPPY_DEFAULT_PNG;      // used if all else fails
 }

@@ -69,7 +69,7 @@ void PicPreview::setLabel(const QString& title, int index, bool bSide)
 {
     _title.setText(title);
     _diskNo.setText(QString::number(index));
-    _isSideA = !bSide;
+    _isSideA = !bSide && index;
     _isSideB = bSide;
 
     update();
