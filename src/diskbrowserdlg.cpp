@@ -280,7 +280,11 @@ void DiskBrowserDlg::itemSelectionChanged()
 
     ui->picPreview->clear();
     _picInfo.label = parsePicLabel();
-    _picInfo.pic   = findImage();        // find a custom or built-in pic
+    _picInfo.pic   = findPicFile();        // find a custom or built-in pic
+
+    if (_picInfo.pic.isEmpty())
+        _picInfo.pic = getFloppyPic();
+
     ui->picPreview->setFileName(_picInfo.pic);
 
     if (_picInfo.pic[0] == ':')
@@ -449,7 +453,7 @@ static QStringList toFileTypes(const QList<QByteArray>& list)   // TBD: make thi
     return strings;
 }
 
-// findImage() is my first pass at a scheme for preview pics. The pics/images are placed in the folder along side disk images.
+// findPicFile (formally findImage) is my second pass at a scheme for preview pics. The pics/images are placed in the folder along side disk images.
 //  (note: an "image file" in this context is a digital picture, not an ATR disk!)
 // A complex, yet flexible naming convention allows the app to grab corresponding pics and labeling data (for rendering on a blank/built in floppy pic)
 // and is organized and prioritized as follows:
@@ -461,9 +465,11 @@ static QStringList toFileTypes(const QList<QByteArray>& list)   // TBD: make thi
 //    or: image file = 12b.PNG
 // 3. Use the hard-coded/generic name respeqt_db.* for default thumbnail.
 //    ex: respeqt_db.png
-// 4. Default to loading a built-in image of a 5 1/2-inch floppy disk
+// 4. TBD: check INI file scheme for an image to load
 //
-QString DiskBrowserDlg::findImage()
+// formally step 5 was: Default to loading a built-in image of a 5 1/2-inch floppy disk (moved to getFloppyPic)
+//
+QString DiskBrowserDlg::findPicFile()
 {
     auto fileInfo = QFileInfo {_diskName};
     auto diskBase = fileInfo.completeBaseName();
@@ -511,14 +517,16 @@ QString DiskBrowserDlg::findImage()
 
     // 4. TBD: check INI file scheme for an image to load
 
-    // 5. load built-in image of a 5 1/2-inch floppy disk
+    return QString();
+}
+
+QString DiskBrowserDlg::getFloppyPic()  // 5. load built-in image of a 5 1/2-inch floppy disk
+{
 
     if (_picInfo.label.sideB)
-        return FLOPPY_BACKSIDE_PNG; // same 2 labels but flip-side of double-sided floppy
-    if (_picInfo.label.index)
-        return FLOPPY_INDEXED_PNG;  // has 2 labels: (small) disk no./index & (large) title/content
+        return FLOPPY_BACKSIDE_PNG; // same 2 labels as default, but flip-side of double-sided floppy
 
-    return FLOPPY_DEFAULT_PNG;      // used if all else fails
+    return FLOPPY_INDEXED_PNG;      // default has 2 labels: (small) disk no./index & (large) title/content
 }
 
 void DiskBrowserDlg::popupMenuReq(const QPoint& pos)

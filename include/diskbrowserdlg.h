@@ -40,13 +40,14 @@ private:
     bool itemIsFolder(QTreeWidgetItem* item);
     void refreshFoldersCombobox();
     bool isDiskImage(const QString& name);
-    QString findImage();
+    QString findPicFile();
+    QString getFloppyPic();
     QString getMostRecentFolder();
     QString getMostRecentDisk();
     QString getRecentDisk(QString folder);
     QString getParentDir(QString fileFolder);
 
-    const QString FLOPPY_DEFAULT_PNG  {":/icons/other-icons/floppy.png"};
+//  const QString FLOPPY_DEFAULT_PNG  {":/icons/other-icons/floppy.png"};       TBD: omit
     const QString FLOPPY_INDEXED_PNG  {":/icons/other-icons/floppy_front.png"};
     const QString FLOPPY_BACKSIDE_PNG {":/icons/other-icons/floppy_back.png"};
 

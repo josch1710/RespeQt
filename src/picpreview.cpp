@@ -42,7 +42,6 @@ void PicPreview::clear()
     _picTooltip.clear();
     _title.clear();
     _diskNo.clear();
-    _isSideA = false;
     _isSideB = false;
 
     if (_pixmap)
@@ -68,9 +67,12 @@ void PicPreview::setFileName(const QString& picPath)
 void PicPreview::setLabel(const QString& title, int index, bool bSide)
 {
     _title.setText(title);
-    _diskNo.setText(QString::number(index));
-    _isSideA = !bSide && index;
     _isSideB = bSide;
+
+    if (index)
+        _diskNo.setText(QString::number(index));
+    else
+        _diskNo.clear();
 
     update();
 }
@@ -138,34 +140,35 @@ void PicPreview::moveLabels()
     if (!_pixmap || _pixmap->isNull())
         return;
 
-    const QRectF LABEL_RECT   {QPointF{95,24}, QSizeF{105,49}};
     const QRectF LABEL_RECT_A {QPointF{57,24}, QSizeF{142,49}};
     const QRectF LABEL_RECT_B {QPointF{23,24}, QSizeF{142,49}};
 
-    QRectF labelRect = LABEL_RECT;
+    QRectF labelRect;
 
-    if (_isSideA)
-        labelRect = LABEL_RECT_A;
     if (_isSideB)
         labelRect = LABEL_RECT_B;
+    else
+        labelRect = LABEL_RECT_A;
 
     QRect paddedRect = padRect();
     QRect scaledRect = scaleRect(labelRect, paddedRect);
 
     _title.setGeometry(scaledRect);
 
-    if (_isSideA || _isSideB)
+    if (_diskNo.isEmpty())
+    {
+        _diskNo.setVisible(false);
+    }
+    else
     {
         // move the index rect
-        const double indexX = (_isSideA ? 25 : 175);
+        const double indexX = (_isSideB ? 175 : 25);
         const QRectF INDEX_RECT {QPointF{indexX,25}, QSizeF{20,20}};
         const QRect  indexRect = scaleRect(INDEX_RECT, paddedRect);
 
         _diskNo.setGeometry(indexRect);
         _diskNo.setVisible(true);
     }
-    else
-        _diskNo.setVisible(false);
 }
 
 void PicPreview::scaleFonts()

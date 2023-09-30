@@ -74,7 +74,6 @@ private:
     QPixmap* _pixmap  {nullptr};
     Title    _title   {this};
     DiskNo   _diskNo  {this};
-    bool     _isSideA {false};
     bool     _isSideB {false};
 
     void loadPixmap(const QString& picPath);
