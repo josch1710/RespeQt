@@ -399,6 +399,8 @@ bool DiskBrowserDlg::itemIsFolder(QTreeWidgetItem *item)
 
 void DiskBrowserDlg::closeEvent(QCloseEvent *event)
 {
+    RespeqtSettings::instance()->saveWidgetGeometry(this);
+    RespeqtSettings::instance()->setShowDiskBrowser(isVisible());
     RespeqtSettings::instance()->setDiskBrowserHorzSplitPos(getHorzSplitPos());
     RespeqtSettings::instance()->setDiskBrowserVertSplitPos(getVertSplitPos());
     QDialog::closeEvent(event);

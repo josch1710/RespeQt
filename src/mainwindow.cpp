@@ -606,8 +606,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     RespeqtSettings::instance()->saveMainWinGeometry(this, isMiniMode);
 
     if (diskBrowserDlg) {
-      RespeqtSettings::instance()->saveWidgetGeometry(diskBrowserDlg);
-      RespeqtSettings::instance()->setShowDiskBrowser(diskBrowserDlg->isVisible());
+      diskBrowserDlg->close();
     } else {
       RespeqtSettings::instance()->setShowDiskBrowser(false);
     }
