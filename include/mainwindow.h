@@ -68,7 +68,7 @@ private:
   std::vector<DriveWidget *> diskWidgets{DISK_COUNT};
   // InfoWidget* infoWidget;
   //SioRecorder *mRecorder{nullptr};
-  QString mTestfile{};
+  QString mTestfile;
 
   QLabel *speedLabel, *onOffLabel, *prtOnOffLabel, *netLabel, *clearMessagesLabel, *limitEntriesLabel;//
 
@@ -126,6 +126,8 @@ private:
   DiskImages::SimpleDiskImage *installDiskImage();
 
   void setupDebugItems();
+
+  void restoreLayout();
 
 protected:
   void showEvent(QShowEvent *event) override;

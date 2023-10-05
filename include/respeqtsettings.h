@@ -190,6 +190,7 @@ public:
   void setSessionFile(const QString &g_sessionFile, const QString &g_sessionFilePath);
 
   // To manipulate session files  //
+  void copySettings(QSettings& setFrom, QSettings& setTo);
   void saveSessionToFile(const QString &fileName);
   void loadSessionFromFile(const QString &fileName);
 

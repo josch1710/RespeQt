@@ -722,31 +722,7 @@ void MainWindow::showEvent(QShowEvent *event) {
   }
   if (event->type() == QEvent::Show && shownThisTime) {
     shownThisTime = false;
-
-    if (RespeqtSettings::instance()->saveDiskVis()) {
-      isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
-    }
-
-    if (RespeqtSettings::instance()->saveWindowsPos())
-    {
-      isMiniMode = RespeqtSettings::instance()->miniMode();
-
-      if (isMiniMode) {     // check if mini-mode was last used
-        isMiniMode = false;                     // reset now so we can toggle it ON
-        ui->actionToggleMiniMode->trigger();    // trigger mini-mode toggle action
-      } else {
-        showHideDrives();
-      }
-
-      RespeqtSettings::instance()->restoreMainWinGeometry(this, isMiniMode);
-
-      if (RespeqtSettings::instance()->showDiskBrowser() && !(diskBrowserDlg && diskBrowserDlg->isVisible())) {
-        diskBrowserTriggered();
-      }
-      if (RespeqtSettings::instance()->showLogWindow() && !(logWindow_ && logWindow_->isVisible())) {
-        showLogWindowTriggered();
-      }
-    }
+    restoreLayout();
   }
   QMainWindow::showEvent(event);
 }
@@ -1872,21 +1848,14 @@ void MainWindow::openSessionTriggered() {
   RespeqtSettings::instance()->loadSessionFromFile(fileName);
 
   setWindowTitle(g_mainWindowTitle + tr(" -- Session: ") + g_sessionFile);
-  setGeometry(RespeqtSettings::instance()->lastHorizontalPos(), RespeqtSettings::instance()->lastVerticalPos(), RespeqtSettings::instance()->lastWidth(), RespeqtSettings::instance()->lastHeight());
 
-  for (char i = 0; i < DISK_COUNT; i++) {//
+  for (char i = 0; i < DISK_COUNT; i++) {
     RespeqtSettings::ImageSettings is;
     is = RespeqtSettings::instance()->mountedImageSetting(i);
     mountFile(i, is.fileName, is.isWriteProtected);
   }
-  isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
-  showHideDrives();
 
-  if (RespeqtSettings::instance()->showDiskBrowser() && !(diskBrowserDlg && diskBrowserDlg->isVisible()))
-    diskBrowserTriggered();
-
-  if (RespeqtSettings::instance()->showLogWindow() && !(logWindow_ && logWindow_->isVisible()))
-    showLogWindowTriggered();
+  restoreLayout();
 
   setSession();
 }
@@ -2067,4 +2036,31 @@ void MainWindow::toggleLimitEntriesTriggered() {
     limitEntriesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/lock.png").pixmap(16, 16, QIcon::Normal));
   }
   RespeqtSettings::instance()->setlimitFileEntries(!RespeqtSettings::instance()->limitFileEntries());
+}
+
+void MainWindow::restoreLayout()
+{
+    if (RespeqtSettings::instance()->saveDiskVis())
+        isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
+
+    if (RespeqtSettings::instance()->saveWindowsPos())
+    {
+        isMiniMode = RespeqtSettings::instance()->miniMode();
+        if (isMiniMode)
+        {                                           // check if mini-mode was last used
+            isMiniMode = false;                     // reset now so we can toggle it ON
+            ui->actionToggleMiniMode->trigger();    // trigger mini-mode toggle action
+        }
+        else
+        {
+            showHideDrives();
+        }
+        RespeqtSettings::instance()->restoreMainWinGeometry(this, isMiniMode);
+
+        if (RespeqtSettings::instance()->showDiskBrowser() && !(diskBrowserDlg && diskBrowserDlg->isVisible()))
+            diskBrowserTriggered();
+
+        if (RespeqtSettings::instance()->showLogWindow() && !(logWindow_ && logWindow_->isVisible()))
+            showLogWindowTriggered();
+    }
 }
