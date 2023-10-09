@@ -263,7 +263,6 @@ MainWindow::MainWindow()
   } else {
     setWindowTitle(g_mainWindowTitle);
   }
-  setGeometry(RespeqtSettings::instance()->lastHorizontalPos(), RespeqtSettings::instance()->lastVerticalPos(), RespeqtSettings::instance()->lastWidth(), RespeqtSettings::instance()->lastHeight());
 
   /* Setup status bar */
   speedLabel = new QLabel(this);
@@ -809,8 +808,7 @@ void MainWindow::toggleMiniModeTriggered() {
     ui->actionHideShowDrives->setEnabled(true);
     if (savedGeometry.isEmpty()) {
       // on first toggle, pull values from our last persisted setting or defaults
-      setGeometry(RespeqtSettings::instance()->lastHorizontalPos(), RespeqtSettings::instance()->lastVerticalPos(),
-                  RespeqtSettings::instance()->lastWidth(), RespeqtSettings::instance()->lastHeight());
+      RespeqtSettings::instance()->restoreMainWinGeometry(this,isMiniMode);
     } else {
       // use saved geometry for both mini and full
       setGeometry(savedGeometry);
@@ -829,8 +827,7 @@ void MainWindow::toggleMiniModeTriggered() {
     setMaximumHeight(height);
     if (savedGeometry.isEmpty()) {
       // on first toggle, pull values from our last persisted setting or defaults
-      setGeometry(RespeqtSettings::instance()->lastMiniHorizontalPos(), RespeqtSettings::instance()->lastMiniVerticalPos(),
-                  RespeqtSettings::instance()->lastMiniWidth(), height);
+      RespeqtSettings::instance()->restoreMainWinGeometry(this, isMiniMode);
     } else {
       // use saved geometry for both mini and full
       setGeometry(savedGeometry);
@@ -1955,7 +1952,6 @@ void MainWindow::diskBrowserTriggered() {
     diskBrowserDlg = new DiskBrowserDlg(sio, this);
   }
   diskBrowserDlg->showNormal();
-  RespeqtSettings::instance()->restoreWidgetGeometry(diskBrowserDlg);
 }
 
 // This connect the signal from UI to slots

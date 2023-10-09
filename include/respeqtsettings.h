@@ -122,25 +122,13 @@ public:
   QString lastRclDir();
   void setRclDir(const QString &dir);
 
+  bool  showLogWindow();
+  void  setShowLogWindow(bool show = true);
+
   // Set and restore last mainwindow position and size //
   const QPoint DefaultFullModePos  = { 100, 100 };
   const QSize  DefaultFullModeSize = { 800, 650 };
   const QRect  DefaultFullModeRect = { DefaultFullModePos, DefaultFullModeSize };
-
-  int lastVerticalPos();
-  void setLastVerticalPos(int lastVpos);
-
-  int lastHorizontalPos();
-  void setLastHorizontalPos(int lastHpos);
-
-  int lastWidth();
-  void setLastWidth(int lastW);
-
-  int lastHeight();
-  void setLastHeight(int lastH);
-
-  bool  showLogWindow();
-  void  setShowLogWindow(bool show = true);
 
   // Set and restore last mini-window position //
   const QPoint DefaultMiniModePos  = { 8, 50 };
@@ -149,28 +137,6 @@ public:
 
   bool miniMode();
   void setMiniMode(bool miniMode);
-
-  int lastMiniVerticalPos();
-  void setLastMiniVerticalPos(int lastMVpos);
-
-  int lastMiniHorizontalPos();
-  void setLastMiniHorizontalPos(int lastMHpos);
-
-  int lastMiniWidth();
-  void setLastMiniWidth(int lastWidth);
-
-  // Set and restore last printwindow position and size //
-  int lastPrtVerticalPos();
-  void setLastPrtVerticalPos(int lastPrtVpos);
-
-  int lastPrtHorizontalPos();
-  void setLastPrtHorizontalPos(int lastPrtHpos);
-
-  int lastPrtWidth();
-  void setLastPrtWidth(int lastPrtW);
-
-  int lastPrtHeight();
-  void setLastPrtHeight(int lastPrtH);
 
   QString i18nLanguage();
   void setI18nLanguage(const QString &lang);

@@ -399,38 +399,6 @@ bool RespeqtSettings::saveWindowsPos() {
 void RespeqtSettings::setSaveWindowsPos(bool saveMwp) {
   mSettings->setValue("SaveWindowsPosSize", saveMwp);
 }
-// Last main window position/size (No Session File) //
-
-int RespeqtSettings::lastHorizontalPos() {
-  return mSettings->value("MainX", DefaultFullModePos.x()).toInt();
-}
-
-void RespeqtSettings::setLastHorizontalPos(int lastHpos) {
-  mSettings->setValue("MainX", lastHpos);
-}
-
-int RespeqtSettings::lastVerticalPos() {
-  return mSettings->value("MainY", DefaultFullModePos.y()).toInt();
-}
-
-void RespeqtSettings::setLastVerticalPos(int lastVpos) {
-  mSettings->setValue("MainY", lastVpos);
-}
-int RespeqtSettings::lastWidth() {
-  return mSettings->value("MainW", DefaultFullModeSize.width()).toInt();
-}
-
-void RespeqtSettings::setLastWidth(int lastW) {
-  mSettings->setValue("MainW", lastW);
-}
-
-int RespeqtSettings::lastHeight() {
-  return mSettings->value("MainH", DefaultFullModeSize.height()).toInt();
-}
-
-void RespeqtSettings::setLastHeight(int lastH) {
-  mSettings->setValue("MainH", lastH);
-}
 
 // mini mode and it's specific window position and width
 bool RespeqtSettings::miniMode() {
@@ -439,63 +407,6 @@ bool RespeqtSettings::miniMode() {
 
 void RespeqtSettings::setMiniMode(bool miniMode) {
   mSettings->setValue("MiniMode", miniMode);
-}
-
-int RespeqtSettings::lastMiniHorizontalPos() {
-  return mSettings->value("MiniX", DefaultMiniModePos.x()).toInt();
-}
-
-void RespeqtSettings::setLastMiniHorizontalPos(int lastMHpos) {
-  mSettings->setValue("MiniX", lastMHpos);
-}
-
-int RespeqtSettings::lastMiniVerticalPos() {
-  return mSettings->value("MiniY", DefaultMiniModePos.y()).toInt();
-}
-
-void RespeqtSettings::setLastMiniVerticalPos(int lastMVpos) {
-  mSettings->setValue("MiniY", lastMVpos);
-}
-
-int RespeqtSettings::lastMiniWidth() {
-  return mSettings->value("MiniW", DefaultMiniModeSize.width()).toInt();
-}
-
-void RespeqtSettings::setLastMiniWidth(int lastWidth) {
-  mSettings->setValue("MiniW", lastWidth);
-}
-
-// Last print window position/size (No Session File) //
-int RespeqtSettings::lastPrtHorizontalPos() {
-  return mSettings->value("PrtX").toInt();
-}
-
-void RespeqtSettings::setLastPrtHorizontalPos(int lastPrtHpos) {
-  mSettings->setValue("PrtX", lastPrtHpos);
-}
-
-int RespeqtSettings::lastPrtVerticalPos() {
-  return mSettings->value("PrtY").toInt();
-}
-
-void RespeqtSettings::setLastPrtVerticalPos(int lastPrtVpos) {
-  mSettings->setValue("PrtY", lastPrtVpos);
-}
-
-int RespeqtSettings::lastPrtWidth() {
-  return mSettings->value("PrtW").toInt();
-}
-
-void RespeqtSettings::setLastPrtWidth(int lastPrtW) {
-  mSettings->setValue("PrtW", lastPrtW);
-}
-
-int RespeqtSettings::lastPrtHeight() {
-  return mSettings->value("PrtH").toInt();
-}
-
-void RespeqtSettings::setLastPrtHeight(int lastPrtH) {
-  mSettings->setValue("PrtH", lastPrtH);
 }
 
 QString RespeqtSettings::lastDiskImageDir() {

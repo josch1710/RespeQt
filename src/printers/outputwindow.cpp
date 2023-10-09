@@ -54,14 +54,27 @@ namespace Printers {
     }
   }
 
-  void OutputWindow::closeEvent(QCloseEvent *e) {
-    // Save Current TexPrinterWindow Position and size //
-    if (RespeqtSettings::instance()->saveWindowsPos()) {
-      // TODO Correct settings
-      RespeqtSettings::instance()->setLastPrtHorizontalPos(OutputWindow::geometry().x());
-      RespeqtSettings::instance()->setLastPrtVerticalPos(OutputWindow::geometry().y());
-      RespeqtSettings::instance()->setLastPrtWidth(OutputWindow::geometry().width());
-      RespeqtSettings::instance()->setLastPrtHeight(OutputWindow::geometry().height());
+  void OutputWindow::showEvent(QShowEvent* e)
+  {
+      QWidget::showEvent(e);
+
+      if (e->type() == QEvent::Show && RespeqtSettings::instance()->saveWindowsPos())
+      {
+          // Restore last widget geometry
+          auto parent = qobject_cast<PrinterWidget*>(parentWidget());
+          QString name = QString("Printer%1").arg(parent->getPrinterNumber()+1);
+          RespeqtSettings::instance()->restoreWidgetGeometry(this, name);
+      }
+  }
+
+  void OutputWindow::closeEvent(QCloseEvent *e)
+  {
+    // Save Current Window Position and size //
+    if (RespeqtSettings::instance()->saveWindowsPos())
+    {
+      auto parent = qobject_cast<PrinterWidget*>(parentWidget());
+      QString name = QString("Printer%1").arg(parent->getPrinterNumber()+1);
+      RespeqtSettings::instance()->saveWidgetGeometry(this, name);
     }
     emit closed(this);
     e->accept();

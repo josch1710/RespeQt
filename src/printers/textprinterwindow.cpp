@@ -87,10 +87,7 @@ namespace Printers {
   void TextPrinterWindow::closeEvent(QCloseEvent *e) {
     // Save Current TexPrinterWindow Position and size //
     if (RespeqtSettings::instance()->saveWindowsPos()) {
-      RespeqtSettings::instance()->setLastPrtHorizontalPos(TextPrinterWindow::geometry().x());
-      RespeqtSettings::instance()->setLastPrtVerticalPos(TextPrinterWindow::geometry().y());
-      RespeqtSettings::instance()->setLastPrtWidth(TextPrinterWindow::geometry().width());
-      RespeqtSettings::instance()->setLastPrtHeight(TextPrinterWindow::geometry().height());
+      RespeqtSettings::instance()->saveWidgetGeometry(this);
     }
     emit closed(this);
     e->accept();

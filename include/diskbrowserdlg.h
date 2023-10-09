@@ -47,7 +47,6 @@ private:
     QString getRecentDisk(QString folder);
     QString getParentDir(QString fileFolder);
 
-//  const QString FLOPPY_DEFAULT_PNG  {":/icons/other-icons/floppy.png"};       TBD: omit
     const QString FLOPPY_INDEXED_PNG  {":/icons/other-icons/floppy_front.png"};
     const QString FLOPPY_BACKSIDE_PNG {":/icons/other-icons/floppy_back.png"};
 

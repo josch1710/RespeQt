@@ -409,8 +409,14 @@ void DiskBrowserDlg::closeEvent(QCloseEvent *event)
 void DiskBrowserDlg::showEvent(QShowEvent *event)
 {
     QDialog::showEvent(event);
-    setHorzSplitPos(RespeqtSettings::instance()->diskBrowserHorzSplitPos());
-    setVertSplitPos(RespeqtSettings::instance()->diskBrowserVertSplitPos());
+
+    if (event->type() == QEvent::Show && RespeqtSettings::instance()->saveWindowsPos())
+    {
+        // Restore last widget geometry
+        RespeqtSettings::instance()->restoreWidgetGeometry(this);
+        setHorzSplitPos(RespeqtSettings::instance()->diskBrowserHorzSplitPos());
+        setVertSplitPos(RespeqtSettings::instance()->diskBrowserVertSplitPos());
+    }
 }
 
 DiskLabel DiskBrowserDlg::parsePicLabel()
