@@ -36,6 +36,7 @@ DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent)
     connect(ui->treeDisks, &QTreeWidget::itemSelectionChanged, this, &DiskBrowserDlg::itemSelectionChanged);
     connect(ui->treeDisks, &QTreeWidget::itemDoubleClicked, this, &DiskBrowserDlg::itemDoubleClicked);
     connect(ui->cboFolderPath, SIGNAL(currentTextChanged(QString)), this, SLOT(onFolderChanged(QString)));
+    connect(ui->picPreview, &PicPreview::sigPopupMenuReq, this, &DiskBrowserDlg::popupMenuReq);
 
     refreshFoldersCombobox();
     onFolderChanged(""); // reload the current item 0 in the combo
@@ -448,19 +449,6 @@ DiskLabel DiskBrowserDlg::parsePicLabel()
     return label;
 }
 
-static QStringList toFileTypes(const QList<QByteArray>& list)   // TBD: make this a member of something?
-{
-    QStringList strings;
-
-    foreach (const QByteArray& item, list)
-    {
-        QString fileSpec = "*." + QString::fromLocal8Bit(item);
-        strings.append(fileSpec);
-    }
-
-    return strings;
-}
-
 // findPicFile (formally findImage) is my second pass at a scheme for preview pics. The pics/images are placed in the folder along side disk images.
 //  (note: an "image file" in this context is a digital picture, not an ATR disk!)
 // A complex, yet flexible naming convention allows the app to grab corresponding pics and labeling data (for rendering on a blank/built in floppy pic)
@@ -483,7 +471,7 @@ QString DiskBrowserDlg::findPicFile()
     auto diskBase = fileInfo.completeBaseName();
     QDir dir {fileInfo.absolutePath()};
     auto formats = QImageReader::supportedImageFormats();
-    auto entries = dir.entryInfoList(toFileTypes(formats));
+    auto entries = dir.entryInfoList(toStringList(formats));
     auto bsidexp = _picInfo.label.sideB ? QString("[b|B]") : QString();
     auto sregexp = QString("^(%1)(%2)(\\.)(.*)").arg(_picInfo.label.index).arg(bsidexp);
     auto qregexp = QRegularExpression {sregexp};
@@ -547,17 +535,22 @@ void DiskBrowserDlg::popupMenuReq(const QPoint& pos)
     menu.addAction(QIcon(":/icons/silk-icons/icons/font.png"), "Set Disk Title", this, &DiskBrowserDlg::actionSetTitle);
     menu.addAction(QIcon(":/icons/silk-icons/icons/text_list_numbers.png"), "Set Disk Index", this, &DiskBrowserDlg::actionSetIndex);
 
-    menu.exec(mapToGlobal(pos));
+    menu.exec(pos);
 }
 
 void DiskBrowserDlg::actionSetDefault()
 {
-//    QString fname = browsePic();
-  //  if (!fname.isEmpty())
-    //{
-      //  auto set = getDbSettings();
+    auto formats = QImageReader::supportedImageFormats();
+    auto fmtList = toStringList(formats);
+    auto fmtStrs = fmtList.join(' ');
+    auto filters = QString("Images (%1)").arg(fmtStrs);
+    QString fname = QFileDialog::getOpenFileName(this, "Choose Default Pic", "", filters);
+    if (!fname.isEmpty())
+    {
+        qDebug() << "!d" << "setting default pic " << fname;
+        //auto set = getDbSettings();
         //set.setDefaultPic(fname);
-//    }
+    }
 }
 
 void DiskBrowserDlg::actionSetPic()

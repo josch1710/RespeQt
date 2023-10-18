@@ -25,6 +25,7 @@ public:
     Title(QWidget* parent);
     void setText(const QString& text);
     void setLineHeight(int height);
+    bool isEmpty() { return toPlainText().isEmpty(); }
 
 private:
     QString _fontColor {"black"};

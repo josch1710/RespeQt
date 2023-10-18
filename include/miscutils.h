@@ -81,5 +81,6 @@ public:
   }
 };
 
+QStringList toStringList(const QList<QByteArray>& list);
 
 #endif// MISCUTILS_H

@@ -18,11 +18,14 @@ PicPreview::PicPreview(QWidget* parent) : QLabel(parent)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, &PicPreview::customContextMenuRequested, this, &PicPreview::popupMenuReq);
+
+    _title.hide();
+    _diskNo.hide();
 }
 
 void PicPreview::popupMenuReq(const QPoint& pos)
 {
-    emit sigPopupMenuReq(pos);
+    emit sigPopupMenuReq(mapToGlobal(pos));
 }
 
 PicPreview::~PicPreview()
@@ -49,6 +52,9 @@ void PicPreview::clear()
         delete _pixmap;
         _pixmap = nullptr;
     }
+
+    _title.hide();
+    _diskNo.hide();
 }
 
 void PicPreview::setFileName(const QString& picPath)
@@ -154,6 +160,7 @@ void PicPreview::moveLabels()
     QRect scaledRect = scaleRect(labelRect, paddedRect);
 
     _title.setGeometry(scaledRect);
+    _title.setVisible(!_title.isEmpty());
 
     if (_diskNo.isEmpty())
     {
