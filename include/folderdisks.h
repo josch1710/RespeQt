@@ -14,10 +14,11 @@
 
 struct DiskLabel
 {
-    DiskLabel(const QString& _title = QString(), int _index = 0, bool _sideB = false) : title(_title), index(_index), sideB(_sideB) { }
-    void clear() {title.clear(); index = 0; sideB = false;}
+    DiskLabel(const QString& _title = QString(), const QString& _diskNo = QString(), bool _sideB = false)
+            : title(_title), diskNo(_diskNo), sideB(_sideB) { }
+    void clear() {title.clear(); diskNo.clear(); sideB = false;}
     QString title;
-    int  index;
+    QString diskNo;
     bool sideB;
 };
 

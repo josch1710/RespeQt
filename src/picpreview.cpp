@@ -70,22 +70,18 @@ void PicPreview::setFileName(const QString& picPath)
     update();
 }
 
-void PicPreview::setLabel(const QString& title, int index, bool bSide)
+void PicPreview::setLabel(const QString& title, const QString& diskNo, bool bSide)
 {
     _title.setText(title);
     _isSideB = bSide;
-
-    if (index)
-        _diskNo.setText(QString::number(index));
-    else
-        _diskNo.clear();
+    _diskNo.setText(diskNo);
 
     update();
 }
 
 void PicPreview::setLabel(const DiskLabel& label)
 {
-    setLabel(label.title, label.index, label.sideB);
+    setLabel(label.title, label.diskNo, label.sideB);
 }
 
 void PicPreview::loadPixmap(const QString& picPath)

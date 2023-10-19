@@ -439,7 +439,7 @@ DiskLabel DiskBrowserDlg::parsePicLabel()
         QString title  = rem.captured(4);
         bool isSideB = rem.captured(2).toUpper() == "B";
 
-        label = DiskLabel {title, diskNo.toInt(), isSideB};
+        label = DiskLabel {title, diskNo, isSideB};
     }
     else
     {
@@ -473,7 +473,7 @@ QString DiskBrowserDlg::findPicFile()
     auto formats = QImageReader::supportedImageFormats();
     auto entries = dir.entryInfoList(toStringList(formats));
     auto bsidexp = _picInfo.label.sideB ? QString("[b|B]") : QString();
-    auto sregexp = QString("^(%1)(%2)(\\.)(.*)").arg(_picInfo.label.index).arg(bsidexp);
+    auto sregexp = QString("^(%1)(%2)(\\.)(.*)").arg(_picInfo.label.diskNo).arg(bsidexp);
     auto qregexp = QRegularExpression {sregexp};
 
     foreach (const QFileInfo& entry, entries)
@@ -489,7 +489,7 @@ QString DiskBrowserDlg::findPicFile()
 
         // 2. check for matching indexing filename prefix
 
-        if (_picInfo.label.index)     // check if current disk has index prefix NN. or NNb.
+        if (!_picInfo.label.diskNo.isEmpty())     // check if current disk has index prefix NN. or NNb.
         {
             auto basename = entry.completeBaseName();
             auto matcher = qregexp.match(basename);

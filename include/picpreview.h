@@ -54,7 +54,7 @@ public:
 
     void setFileName(const QString& name);
     void setLabel(const DiskLabel& label);
-    void setLabel(const QString& title, int diskNo, bool bSide);
+    void setLabel(const QString& title, const QString& diskNo, bool bSide);
 
     double ratio();
     void clear();
