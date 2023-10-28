@@ -46,6 +46,7 @@ private:
     QString getMostRecentDisk();
     QString getRecentDisk(QString folder);
     QString getParentDir(QString fileFolder);
+    QSettings* getDbSettings();
 
     const QString FLOPPY_INDEXED_PNG  {":/icons/other-icons/floppy_front.png"};
     const QString FLOPPY_BACKSIDE_PNG {":/icons/other-icons/floppy_back.png"};
@@ -55,6 +56,7 @@ private:
     FloppyArt _picInfo;
     SioWorkerPtr sio;
     QString _diskName;
+    QSettings* _dbSettings = nullptr;
 
     void actionSetPic();
     void actionSetDefault();
