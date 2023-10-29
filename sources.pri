@@ -23,6 +23,7 @@ SOURCES += \
     src/diskimages/diskimage.cpp \
     src/diskimages/folderimage.cpp \
     src/folderdisks.cpp \
+    src/dbsettings.cpp \
     src/diskbrowserdlg.cpp \
     src/createimagedialog.cpp \
     src/diskeditdialog.cpp \
@@ -91,6 +92,7 @@ HEADERS += \
     include/diskimages/diskimage.h \
     include/diskimages/folderimage.h \
     include/folderdisks.h \
+    include/dbsettings.h \
     include/diskbrowserdlg.h \
     include/createimagedialog.h \
     include/diskeditdialog.h \

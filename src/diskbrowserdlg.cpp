@@ -539,25 +539,6 @@ void DiskBrowserDlg::popupMenuReq(const QPoint& pos)
     menu.exec(pos);
 }
 
-QSettings* DiskBrowserDlg::getDbSettings()
-{
-    if (!_dbSettings)
-    {
-        auto locType = QStandardPaths::AppDataLocation;
-        QString appFolder = QStandardPaths::writableLocation(locType);
-        QDir appDataDir(appFolder);
-
-        if (!appDataDir.exists())
-            appDataDir.mkpath(".");
-
-        QString file = appDataDir.absoluteFilePath("dbSettings.ini");
-        _dbSettings = new QSettings(file, QSettings::IniFormat);
-    }
-    bool ok = (_dbSettings && _dbSettings->isWritable() && _dbSettings->status() == QSettings::NoError);
-    Q_ASSERT(ok);
-    return ok ? _dbSettings : RespeqtSettings::instance()->mSettings;   // TBD: overkill? maybe just error popup (but how?)
-}
-
 void DiskBrowserDlg::actionSetDefault()
 {
     auto formats = QImageReader::supportedImageFormats();
@@ -568,8 +549,7 @@ void DiskBrowserDlg::actionSetDefault()
     if (!fname.isEmpty())
     {
         qDebug() << "!d" << "setting default pic " << fname;
-        auto set = getDbSettings();
-        set->setValue("db/default_pic", fname);
+        _dbSettings.setDefault(fname);
     }
 }
 

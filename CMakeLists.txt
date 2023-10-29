@@ -55,6 +55,7 @@ set(SOURCES
         src/diskimages/folderimage.cpp
     src/folderdisks.cpp
     src/diskbrowserdlg.cpp
+    src/dbsettings.cpp
     src/picsplitter.cpp
     src/picpreview.cpp
     src/createimagedialog.cpp
@@ -120,6 +121,7 @@ set(HEADERS
         include/diskimages/folderimage.h
     include/folderdisks.h
     include/diskbrowserdlg.h
+    include/dbsettings.h
     include/picsplitter.h
     include/picpreview.h
     include/createimagedialog.h
