@@ -549,7 +549,7 @@ void DiskBrowserDlg::actionSetDefault()
     if (!fname.isEmpty())
     {
         qDebug() << "!d" << "setting default pic " << fname;
-        _dbSettings.setDefault(fname);
+        _dbSettings.setDefaultPic(fname);
     }
 }
 

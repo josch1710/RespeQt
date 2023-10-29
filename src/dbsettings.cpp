@@ -1,5 +1,7 @@
 #include "dbsettings.h"
+#include "respeqtsettings.h"
 #include <QStandardPaths>
+#include <QDir>
 
 DbSettings::DbSettings()
 {
@@ -24,5 +26,5 @@ DbSettings::DbSettings()
 
 void DbSettings::setDefaultPic(const QString& defPic)
 {
-    _settings->setValue("db/default_pic", fname);
+    _settings->setValue("db/default_pic", defPic);
 }
