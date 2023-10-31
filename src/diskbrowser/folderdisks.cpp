@@ -3,7 +3,7 @@
  *
  * Copyright 2023 D.Caputi
  */
-#include "folderdisks.h"
+#include "diskbrowser/folderdisks.h"
 #include "miscutils.h"
 #include <QDir>
 

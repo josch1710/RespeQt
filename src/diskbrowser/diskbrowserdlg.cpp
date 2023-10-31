@@ -3,7 +3,7 @@
  *
  * Copyright 2023 D.Caputi
  */
-#include "diskbrowserdlg.h"
+#include "diskbrowser/diskbrowserdlg.h"
 #include "diskimages/diskimage.h"
 #include "filesystems/ataridirentry.h"
 #include "filesystems/atarifilesystem.h"
@@ -12,7 +12,7 @@
 #include "filesystems/dos25filesystem.h"
 #include "filesystems/mydosfilesystem.h"
 #include "filesystems/spartadosfilesystem.h"
-#include "folderdisks.h"
+#include "diskbrowser/folderdisks.h"
 #include "mainwindow.h"
 #include "miscutils.h"
 #include "respeqtsettings.h"

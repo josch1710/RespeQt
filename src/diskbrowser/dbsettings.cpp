@@ -1,4 +1,9 @@
-#include "dbsettings.h"
+/*
+ * dbsettings.cpp - implementation of DiskBrowserDialog's DbSettings class.
+ *
+ * Copyright 2023 D.Caputi
+ */
+#include "diskbrowser/dbsettings.h"
 #include "respeqtsettings.h"
 #include <QStandardPaths>
 #include <QDir>

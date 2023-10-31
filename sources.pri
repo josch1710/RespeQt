@@ -22,9 +22,6 @@ SOURCES += \
     src/aboutdialog.cpp \
     src/diskimages/diskimage.cpp \
     src/diskimages/folderimage.cpp \
-    src/folderdisks.cpp \
-    src/dbsettings.cpp \
-    src/diskbrowserdlg.cpp \
     src/createimagedialog.cpp \
     src/diskeditdialog.cpp \
     src/autoboot.cpp \
@@ -73,8 +70,11 @@ SOURCES += \
     src/diskimages/atxsectorinfo.cpp \
     src/diskimages/atxtrackinfo.cpp \
     src/diskimages/board.cpp \
-    src/picsplitter.cpp \
-    src/picpreview.cpp
+    src/diskbrowser/picsplitter.cpp \
+    src/diskbrowser/picpreview.cpp \
+    src/diskbrowser/folderdisks.cpp \
+    src/diskbrowser/dbsettings.cpp \
+    src/diskbrowser/diskbrowserdlg.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -91,9 +91,6 @@ HEADERS += \
     include/aboutdialog.h \
     include/diskimages/diskimage.h \
     include/diskimages/folderimage.h \
-    include/folderdisks.h \
-    include/dbsettings.h \
-    include/diskbrowserdlg.h \
     include/createimagedialog.h \
     include/diskeditdialog.h \
     include/autoboot.h \
@@ -141,8 +138,11 @@ HEADERS += \
     include/diskimages/atxsectorinfo.h \
     include/diskimages/atxtrackinfo.h \
     include/diskimages/board.h \
-    include/picsplitter.h \
-    include/picpreview.h
+    include/diskbrowser/picsplitter.h \
+    include/diskbrowser/picpreview.h \
+    include/diskbrowser/folderdisks.h \
+    include/diskbrowser/dbsettings.h \
+    include/diskbrowser/diskbrowserdlg.h
 
 FORMS += \
     ui/mainwindow.ui \

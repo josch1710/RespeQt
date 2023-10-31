@@ -3,7 +3,7 @@
  *
  * Copyright 2023 D.Caputi
  */
-#include "include/picsplitter.h"
+#include "include/diskbrowser/picsplitter.h"
 #include <QResizeEvent>
 #include <QLabel>
 #include <QtDebug>

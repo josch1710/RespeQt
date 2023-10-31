@@ -3,7 +3,7 @@
  *
  * Copyright 2023 D.Caputi
  */
-#include "include/picpreview.h"
+#include "include/diskbrowser/picpreview.h"
 #include <math.h>
 #include <QPaintEvent>
 #include <QPainter>

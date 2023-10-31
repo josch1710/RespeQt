@@ -38,8 +38,8 @@
 #include "serialport.h"
 #include "siorecorder.h"
 #include "sioworker.h"
-#include "folderdisks.h"
-#include "diskbrowserdlg.h"
+#include "diskbrowser/folderdisks.h"
+#include "diskbrowser/diskbrowserdlg.h"
 
 namespace Ui {
   class MainWindow;

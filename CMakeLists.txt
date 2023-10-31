@@ -53,11 +53,11 @@ set(SOURCES
     src/aboutdialog.cpp
         src/diskimages/diskimage.cpp
         src/diskimages/folderimage.cpp
-    src/folderdisks.cpp
-    src/diskbrowserdlg.cpp
-    src/dbsettings.cpp
-    src/picsplitter.cpp
-    src/picpreview.cpp
+    src/diskbrowser/folderdisks.cpp
+    src/diskbrowser/diskbrowserdlg.cpp
+    src/diskbrowser/dbsettings.cpp
+    src/diskbrowser/picsplitter.cpp
+    src/diskbrowser/picpreview.cpp
     src/createimagedialog.cpp
     src/diskeditdialog.cpp
     src/autoboot.cpp
@@ -119,11 +119,11 @@ set(HEADERS
     include/aboutdialog.h
         include/diskimages/diskimage.h
         include/diskimages/folderimage.h
-    include/folderdisks.h
-    include/diskbrowserdlg.h
-    include/dbsettings.h
-    include/picsplitter.h
-    include/picpreview.h
+    include/diskbrowser/folderdisks.h
+    include/diskbrowser/diskbrowserdlg.h
+    include/diskbrowser/dbsettings.h
+    include/diskbrowser/picsplitter.h
+    include/diskbrowser/picpreview.h
     include/createimagedialog.h
     include/diskeditdialog.h
     include/autoboot.h

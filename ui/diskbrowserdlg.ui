@@ -205,13 +205,13 @@
   <customwidget>
    <class>PicSplitter</class>
    <extends>QSplitter</extends>
-   <header>include/picsplitter.h</header>
+   <header>include/diskbrowser/picsplitter.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>PicPreview</class>
    <extends>QLabel</extends>
-   <header>include/picpreview.h</header>
+   <header>include/diskbrowser/picpreview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
