@@ -12,10 +12,12 @@
 #include "folderdisks.h"
 #include "sioworker.h"
 #include "dbsettings.h"
+#include "picsourcetype.h"
 
 namespace Ui {
 class DiskBrowserDlg;
 }
+
 
 class DiskBrowserDlg : public QDialog
 {
@@ -41,12 +43,14 @@ private:
     bool itemIsFolder(QTreeWidgetItem* item);
     void refreshFoldersCombobox();
     bool isDiskImage(const QString& name);
+    void update();
     QString findPicFile();
     QString getFloppyPic();
     QString getMostRecentFolder();
     QString getMostRecentDisk();
     QString getRecentDisk(QString folder);
     QString getParentDir(QString fileFolder);
+    QString browseForPic(const QString& start);
 
     const QString FLOPPY_INDEXED_PNG  {":/icons/other-icons/floppy_front.png"};
     const QString FLOPPY_BACKSIDE_PNG {":/icons/other-icons/floppy_back.png"};
@@ -55,14 +59,18 @@ private:
     FolderDisks _folderDisks;
     FloppyArt _picInfo;
     SioWorkerPtr sio;
-    QString _diskName;
+    QString _currentDir;
+    QString _diskFileName;
+    QString _diskFullName;
+    PicSourceType _picSource = PicSource_none;
     DbSettings _dbSettings;
 
     void actionSetPic();
+    void actionSetDirPic();
     void actionSetDefault();
     void actionSetTitle();
     void actionSetIndex();
-    void actionClear();
+    void actionClearPic();
 
 private slots:
     void popupMenuReq(const QPoint& pos);

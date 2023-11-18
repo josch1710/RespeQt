@@ -124,6 +124,7 @@ set(HEADERS
     include/diskbrowser/dbsettings.h
     include/diskbrowser/picsplitter.h
     include/diskbrowser/picpreview.h
+    include/diskbrowser/picsourcetype.h
     include/createimagedialog.h
     include/diskeditdialog.h
     include/autoboot.h

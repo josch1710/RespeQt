@@ -201,6 +201,11 @@ void DiskBrowserDlg::refreshFoldersCombobox()
 
 void DiskBrowserDlg::itemSelectionChanged()
 {
+    update();
+}
+
+void DiskBrowserDlg::update()
+{
     if (!ui->treeDisks->topLevelItemCount() || !ui->treeDisks->currentItem())
         return;
 
@@ -225,7 +230,9 @@ void DiskBrowserDlg::itemSelectionChanged()
         return;
     }
 
-    _diskName = fullName;
+    _diskFullName = fullName;
+    _diskFileName = diskName;
+    _currentDir = pathName;
 
     RespeqtSettings::instance()->setMostRecentBrowserFolder(fullName);
     MainWindow::instance()->mountFileWithDefaultProtection(0, fullName);
@@ -425,7 +432,7 @@ DiskLabel DiskBrowserDlg::parsePicLabel()
 {
     DiskLabel label;
 
-    auto fileInfo = QFileInfo {_diskName};
+    auto fileInfo = QFileInfo {_diskFullName};
 
     Q_ASSERT(fileInfo.exists());    // validated prior to this call
 
@@ -468,7 +475,7 @@ DiskLabel DiskBrowserDlg::parsePicLabel()
 //
 QString DiskBrowserDlg::findPicFile()
 {
-    auto fileInfo = QFileInfo {_diskName};
+    auto fileInfo = QFileInfo {_diskFullName};
     auto diskBase = fileInfo.completeBaseName();
     QDir dir {fileInfo.absolutePath()};
     auto formats = QImageReader::supportedImageFormats();
@@ -485,6 +492,7 @@ QString DiskBrowserDlg::findPicFile()
         if (entryName == diskBase)
         {
             setToolTip(entryName);
+            _picSource = PicFromFile_base;
             return entry.absoluteFilePath();
         }
 
@@ -498,6 +506,7 @@ QString DiskBrowserDlg::findPicFile()
             {
                 QString tip = matcher.captured(4);  // use mid string as tooltip
                 setToolTip(tip);
+                _picSource = PicFromFile_index;
                 return entry.absoluteFilePath();
             }
         }
@@ -508,13 +517,14 @@ QString DiskBrowserDlg::findPicFile()
         if (QFileInfo::exists(imagePath))
         {
             setToolTip("");
+            _picSource = PicFromFile_dir;
             return imagePath;
         }
     }
 
     // 4. TBD: check INI file scheme for an image to load
 
-    return QString();
+    return _dbSettings.getPicture(dir, _diskFileName, _picSource);
 }
 
 QString DiskBrowserDlg::getFloppyPic()  // 5. load built-in image of a 5 1/2-inch floppy disk
@@ -529,9 +539,10 @@ QString DiskBrowserDlg::getFloppyPic()  // 5. load built-in image of a 5 1/2-inc
 void DiskBrowserDlg::popupMenuReq(const QPoint& pos)
 {
     QMenu menu;
-    menu.addAction(QIcon(":/icons/silk-icons/icons/image.png"), "Set Preview Default...", this, &DiskBrowserDlg::actionSetDefault);
+    menu.addAction(QIcon(":/icons/silk-icons/icons/image.png"), "Set Default Preview...", this, &DiskBrowserDlg::actionSetDefault);
+    menu.addAction(QIcon(":/icons/silk-icons/icons/folder_image.png"), "Set Folder Preview Pic...", this, &DiskBrowserDlg::actionSetDirPic);
     menu.addAction(QIcon(":/icons/silk-icons/icons/image_add.png"), "Set Disk Preview Pic...", this, &DiskBrowserDlg::actionSetPic);
-    menu.addAction(QIcon(":/icons/silk-icons/icons/image_delete.png"), "Clear Preview", this, &DiskBrowserDlg::actionSetPic);
+    menu.addAction(QIcon(":/icons/silk-icons/icons/image_delete.png"), "Clear Preview", this, &DiskBrowserDlg::actionClearPic);
     menu.addSeparator();
     menu.addAction(QIcon(":/icons/silk-icons/icons/font.png"), "Set Disk Title", this, &DiskBrowserDlg::actionSetTitle);
     menu.addAction(QIcon(":/icons/silk-icons/icons/text_list_numbers.png"), "Set Disk Index", this, &DiskBrowserDlg::actionSetIndex);
@@ -539,22 +550,42 @@ void DiskBrowserDlg::popupMenuReq(const QPoint& pos)
     menu.exec(pos);
 }
 
-void DiskBrowserDlg::actionSetDefault()
+QString DiskBrowserDlg::browseForPic(const QString& start)
 {
     auto formats = QImageReader::supportedImageFormats();
     auto fmtList = toStringList(formats);
     auto fmtStrs = fmtList.join(' ');
     auto filters = QString("Images (%1)").arg(fmtStrs);
-    QString fname = QFileDialog::getOpenFileName(this, "Choose Default Pic", "", filters);
-    if (!fname.isEmpty())
-    {
-        qDebug() << "!d" << "setting default pic " << fname;
-        _dbSettings.setDefaultPic(fname);
-    }
+
+    return QFileDialog::getOpenFileName(this, "Choose Default Pic", start, filters);
+}
+
+void DiskBrowserDlg::actionSetDefault()
+{
+    QString fname = browseForPic(_currentDir);
+    if (fname.isEmpty())
+        return;
+
+    _dbSettings.setPicture(fname);
+    update();
+}
+
+void DiskBrowserDlg::actionSetDirPic()
+{
+    QString fname = browseForPic(_currentDir);
+    if (fname.isEmpty())
+        return;
+
+    _dbSettings.setPicture(fname, _currentDir);
 }
 
 void DiskBrowserDlg::actionSetPic()
 {
+    QString fname = browseForPic(_currentDir);
+    if (fname.isEmpty())
+        return;
+
+    _dbSettings.setPicture(fname, _currentDir, _diskFileName);
 }
 
 void DiskBrowserDlg::actionSetTitle()
@@ -565,6 +596,22 @@ void DiskBrowserDlg::actionSetIndex()
 {
 }
 
-void DiskBrowserDlg::actionClear()
+void DiskBrowserDlg::actionClearPic()
 {
+    switch (_picSource)
+    {
+    case PicFromIni_dir:
+        _dbSettings.setPicture("", _currentDir, "");
+        break;
+    case PicFromIni_global:
+        _dbSettings.setPicture("");
+        break;
+    case PicFromIni_disk:
+        _dbSettings.setPicture("", _currentDir, _diskFileName);
+        break;
+    default:
+        break;
+    }
+
+    update();
 }

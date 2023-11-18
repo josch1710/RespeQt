@@ -30,6 +30,7 @@ struct FloppyArt
     DiskLabel label;
 };
 
+#if 0
 class FolderSettings : public QSettings
 {
 public:
@@ -42,6 +43,7 @@ public:
 private:
     QString _path;
 };
+#endif
 
 class FolderDisks : public QObject
 {
@@ -53,20 +55,20 @@ public:
     int count() const { return diskList.count(); }
     QStringList disks() const { return diskList; }
     QStringList folders() const { return dirList; }
-    QString defaultPic() const { return _defaultPic; }
+/*  QString defaultPic() const { return _defaultPic; }          TBD: omit...
     const FloppyArt& diskArt(int i) { return _diskArt.at(i); }
     QString diskPic(int i) { return diskArt(i).pic; }
     QString diskTitle(int i) { return diskArt(i).label.title; }
     QString indexLabel(int i);
     FolderSettings& getSettings() { return *_settings; }
-
+*/
 private:
     QDir dir;
     QStringList dirList;
     QStringList diskList;
     QString          _defaultPic;
     QList<FloppyArt> _diskArt;
-    FolderSettings*  _settings = nullptr;
+//  FolderSettings*  _settings = nullptr;
 };
 
 #endif // FOLDERDISKS_H

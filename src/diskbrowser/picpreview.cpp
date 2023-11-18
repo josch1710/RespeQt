@@ -40,7 +40,6 @@ PicPreview::~PicPreview()
 void PicPreview::clear()
 {
     QLabel::clear();
-    _diskName.clear();
     _picPath.clear();
     _picTooltip.clear();
     _title.clear();

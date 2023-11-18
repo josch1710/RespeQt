@@ -69,7 +69,6 @@ signals:
     void sigPopupMenuReq(const QPoint& pos);
 
 private:
-    QString  _diskName;
     QString  _picPath;
     QString  _picTooltip;
     QPixmap* _pixmap  {nullptr};

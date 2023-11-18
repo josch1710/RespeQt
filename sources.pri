@@ -138,6 +138,7 @@ HEADERS += \
     include/diskimages/atxsectorinfo.h \
     include/diskimages/atxtrackinfo.h \
     include/diskimages/board.h \
+    include/diskbrowser/picsourcetype.h \
     include/diskbrowser/picsplitter.h \
     include/diskbrowser/picpreview.h \
     include/diskbrowser/folderdisks.h \

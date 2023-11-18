@@ -23,16 +23,16 @@ bool FolderDisks::load(const QString& path)
         diskList = dir.entryList(filter, QDir::Files);
         dirList = dir.entryList(QDir::AllDirs | QDir::NoDot);
 
-        if (_settings)
-            delete _settings;
+//        if (_settings)
+  //          delete _settings;
 
-        _settings = new FolderSettings(targetPath);
+    //    _settings = new FolderSettings(targetPath);
     }
 
     return !diskList.isEmpty() || !dirList.isEmpty();
 }
 
-// FolderSettings class -
+/* FolderSettings class - TBD omit...
 // Derived from QSettings, this class encapsulates DiskBrowser's pics, titles and indexing required for the PicPreview widget.
 
 FolderSettings::FolderSettings(const QString& path) : QSettings(path + ".respeqt_db.ini", QSettings::Format::IniFormat),
@@ -55,3 +55,4 @@ void FolderSettings::save()
 {
 
 }
+*/

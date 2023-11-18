@@ -31,15 +31,16 @@ OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent),
   itemStandard = m_ui->optionSections->topLevelItem(0)->child(0);
   itemAtariSio = m_ui->optionSections->topLevelItem(0)->child(1);
   itemEmulation = m_ui->optionSections->topLevelItem(1);
-  itemDiskOptions = m_ui->optionSections->topLevelItem(2)->child(0);
-  itemDiskOSB = m_ui->optionSections->topLevelItem(2)->child(1);
-  itemDiskIcons = m_ui->optionSections->topLevelItem(2)->child(2);
-  itemDiskFavorite = m_ui->optionSections->topLevelItem(2)->child(3);
-  itemI18n = m_ui->optionSections->topLevelItem(3);
-  itemAtari1027 = m_ui->optionSections->topLevelItem(4)->child(0);
-  itemPassthrough = m_ui->optionSections->topLevelItem(4)->child(1);
-  itemPrinterProtocol = m_ui->optionSections->topLevelItem(4)->child(2);
-  item1020Options = m_ui->optionSections->topLevelItem(4)->child(3);
+  itemDiskBrowser = m_ui->optionSections->topLevelItem(2);
+  itemDiskOptions = m_ui->optionSections->topLevelItem(3)->child(0);
+  itemDiskOSB = m_ui->optionSections->topLevelItem(3)->child(1);
+  itemDiskIcons = m_ui->optionSections->topLevelItem(3)->child(2);
+  itemDiskFavorite = m_ui->optionSections->topLevelItem(3)->child(3);
+  itemI18n = m_ui->optionSections->topLevelItem(4);
+  itemAtari1027 = m_ui->optionSections->topLevelItem(5)->child(0);
+  itemPassthrough = m_ui->optionSections->topLevelItem(5)->child(1);
+  itemPrinterProtocol = m_ui->optionSections->topLevelItem(5)->child(2);
+  item1020Options = m_ui->optionSections->topLevelItem(5)->child(3);
 
 #ifndef Q_OS_LINUX
   m_ui->optionSections->topLevelItem(0)->removeChild(itemAtariSio);
@@ -317,24 +318,26 @@ void OptionsDialog::currentSectionChanged(QTreeWidgetItem *current, QTreeWidgetI
     m_ui->stackedWidget->setCurrentIndex(1);
   } else if (current == itemEmulation) {
     m_ui->stackedWidget->setCurrentIndex(2);
-  } else if (current == itemDiskOptions) {
+  } else if (current == itemDiskBrowser) {
     m_ui->stackedWidget->setCurrentIndex(3);
-  } else if (current == itemDiskOSB) {
-    m_ui->stackedWidget->setCurrentIndex(11);
-  } else if (current == itemDiskIcons) {
-    m_ui->stackedWidget->setCurrentIndex(12);
-  } else if (current == itemDiskFavorite) {
-    m_ui->stackedWidget->setCurrentIndex(13);
-  } else if (current == itemI18n) {
+  } else if (current == itemDiskOptions) {
     m_ui->stackedWidget->setCurrentIndex(4);
-  } else if (current == itemAtari1027) {
-    m_ui->stackedWidget->setCurrentIndex(5);
-  } else if (current == itemPassthrough) {
-    m_ui->stackedWidget->setCurrentIndex(6);
-  } else if (current == itemPrinterProtocol) {
+  } else if (current == itemDiskOSB) {
+    m_ui->stackedWidget->setCurrentIndex(12);
+  } else if (current == itemDiskIcons) {
+    m_ui->stackedWidget->setCurrentIndex(13);
+  } else if (current == itemDiskFavorite) {
     m_ui->stackedWidget->setCurrentIndex(14);
-  } else if (current == item1020Options) {
+  } else if (current == itemI18n) {
+    m_ui->stackedWidget->setCurrentIndex(5);
+  } else if (current == itemAtari1027) {
+    m_ui->stackedWidget->setCurrentIndex(6);
+  } else if (current == itemPassthrough) {
+    m_ui->stackedWidget->setCurrentIndex(7);
+  } else if (current == itemPrinterProtocol) {
     m_ui->stackedWidget->setCurrentIndex(15);
+  } else if (current == item1020Options) {
+    m_ui->stackedWidget->setCurrentIndex(16);
   }
 }
 

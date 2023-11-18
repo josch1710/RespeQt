@@ -79,5 +79,6 @@
         <file>silk-icons/icons/image_add.png</file>
         <file>silk-icons/icons/image_delete.png</file>
         <file>silk-icons/icons/text_list_numbers.png</file>
+        <file>silk-icons/icons/folder_image.png</file>
     </qresource>
 </RCC>
