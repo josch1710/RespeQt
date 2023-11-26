@@ -13,6 +13,7 @@
 #include "sioworker.h"
 #include "dbsettings.h"
 #include "picsourcetype.h"
+#include "dbjson.h"
 
 namespace Ui {
 class DiskBrowserDlg;
@@ -64,6 +65,7 @@ private:
     QString _diskFullName;
     PicSourceType _picSource = PicSource_none;
     DbSettings _dbSettings;
+    DbJson _dbJson;
 
     void actionSetPic();
     void actionSetDirPic();
@@ -74,6 +76,7 @@ private:
 
 private slots:
     void popupMenuReq(const QPoint& pos);
+    void titleChanged(QString title);
     void onBrowseFolder();
     void itemSelectionChanged();
     void onFolderChanged(QString lastDir);

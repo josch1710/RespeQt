@@ -109,6 +109,23 @@ void OptionsDialog::setupSettings() {
   m_ui->displayGraphicsInstructions->setChecked(RespeqtSettings::instance()->displayGraphicsInstructions());
   m_ui->clearOnStatus->setChecked(RespeqtSettings::instance()->clearOnStatus());
 
+  bool bJsonFirst = false;
+  switch (RespeqtSettings::instance()->dbDataSource(bJsonFirst))
+  {
+  case DbData_fname:
+      m_ui->rb_filename->setChecked(true);
+      break;
+  case DbData_json:
+      m_ui->rb_json->setChecked(true);
+      break;
+  case DbData_either: default:
+      if (bJsonFirst)
+          m_ui->rb_json_filename->setChecked(true);
+      else
+          m_ui->rb_filename_json->setChecked(true);
+      break;
+  }
+
 #ifdef Q_OS_MAC
   m_ui->useNativeMenu->setChecked(RespeqtSettings::instance()->nativeMenu());
   const auto &actualNoMenu = QApplication::testAttribute(Qt::AA_DontUseNativeMenuBar);
@@ -244,6 +261,9 @@ void OptionsDialog::connectSignals() {
 
   // UI section
   connect(m_ui->useNativeMenu, &QCheckBox::toggled, this, &OptionsDialog::useNativeMenuToggled);
+
+  // Disk browser section
+  connect(m_ui->rb_filename, &QRadioButton::toggled, this, &OptionsDialog::updateJsonExport);
 }
 
 void OptionsDialog::changeEvent(QEvent *e) {
@@ -386,6 +406,20 @@ void OptionsDialog::saveSettings() {
   RespeqtSettings::instance()->setDisplayGraphicsInstructions(m_ui->displayGraphicsInstructions->isChecked());
   RespeqtSettings::instance()->setClearOnStatus(m_ui->clearOnStatus->isChecked());
 
+  DbDataSource dbSource = DbData_either;
+  bool bJsonFirst = false;
+  if (m_ui->rb_filename->isChecked())
+      dbSource = DbData_fname;
+  else if (m_ui->rb_json->isChecked())
+      dbSource = DbData_json;
+  else if (m_ui->rb_json_filename->isChecked())
+      bJsonFirst = true;
+
+  RespeqtSettings::instance()->setDbDataSource(dbSource,bJsonFirst);
+
+  if (m_ui->cb_export->isEnabled() && m_ui->cb_export->isChecked())
+      DbSettings::ExportJson();
+
   SerialBackend backend = SerialBackend::STANDARD;
   if (itemAtariSio->checkState(0) == Qt::Checked) {
     backend = SerialBackend::SIO_DRIVER;
@@ -505,4 +539,11 @@ void OptionsDialog::useNativeMenuToggled() {
   // We reverse the meaning of the checkbox to match the application attribute, see above for reason.
   const auto &checkboxNoMenu = m_ui->useNativeMenu->checkState() == Qt::Unchecked;
   m_ui->warning_nativemenu->setVisible(actualNoMenu != checkboxNoMenu);
+}
+
+void OptionsDialog::updateJsonExport()
+{
+    bool wasJson = RespeqtSettings::instance()->dbDataSource() != DbData_fname;
+    bool useJson = !m_ui->rb_filename->isChecked();
+    m_ui->cb_export->setEnabled(!wasJson && useJson);
 }

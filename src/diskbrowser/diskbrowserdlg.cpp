@@ -22,6 +22,13 @@
 #include <QImageReader>
 #include <QMenu>
 #include <QStandardPaths>
+#include <QInputDialog>
+
+#ifdef USE_INI_SETTINGS
+#define DB_SETTINGS _dbSettings
+#else
+#define DB_SETTINGS _dbJson
+#endif
 
 DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent)
     : QDialog(parent), ui(new Ui::DiskBrowserDlg)
@@ -38,6 +45,7 @@ DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent)
     connect(ui->treeDisks, &QTreeWidget::itemDoubleClicked, this, &DiskBrowserDlg::itemDoubleClicked);
     connect(ui->cboFolderPath, SIGNAL(currentTextChanged(QString)), this, SLOT(onFolderChanged(QString)));
     connect(ui->picPreview, &PicPreview::sigPopupMenuReq, this, &DiskBrowserDlg::popupMenuReq);
+    connect(ui->picPreview, &PicPreview::sigTitleChanged, this, &DiskBrowserDlg::titleChanged);
 
     refreshFoldersCombobox();
     onFolderChanged(""); // reload the current item 0 in the combo
@@ -286,18 +294,52 @@ void DiskBrowserDlg::update()
     double oldRatio = ui->picPreview->ratio();
 
     ui->lblFileList->setText(fileList);
-
     ui->picPreview->clear();
-    _picInfo.label = parsePicLabel();
-    _picInfo.pic   = findPicFile();        // find a custom or built-in pic
+    _picInfo.clear();
+
+    bool jsonFirst = false;
+    auto dbSource  = RespeqtSettings::instance()->dbDataSource(jsonFirst);
+
+    // find a custom or built-in pic
+
+    auto fileInfo = QFileInfo {_diskFullName};      // tbd move out of findPicFile
+    QDir dir {fileInfo.absolutePath()};             // tbd "
+
+    if ((dbSource == DbData_fname) ||
+       ((dbSource == DbData_either) && !jsonFirst))
+    {
+        _picInfo.label = parsePicLabel();
+        _picInfo.pic   = findPicFile();
+
+        if (_picInfo.pic.isEmpty() && (dbSource == DbData_either))
+        {
+            _picInfo.label = DB_SETTINGS.getLabel(dir, _diskFileName);
+            _picInfo.pic   = DB_SETTINGS.getPicture(dir, _diskFileName, _picSource);
+        }
+    }
+    else
+    {
+        _picInfo.label = DB_SETTINGS.getLabel(dir, _diskFileName);
+        _picInfo.pic = DB_SETTINGS.getPicture(dir, _diskFileName, _picSource);
+
+        if (_picInfo.pic.isEmpty() && (dbSource == DbData_either))
+        {
+            _picInfo.label = parsePicLabel();
+            _picInfo.pic   = findPicFile();
+        }
+    }
 
     if (_picInfo.pic.isEmpty())
+    {
         _picInfo.pic = getFloppyPic();
+        if (!_picInfo.pic.isEmpty())
+        {
+            _picSource = PicSource_floppy;
+            ui->picPreview->setLabel(_picInfo.label);
+        }
+    }
 
     ui->picPreview->setFileName(_picInfo.pic);
-
-    if (_picInfo.pic[0] == ':')
-        ui->picPreview->setLabel(_picInfo.label);
 
     double newRatio = ui->picPreview->ratio();
 
@@ -417,15 +459,23 @@ void DiskBrowserDlg::closeEvent(QCloseEvent *event)
 
 void DiskBrowserDlg::showEvent(QShowEvent *event)
 {
+    static int count = 0;
+
     QDialog::showEvent(event);
 
-    if (event->type() == QEvent::Show && RespeqtSettings::instance()->saveWindowsPos())
+    if (event->type() != QEvent::Show)
+        return;
+
+    if (!count && RespeqtSettings::instance()->saveWindowsPos())
     {
         // Restore last widget geometry
         RespeqtSettings::instance()->restoreWidgetGeometry(this);
         setHorzSplitPos(RespeqtSettings::instance()->diskBrowserHorzSplitPos());
         setVertSplitPos(RespeqtSettings::instance()->diskBrowserVertSplitPos());
     }
+
+    if (count++)
+        update();
 }
 
 DiskLabel DiskBrowserDlg::parsePicLabel()
@@ -492,7 +542,7 @@ QString DiskBrowserDlg::findPicFile()
         if (entryName == diskBase)
         {
             setToolTip(entryName);
-            _picSource = PicFromFile_base;
+            _picSource = PicFromFname_base;
             return entry.absoluteFilePath();
         }
 
@@ -506,7 +556,7 @@ QString DiskBrowserDlg::findPicFile()
             {
                 QString tip = matcher.captured(4);  // use mid string as tooltip
                 setToolTip(tip);
-                _picSource = PicFromFile_index;
+                _picSource = PicFromFname_index;
                 return entry.absoluteFilePath();
             }
         }
@@ -517,14 +567,11 @@ QString DiskBrowserDlg::findPicFile()
         if (QFileInfo::exists(imagePath))
         {
             setToolTip("");
-            _picSource = PicFromFile_dir;
+            _picSource = PicFromFname_dir;
             return imagePath;
         }
     }
-
-    // 4. TBD: check INI file scheme for an image to load
-
-    return _dbSettings.getPicture(dir, _diskFileName, _picSource);
+    return QString();
 }
 
 QString DiskBrowserDlg::getFloppyPic()  // 5. load built-in image of a 5 1/2-inch floppy disk
@@ -550,6 +597,12 @@ void DiskBrowserDlg::popupMenuReq(const QPoint& pos)
     menu.exec(pos);
 }
 
+void DiskBrowserDlg::titleChanged(QString title)
+{
+    _picInfo.label.title = title;
+    DB_SETTINGS.setTitle(title, _currentDir, _diskFileName);
+}
+
 QString DiskBrowserDlg::browseForPic(const QString& start)
 {
     auto formats = QImageReader::supportedImageFormats();
@@ -566,7 +619,7 @@ void DiskBrowserDlg::actionSetDefault()
     if (fname.isEmpty())
         return;
 
-    _dbSettings.setPicture(fname);
+    DB_SETTINGS.setPicture(fname);
     update();
 }
 
@@ -576,7 +629,7 @@ void DiskBrowserDlg::actionSetDirPic()
     if (fname.isEmpty())
         return;
 
-    _dbSettings.setPicture(fname, _currentDir);
+    DB_SETTINGS.setPicture(fname, _currentDir);
 }
 
 void DiskBrowserDlg::actionSetPic()
@@ -585,11 +638,24 @@ void DiskBrowserDlg::actionSetPic()
     if (fname.isEmpty())
         return;
 
-    _dbSettings.setPicture(fname, _currentDir, _diskFileName);
+    DB_SETTINGS.setPicture(fname, _currentDir, _diskFileName);
 }
 
 void DiskBrowserDlg::actionSetTitle()
 {
+    if (_picSource == PicSource_floppy)
+    {
+        ui->picPreview->editTitle();
+    }
+    else
+    {
+        bool ok;
+        QString text = QInputDialog::getText(this, "Input Text",
+                                             "Disk Title:", QLineEdit::Normal,
+                                             _picInfo.label.title, &ok);
+        if (ok)
+            DB_SETTINGS.setTitle(text, _currentDir, _diskFileName);
+    }
 }
 
 void DiskBrowserDlg::actionSetIndex()
@@ -600,14 +666,14 @@ void DiskBrowserDlg::actionClearPic()
 {
     switch (_picSource)
     {
-    case PicFromIni_dir:
-        _dbSettings.setPicture("", _currentDir, "");
+    case PicFromJson_dir:
+        DB_SETTINGS.setPicture("", _currentDir, "");
         break;
-    case PicFromIni_global:
-        _dbSettings.setPicture("");
+    case PicFromJson_global:
+        DB_SETTINGS.setPicture("");
         break;
-    case PicFromIni_disk:
-        _dbSettings.setPicture("", _currentDir, _diskFileName);
+    case PicFromJson_disk:
+        DB_SETTINGS.setPicture("", _currentDir, _diskFileName);
         break;
     default:
         break;

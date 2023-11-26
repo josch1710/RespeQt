@@ -21,13 +21,23 @@ public:
 
 class Title : public QTextEdit
 {
+    Q_OBJECT
 public:
     Title(QWidget* parent);
     void setText(const QString& text);
     void setLineHeight(int height);
     bool isEmpty() { return toPlainText().isEmpty(); }
+    void setEditMode(bool edit = true);
+
+signals:
+    void sigEditDone(bool canceled);
+
+protected:
+    virtual void keyPressEvent(QKeyEvent* evt) override;
 
 private:
+    bool    _editMode = false;
+    QString _lastTitle;
     QString _fontColor {"black"};
 #if defined Q_OS_WIN
     const QString _fontFamily {"Ink Free"};
@@ -56,17 +66,22 @@ public:
     void setLabel(const DiskLabel& label);
     void setLabel(const QString& title, const QString& diskNo, bool bSide);
 
+    void editTitle();
+
     double ratio();
     void clear();
 
-    virtual QSize sizeHint() const override;
+signals:
+    void sigTitleChanged(QString title);
+    void sigPopupMenuReq(const QPoint& pos);
 
 protected:
+    virtual QSize sizeHint() const override;
     virtual void paintEvent(QPaintEvent* event) override;
     virtual void resizeEvent(QResizeEvent* event) override;
 
-signals:
-    void sigPopupMenuReq(const QPoint& pos);
+private slots:
+    void slotEditDone(bool canceled);
 
 private:
     QString  _picPath;

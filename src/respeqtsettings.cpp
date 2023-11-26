@@ -12,6 +12,7 @@
 
 #include "respeqtsettings.h"
 #include "serialport.h"
+#include "diskbrowser/picsourcetype.h"
 #include <QFileInfo>
 #include <memory>
 #include <QApplication>
@@ -930,4 +931,21 @@ bool RespeqtSettings::restoreWidgetGeometry(QWidget* widget, const QString& name
   }
 
   return true;
+}
+
+void RespeqtSettings::setDbDataSource(DbDataSource dbSource, bool jsonFirst)
+{
+    mSettings->setValue("DiskBrowserDlg/source", dbSource);
+    mSettings->setValue("DiskBrowserDlg/json_1st", jsonFirst);
+}
+
+DbDataSource RespeqtSettings::dbDataSource()
+{
+    return static_cast<DbDataSource>(mSettings->value("DiskBrowserDlg/source", DbData_fname).toInt());
+}
+
+DbDataSource RespeqtSettings::dbDataSource(bool& jsonFirst)
+{
+    jsonFirst = mSettings->value("DiskBrowserDlg/json_1st", jsonFirst).toBool();
+    return dbDataSource();
 }

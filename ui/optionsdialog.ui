@@ -952,7 +952,7 @@
            <string>File naming scheme for DB pics/labels</string>
           </property>
           <property name="checked">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -962,7 +962,7 @@
            <string>Use both above - Prioritize file names</string>
           </property>
           <property name="checked">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -984,8 +984,11 @@
         </item>
         <item row="10" column="0">
          <widget class="QCheckBox" name="cb_export">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
-           <string>Convert to specified JSON on Save</string>
+           <string>Convert to selected JSON on Save</string>
           </property>
          </widget>
         </item>

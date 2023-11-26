@@ -56,6 +56,7 @@ set(SOURCES
     src/diskbrowser/folderdisks.cpp
     src/diskbrowser/diskbrowserdlg.cpp
     src/diskbrowser/dbsettings.cpp
+    src/diskbrowser/dbjson.cpp
     src/diskbrowser/picsplitter.cpp
     src/diskbrowser/picpreview.cpp
     src/createimagedialog.cpp
@@ -122,6 +123,7 @@ set(HEADERS
     include/diskbrowser/folderdisks.h
     include/diskbrowser/diskbrowserdlg.h
     include/diskbrowser/dbsettings.h
+    include/diskbrowser/dbjson.h
     include/diskbrowser/picsplitter.h
     include/diskbrowser/picpreview.h
     include/diskbrowser/picsourcetype.h

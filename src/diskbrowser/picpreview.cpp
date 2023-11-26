@@ -12,20 +12,34 @@
 #include <QDebug>
 #include <QDir>
 #include <QFileInfo>
+#include <QGuiApplication>
 
 
 PicPreview::PicPreview(QWidget* parent) : QLabel(parent)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, &PicPreview::customContextMenuRequested, this, &PicPreview::popupMenuReq);
+    connect(&_title, &Title::sigEditDone, this, &PicPreview::slotEditDone);
 
-    _title.hide();
-    _diskNo.hide();
+//  _title.hide();
+//  _diskNo.hide();
+    _title.setReadOnly(true);
 }
 
 void PicPreview::popupMenuReq(const QPoint& pos)
 {
     emit sigPopupMenuReq(mapToGlobal(pos));
+}
+
+void PicPreview::slotEditDone(bool canceled)
+{
+    if (canceled)
+    {
+        setFocus();
+        return;
+    }
+
+    emit sigTitleChanged(_title.toPlainText());
 }
 
 PicPreview::~PicPreview()
@@ -52,8 +66,9 @@ void PicPreview::clear()
         _pixmap = nullptr;
     }
 
-    _title.hide();
-    _diskNo.hide();
+//  _title.hide();
+//  _diskNo.hide();
+    _title.setEditMode(false);
 }
 
 void PicPreview::setFileName(const QString& picPath)
@@ -155,7 +170,7 @@ void PicPreview::moveLabels()
     QRect scaledRect = scaleRect(labelRect, paddedRect);
 
     _title.setGeometry(scaledRect);
-    _title.setVisible(!_title.isEmpty());
+//  _title.setVisible(!_title.isEmpty());
 
     if (_diskNo.isEmpty())
     {
@@ -233,6 +248,11 @@ QSize PicPreview::sizeHint() const
     return QSize(_pixmap->width(), _pixmap->height());
 }
 
+void PicPreview::editTitle()
+{
+    _title.setEditMode();
+}
+
 
 // Title class -
 // Derived from QTextEdit, this class encapsulates the floppy disk title rendered on the label (if no preview is defined).
@@ -282,6 +302,57 @@ void Title::setText(const QString& text)
     theCursor.clearSelection();
     theCursor.select(QTextCursor::Document);
     theCursor.mergeBlockFormat(blockFmt);
+}
+
+void Title::setEditMode(bool edit)
+{
+    if (edit == _editMode)
+        return;
+
+    _editMode = edit;
+
+    setReadOnly(!edit);
+
+    if (edit)
+    {
+        _lastTitle = toPlainText();
+        setFocus();
+        selectAll();
+    }
+}
+
+void Title::keyPressEvent(QKeyEvent* evt)
+{
+    if (_editMode)
+    {
+        switch (evt->key())
+        {
+        case Qt::Key_Return:
+        case Qt::Key_Enter:
+            {
+                // if the shift key is down, process the return/enter key
+                auto mods = QGuiApplication::queryKeyboardModifiers();
+                if (mods & Qt::ShiftModifier)
+                    break;
+
+                // return/enter completes edit mode
+                setEditMode(false);
+                emit sigEditDone(false); // not canceled
+                return;
+            }
+        case Qt::Key_Escape:
+            {
+                setEditMode(false);
+                setText(_lastTitle);
+                emit sigEditDone(true); // canceled
+                return;
+            }
+        default:
+            break;
+        }
+    }
+
+    QTextEdit::keyPressEvent(evt);
 }
 
 DiskNo::DiskNo(QWidget* parent) : QLabel(parent)

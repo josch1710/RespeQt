@@ -44,8 +44,8 @@ void DbSettings::setPicture(const QString& pic, const QString& dir, const QStrin
     bool isDirPic = (!dir.isEmpty() && disk.isEmpty());
     bool isDiskPic = (!dir.isEmpty() && !disk.isEmpty());
 
-    QString escDir  = QDir::fromNativeSeparators(dir).replace('/','@');
-    QString escDisk = QDir::fromNativeSeparators(disk).replace('/','@');
+    QString escDir  = QDir::fromNativeSeparators(dir);  //.replace('/','@');
+    QString escDisk = QDir::fromNativeSeparators(disk); //.replace('/','@');
 
     if (isGlobal)
         _diskPic = pic;
@@ -62,8 +62,8 @@ void DbSettings::setPicture(const QString& pic, const QString& dir, const QStrin
 QString DbSettings::getPicture(const QDir& dir, const QString& disk, PicSourceType& picSource)
 {
     QString dirStr  = dir.absolutePath();
-    QString escDir  = QDir::fromNativeSeparators(dirStr).replace('/','@');
-    QString escDisk = QDir::fromNativeSeparators(disk).replace('/','@');
+    QString escDir  = QDir::fromNativeSeparators(dirStr);   //.replace('/','@');
+    QString escDisk = QDir::fromNativeSeparators(disk);     //.replace('/','@');
     auto dirInfo = _dirMap[escDir];
 
     QString pic;
@@ -71,21 +71,45 @@ QString DbSettings::getPicture(const QDir& dir, const QString& disk, PicSourceTy
 
     if (!dirInfo.map[escDisk].pic.isEmpty())
     {
-        picSource = PicFromIni_disk;
+        picSource = PicFromJson_disk;
         pic = dirInfo.map[escDisk].pic;
     }
     else if (!dirInfo.pic.isEmpty())
     {
-        picSource = PicFromIni_dir;
+        picSource = PicFromJson_dir;
         pic = dirInfo.pic;
     }
     else if (!_diskPic.isEmpty())
     {
-        picSource = PicFromIni_global;
+        picSource = PicFromJson_global;
         pic = _diskPic;
     }
 
     return pic;
+}
+
+void DbSettings::setTitle(const QString& title, const QString& folder, const QString& disk)
+{
+    _dirMap[folder].map[disk].label.title = title;
+    _dirty = true;
+}
+
+void DbSettings::setIndex(const QString& index, const QString& folder, const QString& disk)
+{
+    _dirMap[folder].map[disk].label.diskNo = index;
+    _dirty = true;
+}
+
+void DbSettings::setSideB(bool sideB, const QString& folder, const QString& disk)
+{
+    _dirMap[folder].map[disk].label.sideB = sideB;
+    _dirty = true;
+}
+
+DiskLabel DbSettings::getLabel(const QDir& dir, const QString& disk)
+{
+    QString folder = dir.absolutePath();
+    return _dirMap[folder].map[disk].label;
 }
 
 void DbSettings::load()
@@ -110,6 +134,13 @@ void DbSettings::load()
 
             if (_settings->contains("pic"))
                 dirInfo.map[childGroup].pic = _settings->value("pic").toString();
+            if (_settings->contains("title"))
+                dirInfo.map[childGroup].label.title = _settings->value("title").toString();
+            if (_settings->contains("index"))
+            {
+                dirInfo.map[childGroup].label.diskNo = _settings->value("index").toString();
+                dirInfo.map[childGroup].label.sideB  = _settings->value("sideb").toBool();
+            }
 
             _settings->endGroup();
         }
@@ -147,6 +178,13 @@ void DbSettings::save()
                 QString group  = it.key();
                 _settings->beginGroup(group);
                 _settings->setValue("pic", art.pic);
+                if (!art.label.title.isEmpty())
+                    _settings->setValue("title", art.label.title);
+                if (!art.label.diskNo.isEmpty())
+                {
+                    _settings->setValue("index", art.label.diskNo);
+                    _settings->setValue("sideb", art.label.sideB);
+                }
                 _settings->endGroup();
             }
         }
@@ -165,4 +203,9 @@ void DbSettings::clear()
     _bSidePos = { QRect(), QRect() };
     _dirty = false;
     _dirMap.clear();
+}
+
+/*static*/ void DbSettings::ExportJson()
+{
+
 }

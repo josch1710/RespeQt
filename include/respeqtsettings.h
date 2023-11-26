@@ -14,6 +14,7 @@
 #define RESPEQTSETTINGS_H
 
 #include "mainwindow.h"
+#include "diskbrowser/picsourcetype.h"
 
 #include <QPrinterInfo>
 #include <QSettings>
@@ -291,6 +292,11 @@ public:
 #endif
   void setRawPrinterName(const QString &name);
   QString rawPrinterName() const;
+
+  // Disk Browser (db) Options
+  void setDbDataSource(DbDataSource dbSource, bool jsonFirst = false);
+  DbDataSource dbDataSource();
+  DbDataSource dbDataSource(bool& jsonFirst);
 
   bool debugMenuVisible() const;
   void setDebugMenuVisible(bool menuVisible);

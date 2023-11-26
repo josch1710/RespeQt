@@ -17,10 +17,9 @@
 //
 // [<path>]
 // pic=<file>   (path-wide preview)
-// size=1
-// 0\title=<text>
-// 0\index=<text>   example: "01"
-// 0\side=<a|b>
+// <disk>\title=<text>
+// <disk>\index=<text>   example: "01"
+// <disk>\sideb=[true|false]
 //
 
 typedef QMap<QString,FloppyArt> ArtMap;
@@ -64,9 +63,16 @@ public:
     void setPicture(const QString& pic, const QString& folder = QString(), const QString& disk = QString());
     QString getPicture(const QDir& dir, const QString& disk, PicSourceType& picSource);
 
+    void setTitle(const QString& title, const QString& folder, const QString& disk);
+    void setIndex(const QString& index, const QString& folder, const QString& disk);
+    void setSideB(bool sideB, const QString& folder, const QString& disk);
+    DiskLabel getLabel(const QDir& dir, const QString& disk);
+
     void load();
     void save();
     void clear();
+
+    static void ExportJson();
 
 private:
     QSettings* _settings = nullptr;
@@ -79,5 +85,4 @@ private:
     LabelPos _bSidePos;
     DirMap   _dirMap;
 };
-
 #endif // DBSETTINGS_H

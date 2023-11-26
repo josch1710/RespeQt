@@ -1,15 +1,23 @@
 #ifndef PICSOURCETYPE_H
 #define PICSOURCETYPE_H
 
+enum DbDataSource
+{
+    DbData_fname,
+    DbData_json,
+    DbData_either
+};
+
 enum PicSourceType
 {
     PicSource_none = 0,
-    PicFromFile_base,   // identical basename
-    PicFromFile_index,  // matching index id
-    PicFromFile_dir,    // dir has respeqt_db.png
-    PicFromIni_global,  // [db] pic
-    PicFromIni_dir,     // [<escaped dir>] pic
-    PicFromIni_disk     // [<escaped dir>] <escaped disk>\pic
+    PicSource_floppy,
+    PicFromFname_base,  // identical basename
+    PicFromFname_index, // matching index id
+    PicFromFname_dir,   // dir has respeqt_db.png
+    PicFromJson_global, // [db] pic
+    PicFromJson_dir,    // [<escaped dir>] pic
+    PicFromJson_disk    // [<escaped dir>] <escaped disk>\pic
 };
 
 #endif // PICSOURCETYPE_H
