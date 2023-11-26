@@ -28,6 +28,8 @@ struct DirInfo
 {
     QString pic;    // dir/folder default pic
     ArtMap  map;    // disk-name -> FloppyArt
+
+    bool isEmpty() const {return pic.isEmpty() && map.isEmpty();}
 };
 
 // FolderMap - map/collection structured for above scheme
@@ -71,8 +73,6 @@ public:
     void load();
     void save();
     void clear();
-
-    static void ExportJson();
 
 private:
     QSettings* _settings = nullptr;

@@ -10,7 +10,7 @@
 
 DbSettings::DbSettings()
 {
-    auto    locType = QStandardPaths::AppDataLocation;
+    auto    locType   = QStandardPaths::AppDataLocation;
     QString appFolder = QStandardPaths::writableLocation(locType);
     QDir appDataDir(appFolder);
 
@@ -43,9 +43,7 @@ void DbSettings::setPicture(const QString& pic, const QString& dir, const QStrin
     bool isGlobal = (dir.isEmpty() && disk.isEmpty());     // program global pic?
     bool isDirPic = (!dir.isEmpty() && disk.isEmpty());
     bool isDiskPic = (!dir.isEmpty() && !disk.isEmpty());
-
-    QString escDir  = QDir::fromNativeSeparators(dir);  //.replace('/','@');
-    QString escDisk = QDir::fromNativeSeparators(disk); //.replace('/','@');
+    QString escDir = QDir::fromNativeSeparators(dir).replace('/','@');
 
     if (isGlobal)
         _diskPic = pic;
@@ -54,7 +52,7 @@ void DbSettings::setPicture(const QString& pic, const QString& dir, const QStrin
         _dirMap[escDir].pic = pic;
 
     if (isDiskPic)
-        _dirMap[escDir].map[escDisk].pic = pic;
+        _dirMap[escDir].map[disk].pic = pic;
 
     _dirty = true;
 }
@@ -62,17 +60,16 @@ void DbSettings::setPicture(const QString& pic, const QString& dir, const QStrin
 QString DbSettings::getPicture(const QDir& dir, const QString& disk, PicSourceType& picSource)
 {
     QString dirStr  = dir.absolutePath();
-    QString escDir  = QDir::fromNativeSeparators(dirStr);   //.replace('/','@');
-    QString escDisk = QDir::fromNativeSeparators(disk);     //.replace('/','@');
-    auto dirInfo = _dirMap[escDir];
+    QString escDir  = QDir::fromNativeSeparators(dirStr).replace('/','@');
+    auto    dirInfo = _dirMap[escDir];
 
     QString pic;
     picSource = PicSource_none;
 
-    if (!dirInfo.map[escDisk].pic.isEmpty())
+    if (!dirInfo.map[disk].pic.isEmpty())
     {
         picSource = PicFromJson_disk;
-        pic = dirInfo.map[escDisk].pic;
+        pic = dirInfo.map[disk].pic;
     }
     else if (!dirInfo.pic.isEmpty())
     {
@@ -90,26 +87,30 @@ QString DbSettings::getPicture(const QDir& dir, const QString& disk, PicSourceTy
 
 void DbSettings::setTitle(const QString& title, const QString& folder, const QString& disk)
 {
-    _dirMap[folder].map[disk].label.title = title;
+    QString escDir = QDir::fromNativeSeparators(folder).replace('/','@');
+    _dirMap[escDir].map[disk].label.title = title;
     _dirty = true;
 }
 
 void DbSettings::setIndex(const QString& index, const QString& folder, const QString& disk)
 {
-    _dirMap[folder].map[disk].label.diskNo = index;
+    QString escDir = QDir::fromNativeSeparators(folder).replace('/','@');
+    _dirMap[escDir].map[disk].label.diskNo = index;
     _dirty = true;
 }
 
 void DbSettings::setSideB(bool sideB, const QString& folder, const QString& disk)
 {
-    _dirMap[folder].map[disk].label.sideB = sideB;
+    QString escDir = QDir::fromNativeSeparators(folder).replace('/','@');
+    _dirMap[escDir].map[disk].label.sideB = sideB;
     _dirty = true;
 }
 
 DiskLabel DbSettings::getLabel(const QDir& dir, const QString& disk)
 {
     QString folder = dir.absolutePath();
-    return _dirMap[folder].map[disk].label;
+    QString escDir = QDir::fromNativeSeparators(folder).replace('/','@');
+    return _dirMap[escDir].map[disk].label;
 }
 
 void DbSettings::load()
@@ -162,7 +163,7 @@ void DbSettings::save()
     for (auto it = _dirMap.begin(); it != _dirMap.end(); ++it)
     {
         DirInfo& dirInfo = it.value();
-        QString escDir = it.key();
+        QString  escDir  = it.key();
 
         _settings->beginGroup(escDir);
 
@@ -203,9 +204,4 @@ void DbSettings::clear()
     _bSidePos = { QRect(), QRect() };
     _dirty = false;
     _dirMap.clear();
-}
-
-/*static*/ void DbSettings::ExportJson()
-{
-
 }

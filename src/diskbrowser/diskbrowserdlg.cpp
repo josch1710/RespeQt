@@ -630,6 +630,7 @@ void DiskBrowserDlg::actionSetDirPic()
         return;
 
     DB_SETTINGS.setPicture(fname, _currentDir);
+    update();
 }
 
 void DiskBrowserDlg::actionSetPic()
@@ -639,6 +640,7 @@ void DiskBrowserDlg::actionSetPic()
         return;
 
     DB_SETTINGS.setPicture(fname, _currentDir, _diskFileName);
+    update();
 }
 
 void DiskBrowserDlg::actionSetTitle()

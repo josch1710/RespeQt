@@ -418,7 +418,7 @@ void OptionsDialog::saveSettings() {
   RespeqtSettings::instance()->setDbDataSource(dbSource,bJsonFirst);
 
   if (m_ui->cb_export->isEnabled() && m_ui->cb_export->isChecked())
-      DbSettings::ExportJson();
+      DbJson::Export();
 
   SerialBackend backend = SerialBackend::STANDARD;
   if (itemAtariSio->checkState(0) == Qt::Checked) {
