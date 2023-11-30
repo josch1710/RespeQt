@@ -79,7 +79,7 @@ void DbJson::setTitle(const QString& title, const QString& folder, const QString
 void DbJson::setIndex(const QString& index, const QString& folder, const QString& disk)
 {
     QString lnxDir = QDir::fromNativeSeparators(folder);
-    _dirMap[lnxDir].map[disk].label.diskNo = index;
+    _dirMap[lnxDir].map[disk].label.index = index;
     _dirty = true;
 }
 
@@ -135,7 +135,7 @@ bool DbJson::load()
                 dirInfo.map[dir].label.title = obj["title"].toString();
             if (obj.contains("index"))
             {
-                dirInfo.map[dir].label.diskNo = obj["index"].toString();
+                dirInfo.map[dir].label.index = obj["index"].toString();
                 dirInfo.map[dir].label.sideB  = obj["sideb"].toBool();
             }
         }
@@ -186,9 +186,9 @@ bool DbJson::save()
             if (!art.label.title.isEmpty())
                 jsNode["title"] = art.label.title;
 
-            if (!art.label.diskNo.isEmpty())
+            if (!art.label.index.isEmpty())
             {
-                jsNode["index"] = art.label.diskNo;
+                jsNode["index"] = art.label.index;
                 jsNode["sideb"] = art.label.sideB;
             }
 

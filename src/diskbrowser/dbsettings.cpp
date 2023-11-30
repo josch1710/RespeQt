@@ -95,7 +95,7 @@ void DbSettings::setTitle(const QString& title, const QString& folder, const QSt
 void DbSettings::setIndex(const QString& index, const QString& folder, const QString& disk)
 {
     QString escDir = QDir::fromNativeSeparators(folder).replace('/','@');
-    _dirMap[escDir].map[disk].label.diskNo = index;
+    _dirMap[escDir].map[disk].label.index = index;
     _dirty = true;
 }
 
@@ -139,7 +139,7 @@ void DbSettings::load()
                 dirInfo.map[childGroup].label.title = _settings->value("title").toString();
             if (_settings->contains("index"))
             {
-                dirInfo.map[childGroup].label.diskNo = _settings->value("index").toString();
+                dirInfo.map[childGroup].label.index = _settings->value("index").toString();
                 dirInfo.map[childGroup].label.sideB  = _settings->value("sideb").toBool();
             }
 
@@ -181,9 +181,9 @@ void DbSettings::save()
                 _settings->setValue("pic", art.pic);
                 if (!art.label.title.isEmpty())
                     _settings->setValue("title", art.label.title);
-                if (!art.label.diskNo.isEmpty())
+                if (!art.label.index.isEmpty())
                 {
-                    _settings->setValue("index", art.label.diskNo);
+                    _settings->setValue("index", art.label.index);
                     _settings->setValue("sideb", art.label.sideB);
                 }
                 _settings->endGroup();

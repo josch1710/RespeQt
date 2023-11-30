@@ -77,6 +77,7 @@ private:
 private slots:
     void popupMenuReq(const QPoint& pos);
     void titleChanged(QString title);
+    void indexChanged(QString index);
     void onBrowseFolder();
     void itemSelectionChanged();
     void onFolderChanged(QString lastDir);

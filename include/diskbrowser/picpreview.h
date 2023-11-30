@@ -12,18 +12,12 @@
 #include <QTextEdit>
 #include "folderdisks.h"
 
-class DiskNo : public QLabel
-{
-public:
-    DiskNo(QWidget* parent);
-    bool isEmpty() { return text().isEmpty(); }
-};
 
-class Title : public QTextEdit
+class Label : public QTextEdit
 {
     Q_OBJECT
 public:
-    Title(QWidget* parent);
+    Label(QWidget* parent, const QString& fontFamily = QString(), bool isIndex = false);
     void setText(const QString& text);
     void setLineHeight(int height);
     bool isEmpty() { return toPlainText().isEmpty(); }
@@ -34,21 +28,23 @@ signals:
 
 protected:
     virtual void keyPressEvent(QKeyEvent* evt) override;
+    virtual void resizeEvent(QResizeEvent* event) override;
 
 private:
+    bool    _isIndex  = false;
     bool    _editMode = false;
     QString _lastTitle;
     QString _fontColor {"black"};
 #if defined Q_OS_WIN
-    const QString _fontFamily {"Ink Free"};
+    QString _fontFamily {"Ink Free"};
     bool _fontIsBold = true;
     int _lineHeight = 70;
 #elif defined Q_OS_MAC
-    const QString _fontFamily {"Bradley Hand"};
+    QString _fontFamily {"Bradley Hand"};
     bool _fontIsBold = false;
     int _lineHeight = 65;
 #else
-    const QString _fontFamily {"Comic Sans"};
+    QString _fontFamily {"Comic Sans"};
     bool _fontIsBold = false;
     int _lineHeight = 70;
 #endif
@@ -64,15 +60,17 @@ public:
 
     void setFileName(const QString& name);
     void setLabel(const DiskLabel& label);
-    void setLabel(const QString& title, const QString& diskNo, bool bSide);
+    void setLabel(const QString& title, const QString& index, bool bSide);
 
     void editTitle();
+    void editIndex();
 
     double ratio();
     void clear();
 
 signals:
     void sigTitleChanged(QString title);
+    void sigIndexChanged(QString index);
     void sigPopupMenuReq(const QPoint& pos);
 
 protected:
@@ -86,10 +84,10 @@ private slots:
 private:
     QString  _picPath;
     QString  _picTooltip;
-    QPixmap* _pixmap  {nullptr};
-    Title    _title   {this};
-    DiskNo   _diskNo  {this};
-    bool     _isSideB {false};
+    QPixmap* _pixmap {nullptr};
+    Label    _title  {this};
+    Label    _index  {this, "Courier New", true};
+    bool     _sideB  {false};
 
     void loadPixmap(const QString& picPath);
     void moveLabels();

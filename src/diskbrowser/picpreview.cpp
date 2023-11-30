@@ -19,11 +19,13 @@ PicPreview::PicPreview(QWidget* parent) : QLabel(parent)
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, &PicPreview::customContextMenuRequested, this, &PicPreview::popupMenuReq);
-    connect(&_title, &Title::sigEditDone, this, &PicPreview::slotEditDone);
+    connect(&_title, &Label::sigEditDone, this, &PicPreview::slotEditDone);
+    connect(&_index, &Label::sigEditDone, this, &PicPreview::slotEditDone);
 
 //  _title.hide();
-//  _diskNo.hide();
+//  _index.hide();
     _title.setReadOnly(true);
+    _index.setReadOnly(true);
 }
 
 void PicPreview::popupMenuReq(const QPoint& pos)
@@ -39,7 +41,10 @@ void PicPreview::slotEditDone(bool canceled)
         return;
     }
 
-    emit sigTitleChanged(_title.toPlainText());
+    if (sender() == qobject_cast<QObject*>(&_title))
+        emit sigTitleChanged(_title.toPlainText());
+    else
+        emit sigIndexChanged(_index.toPlainText());
 }
 
 PicPreview::~PicPreview()
@@ -57,8 +62,8 @@ void PicPreview::clear()
     _picPath.clear();
     _picTooltip.clear();
     _title.clear();
-    _diskNo.clear();
-    _isSideB = false;
+    _index.clear();
+    _sideB = false;
 
     if (_pixmap)
     {
@@ -67,8 +72,9 @@ void PicPreview::clear()
     }
 
 //  _title.hide();
-//  _diskNo.hide();
+//  _index.hide();
     _title.setEditMode(false);
+    _index.setEditMode(false);
 }
 
 void PicPreview::setFileName(const QString& picPath)
@@ -77,25 +83,25 @@ void PicPreview::setFileName(const QString& picPath)
 
     if (picPath[0] != ':')          // custom pic?...
     {
-        _diskNo.clear();            // no number overlay
+        _index.clear();             // no number overlay
         _title.clear();             // no title overlay
     }
 
     update();
 }
 
-void PicPreview::setLabel(const QString& title, const QString& diskNo, bool bSide)
+void PicPreview::setLabel(const QString& title, const QString& index, bool bSide)
 {
     _title.setText(title);
-    _isSideB = bSide;
-    _diskNo.setText(diskNo);
+    _sideB = bSide;
+    _index.setText(index);
 
     update();
 }
 
 void PicPreview::setLabel(const DiskLabel& label)
 {
-    setLabel(label.title, label.diskNo, label.sideB);
+    setLabel(label.title, label.index, label.sideB);
 }
 
 void PicPreview::loadPixmap(const QString& picPath)
@@ -128,6 +134,9 @@ QRect PicPreview::scaleRect(const QRectF& rect, const QRectF& rcChild)
     return QRect {QPoint{X,Y}, QSize{W,H}};
 }
 
+// returns the current widget rect padded either horizontally or vertically
+// to maintain the current aspect ratio (property defined by the content)
+//
 QRect PicPreview::padRect()
 {
     QRect lblRect(rect());
@@ -161,7 +170,7 @@ void PicPreview::moveLabels()
 
     QRectF labelRect;
 
-    if (_isSideB)
+    if (_sideB)
         labelRect = LABEL_RECT_B;
     else
         labelRect = LABEL_RECT_A;
@@ -170,22 +179,13 @@ void PicPreview::moveLabels()
     QRect scaledRect = scaleRect(labelRect, paddedRect);
 
     _title.setGeometry(scaledRect);
-//  _title.setVisible(!_title.isEmpty());
 
-    if (_diskNo.isEmpty())
-    {
-        _diskNo.setVisible(false);
-    }
-    else
-    {
-        // move the index rect
-        const double indexX = (_isSideB ? 175 : 25);
-        const QRectF INDEX_RECT {QPointF{indexX,25}, QSizeF{20,20}};
-        const QRect  indexRect = scaleRect(INDEX_RECT, paddedRect);
+    // move the index rect
+    const double indexX = (_sideB ? 170 : 20);
+    const QRectF INDEX_RECT {QPointF{indexX,20}, QSizeF{30,30}};
+    const QRect  indexRect = scaleRect(INDEX_RECT, paddedRect);
 
-        _diskNo.setGeometry(indexRect);
-        _diskNo.setVisible(true);
-    }
+    _index.setGeometry(indexRect);
 }
 
 void PicPreview::scaleFonts()
@@ -197,12 +197,12 @@ void PicPreview::scaleFonts()
 
     _title.setFont(font);
 
-    font = _diskNo.font();
-    pix = round((double)_diskNo.size().height() / 2.0);
+    font = _index.font();
+    pix = round((double)_index.size().height() / 2.5);
 
     font.setPixelSize((int)pix);
 
-    _diskNo.setFont(font);
+    _index.setFont(font);
 }
 
 void PicPreview::update()
@@ -253,25 +253,44 @@ void PicPreview::editTitle()
     _title.setEditMode();
 }
 
+void PicPreview::editIndex()
+{
+    _index.setEditMode();
+}
+
 
 // Title class -
 // Derived from QTextEdit, this class encapsulates the floppy disk title rendered on the label (if no preview is defined).
 // I'm using a Rich Text widget Due to the buggy nature specifically on macOS with line spacing in a QLabel.
 
-Title::Title(QWidget* parent) : QTextEdit(parent)
+Label::Label(QWidget* parent, const QString& fontFamily, bool isIndex) : QTextEdit(parent)
 {
+    if (!fontFamily.isEmpty())
+        _fontFamily = fontFamily;
+
+    _isIndex = isIndex;
+
+    if (_isIndex)
+    {
+        setAlignment(Qt::AlignCenter);
+        setLineWrapMode(QTextEdit::NoWrap);
+        document()->setDocumentMargin(qreal(height())/2.0);
+    }
+    else
+    {
+        setAlignment(Qt::AlignLeft | Qt::AlignTop);
+        setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+    }
+
     QString fmt
     {
         "color: %1;"
         "font-family: \"%2\";"
     };
-
     QString style = fmt.arg(_fontColor, _fontFamily);
     if (_fontIsBold)
         style += "font-weight: bold";
     setStyleSheet(style);
-    setAlignment(Qt::AlignLeft | Qt::AlignTop);
-    setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
     auto pal = palette();
     pal.setColor(QPalette::Base, QColor(0,0,0,0));
     setPalette(pal);
@@ -286,17 +305,28 @@ Title::Title(QWidget* parent) : QTextEdit(parent)
 #endif
 }
 
-void Title::setLineHeight(int height)
+void Label::resizeEvent(QResizeEvent *event)
+{
+    QTextEdit::resizeEvent(event);
+
+    if (_isIndex)
+        document()->setDocumentMargin(qreal(height())/4.0);
+}
+
+void Label::setLineHeight(int height)
 {
     _lineHeight = height;
 }
 
-void Title::setText(const QString& text)
+void Label::setText(const QString& text)
 {
     setPlainText(text);
 
     QTextBlockFormat blockFmt;
     blockFmt.setLineHeight(_lineHeight, QTextBlockFormat::ProportionalHeight);
+
+    if (_isIndex)
+        blockFmt.setAlignment(Qt::AlignCenter);
 
     auto theCursor = textCursor();
     theCursor.clearSelection();
@@ -304,7 +334,7 @@ void Title::setText(const QString& text)
     theCursor.mergeBlockFormat(blockFmt);
 }
 
-void Title::setEditMode(bool edit)
+void Label::setEditMode(bool edit)
 {
     if (edit == _editMode)
         return;
@@ -318,17 +348,23 @@ void Title::setEditMode(bool edit)
         _lastTitle = toPlainText();
         setFocus();
         selectAll();
+        QFrame::setFrameStyle(QFrame::Box | QFrame::Plain);
+        QFrame::setLineWidth(1);
+    }
+    else
+    {
+        QFrame::setFrameStyle(QFrame::NoFrame);
     }
 }
 
-void Title::keyPressEvent(QKeyEvent* evt)
+void Label::keyPressEvent(QKeyEvent* evt)
 {
     if (_editMode)
     {
         switch (evt->key())
         {
-        case Qt::Key_Return:
-        case Qt::Key_Enter:
+            case Qt::Key_Return:
+            case Qt::Key_Enter:
             {
                 // if the shift key is down, process the return/enter key
                 auto mods = QGuiApplication::queryKeyboardModifiers();
@@ -340,22 +376,17 @@ void Title::keyPressEvent(QKeyEvent* evt)
                 emit sigEditDone(false); // not canceled
                 return;
             }
-        case Qt::Key_Escape:
+            case Qt::Key_Escape:
             {
                 setEditMode(false);
                 setText(_lastTitle);
                 emit sigEditDone(true); // canceled
                 return;
             }
-        default:
-            break;
+            default:
+                break;
         }
     }
 
     QTextEdit::keyPressEvent(evt);
-}
-
-DiskNo::DiskNo(QWidget* parent) : QLabel(parent)
-{
-    setStyleSheet("color: black; font-family: \"Courier New\"");
 }
