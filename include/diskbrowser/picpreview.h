@@ -29,6 +29,7 @@ signals:
 protected:
     virtual void keyPressEvent(QKeyEvent* evt) override;
     virtual void resizeEvent(QResizeEvent* event) override;
+    virtual void mousePressEvent(QMouseEvent* event) override;
 
 private:
     bool    _isIndex  = false;

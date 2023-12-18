@@ -265,6 +265,8 @@ void PicPreview::editIndex()
 
 Label::Label(QWidget* parent, const QString& fontFamily, bool isIndex) : QTextEdit(parent)
 {
+    setContextMenuPolicy(Qt::NoContextMenu);
+
     if (!fontFamily.isEmpty())
         _fontFamily = fontFamily;
 
@@ -389,4 +391,12 @@ void Label::keyPressEvent(QKeyEvent* evt)
     }
 
     QTextEdit::keyPressEvent(evt);
+}
+
+void Label::mousePressEvent(QMouseEvent* evt)
+{
+    if (!_editMode && (evt->button() == Qt::LeftButton))
+        setEditMode();
+    else
+        QTextEdit::mousePressEvent(evt);
 }

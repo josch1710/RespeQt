@@ -108,21 +108,19 @@ void OptionsDialog::setupSettings() {
   m_ui->printerSpyMode->setChecked(RespeqtSettings::instance()->isPrinterSpyMode());
   m_ui->displayGraphicsInstructions->setChecked(RespeqtSettings::instance()->displayGraphicsInstructions());
   m_ui->clearOnStatus->setChecked(RespeqtSettings::instance()->clearOnStatus());
+  m_ui->cb_filename->setChecked(RespeqtSettings::instance()->dbUseFileNames());
+  m_ui->cb_json_first->setChecked(RespeqtSettings::instance()->dbJsonFirst());
 
-  bool bJsonFirst = false;
-  switch (RespeqtSettings::instance()->dbDataSource(bJsonFirst))
+  switch (RespeqtSettings::instance()->dbDataSource())
   {
-  case DbData_fname:
-      m_ui->rb_filename->setChecked(true);
+  case DbData_appFolderJson:
+      m_ui->rb_dbset_app_data_dir->setChecked(true);
       break;
-  case DbData_json:
-      m_ui->rb_json->setChecked(true);
+  case DbData_subDir:
+      m_ui->rb_dbset_subdir->setChecked(true);
       break;
-  case DbData_either: default:
-      if (bJsonFirst)
-          m_ui->rb_json_filename->setChecked(true);
-      else
-          m_ui->rb_filename_json->setChecked(true);
+  case DbData_appSettings: default:
+      m_ui->rb_dbset_appset_ini->setChecked(true);
       break;
   }
 
@@ -261,9 +259,6 @@ void OptionsDialog::connectSignals() {
 
   // UI section
   connect(m_ui->useNativeMenu, &QCheckBox::toggled, this, &OptionsDialog::useNativeMenuToggled);
-
-  // Disk browser section
-  connect(m_ui->rb_filename, &QRadioButton::toggled, this, &OptionsDialog::updateJsonExport);
 }
 
 void OptionsDialog::changeEvent(QEvent *e) {
@@ -405,20 +400,12 @@ void OptionsDialog::saveSettings() {
   RespeqtSettings::instance()->setPrinterSpyMode(m_ui->printerSpyMode->isChecked());
   RespeqtSettings::instance()->setDisplayGraphicsInstructions(m_ui->displayGraphicsInstructions->isChecked());
   RespeqtSettings::instance()->setClearOnStatus(m_ui->clearOnStatus->isChecked());
-
-  DbDataSource dbSource = DbData_either;
-  bool bJsonFirst = false;
-  if (m_ui->rb_filename->isChecked())
-      dbSource = DbData_fname;
-  else if (m_ui->rb_json->isChecked())
-      dbSource = DbData_json;
-  else if (m_ui->rb_json_filename->isChecked())
-      bJsonFirst = true;
-
-  RespeqtSettings::instance()->setDbDataSource(dbSource,bJsonFirst);
-
-  if (m_ui->cb_export->isEnabled() && m_ui->cb_export->isChecked())
-      DbJson::Export();
+  RespeqtSettings::instance()->setDbFileNames(m_ui->cb_filename->isChecked(), m_ui->cb_json_first->isChecked());
+  DbDataSource dbSource = DbData_appSettings;
+  if (m_ui->rb_dbset_app_data_dir->isChecked())
+      dbSource = DbData_appFolderJson;
+  else if (m_ui->rb_dbset_subdir)
+      dbSource = DbData_subDir;
 
   SerialBackend backend = SerialBackend::STANDARD;
   if (itemAtariSio->checkState(0) == Qt::Checked) {
@@ -539,11 +526,4 @@ void OptionsDialog::useNativeMenuToggled() {
   // We reverse the meaning of the checkbox to match the application attribute, see above for reason.
   const auto &checkboxNoMenu = m_ui->useNativeMenu->checkState() == Qt::Unchecked;
   m_ui->warning_nativemenu->setVisible(actualNoMenu != checkboxNoMenu);
-}
-
-void OptionsDialog::updateJsonExport()
-{
-    bool wasJson = RespeqtSettings::instance()->dbDataSource() != DbData_fname;
-    bool useJson = !m_ui->rb_filename->isChecked();
-    m_ui->cb_export->setEnabled(!wasJson && useJson);
 }

@@ -689,7 +689,7 @@
      <normaloff>:/icons/oxygen-icons/16x16/filesystems/folder_html.png</normaloff>:/icons/oxygen-icons/16x16/filesystems/folder_html.png</iconset>
    </property>
    <property name="text">
-    <string>Open Disk Browser</string>
+    <string>Open Disk collection Browser</string>
    </property>
    <property name="toolTip">
     <string>Open/Browse a folder with a collection of disk images</string>

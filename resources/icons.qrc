@@ -80,5 +80,6 @@
         <file>silk-icons/icons/image_delete.png</file>
         <file>silk-icons/icons/text_list_numbers.png</file>
         <file>silk-icons/icons/folder_image.png</file>
+        <file>other-icons/sideb.png</file>
     </qresource>
 </RCC>

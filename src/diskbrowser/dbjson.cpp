@@ -14,12 +14,12 @@ DbJson::DbJson()
 
     _fileName = appDataDir.absoluteFilePath("dbSettings.json");
 
-    load();
+    DbJson::load();
 }
 
 DbJson::~DbJson()
 {
-    save();
+    DbJson::save();
 }
 
 void DbJson::setPicture(const QString& pic, const QString& dir, const QString& disk)
@@ -208,9 +208,4 @@ bool DbJson::save()
 
     _dirty = false;
     return true;
-}
-
-/*static*/ void DbJson::Export()
-{
-    // TBD: omit?
 }

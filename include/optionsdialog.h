@@ -68,7 +68,6 @@ private slots:
   void fixedFontClicked();
   void rclFolderClicked();
   void useNativeMenuToggled();
-  void updateJsonExport();
 };
 
 #endif// OPTIONSDIALOG_H

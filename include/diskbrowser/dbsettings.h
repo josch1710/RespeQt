@@ -62,27 +62,27 @@ public:
     explicit DbSettings();
     virtual ~DbSettings();
 
-    void setPicture(const QString& pic, const QString& folder = QString(), const QString& disk = QString());
-    QString getPicture(const QDir& dir, const QString& disk, PicSourceType& picSource);
+    virtual void setPicture(const QString& pic, const QString& folder = QString(), const QString& disk = QString()) = 0;
+    virtual QString getPicture(const QDir& dir, const QString& disk, PicSourceType& picSource) = 0;
 
-    void setTitle(const QString& title, const QString& folder, const QString& disk);
-    void setIndex(const QString& index, const QString& folder, const QString& disk);
-    void setSideB(bool sideB, const QString& folder, const QString& disk);
-    DiskLabel getLabel(const QDir& dir, const QString& disk);
+    virtual void setTitle(const QString& title, const QString& folder, const QString& disk) = 0;
+    virtual void setIndex(const QString& index, const QString& folder, const QString& disk) = 0;
+    virtual void setSideB(bool sideB, const QString& folder, const QString& disk) = 0;
+    virtual DiskLabel getLabel(const QDir& dir, const QString& disk) = 0;
 
-    void load();
-    void save();
-    void clear();
+    virtual bool load()  = 0;
+    virtual bool save()  = 0;
+//  virtual void clear() = 0;
 
-private:
-    QSettings* _settings = nullptr;
-    bool _useAppSettings = false;
+protected:
     bool _dirty = false;
 
+    QString  _appData;
     QString  _diskPic;
     QString  _bSidePic;
     LabelPos _labelPos;
     LabelPos _bSidePos;
     DirMap   _dirMap;
 };
-#endif // DBSETTINGS_H
+
+#endif

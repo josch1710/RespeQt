@@ -3,9 +3,9 @@
 
 enum DbDataSource
 {
-    DbData_fname,
-    DbData_json,
-    DbData_either
+    DbData_appSettings,
+    DbData_subDir,
+    DbData_appFolderJson
 };
 
 enum PicSourceType

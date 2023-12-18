@@ -16,6 +16,7 @@
 #include <QFileInfo>
 #include <memory>
 #include <QApplication>
+#include <QStandardPaths>
 
 std::unique_ptr<RespeqtSettings> RespeqtSettings::sInstance;
 
@@ -861,27 +862,27 @@ void RespeqtSettings::writeRecentBrowserFolders(const QStringList& folders) {
 }
 
 bool RespeqtSettings::showDiskBrowser() {
-  return mSettings->value("ShowDiskBrowser").toBool();
+  return mSettings->value("/DiskBrowserDlg/show").toBool();
 }
 
 void RespeqtSettings::setShowDiskBrowser(bool show /*= true*/) {
-  mSettings->setValue("ShowDiskBrowser", show);
+  mSettings->setValue("/DiskBrowserDlg/show", show);
 }
 
 int RespeqtSettings::diskBrowserHorzSplitPos() {
-  return mSettings->value("DiskBrowserHorzSplitPos", -1).toInt();
+  return mSettings->value("/DiskBrowserDlg/HorzSplitPos", -1).toInt();
 }
 
 int RespeqtSettings::diskBrowserVertSplitPos() {
-  return mSettings->value("DiskBrowserVertSplitPos", -1).toInt();
+  return mSettings->value("/DiskBrowserDlg/VertSplitPos", -1).toInt();
 }
 
 void RespeqtSettings::setDiskBrowserHorzSplitPos(int pos) {
-  mSettings->setValue("DiskBrowserHorzSplitPos", pos);
+  mSettings->setValue("/DiskBrowserDlg/HorzSplitPos", pos);
 }
 
 void RespeqtSettings::setDiskBrowserVertSplitPos(int pos) {
-  mSettings->setValue("DiskBrowserVertSplitPos", pos);
+  mSettings->setValue("/DiskBrowserDlg/VertSplitPos", pos);
 }
 
 bool RespeqtSettings::saveMainWinGeometry(QMainWindow* window, bool isMiniMode) {
@@ -933,19 +934,44 @@ bool RespeqtSettings::restoreWidgetGeometry(QWidget* widget, const QString& name
   return true;
 }
 
-void RespeqtSettings::setDbDataSource(DbDataSource dbSource, bool jsonFirst)
+void RespeqtSettings::setDbDataSource(DbDataSource dbSource)
 {
-    mSettings->setValue("DiskBrowserDlg/source", dbSource);
-    mSettings->setValue("DiskBrowserDlg/json_1st", jsonFirst);
+    mSettings->setValue("/DiskBrowserDlg/source", dbSource);
 }
 
 DbDataSource RespeqtSettings::dbDataSource()
 {
-    return static_cast<DbDataSource>(mSettings->value("DiskBrowserDlg/source", DbData_fname).toInt());
+    return static_cast<DbDataSource>(mSettings->value("/DiskBrowserDlg/source", DbData_appSettings).toInt());
 }
 
-DbDataSource RespeqtSettings::dbDataSource(bool& jsonFirst)
+void RespeqtSettings::setDbFileNames(bool useFileNames, bool jsonFirst)
 {
-    jsonFirst = mSettings->value("DiskBrowserDlg/json_1st", jsonFirst).toBool();
-    return dbDataSource();
+    mSettings->setValue("/DiskBrowserDlg/use_filenames", useFileNames);
+    mSettings->setValue("/DiskBrowserDlg/json_1st", jsonFirst);
+}
+
+bool RespeqtSettings::dbJsonFirst()
+{
+    return mSettings->value("/DiskBrowserDlg/json_1st", false).toBool();
+}
+
+bool RespeqtSettings::dbUseFileNames()
+{
+    return mSettings->value("/DiskBrowserDlg/use_filenames", false).toBool();
+}
+
+QString RespeqtSettings::appDataFolder()
+{
+    QString defFolder = mSettings->value("/DiskBrowserDlg/appData_folder", QString()).toString();
+    if (defFolder.isEmpty())
+    {
+        auto    locType   = QStandardPaths::AppDataLocation;
+        QString appFolder = QStandardPaths::writableLocation(locType);
+        QDir appDataDir(appFolder);
+
+        if (!appDataDir.exists())
+            appDataDir.mkpath(".");
+
+        QString file = appDataDir.absoluteFilePath("dbSettings.json");
+    }
 }

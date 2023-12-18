@@ -208,7 +208,7 @@ public:
   bool explorerOnTop();
   void setExplorerOnTop(bool expOnTop);
 
-// Disk Browser settings
+// Disk collection Browser settings
   QString mostRecentBrowserFolder();
   QStringList recentBrowserFolders();
   void setMostRecentBrowserFolder(const QString& name);
@@ -293,10 +293,13 @@ public:
   void setRawPrinterName(const QString &name);
   QString rawPrinterName() const;
 
-  // Disk Browser (db) Options
-  void setDbDataSource(DbDataSource dbSource, bool jsonFirst = false);
+  // Disk collection Browser (db) Options
   DbDataSource dbDataSource();
-  DbDataSource dbDataSource(bool& jsonFirst);
+  void setDbDataSource(DbDataSource dbSource);
+  void setDbFileNames(bool useFileNames, bool jsonFirst = false);
+  bool dbJsonFirst();
+  bool dbUseFileNames();
+  QString appDataFolder();
 
   bool debugMenuVisible() const;
   void setDebugMenuVisible(bool menuVisible);

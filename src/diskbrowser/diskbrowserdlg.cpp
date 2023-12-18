@@ -13,6 +13,8 @@
 #include "filesystems/mydosfilesystem.h"
 #include "filesystems/spartadosfilesystem.h"
 #include "diskbrowser/folderdisks.h"
+#include "diskbrowser/dbini.h"
+#include "diskbrowser/dbjson.h"
 #include "mainwindow.h"
 #include "miscutils.h"
 #include "respeqtsettings.h"
@@ -23,12 +25,6 @@
 #include <QMenu>
 #include <QStandardPaths>
 #include <QInputDialog>
-
-#ifdef USE_INI_SETTINGS
-#define DB_SETTINGS _dbSettings
-#else
-#define DB_SETTINGS _dbJson
-#endif
 
 DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent)
     : QDialog(parent), ui(new Ui::DiskBrowserDlg)
@@ -48,6 +44,11 @@ DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent)
     connect(ui->picPreview, &PicPreview::sigTitleChanged, this, &DiskBrowserDlg::titleChanged);
     connect(ui->picPreview, &PicPreview::sigIndexChanged, this, &DiskBrowserDlg::indexChanged);
 
+    if (RespeqtSettings::instance()->dbDataSource() == DbData_appSettings)
+        _dbSettings = new DbIni();
+    else
+        _dbSettings = new DbJson();
+
     refreshFoldersCombobox();
     onFolderChanged(""); // reload the current item 0 in the combo
 }
@@ -55,6 +56,7 @@ DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent)
 DiskBrowserDlg::~DiskBrowserDlg()
 {
     delete ui;
+    delete _dbSettings;
 }
 
 void DiskBrowserDlg::clear()
@@ -128,7 +130,7 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
 
     _folderDisks.load(folder);
 
-    clear();// clear disk browser contents
+    clear();// clear disk collection browser contents
 
     // fill in any sub-directories
     auto folders = _folderDisks.folders();
@@ -193,13 +195,13 @@ void DiskBrowserDlg::refreshFoldersCombobox()
             }
             else
             {
-                qDebug() << "!w" << tr("Disk Browser most recent list updated. '%1' not found.").arg(name);
+                qDebug() << "!w" << tr("Disk collection Browser most recent list updated. '%1' not found.").arg(name);
                 RespeqtSettings::instance()->delMostRecentBrowserFolder(name);
             }
         }
         else    // Simple case of missing folder
         {
-            qDebug() << "!w" << tr("Disk Browser most recent list updated. Folder '%1' not found.").arg(name);
+            qDebug() << "!w" << tr("Disk collection Browser most recent list updated. Folder '%1' not found.").arg(name);
             RespeqtSettings::instance()->delMostRecentBrowserFolder(name);
         }
     }
@@ -298,32 +300,32 @@ void DiskBrowserDlg::update()
     ui->picPreview->clear();
     _picInfo.clear();
 
-    bool jsonFirst = false;
-    auto dbSource  = RespeqtSettings::instance()->dbDataSource(jsonFirst);
+    bool jsonFirst = RespeqtSettings::instance()->dbJsonFirst();
+    bool fileNames = RespeqtSettings::instance()->dbUseFileNames();
+    auto dbSource  = RespeqtSettings::instance()->dbDataSource();
 
     // find a custom or built-in pic
 
     auto fileInfo = QFileInfo {_diskFullName};      // tbd move out of findPicFile
     QDir dir {fileInfo.absolutePath()};             // tbd "
 
-    if ((dbSource == DbData_fname) ||
-       ((dbSource == DbData_either) && !jsonFirst))
+    if (fileNames && !jsonFirst)
     {
         _picInfo.label = parsePicLabel();
         _picInfo.pic   = findPicFile();
 
-        if (_picInfo.pic.isEmpty() && (dbSource == DbData_either))
+        if (_picInfo.pic.isEmpty())
         {
-            _picInfo.label = DB_SETTINGS.getLabel(dir, _diskFileName);
-            _picInfo.pic   = DB_SETTINGS.getPicture(dir, _diskFileName, _picSource);
+            _picInfo.label = _dbSettings->getLabel(dir, _diskFileName);
+            _picInfo.pic   = _dbSettings->getPicture(dir, _diskFileName, _picSource);
         }
     }
     else
     {
-        _picInfo.label = DB_SETTINGS.getLabel(dir, _diskFileName);
-        _picInfo.pic = DB_SETTINGS.getPicture(dir, _diskFileName, _picSource);
+        _picInfo.label = _dbSettings->getLabel(dir, _diskFileName);
+        _picInfo.pic = _dbSettings->getPicture(dir, _diskFileName, _picSource);
 
-        if (_picInfo.pic.isEmpty() && (dbSource == DbData_either))
+        if (_picInfo.pic.isEmpty())
         {
             _picInfo.label = parsePicLabel();
             _picInfo.pic   = findPicFile();
@@ -591,23 +593,37 @@ void DiskBrowserDlg::popupMenuReq(const QPoint& pos)
     menu.addAction(QIcon(":/icons/silk-icons/icons/folder_image.png"), "Set Folder Preview Pic...", this, &DiskBrowserDlg::actionSetDirPic);
     menu.addAction(QIcon(":/icons/silk-icons/icons/image_add.png"), "Set Disk Preview Pic...", this, &DiskBrowserDlg::actionSetPic);
     menu.addAction(QIcon(":/icons/silk-icons/icons/image_delete.png"), "Clear Preview", this, &DiskBrowserDlg::actionClearPic);
-    menu.addSeparator();
-    menu.addAction(QIcon(":/icons/silk-icons/icons/font.png"), "Set Disk Title", this, &DiskBrowserDlg::actionSetTitle);
-    menu.addAction(QIcon(":/icons/silk-icons/icons/text_list_numbers.png"), "Set Disk Index", this, &DiskBrowserDlg::actionSetIndex);
-
+    if (_picSource == PicSource_floppy)
+    {
+        menu.addSeparator();
+        menu.addAction(QIcon(":/icons/silk-icons/icons/font.png"), "Set Disk Title", this, &DiskBrowserDlg::actionSetTitle);
+        menu.addAction(QIcon(":/icons/silk-icons/icons/text_list_numbers.png"), "Set Disk Index", this, &DiskBrowserDlg::actionSetIndex);
+        QString text = QString("Label Side %1").arg(_picInfo.label.sideB ? "A" : "B");
+        menu.addAction(QIcon(":/icons/other-icons/sideb.png"), text, this, &DiskBrowserDlg::actionBackSide);
+    }
     menu.exec(pos);
+}
+
+void DiskBrowserDlg::actionBackSide()
+{
+    if (_picSource == PicSource_floppy)
+    {
+        _picInfo.label.sideB = !_picInfo.label.sideB;
+        _dbSettings->setSideB(_picInfo.label.sideB, _currentDir, _diskFileName);
+        update();
+    }
 }
 
 void DiskBrowserDlg::titleChanged(QString title)
 {
     _picInfo.label.title = title;
-    DB_SETTINGS.setTitle(title, _currentDir, _diskFileName);
+    _dbSettings->setTitle(title, _currentDir, _diskFileName);
 }
 
 void DiskBrowserDlg::indexChanged(QString index)
 {
     _picInfo.label.index = index;
-    DB_SETTINGS.setIndex(index, _currentDir, _diskFileName);
+    _dbSettings->setIndex(index, _currentDir, _diskFileName);
 }
 
 QString DiskBrowserDlg::browseForPic(const QString& start)
@@ -626,7 +642,7 @@ void DiskBrowserDlg::actionSetDefault()
     if (fname.isEmpty())
         return;
 
-    DB_SETTINGS.setPicture(fname);
+    _dbSettings->setPicture(fname);
     update();
 }
 
@@ -636,7 +652,7 @@ void DiskBrowserDlg::actionSetDirPic()
     if (fname.isEmpty())
         return;
 
-    DB_SETTINGS.setPicture(fname, _currentDir);
+    _dbSettings->setPicture(fname, _currentDir);
     update();
 }
 
@@ -646,7 +662,7 @@ void DiskBrowserDlg::actionSetPic()
     if (fname.isEmpty())
         return;
 
-    DB_SETTINGS.setPicture(fname, _currentDir, _diskFileName);
+    _dbSettings->setPicture(fname, _currentDir, _diskFileName);
     update();
 }
 
@@ -663,7 +679,7 @@ void DiskBrowserDlg::actionSetTitle()
                                              "Disk Title:", QLineEdit::Normal,
                                              _picInfo.label.title, &ok);
         if (ok)
-            DB_SETTINGS.setTitle(text, _currentDir, _diskFileName);
+            _dbSettings->setTitle(text, _currentDir, _diskFileName);
     }
 }
 
@@ -680,7 +696,7 @@ void DiskBrowserDlg::actionSetIndex()
                                              "Disk Index:", QLineEdit::Normal,
                                              _picInfo.label.index, &ok);
         if (ok)
-            DB_SETTINGS.setIndex(text, _currentDir, _diskFileName);
+            _dbSettings->setIndex(text, _currentDir, _diskFileName);
     }
 }
 
@@ -689,13 +705,13 @@ void DiskBrowserDlg::actionClearPic()
     switch (_picSource)
     {
     case PicFromJson_dir:
-        DB_SETTINGS.setPicture("", _currentDir, "");
+        _dbSettings->setPicture("", _currentDir, "");
         break;
     case PicFromJson_global:
-        DB_SETTINGS.setPicture("");
+        _dbSettings->setPicture("");
         break;
     case PicFromJson_disk:
-        DB_SETTINGS.setPicture("", _currentDir, _diskFileName);
+        _dbSettings->setPicture("", _currentDir, _diskFileName);
         break;
     default:
         break;

@@ -17,7 +17,9 @@ struct DiskLabel
     DiskLabel(const QString& _title = QString(), const QString& _index = QString(), bool _sideB = false)
             : title(_title), index(_index), sideB(_sideB) { }
 
-    void clear() {title.clear(); index.clear(); sideB = false;}
+    void clear() { title.clear(); index.clear(); sideB = false; }
+
+    bool isEmpty() const { return title.isEmpty() && index.isEmpty() && !sideB; }
 
     QString title;
     QString index;
@@ -29,6 +31,7 @@ struct FloppyArt
     FloppyArt() { }
 
     void clear() { pic.clear(); label.clear(); }
+    bool isEmpty() const { return pic.isEmpty() && label.isEmpty(); }
 
     QString pic;
     DiskLabel label;
