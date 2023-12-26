@@ -2,11 +2,11 @@
 #include <QStandardPaths>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include "respeqtsettings.h"
 
 DbJson::DbJson()
 {
-    auto    locType   = QStandardPaths::AppDataLocation;
-    QString appFolder = QStandardPaths::writableLocation(locType);
+    QString appFolder = RespeqtSettings::instance()->appDataFolder();
     QDir appDataDir(appFolder);
 
     if (!appDataDir.exists())

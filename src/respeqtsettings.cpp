@@ -13,6 +13,7 @@
 #include "respeqtsettings.h"
 #include "serialport.h"
 #include "diskbrowser/picsourcetype.h"
+#include "diskbrowser/picpreview.h"
 #include <QFileInfo>
 #include <memory>
 #include <QApplication>
@@ -962,8 +963,8 @@ bool RespeqtSettings::dbUseFileNames()
 
 QString RespeqtSettings::appDataFolder()
 {
-    QString defFolder = mSettings->value("/DiskBrowserDlg/appData_folder", QString()).toString();
-    if (defFolder.isEmpty())
+    QString folder = mSettings->value("/DiskBrowserDlg/appData_folder", QString()).toString();
+    if (folder.isEmpty())
     {
         auto    locType   = QStandardPaths::AppDataLocation;
         QString appFolder = QStandardPaths::writableLocation(locType);
@@ -972,6 +973,70 @@ QString RespeqtSettings::appDataFolder()
         if (!appDataDir.exists())
             appDataDir.mkpath(".");
 
-        QString file = appDataDir.absoluteFilePath("dbSettings.json");
+        //QString file = appDataDir.absoluteFilePath("dbSettings.json");
+        folder = appDataDir.absolutePath();
     }
+    return folder;
 }
+
+void RespeqtSettings::setAppFolderDir(const QString& appDataDir)
+{
+    mSettings->setValue("/DiskBrowserDlg/appData_folder", appDataDir);
+}
+
+void RespeqtSettings::setDbTitleFont(const LabelFont& font)
+{
+    mSettings->beginGroup("/DiskBrowserDlg");
+    mSettings->beginGroup("title_font");
+    mSettings->setValue("family", font.family());
+    mSettings->setValue("size", font.pixelSize());
+    mSettings->setValue("bold", font.bold());
+    mSettings->setValue("italic", font.italic());
+    mSettings->setValue("color", font.color().name());
+    mSettings->endGroup();
+    mSettings->endGroup();
+}
+
+LabelFont RespeqtSettings::dbTitleFont()
+{
+    LabelFont font;
+    mSettings->beginGroup("/DiskBrowserDlg");
+    mSettings->beginGroup("title_font");
+    font.setFamily(mSettings->value("family", Label::DEF_TITLE_FNT).toString());
+    font.setPixelSize(mSettings->value("size", 10).toInt());
+    font.setBold(mSettings->value("bold", Label::DEF_TITLE_BOLD).toBool());
+    font.setItalic(mSettings->value("italic", false).toBool());
+    font.setColor(mSettings->value("color", "black").toString());
+    mSettings->endGroup();
+    mSettings->endGroup();
+    return font;
+}
+
+void RespeqtSettings::setDbIndexFont(const LabelFont& font)
+{
+    mSettings->beginGroup("/DiskBrowserDlg");
+    mSettings->beginGroup("index_font");
+    mSettings->setValue("family", font.family());
+    mSettings->setValue("size", font.pixelSize());
+    mSettings->setValue("bold", font.bold());
+    mSettings->setValue("italic", font.italic());
+    mSettings->setValue("color", font.color().name());
+    mSettings->endGroup();
+    mSettings->endGroup();
+}
+
+LabelFont RespeqtSettings::dbIndexFont()
+{
+    LabelFont font;
+    mSettings->beginGroup("/DiskBrowserDlg");
+    mSettings->beginGroup("index_font");
+    font.setFamily(mSettings->value("family", Label::DEF_INDEX_FNT).toString());
+    font.setPixelSize(mSettings->value("size", 10).toInt());
+    font.setBold(mSettings->value("bold", false).toBool());
+    font.setItalic(mSettings->value("italic", false).toBool());
+    font.setColor(mSettings->value("color", "black").toString());
+    mSettings->endGroup();
+    mSettings->endGroup();
+    return font;
+}
+

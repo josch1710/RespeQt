@@ -40,14 +40,6 @@ struct DirInfo
 //
 typedef QMap<QString,DirInfo> DirMap;
 
-struct LabelFont
-{
-    QString name;
-    int     size = 0;
-    QColor  color;
-    bool    bold = false;
-    bool    italic = false;
-};
 
 struct LabelPos
 {

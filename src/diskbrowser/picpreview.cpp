@@ -14,6 +14,17 @@
 #include <QFileInfo>
 #include <QGuiApplication>
 
+const QString Label::DEF_INDEX_FNT { "Courier New" };
+#if defined Q_OS_WIN
+const QString Label::DEF_TITLE_FNT  { "Ink Free" };
+const bool    Label::DEF_TITLE_BOLD { true };
+#elif defined Q_OS_MAC
+const QString Label::DEF_TITLE_FNT  { "Bradley Hand" };
+const bool    Label::DEF_TITLE_BOLD { false };
+#else
+const QString Label::DEF_TITLE_FNT  { "Comic Sans" };
+const bool    Label::DEF_TITLE_BOLD { false };
+#endif
 
 PicPreview::PicPreview(QWidget* parent) : QLabel(parent)
 {
@@ -268,7 +279,7 @@ Label::Label(QWidget* parent, const QString& fontFamily, bool isIndex) : QTextEd
     setContextMenuPolicy(Qt::NoContextMenu);
 
     if (!fontFamily.isEmpty())
-        _fontFamily = fontFamily;
+        _font.setFamily(fontFamily);
 
     _isIndex = isIndex;
 
@@ -289,8 +300,8 @@ Label::Label(QWidget* parent, const QString& fontFamily, bool isIndex) : QTextEd
         "color: %1;"
         "font-family: \"%2\";"
     };
-    QString style = fmt.arg(_fontColor, _fontFamily);
-    if (_fontIsBold)
+    QString style = fmt.arg(_font.color().name(), _font.family());
+    if (_font.bold())
         style += "font-weight: bold";
     setStyleSheet(style);
     auto pal = palette();
@@ -303,7 +314,7 @@ Label::Label(QWidget* parent, const QString& fontFamily, bool isIndex) : QTextEd
 
 #ifndef QT_NO_DEBUG
     ensurePolished();
-    Q_ASSERT(font().family() == _fontFamily);
+    Q_ASSERT(font().family() == _font.family());
 #endif
 }
 

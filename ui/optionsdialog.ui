@@ -897,26 +897,104 @@
             <property name="title">
              <string>Floppy Labels</string>
             </property>
-            <layout class="QFormLayout" name="formLayout">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_6">
-               <property name="text">
-                <string>Title Font</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QFontComboBox" name="fontComboBox"/>
-             </item>
+            <layout class="QGridLayout" name="gridLayout_17">
              <item row="1" column="0">
               <widget class="QLabel" name="label_7">
                <property name="text">
-                <string>Index Font</string>
+                <string>Index</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>Title</string>
                </property>
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QFontComboBox" name="fontComboBox_2"/>
+              <widget class="QFontComboBox" name="cb_index_font"/>
+             </item>
+             <item row="1" column="3">
+              <widget class="QPushButton" name="btn_italic_index">
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>I</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QPushButton" name="btn_bold_index">
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>B</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QPushButton" name="btn_bold_title">
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>B</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QPushButton" name="btn_italic_title">
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>I</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QFontComboBox" name="cb_title_font"/>
+             </item>
+             <item row="0" column="4">
+              <widget class="QDoubleSpinBox" name="spn_scale_title">
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="decimals">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="4">
+              <widget class="QDoubleSpinBox" name="spn_scale_index">
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="decimals">
+                <number>1</number>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -1016,12 +1094,18 @@
                <property name="text">
                 <string>Scan and Parse filenames for pics/labels</string>
                </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
               </widget>
              </item>
              <item>
               <widget class="QCheckBox" name="cb_json_first">
                <property name="text">
-                <string>Override filename scheme with AppData/JSON</string>
+                <string>Override AppData/JSON with filename scheme</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
              </item>

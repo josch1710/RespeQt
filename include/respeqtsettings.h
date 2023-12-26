@@ -15,6 +15,7 @@
 
 #include "mainwindow.h"
 #include "diskbrowser/picsourcetype.h"
+#include "diskbrowser/picpreview.h"
 
 #include <QPrinterInfo>
 #include <QSettings>
@@ -299,7 +300,12 @@ public:
   void setDbFileNames(bool useFileNames, bool jsonFirst = false);
   bool dbJsonFirst();
   bool dbUseFileNames();
+  LabelFont dbTitleFont();
+  void setDbTitleFont(const LabelFont& font);
+  LabelFont dbIndexFont();
+  void setDbIndexFont(const LabelFont& font);
   QString appDataFolder();
+  void setAppFolderDir(const QString& appDataDir);
 
   bool debugMenuVisible() const;
   void setDebugMenuVisible(bool menuVisible);

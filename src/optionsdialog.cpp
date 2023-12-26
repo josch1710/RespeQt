@@ -124,6 +124,11 @@ void OptionsDialog::setupSettings() {
       break;
   }
 
+  auto dbfnt = RespeqtSettings::instance()->dbTitleFont();
+  m_ui->cb_title_font->setCurrentFont(dbfnt);
+  dbfnt = RespeqtSettings::instance()->dbIndexFont();
+  m_ui->cb_index_font->setCurrentFont(dbfnt);
+
 #ifdef Q_OS_MAC
   m_ui->useNativeMenu->setChecked(RespeqtSettings::instance()->nativeMenu());
   const auto &actualNoMenu = QApplication::testAttribute(Qt::AA_DontUseNativeMenuBar);
@@ -259,6 +264,9 @@ void OptionsDialog::connectSignals() {
 
   // UI section
   connect(m_ui->useNativeMenu, &QCheckBox::toggled, this, &OptionsDialog::useNativeMenuToggled);
+
+  connect(m_ui->btn_appdata_browse, &QPushButton::clicked, this, &OptionsDialog::browseForAppDir);
+  connect(m_ui->rb_dbset_app_data_dir, &QRadioButton::toggled, this, &OptionsDialog::appDataDirToggled);
 }
 
 void OptionsDialog::changeEvent(QEvent *e) {
@@ -403,9 +411,17 @@ void OptionsDialog::saveSettings() {
   RespeqtSettings::instance()->setDbFileNames(m_ui->cb_filename->isChecked(), m_ui->cb_json_first->isChecked());
   DbDataSource dbSource = DbData_appSettings;
   if (m_ui->rb_dbset_app_data_dir->isChecked())
+  {
       dbSource = DbData_appFolderJson;
+      RespeqtSettings::instance()->setAppFolderDir(m_ui->edt_appdata_dir->text());
+  }
   else if (m_ui->rb_dbset_subdir)
+  {
       dbSource = DbData_subDir;
+  }
+  RespeqtSettings::instance()->setDbDataSource(dbSource);
+  RespeqtSettings::instance()->setDbTitleFont(LabelFont(m_ui->cb_title_font->currentFont()));
+  RespeqtSettings::instance()->setDbIndexFont(LabelFont(m_ui->cb_index_font->currentFont()));
 
   SerialBackend backend = SerialBackend::STANDARD;
   if (itemAtariSio->checkState(0) == Qt::Checked) {
@@ -526,4 +542,29 @@ void OptionsDialog::useNativeMenuToggled() {
   // We reverse the meaning of the checkbox to match the application attribute, see above for reason.
   const auto &checkboxNoMenu = m_ui->useNativeMenu->checkState() == Qt::Unchecked;
   m_ui->warning_nativemenu->setVisible(actualNoMenu != checkboxNoMenu);
+}
+
+void OptionsDialog::appDataDirToggled()
+{
+    bool isChecked = m_ui->rb_dbset_app_data_dir->isChecked();
+    m_ui->edt_appdata_dir->setEnabled(isChecked);
+    if (isChecked)
+    {
+        QString appdatadir = RespeqtSettings::instance()->appDataFolder();
+        m_ui->edt_appdata_dir->setText(appdatadir);
+    }
+}
+
+void OptionsDialog::browseForAppDir()
+{
+    QString dirName = RespeqtSettings::instance()->appDataFolder();
+    dirName = QFileDialog::getExistingDirectory(this, tr("Choose directory for app data"), dirName);
+    if (!dirName.isEmpty())
+    {
+        QFileInfo fileInfo(dirName);
+        if (fileInfo.isWritable())
+            m_ui->edt_appdata_dir->setText(dirName);
+        else
+            QMessageBox::warning(this, "Error directory not writable", "Check permissions and try again.");
+    }
 }

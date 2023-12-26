@@ -306,29 +306,33 @@ void DiskBrowserDlg::update()
 
     // find a custom or built-in pic
 
-    auto fileInfo = QFileInfo {_diskFullName};      // tbd move out of findPicFile
-    QDir dir {fileInfo.absolutePath()};             // tbd "
+    auto fileInfo = QFileInfo {_diskFullName};
+    QDir dir {fileInfo.absolutePath()};
 
-    if (fileNames && !jsonFirst)
+    if (fileNames && jsonFirst)     // a bit confusing...
     {
+        // 'fileNames' true enables the filesystem scan for pics/titles
+        // 'jsonFirst' really means load json/ini 2nd (but only if the scan came up empty)
+
         _picInfo.label = parsePicLabel();
         _picInfo.pic   = findPicFile();
 
         if (_picInfo.pic.isEmpty())
-        {
+            _picInfo.pic = _dbSettings->getPicture(dir, _diskFileName, _picSource);
+        if (_picInfo.label.isEmpty())
             _picInfo.label = _dbSettings->getLabel(dir, _diskFileName);
-            _picInfo.pic   = _dbSettings->getPicture(dir, _diskFileName, _picSource);
-        }
     }
-    else
+    else    // load json/ini data, then go to filesytem if scan enabled
     {
         _picInfo.label = _dbSettings->getLabel(dir, _diskFileName);
         _picInfo.pic = _dbSettings->getPicture(dir, _diskFileName, _picSource);
 
-        if (_picInfo.pic.isEmpty())
+        if (fileNames)
         {
-            _picInfo.label = parsePicLabel();
-            _picInfo.pic   = findPicFile();
+            if (_picInfo.pic.isEmpty())
+                _picInfo.pic = findPicFile();
+            if (_picInfo.label.isEmpty())
+                _picInfo.label = parsePicLabel();
         }
     }
 
@@ -531,11 +535,16 @@ QString DiskBrowserDlg::findPicFile()
     auto fileInfo = QFileInfo {_diskFullName};
     auto diskBase = fileInfo.completeBaseName();
     QDir dir {fileInfo.absolutePath()};
+    QDir subdir {fileInfo.absolutePath() + "/.respeqt_db"};
     auto formats = QImageReader::supportedImageFormats();
-    auto entries = dir.entryInfoList(toStringList(formats));
+    auto fmtlist = toStringList(formats);
+    auto entries = dir.entryInfoList(fmtlist);
     auto bsidexp = _picInfo.label.sideB ? QString("[b|B]") : QString();
     auto sregexp = QString("^(%1)(%2)(\\.)(.*)").arg(_picInfo.label.index).arg(bsidexp);
     auto qregexp = QRegularExpression {sregexp};
+
+    if (subdir.exists())
+        entries += subdir.entryInfoList(fmtlist);   // also scan ./.respeqt_db sub-dir for pics
 
     foreach (const QFileInfo& entry, entries)
     {
@@ -564,9 +573,11 @@ QString DiskBrowserDlg::findPicFile()
             }
         }
 
-        // 3. use generic name for default thumbnail
+        // 3. use generic name (i.e. "respeqt_db.png") for default thumbnail
 
-        auto imagePath = fileInfo.path() + "/.respeqt_db." + entry.suffix();
+        auto imagePath = fileInfo.path() + "/respeqt_db." + entry.suffix();
+        if (!QFileInfo::exists(imagePath))
+            imagePath = fileInfo.path() + "/.respeqt_db/respeqt_db." + entry.suffix();
         if (QFileInfo::exists(imagePath))
         {
             setToolTip("");
