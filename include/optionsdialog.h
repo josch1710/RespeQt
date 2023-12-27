@@ -53,6 +53,8 @@ private slots:
   void useCustomBaudToggled(bool checked);
   void appDataDirToggled();
   void browseForAppDir();
+  void indexColorClicked();
+  void titleColorClicked();
 
 #ifdef SHOWFIRMWARE
   void select810FirmwareTriggered();

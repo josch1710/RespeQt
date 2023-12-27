@@ -4,6 +4,7 @@
  * Copyright 2023 D.Caputi
  */
 #include "include/diskbrowser/picpreview.h"
+#include "respeqtsettings.h"
 #include <math.h>
 #include <QPaintEvent>
 #include <QPainter>
@@ -15,6 +16,9 @@
 #include <QGuiApplication>
 
 const QString Label::DEF_INDEX_FNT { "Courier New" };
+const double  Label::DEF_INDEX_SCALE { 2.5 };
+const double  Label::DEF_TITLE_SCALE { 3.5 };
+
 #if defined Q_OS_WIN
 const QString Label::DEF_TITLE_FNT  { "Ink Free" };
 const bool    Label::DEF_TITLE_BOLD { true };
@@ -22,7 +26,7 @@ const bool    Label::DEF_TITLE_BOLD { true };
 const QString Label::DEF_TITLE_FNT  { "Bradley Hand" };
 const bool    Label::DEF_TITLE_BOLD { false };
 #else
-const QString Label::DEF_TITLE_FNT  { "Comic Sans" };
+const QString Label::DEF_TITLE_FNT  { "Comic Sans" };       // Ubuntu only (TBD: redhat?)
 const bool    Label::DEF_TITLE_BOLD { false };
 #endif
 
@@ -202,14 +206,15 @@ void PicPreview::moveLabels()
 void PicPreview::scaleFonts()
 {
     QFont font = _title.font();
-    double pix = round((double)_title.size().height() / 3.5);
+    double scl = RespeqtSettings::instance()->dbTitleFont().scale();
+    double pix = round((double)_title.size().height() / scl);
 
     font.setPixelSize((int)pix);
 
     _title.setFont(font);
 
     font = _index.font();
-    pix = round((double)_index.size().height() / 2.5);
+    pix = round((double)_index.size().height() / Label::DEF_INDEX_SCALE);
 
     font.setPixelSize((int)pix);
 
@@ -274,23 +279,22 @@ void PicPreview::editIndex()
 // Derived from QTextEdit, this class encapsulates the floppy disk title rendered on the label (if no preview is defined).
 // I'm using a Rich Text widget Due to the buggy nature specifically on macOS with line spacing in a QLabel.
 
-Label::Label(QWidget* parent, const QString& fontFamily, bool isIndex) : QTextEdit(parent)
+Label::Label(QWidget* parent, bool isIndex) : QTextEdit(parent)
 {
     setContextMenuPolicy(Qt::NoContextMenu);
-
-    if (!fontFamily.isEmpty())
-        _font.setFamily(fontFamily);
 
     _isIndex = isIndex;
 
     if (_isIndex)
     {
+        _font = LabelFont {RespeqtSettings::instance()->dbIndexFont()};
         setAlignment(Qt::AlignCenter);
         setLineWrapMode(QTextEdit::NoWrap);
         document()->setDocumentMargin(qreal(height())/2.0);
     }
     else
     {
+        _font = LabelFont {RespeqtSettings::instance()->dbTitleFont()};
         setAlignment(Qt::AlignLeft | Qt::AlignTop);
         setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
     }

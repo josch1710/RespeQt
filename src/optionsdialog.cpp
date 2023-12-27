@@ -18,6 +18,7 @@
 #include <QFontDialog>
 #include <QTranslator>
 #include <QtSerialPort>
+#include <QColorDialog>
 
 OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent),
                                                 m_ui(new Ui::OptionsDialog) {
@@ -125,9 +126,20 @@ void OptionsDialog::setupSettings() {
   }
 
   auto dbfnt = RespeqtSettings::instance()->dbTitleFont();
+  auto btnFont = m_ui->btn_bold_title->font();
+  btnFont.setBold(dbfnt.bold());
+  btnFont.setItalic(dbfnt.italic());
+  m_ui->btn_bold_title->setFont(btnFont);
   m_ui->cb_title_font->setCurrentFont(dbfnt);
+  m_ui->spn_scale_title->setValue(dbfnt.scale());
+
   dbfnt = RespeqtSettings::instance()->dbIndexFont();
+  btnFont = m_ui->btn_bold_index->font();
+  btnFont.setBold(dbfnt.bold());
+  btnFont.setItalic(dbfnt.italic());
+  m_ui->btn_bold_index->setFont(btnFont);
   m_ui->cb_index_font->setCurrentFont(dbfnt);
+  m_ui->spn_scale_index->setValue(dbfnt.scale());
 
 #ifdef Q_OS_MAC
   m_ui->useNativeMenu->setChecked(RespeqtSettings::instance()->nativeMenu());
@@ -267,6 +279,8 @@ void OptionsDialog::connectSignals() {
 
   connect(m_ui->btn_appdata_browse, &QPushButton::clicked, this, &OptionsDialog::browseForAppDir);
   connect(m_ui->rb_dbset_app_data_dir, &QRadioButton::toggled, this, &OptionsDialog::appDataDirToggled);
+  connect(m_ui->btn_color_index, &QPushButton::clicked, this, &OptionsDialog::indexColorClicked);
+  connect(m_ui->btn_color_title, &QPushButton::clicked, this, &OptionsDialog::titleColorClicked);
 }
 
 void OptionsDialog::changeEvent(QEvent *e) {
@@ -567,4 +581,22 @@ void OptionsDialog::browseForAppDir()
         else
             QMessageBox::warning(this, "Error directory not writable", "Check permissions and try again.");
     }
+}
+
+void OptionsDialog::indexColorClicked()
+{
+    QColor init = RespeqtSettings::instance()->dbIndexFont().color();
+    QColor color = QColorDialog::getColor(init, this, "Select the font color for Index labels:");
+    QString style = QString("QPushButton {color: %1}").arg(color.name());
+
+    m_ui->btn_color_index->setStyleSheet(style);
+}
+
+void OptionsDialog::titleColorClicked()
+{
+    QColor init = RespeqtSettings::instance()->dbTitleFont().color();
+    QColor color = QColorDialog::getColor(init, this, "Select the font color for Title labels:");
+    QString style = QString("QPushButton {color: %1}").arg(color.name());
+
+    m_ui->btn_color_title->setStyleSheet(style);
 }

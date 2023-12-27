@@ -993,6 +993,7 @@ void RespeqtSettings::setDbTitleFont(const LabelFont& font)
     mSettings->setValue("bold", font.bold());
     mSettings->setValue("italic", font.italic());
     mSettings->setValue("color", font.color().name());
+    mSettings->setValue("scale", font.scale());
     mSettings->endGroup();
     mSettings->endGroup();
 }
@@ -1007,6 +1008,7 @@ LabelFont RespeqtSettings::dbTitleFont()
     font.setBold(mSettings->value("bold", Label::DEF_TITLE_BOLD).toBool());
     font.setItalic(mSettings->value("italic", false).toBool());
     font.setColor(mSettings->value("color", "black").toString());
+    font.setScale(mSettings->value("scale", Label::DEF_TITLE_SCALE).toDouble());
     mSettings->endGroup();
     mSettings->endGroup();
     return font;
@@ -1021,6 +1023,7 @@ void RespeqtSettings::setDbIndexFont(const LabelFont& font)
     mSettings->setValue("bold", font.bold());
     mSettings->setValue("italic", font.italic());
     mSettings->setValue("color", font.color().name());
+    mSettings->setValue("scale", font.scale());
     mSettings->endGroup();
     mSettings->endGroup();
 }
@@ -1035,6 +1038,7 @@ LabelFont RespeqtSettings::dbIndexFont()
     font.setBold(mSettings->value("bold", false).toBool());
     font.setItalic(mSettings->value("italic", false).toBool());
     font.setColor(mSettings->value("color", "black").toString());
+    font.setScale(mSettings->value("scale", Label::DEF_TITLE_SCALE).toDouble());
     mSettings->endGroup();
     mSettings->endGroup();
     return font;

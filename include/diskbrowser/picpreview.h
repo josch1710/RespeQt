@@ -25,35 +25,41 @@ public:
         setItalic(font.italic());
         setPixelSize(font.pixelSize());
         _color = 0;
+        _scale = 3.0;
     }
 
-    LabelFont(const QString& family, bool bold = false, int color = 0)
+    LabelFont(const QString& family, bool bold = false, int color = 0, double scale = 3.0)
     {
         setFamily(family);
         setBold(bold);
         _color = color;
+        _scale = scale;
     }
     virtual ~LabelFont() {}
 
-//    LabelFont& operator= (const QFont& font)      Andrew: why doesn't this work?
-//    {
-//        static_cast<QFont>(*this) = font;
-//        return *this;
-//    }
+//  LabelFont& operator= (const QFont& font)      Andrew: why doesn't this work?
+//  {
+//      static_cast<QFont>(*this) = font;
+//      return *this;
+//  }
 
     QColor color() const { return QColor(_color); }
     void setColor(int color) { _color = color; }
     void setColor(const QString& color) { _color = QColor(color).value(); }
 
+    double scale() const { return _scale; }
+    void setScale(double scale) { _scale = scale; }
+
 private:
-    int _color = 0;
+    int    _color = 0;
+    double _scale = 3.0;
 };
 
 class Label : public QTextEdit
 {
     Q_OBJECT
 public:
-    Label(QWidget* parent, const QString& fontFamily = QString(), bool isIndex = false);
+    Label(QWidget* parent, bool isIndex = false);
     void setText(const QString& text);
     void setLineHeight(int height);
     bool isEmpty() { return toPlainText().isEmpty(); }
@@ -62,6 +68,8 @@ public:
     static const QString DEF_INDEX_FNT;
     static const QString DEF_TITLE_FNT;
     static const bool    DEF_TITLE_BOLD;
+    static const double  DEF_INDEX_SCALE;
+    static const double  DEF_TITLE_SCALE;
 
 signals:
     void sigEditDone(bool canceled);
@@ -72,11 +80,10 @@ protected:
     virtual void mousePressEvent(QMouseEvent* event) override;
 
 private:
-    bool    _isIndex  = false;
-    bool    _editMode = false;
-    QString _lastTitle;
-
-    LabelFont _font {DEF_TITLE_FNT};
+    bool      _isIndex  = false;
+    bool      _editMode = false;
+    QString   _lastTitle;
+    LabelFont _font;
 
 #if defined Q_OS_WIN
     int _lineHeight = 70;
@@ -123,7 +130,7 @@ private:
     QString  _picTooltip;
     QPixmap* _pixmap {nullptr};
     Label    _title  {this};
-    Label    _index  {this, "Courier New", true};
+    Label    _index  {this, true};
     bool     _sideB  {false};
 
     void loadPixmap(const QString& picPath);

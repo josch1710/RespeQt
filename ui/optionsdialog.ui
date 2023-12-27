@@ -912,8 +912,44 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QFontComboBox" name="cb_index_font"/>
+             <item row="0" column="2">
+              <widget class="QPushButton" name="btn_bold_title">
+               <property name="maximumSize">
+                <size>
+                 <width>20</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>B</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="5">
+              <widget class="QDoubleSpinBox" name="spn_scale_title">
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="decimals">
+                <number>1</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="5">
+              <widget class="QDoubleSpinBox" name="spn_scale_index">
+               <property name="maximumSize">
+                <size>
+                 <width>50</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="decimals">
+                <number>1</number>
+               </property>
+              </widget>
              </item>
              <item row="1" column="3">
               <widget class="QPushButton" name="btn_italic_index">
@@ -928,6 +964,9 @@
                </property>
               </widget>
              </item>
+             <item row="0" column="1">
+              <widget class="QFontComboBox" name="cb_title_font"/>
+             </item>
              <item row="1" column="2">
               <widget class="QPushButton" name="btn_bold_index">
                <property name="maximumSize">
@@ -941,18 +980,8 @@
                </property>
               </widget>
              </item>
-             <item row="0" column="2">
-              <widget class="QPushButton" name="btn_bold_title">
-               <property name="maximumSize">
-                <size>
-                 <width>20</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>B</string>
-               </property>
-              </widget>
+             <item row="1" column="1">
+              <widget class="QFontComboBox" name="cb_index_font"/>
              </item>
              <item row="0" column="3">
               <widget class="QPushButton" name="btn_italic_title">
@@ -967,32 +996,29 @@
                </property>
               </widget>
              </item>
-             <item row="0" column="1">
-              <widget class="QFontComboBox" name="cb_title_font"/>
-             </item>
              <item row="0" column="4">
-              <widget class="QDoubleSpinBox" name="spn_scale_title">
+              <widget class="QPushButton" name="btn_color_title">
                <property name="maximumSize">
                 <size>
-                 <width>50</width>
+                 <width>30</width>
                  <height>16777215</height>
                 </size>
                </property>
-               <property name="decimals">
-                <number>1</number>
+               <property name="text">
+                <string>■</string>
                </property>
               </widget>
              </item>
              <item row="1" column="4">
-              <widget class="QDoubleSpinBox" name="spn_scale_index">
+              <widget class="QPushButton" name="btn_color_index">
                <property name="maximumSize">
                 <size>
-                 <width>50</width>
+                 <width>30</width>
                  <height>16777215</height>
                 </size>
                </property>
-               <property name="decimals">
-                <number>1</number>
+               <property name="text">
+                <string>■</string>
                </property>
               </widget>
              </item>
@@ -2798,7 +2824,6 @@
   </layout>
  </widget>
  <resources>
-  <include location="../resources/icons.qrc"/>
   <include location="../resources/icons.qrc"/>
  </resources>
  <connections>
