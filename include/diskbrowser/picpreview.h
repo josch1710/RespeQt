@@ -24,34 +24,30 @@ public:
         setBold(font.bold());
         setItalic(font.italic());
         setPixelSize(font.pixelSize());
-        _color = 0;
+        _color = QRgb(0);
         _scale = 3.0;
     }
 
-    LabelFont(const QString& family, bool bold = false, int color = 0, double scale = 3.0)
+    LabelFont(const QString& family, bool bold = false, QRgb rgb = 0, double scale = 3.0)
     {
         setFamily(family);
         setBold(bold);
-        _color = color;
+        _color = rgb;
         _scale = scale;
     }
     virtual ~LabelFont() {}
 
-//  LabelFont& operator= (const QFont& font)      Andrew: why doesn't this work?
-//  {
-//      static_cast<QFont>(*this) = font;
-//      return *this;
-//  }
-
-    QColor color() const { return QColor(_color); }
-    void setColor(int color) { _color = color; }
-    void setColor(const QString& color) { _color = QColor(color).value(); }
+    QColor color() const { return _color; }
+    void setColor(const QColor& color)  { _color = color; }
+    void setColor(const QString& color) { _color = QColor(color); }
 
     double scale() const { return _scale; }
     void setScale(double scale) { _scale = scale; }
 
+//  QFont qfont() { return QFont {family(), pointSize(), weight(), italic()}; }  // TBD: override cast operator? omit?
+
 private:
-    int    _color = 0;
+    QColor _color = QColor("black");
     double _scale = 3.0;
 };
 
@@ -64,6 +60,9 @@ public:
     void setLineHeight(int height);
     bool isEmpty() { return toPlainText().isEmpty(); }
     void setEditMode(bool edit = true);
+    void setFont(const LabelFont& font);
+
+    const LabelFont& font() { return _font; }
 
     static const QString DEF_INDEX_FNT;
     static const QString DEF_TITLE_FNT;

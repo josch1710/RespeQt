@@ -132,6 +132,8 @@ void OptionsDialog::setupSettings() {
   m_ui->btn_bold_title->setFont(btnFont);
   m_ui->cb_title_font->setCurrentFont(dbfnt);
   m_ui->spn_scale_title->setValue(dbfnt.scale());
+  QString style = QString("QPushButton {color: %1}").arg(dbfnt.color().name());
+  m_ui->btn_color_title->setStyleSheet(style);
 
   dbfnt = RespeqtSettings::instance()->dbIndexFont();
   btnFont = m_ui->btn_bold_index->font();
@@ -140,6 +142,8 @@ void OptionsDialog::setupSettings() {
   m_ui->btn_bold_index->setFont(btnFont);
   m_ui->cb_index_font->setCurrentFont(dbfnt);
   m_ui->spn_scale_index->setValue(dbfnt.scale());
+  style = QString("QPushButton {color: %1}").arg(dbfnt.color().name());
+  m_ui->btn_color_index->setStyleSheet(style);
 
 #ifdef Q_OS_MAC
   m_ui->useNativeMenu->setChecked(RespeqtSettings::instance()->nativeMenu());
@@ -438,11 +442,13 @@ void OptionsDialog::saveSettings() {
   titleFont.setBold(m_ui->btn_bold_title->font().bold());
   titleFont.setItalic(m_ui->btn_italic_title->font().italic());
   titleFont.setScale(m_ui->spn_scale_title->value());
+  titleFont.setColor(m_ui->btn_color_title->property("color").toString());
   RespeqtSettings::instance()->setDbTitleFont(titleFont);
   LabelFont indexFont {m_ui->cb_index_font->currentFont()};
   indexFont.setBold(m_ui->btn_bold_index->font().bold());
   indexFont.setItalic(m_ui->btn_italic_index->font().italic());
   indexFont.setScale(m_ui->spn_scale_index->value());
+  indexFont.setColor(m_ui->btn_color_index->property("color").toString());
   RespeqtSettings::instance()->setDbIndexFont(indexFont);
 
   SerialBackend backend = SerialBackend::STANDARD;
@@ -593,18 +599,22 @@ void OptionsDialog::browseForAppDir()
 
 void OptionsDialog::indexColorClicked()
 {
-    QColor init = RespeqtSettings::instance()->dbIndexFont().color();
+    auto font = RespeqtSettings::instance()->dbIndexFont();
+    QColor init = font.color();
     QColor color = QColorDialog::getColor(init, this, "Select the font color for Index labels:");
     QString style = QString("QPushButton {color: %1}").arg(color.name());
 
+    m_ui->btn_color_index->setProperty("color", color.name());
     m_ui->btn_color_index->setStyleSheet(style);
 }
 
 void OptionsDialog::titleColorClicked()
 {
-    QColor init = RespeqtSettings::instance()->dbTitleFont().color();
+    auto font = RespeqtSettings::instance()->dbTitleFont();
+    QColor init = font.color();
     QColor color = QColorDialog::getColor(init, this, "Select the font color for Title labels:");
     QString style = QString("QPushButton {color: %1}").arg(color.name());
 
+    m_ui->btn_color_title->setProperty("color", color.name());
     m_ui->btn_color_title->setStyleSheet(style);
 }

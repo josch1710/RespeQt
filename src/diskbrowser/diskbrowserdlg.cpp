@@ -457,7 +457,7 @@ bool DiskBrowserDlg::itemIsFolder(QTreeWidgetItem *item)
 
 void DiskBrowserDlg::closeEvent(QCloseEvent *event)
 {
-    if (!event->spontaneous())
+    if (!event->spontaneous()) // linux fires 2 close events (2nd one is !visible)...
     {
         RespeqtSettings::instance()->saveWidgetGeometry(this);
         RespeqtSettings::instance()->setShowDiskBrowser(isVisible());

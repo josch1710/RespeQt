@@ -205,16 +205,17 @@ void PicPreview::moveLabels()
 
 void PicPreview::scaleFonts()
 {
-    QFont font = _title.font();
-    double scl = RespeqtSettings::instance()->dbTitleFont().scale();
+    LabelFont font = RespeqtSettings::instance()->dbTitleFont();
+    double scl = font.scale();
     double pix = round((double)_title.size().height() / scl);
 
     font.setPixelSize((int)pix);
 
     _title.setFont(font);
 
-    font = _index.font();
-    pix = round((double)_index.size().height() / Label::DEF_INDEX_SCALE);
+    font = RespeqtSettings::instance()->dbIndexFont();
+    scl = font.scale();
+    pix = round((double)_index.size().height() / scl);
 
     font.setPixelSize((int)pix);
 
@@ -287,39 +288,22 @@ Label::Label(QWidget* parent, bool isIndex) : QTextEdit(parent)
 
     if (_isIndex)
     {
-        _font = LabelFont {RespeqtSettings::instance()->dbIndexFont()};
+        setFont(RespeqtSettings::instance()->dbIndexFont());
         setAlignment(Qt::AlignCenter);
         setLineWrapMode(QTextEdit::NoWrap);
         document()->setDocumentMargin(qreal(height())/2.0);
     }
     else
     {
-        _font = LabelFont {RespeqtSettings::instance()->dbTitleFont()};
+        setFont(RespeqtSettings::instance()->dbTitleFont());
         setAlignment(Qt::AlignLeft | Qt::AlignTop);
         setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
     }
 
-    QString fmt
-    {
-        "color: %1;"
-        "font-family: \"%2\";"
-    };
-    QString style = fmt.arg(_font.color().name(), _font.family());
-    if (_font.bold())
-        style += "font-weight: bold";
-    setStyleSheet(style);
-    auto pal = palette();
-    pal.setColor(QPalette::Base, QColor(0,0,0,0));
-    setPalette(pal);
     setFrameStyle(QFrame::NoFrame);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setReadOnly(true);
-
-#ifndef QT_NO_DEBUG
-    ensurePolished();
-    Q_ASSERT(font().family() == _font.family());
-#endif
 }
 
 void Label::resizeEvent(QResizeEvent *event)
@@ -414,4 +398,30 @@ void Label::mousePressEvent(QMouseEvent* evt)
         setEditMode();
     else
         QTextEdit::mousePressEvent(evt);
+}
+
+void Label::setFont(const LabelFont& font)
+{
+    _font = font;
+    QTextEdit::setFont(font);
+
+    QString fmt
+    {
+        "color: %1;"
+        "font-family: \"%2\";"
+    };
+    QString style = fmt.arg(_font.color().name(), _font.family());
+    if (_font.bold())
+        style += "font-weight: bold;";
+    if (_font.italic())
+        style += "font-style: italic;";
+    setStyleSheet(style);
+    auto pal = palette();
+    pal.setColor(QPalette::Base, QColor(0,0,0,0));
+    setPalette(pal);
+
+#ifndef QT_NO_DEBUG
+    ensurePolished();
+    Q_ASSERT(this->font().family() == _font.family());
+#endif
 }
