@@ -434,8 +434,16 @@ void OptionsDialog::saveSettings() {
       dbSource = DbData_subDir;
   }
   RespeqtSettings::instance()->setDbDataSource(dbSource);
-  RespeqtSettings::instance()->setDbTitleFont(LabelFont(m_ui->cb_title_font->currentFont()));
-  RespeqtSettings::instance()->setDbIndexFont(LabelFont(m_ui->cb_index_font->currentFont()));
+  LabelFont titleFont {m_ui->cb_title_font->currentFont()};
+  titleFont.setBold(m_ui->btn_bold_title->font().bold());
+  titleFont.setItalic(m_ui->btn_italic_title->font().italic());
+  titleFont.setScale(m_ui->spn_scale_title->value());
+  RespeqtSettings::instance()->setDbTitleFont(titleFont);
+  LabelFont indexFont {m_ui->cb_index_font->currentFont()};
+  indexFont.setBold(m_ui->btn_bold_index->font().bold());
+  indexFont.setItalic(m_ui->btn_italic_index->font().italic());
+  indexFont.setScale(m_ui->spn_scale_index->value());
+  RespeqtSettings::instance()->setDbIndexFont(indexFont);
 
   SerialBackend backend = SerialBackend::STANDARD;
   if (itemAtariSio->checkState(0) == Qt::Checked) {

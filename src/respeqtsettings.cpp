@@ -953,12 +953,12 @@ void RespeqtSettings::setDbFileNames(bool useFileNames, bool jsonFirst)
 
 bool RespeqtSettings::dbJsonFirst()
 {
-    return mSettings->value("/DiskBrowserDlg/json_1st", false).toBool();
+    return mSettings->value("/DiskBrowserDlg/json_1st", true).toBool();
 }
 
 bool RespeqtSettings::dbUseFileNames()
 {
-    return mSettings->value("/DiskBrowserDlg/use_filenames", false).toBool();
+    return mSettings->value("/DiskBrowserDlg/use_filenames", true).toBool();
 }
 
 QString RespeqtSettings::appDataFolder()
@@ -1038,7 +1038,7 @@ LabelFont RespeqtSettings::dbIndexFont()
     font.setBold(mSettings->value("bold", false).toBool());
     font.setItalic(mSettings->value("italic", false).toBool());
     font.setColor(mSettings->value("color", "black").toString());
-    font.setScale(mSettings->value("scale", Label::DEF_TITLE_SCALE).toDouble());
+    font.setScale(mSettings->value("scale", Label::DEF_INDEX_SCALE).toDouble());
     mSettings->endGroup();
     mSettings->endGroup();
     return font;
