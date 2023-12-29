@@ -55,6 +55,10 @@ private slots:
   void browseForAppDir();
   void indexColorClicked();
   void titleColorClicked();
+  void indexBoldToggled();
+  void titleBoldToggled();
+  void indexItalicToggled();
+  void titleItalicToggled();
 
 #ifdef SHOWFIRMWARE
   void select810FirmwareTriggered();

@@ -28,11 +28,12 @@ public:
         _scale = 3.0;
     }
 
-    LabelFont(const QString& family, bool bold = false, QRgb rgb = 0, double scale = 3.0)
+    LabelFont(const QString& family, bool bold = false, bool italic = false, QColor color = QColor("black"), double scale = 3.0)
     {
         setFamily(family);
         setBold(bold);
-        _color = rgb;
+        setItalic(italic);
+        _color = color;
         _scale = scale;
     }
     virtual ~LabelFont() {}

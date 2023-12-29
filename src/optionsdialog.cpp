@@ -125,22 +125,34 @@ void OptionsDialog::setupSettings() {
       break;
   }
 
+  // DB title font settings
   auto dbfnt = RespeqtSettings::instance()->dbTitleFont();
+  m_ui->cb_title_font->setCurrentFont(dbfnt);
   auto btnFont = m_ui->btn_bold_title->font();
   btnFont.setBold(dbfnt.bold());
-  btnFont.setItalic(dbfnt.italic());
+  m_ui->btn_bold_title->setChecked(dbfnt.bold());
   m_ui->btn_bold_title->setFont(btnFont);
-  m_ui->cb_title_font->setCurrentFont(dbfnt);
+  m_ui->btn_bold_title->update();
+  btnFont = m_ui->btn_italic_title->font();
+  btnFont.setItalic(dbfnt.italic());
+  m_ui->btn_italic_title->setChecked(dbfnt.italic());
+  m_ui->btn_italic_title->setFont(btnFont);
+  m_ui->btn_italic_title->update();
   m_ui->spn_scale_title->setValue(dbfnt.scale());
   QString style = QString("QPushButton {color: %1}").arg(dbfnt.color().name());
   m_ui->btn_color_title->setStyleSheet(style);
 
+  // DB index font settings
   dbfnt = RespeqtSettings::instance()->dbIndexFont();
+  m_ui->cb_index_font->setCurrentFont(dbfnt);
   btnFont = m_ui->btn_bold_index->font();
   btnFont.setBold(dbfnt.bold());
-  btnFont.setItalic(dbfnt.italic());
+  m_ui->btn_bold_index->setChecked(dbfnt.bold());
   m_ui->btn_bold_index->setFont(btnFont);
-  m_ui->cb_index_font->setCurrentFont(dbfnt);
+  btnFont = m_ui->btn_italic_index->font();
+  btnFont.setItalic(dbfnt.italic());
+  m_ui->btn_italic_index->setChecked(dbfnt.italic());
+  m_ui->btn_italic_index->setFont(btnFont);
   m_ui->spn_scale_index->setValue(dbfnt.scale());
   style = QString("QPushButton {color: %1}").arg(dbfnt.color().name());
   m_ui->btn_color_index->setStyleSheet(style);
@@ -285,6 +297,10 @@ void OptionsDialog::connectSignals() {
   connect(m_ui->rb_dbset_app_data_dir, &QRadioButton::toggled, this, &OptionsDialog::appDataDirToggled);
   connect(m_ui->btn_color_index, &QPushButton::clicked, this, &OptionsDialog::indexColorClicked);
   connect(m_ui->btn_color_title, &QPushButton::clicked, this, &OptionsDialog::titleColorClicked);
+  connect(m_ui->btn_bold_index, &QPushButton::toggled, this, &OptionsDialog::indexBoldToggled);
+  connect(m_ui->btn_bold_title, &QPushButton::toggled, this, &OptionsDialog::titleBoldToggled);
+  connect(m_ui->btn_italic_index, &QPushButton::toggled, this, &OptionsDialog::indexItalicToggled);
+  connect(m_ui->btn_italic_title, &QPushButton::toggled, this, &OptionsDialog::titleItalicToggled);
 }
 
 void OptionsDialog::changeEvent(QEvent *e) {
@@ -438,17 +454,23 @@ void OptionsDialog::saveSettings() {
       dbSource = DbData_subDir;
   }
   RespeqtSettings::instance()->setDbDataSource(dbSource);
-  LabelFont titleFont {m_ui->cb_title_font->currentFont()};
-  titleFont.setBold(m_ui->btn_bold_title->font().bold());
-  titleFont.setItalic(m_ui->btn_italic_title->font().italic());
-  titleFont.setScale(m_ui->spn_scale_title->value());
-  titleFont.setColor(m_ui->btn_color_title->property("color").toString());
+  LabelFont titleFont
+  {
+      m_ui->cb_title_font->currentFont().family(),
+      m_ui->btn_bold_title->isChecked(),
+      m_ui->btn_italic_title->isChecked(),
+      QColor {m_ui->btn_color_title->property("color").toString()},
+      m_ui->spn_scale_title->value()
+  };
   RespeqtSettings::instance()->setDbTitleFont(titleFont);
-  LabelFont indexFont {m_ui->cb_index_font->currentFont()};
-  indexFont.setBold(m_ui->btn_bold_index->font().bold());
-  indexFont.setItalic(m_ui->btn_italic_index->font().italic());
-  indexFont.setScale(m_ui->spn_scale_index->value());
-  indexFont.setColor(m_ui->btn_color_index->property("color").toString());
+  LabelFont indexFont
+  {
+      m_ui->cb_index_font->currentFont().family(),
+      m_ui->btn_bold_index->isChecked(),
+      m_ui->btn_italic_index->isChecked(),
+      QColor {m_ui->btn_color_index->property("color").toString()},
+      m_ui->spn_scale_index->value()
+  };
   RespeqtSettings::instance()->setDbIndexFont(indexFont);
 
   SerialBackend backend = SerialBackend::STANDARD;
@@ -617,4 +639,32 @@ void OptionsDialog::titleColorClicked()
 
     m_ui->btn_color_title->setProperty("color", color.name());
     m_ui->btn_color_title->setStyleSheet(style);
+}
+
+void OptionsDialog::indexBoldToggled()
+{
+    QFont font = m_ui->btn_bold_index->font();
+    font.setBold(m_ui->btn_bold_index->isChecked());
+    m_ui->btn_bold_index->setFont(font);
+}
+
+void OptionsDialog::titleBoldToggled()
+{
+    QFont font = m_ui->btn_bold_title->font();
+    font.setBold(m_ui->btn_bold_title->isChecked());
+    m_ui->btn_bold_title->setFont(font);
+}
+
+void OptionsDialog::indexItalicToggled()
+{
+    QFont font = m_ui->btn_italic_index->font();
+    font.setItalic(m_ui->btn_italic_index->isChecked());
+    m_ui->btn_italic_index->setFont(font);
+}
+
+void OptionsDialog::titleItalicToggled()
+{
+    QFont font = m_ui->btn_italic_title->font();
+    font.setItalic(m_ui->btn_italic_title->isChecked());
+    m_ui->btn_italic_title->setFont(font);
 }
