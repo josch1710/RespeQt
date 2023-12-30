@@ -18,8 +18,7 @@ PrinterWidget::PrinterWidget(int printerNum, QWidget *parent)
   setup();
 
   // Connect the printer selection combobox
-  void (QComboBox::*printerSignal)(const QString &) = &QComboBox::currentIndexChanged;
-  connect(ui->atariPrinters, printerSignal, this, &PrinterWidget::printerSelectionChanged);
+  connect(ui->atariPrinters, &QComboBox::currentTextChanged, this, &PrinterWidget::printerSelectionChanged);
   // Connect the connect and disconnect button
   connect(ui->buttonConnectPrinter, &QToolButton::triggered, this, &PrinterWidget::connectPrinter);
   connect(ui->buttonDisconnectPrinter, &QToolButton::triggered, this, &PrinterWidget::disconnectPrinter);

@@ -12,6 +12,8 @@
 #include <QMessageBox>
 #include <QPointer>
 #include <QTimer>
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
+// These network classes were deprecated way back in Qt 5.15
 #include <qnetworkconfigmanager.h>
 #include <qnetworkinterface.h>
 #include <qnetworksession.h>
@@ -30,4 +32,19 @@ public slots:
 private:
   QPointer<QNetworkSession> m_session;
 };
+#else
+// Network class stub for testing with Qt >= 5.15
+//
+class Network : public QMainWindow {
+  Q_OBJECT
+
+public:
+    Network() {}
+    ~Network() {}
+
+public slots:
+    bool openConnection(QString &) {return false;}
+};
+#endif
+
 #endif// NETWORK_H

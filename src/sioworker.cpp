@@ -36,7 +36,11 @@ QString SioDevice::deviceName() {
 
 SioWorker::SioWorker()
     : QThread() {
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
   deviceMutex = new QMutex(QMutex::Recursive);
+#else
+  deviceMutex = new QRecursiveMutex();
+#endif
   for (int i = 0; i <= 255; i++) {
     devices[i] = nullptr;
   }

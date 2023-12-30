@@ -75,6 +75,7 @@ SOURCES += \
     src/diskbrowser/folderdisks.cpp \
     src/diskbrowser/dbsettings.cpp \
     src/diskbrowser/dbjson.cpp \
+    src/diskbrowser/dbini.cpp \
     src/diskbrowser/diskbrowserdlg.cpp
 
 HEADERS += \
@@ -145,6 +146,7 @@ HEADERS += \
     include/diskbrowser/folderdisks.h \
     include/diskbrowser/dbsettings.h \
     include/diskbrowser/dbjson.h \
+    include/diskbrowser/dbini.h \
     include/diskbrowser/diskbrowserdlg.h
 
 FORMS += \

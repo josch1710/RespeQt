@@ -102,7 +102,7 @@ namespace Printers {
 
     int n = text.size();
     QByteArray textASCII;
-    textASCII.append(text);
+    textASCII.append(text.toLatin1());
 
     // Disable ATASCII Inverse Video for ASCII window //
     for (int x = 0; x <= n - 1; ++x) {
@@ -245,7 +245,7 @@ namespace Printers {
     for (int i = 0; i < lines.size(); ++i) {
       int x = lines.at(i).indexOf(" ");
       if (x > 0) {
-        lines.at(i).midRef(1, x - 1).toInt(&number);
+        number = QStringView(lines.at(i)).mid(1, x - 1).toInt();
         if (number) {
           lineNumberFound = true;
           break;
@@ -261,7 +261,7 @@ namespace Printers {
       for (int i = 0; i < lines.size(); ++i) {
         int x = lines.at(i).indexOf(" ");
         if (x > 0) {
-          lines.at(i).midRef(1, x - 1).toInt(&number);
+          number = QStringView(lines.at(i)).mid(1, x - 1).toInt();
           if (!number) {
             x = -1;
           }

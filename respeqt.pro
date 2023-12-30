@@ -25,6 +25,7 @@ TEMPLATE = app
 
 CONFIG += qt c++11 strict_c++
 QT += core gui network widgets printsupport serialport svg
+greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat
 INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib include headers tools
 
 # Warnings for Deprecated functions

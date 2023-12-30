@@ -36,7 +36,8 @@
 //#include "printers/outputs.h"
 #include "respeqtsettings.h"
 
-#include <QDesktopWidget>
+//#include <QDesktopWidget> deprecated in Qt 5. Use QScreen:
+#include <QScreen>
 #include <QDrag>
 #include <QDragEnterEvent>
 //#include <QDropEvent>
@@ -726,7 +727,11 @@ void MainWindow::showEvent(QShowEvent *event) {
   QMainWindow::showEvent(event);
 }
 
+#if (QT_VERSION_MAJOR < 6)
 void MainWindow::enterEvent(QEvent *) {
+#else
+void MainWindow::enterEvent(QEnterEvent *) {
+#endif
   if (isMiniMode && isShadeMode) {
     setWindowOpacity(1.0);
   }

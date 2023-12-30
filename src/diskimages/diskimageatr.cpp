@@ -100,7 +100,7 @@ namespace DiskImages {
     // Check if the reported image size is consistent with the actual size
     //
     if (size != imageSize) {
-      qWarning() << "!w" << tr("Image size of '%1' is reported as %2 bytes in the header but it's actually %3.").arg(fileName, QString::number(size, 10), QString(imageSize, 10));
+      qWarning() << "!w" << tr("Image size of '%1' is reported as %2 bytes in the header but it's actually %3.").arg(fileName, QString::number(size, 10), QString::number(imageSize, 10));
       size = imageSize;
       repaired = true;
     }

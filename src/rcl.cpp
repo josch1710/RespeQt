@@ -148,8 +148,12 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
       data[3] = static_cast<char>(dateTime.time().hour());
       data[4] = static_cast<char>(dateTime.time().minute());
       data[5] = static_cast<char>(dateTime.time().second());
-      qDebug() << "!n" << tr("[%1] Date/time sent to client (%2).").arg(deviceName(), dateTime.toString(Qt::SystemLocaleShortDate));
-
+      qDebug() << "!n" << tr("[%1] Date/time sent to client (%2).").arg(deviceName(),
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
+                  dateTime.toString(Qt::SystemLocaleShortDate));
+#else
+                  dateTime.toString(QLocale::system().dateFormat(QLocale::ShortFormat)));
+#endif
       sio->port()->writeComplete();
       sio->port()->writeDataFrame(data);
     } break;
@@ -264,7 +268,11 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
           int i, type;
           bool ok;
           i = imageFileName.lastIndexOf(".");
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
           type = imageFileName.midRef(i + 1).toInt(&ok, 10);
+#else
+          type = QStringView(imageFileName).mid(i + 1).toInt(&ok, 10);
+#endif
           if (ok && (type < 1 || type > 6)) ok = false;
           if (!ok) {
             qCritical() << "!e" << tr("[%1] Invalid image file attribute: %2").arg(deviceName()).arg(type);
@@ -585,9 +593,9 @@ QString RCl::toAtariFileName(QString dosFileName) {
     name = filename.left(t);
     ext = filename.right(filename.length() - t - 1);
   }
-  name.remove(QRegExp("[^A-Z0-9_]"));
+  name.remove(QRegularExpression("[^A-Z0-9_]"));
   name = (name.length() > 8) ? name.left(5) + "$" + name.right(2) : name;
-  ext.remove(QRegExp("[^A-Z0-9_]"));
+  ext.remove(QRegularExpression("[^A-Z0-9_]"));
   return name + "." + ext;
 }
 

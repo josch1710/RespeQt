@@ -106,11 +106,11 @@ namespace Printers {
     QPainter painter;
     painter.begin(&printer);
     // Scale the contents of the window to the printer.
-    auto xscale = printer.pageRect().width() / static_cast<double>(width());
-    auto yscale = printer.pageRect().height() / static_cast<double>(height());
+    auto xscale = printer.pageRect(QPrinter::DevicePixel).width() / static_cast<double>(width());
+    auto yscale = printer.pageRect(QPrinter::DevicePixel).height() / static_cast<double>(height());
     auto scale = qMin(xscale, yscale);
-    painter.translate(printer.paperRect().x() + printer.pageRect().width() / 2,
-                      printer.paperRect().y() + printer.pageRect().height() / 2);
+    painter.translate(printer.paperRect(QPrinter::DevicePixel).x() + printer.pageRect(QPrinter::DevicePixel).width() / 2,
+                      printer.paperRect(QPrinter::DevicePixel).y() + printer.pageRect(QPrinter::DevicePixel).height() / 2);
     painter.scale(scale, scale);
     painter.translate(-width() / 2, -height() / 2);
     // Now render the scene on the printer.

@@ -73,9 +73,9 @@ namespace DiskImages {
       longName = info.completeBaseName();
       name = longName.toUpper();
       if (RespeqtSettings::instance()->filterUnderscore()) {
-        name.remove(QRegExp("[^A-Z0-9]"));
+        name.remove(QRegularExpression("[^A-Z0-9]"));
       } else {
-        name.remove(QRegExp("[^A-Z0-9_]"));
+        name.remove(QRegularExpression("[^A-Z0-9_]"));
       }
       name = name.left(8);
       if (name.isEmpty()) {
@@ -84,9 +84,9 @@ namespace DiskImages {
       longName += "." + info.suffix();
       ext = info.suffix().toUpper();
       if (RespeqtSettings::instance()->filterUnderscore()) {
-        ext.remove(QRegExp("[^A-Z0-9]"));
+        ext.remove(QRegularExpression("[^A-Z0-9]"));
       } else {
-        ext.remove(QRegExp("[^A-Z0-9_]"));
+        ext.remove(QRegularExpression("[^A-Z0-9_]"));
       }
       ext = ext.left(3);
 
@@ -205,13 +205,13 @@ namespace DiskImages {
             QFile picoName(dir.path() + "/piconame.txt");
             picoName.open(QFile::WriteOnly);
             QByteArray nameLine;
-            nameLine.append(dir.dirName() + '\x9B');
+            nameLine.append(QString(dir.dirName() + '\x9B').toLatin1());
             picoName.write(nameLine);
             for (int j = 0; j < maxEntries; j++) {
               if (atariFiles[j].exists) {
                 if (atariFiles[j].longName != "$boot.bin") {
                   nameLine.clear();
-                  nameLine.append(atariFiles[j].atariName);
+                  nameLine.append(atariFiles[j].atariName.toLatin1());
                   QByteArray space;
                   int size;
                   size = atariFiles[j].atariName.size();
@@ -219,9 +219,9 @@ namespace DiskImages {
                     space[k] = '\x20';
                   }
                   nameLine.append(space);
-                  nameLine.append(atariFiles[j].atariExt);
+                  nameLine.append(atariFiles[j].atariExt.toLatin1());
                   nameLine.append('\x20');
-                  nameLine.append(atariFiles[j].longName.mid(0, atariFiles[j].longName.indexOf(".", -1) - 1));
+                  nameLine.append(atariFiles[j].longName.mid(0, atariFiles[j].longName.indexOf(".", -1) - 1).toLatin1());
                   nameLine.append('\x9B');
                   picoName.write(nameLine);
                 }

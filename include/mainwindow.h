@@ -139,7 +139,11 @@ protected:
   void dropEvent(QDropEvent *event) override;
   void closeEvent(QCloseEvent *event) override;
   void hideEvent(QHideEvent *event) override;
+#if (QT_VERSION_MAJOR < 6)
   void enterEvent(QEvent *) override;
+#else
+  void enterEvent(QEnterEvent *) override;
+#endif
   void leaveEvent(QEvent *) override;
   bool eventFilter(QObject *obj, QEvent *event) override;
 

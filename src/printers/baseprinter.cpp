@@ -21,7 +21,7 @@ namespace Printers {
     if (RespeqtSettings::instance()->printerEmulation() && mOutputWindow) {// Ignore printer commands  if Emulation turned OFF)    //
       qDebug() << "!n"
                << "[" << deviceName() << "] "
-               << hex << "command: " << command << " aux1: " << aux1 << " aux2: " << aux2;
+               << Qt::hex << "command: " << command << " aux1: " << aux1 << " aux2: " << aux2;
       switch (command) {
         case 0x53:// dec 83
         {
