@@ -168,11 +168,11 @@ bool DbJson::save()
         jsRoot["db"] = jsObj;
     }
 
-    auto it = _dirMap.begin();
+    auto it = _dirMap.begin();  // set iterator to the first disk collection folder
 
-    // using a dataDir means this JSON data is for 1-and-only-1 dir...
-    if (!_dataDir.isEmpty())
-        it = _dirMap.find(_dataDir.path()); // ...so set the iterator to that dir.
+    bool useDataDir = (RespeqtSettings::instance()->dbDataSource() == DbData_subDir);
+    if (useDataDir)
+        it = _dirMap.find(_dataDir.path());     // reset the iterator to current data dir
 
     while (it != _dirMap.end())
     {
@@ -213,7 +213,7 @@ bool DbJson::save()
         if (!jsDirObj.isEmpty())
             jsRoot[dirName] = jsDirObj;
 
-        if (_dataDir.isEmpty())     // using a dataDir?
+        if (useDataDir)             // using JSON file in .respeqt_db dir?
             ++it;                   // no: grab the next dir (if any)
         else
             it = _dirMap.end();     // yes: we're done (mostly)

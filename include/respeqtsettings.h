@@ -209,18 +209,6 @@ public:
   bool explorerOnTop();
   void setExplorerOnTop(bool expOnTop);
 
-// Disk collection Browser settings
-  QString mostRecentBrowserFolder();
-  QStringList recentBrowserFolders();
-  void setMostRecentBrowserFolder(const QString& name);
-  void delMostRecentBrowserFolder(const QString& name);
-  bool showDiskBrowser();
-  void setShowDiskBrowser(bool show = true);
-  int  diskBrowserHorzSplitPos();
-  int  diskBrowserVertSplitPos();
-  void setDiskBrowserHorzSplitPos(int pos);
-  void setDiskBrowserVertSplitPos(int pos);
-
   // save/restore top-level widget geometry
   bool saveWidgetGeometry(QWidget* widget, const QString& name = QString());
   bool restoreWidgetGeometry(QWidget* widget, const QString& name = QString(), const QRect& defRect = QRect());
@@ -294,7 +282,21 @@ public:
   void setRawPrinterName(const QString &name);
   QString rawPrinterName() const;
 
-  // Disk collection Browser (db) Options
+  // Disk collection Browser
+  QString mostRecentBrowserFolder();
+  QStringList recentBrowserFolders();
+  void setMostRecentBrowserFolder(const QString& name);
+  void delMostRecentBrowserFolder(const QString& name);
+  bool showDiskBrowser();
+  void setShowDiskBrowser(bool show = true);
+  int  diskBrowserHorzSplitPos();
+  int  diskBrowserVertSplitPos();
+  void setDiskBrowserHorzSplitPos(int pos);
+  void setDiskBrowserVertSplitPos(int pos);
+  void setDiskPic(const QString& pic);
+  QString diskPic();
+
+  // Disk collection browser options page
   DbDataSource dbDataSource();
   void setDbDataSource(DbDataSource dbSource);
   void setDbFileNames(bool useFileNames, bool jsonFirst = false);
