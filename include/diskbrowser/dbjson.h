@@ -33,6 +33,8 @@ public:
     explicit DbJson();
     virtual ~DbJson();
 
+    void setDataDir(const QString& dir);
+
     void setPicture(const QString& pic, const QString& folder = QString(), const QString& disk = QString());
     QString getPicture(const QDir& dir, const QString& disk, PicSourceType& picSource);
 
@@ -48,6 +50,8 @@ public:
 private:
     QJsonDocument _jsDoc;
     QString       _fileName;
+    QDir          _dataDir;
+
     bool _dirty = false;
 
     QString  _diskPic;

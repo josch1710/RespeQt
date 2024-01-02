@@ -1044,3 +1044,12 @@ LabelFont RespeqtSettings::dbIndexFont()
     return font;
 }
 
+void RespeqtSettings::setDiskPic(const QString& pic)
+{
+    mSettings->setValue("/DiskBrowserDlg/disk_pic", pic);
+}
+
+QString RespeqtSettings::diskPic()
+{
+    return mSettings->value("/DiskBrowserDlg/disk_pic").toString();
+}

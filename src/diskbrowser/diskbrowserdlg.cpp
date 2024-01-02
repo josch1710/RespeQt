@@ -120,6 +120,9 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
         return;
     }
 
+    if (RespeqtSettings::instance()->dbDataSource() == DbData_subDir)
+        _dbSettings->setDataDir(folder);
+
     QString disk = getRecentDisk(folder);
     QString path = disk.isEmpty() ? folder : folder + "/" + disk;
     // NOTE: MRU scheme uses "path" for both folder *and* files (if one is selected)
@@ -302,7 +305,6 @@ void DiskBrowserDlg::update()
 
     bool jsonFirst = RespeqtSettings::instance()->dbJsonFirst();
     bool fileNames = RespeqtSettings::instance()->dbUseFileNames();
-    auto dbSource  = RespeqtSettings::instance()->dbDataSource();
 
     // find a custom or built-in pic
 

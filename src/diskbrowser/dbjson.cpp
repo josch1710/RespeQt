@@ -5,21 +5,26 @@
 #include "respeqtsettings.h"
 
 DbJson::DbJson()
-{
-    QString appFolder = RespeqtSettings::instance()->appDataFolder();
-    QDir appDataDir(appFolder);
-
-    if (!appDataDir.exists())
-        appDataDir.mkpath(".");
-
-    _fileName = appDataDir.absoluteFilePath("dbSettings.json");
-
-    DbJson::load();
+{    
+    if (RespeqtSettings::instance()->dbDataSource() == DbData_appFolderJson)
+        setDataDir(RespeqtSettings::instance()->appDataFolder());
 }
 
 DbJson::~DbJson()
 {
     DbJson::save();
+}
+
+void DbJson::setDataDir(const QString& dir)
+{
+    _dataDir.setPath(dir);
+
+    if (!_dataDir.exists())
+        _dataDir.mkpath(".");
+
+    _fileName = _dataDir.absoluteFilePath("dbSettings.json");
+
+    DbJson::load();
 }
 
 void DbJson::setPicture(const QString& pic, const QString& dir, const QString& disk)
@@ -99,6 +104,9 @@ DiskLabel DbJson::getLabel(const QDir& dir, const QString& disk)
 
 bool DbJson::load()
 {
+    if (_dirty)
+        DbJson::save();
+
     QFile file {_fileName};
     file.open(QIODevice::ReadOnly);
 
@@ -160,7 +168,13 @@ bool DbJson::save()
         jsRoot["db"] = jsObj;
     }
 
-    for (auto it = _dirMap.begin(); it != _dirMap.end(); ++it)
+    auto it = _dirMap.begin();
+
+    // using a dataDir means this JSON data is for 1-and-only-1 dir...
+    if (!_dataDir.isEmpty())
+        it = _dirMap.find(_dataDir.path()); // ...so set the iterator to that dir.
+
+    while (it != _dirMap.end())
     {
         const QString  dirName = it.key();
         const DirInfo& dirInfo = it.value();
@@ -198,6 +212,11 @@ bool DbJson::save()
 
         if (!jsDirObj.isEmpty())
             jsRoot[dirName] = jsDirObj;
+
+        if (_dataDir.isEmpty())     // using a dataDir?
+            ++it;                   // no: grab the next dir (if any)
+        else
+            it = _dirMap.end();     // yes: we're done (mostly)
     }
 
     _jsDoc = QJsonDocument(jsRoot);

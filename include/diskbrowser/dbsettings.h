@@ -54,6 +54,8 @@ public:
     explicit DbSettings();
     virtual ~DbSettings();
 
+    virtual void setDataDir(const QString& dir) = 0;
+
     virtual void setPicture(const QString& pic, const QString& folder = QString(), const QString& disk = QString()) = 0;
     virtual QString getPicture(const QDir& dir, const QString& disk, PicSourceType& picSource) = 0;
 

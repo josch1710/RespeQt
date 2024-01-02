@@ -20,6 +20,11 @@ DbIni::~DbIni()
     DbIni::save();
 }
 
+void DbIni::setDataDir(const QString &dir)
+{
+    // TBD: log error, assert (ini file format not used with .respeqt_db subdirs)
+}
+
 void DbIni::setPicture(const QString& pic, const QString& dir, const QString& disk)
 {
     bool isGlobal = (dir.isEmpty() && disk.isEmpty());     // program global pic?

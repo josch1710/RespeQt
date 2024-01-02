@@ -29,6 +29,8 @@ public:
     explicit DbIni();
     virtual ~DbIni();
 
+    void setDataDir(const QString& dir);    // not used (used only with JSON impl)
+
     void setPicture(const QString& pic, const QString& folder = QString(), const QString& disk = QString());
     QString getPicture(const QDir& dir, const QString& disk, PicSourceType& picSource);
 
