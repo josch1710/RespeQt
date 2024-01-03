@@ -245,7 +245,11 @@ namespace Printers {
     for (int i = 0; i < lines.size(); ++i) {
       int x = lines.at(i).indexOf(" ");
       if (x > 0) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
         number = QStringView(lines.at(i)).mid(1, x - 1).toInt();
+#else
+        number = lines.at(i).midRef(1, x - 1).toInt();
+#endif
         if (number) {
           lineNumberFound = true;
           break;
@@ -261,7 +265,11 @@ namespace Printers {
       for (int i = 0; i < lines.size(); ++i) {
         int x = lines.at(i).indexOf(" ");
         if (x > 0) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
           number = QStringView(lines.at(i)).mid(1, x - 1).toInt();
+#else
+          number = lines.at(i).midRef(1, x - 1).toInt();
+#endif
           if (!number) {
             x = -1;
           }

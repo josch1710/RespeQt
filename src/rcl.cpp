@@ -268,10 +268,10 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
           int i, type;
           bool ok;
           i = imageFileName.lastIndexOf(".");
-#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
-          type = imageFileName.midRef(i + 1).toInt(&ok, 10);
-#else
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
           type = QStringView(imageFileName).mid(i + 1).toInt(&ok, 10);
+#else
+          type = imageFileName.midRef(i + 1).toInt(&ok, 10);
 #endif
           if (ok && (type < 1 || type > 6)) ok = false;
           if (!ok) {

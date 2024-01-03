@@ -1,12 +1,18 @@
 
 #include "diskimages/atxsectorinfo.h"
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
 #include <QRandomGenerator>
+#endif
 
 namespace DiskImages {
   QByteArray AtxSectorInfo::sectorData() {
     if (m_sectorWeakOffset != 0xFFFF) {
       for (int i = m_sectorWeakOffset; i < m_sectorData.size(); i++) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
         m_sectorData[i] = QRandomGenerator::global()->generate() % 0xFF;
+#else
+        m_sectorData[i] = qrand() % 0xFF;
+#endif
       }
     }
     return m_sectorData;
@@ -17,7 +23,11 @@ namespace DiskImages {
       return 0;
     }
     if ((m_sectorWeakOffset != 0xFFFF) && (pos >= m_sectorWeakOffset)) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
       return QRandomGenerator::global()->generate() & 0xFF;
+#else
+      return qrand() & 0xFF;
+#endif
     }
     return m_sectorData[pos];
   }
