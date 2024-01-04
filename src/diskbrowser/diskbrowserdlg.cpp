@@ -139,6 +139,9 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
     auto folders = _folderDisks.folders();
     foreach (const QString &subdir, folders)
     {
+        if (subdir.startsWith('.') && (subdir != ".."))     // hide .folders on Windows
+            continue;
+
         auto item = new QTreeWidgetItem(ui->treeDisks);
         auto icon = QIcon{":/icons/silk-icons/icons/folder_explore.png"};
         item->setText(0, subdir);

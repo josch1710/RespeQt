@@ -17,7 +17,7 @@ DbJson::~DbJson()
 
 void DbJson::setDataDir(const QString& dir)
 {
-    _dataDir.setPath(dir);
+    _dataDir.setPath(dir + "/.respeqt_db");
 
     if (!_dataDir.exists())
         _dataDir.mkpath(".");
@@ -172,7 +172,13 @@ bool DbJson::save()
 
     bool useDataDir = (RespeqtSettings::instance()->dbDataSource() == DbData_subDir);
     if (useDataDir)
-        it = _dirMap.find(_dataDir.path());     // reset the iterator to current data dir
+    {
+        QDir upDir(_dataDir);               // disk collection dir will be the parent
+        upDir.cdUp();                       // back out of .respeqt_db to ..
+        it = _dirMap.find(upDir.path());    // reset the iterator to current data dir
+
+        Q_ASSERT(it != _dirMap.end());
+    }
 
     while (it != _dirMap.end())
     {
@@ -214,9 +220,9 @@ bool DbJson::save()
             jsRoot[dirName] = jsDirObj;
 
         if (useDataDir)             // using JSON file in .respeqt_db dir?
-            ++it;                   // no: grab the next dir (if any)
-        else
             it = _dirMap.end();     // yes: we're done (mostly)
+        else
+            ++it;                   // no: grab the next dir (if any)
     }
 
     _jsDoc = QJsonDocument(jsRoot);
