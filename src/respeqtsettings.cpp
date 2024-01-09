@@ -945,13 +945,13 @@ DbDataSource RespeqtSettings::dbDataSource()
     return static_cast<DbDataSource>(mSettings->value("/DiskBrowserDlg/source", DbData_appSettings).toInt());
 }
 
-void RespeqtSettings::setDbFileNames(bool useFileNames, bool jsonFirst)
+void RespeqtSettings::setDbFileNames(bool useFileNames, bool favorJson)
 {
     mSettings->setValue("/DiskBrowserDlg/use_filenames", useFileNames);
-    mSettings->setValue("/DiskBrowserDlg/json_1st", jsonFirst);
+    mSettings->setValue("/DiskBrowserDlg/favor_json", favorJson);
 }
 
-bool RespeqtSettings::dbJsonFirst()
+bool RespeqtSettings::dbFavorJson()
 {
     return mSettings->value("/DiskBrowserDlg/json_1st", true).toBool();
 }

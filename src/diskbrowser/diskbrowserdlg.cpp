@@ -306,7 +306,7 @@ void DiskBrowserDlg::update()
     ui->picPreview->clear();
     _picInfo.clear();
 
-    bool jsonFirst = RespeqtSettings::instance()->dbJsonFirst();
+    bool favorJson = RespeqtSettings::instance()->dbFavorJson();
     bool fileNames = RespeqtSettings::instance()->dbUseFileNames();
 
     // find a custom or built-in pic
@@ -314,32 +314,15 @@ void DiskBrowserDlg::update()
     auto fileInfo = QFileInfo {_diskFullName};
     QDir dir {fileInfo.absolutePath()};
 
-    if (fileNames && jsonFirst)     // a bit confusing...
+    if (fileNames)
     {
-        // 'fileNames' true enables the filesystem scan for pics/titles
-        // 'jsonFirst' really means load json/ini 2nd (but only if the scan came up empty)
-
         _picInfo.label = parsePicLabel();
         _picInfo.pic   = findPicFile();
-
-        if (_picInfo.pic.isEmpty())
-            _picInfo.pic = _dbSettings->getPicture(dir, _diskFileName, _picSource);
-        if (_picInfo.label.isEmpty())
-            _picInfo.label = _dbSettings->getLabel(dir, _diskFileName);
     }
-    else    // load json/ini data, then go to filesytem if scan enabled
-    {
-        _picInfo.label = _dbSettings->getLabel(dir, _diskFileName);
+    if (_picInfo.pic.isEmpty() || favorJson)
         _picInfo.pic = _dbSettings->getPicture(dir, _diskFileName, _picSource);
-
-        if (fileNames)
-        {
-            if (_picInfo.pic.isEmpty())
-                _picInfo.pic = findPicFile();
-            if (_picInfo.label.isEmpty())
-                _picInfo.label = parsePicLabel();
-        }
-    }
+    if (_picInfo.label.isEmpty() || favorJson)
+        _picInfo.label = _dbSettings->getLabel(dir, _diskFileName);
 
     if (_picInfo.pic.isEmpty())
     {
@@ -347,6 +330,8 @@ void DiskBrowserDlg::update()
         if (!_picInfo.pic.isEmpty())
         {
             _picSource = PicSource_floppy;
+            if (_picInfo.label.isEmpty())
+                _picInfo.label.title = fileInfo.completeBaseName();
             ui->picPreview->setLabel(_picInfo.label);
         }
     }

@@ -1138,9 +1138,9 @@
               </widget>
              </item>
              <item>
-              <widget class="QCheckBox" name="cb_json_first">
+              <widget class="QCheckBox" name="cb_favor_json">
                <property name="text">
-                <string>Override AppData/JSON with filename scheme</string>
+                <string>Favor AppData/Json over filename scheme</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
@@ -2836,6 +2836,7 @@
   </layout>
  </widget>
  <resources>
+  <include location="../resources/icons.qrc"/>
   <include location="../resources/icons.qrc"/>
  </resources>
  <connections>

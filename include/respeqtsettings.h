@@ -299,8 +299,8 @@ public:
   // Disk collection browser options page
   DbDataSource dbDataSource();
   void setDbDataSource(DbDataSource dbSource);
-  void setDbFileNames(bool useFileNames, bool jsonFirst = false);
-  bool dbJsonFirst();
+  void setDbFileNames(bool useFileNames, bool favorJson = false);
+  bool dbFavorJson();
   bool dbUseFileNames();
   LabelFont dbTitleFont();
   void setDbTitleFont(const LabelFont& font);
