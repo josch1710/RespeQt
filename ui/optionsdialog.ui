@@ -1520,995 +1520,1097 @@
       </layout>
      </widget>
      <widget class="QWidget" name="page_810_firmware">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <widget class="QGroupBox" name="firmware810Group">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>320</width>
-         <height>401</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>258</width>
-         <height>208</height>
-        </size>
-       </property>
-       <property name="title">
-        <string>810 firmware path</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_4">
-        <item row="4" column="0">
-         <widget class="QLabel" name="atari810HappyFirmwareLabel">
-          <property name="text">
-           <string>Atari 810 Happy firmware path:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLineEdit" name="atari810HappyFirmwarePath">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLineEdit" name="atari810ChipFirmwarePath">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="atari810ChipFirmwareLabel">
-          <property name="text">
-           <string>Atari 810 Chip firmware path:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0">
-         <spacer name="firmware810Spacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLineEdit" name="atari810FirmwarePath">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="atari810FirmwareLabel">
-          <property name="text">
-           <string>Atari 810 firmware path:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QToolButton" name="atari810HappyFirmwareButton">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="icon">
-           <iconset resource="../resources/icons.qrc">
-            <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QToolButton" name="atari810ChipFirmwareButton">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="icon">
-           <iconset resource="../resources/icons.qrc">
-            <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QToolButton" name="atari810FirmwareButton">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="icon">
-           <iconset resource="../resources/icons.qrc">
-            <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
-          </property>
-         </widget>
-        </item>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+         <property name="spacing">
+           <number>0</number>
+         </property>
+         <property name="leftMargin">
+           <number>0</number>
+         </property>
+         <property name="topMargin">
+           <number>0</number>
+         </property>
+         <property name="rightMargin">
+           <number>0</number>
+         </property>
+         <property name="bottomMargin">
+           <number>0</number>
+         </property>
+         <item>
+           <widget class="QGroupBox" name="firmware810Group">
+             <property name="enabled">
+               <bool>true</bool>
+             </property>
+             <property name="geometry">
+               <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>320</width>
+                 <height>401</height>
+               </rect>
+             </property>
+             <property name="minimumSize">
+               <size>
+                 <width>258</width>
+                 <height>208</height>
+               </size>
+             </property>
+             <property name="title">
+               <string>810 firmware path</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_4">
+               <item row="4" column="0">
+                 <widget class="QLabel" name="atari810HappyFirmwareLabel">
+                   <property name="text">
+                     <string>Atari 810 Happy firmware path:</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="5" column="0">
+                 <widget class="QLineEdit" name="atari810HappyFirmwarePath">
+                   <property name="text">
+                     <string/>
+                   </property>
+                 </widget>
+               </item>
+               <item row="3" column="0">
+                 <widget class="QLineEdit" name="atari810ChipFirmwarePath">
+                   <property name="text">
+                     <string/>
+                   </property>
+                 </widget>
+               </item>
+               <item row="2" column="0">
+                 <widget class="QLabel" name="atari810ChipFirmwareLabel">
+                   <property name="text">
+                     <string>Atari 810 Chip firmware path:</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="6" column="0">
+                 <spacer name="firmware810Spacer">
+                   <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                     <size>
+                       <width>20</width>
+                       <height>40</height>
+                     </size>
+                   </property>
+                 </spacer>
+               </item>
+               <item row="1" column="0">
+                 <widget class="QLineEdit" name="atari810FirmwarePath">
+                   <property name="text">
+                     <string/>
+                   </property>
+                 </widget>
+               </item>
+               <item row="0" column="0">
+                 <widget class="QLabel" name="atari810FirmwareLabel">
+                   <property name="text">
+                     <string>Atari 810 firmware path:</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="5" column="1">
+                 <widget class="QToolButton" name="atari810HappyFirmwareButton">
+                   <property name="enabled">
+                     <bool>true</bool>
+                   </property>
+                   <property name="minimumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="maximumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="icon">
+                     <iconset resource="../resources/icons.qrc">
+                       <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png
+                     </iconset>
+                   </property>
+                 </widget>
+               </item>
+               <item row="3" column="1">
+                 <widget class="QToolButton" name="atari810ChipFirmwareButton">
+                   <property name="enabled">
+                     <bool>true</bool>
+                   </property>
+                   <property name="minimumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="maximumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="icon">
+                     <iconset resource="../resources/icons.qrc">
+                       <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png
+                     </iconset>
+                   </property>
+                 </widget>
+               </item>
+               <item row="1" column="1">
+                 <widget class="QToolButton" name="atari810FirmwareButton">
+                   <property name="enabled">
+                     <bool>true</bool>
+                   </property>
+                   <property name="minimumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="maximumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="icon">
+                     <iconset resource="../resources/icons.qrc">
+                       <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png
+                     </iconset>
+                   </property>
+                 </widget>
+               </item>
+             </layout>
+           </widget>
+         </item>
        </layout>
       </widget>
-     </widget>
      <widget class="QWidget" name="page_1050_firmware">
-      <widget class="QGroupBox" name="firmware1050Group">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>320</width>
-         <height>401</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>258</width>
-         <height>208</height>
-        </size>
-       </property>
-       <property name="title">
-        <string>1050 firmware path</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_8">
-        <item row="8" column="0">
-         <widget class="QLabel" name="atari1050TurboFirmwareLabel">
-          <property name="text">
-           <string>Atari 1050 Turbo firmware path:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="0">
-         <widget class="QLabel" name="atari1050DuplicatorFirmwareLabel">
-          <property name="text">
-           <string>Atari 1050 Duplicator firmware path:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="1">
-         <widget class="QToolButton" name="atari1050TurboFirmwareButton">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="icon">
-           <iconset resource="../resources/icons.qrc">
-            <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="0">
-         <widget class="QLineEdit" name="atari1050TurboFirmwarePath">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLineEdit" name="atari1050FirmwarePath">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="atari1050FirmwareLabel">
-          <property name="text">
-           <string>Atari 1050 firmware path:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLineEdit" name="atari1050HappyFirmwarePath">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="atari1050ArchiverFirmwareLabel">
-          <property name="text">
-           <string>Atari 1050 Archiver firmware path:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLineEdit" name="atari1050ArchiverFirmwarePath">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="atari1050HappyFirmwareLabel">
-          <property name="text">
-           <string>Atari 1050 Happy firmware path:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0">
-         <widget class="QLabel" name="atari1050SpeedyFirmwareLabel">
-          <property name="text">
-           <string>Atari 1050 Speedy firmware path:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="12" column="0">
-         <spacer name="firmware1050Spacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="7" column="0">
-         <widget class="QLineEdit" name="atari1050SpeedyFirmwarePath">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QToolButton" name="atari1050HappyFirmwareButton">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="icon">
-           <iconset resource="../resources/icons.qrc">
-            <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QToolButton" name="atari1050ArchiverFirmwareButton">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="icon">
-           <iconset resource="../resources/icons.qrc">
-            <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QToolButton" name="atari1050FirmwareButton">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="icon">
-           <iconset resource="../resources/icons.qrc">
-            <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="1">
-         <widget class="QToolButton" name="atari1050SpeedyFirmwareButton">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="icon">
-           <iconset resource="../resources/icons.qrc">
-            <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="0">
-         <widget class="QLineEdit" name="atari1050DuplicatorFirmwarePath">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="1">
-         <widget class="QToolButton" name="atari1050DuplicatorFirmwareButton">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="icon">
-           <iconset resource="../resources/icons.qrc">
-            <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_15">
+         <property name="spacing">
+           <number>0</number>
+         </property>
+         <property name="leftMargin">
+           <number>0</number>
+         </property>
+         <property name="topMargin">
+           <number>0</number>
+         </property>
+         <property name="rightMargin">
+           <number>0</number>
+         </property>
+         <property name="bottomMargin">
+           <number>0</number>
+         </property>
+         <item>
+           <widget class="QGroupBox" name="firmware1050Group">
+             <property name="geometry">
+               <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>320</width>
+                 <height>401</height>
+               </rect>
+             </property>
+             <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+               </sizepolicy>
+             </property>
+             <property name="minimumSize">
+               <size>
+                 <width>258</width>
+                 <height>208</height>
+               </size>
+             </property>
+             <property name="title">
+               <string>1050 firmware path</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_8">
+               <item row="8" column="0">
+                 <widget class="QLabel" name="atari1050TurboFirmwareLabel">
+                   <property name="text">
+                     <string>Atari 1050 Turbo firmware path:</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="10" column="0">
+                 <widget class="QLabel" name="atari1050DuplicatorFirmwareLabel">
+                   <property name="text">
+                     <string>Atari 1050 Duplicator firmware path:</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="9" column="1">
+                 <widget class="QToolButton" name="atari1050TurboFirmwareButton">
+                   <property name="enabled">
+                     <bool>true</bool>
+                   </property>
+                   <property name="minimumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="maximumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="icon">
+                     <iconset resource="../resources/icons.qrc">
+                       <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png
+                     </iconset>
+                   </property>
+                 </widget>
+               </item>
+               <item row="9" column="0">
+                 <widget class="QLineEdit" name="atari1050TurboFirmwarePath">
+                   <property name="text">
+                     <string/>
+                   </property>
+                 </widget>
+               </item>
+               <item row="1" column="0">
+                 <widget class="QLineEdit" name="atari1050FirmwarePath">
+                   <property name="text">
+                     <string/>
+                   </property>
+                 </widget>
+               </item>
+               <item row="0" column="0">
+                 <widget class="QLabel" name="atari1050FirmwareLabel">
+                   <property name="text">
+                     <string>Atari 1050 firmware path:</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="5" column="0">
+                 <widget class="QLineEdit" name="atari1050HappyFirmwarePath">
+                   <property name="text">
+                     <string/>
+                   </property>
+                 </widget>
+               </item>
+               <item row="2" column="0">
+                 <widget class="QLabel" name="atari1050ArchiverFirmwareLabel">
+                   <property name="text">
+                     <string>Atari 1050 Archiver firmware path:</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="3" column="0">
+                 <widget class="QLineEdit" name="atari1050ArchiverFirmwarePath">
+                   <property name="text">
+                     <string/>
+                   </property>
+                 </widget>
+               </item>
+               <item row="4" column="0">
+                 <widget class="QLabel" name="atari1050HappyFirmwareLabel">
+                   <property name="text">
+                     <string>Atari 1050 Happy firmware path:</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="6" column="0">
+                 <widget class="QLabel" name="atari1050SpeedyFirmwareLabel">
+                   <property name="text">
+                     <string>Atari 1050 Speedy firmware path:</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="12" column="0">
+                 <spacer name="firmware1050Spacer">
+                   <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                     <size>
+                       <width>20</width>
+                       <height>40</height>
+                     </size>
+                   </property>
+                 </spacer>
+               </item>
+               <item row="7" column="0">
+                 <widget class="QLineEdit" name="atari1050SpeedyFirmwarePath">
+                   <property name="text">
+                     <string/>
+                   </property>
+                 </widget>
+               </item>
+               <item row="5" column="1">
+                 <widget class="QToolButton" name="atari1050HappyFirmwareButton">
+                   <property name="enabled">
+                     <bool>true</bool>
+                   </property>
+                   <property name="minimumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="maximumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="icon">
+                     <iconset resource="../resources/icons.qrc">
+                       <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png
+                     </iconset>
+                   </property>
+                 </widget>
+               </item>
+               <item row="3" column="1">
+                 <widget class="QToolButton" name="atari1050ArchiverFirmwareButton">
+                   <property name="enabled">
+                     <bool>true</bool>
+                   </property>
+                   <property name="minimumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="maximumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="icon">
+                     <iconset resource="../resources/icons.qrc">
+                       <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png
+                     </iconset>
+                   </property>
+                 </widget>
+               </item>
+               <item row="1" column="1">
+                 <widget class="QToolButton" name="atari1050FirmwareButton">
+                   <property name="enabled">
+                     <bool>true</bool>
+                   </property>
+                   <property name="minimumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="maximumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="icon">
+                     <iconset resource="../resources/icons.qrc">
+                       <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png
+                     </iconset>
+                   </property>
+                 </widget>
+               </item>
+               <item row="7" column="1">
+                 <widget class="QToolButton" name="atari1050SpeedyFirmwareButton">
+                   <property name="enabled">
+                     <bool>true</bool>
+                   </property>
+                   <property name="minimumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="maximumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="icon">
+                     <iconset resource="../resources/icons.qrc">
+                       <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png
+                     </iconset>
+                   </property>
+                 </widget>
+               </item>
+               <item row="11" column="0">
+                 <widget class="QLineEdit" name="atari1050DuplicatorFirmwarePath">
+                   <property name="text">
+                     <string/>
+                   </property>
+                 </widget>
+               </item>
+               <item row="11" column="1">
+                 <widget class="QToolButton" name="atari1050DuplicatorFirmwareButton">
+                   <property name="enabled">
+                     <bool>true</bool>
+                   </property>
+                   <property name="minimumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="maximumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="icon">
+                     <iconset resource="../resources/icons.qrc">
+                       <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png
+                     </iconset>
+                   </property>
+                 </widget>
+               </item>
+             </layout>
+           </widget>
+         </item>
+        </layout>
+       </widget>
      <widget class="QWidget" name="page_type">
-      <widget class="QGroupBox" name="typeGroup">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>320</width>
-         <height>401</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>258</width>
-         <height>208</height>
-        </size>
-       </property>
-       <property name="title">
-        <string>Firmware emulation</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_5">
-        <item row="0" column="0" colspan="2">
-         <widget class="QLabel" name="warning1">
-          <property name="text">
-           <string>Modifications in this panel are applied when a</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0" colspan="2">
-         <widget class="QLabel" name="warning2">
-          <property name="text">
-           <string>disk image is loaded in one of the first 4 drives</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QComboBox" name="d1EmulationType">
-          <item>
-           <property name="text">
-            <string>SIO command emulation (default)</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 810 firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 810 with the Chip firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 810 with Happy firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with the Archiver firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Happy firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Speedy firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Turbo firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Duplicator firmware</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="8" column="1">
-         <widget class="QCheckBox" name="d3PowerOnWithDiskInserted">
-          <property name="text">
-           <string>Power on D3 with disk inserted</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="1">
-         <widget class="QCheckBox" name="d2PowerOnWithDiskInserted">
-          <property name="text">
-           <string>Power on D2 with disk inserted</string>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="1">
-         <widget class="QCheckBox" name="d4PowerOnWithDiskInserted">
-          <property name="text">
-           <string>Power on D4 with disk inserted</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="d2TypeLabel">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>D2:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="1">
-         <widget class="QComboBox" name="d4EmulationType">
-          <item>
-           <property name="text">
-            <string>SIO command emulation (default)</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 810 firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 810 with the Chip firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 810 with Happy firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with the Archiver firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Happy firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Speedy firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Turbo firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Duplicator firmware</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="7" column="1">
-         <widget class="QComboBox" name="d3EmulationType">
-          <item>
-           <property name="text">
-            <string>SIO command emulation (default)</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 810 firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 810 with the Chip firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 810 with Happy firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with the Archiver firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Happy firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Speedy firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Turbo firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Duplicator firmware</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QComboBox" name="d2EmulationType">
-          <item>
-           <property name="text">
-            <string>SIO command emulation (default)</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 810 firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 810 with the Chip firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 810 with Happy firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with the Archiver firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Happy firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Speedy firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Turbo firmware</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Atari 1050 with Duplicator firmware</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="7" column="0">
-         <widget class="QLabel" name="d3TypeLabel">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>D3:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="0" colspan="2">
-         <spacer name="typeSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="d1TypeLabel">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>D1:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="0">
-         <widget class="QLabel" name="d4TypeLabel">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>D4</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QCheckBox" name="d1PowerOnWithDiskInserted">
-          <property name="text">
-           <string>Power on D1 with disk inserted</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <spacer name="verticalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Fixed</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>10</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
+       <layout class="QVBoxLayout" name="verticalLayout_16">
+         <property name="spacing">
+           <number>0</number>
+         </property>
+         <property name="leftMargin">
+           <number>0</number>
+         </property>
+         <property name="topMargin">
+           <number>0</number>
+         </property>
+         <property name="rightMargin">
+           <number>0</number>
+         </property>
+         <property name="bottomMargin">
+           <number>0</number>
+         </property>
+         <item>
+           <widget class="QGroupBox" name="typeGroup">
+             <property name="geometry">
+               <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>320</width>
+                 <height>401</height>
+               </rect>
+             </property>
+             <property name="minimumSize">
+               <size>
+                 <width>258</width>
+                 <height>208</height>
+               </size>
+             </property>
+             <property name="title">
+               <string>Firmware emulation</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_5">
+               <item row="0" column="0" colspan="2">
+                 <widget class="QLabel" name="warning1">
+                   <property name="text">
+                     <string>Modifications in this panel are applied when a</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="1" column="0" colspan="2">
+                 <widget class="QLabel" name="warning2">
+                   <property name="text">
+                     <string>disk image is loaded in one of the first 4 drives</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="3" column="1">
+                 <widget class="QComboBox" name="d1EmulationType">
+                   <item>
+                     <property name="text">
+                       <string>SIO command emulation (default)</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 810 firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 810 with the Chip firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 810 with Happy firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with the Archiver firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Happy firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Speedy firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Turbo firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Duplicator firmware</string>
+                     </property>
+                   </item>
+                 </widget>
+               </item>
+               <item row="8" column="1">
+                 <widget class="QCheckBox" name="d3PowerOnWithDiskInserted">
+                   <property name="text">
+                     <string>Power on D3 with disk inserted</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="6" column="1">
+                 <widget class="QCheckBox" name="d2PowerOnWithDiskInserted">
+                   <property name="text">
+                     <string>Power on D2 with disk inserted</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="10" column="1">
+                 <widget class="QCheckBox" name="d4PowerOnWithDiskInserted">
+                   <property name="text">
+                     <string>Power on D4 with disk inserted</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="5" column="0">
+                 <widget class="QLabel" name="d2TypeLabel">
+                   <property name="sizePolicy">
+                     <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                     </sizepolicy>
+                   </property>
+                   <property name="text">
+                     <string>D2:</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="9" column="1">
+                 <widget class="QComboBox" name="d4EmulationType">
+                   <item>
+                     <property name="text">
+                       <string>SIO command emulation (default)</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 810 firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 810 with the Chip firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 810 with Happy firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with the Archiver firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Happy firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Speedy firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Turbo firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Duplicator firmware</string>
+                     </property>
+                   </item>
+                 </widget>
+               </item>
+               <item row="7" column="1">
+                 <widget class="QComboBox" name="d3EmulationType">
+                   <item>
+                     <property name="text">
+                       <string>SIO command emulation (default)</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 810 firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 810 with the Chip firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 810 with Happy firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with the Archiver firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Happy firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Speedy firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Turbo firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Duplicator firmware</string>
+                     </property>
+                   </item>
+                 </widget>
+               </item>
+               <item row="5" column="1">
+                 <widget class="QComboBox" name="d2EmulationType">
+                   <item>
+                     <property name="text">
+                       <string>SIO command emulation (default)</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 810 firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 810 with the Chip firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 810 with Happy firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with the Archiver firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Happy firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Speedy firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Turbo firmware</string>
+                     </property>
+                   </item>
+                   <item>
+                     <property name="text">
+                       <string>Atari 1050 with Duplicator firmware</string>
+                     </property>
+                   </item>
+                 </widget>
+               </item>
+               <item row="7" column="0">
+                 <widget class="QLabel" name="d3TypeLabel">
+                   <property name="sizePolicy">
+                     <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                     </sizepolicy>
+                   </property>
+                   <property name="text">
+                     <string>D3:</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="11" column="0" colspan="2">
+                 <spacer name="typeSpacer">
+                   <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                     <size>
+                       <width>20</width>
+                       <height>40</height>
+                     </size>
+                   </property>
+                 </spacer>
+               </item>
+               <item row="3" column="0">
+                 <widget class="QLabel" name="d1TypeLabel">
+                   <property name="sizePolicy">
+                     <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                     </sizepolicy>
+                   </property>
+                   <property name="text">
+                     <string>D1:</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="9" column="0">
+                 <widget class="QLabel" name="d4TypeLabel">
+                   <property name="sizePolicy">
+                     <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                     </sizepolicy>
+                   </property>
+                   <property name="text">
+                     <string>D4</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="4" column="1">
+                 <widget class="QCheckBox" name="d1PowerOnWithDiskInserted">
+                   <property name="text">
+                     <string>Power on D1 with disk inserted</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="2" column="0">
+                 <spacer name="verticalSpacer_4">
+                   <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeType">
+                     <enum>QSizePolicy::Fixed</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                     <size>
+                       <width>20</width>
+                       <height>10</height>
+                     </size>
+                   </property>
+                 </spacer>
+               </item>
+             </layout>
+           </widget>
+         </item>
        </layout>
-      </widget>
-     </widget>
+       </widget>
      <widget class="QWidget" name="page_trace">
-      <widget class="QGroupBox" name="traceGroup">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>320</width>
-         <height>401</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>258</width>
-         <height>208</height>
-        </size>
-       </property>
-       <property name="title">
-        <string>Trace options</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_6">
-        <item row="10" column="0" colspan="2">
-         <widget class="QCheckBox" name="displayIdAddressMarks">
-          <property name="text">
-           <string>Display ID addess marks</string>
-          </property>
-         </widget>
-        </item>
-        <item row="14" column="0">
-         <spacer name="traceSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="12" column="0" colspan="2">
-         <widget class="QCheckBox" name="displayCpuInstructions">
-          <property name="text">
-           <string>Trace CPU execution in this file:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0" colspan="2">
-         <widget class="QCheckBox" name="displayDriveHead">
-          <property name="text">
-           <string>Display drive head position</string>
-          </property>
-         </widget>
-        </item>
-        <item row="13" column="0">
-         <widget class="QLineEdit" name="traceFilename">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="0" colspan="2">
-         <widget class="QCheckBox" name="displayIndexPulse">
-          <property name="text">
-           <string>Display index pulse</string>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="0" colspan="2">
-         <widget class="QCheckBox" name="displayTrackInformation">
-          <property name="text">
-           <string>Display track information</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="0" colspan="2">
-         <widget class="QCheckBox" name="displayFdcCommands">
-          <property name="text">
-           <string>Display FDC commands</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="0" colspan="2">
-         <widget class="QCheckBox" name="displayMotorOnOff">
-          <property name="text">
-           <string>Display motor On/Off</string>
-          </property>
-         </widget>
-        </item>
+       <layout class="QVBoxLayout" name="verticalLayout_17">
+         <property name="spacing">
+           <number>0</number>
+         </property>
+         <property name="leftMargin">
+           <number>0</number>
+         </property>
+         <property name="topMargin">
+           <number>0</number>
+         </property>
+         <property name="rightMargin">
+           <number>0</number>
+         </property>
+         <property name="bottomMargin">
+           <number>0</number>
+         </property>
+         <item>
+           <widget class="QGroupBox" name="traceGroup">
+             <property name="geometry">
+               <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>320</width>
+                 <height>401</height>
+               </rect>
+             </property>
+             <property name="minimumSize">
+               <size>
+                 <width>258</width>
+                 <height>208</height>
+               </size>
+             </property>
+             <property name="title">
+               <string>Trace options</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_6">
+               <item row="10" column="0" colspan="2">
+                 <widget class="QCheckBox" name="displayIdAddressMarks">
+                   <property name="text">
+                     <string>Display ID addess marks</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="14" column="0">
+                 <spacer name="traceSpacer">
+                   <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                     <size>
+                       <width>20</width>
+                       <height>40</height>
+                     </size>
+                   </property>
+                 </spacer>
+               </item>
+               <item row="12" column="0" colspan="2">
+                 <widget class="QCheckBox" name="displayCpuInstructions">
+                   <property name="text">
+                     <string>Trace CPU execution in this file:</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="6" column="0" colspan="2">
+                 <widget class="QCheckBox" name="displayDriveHead">
+                   <property name="text">
+                     <string>Display drive head position</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="13" column="0">
+                 <widget class="QLineEdit" name="traceFilename">
+                   <property name="text">
+                     <string/>
+                   </property>
+                 </widget>
+               </item>
+               <item row="8" column="0" colspan="2">
+                 <widget class="QCheckBox" name="displayIndexPulse">
+                   <property name="text">
+                     <string>Display index pulse</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="11" column="0" colspan="2">
+                 <widget class="QCheckBox" name="displayTrackInformation">
+                   <property name="text">
+                     <string>Display track information</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="7" column="0" colspan="2">
+                 <widget class="QCheckBox" name="displayFdcCommands">
+                   <property name="text">
+                     <string>Display FDC commands</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="9" column="0" colspan="2">
+                 <widget class="QCheckBox" name="displayMotorOnOff">
+                   <property name="text">
+                     <string>Display motor On/Off</string>
+                   </property>
+                 </widget>
+               </item>
+             </layout>
+           </widget>
+         </item>
        </layout>
       </widget>
-     </widget>
      <widget class="QWidget" name="osbEmulation">
-      <widget class="QGroupBox" name="traceGroup_2">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>378</width>
-         <height>317</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>258</width>
-         <height>208</height>
-        </size>
-       </property>
-       <property name="title">
-        <string>OS-B emulation</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_7">
-        <item row="18" column="0" rowspan="2">
-         <widget class="QLabel" name="warning2_2">
-          <property name="text">
-           <string>With this option active, RespeQt will detect [OS-B] in a disk image filename and will automatically boot a translator disk before booting the chosen disk image.</string>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="0">
-         <widget class="QLabel" name="warning2_1">
-          <property name="text">
-           <string>Translator disk to use with [OS-B] disk images</string>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="20" column="0">
-         <widget class="QLabel" name="warning2_3">
-          <property name="text">
-           <string>NOTE: This option applies only to slot D1:</string>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="12" column="0">
-         <spacer name="verticalSpacer_6">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Fixed</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>10</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="21" column="0">
-         <spacer name="traceSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="17" column="0">
-         <widget class="QCheckBox" name="translatorAutomaticDetection">
-          <property name="text">
-           <string>Detect [OS-B] and boot Translator</string>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="1">
-         <widget class="QToolButton" name="translatorSelectButton">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>24</width>
-            <height>24</height>
-           </size>
-          </property>
-          <property name="icon">
-           <iconset resource="../resources/icons.qrc">
-            <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="0">
-         <widget class="QLineEdit" name="translatorDiskImagePath">
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
+       <layout class="QVBoxLayout" name="verticalLayout_18">
+         <property name="spacing">
+           <number>0</number>
+         </property>
+         <property name="leftMargin">
+           <number>0</number>
+         </property>
+         <property name="topMargin">
+           <number>0</number>
+         </property>
+         <property name="rightMargin">
+           <number>0</number>
+         </property>
+         <property name="bottomMargin">
+           <number>0</number>
+         </property>
+         <item>
+           <widget class="QGroupBox" name="traceGroup_2">
+             <property name="geometry">
+               <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>378</width>
+                 <height>317</height>
+               </rect>
+             </property>
+             <property name="minimumSize">
+               <size>
+                 <width>258</width>
+                 <height>208</height>
+               </size>
+             </property>
+             <property name="title">
+               <string>OS-B emulation</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_7">
+               <item row="18" column="0" rowspan="2">
+                 <widget class="QLabel" name="warning2_2">
+                   <property name="text">
+                     <string>With this option active, RespeQt will detect [OS-B] in a disk image filename and will automatically boot a translator disk before booting the chosen disk image.</string>
+                   </property>
+                   <property name="wordWrap">
+                     <bool>true</bool>
+                   </property>
+                 </widget>
+               </item>
+               <item row="10" column="0">
+                 <widget class="QLabel" name="warning2_1">
+                   <property name="text">
+                     <string>Translator disk to use with [OS-B] disk images</string>
+                   </property>
+                   <property name="wordWrap">
+                     <bool>true</bool>
+                   </property>
+                 </widget>
+               </item>
+               <item row="20" column="0">
+                 <widget class="QLabel" name="warning2_3">
+                   <property name="text">
+                     <string>NOTE: This option applies only to slot D1:</string>
+                   </property>
+                   <property name="wordWrap">
+                     <bool>true</bool>
+                   </property>
+                 </widget>
+               </item>
+               <item row="12" column="0">
+                 <spacer name="verticalSpacer_6">
+                   <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeType">
+                     <enum>QSizePolicy::Fixed</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                     <size>
+                       <width>20</width>
+                       <height>10</height>
+                     </size>
+                   </property>
+                 </spacer>
+               </item>
+               <item row="21" column="0">
+                 <spacer name="traceSpacer_2">
+                   <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                     <size>
+                       <width>20</width>
+                       <height>40</height>
+                     </size>
+                   </property>
+                 </spacer>
+               </item>
+               <item row="17" column="0">
+                 <widget class="QCheckBox" name="translatorAutomaticDetection">
+                   <property name="text">
+                     <string>Detect [OS-B] and boot Translator</string>
+                   </property>
+                 </widget>
+               </item>
+               <item row="11" column="1">
+                 <widget class="QToolButton" name="translatorSelectButton">
+                   <property name="enabled">
+                     <bool>true</bool>
+                   </property>
+                   <property name="minimumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="maximumSize">
+                     <size>
+                       <width>24</width>
+                       <height>24</height>
+                     </size>
+                   </property>
+                   <property name="icon">
+                     <iconset resource="../resources/icons.qrc">
+                       <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png
+                     </iconset>
+                   </property>
+                 </widget>
+               </item>
+               <item row="11" column="0">
+                 <widget class="QLineEdit" name="translatorDiskImagePath">
+                   <property name="text">
+                     <string/>
+                   </property>
+                 </widget>
+               </item>
+             </layout>
+           </widget>
+         </item>
        </layout>
-      </widget>
-     </widget>
+       </widget>
      <widget class="QWidget" name="page_iconsettings">
       <layout class="QVBoxLayout" name="verticalLayout_13">
        <item>
@@ -2603,132 +2705,152 @@
       </layout>
      </widget>
      <widget class="QWidget" name="page_tooldisk">
-      <widget class="QGroupBox" name="traceGroup_3">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>315</width>
-         <height>401</height>
-        </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>258</width>
-         <height>208</height>
-        </size>
-       </property>
-       <property name="title">
-        <string>Favorite tool disk</string>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_8">
-        <property name="sizeConstraint">
-         <enum>QLayout::SetDefaultConstraint</enum>
-        </property>
-        <item>
-         <widget class="QLabel" name="warning2_8">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>70</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>The favorite tool disk is a disk image to boot before the selected disk image in slot D1:. For example, you can have your favorite copier always ready with this option.</string>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="warning2_9">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>50</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Tool disk image to boot when the favorite icon is active</string>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QLineEdit" name="toolDiskImagePath">
-            <property name="text">
-             <string/>
-            </property>
+       <layout class="QVBoxLayout" name="verticalLayout_19">
+         <property name="spacing">
+           <number>0</number>
+         </property>
+         <property name="leftMargin">
+           <number>0</number>
+         </property>
+         <property name="topMargin">
+           <number>0</number>
+         </property>
+         <property name="rightMargin">
+           <number>0</number>
+         </property>
+         <property name="bottomMargin">
+           <number>0</number>
+         </property>
+         <item>
+           <widget class="QGroupBox" name="traceGroup_3">
+             <property name="enabled">
+               <bool>true</bool>
+             </property>
+             <property name="geometry">
+               <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>315</width>
+                 <height>401</height>
+               </rect>
+             </property>
+             <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+               </sizepolicy>
+             </property>
+             <property name="minimumSize">
+               <size>
+                 <width>258</width>
+                 <height>208</height>
+               </size>
+             </property>
+             <property name="title">
+               <string>Favorite tool disk</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_8">
+               <property name="sizeConstraint">
+                 <enum>QLayout::SetDefaultConstraint</enum>
+               </property>
+               <item>
+                 <widget class="QLabel" name="warning2_8">
+                   <property name="minimumSize">
+                     <size>
+                       <width>0</width>
+                       <height>70</height>
+                     </size>
+                   </property>
+                   <property name="text">
+                     <string>The favorite tool disk is a disk image to boot before the selected disk image in slot D1:. For example, you can have your favorite copier always ready with this option.</string>
+                   </property>
+                   <property name="wordWrap">
+                     <bool>true</bool>
+                   </property>
+                 </widget>
+               </item>
+               <item>
+                 <widget class="QLabel" name="warning2_9">
+                   <property name="minimumSize">
+                     <size>
+                       <width>0</width>
+                       <height>50</height>
+                     </size>
+                   </property>
+                   <property name="text">
+                     <string>Tool disk image to boot when the favorite icon is active</string>
+                   </property>
+                   <property name="wordWrap">
+                     <bool>true</bool>
+                   </property>
+                 </widget>
+               </item>
+               <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_3">
+                   <item>
+                     <widget class="QLineEdit" name="toolDiskImagePath">
+                       <property name="text">
+                         <string/>
+                       </property>
+                     </widget>
+                   </item>
+                   <item>
+                     <widget class="QToolButton" name="toolDiskSelectButton">
+                       <property name="enabled">
+                         <bool>true</bool>
+                       </property>
+                       <property name="minimumSize">
+                         <size>
+                           <width>24</width>
+                           <height>24</height>
+                         </size>
+                       </property>
+                       <property name="maximumSize">
+                         <size>
+                           <width>24</width>
+                           <height>24</height>
+                         </size>
+                       </property>
+                       <property name="icon">
+                         <iconset resource="../resources/icons.qrc">
+                           <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png
+                         </iconset>
+                       </property>
+                     </widget>
+                   </item>
+                 </layout>
+               </item>
+               <item>
+                 <widget class="QCheckBox" name="activateChipModeWithTool">
+                   <property name="text">
+                     <string>Activate Chip mode when booting this disk</string>
+                   </property>
+                 </widget>
+               </item>
+               <item>
+                 <widget class="QCheckBox" name="activateHappyModeWithTool">
+                   <property name="text">
+                     <string>Activate Happy mode when booting this disk</string>
+                   </property>
+                 </widget>
+               </item>
+               <item>
+                 <spacer name="verticalSpacer_8">
+                   <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                     <size>
+                       <width>20</width>
+                       <height>40</height>
+                     </size>
+                   </property>
+                 </spacer>
+               </item>
+             </layout>
            </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="toolDiskSelectButton">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>24</width>
-              <height>24</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>24</width>
-              <height>24</height>
-             </size>
-            </property>
-            <property name="icon">
-             <iconset resource="../resources/icons.qrc">
-              <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="activateChipModeWithTool">
-          <property name="text">
-           <string>Activate Chip mode when booting this disk</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="activateHappyModeWithTool">
-          <property name="text">
-           <string>Activate Happy mode when booting this disk</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer_8">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
+         </item>
        </layout>
-      </widget>
      </widget>
      <widget class="QWidget" name="page_5">
       <layout class="QVBoxLayout" name="verticalLayout_11">
