@@ -30,7 +30,8 @@ public:
   ~OptionsDialog() = default;
 
 protected:
-  void changeEvent(QEvent *e);
+  void changeEvent(QEvent *e) override;
+  void showEvent(QShowEvent *e) override;
 
 private:
   Ui::OptionsDialog *m_ui;

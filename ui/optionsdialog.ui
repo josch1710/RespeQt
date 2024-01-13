@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>417</height>
+    <width>703</width>
+    <height>637</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -55,7 +55,7 @@
      <widget class="QTreeWidget" name="optionSections">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-        <horstretch>1</horstretch>
+        <horstretch>50</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
@@ -175,7 +175,7 @@
      <widget class="QWidget" name="verticalLayoutWidget_2" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-        <horstretch>2</horstretch>
+        <horstretch>50</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
@@ -3058,7 +3058,6 @@
   </layout>
  </widget>
  <resources>
-  <include location="../resources/icons.qrc"/>
   <include location="../resources/icons.qrc"/>
  </resources>
  <connections>

@@ -320,10 +320,17 @@ void DiskBrowserDlg::update()
         _picInfo.pic   = findPicFile();
     }
     if (_picInfo.pic.isEmpty() || favorJson)
-        _picInfo.pic = _dbSettings->getPicture(dir, _diskFileName, _picSource);
+    {
+        QString jsonPic = _dbSettings->getPicture(dir, _diskFileName, _picSource);
+        if (_picInfo.pic.isEmpty() || !jsonPic.isEmpty())
+            _picInfo.pic = jsonPic;
+    }
     if (_picInfo.label.isEmpty() || favorJson)
-        _picInfo.label = _dbSettings->getLabel(dir, _diskFileName);
-
+    {
+        auto jsonLabel = _dbSettings->getLabel(dir, _diskFileName);
+        if (_picInfo.label.isEmpty() || !jsonLabel.isEmpty())
+            _picInfo.label = jsonLabel;
+    }
     if (_picInfo.pic.isEmpty())
     {
         _picInfo.pic = getFloppyPic();

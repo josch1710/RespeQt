@@ -19,6 +19,7 @@
 #include <QTranslator>
 #include <QtSerialPort>
 #include <QColorDialog>
+#include <QScreen>
 
 OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent),
                                                 m_ui(new Ui::OptionsDialog) {
@@ -312,6 +313,25 @@ void OptionsDialog::changeEvent(QEvent *e) {
     default:
       break;
   }
+}
+
+void OptionsDialog::showEvent(QShowEvent *e)
+{
+    static bool setSize = true;
+
+    QDialog::showEvent(e);
+
+    if (e->type() != QEvent::Show)
+        return;
+
+    if (setSize)    // on first presentation, resize the dialog to a reasonable size (TBD: do this in designer?)
+    {
+        resize(QGuiApplication::primaryScreen()->size() / 2);   // Qt doesn't seem to have a better way to do this
+        auto sizes = m_ui->splitter->sizes();
+        int  total = sizes[0] + sizes[1];
+        m_ui->splitter->setSizes( QList<int>{total / 3, total * 2 / 3});    // TBD: use 2x widget stretch factors?
+        setSize = false;
+    }
 }
 
 void OptionsDialog::serialPortChanged(int index) {
