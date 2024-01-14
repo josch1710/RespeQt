@@ -282,7 +282,7 @@ public:
   void setRawPrinterName(const QString &name);
   QString rawPrinterName() const;
 
-  // Disk collection Browser
+  // Disk Collection Browser
   QString mostRecentBrowserFolder();
   QStringList recentBrowserFolders();
   void setMostRecentBrowserFolder(const QString& name);
@@ -296,7 +296,7 @@ public:
   void setDiskPic(const QString& pic);
   QString diskPic();
 
-  // Disk collection browser options page
+  // Disk Collection browser options page
   DbDataSource dbDataSource();
   void setDbDataSource(DbDataSource dbSource);
   void setDbFileNames(bool useFileNames, bool favorJson = false);

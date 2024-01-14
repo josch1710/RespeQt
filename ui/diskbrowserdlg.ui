@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Disk collection Browser</string>
+   <string>Disk Collection Browser</string>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
@@ -108,8 +108,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>49</width>
-          <height>503</height>
+          <width>83</width>
+          <height>450</height>
          </rect>
         </property>
         <property name="font">

@@ -201,13 +201,13 @@ void DiskBrowserDlg::refreshFoldersCombobox()
             }
             else
             {
-                qDebug() << "!w" << tr("Disk collection Browser most recent list updated. '%1' not found.").arg(name);
+                qDebug() << "!w" << tr("Disk Collection Browser most recent list updated. '%1' not found.").arg(name);
                 RespeqtSettings::instance()->delMostRecentBrowserFolder(name);
             }
         }
         else    // Simple case of missing folder
         {
-            qDebug() << "!w" << tr("Disk collection Browser most recent list updated. Folder '%1' not found.").arg(name);
+            qDebug() << "!w" << tr("Disk Collection Browser most recent list updated. Folder '%1' not found.").arg(name);
             RespeqtSettings::instance()->delMostRecentBrowserFolder(name);
         }
     }

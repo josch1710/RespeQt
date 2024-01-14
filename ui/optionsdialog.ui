@@ -107,67 +107,67 @@
       </item>
       <item>
        <property name="text">
-        <string>Disk collection browser</string>
+        <string>Disk Collection Browser</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Disk images</string>
+        <string>Disk Images</string>
        </property>
        <property name="flags">
         <set>ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
        </property>
        <item>
         <property name="text">
-         <string>Image options</string>
+         <string>Image Options</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>OS-B emulation</string>
+         <string>OS-B Emulation</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Icon visibility</string>
+         <string>Icon Visibility</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Favorite tool disk</string>
+         <string>Favorite Tool Disk</string>
         </property>
        </item>
       </item>
       <item>
        <property name="text">
-        <string>User interface</string>
+        <string>User Interface</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Printer emulation</string>
+        <string>Printer Emulation</string>
        </property>
        <property name="flags">
         <set>ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
        </property>
        <item>
         <property name="text">
-         <string>Printer fixed width font</string>
+         <string>Printer Fixed Width Font</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Passthrough settings</string>
+         <string>Passthrough Settings</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Printer protocol</string>
+         <string>Printer Protocol</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>1020 emulation options</string>
+         <string>1020 Emulation Options</string>
         </property>
        </item>
       </item>
