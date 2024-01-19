@@ -425,3 +425,19 @@ void Label::setFont(const LabelFont& font)
     Q_ASSERT(this->font().family() == _font.family());
 #endif
 }
+
+void Label::focusOutEvent(QFocusEvent* event)
+{
+    QTextEdit::focusOutEvent(event);
+
+    if (_editMode)
+    {
+        // select nothing (work-around for strange background color glitch)
+        auto cursor = textCursor();
+        cursor.movePosition(QTextCursor::End);
+        setTextCursor(cursor);
+
+        setEditMode(false);
+        emit sigEditDone(false);
+    }
+}

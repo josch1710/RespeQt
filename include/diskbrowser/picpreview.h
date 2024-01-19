@@ -75,8 +75,9 @@ signals:
     void sigEditDone(bool canceled);
 
 protected:
-    virtual void keyPressEvent(QKeyEvent* evt) override;
+    virtual void keyPressEvent(QKeyEvent* event) override;
     virtual void resizeEvent(QResizeEvent* event) override;
+    virtual void focusOutEvent(QFocusEvent* event) override;
     virtual void mousePressEvent(QMouseEvent* event) override;
 
 private:
