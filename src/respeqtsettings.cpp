@@ -961,6 +961,16 @@ bool RespeqtSettings::dbUseFileNames()
     return mSettings->value("/DiskBrowserDlg/use_filenames", true).toBool();
 }
 
+bool RespeqtSettings::dbCopyPics()
+{
+    return mSettings->value("/DiskBrowserDlg/copy_pics", true).toBool();
+}
+
+void RespeqtSettings::setDbCopyPics(bool copy)
+{
+    mSettings->setValue("/DiskBrowserDlg/copy_pics", copy);
+}
+
 QString RespeqtSettings::appDataFolder()
 {
     QString folder = mSettings->value("/DiskBrowserDlg/appData_folder", QString()).toString();

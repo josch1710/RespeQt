@@ -112,6 +112,7 @@ void OptionsDialog::setupSettings() {
   m_ui->clearOnStatus->setChecked(RespeqtSettings::instance()->clearOnStatus());
   m_ui->cb_filename->setChecked(RespeqtSettings::instance()->dbUseFileNames());
   m_ui->cb_favor_json->setChecked(RespeqtSettings::instance()->dbFavorJson());
+  m_ui->cb_copypics->setChecked(RespeqtSettings::instance()->dbCopyPics());
 
   switch (RespeqtSettings::instance()->dbDataSource())
   {
@@ -463,6 +464,7 @@ void OptionsDialog::saveSettings() {
   RespeqtSettings::instance()->setDisplayGraphicsInstructions(m_ui->displayGraphicsInstructions->isChecked());
   RespeqtSettings::instance()->setClearOnStatus(m_ui->clearOnStatus->isChecked());
   RespeqtSettings::instance()->setDbFileNames(m_ui->cb_filename->isChecked(), m_ui->cb_favor_json->isChecked());
+  RespeqtSettings::instance()->setDbCopyPics(m_ui->cb_copypics->isChecked());
   DbDataSource dbSource = DbData_appSettings;
   if (m_ui->rb_dbset_app_data_dir->isChecked())
   {

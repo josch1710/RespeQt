@@ -22,7 +22,8 @@ DbIni::~DbIni()
 
 void DbIni::setDataDir(const QString &dir)
 {
-    // TBD: log error, assert (ini file format not used with .respeqt_db subdirs)
+    qDebug() << "!e" << "Disk Collection Browser: ini file format not used with .respeqt_db subdirs";
+    Q_ASSERT(0);
 }
 
 void DbIni::setPicture(const QString& pic, const QString& dir, const QString& disk)

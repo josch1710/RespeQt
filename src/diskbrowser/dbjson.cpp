@@ -123,6 +123,8 @@ bool DbJson::load()
         auto jsObj = itRoot.value().toObject();
         auto pic   = jsObj["pic"].toString();
 
+        pic = makeFullPath(pic);    // prepend path to copied pics
+
         if (key == "db")
         {
             _diskPic = pic;
@@ -134,23 +136,51 @@ bool DbJson::load()
 
         for (auto itChild = jsObj.begin(); itChild != jsObj.end(); ++itChild)
         {
-            auto dir = itChild.key();
+            auto disk = itChild.key();
             auto obj = itChild.value().toObject();
 
             if (obj.contains("pic"))
-                dirInfo.map[dir].pic = obj["pic"].toString();
+                dirInfo.map[disk].pic = makeFullPath(obj["pic"].toString());
             if (obj.contains("title"))
-                dirInfo.map[dir].label.title = obj["title"].toString();
+                dirInfo.map[disk].label.title = obj["title"].toString();
             if (obj.contains("index"))
             {
-                dirInfo.map[dir].label.index = obj["index"].toString();
-                dirInfo.map[dir].label.sideB  = obj["sideb"].toBool();
+                dirInfo.map[disk].label.index = obj["index"].toString();
+                dirInfo.map[disk].label.sideB  = obj["sideb"].toBool();
             }
         }
 
+        if (key == "ArtWork")                   // subdir stored JSON using copy files
+        {
+            QDir upDir(_dataDir);               // disk collection dir will be the parent
+            upDir.cdUp();                       // back out of .respeqt_db
+            key = upDir.absolutePath();
+        }
         _dirMap[key] = dirInfo;
     }
     return true;    // TBD: error check?
+}
+
+QString DbJson::checkCopyPic(const QString& name)
+{
+    // remove the path name if it's not needed
+    // (allows collection/folder to be moved/copied)
+
+    if (name.startsWith(_dataDir.absolutePath()))
+        return name.right(name.count() - _dataDir.absolutePath().count() - 1);
+
+    return name;
+}
+
+QString DbJson::makeFullPath(const QString& name)
+{
+    if (name.isEmpty())
+        return name;
+
+    if (!name.contains('/'))
+        return QFileInfo(_fileName).absolutePath() + "/" + name;
+
+    return name;
 }
 
 bool DbJson::save()
@@ -170,8 +200,8 @@ bool DbJson::save()
 
     auto it = _dirMap.begin();  // set iterator to the first disk collection folder
 
-    bool useDataDir = (RespeqtSettings::instance()->dbDataSource() == DbData_subDir);
-    if (useDataDir)
+    bool useSubDir = (RespeqtSettings::instance()->dbDataSource() == DbData_subDir);
+    if (useSubDir)
     {
         QDir upDir(_dataDir);               // disk collection dir will be the parent
         upDir.cdUp();                       // back out of .respeqt_db to ..
@@ -182,7 +212,7 @@ bool DbJson::save()
 
     while (it != _dirMap.end())
     {
-        const QString  dirName = it.key();
+        const QString  dirName = useSubDir ? QString("ArtWork") : it.key();
         const DirInfo& dirInfo = it.value();
 
         if (dirInfo.isEmpty())
@@ -191,7 +221,7 @@ bool DbJson::save()
         QJsonObject jsDirObj;
 
         if (!dirInfo.pic.isEmpty())
-            jsDirObj["pic"] = dirInfo.pic;
+            jsDirObj["pic"] = checkCopyPic(dirInfo.pic);
 
         for (auto it = dirInfo.map.begin(); it != dirInfo.map.end(); ++it)
         {
@@ -201,7 +231,7 @@ bool DbJson::save()
             QJsonObject jsNode;
 
             if (!art.pic.isEmpty())
-                jsNode["pic"] = art.pic;
+                jsNode["pic"] = checkCopyPic(art.pic);
 
             if (!art.label.title.isEmpty())
                 jsNode["title"] = art.label.title;
@@ -219,7 +249,7 @@ bool DbJson::save()
         if (!jsDirObj.isEmpty())
             jsRoot[dirName] = jsDirObj;
 
-        if (useDataDir)             // using JSON file in .respeqt_db dir?
+        if (useSubDir)             // using JSON file in .respeqt_db dir?
             it = _dirMap.end();     // yes: we're done (mostly)
         else
             ++it;                   // no: grab the next dir (if any)

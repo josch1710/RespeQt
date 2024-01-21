@@ -44,6 +44,7 @@ private:
     void refreshFoldersCombobox();
     bool isDiskImage(const QString& name);
     void update();
+    QString checkCopyPic(const QString& fname);
     QString findPicFile();
     QString getFloppyPic();
     QString getMostRecentFolder();

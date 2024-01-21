@@ -59,6 +59,9 @@ private:
     LabelPos _labelPos;
     LabelPos _bSidePos;
     DirMap   _dirMap;
+
+    QString checkCopyPic(const QString& name);
+    QString makeFullPath(const QString& name);
 };
 
 #endif

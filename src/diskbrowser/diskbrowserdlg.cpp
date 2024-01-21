@@ -644,36 +644,63 @@ QString DiskBrowserDlg::browseForPic(const QString& start)
     auto fmtStrs = fmtList.join(' ');
     auto filters = QString("Images (%1)").arg(fmtStrs);
 
-    return QFileDialog::getOpenFileName(this, "Choose Default Pic", start, filters);
+    auto fname = QFileDialog::getOpenFileName(this, "Choose Default Pic", start, filters);
+
+    return checkCopyPic(fname);
+}
+
+QString DiskBrowserDlg::checkCopyPic(const QString& fname)
+{
+    if (RespeqtSettings::instance()->dbDataSource() != DbData_appSettings
+     && RespeqtSettings::instance()->dbCopyPics())
+    {
+        QString fileName = QFileInfo(fname).fileName();
+        QString newPath  = _currentDir + "/";
+        if (RespeqtSettings::instance()->dbDataSource() == DbData_subDir)
+            newPath += ".respeqt_db/";
+        QString newName  = newPath + fileName;
+        if (QFile::copy(fname, newName))
+        {
+            qDebug() << "!i" << "Disk Collection Browser pic " << fileName << " copied to " << newPath;
+            return newName;
+        }
+        else
+        {
+            // error copying the file (no overwrite?) TBD: popup here and/or confirm above
+            qDebug() << "!e" << "Disk Collection Browser could not copy to " << newPath;
+            return QString();
+        }
+    }
+    return fname;
 }
 
 void DiskBrowserDlg::actionSetDefault()
 {
-    QString fname = browseForPic(_currentDir);
-    if (fname.isEmpty())
+    QString pic = browseForPic(_currentDir);
+    if (pic.isEmpty())
         return;
 
-    _dbSettings->setPicture(fname);
+    _dbSettings->setPicture(pic);
     update();
 }
 
 void DiskBrowserDlg::actionSetDirPic()
 {
-    QString fname = browseForPic(_currentDir);
-    if (fname.isEmpty())
+    QString pic = browseForPic(_currentDir);
+    if (pic.isEmpty())
         return;
 
-    _dbSettings->setPicture(fname, _currentDir);
+    _dbSettings->setPicture(pic, _currentDir);
     update();
 }
 
 void DiskBrowserDlg::actionSetPic()
 {
-    QString fname = browseForPic(_currentDir);
-    if (fname.isEmpty())
+    QString pic = browseForPic(_currentDir);
+    if (pic.isEmpty())
         return;
 
-    _dbSettings->setPicture(fname, _currentDir, _diskFileName);
+    _dbSettings->setPicture(pic, _currentDir, _diskFileName);
     update();
 }
 

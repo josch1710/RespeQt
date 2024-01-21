@@ -302,6 +302,8 @@ public:
   void setDbFileNames(bool useFileNames, bool favorJson = false);
   bool dbFavorJson();
   bool dbUseFileNames();
+  bool dbCopyPics();
+  void setDbCopyPics(bool copy);
   LabelFont dbTitleFont();
   void setDbTitleFont(const LabelFont& font);
   LabelFont dbIndexFont();
