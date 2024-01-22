@@ -983,7 +983,6 @@ QString RespeqtSettings::appDataFolder()
         if (!appDataDir.exists())
             appDataDir.mkpath(".");
 
-        //QString file = appDataDir.absoluteFilePath("dbSettings.json");
         folder = appDataDir.absolutePath();
     }
     return folder;

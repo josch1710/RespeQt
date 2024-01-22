@@ -343,7 +343,11 @@ void DiskBrowserDlg::update()
         }
     }
 
-    ui->picPreview->setFileName(_picInfo.pic);
+    // make sure the pic is valid
+    if (!_picInfo.pic.isEmpty() && !QFile::exists(_picInfo.pic))
+        ui->picPreview->clear();    // TBD: remove entry, log error?
+    else
+        ui->picPreview->setFileName(_picInfo.pic);
 
     double newRatio = ui->picPreview->ratio();
 
@@ -651,27 +655,35 @@ QString DiskBrowserDlg::browseForPic(const QString& start)
 
 QString DiskBrowserDlg::checkCopyPic(const QString& fname)
 {
-    if (RespeqtSettings::instance()->dbDataSource() != DbData_appSettings
-     && RespeqtSettings::instance()->dbCopyPics())
+    if (!RespeqtSettings::instance()->dbCopyPics())
+        return fname;
+
+    QString fileName = QFileInfo(fname).fileName();
+    QString newPath;
+
+    switch (RespeqtSettings::instance()->dbDataSource())
     {
-        QString fileName = QFileInfo(fname).fileName();
-        QString newPath  = _currentDir + "/";
-        if (RespeqtSettings::instance()->dbDataSource() == DbData_subDir)
-            newPath += ".respeqt_db/";
-        QString newName  = newPath + fileName;
-        if (QFile::copy(fname, newName))
-        {
-            qDebug() << "!i" << "Disk Collection Browser pic " << fileName << " copied to " << newPath;
-            return newName;
-        }
-        else
-        {
-            // error copying the file (no overwrite?) TBD: popup here and/or confirm above
-            qDebug() << "!e" << "Disk Collection Browser could not copy to " << newPath;
-            return QString();
-        }
+    case DbData_appSettings:
+        newPath = _currentDir;
+        break;
+    case DbData_subDir:
+        newPath = _currentDir + "/.respeqt_db";
+        break;
+    case DbData_appFolderJson:
+        newPath = RespeqtSettings::instance()->appDataFolder() + "/.respeqt_db";
+        break;
     }
-    return fname;
+    QString newName = newPath + "/" + fileName;
+
+    if (QFile::copy(fname, newName))
+    {
+        qDebug() << "!i" << "Disk Collection Browser pic " << fileName << " copied to " << newPath;
+        return newName;
+    }
+
+    // error copying the file (no overwrite?) TBD: popup here and/or confirm above
+    qDebug() << "!e" << "Disk Collection Browser could not copy to " << newPath;
+    return QString();
 }
 
 void DiskBrowserDlg::actionSetDefault()
