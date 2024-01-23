@@ -471,7 +471,7 @@ void OptionsDialog::saveSettings() {
       dbSource = DbData_appFolderJson;
       RespeqtSettings::instance()->setAppFolderDir(m_ui->edt_appdata_dir->text());
   }
-  else if (m_ui->rb_dbset_subdir)
+  else if (m_ui->rb_dbset_subdir->isChecked())
   {
       dbSource = DbData_subDir;
   }

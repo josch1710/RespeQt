@@ -675,13 +675,22 @@ QString DiskBrowserDlg::checkCopyPic(const QString& fname)
     }
     QString newName = newPath + "/" + fileName;
 
+    if (QFile::exists(newName))
+    {
+        QString text = QString("Pic %1 already exists: Replace and use for this?\n"
+                               "(choosing 'no' will use pic from current location)").arg(fileName,newName);
+        if (QMessageBox::question(this,"Confirm Overwrite", text) == QMessageBox::Yes)
+            QFile::remove(newName);
+        else
+            return fname;
+    }
     if (QFile::copy(fname, newName))
     {
         qDebug() << "!i" << "Disk Collection Browser pic " << fileName << " copied to " << newPath;
         return newName;
     }
 
-    // error copying the file (no overwrite?) TBD: popup here and/or confirm above
+    // error copying the file (no overwrite?) TBD: popup?
     qDebug() << "!e" << "Disk Collection Browser could not copy to " << newPath;
     return QString();
 }
