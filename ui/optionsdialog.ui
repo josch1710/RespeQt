@@ -1231,34 +1231,17 @@
                   </widget>
                  </item>
                  <item>
-                  <layout class="QHBoxLayout" name="horizontalLayout_4">
-                   <property name="spacing">
-                    <number>20</number>
+                  <widget class="QRadioButton" name="rb_dbset_subdir">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
                    </property>
-                   <item>
-                    <widget class="QRadioButton" name="rb_dbset_subdir">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>Subdir .respeqt_db in each folder</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QCheckBox" name="cb_copypics">
-                     <property name="text">
-                      <string>Copy pics</string>
-                     </property>
-                     <property name="checked">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
+                   <property name="text">
+                    <string>Subdir .respeqt_db in each folder</string>
+                   </property>
+                  </widget>
                  </item>
                  <item>
                   <widget class="QRadioButton" name="rb_dbset_app_data_dir">
@@ -1297,6 +1280,16 @@
                     </widget>
                    </item>
                   </layout>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="cb_copypics">
+                   <property name="text">
+                    <string>Copy pics to disk folders</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
                  </item>
                  <item>
                   <widget class="QCheckBox" name="cb_filename">
@@ -1692,7 +1685,7 @@
           </layout>
          </widget>
          <widget class="QWidget" name="page_810_firmware">
-          <layout class="QVBoxLayout" name="verticalLayout_4">
+          <layout class="QVBoxLayout" name="verticalLayout_20">
            <property name="spacing">
             <number>0</number>
            </property>

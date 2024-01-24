@@ -297,6 +297,8 @@ void OptionsDialog::connectSignals() {
 
   connect(m_ui->btn_appdata_browse, &QPushButton::clicked, this, &OptionsDialog::browseForAppDir);
   connect(m_ui->rb_dbset_app_data_dir, &QRadioButton::toggled, this, &OptionsDialog::appDataDirToggled);
+  connect(m_ui->rb_dbset_appset_ini, &QRadioButton::toggled, this, &OptionsDialog::appSettingsToggled);
+  connect(m_ui->rb_dbset_subdir, &QRadioButton::toggled, this, &OptionsDialog::diskSubDirToggled);
   connect(m_ui->btn_color_index, &QPushButton::clicked, this, &OptionsDialog::indexColorClicked);
   connect(m_ui->btn_color_title, &QPushButton::clicked, this, &OptionsDialog::titleColorClicked);
   connect(m_ui->btn_bold_index, &QPushButton::toggled, this, &OptionsDialog::indexBoldToggled);
@@ -624,7 +626,19 @@ void OptionsDialog::appDataDirToggled()
     {
         QString appdatadir = RespeqtSettings::instance()->appDataFolder();
         m_ui->edt_appdata_dir->setText(appdatadir);
+        m_ui->cb_copypics->setText(tr("Copy pics to AppData folder"));
     }
+}
+
+void OptionsDialog::diskSubDirToggled()
+{
+    if (m_ui->rb_dbset_subdir->isChecked())
+        m_ui->cb_copypics->setText(tr("Copy pics to .respeqt_db subdir"));
+}
+void OptionsDialog::appSettingsToggled()
+{
+    if (m_ui->rb_dbset_appset_ini->isChecked())
+        m_ui->cb_copypics->setText(tr("Copy pics to disk folders"));
 }
 
 void OptionsDialog::browseForAppDir()

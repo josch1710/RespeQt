@@ -53,6 +53,8 @@ private slots:
   void saveSettings();
   void useCustomBaudToggled(bool checked);
   void appDataDirToggled();
+  void diskSubDirToggled();
+  void appSettingsToggled();
   void browseForAppDir();
   void indexColorClicked();
   void titleColorClicked();

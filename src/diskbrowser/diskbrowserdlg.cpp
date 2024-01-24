@@ -690,7 +690,7 @@ QString DiskBrowserDlg::checkCopyPic(const QString& fname)
         return newName;
     }
 
-    // error copying the file (no overwrite?) TBD: popup?
+    // error copying the file TBD: popup?
     qDebug() << "!e" << "Disk Collection Browser could not copy to " << newPath;
     return QString();
 }
