@@ -33,12 +33,15 @@ DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent)
 
     ui->setupUi(this);
 
+    ui->treeDisks->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+
     ui->splitTopDirBotPng->setOther(ui->splitLeftAtrRightDirPng);
     ui->splitLeftAtrRightDirPng->setOther(ui->splitTopDirBotPng);
 
     connect(ui->btnBrowse, SIGNAL(clicked()), this, SLOT(onBrowseFolder()));
     connect(ui->treeDisks, &QTreeWidget::itemSelectionChanged, this, &DiskBrowserDlg::itemSelectionChanged);
     connect(ui->treeDisks, &QTreeWidget::itemDoubleClicked, this, &DiskBrowserDlg::itemDoubleClicked);
+    connect(ui->treeDisks, &QTreeWidget::customContextMenuRequested, this, &DiskBrowserDlg::popupMenuReq);
     connect(ui->cboFolderPath, SIGNAL(currentTextChanged(QString)), this, SLOT(onFolderChanged(QString)));
     connect(ui->picPreview, &PicPreview::sigPopupMenuReq, this, &DiskBrowserDlg::popupMenuReq);
     connect(ui->picPreview, &PicPreview::sigTitleChanged, this, &DiskBrowserDlg::titleChanged);
@@ -616,7 +619,16 @@ void DiskBrowserDlg::popupMenuReq(const QPoint& pos)
         QString text = QString("Label Side %1").arg(_picInfo.label.sideB ? "A" : "B");
         menu.addAction(QIcon(":/icons/other-icons/sideb.png"), text, this, &DiskBrowserDlg::actionBackSide);
     }
-    menu.exec(pos);
+
+    if (sender() == ui->treeDisks)
+    {
+        QPoint globalPt = ui->treeDisks->mapToGlobal(pos);
+        menu.exec(globalPt);
+    }
+    else
+    {
+        menu.exec(pos);
+    }
 }
 
 void DiskBrowserDlg::actionBackSide()
