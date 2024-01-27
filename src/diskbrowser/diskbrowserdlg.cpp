@@ -253,6 +253,7 @@ void DiskBrowserDlg::update()
     _diskFullName = fullName;
     _diskFileName = diskName;
     _currentDir = pathName;
+    _diskTitle  = fiDisk.completeBaseName();
 
     RespeqtSettings::instance()->setMostRecentBrowserFolder(fullName);
     MainWindow::instance()->mountFileWithDefaultProtection(0, fullName);
@@ -314,8 +315,7 @@ void DiskBrowserDlg::update()
 
     // find a custom or built-in pic
 
-    auto fileInfo = QFileInfo {_diskFullName};
-    QDir dir {fileInfo.absolutePath()};
+    QDir dir {fiDisk.absolutePath()};
 
     if (fileNames)
     {
@@ -341,7 +341,7 @@ void DiskBrowserDlg::update()
         {
             _picSource = PicSource_floppy;
             if (_picInfo.label.isEmpty())
-                _picInfo.label.title = fileInfo.completeBaseName();
+                _picInfo.label.title = _diskTitle;
             ui->picPreview->setLabel(_picInfo.label);
         }
     }
@@ -682,7 +682,8 @@ QString DiskBrowserDlg::checkCopyPic(const QString& fname)
         newPath = _currentDir + "/.respeqt_db";
         break;
     case DbData_appFolderJson:
-        newPath = RespeqtSettings::instance()->appDataFolder() + "/.respeqt_db";
+        newPath = RespeqtSettings::instance()->appDataFolder() + "/.respeqt_db/" + QDir(_currentDir).dirName();
+        QDir(newPath).mkpath(".");
         break;
     }
     QString newName = newPath + "/" + fileName;

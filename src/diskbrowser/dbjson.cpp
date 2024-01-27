@@ -18,9 +18,7 @@ DbJson::~DbJson()
 void DbJson::setDataDir(const QString& dir)
 {
     _dataDir.setPath(dir + "/.respeqt_db");
-
-    if (!_dataDir.exists())
-        _dataDir.mkpath(".");
+    _dataDir.mkpath(".");
 
     _fileName = _dataDir.absoluteFilePath("dbSettings.json");
 
@@ -166,7 +164,8 @@ QString DbJson::checkCopyPic(const QString& name)
     // remove the path name if it's not needed
     // (allows collection/folder to be moved/copied)
 
-    if (name.startsWith(_dataDir.absolutePath()))
+    if ((RespeqtSettings::instance()->dbDataSource() == DbData_subDir)
+         && name.startsWith(_dataDir.absolutePath()))
         return name.right(name.count() - _dataDir.absolutePath().count() - 1);
 
     return name;

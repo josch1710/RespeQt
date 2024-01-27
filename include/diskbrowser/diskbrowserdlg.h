@@ -61,6 +61,7 @@ private:
     FloppyArt _picInfo;
     SioWorkerPtr sio;
     QString _currentDir;
+    QString _diskTitle;
     QString _diskFileName;
     QString _diskFullName;
     PicSourceType _picSource  = PicSource_none;
