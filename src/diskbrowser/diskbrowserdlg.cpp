@@ -660,8 +660,13 @@ QString DiskBrowserDlg::browseForPic(const QString& start)
     auto fmtStrs = fmtList.join(' ');
     auto filters = QString("Images (%1)").arg(fmtStrs);
 
-    auto fname = QFileDialog::getOpenFileName(this, "Choose Default Pic", start, filters);
-
+#ifdef Q_OS_LINUX
+    // Quirks on linux: getOpenFileName will use case sensitive filters (i.e. it won't find all caps *.JPG)
+    // The non-native/Qt version is better, but resizes rediculously wide to fit the long filter string! (TBD: fix)
+    auto fname = QFileDialog::getOpenFileName(this, "Choose Default Pic", start, filters, nullptr, QFileDialog::DontUseNativeDialog);
+#else
+    auto fname = QFileDialog::getOpenFileName(this, "Choose Default Pic", start, filters, nullptr);
+#endif
     return checkCopyPic(fname);
 }
 
