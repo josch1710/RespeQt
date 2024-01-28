@@ -667,7 +667,7 @@ QString DiskBrowserDlg::browseForPic(const QString& start)
 
 QString DiskBrowserDlg::checkCopyPic(const QString& fname)
 {
-    if (!RespeqtSettings::instance()->dbCopyPics())
+    if (!RespeqtSettings::instance()->dbCopyPics() || fname.isEmpty())
         return fname;
 
     QString fileName = QFileInfo(fname).fileName();
