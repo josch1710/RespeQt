@@ -653,7 +653,7 @@ void DiskBrowserDlg::indexChanged(QString index)
     _dbSettings->setIndex(index, _currentDir, _diskFileName);
 }
 
-QString DiskBrowserDlg::browseForPic(const QString& start)
+QString DiskBrowserDlg::browseForPic(const QString& start, const QString& action)
 {
     auto formats = QImageReader::supportedImageFormats();
     auto fmtList = toStringList(formats);
@@ -663,16 +663,16 @@ QString DiskBrowserDlg::browseForPic(const QString& start)
 #ifdef Q_OS_LINUX
     // Quirks on linux: getOpenFileName will use case sensitive filters (i.e. it won't find all caps *.JPG)
     // The non-native/Qt version is better, but resizes rediculously wide to fit the long filter string! (TBD: fix)
-    auto fname = QFileDialog::getOpenFileName(this, "Choose Default Pic", start, filters, nullptr, QFileDialog::DontUseNativeDialog);
+    auto fname = QFileDialog::getOpenFileName(this, action, start, filters, nullptr, QFileDialog::DontUseNativeDialog);
 #else
-    auto fname = QFileDialog::getOpenFileName(this, "Choose Default Pic", start, filters, nullptr);
+    auto fname = QFileDialog::getOpenFileName(this, action, start, filters, nullptr);
 #endif
-    return checkCopyPic(fname);
+    return fname;
 }
 
 QString DiskBrowserDlg::checkCopyPic(const QString& fname)
 {
-    if (!RespeqtSettings::instance()->dbCopyPics() || fname.isEmpty())
+    if (!RespeqtSettings::instance()->dbCopyPics())
         return fname;
 
     QString fileName = QFileInfo(fname).fileName();
@@ -715,9 +715,14 @@ QString DiskBrowserDlg::checkCopyPic(const QString& fname)
 
 void DiskBrowserDlg::actionSetDefault()
 {
-    QString pic = browseForPic(_currentDir);
+    QString pic = browseForPic(_currentDir, "Choose a Default Pic");
     if (pic.isEmpty())
         return;
+
+    if (RespeqtSettings::instance()->dbDataSource() != DbData_appSettings)
+        pic = checkCopyPic(pic);
+    else if (RespeqtSettings::instance()->dbCopyPics())
+        qDebug() << "!w" << "Updating default Pic file for all collections - file not copied";
 
     _dbSettings->setPicture(pic);
     update();
@@ -725,21 +730,21 @@ void DiskBrowserDlg::actionSetDefault()
 
 void DiskBrowserDlg::actionSetDirPic()
 {
-    QString pic = browseForPic(_currentDir);
+    QString pic = browseForPic(_currentDir, "Choose Pic for this Collection");
     if (pic.isEmpty())
         return;
 
-    _dbSettings->setPicture(pic, _currentDir);
+    _dbSettings->setPicture(checkCopyPic(pic), _currentDir);
     update();
 }
 
 void DiskBrowserDlg::actionSetPic()
 {
-    QString pic = browseForPic(_currentDir);
+    QString pic = browseForPic(_currentDir, "Choose Pic for this Disk");
     if (pic.isEmpty())
         return;
 
-    _dbSettings->setPicture(pic, _currentDir, _diskFileName);
+    _dbSettings->setPicture(checkCopyPic(pic), _currentDir, _diskFileName);
     update();
 }
 

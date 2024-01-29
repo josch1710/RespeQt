@@ -51,7 +51,7 @@ private:
     QString getMostRecentDisk();
     QString getRecentDisk(QString folder);
     QString getParentDir(QString fileFolder);
-    QString browseForPic(const QString& start);
+    QString browseForPic(const QString& start, const QString& action);
 
     const QString FLOPPY_INDEXED_PNG  {":/icons/other-icons/floppy_front.png"};
     const QString FLOPPY_BACKSIDE_PNG {":/icons/other-icons/floppy_back.png"};

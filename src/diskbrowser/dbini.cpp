@@ -104,6 +104,7 @@ DiskLabel DbIni::getLabel(const QDir& dir, const QString& disk)
 bool DbIni::load()
 {
     _settings->beginGroup("/DiskBrowserDlg");
+    _settings->beginGroup("Artwork");
 
     // global Disk Browser settings (do not step on current/default values)
     if (_settings->contains("pic"))
@@ -114,8 +115,6 @@ bool DbIni::load()
         _titleFont = _settings->value("title_font").toString();
     if (_settings->contains("index_font"))
         _indexFont = _settings->value("index_font").toString();
-
-    _settings->beginGroup("Artwork");
 
     foreach (QString group, _settings->childGroups())
     {
