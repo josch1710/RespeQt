@@ -998,7 +998,7 @@ void RespeqtSettings::setDbTitleFont(const LabelFont& font)
     mSettings->beginGroup("/DiskBrowserDlg");
     mSettings->beginGroup("title_font");
     mSettings->setValue("family", font.family());
-    mSettings->setValue("size", font.pixelSize());
+    mSettings->setValue("size", font.pixelSize() <= 0 ? 10 : font.pixelSize());
     mSettings->setValue("bold", font.bold());
     mSettings->setValue("italic", font.italic());
     mSettings->setValue("color", font.color().name());

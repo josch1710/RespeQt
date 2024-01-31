@@ -34,10 +34,10 @@ protected:
 };
 
 inline Qt::CaseSensitivity osCaseSensitivity() {
-#if defined Q_OS_WIN
-  return Qt::CaseInsensitive;
-#else
+#if defined Q_OS_LINUX
   return Qt::CaseSensitive;
+#else
+  return Qt::CaseInsensitive;
 #endif
 }
 
@@ -73,8 +73,8 @@ public:
       static QStringList list
       {
           "*.xfd", "*.atr", "*.pro", "*.atx"
-  #if !defined Q_OS_WIN
-        , "*.XFD", "*.ATR", "*.PRO", "*.ATX"  // non-Windows OS are case sensitive
+  #if defined Q_OS_LINUX
+        , "*.XFD", "*.ATR", "*.PRO", "*.ATX"  // Linux is case sensitive
   #endif
       };
       return list;
