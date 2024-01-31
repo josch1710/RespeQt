@@ -1,6 +1,8 @@
 #include "siorecorder.h"
 #include "mainwindow.h"
+#if (QT_VERSION_MAJOR < 6)
 #include "make_unique.h"
+#endif
 #include "respeqtsettings.h"
 
 #include <QDataStream>

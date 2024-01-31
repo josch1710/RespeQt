@@ -36,7 +36,8 @@
 //#include "printers/outputs.h"
 #include "respeqtsettings.h"
 
-#include <QDesktopWidget>
+//#include <QDesktopWidget> deprecated in Qt 5. Use QScreen:
+#include <QScreen>
 #include <QDrag>
 #include <QDragEnterEvent>
 //#include <QDropEvent>
@@ -80,12 +81,16 @@ MainWindow *MainWindow::sInstance{nullptr};
 
 // ****************************** END OF GLOBALS ************************************//
 
+// DEV NOTE: using qDebug() requires one of the following prefix strings:
+//
 // Displayed only in debug mode    "!d"
 // Unimportant     (gray)          "!u"
 // Normal          (black)         "!n"
 // Important       (blue)          "!i"
 // Warning         (brown)         "!w"
 // Error           (red)           "!e"
+// (???)           (purple)        "!"      (not used?)
+//
 void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*context*/, const QString &msg) {
   logMutex->lock();
   logFile->write(QString::number((quint64) QThread::currentThreadId(), 16).toLatin1());
@@ -108,25 +113,34 @@ void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*c
       logFile->write(": [Fatal]    ");
       break;
   }
-  QByteArray localMsg = msg.toLocal8Bit();
+
+  QString nonConstMsg(msg);
+  if (!msg.startsWith("!"))     // Qt/system log message?
+    nonConstMsg = "123" + msg;  // "123" gets removed below
+
+  QByteArray localMsg = nonConstMsg.toLocal8Bit();
   QByteArray displayMsg = localMsg.mid(3);
+
   logFile->write(displayMsg);
   logFile->write("\n");
+
   if (type == QtFatalMsg) {
     logFile->close();
+#if defined(QT_NO_DEBUG) // allow debugger to survive fatal error
     abort();
-  }
-  logMutex->unlock();
-
-  if (msg[0] == '!') {
-#ifdef QT_NO_DEBUG
-    if (msg[1] == 'd') {
-      return;
-    }
+#elif defined (Q_OS_WIN) // TBD: non-windows? (QtCreator 10.x on Mojave is OK)
+    __debugbreak();
 #endif
-    // TODO Should be signal-slot
-    sInstance->doLogMessage(localMsg.at(1), displayMsg);
   }
+  logMutex->unlock();   // __debugbreak() (line above) breaks *here* on fatal error, crash or assert.
+
+#ifdef QT_NO_DEBUG
+  // release build: filter Qt/system messages (all app generated log messages follow above DEV NOTE)
+  if ((msg[0] != '!') || (msg[1] == 'd')) {
+    return;
+  }
+#endif
+  sInstance->doLogMessage(localMsg.at(1), displayMsg);
 }
 
 void MainWindow::doLogMessage(int type, const QString &msg) {
@@ -149,9 +163,10 @@ MainWindow::MainWindow()
   logMutex = new QMutex();
   connect(this, &MainWindow::logMessage, this, &MainWindow::uiMessage, Qt::QueuedConnection);
   qInstallMessageHandler(MainWindow::logMessageOutput);
-  qDebug() << "!d" << tr("RespeQt started at %1.").arg(QDateTime::currentDateTime().toString());
+  qDebug() << "!d" << tr("RespeQt started @ %1.").arg(QDateTime::currentDateTime().toString());
 
   logWindow_ = nullptr;
+  diskBrowserDlg = nullptr;
 
   /* Remove old temporaries */
   QDir tempDir = QDir::temp();
@@ -249,7 +264,6 @@ MainWindow::MainWindow()
   } else {
     setWindowTitle(g_mainWindowTitle);
   }
-  setGeometry(RespeqtSettings::instance()->lastHorizontalPos(), RespeqtSettings::instance()->lastVerticalPos(), RespeqtSettings::instance()->lastWidth(), RespeqtSettings::instance()->lastHeight());
 
   /* Setup status bar */
   speedLabel = new QLabel(this);
@@ -586,11 +600,32 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   isClosing = true;
 
   // Save various session settings  //
-  RespeqtSettings::instance()->saveGeometry(geometry(), isMiniMode);
-  RespeqtSettings::instance()->setD9DOVisible(isD9DOVisible);
+
+  if (RespeqtSettings::instance()->saveWindowsPos()) {
+
+    RespeqtSettings::instance()->saveMainWinGeometry(this, isMiniMode);
+
+    if (diskBrowserDlg) {
+      diskBrowserDlg->close();
+    } else {
+      RespeqtSettings::instance()->setShowDiskBrowser(false);
+    }
+
+    if (logWindow_) {
+      RespeqtSettings::instance()->setShowLogWindow(logWindow_->isVisible());
+      RespeqtSettings::instance()->saveWidgetGeometry(logWindow_);
+    } else {
+      RespeqtSettings::instance()->setShowLogWindow(false);
+    }
+  }
+
+  if (RespeqtSettings::instance()->saveDiskVis()) {
+    RespeqtSettings::instance()->setD9DOVisible(isD9DOVisible);
+  }
 
   if (g_sessionFile != "")
     RespeqtSettings::instance()->saveSessionToFile(g_sessionFilePath + "/" + g_sessionFile);
+
   bool wasRunning = ui->actionStartEmulation->isChecked();
   QMessageBox::StandardButton answer = QMessageBox::No;
 
@@ -687,21 +722,16 @@ void MainWindow::showEvent(QShowEvent *event) {
   }
   if (event->type() == QEvent::Show && shownThisTime) {
     shownThisTime = false;
-    isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
-    isMiniMode = RespeqtSettings::instance()->miniMode();
-
-    // check if mini-mode was last used
-    if (isMiniMode) {
-        isMiniMode = false;                     // reset now so we can toggle it ON
-        ui->actionToggleMiniMode->trigger();    // trigger mini-mode toggle action
-    } else {
-        showHideDrives();
-    }
+    restoreLayout();
   }
   QMainWindow::showEvent(event);
 }
 
+#if (QT_VERSION_MAJOR < 6)
 void MainWindow::enterEvent(QEvent *) {
+#else
+void MainWindow::enterEvent(QEnterEvent *) {
+#endif
   if (isMiniMode && isShadeMode) {
     setWindowOpacity(1.0);
   }
@@ -723,21 +753,26 @@ bool MainWindow::eventFilter(QObject * /*obj*/, QEvent *event) {
 void MainWindow::showLogWindowTriggered() {
   if (logWindow_ == nullptr) {
     logWindow_ = new LogDisplayDialog(this);
-    int x, y, w, h;
-    x = geometry().x();
-    y = geometry().y();
-    w = geometry().width();
-    h = geometry().height();
-    if (!isMiniMode) {
-      logWindow_->setGeometry(static_cast<int>(x + w / 1.9), y + 30, logWindow_->geometry().width(), geometry().height());
-    } else {
-      logWindow_->setGeometry(x + 20, y + 60, w, h * 2);
+    bool restored = false;
+    if (RespeqtSettings::instance()->saveWindowsPos()) {
+      restored = RespeqtSettings::instance()->restoreWidgetGeometry(logWindow_);
+    }
+    if (!restored) {
+      int x, y, w, h;
+      x = geometry().x();
+      y = geometry().y();
+      w = geometry().width();
+      h = geometry().height();
+      if (!isMiniMode) {
+        logWindow_->setGeometry(static_cast<int>(x + w / 1.9), y + 30, logWindow_->geometry().width(), geometry().height());
+      } else {
+        logWindow_->setGeometry(x + 20, y + 60, w, h * 2);
+      }
     }
     connect(this, &MainWindow::sendLogText, logWindow_, &LogDisplayDialog::getLogText);
     connect(this, &MainWindow::sendLogTextChange, logWindow_, &LogDisplayDialog::getLogTextChange);
     emit sendLogText(ui->textEdit->toHtml());
   }
-
   logWindow_->show();
 }
 
@@ -778,8 +813,7 @@ void MainWindow::toggleMiniModeTriggered() {
     ui->actionHideShowDrives->setEnabled(true);
     if (savedGeometry.isEmpty()) {
       // on first toggle, pull values from our last persisted setting or defaults
-      setGeometry(RespeqtSettings::instance()->lastHorizontalPos(), RespeqtSettings::instance()->lastVerticalPos(),
-                  RespeqtSettings::instance()->lastWidth(), RespeqtSettings::instance()->lastHeight());
+      RespeqtSettings::instance()->restoreMainWinGeometry(this,isMiniMode);
     } else {
       // use saved geometry for both mini and full
       setGeometry(savedGeometry);
@@ -798,8 +832,7 @@ void MainWindow::toggleMiniModeTriggered() {
     setMaximumHeight(height);
     if (savedGeometry.isEmpty()) {
       // on first toggle, pull values from our last persisted setting or defaults
-      setGeometry(RespeqtSettings::instance()->lastMiniHorizontalPos(), RespeqtSettings::instance()->lastMiniVerticalPos(),
-                  RespeqtSettings::instance()->lastMiniWidth(), height);
+      RespeqtSettings::instance()->restoreMainWinGeometry(this, isMiniMode);
     } else {
       // use saved geometry for both mini and full
       setGeometry(savedGeometry);
@@ -1817,15 +1850,15 @@ void MainWindow::openSessionTriggered() {
   RespeqtSettings::instance()->loadSessionFromFile(fileName);
 
   setWindowTitle(g_mainWindowTitle + tr(" -- Session: ") + g_sessionFile);
-  setGeometry(RespeqtSettings::instance()->lastHorizontalPos(), RespeqtSettings::instance()->lastVerticalPos(), RespeqtSettings::instance()->lastWidth(), RespeqtSettings::instance()->lastHeight());
 
-  for (char i = 0; i < DISK_COUNT; i++) {//
+  for (char i = 0; i < DISK_COUNT; i++) {
     RespeqtSettings::ImageSettings is;
     is = RespeqtSettings::instance()->mountedImageSetting(i);
     mountFile(i, is.fileName, is.isWriteProtected);
   }
-  isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
-  showHideDrives();
+
+  restoreLayout();
+
   setSession();
 }
 
@@ -1842,7 +1875,24 @@ void MainWindow::saveSessionTriggered() {
   RespeqtSettings::instance()->setLastSessionDir(QFileInfo(fileName).absolutePath());
 
   // Save mainwindow position and size to session file //
-  RespeqtSettings::instance()->saveGeometry(geometry(), isMiniMode);
+  RespeqtSettings::instance()->saveMainWinGeometry(this, isMiniMode);
+
+  if (diskBrowserDlg) {
+    RespeqtSettings::instance()->setShowDiskBrowser(diskBrowserDlg->isVisible());
+    RespeqtSettings::instance()->saveWidgetGeometry(diskBrowserDlg);
+    RespeqtSettings::instance()->setDiskBrowserHorzSplitPos(diskBrowserDlg->getHorzSplitPos());
+    RespeqtSettings::instance()->setDiskBrowserVertSplitPos(diskBrowserDlg->getVertSplitPos());
+  } else {
+    RespeqtSettings::instance()->setShowDiskBrowser(false);
+  }
+
+  if (logWindow_) {
+    RespeqtSettings::instance()->setShowLogWindow(logWindow_->isVisible());
+    RespeqtSettings::instance()->saveWidgetGeometry(logWindow_);
+  } else {
+    RespeqtSettings::instance()->setShowLogWindow(false);
+  }
+
   RespeqtSettings::instance()->saveSessionToFile(fileName);
 }
 
@@ -1902,6 +1952,13 @@ void MainWindow::bootOptionTriggered() {
   bod.exec();
 }
 
+void MainWindow::diskBrowserTriggered() {
+  if (!diskBrowserDlg) {
+    diskBrowserDlg = new DiskBrowserDlg(sio, this);
+  }
+  diskBrowserDlg->showNormal();
+}
+
 // This connect the signal from UI to slots
 void MainWindow::connectUISignal() {
   connect(ui->actionPlaybackCassette, &QAction::triggered, this, &MainWindow::cassettePlaybackTriggered);
@@ -1921,6 +1978,7 @@ void MainWindow::connectUISignal() {
   connect(ui->actionToggleMiniMode, &QAction::triggered, this, &MainWindow::toggleMiniModeTriggered);
   connect(ui->actionToggleShade, &QAction::triggered, this, &MainWindow::toggleShadeTriggered);
   connect(ui->actionLogWindow, &QAction::triggered, this, &MainWindow::showLogWindowTriggered);
+  connect(ui->actionDiskBrowser, &QAction::triggered, this, &MainWindow::diskBrowserTriggered);
   connect(ui->actionCaptureSnapshot, &QAction::toggled, this, &MainWindow::toggleSnapshotCapture);
   connect(ui->actionReplaySnapshot, &QAction::triggered, this, &MainWindow::replaySnapshot);
 }
@@ -1979,4 +2037,31 @@ void MainWindow::toggleLimitEntriesTriggered() {
     limitEntriesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/lock.png").pixmap(16, 16, QIcon::Normal));
   }
   RespeqtSettings::instance()->setlimitFileEntries(!RespeqtSettings::instance()->limitFileEntries());
+}
+
+void MainWindow::restoreLayout()
+{
+    if (RespeqtSettings::instance()->saveDiskVis())
+        isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
+
+    if (RespeqtSettings::instance()->saveWindowsPos())
+    {
+        isMiniMode = RespeqtSettings::instance()->miniMode();
+        if (isMiniMode)
+        {                                           // check if mini-mode was last used
+            isMiniMode = false;                     // reset now so we can toggle it ON
+            ui->actionToggleMiniMode->trigger();    // trigger mini-mode toggle action
+        }
+        else
+        {
+            showHideDrives();
+        }
+        RespeqtSettings::instance()->restoreMainWinGeometry(this, isMiniMode);
+
+        if (RespeqtSettings::instance()->showDiskBrowser() && !(diskBrowserDlg && diskBrowserDlg->isVisible()))
+            diskBrowserTriggered();
+
+        if (RespeqtSettings::instance()->showLogWindow() && !(logWindow_ && logWindow_->isVisible()))
+            showLogWindowTriggered();
+    }
 }

@@ -33,6 +33,14 @@ protected:
   qint64 writeData(const char *data, qint64 maxSize) override;
 };
 
+inline Qt::CaseSensitivity osCaseSensitivity() {
+#if defined Q_OS_LINUX
+  return Qt::CaseSensitive;
+#else
+  return Qt::CaseInsensitive;
+#endif
+}
+
 class FileTypes : public QObject {
   Q_OBJECT
 
@@ -59,7 +67,20 @@ public:
   };
   static FileType getFileType(const QString &fileName);
   __attribute__((unused)) static QString getFileTypeName(FileType type);
+
+  static const QStringList& getDiskImageTypes()
+  {
+      static QStringList list
+      {
+          "*.xfd", "*.atr", "*.pro", "*.atx"
+  #if defined Q_OS_LINUX
+        , "*.XFD", "*.ATR", "*.PRO", "*.ATX"  // Linux is case sensitive
+  #endif
+      };
+      return list;
+  }
 };
 
+QStringList toStringList(const QList<QByteArray>& list);
 
 #endif// MISCUTILS_H

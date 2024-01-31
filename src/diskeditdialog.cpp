@@ -137,7 +137,7 @@ bool FileModel::setData(const QModelIndex &index, const QVariant &value, int rol
         s.resize(8);
       }
       foreach (QChar c, s) {
-        if ((c > 0x7f) || (!c.isLetterOrNumber() && c != '_')) {
+        if ((static_cast<uint8_t>(c.toLatin1()) > 0x7f) || (!c.isLetterOrNumber() && c != '_')) {
           return false;
         }
       }
@@ -172,7 +172,7 @@ bool FileModel::setData(const QModelIndex &index, const QVariant &value, int rol
         s.resize(3);
       }
       foreach (QChar c, s) {
-        if ((c > 0x7f) || (!c.isLetterOrNumber() && c != '_')) {
+        if ((static_cast<uint8_t>(c.toLatin1()) > 0x7f) || (!c.isLetterOrNumber() && c != '_')) {
           return false;
         }
       }

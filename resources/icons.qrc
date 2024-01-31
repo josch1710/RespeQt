@@ -71,5 +71,15 @@
         <file>other-icons/toggleosb.png</file>
         <file>silk-icons/icons/shield.png</file>
         <file>silk-icons/icons/shield_go.png</file>
+        <file>other-icons/floppy_back.png</file>
+        <file>other-icons/floppy_front.png</file>
+        <file>oxygen-icons/16x16/filesystems/folder_html.png</file>
+        <file>silk-icons/icons/folder_explore.png</file>
+        <file>silk-icons/icons/image.png</file>
+        <file>silk-icons/icons/image_add.png</file>
+        <file>silk-icons/icons/image_delete.png</file>
+        <file>silk-icons/icons/text_list_numbers.png</file>
+        <file>silk-icons/icons/folder_image.png</file>
+        <file>other-icons/sideb.png</file>
     </qresource>
 </RCC>

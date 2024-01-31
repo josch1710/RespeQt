@@ -69,7 +69,14 @@ SOURCES += \
     src/diskimages/prosectorinfo.cpp \
     src/diskimages/atxsectorinfo.cpp \
     src/diskimages/atxtrackinfo.cpp \
-    src/diskimages/board.cpp
+    src/diskimages/board.cpp \
+    src/diskbrowser/picsplitter.cpp \
+    src/diskbrowser/picpreview.cpp \
+    src/diskbrowser/folderdisks.cpp \
+    src/diskbrowser/dbsettings.cpp \
+    src/diskbrowser/dbjson.cpp \
+    src/diskbrowser/dbini.cpp \
+    src/diskbrowser/diskbrowserdlg.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -132,12 +139,21 @@ HEADERS += \
     include/diskimages/prosectorinfo.h \
     include/diskimages/atxsectorinfo.h \
     include/diskimages/atxtrackinfo.h \
-    include/diskimages/board.h
+    include/diskimages/board.h \
+    include/diskbrowser/picsourcetype.h \
+    include/diskbrowser/picsplitter.h \
+    include/diskbrowser/picpreview.h \
+    include/diskbrowser/folderdisks.h \
+    include/diskbrowser/dbsettings.h \
+    include/diskbrowser/dbjson.h \
+    include/diskbrowser/dbini.h \
+    include/diskbrowser/diskbrowserdlg.h
 
 FORMS += \
     ui/mainwindow.ui \
     ui/optionsdialog.ui \
     ui/aboutdialog.ui \
+    ui/diskbrowserdlg.ui \
     ui/createimagedialog.ui \
     ui/diskeditdialog.ui \
     ui/autobootdialog.ui \

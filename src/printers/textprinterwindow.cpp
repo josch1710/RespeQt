@@ -87,10 +87,7 @@ namespace Printers {
   void TextPrinterWindow::closeEvent(QCloseEvent *e) {
     // Save Current TexPrinterWindow Position and size //
     if (RespeqtSettings::instance()->saveWindowsPos()) {
-      RespeqtSettings::instance()->setLastPrtHorizontalPos(TextPrinterWindow::geometry().x());
-      RespeqtSettings::instance()->setLastPrtVerticalPos(TextPrinterWindow::geometry().y());
-      RespeqtSettings::instance()->setLastPrtWidth(TextPrinterWindow::geometry().width());
-      RespeqtSettings::instance()->setLastPrtHeight(TextPrinterWindow::geometry().height());
+      RespeqtSettings::instance()->saveWidgetGeometry(this);
     }
     emit closed(this);
     e->accept();
@@ -105,7 +102,7 @@ namespace Printers {
 
     int n = text.size();
     QByteArray textASCII;
-    textASCII.append(text);
+    textASCII.append(text.toLatin1());
 
     // Disable ATASCII Inverse Video for ASCII window //
     for (int x = 0; x <= n - 1; ++x) {
@@ -248,7 +245,11 @@ namespace Printers {
     for (int i = 0; i < lines.size(); ++i) {
       int x = lines.at(i).indexOf(" ");
       if (x > 0) {
-        lines.at(i).midRef(1, x - 1).toInt(&number);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+        number = QStringView(lines.at(i)).mid(1, x - 1).toInt();
+#else
+        number = lines.at(i).midRef(1, x - 1).toInt();
+#endif
         if (number) {
           lineNumberFound = true;
           break;
@@ -264,7 +265,11 @@ namespace Printers {
       for (int i = 0; i < lines.size(); ++i) {
         int x = lines.at(i).indexOf(" ");
         if (x > 0) {
-          lines.at(i).midRef(1, x - 1).toInt(&number);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+          number = QStringView(lines.at(i)).mid(1, x - 1).toInt();
+#else
+          number = lines.at(i).midRef(1, x - 1).toInt();
+#endif
           if (!number) {
             x = -1;
           }

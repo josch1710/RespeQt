@@ -53,6 +53,13 @@ set(SOURCES
     src/aboutdialog.cpp
         src/diskimages/diskimage.cpp
         src/diskimages/folderimage.cpp
+    src/diskbrowser/folderdisks.cpp
+    src/diskbrowser/diskbrowserdlg.cpp
+    src/diskbrowser/dbsettings.cpp
+    src/diskbrowser/dbjson.cpp
+    src/diskbrowser/dbini.cpp
+    src/diskbrowser/picsplitter.cpp
+    src/diskbrowser/picpreview.cpp
     src/createimagedialog.cpp
     src/diskeditdialog.cpp
     src/autoboot.cpp
@@ -114,6 +121,14 @@ set(HEADERS
     include/aboutdialog.h
         include/diskimages/diskimage.h
         include/diskimages/folderimage.h
+    include/diskbrowser/folderdisks.h
+    include/diskbrowser/diskbrowserdlg.h
+    include/diskbrowser/dbsettings.h
+    include/diskbrowser/dbjson.h
+    include/diskbrowser/dbini.h
+    include/diskbrowser/picsplitter.h
+    include/diskbrowser/picpreview.h
+    include/diskbrowser/picsourcetype.h
     include/createimagedialog.h
     include/diskeditdialog.h
     include/autoboot.h
@@ -174,6 +189,7 @@ set(FORMS
     ui/printers/outputwindow.ui
     ui/printerwidget.ui
     ui/printers/textprinterwindow.ui
+    ui/diskbrowserdlg.ui
 )
 
 set(RESOURCES
