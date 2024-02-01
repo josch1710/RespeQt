@@ -50,7 +50,6 @@ SOURCES += \
     src/printers/passthrough.cpp \
     src/printers/graphicsprimitive.cpp \
     src/crc16.cpp \
-    src/cpu6502.cpp \
     src/filesystems/ataridirentry.cpp \
     src/filesystems/atarifilesystem.cpp \
     src/filesystems/dos10filesystem.cpp \
@@ -61,8 +60,7 @@ SOURCES += \
     src/diskimages/diskimagepro.cpp \
     src/diskimages/diskimageatx.cpp \
     src/diskimages/diskimage.cpp \
-    src/diskimages/folderimage.cpp \    src/diskimages/diskimagepro.cpp \
-    src/diskimages/diskimageatx.cpp \
+    src/diskimages/folderimage.cpp \
     src/diskimages/diskgeometry.cpp \
     src/diskimages/prosectorinfo.cpp \
     src/diskimages/atxsectorinfo.cpp \
@@ -163,6 +161,7 @@ FORMS += \
     ui/bootoptionsdialog.ui \
     ui/logdisplaydialog.ui \
     ui/drivewidget.ui \
+    ui/diskbrowserdlg.ui \
     ui/printers/outputwindow.ui \
     ui/printerwidget.ui \
     ui/printers/textprinterwindow.ui
