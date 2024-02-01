@@ -10,6 +10,7 @@
 #include <QApplication>
 #include <QTextCodec>
 #include <memory>
+#include <QStyleFactory>
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -20,6 +21,7 @@ int main(int argc, char *argv[]) {
   timeBeginPeriod(1);
 #endif
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+  QApplication::setStyle(QStyleFactory::create("Fusion"));
   QApplication a(argc, argv);
   a.setFont(a.font("QMenu"));
   QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));

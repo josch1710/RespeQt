@@ -17,6 +17,9 @@
 #include "filesystems/atarifilesystem.h"
 #include "respeqtsettings.h"
 #include <QFileInfo>
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+#include <QRandomGenerator>
+#endif
 
 namespace DiskImages {
   extern quint8 FDC_CRC_PATTERN[];
@@ -139,7 +142,7 @@ namespace DiskImages {
           }
           quint8 sectorStatus = m_proSectorInfo[indexInProSector].wd1771Status;
           if (sectorStatus & 0x10) {
-            secBuf.append(tr("%1").arg(m_proSectorInfo[indexInProSector].sectorNumber, 2, 16, QChar('0')));
+            secBuf.append(tr("%1").arg(m_proSectorInfo[indexInProSector].sectorNumber, 2, 16, QChar('0')).toLatin1());
             // display only the one word to keep the line as compact as possible
             if (m_proSectorInfo[indexInProSector].weakBits != 0xFFFF) {
               secBuf.append("(WEAK)");
@@ -1325,7 +1328,11 @@ namespace DiskImages {
       data = m_proSectorInfo[slot].sectorData;
       if (weakOffset != 0xFFFF) {
         for (int i = weakOffset; i < data.size(); i++) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+          data[i] = QRandomGenerator::global()->generate() & 0xFF;
+#else
           data[i] = qrand() & 0xFF;
+#endif
         }
       }
 
@@ -2007,7 +2014,11 @@ namespace DiskImages {
         if ((i < weakOffset) || (i >= m_geometry.bytesPerSector() - 3)) {
           m_proSectorInfo[phantomSlot].sectorData[i] = m_proSectorInfo[slot].sectorData[i];
         } else {
-          m_proSectorInfo[phantomSlot].sectorData[i] = qrand() & 0xFF;
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+          m_proSectorInfo[phantomSlot].sectorData[i] = QRandomGenerator::global()->generate() & 0xFF;
+#else
+            m_proSectorInfo[phantomSlot].sectorData[i] = qrand() & 0xFF;
+#endif
         }
       }
     }
@@ -2157,7 +2168,11 @@ namespace DiskImages {
           } else if ((i < weakOffset) || (i >= m_geometry.bytesPerSector() - 3)) {
             m_proSectorInfo[phantomSlot].sectorData[i] = data[i];
           } else {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 10, 0))
+            m_proSectorInfo[phantomSlot].sectorData[i] = QRandomGenerator::global()->generate() & 0xFF;
+#else
             m_proSectorInfo[phantomSlot].sectorData[i] = qrand() & 0xFF;
+#endif
           }
         }
       }

@@ -18,7 +18,7 @@ namespace DiskImages {
   class SimpleDiskImage;
 }
 
-class DriveWidget : public QFrame {
+class DriveWidget : public QWidget {
   Q_OBJECT
 
 public:
@@ -39,6 +39,7 @@ public:
   bool isHappyEnabled();
   bool isChipEnabled();
   void setLabelToolTips(const QString &one, const QString &two, const QString &three);
+  void setDropTarget(bool target);
 
   void triggerAutoSaveClickIfEnabled();
   void triggerHappyClickIfEnabled();

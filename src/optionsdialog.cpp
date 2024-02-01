@@ -18,6 +18,8 @@
 #include <QFontDialog>
 #include <QTranslator>
 #include <QtSerialPort>
+#include <QColorDialog>
+#include <QScreen>
 
 OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent),
                                                 m_ui(new Ui::OptionsDialog) {
@@ -31,15 +33,16 @@ OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent),
   itemStandard = m_ui->optionSections->topLevelItem(0)->child(0);
   itemAtariSio = m_ui->optionSections->topLevelItem(0)->child(1);
   itemEmulation = m_ui->optionSections->topLevelItem(1);
-  itemDiskOptions = m_ui->optionSections->topLevelItem(2)->child(0);
-  itemDiskOSB = m_ui->optionSections->topLevelItem(2)->child(1);
-  itemDiskIcons = m_ui->optionSections->topLevelItem(2)->child(2);
-  itemDiskFavorite = m_ui->optionSections->topLevelItem(2)->child(3);
-  itemI18n = m_ui->optionSections->topLevelItem(3);
-  itemAtari1027 = m_ui->optionSections->topLevelItem(4)->child(0);
-  itemPassthrough = m_ui->optionSections->topLevelItem(4)->child(1);
-  itemPrinterProtocol = m_ui->optionSections->topLevelItem(4)->child(2);
-  item1020Options = m_ui->optionSections->topLevelItem(4)->child(3);
+  itemDiskBrowser = m_ui->optionSections->topLevelItem(2);
+  itemDiskOptions = m_ui->optionSections->topLevelItem(3)->child(0);
+  itemDiskOSB = m_ui->optionSections->topLevelItem(3)->child(1);
+  itemDiskIcons = m_ui->optionSections->topLevelItem(3)->child(2);
+  itemDiskFavorite = m_ui->optionSections->topLevelItem(3)->child(3);
+  itemI18n = m_ui->optionSections->topLevelItem(4);
+  itemAtari1027 = m_ui->optionSections->topLevelItem(5)->child(0);
+  itemPassthrough = m_ui->optionSections->topLevelItem(5)->child(1);
+  itemPrinterProtocol = m_ui->optionSections->topLevelItem(5)->child(2);
+  item1020Options = m_ui->optionSections->topLevelItem(5)->child(3);
 
 #ifndef Q_OS_LINUX
   m_ui->optionSections->topLevelItem(0)->removeChild(itemAtariSio);
@@ -107,6 +110,54 @@ void OptionsDialog::setupSettings() {
   m_ui->printerSpyMode->setChecked(RespeqtSettings::instance()->isPrinterSpyMode());
   m_ui->displayGraphicsInstructions->setChecked(RespeqtSettings::instance()->displayGraphicsInstructions());
   m_ui->clearOnStatus->setChecked(RespeqtSettings::instance()->clearOnStatus());
+  m_ui->cb_filename->setChecked(RespeqtSettings::instance()->dbUseFileNames());
+  m_ui->cb_favor_json->setChecked(RespeqtSettings::instance()->dbFavorJson());
+  m_ui->cb_copypics->setChecked(RespeqtSettings::instance()->dbCopyPics());
+
+  switch (RespeqtSettings::instance()->dbDataSource())
+  {
+  case DbData_appFolderJson:
+      m_ui->rb_dbset_app_data_dir->setChecked(true);
+      break;
+  case DbData_subDir:
+      m_ui->rb_dbset_subdir->setChecked(true);
+      break;
+  case DbData_appSettings: default:
+      m_ui->rb_dbset_appset_ini->setChecked(true);
+      break;
+  }
+
+  // DB title font settings
+  auto dbfnt = RespeqtSettings::instance()->dbTitleFont();
+  m_ui->cb_title_font->setCurrentFont(dbfnt);
+  auto btnFont = m_ui->btn_bold_title->font();
+  btnFont.setBold(dbfnt.bold());
+  m_ui->btn_bold_title->setChecked(dbfnt.bold());
+  m_ui->btn_bold_title->setFont(btnFont);
+  m_ui->btn_bold_title->update();
+  btnFont = m_ui->btn_italic_title->font();
+  btnFont.setItalic(dbfnt.italic());
+  m_ui->btn_italic_title->setChecked(dbfnt.italic());
+  m_ui->btn_italic_title->setFont(btnFont);
+  m_ui->btn_italic_title->update();
+  m_ui->spn_scale_title->setValue(dbfnt.scale());
+  QString style = QString("QPushButton {color: %1}").arg(dbfnt.color().name());
+  m_ui->btn_color_title->setStyleSheet(style);
+
+  // DB index font settings
+  dbfnt = RespeqtSettings::instance()->dbIndexFont();
+  m_ui->cb_index_font->setCurrentFont(dbfnt);
+  btnFont = m_ui->btn_bold_index->font();
+  btnFont.setBold(dbfnt.bold());
+  m_ui->btn_bold_index->setChecked(dbfnt.bold());
+  m_ui->btn_bold_index->setFont(btnFont);
+  btnFont = m_ui->btn_italic_index->font();
+  btnFont.setItalic(dbfnt.italic());
+  m_ui->btn_italic_index->setChecked(dbfnt.italic());
+  m_ui->btn_italic_index->setFont(btnFont);
+  m_ui->spn_scale_index->setValue(dbfnt.scale());
+  style = QString("QPushButton {color: %1}").arg(dbfnt.color().name());
+  m_ui->btn_color_index->setStyleSheet(style);
 
 #ifdef Q_OS_MAC
   m_ui->useNativeMenu->setChecked(RespeqtSettings::instance()->nativeMenu());
@@ -243,6 +294,17 @@ void OptionsDialog::connectSignals() {
 
   // UI section
   connect(m_ui->useNativeMenu, &QCheckBox::toggled, this, &OptionsDialog::useNativeMenuToggled);
+
+  connect(m_ui->btn_appdata_browse, &QPushButton::clicked, this, &OptionsDialog::browseForAppDir);
+  connect(m_ui->rb_dbset_app_data_dir, &QRadioButton::toggled, this, &OptionsDialog::appDataDirToggled);
+  connect(m_ui->rb_dbset_appset_ini, &QRadioButton::toggled, this, &OptionsDialog::appSettingsToggled);
+  connect(m_ui->rb_dbset_subdir, &QRadioButton::toggled, this, &OptionsDialog::diskSubDirToggled);
+  connect(m_ui->btn_color_index, &QPushButton::clicked, this, &OptionsDialog::indexColorClicked);
+  connect(m_ui->btn_color_title, &QPushButton::clicked, this, &OptionsDialog::titleColorClicked);
+  connect(m_ui->btn_bold_index, &QPushButton::toggled, this, &OptionsDialog::indexBoldToggled);
+  connect(m_ui->btn_bold_title, &QPushButton::toggled, this, &OptionsDialog::titleBoldToggled);
+  connect(m_ui->btn_italic_index, &QPushButton::toggled, this, &OptionsDialog::indexItalicToggled);
+  connect(m_ui->btn_italic_title, &QPushButton::toggled, this, &OptionsDialog::titleItalicToggled);
 }
 
 void OptionsDialog::changeEvent(QEvent *e) {
@@ -254,6 +316,25 @@ void OptionsDialog::changeEvent(QEvent *e) {
     default:
       break;
   }
+}
+
+void OptionsDialog::showEvent(QShowEvent *e)
+{
+    static bool setSize = true;
+
+    QDialog::showEvent(e);
+
+    if (e->type() != QEvent::Show)
+        return;
+
+    if (setSize)    // on first presentation, resize the dialog to a reasonable size (TBD: do this in designer?)
+    {
+        resize(QGuiApplication::primaryScreen()->size() / 2);   // Qt doesn't seem to have a better way to do this
+        auto sizes = m_ui->splitter->sizes();
+        int  total = sizes[0] + sizes[1];
+        m_ui->splitter->setSizes( QList<int>{total / 3, total * 2 / 3});    // TBD: use 2x widget stretch factors?
+        setSize = false;
+    }
 }
 
 void OptionsDialog::serialPortChanged(int index) {
@@ -317,24 +398,26 @@ void OptionsDialog::currentSectionChanged(QTreeWidgetItem *current, QTreeWidgetI
     m_ui->stackedWidget->setCurrentIndex(1);
   } else if (current == itemEmulation) {
     m_ui->stackedWidget->setCurrentIndex(2);
-  } else if (current == itemDiskOptions) {
+  } else if (current == itemDiskBrowser) {
     m_ui->stackedWidget->setCurrentIndex(3);
-  } else if (current == itemDiskOSB) {
-    m_ui->stackedWidget->setCurrentIndex(11);
-  } else if (current == itemDiskIcons) {
-    m_ui->stackedWidget->setCurrentIndex(12);
-  } else if (current == itemDiskFavorite) {
-    m_ui->stackedWidget->setCurrentIndex(13);
-  } else if (current == itemI18n) {
+  } else if (current == itemDiskOptions) {
     m_ui->stackedWidget->setCurrentIndex(4);
-  } else if (current == itemAtari1027) {
-    m_ui->stackedWidget->setCurrentIndex(5);
-  } else if (current == itemPassthrough) {
-    m_ui->stackedWidget->setCurrentIndex(6);
-  } else if (current == itemPrinterProtocol) {
+  } else if (current == itemDiskOSB) {
+    m_ui->stackedWidget->setCurrentIndex(12);
+  } else if (current == itemDiskIcons) {
+    m_ui->stackedWidget->setCurrentIndex(13);
+  } else if (current == itemDiskFavorite) {
     m_ui->stackedWidget->setCurrentIndex(14);
-  } else if (current == item1020Options) {
+  } else if (current == itemI18n) {
+    m_ui->stackedWidget->setCurrentIndex(5);
+  } else if (current == itemAtari1027) {
+    m_ui->stackedWidget->setCurrentIndex(6);
+  } else if (current == itemPassthrough) {
+    m_ui->stackedWidget->setCurrentIndex(7);
+  } else if (current == itemPrinterProtocol) {
     m_ui->stackedWidget->setCurrentIndex(15);
+  } else if (current == item1020Options) {
+    m_ui->stackedWidget->setCurrentIndex(16);
   }
 }
 
@@ -354,8 +437,8 @@ void OptionsDialog::saveSettings() {
   RespeqtSettings::instance()->setUseCustomCasBaud(m_ui->emulationUseCustomCasBaudBox->isChecked());
   RespeqtSettings::instance()->setCustomCasBaud(m_ui->emulationCustomCasBaudSpin->value());
   RespeqtSettings::instance()->setMinimizeToTray(m_ui->minimizeToTrayBox->isChecked());
-  RespeqtSettings::instance()->setsaveWindowsPos(m_ui->saveWinPosBox->isChecked());
-  RespeqtSettings::instance()->setsaveDiskVis(m_ui->saveDiskVisBox->isChecked());
+  RespeqtSettings::instance()->setSaveWindowsPos(m_ui->saveWinPosBox->isChecked());
+  RespeqtSettings::instance()->setSaveDiskVis(m_ui->saveDiskVisBox->isChecked());
   RespeqtSettings::instance()->setfilterUnderscore(m_ui->filterUscore->isChecked());
   RespeqtSettings::instance()->setlimitFileEntries(m_ui->limitFileEntries->isChecked());
   RespeqtSettings::instance()->setCapitalLettersInPCLINK(m_ui->capitalLettersPCLINK->isChecked());
@@ -382,6 +465,37 @@ void OptionsDialog::saveSettings() {
   RespeqtSettings::instance()->setPrinterSpyMode(m_ui->printerSpyMode->isChecked());
   RespeqtSettings::instance()->setDisplayGraphicsInstructions(m_ui->displayGraphicsInstructions->isChecked());
   RespeqtSettings::instance()->setClearOnStatus(m_ui->clearOnStatus->isChecked());
+  RespeqtSettings::instance()->setDbFileNames(m_ui->cb_filename->isChecked(), m_ui->cb_favor_json->isChecked());
+  RespeqtSettings::instance()->setDbCopyPics(m_ui->cb_copypics->isChecked());
+  DbDataSource dbSource = DbData_appSettings;
+  if (m_ui->rb_dbset_app_data_dir->isChecked())
+  {
+      dbSource = DbData_appFolderJson;
+      RespeqtSettings::instance()->setAppFolderDir(m_ui->edt_appdata_dir->text());
+  }
+  else if (m_ui->rb_dbset_subdir->isChecked())
+  {
+      dbSource = DbData_subDir;
+  }
+  RespeqtSettings::instance()->setDbDataSource(dbSource);
+  LabelFont titleFont
+  {
+      m_ui->cb_title_font->currentFont().family(),
+      m_ui->btn_bold_title->isChecked(),
+      m_ui->btn_italic_title->isChecked(),
+      QColor {m_ui->btn_color_title->property("color").toString()},
+      m_ui->spn_scale_title->value()
+  };
+  RespeqtSettings::instance()->setDbTitleFont(titleFont);
+  LabelFont indexFont
+  {
+      m_ui->cb_index_font->currentFont().family(),
+      m_ui->btn_bold_index->isChecked(),
+      m_ui->btn_italic_index->isChecked(),
+      QColor {m_ui->btn_color_index->property("color").toString()},
+      m_ui->spn_scale_index->value()
+  };
+  RespeqtSettings::instance()->setDbIndexFont(indexFont);
 
   SerialBackend backend = SerialBackend::STANDARD;
   if (itemAtariSio->checkState(0) == Qt::Checked) {
@@ -502,4 +616,91 @@ void OptionsDialog::useNativeMenuToggled() {
   // We reverse the meaning of the checkbox to match the application attribute, see above for reason.
   const auto &checkboxNoMenu = m_ui->useNativeMenu->checkState() == Qt::Unchecked;
   m_ui->warning_nativemenu->setVisible(actualNoMenu != checkboxNoMenu);
+}
+
+void OptionsDialog::appDataDirToggled()
+{
+    bool isChecked = m_ui->rb_dbset_app_data_dir->isChecked();
+    m_ui->edt_appdata_dir->setEnabled(isChecked);
+    if (isChecked)
+    {
+        QString appdatadir = RespeqtSettings::instance()->appDataFolder();
+        m_ui->edt_appdata_dir->setText(appdatadir);
+        m_ui->cb_copypics->setText(tr("Copy pics to AppData folder"));
+    }
+}
+
+void OptionsDialog::diskSubDirToggled()
+{
+    if (m_ui->rb_dbset_subdir->isChecked())
+        m_ui->cb_copypics->setText(tr("Copy pics to .respeqt_db subdir"));
+}
+void OptionsDialog::appSettingsToggled()
+{
+    if (m_ui->rb_dbset_appset_ini->isChecked())
+        m_ui->cb_copypics->setText(tr("Copy pics to disk folders"));
+}
+
+void OptionsDialog::browseForAppDir()
+{
+    QString dirName = RespeqtSettings::instance()->appDataFolder();
+    dirName = QFileDialog::getExistingDirectory(this, tr("Choose directory for app data"), dirName);
+    if (!dirName.isEmpty())
+    {
+        QFileInfo fileInfo(dirName);
+        if (fileInfo.isWritable())
+            m_ui->edt_appdata_dir->setText(dirName);
+        else
+            QMessageBox::warning(this, "Error directory not writable", "Check permissions and try again.");
+    }
+}
+
+void OptionsDialog::indexColorClicked()
+{
+    auto font = RespeqtSettings::instance()->dbIndexFont();
+    QColor init = font.color();
+    QColor color = QColorDialog::getColor(init, this, "Select the font color for Index labels:");
+    QString style = QString("QPushButton {color: %1}").arg(color.name());
+
+    m_ui->btn_color_index->setProperty("color", color.name());
+    m_ui->btn_color_index->setStyleSheet(style);
+}
+
+void OptionsDialog::titleColorClicked()
+{
+    auto font = RespeqtSettings::instance()->dbTitleFont();
+    QColor init = font.color();
+    QColor color = QColorDialog::getColor(init, this, "Select the font color for Title labels:");
+    QString style = QString("QPushButton {color: %1}").arg(color.name());
+
+    m_ui->btn_color_title->setProperty("color", color.name());
+    m_ui->btn_color_title->setStyleSheet(style);
+}
+
+void OptionsDialog::indexBoldToggled()
+{
+    QFont font = m_ui->btn_bold_index->font();
+    font.setBold(m_ui->btn_bold_index->isChecked());
+    m_ui->btn_bold_index->setFont(font);
+}
+
+void OptionsDialog::titleBoldToggled()
+{
+    QFont font = m_ui->btn_bold_title->font();
+    font.setBold(m_ui->btn_bold_title->isChecked());
+    m_ui->btn_bold_title->setFont(font);
+}
+
+void OptionsDialog::indexItalicToggled()
+{
+    QFont font = m_ui->btn_italic_index->font();
+    font.setItalic(m_ui->btn_italic_index->isChecked());
+    m_ui->btn_italic_index->setFont(font);
+}
+
+void OptionsDialog::titleItalicToggled()
+{
+    QFont font = m_ui->btn_italic_title->font();
+    font.setItalic(m_ui->btn_italic_title->isChecked());
+    m_ui->btn_italic_title->setFont(font);
 }

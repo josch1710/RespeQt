@@ -3,6 +3,7 @@
 
 #include <QtGlobal>
 #include <QObject>
+#include "diskimages/atxsectorinfo.h"
 
 #include "diskimages/atxsectorinfo.h"
 

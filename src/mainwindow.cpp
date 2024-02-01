@@ -36,7 +36,8 @@
 //#include "printers/outputs.h"
 #include "respeqtsettings.h"
 
-#include <QDesktopWidget>
+//#include <QDesktopWidget> deprecated in Qt 5. Use QScreen:
+#include <QScreen>
 #include <QDrag>
 #include <QDragEnterEvent>
 //#include <QDropEvent>
@@ -72,11 +73,7 @@ static QMutex *logMutex;
 QString g_exefileName;
 static QString g_rclFileName;
 QString g_respeQtAppPath;
-static QRect g_savedGeometry;
 bool g_disablePicoHiSpeed;
-static bool g_D9DOVisible = true;
-bool g_miniMode = false;
-static bool g_shadeMode = false;
 //SimpleDiskImage *g_translator = nullptr;
 //static int g_savedWidth;
 
@@ -84,12 +81,16 @@ MainWindow *MainWindow::sInstance{nullptr};
 
 // ****************************** END OF GLOBALS ************************************//
 
+// DEV NOTE: using qDebug() requires one of the following prefix strings:
+//
 // Displayed only in debug mode    "!d"
 // Unimportant     (gray)          "!u"
 // Normal          (black)         "!n"
 // Important       (blue)          "!i"
 // Warning         (brown)         "!w"
 // Error           (red)           "!e"
+// (???)           (purple)        "!"      (not used?)
+//
 void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*context*/, const QString &msg) {
   logMutex->lock();
   logFile->write(QString::number((quint64) QThread::currentThreadId(), 16).toLatin1());
@@ -112,25 +113,34 @@ void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*c
       logFile->write(": [Fatal]    ");
       break;
   }
-  QByteArray localMsg = msg.toLocal8Bit();
+
+  QString nonConstMsg(msg);
+  if (!msg.startsWith("!"))     // Qt/system log message?
+    nonConstMsg = "123" + msg;  // "123" gets removed below
+
+  QByteArray localMsg = nonConstMsg.toLocal8Bit();
   QByteArray displayMsg = localMsg.mid(3);
+
   logFile->write(displayMsg);
   logFile->write("\n");
+
   if (type == QtFatalMsg) {
     logFile->close();
+#if defined(QT_NO_DEBUG) // allow debugger to survive fatal error
     abort();
-  }
-  logMutex->unlock();
-
-  if (msg[0] == '!') {
-#ifdef QT_NO_DEBUG
-    if (msg[1] == 'd') {
-      return;
-    }
+#elif defined (Q_OS_WIN) // TBD: non-windows? (QtCreator 10.x on Mojave is OK)
+    __debugbreak();
 #endif
-    // TODO Should be signal-slot
-    sInstance->doLogMessage(localMsg.at(1), displayMsg);
   }
+  logMutex->unlock();   // __debugbreak() (line above) breaks *here* on fatal error, crash or assert.
+
+#ifdef QT_NO_DEBUG
+  // release build: filter Qt/system messages (all app generated log messages follow above DEV NOTE)
+  if ((msg[0] != '!') || (msg[1] == 'd')) {
+    return;
+  }
+#endif
+  sInstance->doLogMessage(localMsg.at(1), displayMsg);
 }
 
 void MainWindow::doLogMessage(int type, const QString &msg) {
@@ -153,9 +163,10 @@ MainWindow::MainWindow()
   logMutex = new QMutex();
   connect(this, &MainWindow::logMessage, this, &MainWindow::uiMessage, Qt::QueuedConnection);
   qInstallMessageHandler(MainWindow::logMessageOutput);
-  qDebug() << "!d" << tr("RespeQt started at %1.").arg(QDateTime::currentDateTime().toString());
+  qDebug() << "!d" << tr("RespeQt started @ %1.").arg(QDateTime::currentDateTime().toString());
 
   logWindow_ = nullptr;
+  diskBrowserDlg = nullptr;
 
   /* Remove old temporaries */
   QDir tempDir = QDir::temp();
@@ -253,7 +264,6 @@ MainWindow::MainWindow()
   } else {
     setWindowTitle(g_mainWindowTitle);
   }
-  setGeometry(RespeqtSettings::instance()->lastHorizontalPos(), RespeqtSettings::instance()->lastVerticalPos(), RespeqtSettings::instance()->lastWidth(), RespeqtSettings::instance()->lastHeight());
 
   /* Setup status bar */
   speedLabel = new QLabel(this);
@@ -291,8 +301,6 @@ MainWindow::MainWindow()
 
   ui->textEdit->installEventFilter(this);
   changeFonts();
-  g_D9DOVisible = RespeqtSettings::instance()->D9DOVisible();
-  showHideDrives();
 
   /* Connect to the network */
   QString netInterface;
@@ -423,42 +431,54 @@ void MainWindow::createDeviceWidgets() {
   changeFonts();
 }
 
-void MainWindow::mousePressEvent(QMouseEvent *event) {
-  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
-  auto slot = containingDiskSlot(event->pos());
-
-  if (event->button() == Qt::LeftButton && slot >= 0) {
-
-    auto drag = new QDrag((QWidget *) this);
-    auto mimeData = new QMimeData;
-
-    mimeData->setData("application/x-respeqt-disk-image", QByteArray(1, slot));
-    drag->setMimeData(mimeData);
-
-    drag->exec();
+void MainWindow::mouseMoveEvent(QMouseEvent *event) {
+  if (isMiniMode && isShadeMode) {
+    auto delta = QPoint(event->globalPos() - savedPosition);
+    move(x() + delta.x(), y() + delta.y());
+    savedPosition = event->globalPos();
   }
+}
 
-  if (event->button() == Qt::LeftButton && onOffLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
+void MainWindow::mousePressEvent(QMouseEvent *event) {
+
+  if (event->button() != Qt::LeftButton)    // check for LEFT mouse button
+    return;                                // EXIT NOW if NOT!
+
+  if (isMiniMode && isShadeMode) {
+    savedPosition = event->globalPos();
+  } else {
+    // auto slot {containingDiskSlot(event->pos())};  do not use
+    // Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+    auto slot = containingDiskSlot(event->pos());   // should be OK with all compilers
+    if (slot >= 0) {
+      auto drag = new QDrag((QWidget *) this);
+      auto mimeData = new QMimeData;
+
+      mimeData->setData("application/x-respeqt-disk-image", QByteArray(1, slot));
+      drag->setMimeData(mimeData);
+      drag->exec();
+    }
+  }
+  if (onOffLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
     ui->actionStartEmulation->trigger();
   }
-
-  if (event->button() == Qt::LeftButton && prtOnOffLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
+  if (prtOnOffLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
     ui->actionPrinterEmulation->trigger();//
   }
-  if (event->button() == Qt::LeftButton && clearMessagesLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
+  if (clearMessagesLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
     ui->textEdit->clear();
     emit sendLogText("");
   }
-  if (event->button() == Qt::LeftButton && !speedLabel->isHidden() && speedLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
+  if (!speedLabel->isHidden() && speedLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
     ui->actionOptions->trigger();
   }
-  if (event->button() == Qt::LeftButton && limitEntriesLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
+  if (limitEntriesLabel->geometry().translated(ui->statusBar->geometry().topLeft()).contains(event->pos())) {
     ui->actionLimitFileEntries->trigger();
   }
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
-  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+  /// not using initialization braces here (Mingw 4.9.2 treats them as std::initializer_list when auto is used)
   auto i = containingDiskSlot(event->pos());
   if (i >= 0 && (event->mimeData()->hasUrls() ||
                  event->mimeData()->hasFormat("application/x-respeqt-disk-image")))
@@ -467,12 +487,8 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
     event->setDropAction(Qt::IgnoreAction);
 
   event->accept();
-  for (int j = 0; j < DISK_COUNT; j++) {//
-    if (i == j) {
-      diskWidgets[j]->setFrameShadow(QFrame::Sunken);
-    } else {
-      diskWidgets[j]->setFrameShadow(QFrame::Raised);
-    }
+  for (int j = 0; j < DISK_COUNT; j++) {
+    diskWidgets[j]->setDropTarget(i == j);
   }
 }
 
@@ -481,7 +497,7 @@ void MainWindow::dragLeaveEvent(QDragLeaveEvent *event) {
 }
 
 void MainWindow::dragMoveEvent(QDragMoveEvent *event) {
-  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+  /// not using initialization braces here (Mingw 4.9.2 treats them as std::initializer_list when auto is used)
   auto i = containingDiskSlot(event->pos());
   if (i >= 0 && (event->mimeData()->hasUrls() ||
                  event->mimeData()->hasFormat("application/x-respeqt-disk-image")))
@@ -491,20 +507,16 @@ void MainWindow::dragMoveEvent(QDragMoveEvent *event) {
 
   event->accept();
 
-  for (int j = 0; j < DISK_COUNT; j++) {//
-    if (i == j) {
-      diskWidgets[j]->setFrameShadow(QFrame::Sunken);
-    } else {
-      diskWidgets[j]->setFrameShadow(QFrame::Raised);
-    }
+  for (int j = 0; j < DISK_COUNT; j++) {
+      diskWidgets[j]->setDropTarget(i == j);
   }
 }
 
 void MainWindow::dropEvent(QDropEvent *event) {
-  for (int j = 0; j < DISK_COUNT; j++) {//
-    diskWidgets[j]->setFrameShadow(QFrame::Raised);
+  for (int j = 0; j < DISK_COUNT; j++) {
+    diskWidgets[j]->setDropTarget(false);
   }
-  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+  /// not using initialization braces here (Mingw 4.9.2 treats them as std::initializer_list when auto is used)
   auto slot = containingDiskSlot(event->pos());
   if (!(event->mimeData()->hasUrls() ||
         event->mimeData()->hasFormat("application/x-respeqt-disk-image")) ||
@@ -588,16 +600,32 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   isClosing = true;
 
   // Save various session settings  //
+
   if (RespeqtSettings::instance()->saveWindowsPos()) {
-    if (g_miniMode) {
-      saveMiniWindowGeometry();
+
+    RespeqtSettings::instance()->saveMainWinGeometry(this, isMiniMode);
+
+    if (diskBrowserDlg) {
+      diskBrowserDlg->close();
     } else {
-      saveWindowGeometry();
+      RespeqtSettings::instance()->setShowDiskBrowser(false);
+    }
+
+    if (logWindow_) {
+      RespeqtSettings::instance()->setShowLogWindow(logWindow_->isVisible());
+      RespeqtSettings::instance()->saveWidgetGeometry(logWindow_);
+    } else {
+      RespeqtSettings::instance()->setShowLogWindow(false);
     }
   }
+
+  if (RespeqtSettings::instance()->saveDiskVis()) {
+    RespeqtSettings::instance()->setD9DOVisible(isD9DOVisible);
+  }
+
   if (g_sessionFile != "")
     RespeqtSettings::instance()->saveSessionToFile(g_sessionFilePath + "/" + g_sessionFile);
-  RespeqtSettings::instance()->setD9DOVisible(g_D9DOVisible);
+
   bool wasRunning = ui->actionStartEmulation->isChecked();
   QMessageBox::StandardButton answer = QMessageBox::No;
 
@@ -674,6 +702,7 @@ void MainWindow::hideEvent(QHideEvent *event) {
 }
 
 void MainWindow::showEvent(QShowEvent *event) {
+  static bool shownThisTime = true;
 
   if (event->type() == QEvent::Show && shownFirstTime) {
     shownFirstTime = false;// Reset the flag
@@ -691,17 +720,25 @@ void MainWindow::showEvent(QShowEvent *event) {
 
     ui->actionStartEmulation->trigger();
   }
+  if (event->type() == QEvent::Show && shownThisTime) {
+    shownThisTime = false;
+    restoreLayout();
+  }
   QMainWindow::showEvent(event);
 }
 
+#if (QT_VERSION_MAJOR < 6)
 void MainWindow::enterEvent(QEvent *) {
-  if (g_miniMode && g_shadeMode) {
+#else
+void MainWindow::enterEvent(QEnterEvent *) {
+#endif
+  if (isMiniMode && isShadeMode) {
     setWindowOpacity(1.0);
   }
 }
 
 void MainWindow::leaveEvent(QEvent *) {
-  if (g_miniMode && g_shadeMode) {
+  if (isMiniMode && isShadeMode) {
     setWindowOpacity(0.25);
   }
 }
@@ -716,21 +753,26 @@ bool MainWindow::eventFilter(QObject * /*obj*/, QEvent *event) {
 void MainWindow::showLogWindowTriggered() {
   if (logWindow_ == nullptr) {
     logWindow_ = new LogDisplayDialog(this);
-    int x, y, w, h;
-    x = geometry().x();
-    y = geometry().y();
-    w = geometry().width();
-    h = geometry().height();
-    if (!g_miniMode) {
-      logWindow_->setGeometry(static_cast<int>(x + w / 1.9), y + 30, logWindow_->geometry().width(), geometry().height());
-    } else {
-      logWindow_->setGeometry(x + 20, y + 60, w, h * 2);
+    bool restored = false;
+    if (RespeqtSettings::instance()->saveWindowsPos()) {
+      restored = RespeqtSettings::instance()->restoreWidgetGeometry(logWindow_);
+    }
+    if (!restored) {
+      int x, y, w, h;
+      x = geometry().x();
+      y = geometry().y();
+      w = geometry().width();
+      h = geometry().height();
+      if (!isMiniMode) {
+        logWindow_->setGeometry(static_cast<int>(x + w / 1.9), y + 30, logWindow_->geometry().width(), geometry().height());
+      } else {
+        logWindow_->setGeometry(x + 20, y + 60, w, h * 2);
+      }
     }
     connect(this, &MainWindow::sendLogText, logWindow_, &LogDisplayDialog::getLogText);
     connect(this, &MainWindow::sendLogTextChange, logWindow_, &LogDisplayDialog::getLogTextChange);
     emit sendLogText(ui->textEdit->toHtml());
   }
-
   logWindow_->show();
 }
 
@@ -738,96 +780,87 @@ void MainWindow::logChanged(QString text) {
   emit sendLogTextChange(std::move(text));
 }
 
-void MainWindow::saveWindowGeometry() {
-  RespeqtSettings::instance()->setLastHorizontalPos(geometry().x());
-  RespeqtSettings::instance()->setLastVerticalPos(geometry().y());
-  RespeqtSettings::instance()->setLastWidth(geometry().width());
-  RespeqtSettings::instance()->setLastHeight(geometry().height());
-}
-
-void MainWindow::saveMiniWindowGeometry() {
-  RespeqtSettings::instance()->setLastMiniHorizontalPos(geometry().x());
-  RespeqtSettings::instance()->setLastMiniVerticalPos(geometry().y());
-}
-
 void MainWindow::toggleShadeTriggered() {
-  if (g_shadeMode) {
-    setWindowFlags(Qt::WindowSystemMenuHint);
+  if (isShadeMode) {
+    setWindowFlags(Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
     setWindowOpacity(1.0);
-    g_shadeMode = false;
+    isShadeMode = false;
     QMainWindow::show();
   } else {
     setWindowFlags(Qt::FramelessWindowHint);
     setWindowOpacity(0.25);
-    g_shadeMode = true;
+    isShadeMode = true;
     QMainWindow::show();
   }
 }
 
 // Toggle Mini Mode //
 void MainWindow::toggleMiniModeTriggered() {
-  g_miniMode = !g_miniMode;
+  isMiniMode = !isMiniMode;
 
-  int i;
-  for (i = 1; i < 8; ++i) {
-    diskWidgets[i]->setVisible(!g_miniMode);
-  }
+  // set asside current geometry before doing anything
+  auto geometryBeforeToggle = geometry();
 
-  for (; i < DISK_COUNT; ++i) {
-    diskWidgets[i]->setVisible(!g_miniMode && g_D9DOVisible);
-  }
+  showHideDrives();
 
-  if (!g_miniMode) {
-    /*if (g_D9DOVisible) {
-            setMinimumWidth(688);
-        } else
-        {
-            setMinimumWidth(344);
-        }*/
+  ui->line->setVisible(!isMiniMode);
 
-    setMinimumHeight(426);
+  if (!isMiniMode) {  // Full Window Mode:
+
+    setMinimumHeight(RespeqtSettings::instance()->DefaultFullModeSize.height());
     setMaximumHeight(QWIDGETSIZE_MAX);
     ui->textEdit->setVisible(true);
     ui->actionHideShowDrives->setEnabled(true);
-    saveMiniWindowGeometry();
-    setGeometry(g_savedGeometry);
+    if (savedGeometry.isEmpty()) {
+      // on first toggle, pull values from our last persisted setting or defaults
+      RespeqtSettings::instance()->restoreMainWinGeometry(this,isMiniMode);
+    } else {
+      // use saved geometry for both mini and full
+      setGeometry(savedGeometry);
+    }
     setWindowOpacity(1.0);
-    setWindowFlags(Qt::WindowSystemMenuHint);
+    setWindowFlags(Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
     ui->actionToggleShade->setDisabled(true);
-    QMainWindow::show();
-    g_shadeMode = false;
-  } else {
-    g_savedGeometry = geometry();
+    isShadeMode = false;
+
+  } else {  // Mini-mode Window:
+
     ui->textEdit->setVisible(false);
-    setMinimumWidth(400);
-    setMinimumHeight(100);
-    setMaximumHeight(100);
-    setGeometry(RespeqtSettings::instance()->lastMiniHorizontalPos(), RespeqtSettings::instance()->lastMiniVerticalPos(),
-                minimumWidth(), minimumHeight());
+    int height = diskWidgets[0]->sizeHint().height() + ui->menuBar->height() + ui->statusBar->height();
+    setMinimumWidth(RespeqtSettings::instance()->DefaultMiniModeSize.width());
+    setMinimumHeight(height);
+    setMaximumHeight(height);
+    if (savedGeometry.isEmpty()) {
+      // on first toggle, pull values from our last persisted setting or defaults
+      RespeqtSettings::instance()->restoreMainWinGeometry(this, isMiniMode);
+    } else {
+      // use saved geometry for both mini and full
+      setGeometry(savedGeometry);
+    }
     ui->actionHideShowDrives->setDisabled(true);
     ui->actionToggleShade->setEnabled(true);
     if (RespeqtSettings::instance()->enableShade()) {
       setWindowOpacity(0.25);
       setWindowFlags(Qt::FramelessWindowHint);
-      g_shadeMode = true;
+      isShadeMode = true;
     } else {
-      g_shadeMode = false;
+      isShadeMode = false;
     }
-    QMainWindow::show();
   }
+  savedGeometry = geometryBeforeToggle;
+
+  QMainWindow::show();
 }
 
 void MainWindow::showHideDrives() {
-  for (int i = 8; i < DISK_COUNT; ++i) {
-    diskWidgets[i]->setVisible(g_D9DOVisible);
+  for (int i = 1; i < DISK_COUNT; ++i) {
+    diskWidgets[i]->setVisible(!isMiniMode && (isD9DOVisible || (i < 8)));
   }
-  for (int i = 2; i < PRINTER_COUNT; ++i) {
-    printerWidgets[i]->setVisible(g_D9DOVisible);
+  for (int i = 0; i < PRINTER_COUNT; ++i) {
+    printerWidgets[i]->setVisible(!isMiniMode && (isD9DOVisible || (i < 2)));
   }
 
-  // infoWidget->setVisible(g_D9DOVisible);
-
-  if (g_D9DOVisible) {
+  if (isD9DOVisible) {
     ui->actionHideShowDrives->setText(QApplication::translate("MainWindow", "Hide drives D9-DO", nullptr));
     ui->actionHideShowDrives->setStatusTip(QApplication::translate("MainWindow", "Hide drives D9-DO", nullptr));
     ui->actionHideShowDrives->setIcon(QIcon(":/icons/silk-icons/icons/drive_add.png").pixmap(16, 16, QIcon::Normal, QIcon::On));
@@ -842,13 +875,12 @@ void MainWindow::showHideDrives() {
 
 // Toggle Hide/Show drives D9-DO  //
 void MainWindow::hideShowTriggered() {
-  g_D9DOVisible = !g_D9DOVisible;
-  g_miniMode = false;
+  isD9DOVisible = !isD9DOVisible;
+  isMiniMode = isShadeMode = false;
 
   showHideDrives();
 
   //setGeometry(geometry().x(), geometry().y(), 0, geometry().height());
-  saveWindowGeometry();
 }
 
 // Toggle printer Emulation ON/OFF //
@@ -1088,8 +1120,10 @@ void MainWindow::showOptionsTriggered() {
     sio->waitOnPort();
     qApp->processEvents();
   }
+
   OptionsDialog optionsDialog(this);
-  optionsDialog.exec();
+  if (optionsDialog.exec() != QDialog::Accepted)
+    return;
 
   // Change drive slot description fonts
   changeFonts();
@@ -1099,6 +1133,9 @@ void MainWindow::showOptionsTriggered() {
 
   // retranslate Designer Form
   ui->retranslateUi(this);
+
+  // fix Hide/Show D9-DO menu (retranslate sets menu text to 'Hide...')
+  showHideDrives();
 
   setupDebugItems();
 
@@ -1329,7 +1366,7 @@ void MainWindow::mountFileWithDefaultProtection(char no, const QString &fileName
     }
   }
 
-  /// Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
+  /// not using initialization braces here (Mingw 4.9.2 treats them as std::initializer_list when auto is used)
   const auto imgSetting = RespeqtSettings::instance()->getImageSettingsFromName(atariFileName);
   auto prot = (!imgSetting.fileName.isEmpty()) && imgSetting.isWriteProtected;
   mountFile(no, atariFileName, prot);
@@ -1813,17 +1850,18 @@ void MainWindow::openSessionTriggered() {
   RespeqtSettings::instance()->loadSessionFromFile(fileName);
 
   setWindowTitle(g_mainWindowTitle + tr(" -- Session: ") + g_sessionFile);
-  setGeometry(RespeqtSettings::instance()->lastHorizontalPos(), RespeqtSettings::instance()->lastVerticalPos(), RespeqtSettings::instance()->lastWidth(), RespeqtSettings::instance()->lastHeight());
 
-  for (char i = 0; i < DISK_COUNT; i++) {//
+  for (char i = 0; i < DISK_COUNT; i++) {
     RespeqtSettings::ImageSettings is;
     is = RespeqtSettings::instance()->mountedImageSetting(i);
     mountFile(i, is.fileName, is.isWriteProtected);
   }
-  g_D9DOVisible = RespeqtSettings::instance()->D9DOVisible();
-  hideShowTriggered();
+
+  restoreLayout();
+
   setSession();
 }
+
 void MainWindow::saveSessionTriggered() {
   auto dir = RespeqtSettings::instance()->lastSessionDir();
   auto fileName = QFileDialog::getSaveFileName(this, tr("Save session as"),
@@ -1837,12 +1875,24 @@ void MainWindow::saveSessionTriggered() {
   RespeqtSettings::instance()->setLastSessionDir(QFileInfo(fileName).absolutePath());
 
   // Save mainwindow position and size to session file //
-  if (RespeqtSettings::instance()->saveWindowsPos()) {
-    RespeqtSettings::instance()->setLastHorizontalPos(geometry().x());
-    RespeqtSettings::instance()->setLastVerticalPos(geometry().y());
-    RespeqtSettings::instance()->setLastWidth(geometry().width());
-    RespeqtSettings::instance()->setLastHeight(geometry().height());
+  RespeqtSettings::instance()->saveMainWinGeometry(this, isMiniMode);
+
+  if (diskBrowserDlg) {
+    RespeqtSettings::instance()->setShowDiskBrowser(diskBrowserDlg->isVisible());
+    RespeqtSettings::instance()->saveWidgetGeometry(diskBrowserDlg);
+    RespeqtSettings::instance()->setDiskBrowserHorzSplitPos(diskBrowserDlg->getHorzSplitPos());
+    RespeqtSettings::instance()->setDiskBrowserVertSplitPos(diskBrowserDlg->getVertSplitPos());
+  } else {
+    RespeqtSettings::instance()->setShowDiskBrowser(false);
   }
+
+  if (logWindow_) {
+    RespeqtSettings::instance()->setShowLogWindow(logWindow_->isVisible());
+    RespeqtSettings::instance()->saveWidgetGeometry(logWindow_);
+  } else {
+    RespeqtSettings::instance()->setShowLogWindow(false);
+  }
+
   RespeqtSettings::instance()->saveSessionToFile(fileName);
 }
 
@@ -1855,7 +1905,6 @@ void MainWindow::cassettePlaybackTriggered() {
                                                tr("Open a cassette image"),
                                                RespeqtSettings::instance()->lastCasDir(),
                                                tr("CAS images (*.cas);;All files (*)"));
-
   if (fileName.isEmpty()) {
     return;
   }
@@ -1903,6 +1952,13 @@ void MainWindow::bootOptionTriggered() {
   bod.exec();
 }
 
+void MainWindow::diskBrowserTriggered() {
+  if (!diskBrowserDlg) {
+    diskBrowserDlg = new DiskBrowserDlg(sio, this);
+  }
+  diskBrowserDlg->showNormal();
+}
+
 // This connect the signal from UI to slots
 void MainWindow::connectUISignal() {
   connect(ui->actionPlaybackCassette, &QAction::triggered, this, &MainWindow::cassettePlaybackTriggered);
@@ -1922,6 +1978,7 @@ void MainWindow::connectUISignal() {
   connect(ui->actionToggleMiniMode, &QAction::triggered, this, &MainWindow::toggleMiniModeTriggered);
   connect(ui->actionToggleShade, &QAction::triggered, this, &MainWindow::toggleShadeTriggered);
   connect(ui->actionLogWindow, &QAction::triggered, this, &MainWindow::showLogWindowTriggered);
+  connect(ui->actionDiskBrowser, &QAction::triggered, this, &MainWindow::diskBrowserTriggered);
   connect(ui->actionCaptureSnapshot, &QAction::toggled, this, &MainWindow::toggleSnapshotCapture);
   connect(ui->actionReplaySnapshot, &QAction::triggered, this, &MainWindow::replaySnapshot);
 }
@@ -1980,4 +2037,31 @@ void MainWindow::toggleLimitEntriesTriggered() {
     limitEntriesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/lock.png").pixmap(16, 16, QIcon::Normal));
   }
   RespeqtSettings::instance()->setlimitFileEntries(!RespeqtSettings::instance()->limitFileEntries());
+}
+
+void MainWindow::restoreLayout()
+{
+    if (RespeqtSettings::instance()->saveDiskVis())
+        isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
+
+    if (RespeqtSettings::instance()->saveWindowsPos())
+    {
+        isMiniMode = RespeqtSettings::instance()->miniMode();
+        if (isMiniMode)
+        {                                           // check if mini-mode was last used
+            isMiniMode = false;                     // reset now so we can toggle it ON
+            ui->actionToggleMiniMode->trigger();    // trigger mini-mode toggle action
+        }
+        else
+        {
+            showHideDrives();
+        }
+        RespeqtSettings::instance()->restoreMainWinGeometry(this, isMiniMode);
+
+        if (RespeqtSettings::instance()->showDiskBrowser() && !(diskBrowserDlg && diskBrowserDlg->isVisible()))
+            diskBrowserTriggered();
+
+        if (RespeqtSettings::instance()->showLogWindow() && !(logWindow_ && logWindow_->isVisible()))
+            showLogWindowTriggered();
+    }
 }

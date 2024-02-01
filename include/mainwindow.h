@@ -38,6 +38,8 @@
 #include "serialport.h"
 #include "siorecorder.h"
 #include "sioworker.h"
+#include "diskbrowser/folderdisks.h"
+#include "diskbrowser/diskbrowserdlg.h"
 
 namespace Ui {
   class MainWindow;
@@ -55,7 +57,6 @@ public:
   void doLogMessage(int type, const QString &msg);
   static void logMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
   static MainWindow *instance() { return sInstance; }
-  void showEvent(QShowEvent *event) override;
 
 private:
   static MainWindow *sInstance;
@@ -67,7 +68,7 @@ private:
   std::vector<DriveWidget *> diskWidgets{DISK_COUNT};
   // InfoWidget* infoWidget;
   //SioRecorder *mRecorder{nullptr};
-  QString mTestfile{};
+  QString mTestfile;
 
   QLabel *speedLabel, *onOffLabel, *prtOnOffLabel, *netLabel, *clearMessagesLabel, *limitEntriesLabel;//
 
@@ -78,12 +79,20 @@ private:
   Qt::WindowStates oldWindowStates;
   QString lastMessage;
   int lastMessageRepeat;
+  DiskBrowserDlg* diskBrowserDlg;
 
   bool isClosing;
 
   LogDisplayDialog *logWindow_;
 
   QList<QAction *> recentFilesActions_;
+
+  QRect savedGeometry;          // for mini mode toggle
+  QPoint savedPosition;         // for mini frameless move
+
+  bool isD9DOVisible = true;    // column 2 disks visible
+  bool isMiniMode    = false;   // mini mode disk 1 only
+  bool isShadeMode   = false;   // mini shade mode main win
 
   void setSession();//
   void updateRecentFileActions();
@@ -118,15 +127,23 @@ private:
 
   void setupDebugItems();
 
+  void restoreLayout();
+
 protected:
+  void showEvent(QShowEvent *event) override;
   void mousePressEvent(QMouseEvent *event) override;
+  void mouseMoveEvent(QMouseEvent *event) override;
   void dragEnterEvent(QDragEnterEvent *event) override;
   void dragLeaveEvent(QDragLeaveEvent *event) override;
   void dragMoveEvent(QDragMoveEvent *event) override;
   void dropEvent(QDropEvent *event) override;
   void closeEvent(QCloseEvent *event) override;
   void hideEvent(QHideEvent *event) override;
+#if (QT_VERSION_MAJOR < 6)
   void enterEvent(QEvent *) override;
+#else
+  void enterEvent(QEnterEvent *) override;
+#endif
   void leaveEvent(QEvent *) override;
   bool eventFilter(QObject *obj, QEvent *event) override;
 
@@ -187,12 +204,11 @@ private slots:
   void saveAsTriggered(char no);                           // MIA
   void revertTriggered(char no);                           // MIA
 
-
   void bootOptionTriggered();    //
   void toggleMiniModeTriggered();//
   void toggleShadeTriggered();   //
   void showLogWindowTriggered(); //
-
+  void diskBrowserTriggered();   // what are all these trailing comment markers for?
   void showHideDrives();                       //
   void sioFinished();                          //
   void sioStarted();                           //
@@ -204,8 +220,6 @@ private slots:
   // TODO Check on Windows and Linux
   void trayIconActivated(QSystemTrayIcon::ActivationReason reason);//
   //void keepBootExeOpen();                                          // Signal AutoBootDialog::keepOpen MIA
-  void saveWindowGeometry();
-  void saveMiniWindowGeometry();
   void logChanged(QString text);
 };
 

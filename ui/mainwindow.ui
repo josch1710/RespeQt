@@ -40,20 +40,26 @@
     <bool>true</bool>
    </property>
    <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,0" columnstretch="0,0" rowminimumheight="0,0,0,0,0,0">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
     <property name="topMargin">
-     <number>4</number>
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
     </property>
     <property name="bottomMargin">
-     <number>6</number>
+     <number>0</number>
     </property>
-    <property name="horizontalSpacing">
-     <number>6</number>
-    </property>
-    <property name="verticalSpacing">
-     <number>1</number>
+    <property name="spacing">
+     <number>0</number>
     </property>
     <item row="0" column="0" colspan="2">
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
       <property name="sizeConstraint">
        <enum>QLayout::SetDefaultConstraint</enum>
       </property>
@@ -61,11 +67,14 @@
        <number>0</number>
       </property>
       <property name="bottomMargin">
-       <number>6</number>
+       <number>0</number>
       </property>
       <item>
        <layout class="QGridLayout" name="leftColumn">
         <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <property name="spacing">
          <number>0</number>
         </property>
        </layout>
@@ -75,6 +84,9 @@
         <property name="bottomMargin">
          <number>0</number>
         </property>
+        <property name="spacing">
+         <number>0</number>
+        </property>
        </layout>
       </item>
      </layout>
@@ -82,7 +94,7 @@
     <item row="3" column="0" colspan="2">
      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,1">
       <property name="spacing">
-       <number>6</number>
+       <number>0</number>
       </property>
       <property name="sizeConstraint">
        <enum>QLayout::SetFixedSize</enum>
@@ -90,12 +102,15 @@
       <property name="topMargin">
        <number>0</number>
       </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
       <property name="bottomMargin">
-       <number>6</number>
+       <number>0</number>
       </property>
       <item>
        <layout class="QGridLayout" name="leftColumn2" rowstretch="0">
-        <property name="horizontalSpacing">
+        <property name="spacing">
          <number>0</number>
         </property>
        </layout>
@@ -108,7 +123,7 @@
         <property name="bottomMargin">
          <number>0</number>
         </property>
-        <property name="horizontalSpacing">
+        <property name="spacing">
          <number>0</number>
         </property>
        </layout>
@@ -161,7 +176,7 @@
      <x>0</x>
      <y>0</y>
      <width>587</width>
-     <height>24</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Disk">
@@ -213,6 +228,7 @@
     <addaction name="actionToggleMiniMode"/>
     <addaction name="actionToggleShade"/>
     <addaction name="actionLogWindow"/>
+    <addaction name="actionDiskBrowser"/>
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="layoutDirection">
@@ -665,6 +681,24 @@
    </property>
    <property name="toolTip">
     <string>Limit file entries to 64</string>
+   </property>
+  </action>
+  <action name="actionDiskBrowser">
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/oxygen-icons/16x16/filesystems/folder_html.png</normaloff>:/icons/oxygen-icons/16x16/filesystems/folder_html.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open Disk Collection Browser</string>
+   </property>
+   <property name="toolTip">
+    <string>Open/Browse a folder with a collection of disk images</string>
+   </property>
+   <property name="statusTip">
+    <string>Open/Browse a folder with a collection of disk images</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+D</string>
    </property>
   </action>
  </widget>

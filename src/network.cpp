@@ -10,6 +10,8 @@
 #include <QMessageBox>
 #include <QTimer>
 
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
+
 Network::Network(QWidget *parent)
     : QMainWindow(parent) {
   //    QTimer::singleShot(0, this, SLOT(openConnection()));
@@ -44,3 +46,4 @@ bool Network::openConnection(QString &netInterface) {
   netInterface = iff.humanReadableName();
   return true;
 }
+#endif

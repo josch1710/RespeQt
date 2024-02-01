@@ -13,14 +13,11 @@
 SOURCES += \
     src/siorecorder.cpp \
     src/mainwindow.cpp \
-    src/printers/outputwindow.cpp \
     src/rcl.cpp \
     src/sdxprotocol.cpp \
     src/sioworker.cpp \
     src/optionsdialog.cpp \
     src/aboutdialog.cpp \
-    src/diskimages/diskimage.cpp \
-    src/diskimages/folderimage.cpp \
     src/createimagedialog.cpp \
     src/diskeditdialog.cpp \
     src/autoboot.cpp \
@@ -44,20 +41,16 @@ SOURCES += \
     src/printers/atari1020.cpp \
     src/smartdevice.cpp \
     src/printers/nativeoutput.cpp \
+    src/printers/outputwindow.cpp \
     src/printers/centronics.cpp \
     src/printers/escp.cpp \
     src/printers/atari1029.cpp \
-    src/diskimages/diskimagepro.cpp \
-    src/diskimages/diskimageatx.cpp \
-    src/diskimages/diskimageatr.cpp \
-    src/diskimages/disassembly810.cpp \
-    src/diskimages/disassembly1050.cpp \
     src/printers/printerfactory.cpp \
     src/printers/atari1025.cpp \
     src/printers/passthrough.cpp \
     src/printers/graphicsprimitive.cpp \
     src/crc16.cpp \
-    src/diskimages/cpu6502.cpp \
+    src/cpu6502.cpp \
     src/filesystems/ataridirentry.cpp \
     src/filesystems/atarifilesystem.cpp \
     src/filesystems/dos10filesystem.cpp \
@@ -65,11 +58,27 @@ SOURCES += \
     src/filesystems/dos25filesystem.cpp \
     src/filesystems/mydosfilesystem.cpp \
     src/filesystems/spartadosfilesystem.cpp \
+    src/diskimages/diskimagepro.cpp \
+    src/diskimages/diskimageatx.cpp \
+    src/diskimages/diskimage.cpp \
+    src/diskimages/folderimage.cpp \    src/diskimages/diskimagepro.cpp \
+    src/diskimages/diskimageatx.cpp \
+    src/diskimages/diskgeometry.cpp \
+    src/diskimages/prosectorinfo.cpp \
     src/diskimages/atxsectorinfo.cpp \
     src/diskimages/atxtrackinfo.cpp \
     src/diskimages/board.cpp \
-    src/diskimages/prosectorinfo.cpp \
-    src/diskimages/diskgeometry.cpp
+    src/diskimages/cpu6502.cpp \
+    src/diskimages/diskimageatr.cpp \
+    src/diskimages/disassembly810.cpp \
+    src/diskimages/disassembly1050.cpp \
+    src/diskbrowser/picsplitter.cpp \
+    src/diskbrowser/picpreview.cpp \
+    src/diskbrowser/folderdisks.cpp \
+    src/diskbrowser/dbsettings.cpp \
+    src/diskbrowser/dbjson.cpp \
+    src/diskbrowser/dbini.cpp \
+    src/diskbrowser/diskbrowserdlg.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -84,8 +93,6 @@ HEADERS += \
     include/sioworker.h \
     include/optionsdialog.h \
     include/aboutdialog.h \
-    include/diskimages/diskimage.h \
-    include/diskimages/folderimage.h \
     include/createimagedialog.h \
     include/diskeditdialog.h \
     include/autoboot.h \
@@ -111,15 +118,12 @@ HEADERS += \
     include/printers/centronics.h \
     include/printers/escp.h \
     include/printers/atari1029.h \
-    include/diskimages/disassembly810.h \
-    include/diskimages/disassembly1050.h \
     include/printers/printerfactory.h \
     include/printers/atari1025.h \
     include/printers/passthrough.h \
     include/smartdevice.h  \
     include/printers/graphicsprimitive.h \
     include/crc16.h \
-    include/diskimages/cpu6502.h \
     headers/atarisio.h \
     include/filesystems/ataridirentry.h \
     include/filesystems/atarifilesystem.h \
@@ -128,11 +132,24 @@ HEADERS += \
     include/filesystems/dos25filesystem.h \
     include/filesystems/mydosfilesystem.h \
     include/filesystems/spartadosfilesystem.h \
+    include/diskimages/disassembly810.h \
+    include/diskimages/disassembly1050.h \
+    include/diskimages/cpu6502.h \
+    include/diskimages/diskimage.h \
+    include/diskimages/folderimage.h \
+    include/diskimages/diskgeometry.h \
+    include/diskimages/prosectorinfo.h \
     include/diskimages/atxsectorinfo.h \
     include/diskimages/atxtrackinfo.h \
     include/diskimages/board.h \
-    include/diskimages/prosectorinfo.h \
-    include/diskimages/diskgeometry.h
+    include/diskbrowser/picsourcetype.h \
+    include/diskbrowser/picsplitter.h \
+    include/diskbrowser/picpreview.h \
+    include/diskbrowser/folderdisks.h \
+    include/diskbrowser/dbsettings.h \
+    include/diskbrowser/dbjson.h \
+    include/diskbrowser/dbini.h \
+    include/diskbrowser/diskbrowserdlg.h
 
 FORMS += \
     ui/mainwindow.ui \
