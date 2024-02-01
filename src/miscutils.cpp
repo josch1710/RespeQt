@@ -60,7 +60,7 @@ FileType getFileType(const QString &fileName) {
   }
 
   /* Read the file header */
-  {
+  if (QFile::exists(fileName)) {
     QFile file(fileName);
     if (file.open(QFile::ReadOnly)) {
       header = file.read(4);
@@ -68,51 +68,72 @@ FileType getFileType(const QString &fileName) {
     while (header.count() < 4) {
       header.append('\x0');
     }
-  }
 
-  /* Check if the file is gzipped */
+    /* Check if the file is gzipped */
 
-  bool gz = false;
+    bool gz = false;
 
-  if ((quint8) header.at(0) == 0x1f && (quint8) header.at(1) == 0x8b) {
-    /* The file is gzipped, read the real header */
-    gz = true;
-    GzFile file(fileName);
-    if (file.open(QFile::ReadOnly)) {
-      header = file.read(4);
-    } else {
-      header = QByteArray(4, 0);
+    if ((quint8) header.at(0) == 0x1f && (quint8) header.at(1) == 0x8b) {
+      /* The file is gzipped, read the real header */
+      gz = true;
+      GzFile file(fileName);
+      if (file.open(QFile::ReadOnly)) {
+        header = file.read(4);
+      } else {
+        header = QByteArray(4, 0);
+      }
+      while (header.count() < 4) {
+        header.append('\x0');
+      }
     }
-    while (header.count() < 4) {
-      header.append('\x0');
+
+    quint8 b0 = header.at(0);
+    quint8 b1 = header.at(1);
+    quint8 b2 = header.at(2);
+    quint8 b3 = header.at(3);
+
+    /* Determine the file type */
+
+    if (b0 == 'A' && b1 == 'T' && b2 == '8' && b3 == 'X') {
+      result = FileType::Atx;
+    } else if (b0 == 'F' && b1 == 'U' && b2 == 'J' && b3 == 'I') {
+      result = FileType::Cas;
+    } else if (b0 == 0x96 && b1 == 0x02) {
+      result = FileType::Atr;
+    } else if (b0 == 0xFF && b1 == 0xFF) {
+      result = FileType::Xex;
+    } else if (b0 == 'D' && b1 == 'I') {
+      result = FileType::Pro;
+    } else if (fileName.endsWith(".XFD", Qt::CaseInsensitive) || fileName.endsWith(".XFZ", Qt::CaseInsensitive) || fileName.endsWith(".XFD.GZ", Qt::CaseInsensitive)) {
+      result = FileType::Xfd;
+    }
+
+    if (result != FileType::Unknown && gz) {
+      result = static_cast<FileType>(static_cast<quint8>(result) + 1); // TODO BAD HACK
     }
   }
-
-  quint8 b0 = header.at(0);
-  quint8 b1 = header.at(1);
-  quint8 b2 = header.at(2);
-  quint8 b3 = header.at(3);
-
-  /* Determine the file type */
-
-  if (b0 == 'A' && b1 == 'T' && b2 == '8' && b3 == 'X') {
-    result = FileType::Atx;
-  } else if (b0 == 'F' && b1 == 'U' && b2 == 'J' && b3 == 'I') {
-    result = FileType::Cas;
-  } else if (b0 == 0x96 && b1 == 0x02) {
-    result = FileType::Atr;
-  } else if (b0 == 0xFF && b1 == 0xFF) {
-    result = FileType::Xex;
-  } else if (b0 == 'D' && b1 == 'I') {
-    result = FileType::Pro;
-  } else if (fileName.endsWith(".XFD", Qt::CaseInsensitive) || fileName.endsWith(".XFZ", Qt::CaseInsensitive) || fileName.endsWith(".XFD.GZ", Qt::CaseInsensitive)) {
-    result = FileType::Xfd;
+  else {
+    // Not a file, we guess the type by extension
+    QFileInfo file(fileName);
+    auto suffix = file.completeSuffix().toLower();
+    qDebug() << "!e" << suffix;
+    if(suffix.compare("atr"))
+        return FileType::Atr;
+    else if (suffix.compare("atr.gz"))
+        return FileType::AtrGz;
+    else if (suffix.compare("atx"))
+        return FileType::Atx;
+    else if (suffix.compare("atx.gz"))
+        return FileType::AtxGz;
+    else if (suffix.compare("pro"))
+        return FileType::Pro;
+    else if (suffix.compare("pro.gz"))
+        return FileType::ProGz;
+    else if (suffix.compare("xfd"))
+        return FileType::Xfd;
+    else if (suffix.compare("xfz") || suffix.compare("xfd.gz"))
+        return FileType::XfdGz;
   }
-
-  if (result != FileType::Unknown && gz) {
-    result = static_cast<FileType>(static_cast<quint8>(result) + 1);
-  }
-
   return result;
 }
 
