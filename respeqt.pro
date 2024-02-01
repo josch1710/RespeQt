@@ -72,11 +72,11 @@ macx {
     QMAKE_EXTRA_TARGETS += deploy
 }
 win32 {
-    deploy.commands = $$PWD/deployment/windeploy.bat "$$OUT_PWD/release/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$$VERSION_$$RC_VERSION"
+    deploy.commands = $$PWD/deployment/windeploy.bat "$$OUT_PWD/release/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$${VERSION}_$${RC_VERSION}"
     QMAKE_EXTRA_TARGETS += deploy
 }
 linux {
-    deploy.commands = $$PWD/deployment/lindeploy.sh "$$OUT_PWD/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$$VERSION_$$RC_VERSION"
+    deploy.commands = $$PWD/deployment/lindeploy.sh "$$OUT_PWD/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$${VERSION}$${RC_VERSION}"
     QMAKE_EXTRA_TARGETS += deploy
 }
 
