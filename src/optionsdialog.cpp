@@ -635,6 +635,7 @@ void OptionsDialog::diskSubDirToggled()
     if (m_ui->rb_dbset_subdir->isChecked())
         m_ui->cb_copypics->setText(tr("Copy pics to .respeqt_db subdir"));
 }
+
 void OptionsDialog::appSettingsToggled()
 {
     if (m_ui->rb_dbset_appset_ini->isChecked())

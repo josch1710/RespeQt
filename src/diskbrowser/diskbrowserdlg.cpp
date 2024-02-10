@@ -34,6 +34,8 @@ DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent)
     ui->setupUi(this);
 
     ui->treeDisks->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+    ui->treeDisks->setSortingEnabled(true);
+    ui->treeDisks->sortByColumn(0,Qt::SortOrder::AscendingOrder);
 
     ui->splitTopDirBotPng->setOther(ui->splitLeftAtrRightDirPng);
     ui->splitLeftAtrRightDirPng->setOther(ui->splitTopDirBotPng);
@@ -69,7 +71,7 @@ void DiskBrowserDlg::clear()
 
     ui->treeDisks->blockSignals(true);
     ui->treeDisks->clear();
-    ui->treeDisks->setColumnCount(1);
+    ui->treeDisks->setColumnCount(2);
     ui->treeDisks->setHeaderHidden(true);
     ui->treeDisks->setRootIsDecorated(false);
     ui->treeDisks->blockSignals(false);
@@ -145,22 +147,27 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
         if (subdir.startsWith('.') && (subdir != ".."))     // hide .folders on Windows
             continue;
 
-        auto item = new QTreeWidgetItem(ui->treeDisks);
-        auto icon = QIcon{":/icons/silk-icons/icons/folder_explore.png"};
-        item->setText(0, subdir);
-        item->setIcon(0, icon);
-        setItemIsFolder(item, true);
+        auto item = new DbItem(ui->treeDisks);
+        auto icon = QIcon{":/icons/silk-icons/icons/folder.png"};
+        item->setIcon(1, icon);
+        item->setText(1, subdir);
+        item->setFolder(true);
     }
 
     // fill in all disk image files
     auto disks = _folderDisks.disks();
     foreach (const QString &disk, disks)
     {
-        auto item = new QTreeWidgetItem(ui->treeDisks);
-        auto icon = QIcon{":/icons/other-icons/floppy.png"};
-        item->setText(0, disk);
-        item->setIcon(0, icon);
-        setItemIsFolder(item, false);
+        auto index = diskIndex(folder, disk);
+        auto item = new DbItem(ui->treeDisks);
+        item->setText(0, index);
+        if (!index.isEmpty() && disk.startsWith(index))
+        {
+            item->setText(1, disk.mid(index.length() + 1));
+            item->setData(1, Qt::UserRole, index);
+        }
+        else
+            item->setText(1, disk);
     }
 
     if (disk.isEmpty())
@@ -174,10 +181,12 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
 
     if (!disk.isEmpty() && disks.contains(disk))
     {
-        auto items = ui->treeDisks->findItems(disk, Qt::MatchExactly);
-        QTreeWidgetItem *item = (items.length() > 0) ? items[0] : nullptr;
+        auto items = ui->treeDisks->findItems(disk, Qt::MatchExactly, 1);
+        QTreeWidgetItem* item = (items.length() > 0) ? items[0] : nullptr;
         ui->treeDisks->setCurrentItem(item);
     }
+
+    ui->treeDisks->resizeColumnToContents(0);
 }
 
 void DiskBrowserDlg::refreshFoldersCombobox()
@@ -238,7 +247,10 @@ void DiskBrowserDlg::update()
         return;
     }
 
-    QString diskName = currentItem->text(0);
+    QString diskName = currentItem->text(1);
+    QString strIndex = currentItem->data(1, Qt::UserRole).toString();
+    if (!strIndex.isEmpty())
+        diskName = strIndex + "." + diskName;
     QString pathName = ui->cboFolderPath->currentText();
     QString fullName = pathName + QString("/") + diskName;
     QFileInfo fiDisk = QFileInfo(fullName);
@@ -340,7 +352,7 @@ void DiskBrowserDlg::update()
         if (!_picInfo.pic.isEmpty())
         {
             _picSource = PicSource_floppy;
-            if (_picInfo.label.isEmpty())
+            if (_picInfo.label.title.isEmpty())
                 _picInfo.label.title = _diskTitle;
             ui->picPreview->setLabel(_picInfo.label);
         }
@@ -432,7 +444,7 @@ void DiskBrowserDlg::setVertSplitPos(int pos)
 
 void DiskBrowserDlg::itemDoubleClicked(QTreeWidgetItem *item, int)
 {
-    QString text = item->text(0);
+    QString text = item->text(1);
     auto path = ui->cboFolderPath->currentText();
 
     if (text == "..")
@@ -449,14 +461,13 @@ void DiskBrowserDlg::itemDoubleClicked(QTreeWidgetItem *item, int)
     }
 }
 
-void DiskBrowserDlg::setItemIsFolder(QTreeWidgetItem *item, bool isFolder)
-{
-    item->setData(0, Qt::UserRole, isFolder);
-}
-
 bool DiskBrowserDlg::itemIsFolder(QTreeWidgetItem *item)
 {
-    return item->data(0, Qt::UserRole).toBool();
+    DbItem* dbItem = dynamic_cast<DbItem*>(item);
+    if (dbItem && dbItem->isFolder())
+        return true;
+
+    return false;
 }
 
 void DiskBrowserDlg::closeEvent(QCloseEvent *event)
@@ -492,16 +503,18 @@ void DiskBrowserDlg::showEvent(QShowEvent *event)
         update();
 }
 
-DiskLabel DiskBrowserDlg::parsePicLabel()
+DiskLabel DiskBrowserDlg::parsePicLabel(const QString& diskName)
 {
+    QString baseName = diskName;
+
+    if (baseName.isEmpty())
+    {
+        auto fileInfo = QFileInfo {_diskFullName};
+        Q_ASSERT(fileInfo.exists());                // validated prior to this call
+        baseName = fileInfo.completeBaseName();
+    }
+
     DiskLabel label;
-
-    auto fileInfo = QFileInfo {_diskFullName};
-
-    Q_ASSERT(fileInfo.exists());    // validated prior to this call
-
-    QString baseName = fileInfo.completeBaseName();
-
     static QRegularExpression re("(^\\d+)([b|B]?)(\\.?)(.*)");
     auto rem = re.match(baseName);
 
@@ -609,8 +622,11 @@ void DiskBrowserDlg::popupMenuReq(const QPoint& pos)
     QMenu menu;
     menu.addAction(QIcon(":/icons/silk-icons/icons/image.png"), "Set Default Preview...", this, &DiskBrowserDlg::actionSetDefault);
     menu.addAction(QIcon(":/icons/silk-icons/icons/folder_image.png"), "Set Folder Preview Pic...", this, &DiskBrowserDlg::actionSetDirPic);
-    menu.addAction(QIcon(":/icons/silk-icons/icons/image_add.png"), "Set Disk Preview Pic...", this, &DiskBrowserDlg::actionSetPic);
-    menu.addAction(QIcon(":/icons/silk-icons/icons/image_delete.png"), "Clear Preview", this, &DiskBrowserDlg::actionClearPic);
+    if (_picSource != PicSource_none)
+    {
+        menu.addAction(QIcon(":/icons/silk-icons/icons/image_add.png"), "Set Disk Preview Pic...", this, &DiskBrowserDlg::actionSetPic);
+        menu.addAction(QIcon(":/icons/silk-icons/icons/image_delete.png"), "Clear Preview", this, &DiskBrowserDlg::actionClearPic);
+    }
     if (_picSource == PicSource_floppy)
     {
         menu.addSeparator();
@@ -651,6 +667,9 @@ void DiskBrowserDlg::indexChanged(QString index)
 {
     _picInfo.label.index = index;
     _dbSettings->setIndex(index, _currentDir, _diskFileName);
+    ui->treeDisks->currentItem()->setText(0, index);
+    ui->treeDisks->resizeColumnToContents(0);
+    ui->treeDisks->sortByColumn(0, Qt::AscendingOrder); // BUG in custom sort (shouldn't need this!)
 }
 
 QString DiskBrowserDlg::browseForPic(const QString& start, const QString& action)
@@ -800,4 +819,78 @@ void DiskBrowserDlg::actionClearPic()
     }
 
     update();
+}
+
+QString DiskBrowserDlg::diskIndex(const QString& folder, const QString& disk)
+{
+    QString index;
+
+    if (RespeqtSettings::instance()->dbUseFileNames())
+    {
+        auto label = parsePicLabel(disk);
+        index = label.index;
+        if (label.sideB)
+            index += 'b';
+    }
+    if (index.isEmpty() || RespeqtSettings::instance()->dbFavorJson())
+    {
+        auto label = _dbSettings->getLabel(folder, disk);
+        if (index.isEmpty() || !label.isEmpty())
+            index = label.index;
+    }
+
+    return index;
+}
+
+
+// DbItem class - mostly just so I can sort the TreeDisks by the index column
+//
+bool DbItem::operator<(const QTreeWidgetItem& other) const
+{
+    const DbItem& dbOther = dynamic_cast<const DbItem&>(other);
+    if (!isFolder() && dbOther.isFolder())
+        return false;
+
+    bool comp = QTreeWidgetItem::operator<(other);
+
+    if (isFolder() && dbOther.isFolder())
+        return comp;
+
+    if (text(0).isEmpty() && other.text(0).isEmpty())
+        return comp;
+
+    if (compNumberVal(text(0), other.text(0), comp))
+        return comp;
+
+    if (text(0).isEmpty() || other.text(0).isEmpty())
+        return !comp;
+
+    return comp;
+}
+
+bool DbItem::compNumberVal(const QString& index, const QString& other, bool& comp) const
+{
+    static QRegularExpression re("^(\\d+)([b|B]?)$");
+    auto remIndex = re.match(index);
+    auto remOther = re.match(other);
+    bool bothNums = remIndex.hasMatch() && remOther.hasMatch();
+
+    if (bothNums)
+    {
+        int nIndex = remIndex.captured(1).toInt();
+        int nOther = remOther.captured(1).toInt();
+
+        if (nIndex == nOther)
+        {
+            bool bIndex = !remIndex.captured(2).isEmpty();
+            bool bOther = !remOther.captured(2).isEmpty();
+
+            comp = !bIndex && bOther;
+        }
+        else
+        {
+            comp = nIndex < nOther;
+        }
+    }
+    return bothNums;
 }
