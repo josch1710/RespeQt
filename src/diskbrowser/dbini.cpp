@@ -10,8 +10,9 @@
 DbIni::DbIni()
 {
     _appData  = RespeqtSettings::instance()->appDataFolder();
-    _settings = RespeqtSettings::instance()->mSettings;
-
+    _settings = RespeqtSettings::instance()->mSettings;         // did I make mSettings public for this? (probably bad)
+                                                                // _settings was also once optionally used for seperate ini file.
+                                                                // This is now only a ref to the app QSetting instance (TBD: fix).
     DbIni::load();
 }
 

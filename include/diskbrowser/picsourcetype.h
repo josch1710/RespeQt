@@ -4,7 +4,7 @@
 enum DbDataSource
 {
     DbData_appSettings,
-    DbData_subDir,
+    DbData_subDirJson,
     DbData_appFolderJson
 };
 

@@ -164,7 +164,7 @@ QString DbJson::checkCopyPic(const QString& name)
     // remove the path name if it's not needed
     // (allows collection/folder to be moved/copied)
 
-    if ((RespeqtSettings::instance()->dbDataSource() == DbData_subDir)
+    if ((RespeqtSettings::instance()->dbDataSource() == DbData_subDirJson)
          && name.startsWith(_dataDir.absolutePath()))
         return name.right(name.count() - _dataDir.absolutePath().count() - 1);
 
@@ -199,7 +199,7 @@ bool DbJson::save()
 
     auto it = _dirMap.begin();  // set iterator to the first disk collection folder
 
-    bool useSubDir = (RespeqtSettings::instance()->dbDataSource() == DbData_subDir);
+    bool useSubDir = (RespeqtSettings::instance()->dbDataSource() == DbData_subDirJson);
     if (useSubDir)
     {
         QDir upDir(_dataDir);               // disk collection dir will be the parent

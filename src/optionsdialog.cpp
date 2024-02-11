@@ -119,7 +119,7 @@ void OptionsDialog::setupSettings() {
   case DbData_appFolderJson:
       m_ui->rb_dbset_app_data_dir->setChecked(true);
       break;
-  case DbData_subDir:
+  case DbData_subDirJson:
       m_ui->rb_dbset_subdir->setChecked(true);
       break;
   case DbData_appSettings: default:
@@ -475,7 +475,7 @@ void OptionsDialog::saveSettings() {
   }
   else if (m_ui->rb_dbset_subdir->isChecked())
   {
-      dbSource = DbData_subDir;
+      dbSource = DbData_subDirJson;
   }
   RespeqtSettings::instance()->setDbDataSource(dbSource);
   LabelFont titleFont

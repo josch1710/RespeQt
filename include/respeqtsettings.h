@@ -311,6 +311,11 @@ public:
   QString appDataFolder();
   void setAppFolderDir(const QString& appDataDir);
 
+  // Disk Collection Browser artwork settings -
+  // These settings are kept seperately from above application global settings
+  // when dbDataSource is JSON (DbData_subDirJson and DbData_appFolderJson).
+  static const std::unique_ptr<DbSettings>& dbSettings();
+
   bool debugMenuVisible() const;
   void setDebugMenuVisible(bool menuVisible);
 
@@ -328,8 +333,10 @@ private:
 
 public:
   QSettings *mSettings;
+
 private:
-  //void writeRecentImageSettings();
+  static std::unique_ptr<DbSettings> sDbSettings;
+
   void writeRecentBrowserFolders(const QStringList& folders);
   const int maxRecentBrowserFolders = 10;
 

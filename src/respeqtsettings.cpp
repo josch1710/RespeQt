@@ -12,8 +12,7 @@
 
 #include "respeqtsettings.h"
 #include "serialport.h"
-#include "diskbrowser/picsourcetype.h"
-#include "diskbrowser/picpreview.h"
+#include "diskbrowser/diskbrowser.h"
 #include <QFileInfo>
 #include <memory>
 #include <QApplication>
@@ -21,15 +20,20 @@
 
 std::unique_ptr<RespeqtSettings> RespeqtSettings::sInstance;
 
+std::unique_ptr<DbSettings> RespeqtSettings::sDbSettings;
+
 RespeqtSettings::RespeqtSettings() {
-  mSettings = new QSettings();//uses QApplication's info to determine setting to use
+  mSettings = new QSettings();  // uses QApplication's info to determine setting to use
 
   mIsFirstTime = mSettings->value("FirstTime", true).toBool();
   mSettings->setValue("FirstTime", false);
 }
 
-RespeqtSettings::~RespeqtSettings() {
-  delete mSettings;
+RespeqtSettings::~RespeqtSettings()
+{
+    sDbSettings.reset();
+
+    delete mSettings;
 }
 
 // Get session file name from Mainwindow //
@@ -937,6 +941,9 @@ bool RespeqtSettings::restoreWidgetGeometry(QWidget* widget, const QString& name
 
 void RespeqtSettings::setDbDataSource(DbDataSource dbSource)
 {
+    if ((DbDataSource() != dbSource) && sDbSettings)
+        sDbSettings.reset();     // dump previous stuff
+
     mSettings->setValue("/DiskBrowserDlg/source", dbSource);
 }
 
@@ -1061,4 +1068,16 @@ void RespeqtSettings::setDiskPic(const QString& pic)
 QString RespeqtSettings::diskPic()
 {
     return mSettings->value("/DiskBrowserDlg/disk_pic").toString();
+}
+
+const std::unique_ptr<DbSettings>& RespeqtSettings::dbSettings()
+{
+    if (!sDbSettings)   // instantiate on demand
+    {
+        if (instance()->dbDataSource() == DbData_appSettings)
+            sDbSettings.reset(new DbIni);
+        else
+            sDbSettings.reset(new DbJson);
+    }
+    return sDbSettings;
 }

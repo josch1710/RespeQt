@@ -80,7 +80,6 @@ private:
     QString _diskFileName;
     QString _diskFullName;
     PicSourceType _picSource  = PicSource_none;
-    DbSettings*   _dbSettings = nullptr;
 
     void actionSetPic();
     void actionSetDirPic();

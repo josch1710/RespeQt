@@ -79,6 +79,7 @@ SOURCES += \
     src/diskbrowser/diskbrowserdlg.cpp
 
 HEADERS += \
+    $$PWD/include/diskbrowser/diskbrowser.h \
     include/mainwindow.h \
     include/printers/outputwindow.h \
     include/printers/rawoutput.h \

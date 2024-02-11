@@ -49,11 +49,6 @@ DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent)
     connect(ui->picPreview, &PicPreview::sigTitleChanged, this, &DiskBrowserDlg::titleChanged);
     connect(ui->picPreview, &PicPreview::sigIndexChanged, this, &DiskBrowserDlg::indexChanged);
 
-    if (RespeqtSettings::instance()->dbDataSource() == DbData_appSettings)
-        _dbSettings = new DbIni();
-    else
-        _dbSettings = new DbJson();
-
     refreshFoldersCombobox();
     onFolderChanged(""); // reload the current item 0 in the combo
 }
@@ -61,7 +56,6 @@ DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent)
 DiskBrowserDlg::~DiskBrowserDlg()
 {
     delete ui;
-    delete _dbSettings;
 }
 
 void DiskBrowserDlg::clear()
@@ -125,8 +119,8 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
         return;
     }
 
-    if (RespeqtSettings::instance()->dbDataSource() == DbData_subDir)
-        _dbSettings->setDataDir(folder);
+    if (RespeqtSettings::instance()->dbDataSource() == DbData_subDirJson)
+        RespeqtSettings::dbSettings()->setDataDir(folder);
 
     QString disk = getRecentDisk(folder);
     QString path = disk.isEmpty() ? folder : folder + "/" + disk;
@@ -336,13 +330,13 @@ void DiskBrowserDlg::update()
     }
     if (_picInfo.pic.isEmpty() || favorJson)
     {
-        QString jsonPic = _dbSettings->getPicture(dir, _diskFileName, _picSource);
+        QString jsonPic = RespeqtSettings::dbSettings()->getPicture(dir, _diskFileName, _picSource);
         if (_picInfo.pic.isEmpty() || !jsonPic.isEmpty())
             _picInfo.pic = jsonPic;
     }
     if (_picInfo.label.isEmpty() || favorJson)
     {
-        auto jsonLabel = _dbSettings->getLabel(dir, _diskFileName);
+        auto jsonLabel = RespeqtSettings::dbSettings()->getLabel(dir, _diskFileName);
         if (_picInfo.label.isEmpty() || !jsonLabel.isEmpty())
             _picInfo.label = jsonLabel;
     }
@@ -652,7 +646,7 @@ void DiskBrowserDlg::actionBackSide()
     if (_picSource == PicSource_floppy)
     {
         _picInfo.label.sideB = !_picInfo.label.sideB;
-        _dbSettings->setSideB(_picInfo.label.sideB, _currentDir, _diskFileName);
+        RespeqtSettings::dbSettings()->setSideB(_picInfo.label.sideB, _currentDir, _diskFileName);
         update();
     }
 }
@@ -660,13 +654,13 @@ void DiskBrowserDlg::actionBackSide()
 void DiskBrowserDlg::titleChanged(QString title)
 {
     _picInfo.label.title = title;
-    _dbSettings->setTitle(title, _currentDir, _diskFileName);
+    RespeqtSettings::dbSettings()->setTitle(title, _currentDir, _diskFileName);
 }
 
 void DiskBrowserDlg::indexChanged(QString index)
 {
     _picInfo.label.index = index;
-    _dbSettings->setIndex(index, _currentDir, _diskFileName);
+    RespeqtSettings::dbSettings()->setIndex(index, _currentDir, _diskFileName);
     ui->treeDisks->currentItem()->setText(0, index);
     ui->treeDisks->resizeColumnToContents(0);
     ui->treeDisks->sortByColumn(0, Qt::AscendingOrder); // BUG in custom sort (shouldn't need this!)
@@ -702,7 +696,7 @@ QString DiskBrowserDlg::checkCopyPic(const QString& fname)
     case DbData_appSettings:
         newPath = _currentDir;
         break;
-    case DbData_subDir:
+    case DbData_subDirJson:
         newPath = _currentDir + "/.respeqt_db";
         break;
     case DbData_appFolderJson:
@@ -743,7 +737,7 @@ void DiskBrowserDlg::actionSetDefault()
     else if (RespeqtSettings::instance()->dbCopyPics())
         qDebug() << "!w" << "Updating default Pic file for all collections - file not copied";
 
-    _dbSettings->setPicture(pic);
+    RespeqtSettings::dbSettings()->setPicture(pic);
     update();
 }
 
@@ -753,7 +747,7 @@ void DiskBrowserDlg::actionSetDirPic()
     if (pic.isEmpty())
         return;
 
-    _dbSettings->setPicture(checkCopyPic(pic), _currentDir);
+    RespeqtSettings::dbSettings()->setPicture(checkCopyPic(pic), _currentDir);
     update();
 }
 
@@ -763,7 +757,7 @@ void DiskBrowserDlg::actionSetPic()
     if (pic.isEmpty())
         return;
 
-    _dbSettings->setPicture(checkCopyPic(pic), _currentDir, _diskFileName);
+    RespeqtSettings::dbSettings()->setPicture(checkCopyPic(pic), _currentDir, _diskFileName);
     update();
 }
 
@@ -780,7 +774,7 @@ void DiskBrowserDlg::actionSetTitle()
                                              "Disk Title:", QLineEdit::Normal,
                                              _picInfo.label.title, &ok);
         if (ok)
-            _dbSettings->setTitle(text, _currentDir, _diskFileName);
+            RespeqtSettings::dbSettings()->setTitle(text, _currentDir, _diskFileName);
     }
 }
 
@@ -797,7 +791,7 @@ void DiskBrowserDlg::actionSetIndex()
                                              "Disk Index:", QLineEdit::Normal,
                                              _picInfo.label.index, &ok);
         if (ok)
-            _dbSettings->setIndex(text, _currentDir, _diskFileName);
+            RespeqtSettings::dbSettings()->setIndex(text, _currentDir, _diskFileName);
     }
 }
 
@@ -806,13 +800,13 @@ void DiskBrowserDlg::actionClearPic()
     switch (_picSource)
     {
     case PicFromJson_dir:
-        _dbSettings->setPicture("", _currentDir, "");
+        RespeqtSettings::dbSettings()->setPicture("", _currentDir, "");
         break;
     case PicFromJson_global:
-        _dbSettings->setPicture("");
+        RespeqtSettings::dbSettings()->setPicture("");
         break;
     case PicFromJson_disk:
-        _dbSettings->setPicture("", _currentDir, _diskFileName);
+        RespeqtSettings::dbSettings()->setPicture("", _currentDir, _diskFileName);
         break;
     default:
         break;
@@ -834,7 +828,7 @@ QString DiskBrowserDlg::diskIndex(const QString& folder, const QString& disk)
     }
     if (index.isEmpty() || RespeqtSettings::instance()->dbFavorJson())
     {
-        auto label = _dbSettings->getLabel(folder, disk);
+        auto label = RespeqtSettings::dbSettings()->getLabel(folder, disk);
         if (index.isEmpty() || !label.isEmpty())
             index = label.index;
     }
