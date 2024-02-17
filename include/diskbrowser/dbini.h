@@ -43,17 +43,9 @@ public:
     bool save();
 //  void clear();
 
+    bool isJson() { return false; }
+
 private:
     QSettings* _settings = nullptr;
-    bool _dirty = false;
-
-    QString  _appData;
-    QString  _diskPic;
-    QString  _bSidePic;
-    QString  _titleFont;
-    QString  _indexFont;
-    LabelPos _labelPos;
-    LabelPos _bSidePos;
-    DirMap   _dirMap;
 };
 #endif // DBSETTINGS_H

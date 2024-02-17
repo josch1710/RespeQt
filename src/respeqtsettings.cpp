@@ -941,14 +941,35 @@ bool RespeqtSettings::restoreWidgetGeometry(QWidget* widget, const QString& name
 
 void RespeqtSettings::setDbDataSource(DbDataSource dbSource)
 {
-    if ((DbDataSource() != dbSource) && sDbSettings)
-        sDbSettings.reset();     // dump previous stuff
-
+    auto prevSource = dbDataSource();
     mSettings->setValue("/DiskBrowserDlg/source", dbSource);
+
+    if ((prevSource != dbSource) && sDbSettings)
+    {
+        bool doCopy = !sDbSettings->isEmpty();
+
+        if (doCopy)
+        {
+            DbSettings* pNew = nullptr;
+            if (dbSource != DbData_appSettings)
+                pNew = new DbJson;
+            else
+                pNew = new DbIni;
+
+            pNew->clone(*sDbSettings);
+            sDbSettings.reset(pNew);
+            sDbSettings->save();
+        }
+        else
+        {
+            sDbSettings.reset();     // dump previous stuff
+        }
+    }
 }
 
 DbDataSource RespeqtSettings::dbDataSource()
 {
+    assert(mSettings->group().isEmpty());
     return static_cast<DbDataSource>(mSettings->value("/DiskBrowserDlg/source", DbData_appSettings).toInt());
 }
 
