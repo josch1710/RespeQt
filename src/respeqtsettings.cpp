@@ -13,6 +13,7 @@
 #include "respeqtsettings.h"
 #include "serialport.h"
 #include "diskbrowser/diskbrowser.h"
+#include "diskbrowser/dbjson.h"
 #include <QFileInfo>
 #include <memory>
 #include <QApplication>
@@ -801,6 +802,53 @@ QStringList RespeqtSettings::recentBrowserFolders() {
   return folders;
 }
 
+bool RespeqtSettings::isDiskImage(const QString &name)
+{
+    foreach (const QString &fileType, FileTypes::getDiskImageTypes())
+    {
+        QString ext = fileType.right(4);
+        if (name.endsWith(ext, osCaseSensitivity()))
+            return true;
+    }
+    return false;
+}
+
+QStringList RespeqtSettings::buildBrowserFolders()
+{
+    QStringList folders;
+
+    // build a list of MRU folders for the GUI dropdown list
+
+    foreach (const QString& name, recentBrowserFolders())
+    {
+        auto fileInf = QFileInfo(name);
+        if (fileInf.exists())
+        {
+            QString path = fileInf.isFile() ? fileInf.path() : name;    // don't want file names in dropdown
+            folders += path;
+        }
+        else if (isDiskImage(name)) // MRU missing. First check if a disk is selected
+        {
+            QString path = DbUtils::getParentDir(name);
+            if (QFileInfo::exists(path))
+            {
+                folders += path;    // Keep parent folder of bad disk
+            }
+            else
+            {
+                qDebug() << "!w" << QString("Disk Collection Browser most recent list updated. '%1' not found.").arg(name);
+                delMostRecentBrowserFolder(name);
+            }
+        }
+        else    // Simple case of missing folder
+        {
+            qDebug() << "!w" << QString("Disk Collection Browser most recent list updated. Folder '%1' not found.").arg(name);
+            delMostRecentBrowserFolder(name);
+        }
+    }
+    return folders;
+}
+
 void RespeqtSettings::setMostRecentBrowserFolder(const QString& name) {
   if (mostRecentBrowserFolder() == name)
     return;
@@ -823,7 +871,7 @@ void RespeqtSettings::setMostRecentBrowserFolder(const QString& name) {
   }
   folders.insert(0, name);
 
-  if (folders.count() > maxRecentBrowserFolders)
+  if (folders.count() > 100)    // TBD: warn user?
     folders.removeLast();
 
   writeRecentBrowserFolders(folders);
@@ -941,30 +989,67 @@ bool RespeqtSettings::restoreWidgetGeometry(QWidget* widget, const QString& name
 
 void RespeqtSettings::setDbDataSource(DbDataSource dbSource)
 {
-    auto prevSource = dbDataSource();
+    if (dbSource == dbDataSource())     // sanity check
+        return;
+
+    if (!sDbSettings)   // we're going to need the
+    {
+        if (DbDataSource() == DbData_appSettings)
+            sDbSettings.reset(new DbIni);
+        else
+            sDbSettings.reset(new DbJson);
+    }
+
     mSettings->setValue("/DiskBrowserDlg/source", dbSource);
 
-    if ((prevSource != dbSource) && sDbSettings)
+    if (dbSource == DbData_subDirJson)
     {
-        bool doCopy = !sDbSettings->isEmpty();
+        // going from multi-dir source to seperate JSON files
 
-        if (doCopy)
+        const DirMap& dirMap = sDbSettings->getDirMap();
+        for (auto itDir = dirMap.begin(); itDir != dirMap.end(); ++itDir)
         {
-            DbSettings* pNew = nullptr;
-            if (dbSource != DbData_appSettings)
-                pNew = new DbJson;
-            else
-                pNew = new DbIni;
+            const QString dir = itDir.key();
+            DbJson* pNew = new DbJson;
+            const QString pic = DbUtils::removePrefix(dir, itDir.value().pic);
+            pNew->setDataDir(dir);
+            pNew->setPicture(pic, itDir.key());
 
-            pNew->clone(*sDbSettings);
-            sDbSettings.reset(pNew);
-            sDbSettings->save();
+            const ArtMap& artMap = itDir.value().map;
+            for (auto itArt = artMap.begin(); itArt != artMap.end(); ++itArt)
+            {
+                QString disk = itArt.key();
+                const FloppyArt& art = itArt.value();
+                const QString artPic = DbUtils::removePrefix(dir, art.pic);
+                pNew->setPicture(art.pic, dir, disk);
+                pNew->setLabel(art.label, dir, disk);
+            }
+            //pNew->save(); delete does this next
+            delete pNew;
         }
-        else
-        {
-            sDbSettings.reset();     // dump previous stuff
-        }
+        sDbSettings.reset();
+        return;
     }
+
+    if (!sDbSettings)
+    {
+        // dialog never opened: load settings
+    }
+    if (!sDbSettings->isEmpty())
+    {
+        DbSettings* pNew = nullptr;
+        if (dbSource != DbData_appSettings)
+            pNew = new DbJson;
+        else
+            pNew = new DbIni;
+
+        pNew->clone(*sDbSettings);
+        sDbSettings.reset(pNew);
+        sDbSettings->save();
+    }
+    sDbSettings.reset(); // TBD needed?
+
+    // TBD are we done?
 }
 
 DbDataSource RespeqtSettings::dbDataSource()

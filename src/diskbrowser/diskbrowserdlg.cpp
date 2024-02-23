@@ -132,7 +132,7 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
 
     _folderDisks.load(folder);
 
-    clear();// clear disk collection browser contents
+    clear();    // clear disk collection browser contents
 
     // fill in any sub-directories
     auto folders = _folderDisks.folders();
@@ -188,35 +188,8 @@ void DiskBrowserDlg::refreshFoldersCombobox()
     ui->cboFolderPath->blockSignals(true);
     ui->cboFolderPath->clear();
 
-    QStringList folders;    // build a list of MRU folders for the dropdown list
+    QStringList folders = RespeqtSettings::instance()->buildBrowserFolders();
 
-    foreach (const QString& name, RespeqtSettings::instance()->recentBrowserFolders())
-    {
-        auto fileInf = QFileInfo(name);
-        if (fileInf.exists())
-        {
-            QString path = fileInf.isFile() ? fileInf.path() : name;// don't want file names in dropdown
-            folders += path;
-        }
-        else if (isDiskImage(name)) // MRU missing. First check if a disk is selected
-        {
-            QString path = getParentDir(name);
-            if (QFileInfo::exists(path))
-            {
-                folders += path;    // Keep parent folder of bad disk
-            }
-            else
-            {
-                qDebug() << "!w" << tr("Disk Collection Browser most recent list updated. '%1' not found.").arg(name);
-                RespeqtSettings::instance()->delMostRecentBrowserFolder(name);
-            }
-        }
-        else    // Simple case of missing folder
-        {
-            qDebug() << "!w" << tr("Disk Collection Browser most recent list updated. Folder '%1' not found.").arg(name);
-            RespeqtSettings::instance()->delMostRecentBrowserFolder(name);
-        }
-    }
     ui->cboFolderPath->addItems(folders);
     ui->cboFolderPath->setCurrentIndex(0);
     ui->cboFolderPath->blockSignals(false);
@@ -382,26 +355,6 @@ QString DiskBrowserDlg::getRecentDisk(QString folder)
     return QString();
 }
 
-QString DiskBrowserDlg::getParentDir(QString fileFolder)
-{
-    int lastSlash = fileFolder.lastIndexOf('/');    // TBD: what if '\'?
-    if (lastSlash >= 0)
-        fileFolder.truncate(lastSlash);
-
-    return fileFolder;
-}
-
-bool DiskBrowserDlg::isDiskImage(const QString &name)
-{
-    foreach (const QString &fileType, FileTypes::getDiskImageTypes())
-    {
-        QString ext = fileType.right(4);
-        if (name.endsWith(ext, osCaseSensitivity()))
-            return true;
-    }
-    return false;
-}
-
 int DiskBrowserDlg::getHorzSplitPos()
 {
     return ui->splitLeftAtrRightDirPng->sizes().at(0);
@@ -551,7 +504,7 @@ QString DiskBrowserDlg::findPicFile()
     QDir dir {fileInfo.absolutePath()};
     QDir subdir {fileInfo.absolutePath() + "/.respeqt_db"};
     auto formats = QImageReader::supportedImageFormats();
-    auto fmtlist = toStringList(formats);
+    auto fmtlist = DbUtils::toStringList(formats);
     auto entries = dir.entryInfoList(fmtlist);
     auto bsidexp = _picInfo.label.sideB ? QString("[b|B]") : QString();
     auto sregexp = QString("^(%1)(%2)(\\.)(.*)").arg(_picInfo.label.index).arg(bsidexp);
@@ -669,7 +622,7 @@ void DiskBrowserDlg::indexChanged(QString index)
 QString DiskBrowserDlg::browseForPic(const QString& start, const QString& action)
 {
     auto formats = QImageReader::supportedImageFormats();
-    auto fmtList = toStringList(formats);
+    auto fmtList = DbUtils::toStringList(formats);
     auto fmtStrs = fmtList.join(' ');
     auto filters = QString("Images (%1)").arg(fmtStrs);
 

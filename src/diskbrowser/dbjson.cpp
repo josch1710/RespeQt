@@ -27,6 +27,9 @@ void DbJson::setDataDir(const QString& dir)
 
 void DbJson::setPicture(const QString& pic, const QString& dir, const QString& disk)
 {
+    if (pic.isEmpty())
+        return;
+
     bool isGlobal = (dir.isEmpty() && disk.isEmpty());     // program global pic?
     bool isDirPic = (!dir.isEmpty() && disk.isEmpty());
     bool isDiskPic = (!dir.isEmpty() && !disk.isEmpty());
@@ -41,6 +44,13 @@ void DbJson::setPicture(const QString& pic, const QString& dir, const QString& d
     if (isDiskPic)
         _dirMap[lnxDir].map[disk].pic = pic;
 
+    _dirty = true;
+}
+
+void DbJson::setLabel(const DiskLabel& label, const QString& dir, const QString& disk)
+{
+    QString lnxDir = QDir::fromNativeSeparators(dir);
+    _dirMap[lnxDir].map[disk].label = label;
     _dirty = true;
 }
 
@@ -164,9 +174,8 @@ QString DbJson::checkCopyPic(const QString& name)
     // remove the path name if it's not needed
     // (allows collection/folder to be moved/copied)
 
-    if ((RespeqtSettings::instance()->dbDataSource() == DbData_subDirJson)
-         && name.startsWith(_dataDir.absolutePath()))
-        return name.right(name.count() - _dataDir.absolutePath().count() - 1);
+    if (RespeqtSettings::instance()->dbDataSource() == DbData_subDirJson)
+        return DbUtils::removePrefix(_dataDir.absolutePath(), name);
 
     return name;
 }

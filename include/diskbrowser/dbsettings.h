@@ -74,6 +74,11 @@ public:
     void clone(DbSettings& other);
     virtual bool isJson() = 0;
 
+    DirMap& getDirMap() { return _dirMap; }
+    QStringList getDirs() { return _dirMap.keys(); }
+    QString getDirPic(const QString& dir) { return _dirMap[dir].pic; }
+    QStringList getDisks(const QString& dir) { return _dirMap[dir].map.keys(); }
+
 protected:
     bool _dirty = false;
 

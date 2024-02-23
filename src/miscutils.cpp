@@ -208,6 +208,8 @@ bool GzFile::atEnd() const {
   return gzeof(mHandle);
 }
 
+namespace DbUtils
+{
 QStringList toStringList(const QList<QByteArray>& list)
 {
     QStringList strings;
@@ -219,4 +221,28 @@ QStringList toStringList(const QList<QByteArray>& list)
     }
 
     return strings;
+}
+
+QString getParentDir(const QString& fileFolder)
+{
+    QString linuxName = QDir::fromNativeSeparators(fileFolder);
+    bool wasNonNative = linuxName != fileFolder;
+
+    int lastSlash = linuxName.lastIndexOf('/');
+    if (lastSlash >= 0)
+        linuxName.truncate(lastSlash);
+
+    if (wasNonNative)
+        return QDir::toNativeSeparators(linuxName);
+
+    return linuxName;   // linux names ok on modern windows
+}
+
+QString removePrefix(const QString& prefix, const QString& name)
+{
+    if (name.startsWith(prefix))
+        return name.right(name.count() - prefix.count() - 1);
+
+    return name;
+}
 }

@@ -44,6 +44,7 @@ public:
     void setIndex(const QString& index, const QString& folder, const QString& disk);
     void setSideB(bool sideB, const QString& folder, const QString& disk);
     DiskLabel getLabel(const QDir& dir, const QString& disk);
+    void setLabel(const DiskLabel& label, const QString& folder, const QString& disk);
 
     bool load();
     bool save();

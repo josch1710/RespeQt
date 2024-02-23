@@ -55,7 +55,6 @@ private:
     void setItemIsFolder(QTreeWidgetItem* item, bool isFolder = true);
     bool itemIsFolder(QTreeWidgetItem* item);
     void refreshFoldersCombobox();
-    bool isDiskImage(const QString& name);
     void update();
     QString checkCopyPic(const QString& fname);
     QString findPicFile();
@@ -63,7 +62,6 @@ private:
     QString getMostRecentFolder();
     QString getMostRecentDisk();
     QString getRecentDisk(QString folder);
-    QString getParentDir(QString fileFolder);
     QString browseForPic(const QString& start, const QString& action);
     QString diskIndex(const QString& folder, const QString& disk);
     DiskLabel parsePicLabel(const QString& diskName = QString());

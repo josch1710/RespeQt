@@ -284,9 +284,11 @@ public:
 
   // Disk Collection Browser
   QString mostRecentBrowserFolder();
-  QStringList recentBrowserFolders();
+  QStringList recentBrowserFolders();   // raw from QSettings map
+  QStringList buildBrowserFolders();    // remove selected disk names from paths and validates exists
   void setMostRecentBrowserFolder(const QString& name);
   void delMostRecentBrowserFolder(const QString& name);
+  bool isDiskImage(const QString& name);
   bool showDiskBrowser();
   void setShowDiskBrowser(bool show = true);
   int  diskBrowserHorzSplitPos();
@@ -338,7 +340,7 @@ private:
   static std::unique_ptr<DbSettings> sDbSettings;
 
   void writeRecentBrowserFolders(const QStringList& folders);
-  const int maxRecentBrowserFolders = 10;
+//  const int maxRecentBrowserFolders = 10;
 
   bool mIsFirstTime;
 
