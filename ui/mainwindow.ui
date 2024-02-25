@@ -228,6 +228,7 @@
     <addaction name="actionToggleMiniMode"/>
     <addaction name="actionToggleShade"/>
     <addaction name="actionLogWindow"/>
+    <addaction name="actionDiskBrowser"/>
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="layoutDirection">
@@ -680,6 +681,24 @@
    </property>
    <property name="toolTip">
     <string>Limit file entries to 64</string>
+   </property>
+  </action>
+  <action name="actionDiskBrowser">
+   <property name="icon">
+    <iconset resource="../resources/icons.qrc">
+     <normaloff>:/icons/oxygen-icons/16x16/filesystems/folder_html.png</normaloff>:/icons/oxygen-icons/16x16/filesystems/folder_html.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open Disk Collection Browser</string>
+   </property>
+   <property name="toolTip">
+    <string>Open/Browse a folder with a collection of disk images</string>
+   </property>
+   <property name="statusTip">
+    <string>Open/Browse a folder with a collection of disk images</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+D</string>
    </property>
   </action>
  </widget>

@@ -40,6 +40,7 @@ namespace Printers {
   protected:
     void changeEvent(QEvent *e) override;
     void closeEvent(QCloseEvent *e) override;
+    void showEvent(QShowEvent *e) override;
 
   private:
     Ui::OutputWindow *ui;

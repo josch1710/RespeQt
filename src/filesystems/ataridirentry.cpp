@@ -80,7 +80,7 @@ namespace Filesystems {
 
   void AtariDirEntry::makeFromAtariDosEntry(const QByteArray &entry, int aNo, int aDir, bool dd) {
     // Translate the attributes
-    attributes = nullptr;
+    attributes = Attributes();
 
     internalData = entry;
 
@@ -128,7 +128,7 @@ namespace Filesystems {
 
   void AtariDirEntry::makeFromSpartaDosEntry(const QByteArray &entry, int aNo, int aDir) {
     // Translate the attributes
-    attributes = nullptr;
+    attributes = Attributes();
 
     internalData = entry;
 

@@ -54,14 +54,27 @@ namespace Printers {
     }
   }
 
-  void OutputWindow::closeEvent(QCloseEvent *e) {
-    // Save Current TexPrinterWindow Position and size //
-    if (RespeqtSettings::instance()->saveWindowsPos()) {
-      // TODO Correct settings
-      RespeqtSettings::instance()->setLastPrtHorizontalPos(OutputWindow::geometry().x());
-      RespeqtSettings::instance()->setLastPrtVerticalPos(OutputWindow::geometry().y());
-      RespeqtSettings::instance()->setLastPrtWidth(OutputWindow::geometry().width());
-      RespeqtSettings::instance()->setLastPrtHeight(OutputWindow::geometry().height());
+  void OutputWindow::showEvent(QShowEvent* e)
+  {
+      QWidget::showEvent(e);
+
+      if (e->type() == QEvent::Show && RespeqtSettings::instance()->saveWindowsPos())
+      {
+          // Restore last widget geometry
+          auto parent = qobject_cast<PrinterWidget*>(parentWidget());
+          QString name = QString("Printer%1").arg(parent->getPrinterNumber()+1);
+          RespeqtSettings::instance()->restoreWidgetGeometry(this, name);
+      }
+  }
+
+  void OutputWindow::closeEvent(QCloseEvent *e)
+  {
+    // Save Current Window Position and size //
+    if (RespeqtSettings::instance()->saveWindowsPos())
+    {
+      auto parent = qobject_cast<PrinterWidget*>(parentWidget());
+      QString name = QString("Printer%1").arg(parent->getPrinterNumber()+1);
+      RespeqtSettings::instance()->saveWidgetGeometry(this, name);
     }
     emit closed(this);
     e->accept();
@@ -93,11 +106,11 @@ namespace Printers {
     QPainter painter;
     painter.begin(&printer);
     // Scale the contents of the window to the printer.
-    auto xscale = printer.pageRect().width() / static_cast<double>(width());
-    auto yscale = printer.pageRect().height() / static_cast<double>(height());
+    auto xscale = printer.pageRect(QPrinter::DevicePixel).width() / static_cast<double>(width());
+    auto yscale = printer.pageRect(QPrinter::DevicePixel).height() / static_cast<double>(height());
     auto scale = qMin(xscale, yscale);
-    painter.translate(printer.paperRect().x() + printer.pageRect().width() / 2,
-                      printer.paperRect().y() + printer.pageRect().height() / 2);
+    painter.translate(printer.paperRect(QPrinter::DevicePixel).x() + printer.pageRect(QPrinter::DevicePixel).width() / 2,
+                      printer.paperRect(QPrinter::DevicePixel).y() + printer.pageRect(QPrinter::DevicePixel).height() / 2);
     painter.scale(scale, scale);
     painter.translate(-width() / 2, -height() / 2);
     // Now render the scene on the printer.

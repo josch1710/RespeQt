@@ -17,15 +17,18 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_AUTOUIC_SEARCH_PATHS} ui ui/printers ui/f
 add_definitions(-DQT_DEPRECATED_WARNINGS -DQT_DISABLE_DEPRECATED_BEFORE=0x050000)
 add_definitions(-DVERSION=\"v${PROJECT_VERSION}_${RC_VERSION}\")
 
-
-
-message(STATUS "Build main application")
-set(TARGET_SOURCES src/main.cpp)
-set(TARGET RespeQt)
-
-message(STATUS "Build test application")
-set(TARGETTEST_SOURCES tests/units/siorecordertest.cpp tests/units/tests.cpp)
-set(TARGETTEST RespeQtTest)
+option(MAKE_TEST "Build the test application" OFF)
+message(STATUS "Build tests ${MAKE_TEST}")
+if (MAKE_TEST)
+    message(STATUS "Build test application")
+    set(TARGET_SOURCES tests/units/siorecordertest.cpp tests/units/tests.cpp)
+    set(TARGET RespeQtTest)
+    add_definitions(-DRESPEQT_TEST)
+else()
+    message(STATUS "Build main application")
+    set(TARGET_SOURCES src/main.cpp)
+    set(TARGET RespeQt)
+endif()
 
 include_directories(include headers tests tools)
 
@@ -48,6 +51,15 @@ set(SOURCES
     src/diskimages/diskimageatx.cpp
     src/optionsdialog.cpp
     src/aboutdialog.cpp
+        src/diskimages/diskimage.cpp
+        src/diskimages/folderimage.cpp
+    src/diskbrowser/folderdisks.cpp
+    src/diskbrowser/diskbrowserdlg.cpp
+    src/diskbrowser/dbsettings.cpp
+    src/diskbrowser/dbjson.cpp
+    src/diskbrowser/dbini.cpp
+    src/diskbrowser/picsplitter.cpp
+    src/diskbrowser/picpreview.cpp
     src/diskimages/diskimage.cpp
     src/diskimages/folderimage.cpp
     src/createimagedialog.cpp
@@ -117,6 +129,14 @@ set(HEADERS
     include/aboutdialog.h
     include/diskimages/diskimage.h
     include/diskimages/folderimage.h
+    include/diskbrowser/folderdisks.h
+    include/diskbrowser/diskbrowserdlg.h
+    include/diskbrowser/dbsettings.h
+    include/diskbrowser/dbjson.h
+    include/diskbrowser/dbini.h
+    include/diskbrowser/picsplitter.h
+    include/diskbrowser/picpreview.h
+    include/diskbrowser/picsourcetype.h
     include/createimagedialog.h
     include/diskeditdialog.h
     include/autoboot.h
@@ -187,6 +207,7 @@ set(FORMS
     ui/printers/outputwindow.ui
     ui/printerwidget.ui
     ui/printers/textprinterwindow.ui
+    ui/diskbrowserdlg.ui
 )
 
 set(RESOURCES
@@ -215,9 +236,9 @@ endif()
 find_package(Qt5 5.0...<5.7 REQUIRED
     COMPONENTS Core Widgets Gui Network PrintSupport SerialPort Svg LinguistTools
 )
-
-find_package(Qt5 5.0...<5.7 REQUIRED COMPONENTS Test)
-
+if (MAKE_TEST)
+    find_package(Qt5 5.0...<5.7 REQUIRED COMPONENTS Test)
+endif()
 if (APPLE)
     find_package(Qt5 5.0...<5.7 COMPONENTS MacExtras)
 elseif(UNIX)
@@ -247,7 +268,6 @@ else()
     add_executable(${TARGET} ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES})
     add_executable(${TARGETTEST} ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGETTEST_SOURCES})
 endif()
-
 
 find_package(ZLIB REQUIRED)
 if (ZLIB_FOUND)
@@ -294,6 +314,9 @@ endif()
 if (WIN32)
     target_link_libraries(${TARGET} winmm z winspool)
 endif()
+
+# Process Documents using LaTex
+# add_subdirectory(docs) # commented out (experimental)
 
 # Deployment
 if (LINUX)

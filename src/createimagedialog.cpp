@@ -21,8 +21,12 @@ CreateImageDialog::CreateImageDialog(QWidget *parent) : QDialog(parent),
 
   void (QSpinBox::*valueChangedSignal)(int) = &QSpinBox::valueChanged;
   connect(m_ui->sectorsSpin, valueChangedSignal, this, &CreateImageDialog::recalculate);
+#if (QT_VERSION_MAJOR < 6)
   void (QComboBox::*densitySignal)(const QString &) = &QComboBox::currentIndexChanged;
   connect(m_ui->densityCombo, densitySignal, this, &CreateImageDialog::recalculate);
+#else
+  connect(m_ui->densityCombo, &QComboBox::currentIndexChanged, this, &CreateImageDialog::recalculate);
+#endif
   connect(m_ui->harddiskButton, &QRadioButton::toggled, this, &CreateImageDialog::harddiskToggled);
   connect(m_ui->customButton, &QRadioButton::toggled, this, &CreateImageDialog::customToggled);
   connect(m_ui->doubleDoubleButton, &QRadioButton::toggled, this, &CreateImageDialog::doubleDoubleToggled);

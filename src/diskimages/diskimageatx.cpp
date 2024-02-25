@@ -442,7 +442,7 @@ namespace DiskImages {
         if (secBuf.size() > 0) {
           secBuf.append(' ');
         }
-        secBuf.append(QString("%1").arg(sectorNumber, 2, 16, QChar('0')));
+        secBuf.append(tr("%1").arg(sectorNumber, 2, 16, QChar('0')).toLatin1());
         // display only one word (the most important) to keep the line as compact as possible
         if (sectorStatus & 0x40) {
           nbExtended++;

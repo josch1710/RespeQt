@@ -14,6 +14,8 @@
 #define RESPEQTSETTINGS_H
 
 #include "mainwindow.h"
+#include "diskbrowser/picsourcetype.h"
+#include "diskbrowser/picpreview.h"
 
 #include <QPrinterInfo>
 #include <QSettings>
@@ -34,7 +36,8 @@ public:
 
   bool isFirstTime();
 
-  void saveGeometry(const QRect& geometry, bool miniMode);
+  bool saveMainWinGeometry(QMainWindow* window, bool miniMode);
+  bool restoreMainWinGeometry(QMainWindow* window, bool miniMode);
 
   QString serialPortName();
   void setSerialPortName(const QString &name);
@@ -121,50 +124,21 @@ public:
   QString lastRclDir();
   void setRclDir(const QString &dir);
 
+  bool  showLogWindow();
+  void  setShowLogWindow(bool show = true);
+
   // Set and restore last mainwindow position and size //
   const QPoint DefaultFullModePos  = { 100, 100 };
   const QSize  DefaultFullModeSize = { 800, 650 };
-
-  int lastVerticalPos();
-  void setLastVerticalPos(int lastVpos);
-
-  int lastHorizontalPos();
-  void setLastHorizontalPos(int lastHpos);
-
-  int lastWidth();
-  void setLastWidth(int lastW);
-
-  int lastHeight();
-  void setLastHeight(int lastH);
+  const QRect  DefaultFullModeRect = { DefaultFullModePos, DefaultFullModeSize };
 
   // Set and restore last mini-window position //
   const QPoint DefaultMiniModePos  = { 8, 50 };
   const QSize  DefaultMiniModeSize = { 600, 100 };
+  const QRect  DefaultMiniModeRect = { DefaultMiniModePos, DefaultMiniModeSize };
 
   bool miniMode();
   void setMiniMode(bool miniMode);
-
-  int lastMiniVerticalPos();
-  void setLastMiniVerticalPos(int lastMVpos);
-
-  int lastMiniHorizontalPos();
-  void setLastMiniHorizontalPos(int lastMHpos);
-
-  int lastMiniWidth();
-  void setLastMiniWidth(int lastWidth);
-
-  // Set and restore last printwindow position and size //
-  int lastPrtVerticalPos();
-  void setLastPrtVerticalPos(int lastPrtVpos);
-
-  int lastPrtHorizontalPos();
-  void setLastPrtHorizontalPos(int lastPrtHpos);
-
-  int lastPrtWidth();
-  void setLastPrtWidth(int lastPrtW);
-
-  int lastPrtHeight();
-  void setLastPrtHeight(int lastPrtH);
 
   QString i18nLanguage();
   void setI18nLanguage(const QString &lang);
@@ -184,6 +158,7 @@ public:
   void setSessionFile(const QString &g_sessionFile, const QString &g_sessionFilePath);
 
   // To manipulate session files  //
+  void copySettings(QSettings& setFrom, QSettings& setTo);
   void saveSessionToFile(const QString &fileName);
   void loadSessionFromFile(const QString &fileName);
 
@@ -233,6 +208,10 @@ public:
   // Explorer Window On Top
   bool explorerOnTop();
   void setExplorerOnTop(bool expOnTop);
+
+  // save/restore top-level widget geometry
+  bool saveWidgetGeometry(QWidget* widget, const QString& name = QString());
+  bool restoreWidgetGeometry(QWidget* widget, const QString& name = QString(), const QRect& defRect = QRect());
 
   // Printer Spy Mode
   bool isPrinterSpyMode();
@@ -303,6 +282,35 @@ public:
   void setRawPrinterName(const QString &name);
   QString rawPrinterName() const;
 
+  // Disk Collection Browser
+  QString mostRecentBrowserFolder();
+  QStringList recentBrowserFolders();
+  void setMostRecentBrowserFolder(const QString& name);
+  void delMostRecentBrowserFolder(const QString& name);
+  bool showDiskBrowser();
+  void setShowDiskBrowser(bool show = true);
+  int  diskBrowserHorzSplitPos();
+  int  diskBrowserVertSplitPos();
+  void setDiskBrowserHorzSplitPos(int pos);
+  void setDiskBrowserVertSplitPos(int pos);
+  void setDiskPic(const QString& pic);
+  QString diskPic();
+
+  // Disk Collection browser options page
+  DbDataSource dbDataSource();
+  void setDbDataSource(DbDataSource dbSource);
+  void setDbFileNames(bool useFileNames, bool favorJson = false);
+  bool dbFavorJson();
+  bool dbUseFileNames();
+  bool dbCopyPics();
+  void setDbCopyPics(bool copy);
+  LabelFont dbTitleFont();
+  void setDbTitleFont(const LabelFont& font);
+  LabelFont dbIndexFont();
+  void setDbIndexFont(const LabelFont& font);
+  QString appDataFolder();
+  void setAppFolderDir(const QString& appDataDir);
+
   bool debugMenuVisible() const;
   void setDebugMenuVisible(bool menuVisible);
 
@@ -321,6 +329,10 @@ private:
 public:
   QSettings *mSettings;
 private:
+  //void writeRecentImageSettings();
+  void writeRecentBrowserFolders(const QStringList& folders);
+  const int maxRecentBrowserFolders = 10;
+
   bool mIsFirstTime;
 
   QString mSessionFileName;

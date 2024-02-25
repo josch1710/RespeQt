@@ -30,12 +30,13 @@ public:
   ~OptionsDialog() = default;
 
 protected:
-  void changeEvent(QEvent *e);
+  void changeEvent(QEvent *e) override;
+  void showEvent(QShowEvent *e) override;
 
 private:
   Ui::OptionsDialog *m_ui;
   QTreeWidgetItem *itemPassthrough, *itemAtari1027, *itemPrinterProtocol, *item1020Options,
-          *itemStandard, *itemAtariSio, *itemEmulation, *itemDiskOptions, *itemDiskOSB, *itemDiskIcons, *itemDiskFavorite, *itemI18n,
+          *itemStandard, *itemAtariSio, *itemEmulation, *itemDiskBrowser, *itemDiskOptions, *itemDiskOSB, *itemDiskIcons, *itemDiskFavorite, *itemI18n,
           *itemFirmware810Path, *itemFirmware1050Path, *itemFirmwareEmulation, *itemTraceOptions, *itemDiskImages;
 
   void selectFirmware(QLineEdit *edit, QString title, QString filters);
@@ -51,6 +52,16 @@ private slots:
   void currentSectionChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
   void saveSettings();
   void useCustomBaudToggled(bool checked);
+  void appDataDirToggled();
+  void diskSubDirToggled();
+  void appSettingsToggled();
+  void browseForAppDir();
+  void indexColorClicked();
+  void titleColorClicked();
+  void indexBoldToggled();
+  void titleBoldToggled();
+  void indexItalicToggled();
+  void titleItalicToggled();
 
 #ifdef SHOWFIRMWARE
   void select810FirmwareTriggered();

@@ -241,3 +241,16 @@ qint64 GzFile::writeData(const char *data, qint64 maxSize) {
 bool GzFile::atEnd() const {
   return gzeof(mHandle);
 }
+
+QStringList toStringList(const QList<QByteArray>& list)
+{
+    QStringList strings;
+
+    foreach (const QByteArray& item, list)
+    {
+        QString fileSpec = "*." + QString::fromLocal8Bit(item);
+        strings.append(fileSpec);
+    }
+
+    return strings;
+}

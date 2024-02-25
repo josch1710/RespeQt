@@ -34,7 +34,52 @@ protected:
   qint64 writeData(const char *data, qint64 maxSize) override;
 };
 
+inline Qt::CaseSensitivity osCaseSensitivity() {
+#if defined Q_OS_LINUX
+  return Qt::CaseSensitive;
+#else
+  return Qt::CaseInsensitive;
+#endif
+}
 
+class FileTypes : public QObject {
+  Q_OBJECT
+
+public:
+  enum FileType {
+    Unknown,
+    Dir,
+    Atr,
+    AtrGz,
+    Xfd,
+    XfdGz,
+    Dcm,
+    DcmGz,
+    Di,
+    DiGz,
+    Pro,
+    ProGz,
+    Atx,
+    AtxGz,
+    Cas,
+    CasGz,
+    Xex,
+    XexGz
+  };
+  static FileType getFileType(const QString &fileName);
+  __attribute__((unused)) static QString getFileTypeName(FileType type);
+
+  static const QStringList& getDiskImageTypes()
+  {
+      static QStringList list
+      {
+          "*.xfd", "*.atr", "*.pro", "*.atx"
+  #if defined Q_OS_LINUX
+        , "*.XFD", "*.ATR", "*.PRO", "*.ATX"  // Linux is case sensitive
+  #endif
+      };
+      return list;
+  }
 enum class FileType: quint8 {
   Unknown,
   Dir,
@@ -52,6 +97,7 @@ enum class FileType: quint8 {
   XexGz
 };
 
+QStringList toStringList(const QList<QByteArray>& list);
 FileType getFileType(const QString &fileName);
 QString getFileTypeName(FileType type);
 bool isArchive(FileType type);

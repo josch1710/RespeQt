@@ -44,7 +44,7 @@ void SmartDevice::handleCommand(const quint8 command, const quint8 aux1, const q
       sio->port()->writeComplete();
       sio->port()->writeDataFrame(data);
 
-      qDebug() << "!n" << tr("[%1] Read date/time (%2).").arg(deviceName(), dateTime.toString(Qt::SystemLocaleShortDate));
+      qDebug() << "!n" << tr("[%1] Read date/time (%2).").arg(deviceName(), dateTime.toString(QLocale::system().dateFormat(QLocale::ShortFormat)));
       break;
     }
 

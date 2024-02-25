@@ -71,7 +71,19 @@ SOURCES += \
     src/diskimages/board.cpp \
     src/diskimages/diskgeometry.cpp \
     src/diskimages/diskimagefactory.cpp \
-    src/diskimages/prosectorinfo.cpp
+    src/diskimages/prosectorinfo.cpp \
+    src/diskimages/board.cpp \
+    src/diskimages/cpu6502.cpp \
+    src/diskimages/diskimageatr.cpp \
+    src/diskimages/disassembly810.cpp \
+    src/diskimages/disassembly1050.cpp \
+    src/diskbrowser/picsplitter.cpp \
+    src/diskbrowser/picpreview.cpp \
+    src/diskbrowser/folderdisks.cpp \
+    src/diskbrowser/dbsettings.cpp \
+    src/diskbrowser/dbjson.cpp \
+    src/diskbrowser/dbini.cpp \
+    src/diskbrowser/diskbrowserdlg.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -136,11 +148,27 @@ HEADERS += \
     include/diskimages/atxtrackinfo.h \
     include/diskimages/board.h \
     include/diskimages/constvalues.h \
+    include/diskimages/disassembly810.h \
+    include/diskimages/disassembly1050.h \
+    include/diskimages/cpu6502.h \
+    include/diskimages/diskimage.h \
+    include/diskimages/folderimage.h \
     include/diskimages/diskgeometry.h \
     include/diskimages/diskimagepro.h \
     include/diskimages/prosectorinfo.h \
     include/diskimages/simplediskimage.h \
     include/diskimages/diskimagefactory.h
+    include/diskimages/atxsectorinfo.h \
+    include/diskimages/atxtrackinfo.h \
+    include/diskimages/board.h \
+    include/diskbrowser/picsourcetype.h \
+    include/diskbrowser/picsplitter.h \
+    include/diskbrowser/picpreview.h \
+    include/diskbrowser/folderdisks.h \
+    include/diskbrowser/dbsettings.h \
+    include/diskbrowser/dbjson.h \
+    include/diskbrowser/dbini.h \
+    include/diskbrowser/diskbrowserdlg.h
 
 FORMS += \
     ui/mainwindow.ui \
@@ -154,6 +182,7 @@ FORMS += \
     ui/bootoptionsdialog.ui \
     ui/logdisplaydialog.ui \
     ui/drivewidget.ui \
+    ui/diskbrowserdlg.ui \
     ui/printers/outputwindow.ui \
     ui/printerwidget.ui \
     ui/printers/textprinterwindow.ui

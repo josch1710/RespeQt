@@ -77,7 +77,7 @@ namespace Printers {
 
   void NativeOutput::printChar(const QChar &c) {
     QFontMetrics metrics(*mFont);
-    if (metrics.width(c) + mX > mBoundingBox.right() || mCharCount + 1 > mCharsPerLine) {
+    if (metrics.boundingRect(c).width() + mX > mBoundingBox.right() || mCharCount + 1 > mCharsPerLine) {
       // Char has to go on next line
       newLine();
     }
@@ -86,7 +86,7 @@ namespace Printers {
       mPainter->setPen(color);
       mPainter->drawText(mX, mY + metrics.height(), c);
     }
-    mX += metrics.width(c);
+    mX += metrics.boundingRect(c).width();
     mCharCount++;
   }
 

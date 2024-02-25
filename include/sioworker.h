@@ -73,7 +73,11 @@ class SioWorker : public QThread {
   Q_OBJECT
 
 private:
+#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
   QMutex *deviceMutex;
+#else
+QRecursiveMutex *deviceMutex;
+#endif
   QVector<SioDevicePtr> devices{256};
   AbstractSerialPortBackendPtr mPort;
   std::atomic_bool mustTerminate;

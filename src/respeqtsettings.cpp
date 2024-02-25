@@ -12,10 +12,12 @@
 
 #include "respeqtsettings.h"
 #include "serialport.h"
-//#include "mainwindow.h"
-
+#include "diskbrowser/picsourcetype.h"
+#include "diskbrowser/picpreview.h"
+#include <QFileInfo>
 #include <memory>
 #include <QApplication>
+#include <QStandardPaths>
 
 std::unique_ptr<RespeqtSettings> RespeqtSettings::sInstance;
 
@@ -55,194 +57,38 @@ void RespeqtSettings::setSessionFile(const QString &g_sessionFile, const QString
   mSessionFilePath = g_sessionFilePath;
 }
 
+void RespeqtSettings::copySettings(QSettings& setFrom, QSettings& setTo)
+{
+    foreach(const QString& key, setFrom.childKeys())
+    {
+        auto value = setFrom.value(key);
+        setTo.setValue(key,value);
+    }
+
+    foreach(const QString& group, setFrom.childGroups())
+    {
+        setFrom.beginGroup(group);
+        setTo.beginGroup(group);
+        copySettings(setFrom, setTo);
+        setTo.endGroup();
+        setFrom.endGroup();
+    }
+}
+
 // Save all session related settings, so that a session could be fully restored later //
-void RespeqtSettings::saveSessionToFile(const QString &fileName) {
-  QSettings s(fileName, QSettings::IniFormat);
+void RespeqtSettings::saveSessionToFile(const QString &fileName)
+{
+    QSettings s(fileName, QSettings::IniFormat);
 
-  s.beginGroup("RespeQt");
-  s.setValue("Backend", static_cast<int>(backend()));
-  s.setValue("AtariSioDriverName", atariSioDriverName());
-  s.setValue("AtariSioHandshakingMethod", atariSioHandshakingMethod());
-  s.setValue("SerialPortName", serialPortName());
-  s.setValue("HandshakingMethod", serialPortHandshakingMethod());
-  s.setValue("FallingEdge", serialPortTriggerOnFallingEdge());
-  s.setValue("DTRControlEnable", serialPortDTRControlEnable());
-  s.setValue("WriteDelay", serialPortWriteDelay());
-  s.setValue("CompErrDelay", serialPortCompErrDelay());
-  s.setValue("MaximumSerialPortSpeed", serialPortMaximumSpeed());
-  s.setValue("SerialPortUsePokeyDivisors", serialPortUsePokeyDivisors());
-  s.setValue("SerialPortPokeyDivisor", serialPortPokeyDivisor());
-  s.setValue("UseHighSpeedExeLoader", useHighSpeedExeLoader());
-  s.setValue("PrinterEmulation", printerEmulation());
-  s.setValue("CustomCasBaud", customCasBaud());
-  s.setValue("UseCustomCasBaud", useCustomCasBaud());
-  s.setValue("I18nLanguage", i18nLanguage());
-  s.setValue("SaveWindowsPosSize", saveWindowsPos());
-  s.setValue("SaveDiskVisibility", saveDiskVis());
-  s.setValue("D9DOVisible", D9DOVisible());
-  s.setValue("MiniMode", miniMode());
-  s.setValue("MiniX", lastMiniHorizontalPos());
-  s.setValue("MiniY", lastMiniVerticalPos());
-  s.setValue("MiniW", lastMiniWidth());
-  s.setValue("MainX", lastHorizontalPos());
-  s.setValue("MainY", lastVerticalPos());
-  s.setValue("MainW", lastWidth());
-  s.setValue("MainH", lastHeight());
-  s.setValue("PrtX", lastPrtHorizontalPos());
-  s.setValue("PrtY", lastPrtVerticalPos());
-  s.setValue("PrtW", lastPrtWidth());
-  s.setValue("PrtH", lastPrtHeight());
-  s.setValue("FilterUnderscore", filterUnderscore());
-  s.setValue("LimitFileEntries", limitFileEntries());
-  s.setValue("CapitalLettersInPCLINK", capitalLettersInPCLINK());
-  s.setValue("URLSubmit", isURLSubmitEnabled());
-  s.setValue("SpyMode", isSpyMode());
-  s.setValue("CommandName", isCommandName());
-  s.setValue("TrackLayout", isTrackLayout());
-  s.setValue("UseLargeFont", useLargeFont());
-  s.setValue("ExplorerOnTop", explorerOnTop());
-  s.setValue("EnableShadeByDefault", enableShade());
-  s.setValue("PrinterSpyMode", isPrinterSpyMode());
-  s.setValue("DisplayGraphicsInstructions", displayGraphicsInstructions());
-  s.setValue("ClearOnStatus", clearOnStatus());
-  s.setValue("DisplayTransmission", displayTransmission());
-  s.setValue("DisplayFdcCommands", displayFdcCommands());
-  s.setValue("DisplayIndexPulse", displayIndexPulse());
-  s.setValue("DisplayMotorOnOff", displayMotorOnOff());
-  s.setValue("DisplayIDAddressMarks", displayIDAddressMarks());
-  s.setValue("DisplayTrackInformation", displayTrackInformation());
-  s.setValue("DisassembleUploadedCode", disassembleUploadedCode());
-  s.setValue("TranslatorAutomaticDetection", translatorAutomaticDetection());
-  s.setValue("TranslatorDiskImagePath", translatorDiskImagePath());
-  s.setValue("SioAutoReconnect", sioAutoReconnect());
-  s.setValue("HideChipMode", hideChipMode());
-  s.setValue("HideHappyMode", hideHappyMode());
-  s.setValue("HideNextImage", hideNextImage());
-  s.setValue("HideOSBMode", hideOSBMode());
-  s.setValue("HideToolDisk", hideToolDisk());
-  s.setValue("ToolDiskImagePath", toolDiskImagePath());
-  s.setValue("ActivateChipModeWithTool", activateChipModeWithTool());
-  s.setValue("ActivateHappyModeWithTool", activateHappyModeWithTool());
-  s.setValue("DisplayCpuInstructions", displayCpuInstructions());
-  s.setValue("TraceFilename", traceFilename());
-  s.setValue("RawPrinterName", rawPrinterName());
-  s.setValue("LastRclDir", lastRclDir());
-  s.setValue("DebugMenuVisible", debugMenuVisible());
-#ifdef Q_OS_MAC
-  s.setValue("NativeMenu", nativeMenu());
-#endif
-  s.endGroup();
-  //
-  s.beginWriteArray("MountedImageSettings");
-  for (auto i = 0; i < 15; i++) {//
-    auto is = mountedImageSetting(i);
-    s.setArrayIndex(i);
-    s.setValue("FileName", is.fileName);
-    s.setValue("IsWriteProtected", is.isWriteProtected);
-  }
-  s.endArray();
-
-  s.beginWriteArray("ConnectedPrinterSettings");
-  for (auto i = 0; i < PRINTER_COUNT; i++) {
-    s.setArrayIndex(i);
-    s.setValue("PrinterName", printerName(i));
-  }
-  s.endArray();
+    copySettings(*mSettings, s);
 }
 
 // Get all session related settings, so that a session could be fully restored //
-void RespeqtSettings::loadSessionFromFile(const QString &fileName) {
-  QSettings s(fileName, QSettings::IniFormat);
-  s.beginGroup("RespeQt");
-  setBackend(static_cast<SerialBackend>(s.value("Backend", 0).toInt()));
-  setAtariSioDriverName(s.value("AtariSioDriverName", AtariSioBackend::defaultPortName()).toString());
-  setAtariSioHandshakingMethod(s.value("AtariSioHandshakingMethod", 0).toInt());
-  setSerialPortName(s.value("SerialPortName", StandardSerialPortBackend::defaultPortName()).toString());
-  setSerialPortHandshakingMethod(s.value("HandshakingMethod", 0).toInt());
-  setSerialPortTriggerOnFallingEdge(s.value("FallingEdge", false).toBool());
-  setRclDir(mSettings->value("LastRclDir", "").toString());
-  setSerialPortDTRControlEnable(s.value("DTRControlEnable", false).toBool());
-  setSerialPortWriteDelay(s.value("WriteDelay", 1).toInt());
-  setSerialPortCompErrDelay(s.value("CompErrDelay", 1).toInt());
-  setSerialPortMaximumSpeed(s.value("MaximumSerialPortSpeed", 2).toInt());
-  setSerialPortUsePokeyDivisors(s.value("SerialPortUsePokeyDivisors", false).toBool());
-  setSerialPortPokeyDivisor(s.value("SerialPortPokeyDivisor", 6).toInt());
-  setUseHighSpeedExeLoader(s.value("UseHighSpeedExeLoader", false).toBool());
-  setPrinterEmulation(s.value("PrinterEmulation", true).toBool());
-  setCustomCasBaud(s.value("CustomCasBaud", 875).toInt());
-  setUseCustomCasBaud(s.value("UseCustomCasBaud", false).toBool());
-  setI18nLanguage(s.value("I18nLanguage").toString());
-  setSaveWindowsPos(s.value("SaveWindowsPosSize", true).toBool());
-  setSaveDiskVis(s.value("SaveDiskVisibility", true).toBool());
-  setMiniMode(s.value("MiniMode", false).toBool());
-  setD9DOVisible(s.value("D9DOVisible", true).toBool());
-  setLastHorizontalPos(s.value("MainX", 20).toInt());
-  setLastVerticalPos(s.value("MainY", 40).toInt());
-  setLastWidth(s.value("MainW", DefaultFullModeSize.width()).toInt());
-  setLastHeight(s.value("MainH", DefaultFullModeSize.height()).toInt());
-  //if (mMainW < 688 && mdVis) mMainW = 688;
-  //if (mMainH < 426 && mdVis) mMainH = 426;
-  setLastMiniHorizontalPos(s.value("MiniX", DefaultMiniModePos.x()).toInt());
-  setLastMiniVerticalPos(s.value("MiniY", DefaultMiniModePos.y()).toInt());
-  setLastMiniWidth(s.value("MiniW", DefaultMiniModeSize.width()).toInt());
-  setLastPrtHorizontalPos(s.value("PrtX", 20).toInt());
-  setLastPrtVerticalPos(s.value("PrtY", 40).toInt());
-  setLastPrtWidth(s.value("PrtW", 600).toInt());
-  setLastPrtHeight(s.value("PrtH", 486).toInt());
-  setfilterUnderscore(s.value("FilterUnderscore", true).toBool());
-  setlimitFileEntries(s.value("LimitFileEntries", true).toBool());
-  setCapitalLettersInPCLINK(s.value("CapitalLettersInPCLINK", false).toBool());
-  setURLSubmit(s.value("URLSubmit", false).toBool());
-  setSpyMode(s.value("SpyMode", false).toBool());
-  setCommandName(s.value("CommandName", false).toBool());
-  setTrackLayout(s.value("TrackLayout", false).toBool());
-  setUseLargeFont(s.value("UseLargeFont", false).toBool());
-  setExplorerOnTop(s.value("ExplorerOnTop", false).toBool());
-  setEnableShade(s.value("EnableShadeByDefault", true).toBool());
-  setDisplayTransmission(s.value("DisplayTransmission", false).toBool());
-  setDisplayDriveHead(s.value("DisplayDriveHead", false).toBool());
-  setDisplayFdcCommands(s.value("DisplayFdcCommands", false).toBool());
-  setDisplayIndexPulse(s.value("DisplayIndexPulse", false).toBool());
-  setDisplayMotorOnOff(s.value("DisplayMotorOnOff", false).toBool());
-  setDisplayIDAddressMarks(s.value("DisplayIDAddressMarks", false).toBool());
-  setDisplayTrackInformation(s.value("DisplayTrackInformation", false).toBool());
-  setDisassembleUploadedCode(s.value("DisassembleUploadedCode", false).toBool());
-  setTranslatorAutomaticDetection(s.value("TranslatorAutomaticDetection", false).toBool());
-  setTranslatorDiskImagePath(s.value("TranslatorDiskImagePath", false).toString());
-  setSioAutoReconnect(s.value("SioAutoReconnect", false).toBool());
-  setHideChipMode(s.value("HideChipMode", false).toBool());
-  setHideHappyMode(s.value("HideHappyMode", false).toBool());
-  setHideNextImage(s.value("HideNextImage", false).toBool());
-  setHideOSBMode(s.value("HideOSBMode", false).toBool());
-  setHideToolDisk(s.value("HideToolDisk", false).toBool());
-  setToolDiskImagePath(s.value("ToolDiskImagePath", false).toString());
-  setActivateChipModeWithTool(s.value("ActivateChipModeWithTool", false).toBool());
-  setActivateHappyModeWithTool(s.value("ActivateHappyModeWithTool", false).toBool());
-  setDisplayCpuInstructions(s.value("DisplayCpuInstructions", false).toBool());
-  setTraceFilename(s.value("TraceFilename", "").toString());
-  setRawPrinterName(s.value("RawPrinterName", "").toString());
-  setPrinterSpyMode(s.value("PrinterSpyMode", false).toBool());
-  setDisplayGraphicsInstructions(s.value("DisplayGraphicsInstructions", true).toBool());
-  setClearOnStatus(s.value("ClearOnStatus", false).toBool());
-  setDebugMenuVisible(s.value("DebugMenuVisible", false).toBool());
+void RespeqtSettings::loadSessionFromFile(const QString &fileName)
+{
+    QSettings s(fileName, QSettings::IniFormat);
 
-#ifdef Q_OS_MAC
-  setNativeMenu(s.value("NativeMenu", false).toBool());
-#endif
-  s.endGroup();
-  //
-  s.beginReadArray("MountedImageSettings");
-  for (auto i = 0; i < 15; i++) {//
-    s.setArrayIndex(i);
-    setMountedImageSetting(i, s.value("FileName", "").toString(), s.value("IsWriteProtected", false).toBool());
-  }
-  s.endArray();
-
-  s.beginReadArray("ConnectedPrinterSettings");
-  for (auto i = 0; i < PRINTER_COUNT; i++) {
-    s.setArrayIndex(i);
-    setPrinterName(i, s.value("PrinterName", "").toString());
-  }
+    copySettings(s, *mSettings);
 }
 
 // Get MainWindow title from MainWindow  //
@@ -254,20 +100,12 @@ bool RespeqtSettings::isFirstTime() {
   return mIsFirstTime;
 }
 
-void RespeqtSettings::saveGeometry(const QRect &geometry, bool isMiniMode) {
-  if (saveWindowsPos()) {
-    setMiniMode(isMiniMode);
-    if (isMiniMode) {
-      setLastMiniHorizontalPos(geometry.x());
-      setLastMiniVerticalPos(geometry.y());
-      setLastMiniWidth(geometry.width());
-    } else {
-      setLastHorizontalPos(geometry.x());
-      setLastVerticalPos(geometry.y());
-      setLastWidth(geometry.width());
-      setLastHeight(geometry.height());
-    }
-  }
+bool RespeqtSettings::showLogWindow() {
+  return mSettings->value("ShowLogWindow", false).toBool();
+}
+
+void RespeqtSettings::setShowLogWindow(bool show) {
+  mSettings->setValue("ShowLogWindow", show);
 }
 
 QString RespeqtSettings::serialPortName() {
@@ -583,38 +421,6 @@ bool RespeqtSettings::saveWindowsPos() {
 void RespeqtSettings::setSaveWindowsPos(bool saveMwp) {
   mSettings->setValue("SaveWindowsPosSize", saveMwp);
 }
-// Last main window position/size (No Session File) //
-
-int RespeqtSettings::lastHorizontalPos() {
-  return mSettings->value("MainX", DefaultFullModePos.x()).toInt();
-}
-
-void RespeqtSettings::setLastHorizontalPos(int lastHpos) {
-  mSettings->setValue("MainX", lastHpos);
-}
-
-int RespeqtSettings::lastVerticalPos() {
-  return mSettings->value("MainY", DefaultFullModePos.y()).toInt();
-}
-
-void RespeqtSettings::setLastVerticalPos(int lastVpos) {
-  mSettings->setValue("MainY", lastVpos);
-}
-int RespeqtSettings::lastWidth() {
-  return mSettings->value("MainW", DefaultFullModeSize.width()).toInt();
-}
-
-void RespeqtSettings::setLastWidth(int lastW) {
-  mSettings->setValue("MainW", lastW);
-}
-
-int RespeqtSettings::lastHeight() {
-  return mSettings->value("MainH", DefaultFullModeSize.height()).toInt();
-}
-
-void RespeqtSettings::setLastHeight(int lastH) {
-  mSettings->setValue("MainH", lastH);
-}
 
 // mini mode and it's specific window position and width
 bool RespeqtSettings::miniMode() {
@@ -623,63 +429,6 @@ bool RespeqtSettings::miniMode() {
 
 void RespeqtSettings::setMiniMode(bool miniMode) {
   mSettings->setValue("MiniMode", miniMode);
-}
-
-int RespeqtSettings::lastMiniHorizontalPos() {
-  return mSettings->value("MiniX", DefaultMiniModePos.x()).toInt();
-}
-
-void RespeqtSettings::setLastMiniHorizontalPos(int lastMHpos) {
-  mSettings->setValue("MiniX", lastMHpos);
-}
-
-int RespeqtSettings::lastMiniVerticalPos() {
-  return mSettings->value("MiniY", DefaultMiniModePos.y()).toInt();
-}
-
-void RespeqtSettings::setLastMiniVerticalPos(int lastMVpos) {
-  mSettings->setValue("MiniY", lastMVpos);
-}
-
-int RespeqtSettings::lastMiniWidth() {
-  return mSettings->value("MiniW", DefaultMiniModeSize.width()).toInt();
-}
-
-void RespeqtSettings::setLastMiniWidth(int lastWidth) {
-  mSettings->setValue("MiniW", lastWidth);
-}
-
-// Last print window position/size (No Session File) //
-int RespeqtSettings::lastPrtHorizontalPos() {
-  return mSettings->value("PrtX").toInt();
-}
-
-void RespeqtSettings::setLastPrtHorizontalPos(int lastPrtHpos) {
-  mSettings->setValue("PrtX", lastPrtHpos);
-}
-
-int RespeqtSettings::lastPrtVerticalPos() {
-  return mSettings->value("PrtY").toInt();
-}
-
-void RespeqtSettings::setLastPrtVerticalPos(int lastPrtVpos) {
-  mSettings->setValue("PrtY", lastPrtVpos);
-}
-
-int RespeqtSettings::lastPrtWidth() {
-  return mSettings->value("PrtW").toInt();
-}
-
-void RespeqtSettings::setLastPrtWidth(int lastPrtW) {
-  mSettings->setValue("PrtW", lastPrtW);
-}
-
-int RespeqtSettings::lastPrtHeight() {
-  return mSettings->value("PrtH").toInt();
-}
-
-void RespeqtSettings::setLastPrtHeight(int lastPrtH) {
-  mSettings->setValue("PrtH", lastPrtH);
 }
 
 QString RespeqtSettings::lastDiskImageDir() {
@@ -1042,4 +791,293 @@ bool RespeqtSettings::debugMenuVisible() const {
 
 void RespeqtSettings::setDebugMenuVisible(bool menuVisible) {
   mSettings->setValue("DebugMenuVisible", menuVisible);
+}
+
+QString RespeqtSettings::mostRecentBrowserFolder() {
+  QStringList folders = recentBrowserFolders();
+
+  if (!folders.isEmpty())
+    return folders.front();
+
+  return QString();
+}
+
+QStringList RespeqtSettings::recentBrowserFolders() {
+  QStringList folders;
+
+  int size = mSettings->beginReadArray("RecentBrowserFolders");
+  for (int i = 0; i < size; i++) {
+    mSettings->setArrayIndex(i);
+    QString value = mSettings->value("FileFolder").toString();
+    folders.append(value);
+  }
+  mSettings->endArray();
+
+  return folders;
+}
+
+void RespeqtSettings::setMostRecentBrowserFolder(const QString& name) {
+  if (mostRecentBrowserFolder() == name)
+    return;
+
+  auto fileInfo = QFileInfo(name);
+
+  if (!fileInfo.exists())
+    return;
+
+  QString path = fileInfo.isFile() ? fileInfo.path() : name;
+
+  QStringList folders = recentBrowserFolders();
+
+  for (int i = 0; i < folders.size(); ++i) {
+    QString text = folders.at(i);
+    QFileInfo fi = QFileInfo(text);
+    QString test = fi.isFile() ? fi.path() : text;
+    if (test == path)
+      folders.removeAt(i);
+  }
+  folders.insert(0, name);
+
+  if (folders.count() > maxRecentBrowserFolders)
+    folders.removeLast();
+
+  writeRecentBrowserFolders(folders);
+}
+
+void RespeqtSettings::delMostRecentBrowserFolder(const QString& name) {
+  auto fileInfo = QFileInfo(name);
+  QString path = fileInfo.isFile() ? fileInfo.path() : name;
+  QStringList folders = recentBrowserFolders();
+
+  for (int i = 0; i < folders.size(); ++i) {
+    QString text = folders.at(i);
+    QFileInfo fi = QFileInfo(text);
+    QString test = fi.isFile() ? fi.path() : text;
+    if (test == path)
+      folders.removeAt(i);
+  }
+
+  writeRecentBrowserFolders(folders);
+}
+
+void RespeqtSettings::writeRecentBrowserFolders(const QStringList& folders) {
+  int index = 0;
+
+  mSettings->beginWriteArray("RecentBrowserFolders");
+  foreach (QString folder, folders) {
+    auto fileInfo = QFileInfo(folder);
+    if (!fileInfo.exists()) {
+      if (fileInfo.isFile())
+        folder = fileInfo.path();
+      else
+        continue;
+
+      if (!QFileInfo::exists(folder))
+        continue;
+    }
+    mSettings->setArrayIndex(index++);
+    mSettings->setValue("FileFolder", folder);
+  }
+  mSettings->endArray();
+}
+
+bool RespeqtSettings::showDiskBrowser() {
+  return mSettings->value("/DiskBrowserDlg/show").toBool();
+}
+
+void RespeqtSettings::setShowDiskBrowser(bool show /*= true*/) {
+  mSettings->setValue("/DiskBrowserDlg/show", show);
+}
+
+int RespeqtSettings::diskBrowserHorzSplitPos() {
+  return mSettings->value("/DiskBrowserDlg/HorzSplitPos", -1).toInt();
+}
+
+int RespeqtSettings::diskBrowserVertSplitPos() {
+  return mSettings->value("/DiskBrowserDlg/VertSplitPos", -1).toInt();
+}
+
+void RespeqtSettings::setDiskBrowserHorzSplitPos(int pos) {
+  mSettings->setValue("/DiskBrowserDlg/HorzSplitPos", pos);
+}
+
+void RespeqtSettings::setDiskBrowserVertSplitPos(int pos) {
+  mSettings->setValue("/DiskBrowserDlg/VertSplitPos", pos);
+}
+
+bool RespeqtSettings::saveMainWinGeometry(QMainWindow* window, bool isMiniMode) {
+  if (!window || !saveWindowsPos())
+    return false;
+
+  setMiniMode(isMiniMode);
+  QString key = isMiniMode ? "MiniWindow" : "MainWindow";
+  return saveWidgetGeometry(window, key);
+}
+
+bool RespeqtSettings::restoreMainWinGeometry(QMainWindow* window, bool isMiniMode) {
+  if (!window || !saveWindowsPos())
+    return false;
+
+  QString key = isMiniMode ? "MiniWindow" : "MainWindow";
+  QRect rcDef = isMiniMode ? DefaultMiniModeRect : DefaultFullModeRect;
+  return restoreWidgetGeometry(window, key, rcDef);
+}
+
+bool RespeqtSettings::saveWidgetGeometry(QWidget* widget, const QString& name) {
+  if (!widget || !saveWindowsPos())
+    return false;
+
+  QString key = name.isEmpty() ? widget->objectName() : name;
+  if (key.isEmpty())
+    return false;
+
+  mSettings->setValue(key + "/geometry", widget->saveGeometry());
+  return true;
+}
+
+bool RespeqtSettings::restoreWidgetGeometry(QWidget* widget, const QString& name, const QRect& defRect) {
+  if (widget == nullptr)
+    return false;
+
+  QString key = name.isEmpty() ? widget->objectName() : name;
+  if (key.isEmpty())
+    return false;
+
+  key += "/geometry";
+  if (mSettings->contains(key)) {
+    auto geoBytes = mSettings->value(key).toByteArray();
+    widget->restoreGeometry(geoBytes);
+  } else if (defRect.isValid()) {
+    widget->setGeometry(defRect);
+  }
+
+  return true;
+}
+
+void RespeqtSettings::setDbDataSource(DbDataSource dbSource)
+{
+    mSettings->setValue("/DiskBrowserDlg/source", dbSource);
+}
+
+DbDataSource RespeqtSettings::dbDataSource()
+{
+    return static_cast<DbDataSource>(mSettings->value("/DiskBrowserDlg/source", DbData_appSettings).toInt());
+}
+
+void RespeqtSettings::setDbFileNames(bool useFileNames, bool favorJson)
+{
+    mSettings->setValue("/DiskBrowserDlg/use_filenames", useFileNames);
+    mSettings->setValue("/DiskBrowserDlg/favor_json", favorJson);
+}
+
+bool RespeqtSettings::dbFavorJson()
+{
+    return mSettings->value("/DiskBrowserDlg/json_1st", true).toBool();
+}
+
+bool RespeqtSettings::dbUseFileNames()
+{
+    return mSettings->value("/DiskBrowserDlg/use_filenames", true).toBool();
+}
+
+bool RespeqtSettings::dbCopyPics()
+{
+    return mSettings->value("/DiskBrowserDlg/copy_pics", true).toBool();
+}
+
+void RespeqtSettings::setDbCopyPics(bool copy)
+{
+    mSettings->setValue("/DiskBrowserDlg/copy_pics", copy);
+}
+
+QString RespeqtSettings::appDataFolder()
+{
+    QString folder = mSettings->value("/DiskBrowserDlg/appData_folder", QString()).toString();
+    if (folder.isEmpty())
+    {
+        auto    locType   = QStandardPaths::AppDataLocation;
+        QString appFolder = QStandardPaths::writableLocation(locType);
+        QDir appDataDir(appFolder);
+
+        if (!appDataDir.exists())
+            appDataDir.mkpath(".");
+
+        folder = appDataDir.absolutePath();
+    }
+    return folder;
+}
+
+void RespeqtSettings::setAppFolderDir(const QString& appDataDir)
+{
+    mSettings->setValue("/DiskBrowserDlg/appData_folder", appDataDir);
+}
+
+void RespeqtSettings::setDbTitleFont(const LabelFont& font)
+{
+    mSettings->beginGroup("/DiskBrowserDlg");
+    mSettings->beginGroup("title_font");
+    mSettings->setValue("family", font.family());
+    mSettings->setValue("size", font.pixelSize() <= 0 ? 10 : font.pixelSize());
+    mSettings->setValue("bold", font.bold());
+    mSettings->setValue("italic", font.italic());
+    mSettings->setValue("color", font.color().name());
+    mSettings->setValue("scale", font.scale());
+    mSettings->endGroup();
+    mSettings->endGroup();
+}
+
+LabelFont RespeqtSettings::dbTitleFont()
+{
+    LabelFont font;
+    mSettings->beginGroup("/DiskBrowserDlg");
+    mSettings->beginGroup("title_font");
+    font.setFamily(mSettings->value("family", Label::DEF_TITLE_FNT).toString());
+    font.setPixelSize(mSettings->value("size", 10).toInt());
+    font.setBold(mSettings->value("bold", Label::DEF_TITLE_BOLD).toBool());
+    font.setItalic(mSettings->value("italic", false).toBool());
+    font.setColor(mSettings->value("color", "black").toString());
+    font.setScale(mSettings->value("scale", Label::DEF_TITLE_SCALE).toDouble());
+    mSettings->endGroup();
+    mSettings->endGroup();
+    return font;
+}
+
+void RespeqtSettings::setDbIndexFont(const LabelFont& font)
+{
+    mSettings->beginGroup("/DiskBrowserDlg");
+    mSettings->beginGroup("index_font");
+    mSettings->setValue("family", font.family());
+    mSettings->setValue("size", font.pixelSize());
+    mSettings->setValue("bold", font.bold());
+    mSettings->setValue("italic", font.italic());
+    mSettings->setValue("color", font.color().name());
+    mSettings->setValue("scale", font.scale());
+    mSettings->endGroup();
+    mSettings->endGroup();
+}
+
+LabelFont RespeqtSettings::dbIndexFont()
+{
+    LabelFont font;
+    mSettings->beginGroup("/DiskBrowserDlg");
+    mSettings->beginGroup("index_font");
+    font.setFamily(mSettings->value("family", Label::DEF_INDEX_FNT).toString());
+    font.setPixelSize(mSettings->value("size", 10).toInt());
+    font.setBold(mSettings->value("bold", false).toBool());
+    font.setItalic(mSettings->value("italic", false).toBool());
+    font.setColor(mSettings->value("color", "black").toString());
+    font.setScale(mSettings->value("scale", Label::DEF_INDEX_SCALE).toDouble());
+    mSettings->endGroup();
+    mSettings->endGroup();
+    return font;
+}
+
+void RespeqtSettings::setDiskPic(const QString& pic)
+{
+    mSettings->setValue("/DiskBrowserDlg/disk_pic", pic);
+}
+
+QString RespeqtSettings::diskPic()
+{
+    return mSettings->value("/DiskBrowserDlg/disk_pic").toString();
 }

@@ -11,7 +11,7 @@
 #
 #CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 VERSION = 5.4
-RC_VERSION = "RC2"
+RC_VERSION = "RC3"
 DEFINES += VERSION=\\\"v$$VERSION_$$RC_VERSION\\\"
 
 #debug {
@@ -25,6 +25,7 @@ TEMPLATE = app
 
 CONFIG += qt c++11 strict_c++
 QT += core gui network widgets printsupport serialport svg
+greaterThan(QT_MAJOR_VERSION, 5): QT += core5compat
 INCLUDEPATH += $$[QT_INSTALL_HEADERS]/QtZlib include headers tools
 
 # Warnings for Deprecated functions
@@ -75,11 +76,11 @@ macx {
     QT += macextras
 }
 win32 {
-    deploy.commands = $$PWD/deployment/windeploy.bat "$$OUT_PWD/release/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$$VERSION_$$RC_VERSION"
+    deploy.commands = $$PWD/deployment/windeploy.bat "$$OUT_PWD/release/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$${VERSION}_$${RC_VERSION}"
     QMAKE_EXTRA_TARGETS += deploy
 }
 linux {
-    deploy.commands = $$PWD/deployment/lindeploy.sh "$$OUT_PWD/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$$VERSION_$$RC_VERSION"
+    deploy.commands = $$PWD/deployment/lindeploy.sh "$$OUT_PWD/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$${VERSION}$${RC_VERSION}"
     QMAKE_EXTRA_TARGETS += deploy
 }
 

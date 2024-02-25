@@ -10,6 +10,7 @@
 #include "respeqtapplication.h"
 #include <QTextCodec>
 #include <memory>
+#include <QStyleFactory>
 
 #if defined(Q_OS_LINUX) && defined(QT_X11EXTRAS_LIB)
 #include <QX11Info>
@@ -30,9 +31,9 @@ int main(int argc, char *argv[]) {
 
 #else
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-#endif
-  RespeQtApplication a(argc, argv);
-
+  QApplication::setStyle(QStyleFactory::create("Fusion"));
+  QApplication a(argc, argv);
+  a.setFont(a.font("QMenu"));
   QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
   auto w = new MainWindow;
   w->show();
