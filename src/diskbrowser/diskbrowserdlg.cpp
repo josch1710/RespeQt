@@ -175,7 +175,11 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
 
     if (!disk.isEmpty() && disks.contains(disk))
     {
-        auto items = ui->treeDisks->findItems(disk, Qt::MatchExactly, 1);
+        QString col1text = disk;
+        auto index = diskIndex(folder, disk);
+        if (!index.isEmpty() && disk.startsWith(index))
+            col1text = disk.mid(index.length() + 1);
+        auto items = ui->treeDisks->findItems(col1text, Qt::MatchExactly, 1);
         QTreeWidgetItem* item = (items.length() > 0) ? items[0] : nullptr;
         ui->treeDisks->setCurrentItem(item);
     }

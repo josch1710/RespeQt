@@ -26,5 +26,12 @@ bool DbSettings::isEmpty()
 void DbSettings::clone(DbSettings& other)
 {
     _dirMap = other._dirMap;
-//    _diskPic = other._diskPic;   TBD: more than this (?)
+    _diskPic = other._diskPic;   // TBD: more than this (?) ...hang on, is this used?
+    _dirty = true;
+}
+
+void DbSettings::merge(DbSettings& other)
+{
+    _dirMap.insert(other.getDirMap());
+    _dirty = true;
 }

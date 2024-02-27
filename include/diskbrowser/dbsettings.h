@@ -72,7 +72,8 @@ public:
 
     bool isEmpty();
     void clone(DbSettings& other);
-    virtual bool isJson() = 0;
+    void merge(DbSettings& other);
+    virtual bool isJson() = 0;          // TBD omit (not used)
 
     DirMap& getDirMap() { return _dirMap; }
     QStringList getDirs() { return _dirMap.keys(); }

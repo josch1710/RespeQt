@@ -300,7 +300,7 @@ public:
 
   // Disk Collection browser options page
   DbDataSource dbDataSource();
-  void setDbDataSource(DbDataSource dbSource);
+  void setDbDataSource(DbDataSource newDbSource);
   void setDbFileNames(bool useFileNames, bool favorJson = false);
   bool dbFavorJson();
   bool dbUseFileNames();

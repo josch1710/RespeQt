@@ -3,6 +3,7 @@
 
 enum DbDataSource
 {
+    DbData_none = 0,
     DbData_appSettings,
     DbData_subDirJson,
     DbData_appFolderJson

@@ -2065,3 +2065,29 @@ void MainWindow::restoreLayout()
             showLogWindowTriggered();
     }
 }
+
+bool MainWindow::checkChangeDbSource(DbDataSource dbSourceNew)
+{
+    DbDataSource dbSourceNow = RespeqtSettings::instance()->dbDataSource();
+    if (dbSourceNew == dbSourceNow)
+        return false;
+
+    auto &sDbSettings = RespeqtSettings::dbSettings();
+    if (!sDbSettings || sDbSettings->isEmpty())
+        return true;
+
+    if (!diskBrowserDlg)
+        return true;
+
+    if (diskBrowserDlg->isVisible())
+    {
+        QMessageBox::warning(diskBrowserDlg, tr("Data Format Conversion Required"),
+               tr("The Disk Collection Browser Window is currently open.\n"
+                  "To convert DCB data format, please close and try again."));
+        return false;
+    }
+
+    diskBrowserDlg->close();
+    diskBrowserDlg = nullptr;
+    return true;
+}

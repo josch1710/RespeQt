@@ -467,17 +467,23 @@ void OptionsDialog::saveSettings() {
   RespeqtSettings::instance()->setClearOnStatus(m_ui->clearOnStatus->isChecked());
   RespeqtSettings::instance()->setDbFileNames(m_ui->cb_filename->isChecked(), m_ui->cb_favor_json->isChecked());
   RespeqtSettings::instance()->setDbCopyPics(m_ui->cb_copypics->isChecked());
-  DbDataSource dbSource = DbData_appSettings;
+
+  DbDataSource dbSourceNew = DbData_appSettings;
   if (m_ui->rb_dbset_app_data_dir->isChecked())
   {
-      dbSource = DbData_appFolderJson;
-      RespeqtSettings::instance()->setAppFolderDir(m_ui->edt_appdata_dir->text());
+      dbSourceNew = DbData_appFolderJson;
+      RespeqtSettings::instance()->setAppFolderDir(m_ui->edt_appdata_dir->text());  // TBD: ok to just change this? What about db source conversion stuff below?
   }
   else if (m_ui->rb_dbset_subdir->isChecked())
   {
-      dbSource = DbData_subDirJson;
+      dbSourceNew = DbData_subDirJson;
   }
-  RespeqtSettings::instance()->setDbDataSource(dbSource);
+
+  if (MainWindow::instance()->checkChangeDbSource(dbSourceNew))
+  {
+    RespeqtSettings::instance()->setDbDataSource(dbSourceNew);
+  }
+
   LabelFont titleFont
   {
       m_ui->cb_title_font->currentFont().family(),

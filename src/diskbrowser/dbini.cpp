@@ -18,7 +18,8 @@ DbIni::DbIni()
 
 DbIni::~DbIni()
 {
-    DbIni::save();
+    if (_dirty)
+        DbIni::save();
 }
 
 void DbIni::setDataDir(const QString &dir)
@@ -124,7 +125,7 @@ bool DbIni::load()
         _settings->beginGroup(group);
 
         if (_settings->contains("pic"))
-            dirInfo.pic = _settings->value("pic").toString();
+            dirInfo.pic = _settings->value("pic").toString().replace('@','/');
 
         foreach (const QString& childGroup, _settings->childGroups())
         {

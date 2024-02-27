@@ -12,7 +12,8 @@ DbJson::DbJson()
 
 DbJson::~DbJson()
 {
-    DbJson::save();
+    if (_dirty)
+        DbJson::save();
 }
 
 void DbJson::setDataDir(const QString& dir)

@@ -987,24 +987,25 @@ bool RespeqtSettings::restoreWidgetGeometry(QWidget* widget, const QString& name
   return true;
 }
 
-void RespeqtSettings::setDbDataSource(DbDataSource dbSource)
+void RespeqtSettings::setDbDataSource(DbDataSource newDbSource)
 {
-    if (dbSource == dbDataSource())     // sanity check
+    auto curDbSource = dbDataSource();
+    if (curDbSource == newDbSource)     // sanity check
         return;
 
-    if (!sDbSettings)   // we're going to need the
+    if (!sDbSettings)   // need current artwork data from the source?
     {
-        if (DbDataSource() == DbData_appSettings)
+        if (curDbSource == DbData_appSettings)
             sDbSettings.reset(new DbIni);
         else
-            sDbSettings.reset(new DbJson);
+            sDbSettings.reset(new DbJson);      // TBD untested (see above)
     }
 
-    mSettings->setValue("/DiskBrowserDlg/source", dbSource);
+    mSettings->setValue("/DiskBrowserDlg/source", newDbSource);
 
-    if (dbSource == DbData_subDirJson)
+    if (newDbSource == DbData_subDirJson)
     {
-        // going from multi-dir source to seperate JSON files
+        // converting from multi-dir source to seperate JSON files
 
         const DirMap& dirMap = sDbSettings->getDirMap();
         for (auto itDir = dirMap.begin(); itDir != dirMap.end(); ++itDir)
@@ -1027,29 +1028,53 @@ void RespeqtSettings::setDbDataSource(DbDataSource dbSource)
             //pNew->save(); delete does this next
             delete pNew;
         }
-        sDbSettings.reset();
-        return;
     }
+    else //if (!sDbSettings->isEmpty()) TBD where does this optimization go?
+    {
+        // converting to a multi-dir source (app settings or single JSON)
 
-    if (!sDbSettings)
-    {
-        // dialog never opened: load settings
-    }
-    if (!sDbSettings->isEmpty())
-    {
-        DbSettings* pNew = nullptr;
-        if (dbSource != DbData_appSettings)
-            pNew = new DbJson;
+        if (curDbSource == DbData_subDirJson)
+        {
+            // converting from seperate subdirs/JSON (to multi-dir source)
+
+            DbSettings* pNew;
+            if (newDbSource == DbData_appSettings)
+                pNew = new DbIni;
+            else
+                pNew = new DbJson;
+
+            foreach (const QString& dir, buildBrowserFolders())
+            {
+                sDbSettings.reset(new DbJson);
+                sDbSettings->setDataDir(dir);
+                pNew->merge(*sDbSettings);
+            }
+            if (newDbSource == DbData_appFolderJson)
+                pNew->setDataDir(appDataFolder());
+
+            //pNew->save();    not needed (re: next line)
+            delete pNew;    // really not a fan of this save on delete design (TBD refactor)
+        }
         else
-            pNew = new DbIni;
+        {
+            // converting to/from app settings and single JSON
 
-        pNew->clone(*sDbSettings);
-        sDbSettings.reset(pNew);
-        sDbSettings->save();
+            DbSettings* pNew = nullptr;
+            if (newDbSource == DbData_appSettings)
+                pNew = new DbIni;
+            else
+                pNew = new DbJson;
+
+            pNew->clone(*sDbSettings);
+            pNew->save();
+            sDbSettings.reset(pNew);
+        }
     }
-    sDbSettings.reset(); // TBD needed?
-
-    // TBD are we done?
+    // sDbSettings.reset(); // TBD needed?
+    // Dev Note: The above line asserts (DbJson::save()) when converting single to multi JSON.
+    // That's because properties such as the DB source are changed out from under the
+    // original DbJson object. When the save method runs, the code is checking
+    // to make sure there's one and only one node as it writes it out.
 }
 
 DbDataSource RespeqtSettings::dbDataSource()
