@@ -32,6 +32,7 @@ public:
 protected:
   void changeEvent(QEvent *e) override;
   void showEvent(QShowEvent *e) override;
+  void closeEvent(QCloseEvent *e) override;
 
 private:
   Ui::OptionsDialog *m_ui;
@@ -40,9 +41,9 @@ private:
           *itemFirmware810Path, *itemFirmware1050Path, *itemFirmwareEmulation, *itemTraceOptions, *itemDiskImages;
 
   void selectFirmware(QLineEdit *edit, QString title, QString filters);
-
   void connectSignals();
   void setupSettings();
+  void setHorzSplitPos(int pos);
 
 private slots:
   void serialPortChanged(int index);
@@ -51,6 +52,7 @@ private slots:
   void sectionClicked(QTreeWidgetItem *item, int column);
   void currentSectionChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
   void saveSettings();
+  void onClosed();
   void useCustomBaudToggled(bool checked);
   void appDataDirToggled();
   void diskSubDirToggled();

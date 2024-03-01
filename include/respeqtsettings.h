@@ -146,6 +146,9 @@ public:
   bool minimizeToTray();
   void setMinimizeToTray(bool tray);
 
+  void setOptionsDlgSplitPos(int pos);
+  int  optionsDialogSplitPos();
+
   // Save window positions and sizes option //
   bool saveWindowsPos();
   void setSaveWindowsPos(bool saveMwp);
@@ -212,6 +215,7 @@ public:
   // save/restore top-level widget geometry
   bool saveWidgetGeometry(QWidget* widget, const QString& name = QString());
   bool restoreWidgetGeometry(QWidget* widget, const QString& name = QString(), const QRect& defRect = QRect());
+  bool windowPosSaved(QWidget* widget, const QString& name = QString());
 
   // Printer Spy Mode
   bool isPrinterSpyMode();

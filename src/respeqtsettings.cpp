@@ -938,6 +938,14 @@ void RespeqtSettings::setDiskBrowserVertSplitPos(int pos) {
   mSettings->setValue("/DiskBrowserDlg/VertSplitPos", pos);
 }
 
+void RespeqtSettings::setOptionsDlgSplitPos(int pos) {
+  mSettings->setValue("/OptionsDialog/SplitterPos", pos);
+}
+
+int RespeqtSettings::optionsDialogSplitPos() {
+  return mSettings->value("/OptionsDialog/SplitterPos",-1).toInt();
+}
+
 bool RespeqtSettings::saveMainWinGeometry(QMainWindow* window, bool isMiniMode) {
   if (!window || !saveWindowsPos())
     return false;
@@ -985,6 +993,20 @@ bool RespeqtSettings::restoreWidgetGeometry(QWidget* widget, const QString& name
   }
 
   return true;
+}
+
+bool RespeqtSettings::windowPosSaved(QWidget* widget, const QString& name)
+{
+    if (widget == nullptr)
+        return false;
+
+    QString key = name.isEmpty() ? widget->objectName() : name;
+    if (key.isEmpty())
+        return false;
+
+    key += "/geometry";
+
+    return mSettings->contains(key);
 }
 
 void RespeqtSettings::setDbDataSource(DbDataSource newDbSource)

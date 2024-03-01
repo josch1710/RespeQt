@@ -258,6 +258,7 @@ void OptionsDialog::setupSettings() {
 void OptionsDialog::connectSignals() {
   // Dialog
   connect(this, &OptionsDialog::accepted, this, &OptionsDialog::saveSettings);
+  connect(this, &OptionsDialog::rejected, this, &OptionsDialog::onClosed);
 
   // Tree
   connect(m_ui->optionSections, &QTreeWidget::itemClicked, this, &OptionsDialog::sectionClicked);
@@ -318,22 +319,36 @@ void OptionsDialog::changeEvent(QEvent *e) {
   }
 }
 
+void OptionsDialog::onClosed()
+{
+    RespeqtSettings::instance()->saveWidgetGeometry(this);
+    RespeqtSettings::instance()->setOptionsDlgSplitPos(m_ui->splitter->sizes().at(0));
+}
+
+void OptionsDialog::closeEvent(QCloseEvent *event)
+{
+    onClosed();
+    event->accept();
+}
+
 void OptionsDialog::showEvent(QShowEvent *e)
 {
-    static bool setSize = true;
-
     QDialog::showEvent(e);
 
     if (e->type() != QEvent::Show)
         return;
 
-    if (setSize)    // on first presentation, resize the dialog to a reasonable size (TBD: do this in designer?)
+    if (RespeqtSettings::instance()->windowPosSaved(this))
     {
-        resize(QGuiApplication::primaryScreen()->size() / 2);   // Qt doesn't seem to have a better way to do this
-        auto sizes = m_ui->splitter->sizes();
-        int  total = sizes[0] + sizes[1];
-        m_ui->splitter->setSizes( QList<int>{total / 3, total * 2 / 3});    // TBD: use 2x widget stretch factors?
-        setSize = false;
+        // Restore last widget geometry
+        RespeqtSettings::instance()->restoreWidgetGeometry(this);
+        setHorzSplitPos(RespeqtSettings::instance()->optionsDialogSplitPos());
+    }
+    else
+    {
+        auto size = QGuiApplication::primaryScreen()->size();
+        resize((size.width() / 3) + 150, size.height() / 3);   // Qt doesn't seem to have a better way to do this
+        setHorzSplitPos((width() / 3) - 20);
     }
 }
 
@@ -520,6 +535,8 @@ void OptionsDialog::saveSettings() {
     RespeqtSettings::instance()->setRawPrinterName("");
 
   RespeqtSettings::instance()->setDebugMenuVisible(m_ui->showDebugMenu->isChecked());
+
+  onClosed();   // persist the dialog geometry
 }
 
 void OptionsDialog::useCustomBaudToggled(bool checked) {
@@ -710,4 +727,16 @@ void OptionsDialog::titleItalicToggled()
     QFont font = m_ui->btn_italic_title->font();
     font.setItalic(m_ui->btn_italic_title->isChecked());
     m_ui->btn_italic_title->setFont(font);
+}
+
+void OptionsDialog::setHorzSplitPos(int pos)
+{
+    if (pos == -1)
+        return;
+
+    QList<int> sizes = m_ui->splitter->sizes();
+    int total = sizes.at(0) + sizes.at(1);
+    sizes.clear();
+    sizes << pos << (total - pos);
+    m_ui->splitter->setSizes(sizes);
 }
