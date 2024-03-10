@@ -13,7 +13,6 @@
 #include "respeqtsettings.h"
 #include "serialport.h"
 #include "diskbrowser/diskbrowser.h"
-#include "diskbrowser/dbjson.h"
 #include <QFileInfo>
 #include <memory>
 #include <QApplication>
