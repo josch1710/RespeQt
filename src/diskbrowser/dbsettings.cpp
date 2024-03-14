@@ -32,6 +32,11 @@ void DbSettings::clone(DbSettings& other)
 
 void DbSettings::merge(DbSettings& other)
 {
-    _dirMap.insert(other.getDirMap());
+    for(auto i = other.getDirMap().constBegin();
+         i != other.getDirMap().constEnd();
+         i++
+    ) {
+        _dirMap.insert(i.key(), i.value());
+    }
     _dirty = true;
 }
