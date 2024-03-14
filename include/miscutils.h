@@ -42,64 +42,43 @@ inline Qt::CaseSensitivity osCaseSensitivity() {
 #endif
 }
 
-class FileTypes : public QObject {
-  Q_OBJECT
+class FileTypes : public QObject
+{
+    Q_OBJECT
 
 public:
-  enum FileType {
-    Unknown,
-    Dir,
-    Atr,
-    AtrGz,
-    Xfd,
-    XfdGz,
-    Dcm,
-    DcmGz,
-    Di,
-    DiGz,
-    Pro,
-    ProGz,
-    Atx,
-    AtxGz,
-    Cas,
-    CasGz,
-    Xex,
-    XexGz
-  };
-  static FileType getFileType(const QString &fileName);
-  __attribute__((unused)) static QString getFileTypeName(FileType type);
+    enum class FileType : quint8
+    {
+        Unknown,
+        Dir,
+        Atr,
+        AtrGz,
+        Xfd,
+        XfdGz,
+        Pro,
+        ProGz,
+        Atx,
+        AtxGz,
+        Cas,
+        CasGz,
+        Xex,
+        XexGz
+    };
+    static FileType getFileType(const QString &fileName);
+    __attribute__((unused)) static QString getFileTypeName(FileType type);
+    static QStringList toStringList(const QList<QByteArray>& list);
 
-  static const QStringList& getDiskImageTypes()
-  {
-      static QStringList list
-      {
-          "*.xfd", "*.atr", "*.pro", "*.atx"
-  #if defined Q_OS_LINUX
-        , "*.XFD", "*.ATR", "*.PRO", "*.ATX"  // Linux is case sensitive
-  #endif
-      };
-      return list;
-  }
-enum class FileType: quint8 {
-  Unknown,
-  Dir,
-  Atr,
-  AtrGz,
-  Xfd,
-  XfdGz,
-  Pro,
-  ProGz,
-  Atx,
-  AtxGz,
-  Cas,
-  CasGz,
-  Xex,
-  XexGz
+    static bool isArchive(FileType type);
+    static const QStringList &getDiskImageTypes()
+    {
+        static QStringList list{
+            "*.xfd", "*.atr", "*.pro", "*.atx"
+#if defined Q_OS_LINUX
+            ,
+            "*.XFD", "*.ATR", "*.PRO", "*.ATX"  // Linux is case sensitive
+#endif
+        };
+        return list;
+    }
 };
-
-QStringList toStringList(const QList<QByteArray>& list);
-FileType getFileType(const QString &fileName);
-QString getFileTypeName(FileType type);
-bool isArchive(FileType type);
-
 #endif// MISCUTILS_H

@@ -51,8 +51,8 @@ set(SOURCES
     src/diskimages/diskimageatx.cpp
     src/optionsdialog.cpp
     src/aboutdialog.cpp
-        src/diskimages/diskimage.cpp
-        src/diskimages/folderimage.cpp
+    src/diskimages/diskimage.cpp
+    src/diskimages/folderimage.cpp
     src/diskbrowser/folderdisks.cpp
     src/diskbrowser/diskbrowserdlg.cpp
     src/diskbrowser/dbsettings.cpp
@@ -258,22 +258,19 @@ qt5_add_resources(UI_RESOURCES ${RESOURCES})
 
 if (APPLE)
     set(MACOSX_BUNDLE_ICON_FILE RespeQt.icns)
-    set(APP_ICON resources/RespeQt.icns src/diskimages/diskimagefactory.cpp)
+    set(APP_ICON resources/RespeQt.icns)
     set_source_files_properties(${APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     add_executable(${TARGET} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES} ${APP_ICON})
-    add_executable(${TARGETTEST} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGETTEST_SOURCES} ${APP_ICON})
 
     add_custom_target(deploy ${CMAKE_SOURCE_DIR}/deployment/macdeploy.sh "\"${CMAKE_SOURCE_DIR}\"" "\"${CMAKE_BINARY_DIR}\"" "${PROJECT_VERSION}" "${RC_VERSION}")
 else()
     add_executable(${TARGET} ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES})
-    add_executable(${TARGETTEST} ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGETTEST_SOURCES})
 endif()
 
 find_package(ZLIB REQUIRED)
 if (ZLIB_FOUND)
-    include_directories( ${ZLIB_INCLUDE_DIRS} )
+    include_directories(${ZLIB_INCLUDE_DIRS} )
     target_link_libraries(${TARGET} ${ZLIB_LIBRARIES})
-    target_link_libraries(${TARGETTEST} ${ZLIB_LIBRARIES})
 endif()
 
 target_link_libraries(${TARGET} Qt5::Core)
@@ -284,28 +281,18 @@ target_link_libraries(${TARGET} Qt5::PrintSupport)
 target_link_libraries(${TARGET} Qt5::SerialPort)
 target_link_libraries(${TARGET} Qt5::Svg)
 
-target_link_libraries(${TARGETTEST} Qt5::Core)
-target_link_libraries(${TARGETTEST} Qt5::Widgets)
-target_link_libraries(${TARGETTEST} Qt5::Gui)
-target_link_libraries(${TARGETTEST} Qt5::Network)
-target_link_libraries(${TARGETTEST} Qt5::PrintSupport)
-target_link_libraries(${TARGETTEST} Qt5::SerialPort)
-target_link_libraries(${TARGETTEST} Qt5::Svg)
-target_link_libraries(${TARGETTEST} Qt5::Test)
-
 # Include platform extras
 if (APPLE AND Qt5MacExtras_FOUND)
     message(STATUS "Found Mac Extras")
     target_link_libraries(${TARGET} Qt5::MacExtras)
-    target_link_libraries(${TARGETTEST} Qt5::MacExtras)
 endif()
 if (UNIX AND Qt5X11Extras_FOUND)
     message(STATUS "Found X11 Extras")
-    target_link_libraries(${TARGETTEST} Qt5::X11Extras)
+    target_link_libraries(${TARGET} Qt5::X11Extras)
 endif()
 if (WIN32 AND Qt5WinExtras_FOUND)
     message(STATUS "Found Win Extras")
-    target_link_libraries(${TARGETTEST} Qt5::WinExtras)
+    target_link_libraries(${TARGET} Qt5::WinExtras)
 endif()
 
 if (UNIX)
@@ -320,7 +307,6 @@ endif()
 
 # Deployment
 if (LINUX)
-    add_custom_target(deploy deployment/lindeploy.sh )
+    add_custom_target(deploy deployment/lindeploy.sh)
 endif()
 
-target_compile_definitions(${TARGETTEST} PUBLIC -DRESPEQT_TEST)

@@ -6,6 +6,7 @@
 namespace DiskImages {
 
   class SimpleDiskImage : public DiskImage {
+      Q_OBJECT
   public:
     explicit SimpleDiskImage(SioWorkerPtr worker, bool gzipped);
     bool openImage(const QString &fileName) override;

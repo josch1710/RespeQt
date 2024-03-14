@@ -49,9 +49,9 @@ quint8 sioChecksum(const QByteArray &data, uint size) {
 
 /* FileTypes */
 
-FileType getFileType(const QString &fileName) {
+FileTypes::FileType FileTypes::getFileType(const QString &fileName) {
   QByteArray header;
-  FileType result = FileType::Unknown;
+  auto result = FileTypes::FileType::Unknown;
 
   /* Check if it is a folder */
 
@@ -137,14 +137,14 @@ FileType getFileType(const QString &fileName) {
   return result;
 }
 
-bool isArchive(FileType type) {
+bool FileTypes::isArchive(FileType type) {
   return type == FileType::AtxGz ||
     type == FileType::AtrGz ||
     type == FileType::ProGz ||
     type == FileType::XfdGz;
 }
 
-QString getFileTypeName(FileType type) {
+QString FileTypes::getFileTypeName(FileType type) {
   switch (type) {
     case FileType::Atr:
       return QObject::tr("ATR disk image");
@@ -242,7 +242,7 @@ bool GzFile::atEnd() const {
   return gzeof(mHandle);
 }
 
-QStringList toStringList(const QList<QByteArray>& list)
+QStringList FileTypes::toStringList(const QList<QByteArray>& list)
 {
     QStringList strings;
 

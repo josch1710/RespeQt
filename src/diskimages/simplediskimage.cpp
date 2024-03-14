@@ -161,8 +161,8 @@ namespace DiskImages {
   } */
 
   bool SimpleDiskImage::saveImageAs() {
-    auto destImageType = getFileType(m_originalFileName);
-    if ((destImageType == FileType::Atr) || (destImageType == FileType::AtrGz)) {
+    auto destImageType = FileTypes::getFileType(m_originalFileName);
+    if ((destImageType == FileTypes::FileType::Atr) || (destImageType == FileTypes::FileType::AtrGz)) {
       m_originalFileHeader = QByteArray(16, 0);
 
       // Put signature
@@ -378,7 +378,7 @@ namespace DiskImages {
       sourceFile = new GzFile(fileName);
     }
 
-    FileType type = getFileType(fileName);
+    FileTypes::FileType type = FileTypes::getFileType(fileName);
 
     QByteArray header;
     quint16 sizeLo{0};
@@ -394,7 +394,7 @@ namespace DiskImages {
       return false;
     }
 
-    if (type == FileType::Atr || type == FileType::AtrGz) {
+    if (type == FileTypes::FileType::Atr || type == FileTypes::FileType::AtrGz) {
       // Try to read the header for a ATR file
       header = sourceFile->read(16);
       if (header.size() != 16) {
@@ -458,7 +458,7 @@ namespace DiskImages {
 
     // Check if the reported image size is consistent with the actual size
     //
-    if (type == FileType::Atr || type == FileType::AtrGz) {
+    if (type == FileTypes::FileType::Atr || type == FileTypes::FileType::AtrGz) {
       if (size != imageSize) {
         qWarning() << "!w" << tr("Image size of '%1' is reported as %2 bytes in the header but it's actually %3.").arg(fileName, QString::number(size, 10), QString(imageSize, 10));
         size = imageSize;
@@ -543,7 +543,7 @@ namespace DiskImages {
       return false;
     }
 
-    if (type == FileType::Atr || type == FileType::AtrGz) {
+    if (type == FileTypes::FileType::Atr || type == FileTypes::FileType::AtrGz) {
       // Check unsupported ATR extensions
       if (header[8] || header[9] || header[9] || header[10] || header[11] || header[12] || header[13] || header[14] || header[15]) {
         qWarning() << "!u" << tr("The file '%1' has some unrecognized fields in its header.").arg(fileName);
@@ -575,10 +575,10 @@ namespace DiskImages {
   }
 
   bool SimpleDiskImage::save() {
-    auto filetype = getFileType(m_originalFileName);
+    auto filetype = FileTypes::getFileType(m_originalFileName);
 
     // Only ATR has a file header
-    if (filetype == FileType::Atr || filetype == FileType::AtrGz) {
+    if (filetype == FileTypes::FileType::Atr || filetype == FileTypes::FileType::AtrGz) {
       if (m_originalFileHeader.size() != 16) {
         m_originalFileHeader = QByteArray(16, 0);
       }
@@ -613,7 +613,7 @@ namespace DiskImages {
     }
 
     // Only ATR has a file header
-    if (filetype == FileType::Atr || filetype == FileType::AtrGz) {
+    if (filetype == FileTypes::FileType::Atr || filetype == FileTypes::FileType::AtrGz) {
       // Try to write the header
       if (outputFile->write(m_originalFileHeader) != 16) {
         qCritical() << "!e" << tr("Cannot save '%1': %2").arg(m_originalFileName, outputFile->errorString());

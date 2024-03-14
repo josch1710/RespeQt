@@ -31,6 +31,7 @@ int main(int argc, char *argv[]) {
 
 #else
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
   QApplication::setStyle(QStyleFactory::create("Fusion"));
   QApplication a(argc, argv);
   a.setFont(a.font("QMenu"));

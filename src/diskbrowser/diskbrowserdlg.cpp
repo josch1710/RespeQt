@@ -5,6 +5,7 @@
  */
 #include "diskbrowser/diskbrowserdlg.h"
 #include "diskimages/diskimage.h"
+#include "diskimages/simplediskimage.h"
 #include "filesystems/ataridirentry.h"
 #include "filesystems/atarifilesystem.h"
 #include "filesystems/dos10filesystem.h"
@@ -544,7 +545,7 @@ QString DiskBrowserDlg::findPicFile()
     QDir dir {fileInfo.absolutePath()};
     QDir subdir {fileInfo.absolutePath() + "/.respeqt_db"};
     auto formats = QImageReader::supportedImageFormats();
-    auto fmtlist = toStringList(formats);
+    auto fmtlist = FileTypes::toStringList(formats);
     auto entries = dir.entryInfoList(fmtlist);
     auto bsidexp = _picInfo.label.sideB ? QString("[b|B]") : QString();
     auto sregexp = QString("^(%1)(%2)(\\.)(.*)").arg(_picInfo.label.index).arg(bsidexp);
@@ -656,7 +657,7 @@ void DiskBrowserDlg::indexChanged(QString index)
 QString DiskBrowserDlg::browseForPic(const QString& start, const QString& action)
 {
     auto formats = QImageReader::supportedImageFormats();
-    auto fmtList = toStringList(formats);
+    auto fmtList = FileTypes::toStringList(formats);
     auto fmtStrs = fmtList.join(' ');
     auto filters = QString("Images (%1)").arg(fmtStrs);
 

@@ -256,7 +256,6 @@ MainWindow::MainWindow()
   } else {
     setWindowTitle(g_mainWindowTitle);
   }
-  setGeometry(RespeqtSettings::instance()->lastHorizontalPos(), RespeqtSettings::instance()->lastVerticalPos(), RespeqtSettings::instance()->lastWidth(), RespeqtSettings::instance()->lastHeight());
 
   /* Setup status bar */
   speedLabel = new QLabel(this);
@@ -294,8 +293,6 @@ MainWindow::MainWindow()
 
   ui->textEdit->installEventFilter(this);
   changeFonts();
-  isD9DOVisible = RespeqtSettings::instance()->D9DOVisible();
-  showHideDrives();
 
   /* Connect to the network */
   QString netInterface;
@@ -546,15 +543,15 @@ void MainWindow::dropEvent(QDropEvent *event) {
     return;
   }
 
-  FileType type = getFileType(files.at(0));
+  FileTypes::FileType type = FileTypes::getFileType(files.at(0));
 
-  if (type == FileType::Xex) {
+  if (type == FileTypes::FileType::Xex) {
     g_exefileName = files.at(0);//
     bootExe(files.at(0));
     return;
   }
 
-  if (type == FileType::Cas) {
+  if (type == FileTypes::FileType::Cas) {
     bool restart;
     restart = ui->actionStartEmulation->isChecked();
     if (restart) {
