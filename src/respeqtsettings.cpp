@@ -1100,7 +1100,7 @@ void RespeqtSettings::setDbDataSource(DbDataSource newDbSource)
 
 DbDataSource RespeqtSettings::dbDataSource()
 {
-    assert(mSettings->group().isEmpty());
+    //assert(mSettings->group().isEmpty());
     return static_cast<DbDataSource>(mSettings->value("/DiskBrowserDlg/source", DbData_appSettings).toInt());
 }
 

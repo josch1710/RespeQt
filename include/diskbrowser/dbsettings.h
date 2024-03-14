@@ -38,7 +38,7 @@ struct DirInfo
 //    - default pic for whole dir
 //    - ArtMap[disk name] -> FloppyArt { pic, label text }
 //
-typedef QMap<QString,DirInfo> DirMap;
+typedef QMap<QString, DirInfo> DirMap;
 
 
 struct LabelPos
