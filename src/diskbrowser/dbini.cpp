@@ -10,14 +10,16 @@
 DbIni::DbIni()
 {
     _appData  = RespeqtSettings::instance()->appDataFolder();
-    _settings = RespeqtSettings::instance()->mSettings;
-
+    _settings = RespeqtSettings::instance()->mSettings;         // did I make mSettings public for this? (probably bad)
+                                                                // _settings was also once optionally used for seperate ini file.
+                                                                // This is now only a ref to the app QSetting instance (TBD: fix).
     DbIni::load();
 }
 
 DbIni::~DbIni()
 {
-    DbIni::save();
+    if (_dirty)
+        DbIni::save();
 }
 
 void DbIni::setDataDir(const QString &dir)
@@ -31,16 +33,16 @@ void DbIni::setPicture(const QString& pic, const QString& dir, const QString& di
     bool isGlobal = (dir.isEmpty() && disk.isEmpty());     // program global pic?
     bool isDirPic = (!dir.isEmpty() && disk.isEmpty());
     bool isDiskPic = (!dir.isEmpty() && !disk.isEmpty());
-    QString escDir = QDir::fromNativeSeparators(dir).replace('/','@');
+    QString lnxDir = QDir::fromNativeSeparators(dir);
 
     if (isGlobal)
         _diskPic = pic;
 
     if (isDirPic)
-        _dirMap[escDir].pic = pic;
+        _dirMap[lnxDir].pic = pic;
 
     if (isDiskPic)
-        _dirMap[escDir].map[disk].pic = pic;
+        _dirMap[lnxDir].map[disk].pic = pic;
 
     _dirty = true;
 }
@@ -48,8 +50,8 @@ void DbIni::setPicture(const QString& pic, const QString& dir, const QString& di
 QString DbIni::getPicture(const QDir& dir, const QString& disk, PicSourceType& picSource)
 {
     QString dirStr  = dir.absolutePath();
-    QString escDir  = QDir::fromNativeSeparators(dirStr).replace('/','@');
-    auto    dirInfo = _dirMap[escDir];
+    QString lnxDir  = QDir::fromNativeSeparators(dirStr);
+    auto    dirInfo = _dirMap[lnxDir];
 
     QString pic;
     picSource = PicSource_none;
@@ -75,30 +77,30 @@ QString DbIni::getPicture(const QDir& dir, const QString& disk, PicSourceType& p
 
 void DbIni::setTitle(const QString& title, const QString& folder, const QString& disk)
 {
-    QString escDir = QDir::fromNativeSeparators(folder).replace('/','@');
-    _dirMap[escDir].map[disk].label.title = title;
+    QString lnxDir = QDir::fromNativeSeparators(folder);
+    _dirMap[lnxDir].map[disk].label.title = title;
     _dirty = true;
 }
 
 void DbIni::setIndex(const QString& index, const QString& folder, const QString& disk)
 {
-    QString escDir = QDir::fromNativeSeparators(folder).replace('/','@');
-    _dirMap[escDir].map[disk].label.index = index;
+    QString lnxDir = QDir::fromNativeSeparators(folder);
+    _dirMap[lnxDir].map[disk].label.index = index;
     _dirty = true;
 }
 
 void DbIni::setSideB(bool sideB, const QString& folder, const QString& disk)
 {
-    QString escDir = QDir::fromNativeSeparators(folder).replace('/','@');
-    _dirMap[escDir].map[disk].label.sideB = sideB;
+    QString lnxDir = QDir::fromNativeSeparators(folder);
+    _dirMap[lnxDir].map[disk].label.sideB = sideB;
     _dirty = true;
 }
 
 DiskLabel DbIni::getLabel(const QDir& dir, const QString& disk)
 {
     QString folder = dir.absolutePath();
-    QString escDir = QDir::fromNativeSeparators(folder).replace('/','@');
-    return _dirMap[escDir].map[disk].label;
+    QString lnxDir = QDir::fromNativeSeparators(folder);
+    return _dirMap[lnxDir].map[disk].label;
 }
 
 bool DbIni::load()
@@ -123,14 +125,14 @@ bool DbIni::load()
         _settings->beginGroup(group);
 
         if (_settings->contains("pic"))
-            dirInfo.pic = _settings->value("pic").toString();
+            dirInfo.pic = _settings->value("pic").toString().replace('@','/');
 
         foreach (const QString& childGroup, _settings->childGroups())
         {
             _settings->beginGroup(childGroup);
 
             if (_settings->contains("pic"))
-                dirInfo.map[childGroup].pic = _settings->value("pic").toString();
+                dirInfo.map[childGroup].pic = _settings->value("pic").toString().replace('@','/');
             if (_settings->contains("title"))
                 dirInfo.map[childGroup].label.title = _settings->value("title").toString();
             if (_settings->contains("index"))
@@ -140,7 +142,7 @@ bool DbIni::load()
 
             _settings->endGroup();
         }
-        _dirMap[group] = dirInfo;
+        _dirMap[group.replace('@','/')] = dirInfo;
 
         _settings->endGroup();
     }
@@ -160,29 +162,30 @@ bool DbIni::save()
     _settings->remove("");
 
     if (!_diskPic.isEmpty())
-        _settings->setValue("pic", _diskPic);
+        _settings->setValue("pic", _diskPic.replace('/','@'));
 
     for (auto it = _dirMap.begin(); it != _dirMap.end(); ++it)
     {
         DirInfo& dirInfo = it.value();
         QString  escDir  = it.key();
+        escDir.replace('/','@');
 
         _settings->beginGroup(escDir);
 
         if (!dirInfo.pic.isEmpty())
-            _settings->setValue("pic",dirInfo.pic);
+            _settings->setValue("pic", dirInfo.pic.replace('/','@'));
 
         for (auto it = dirInfo.map.begin(); it != dirInfo.map.end(); ++it)
         {
-            const FloppyArt& art = it.value();
-            const QString group  = it.key();
+            FloppyArt art = it.value();
+            QString group = it.key();
 
             if (art.isEmpty())
                 continue;
 
             _settings->beginGroup(group);
             if (!art.pic.isEmpty())
-                _settings->setValue("pic", art.pic);
+                _settings->setValue("pic", art.pic.replace('/','@'));
             if (!art.label.title.isEmpty())
                 _settings->setValue("title", art.label.title);
             if (!art.label.index.isEmpty())

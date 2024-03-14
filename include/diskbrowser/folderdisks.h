@@ -54,8 +54,6 @@ private:
     QDir dir;
     QStringList dirList;
     QStringList diskList;
-    QString          _defaultPic;
-    QList<FloppyArt> _diskArt;
 };
 
 #endif // FOLDERDISKS_H

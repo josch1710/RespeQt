@@ -14,9 +14,23 @@
 #include "dbsettings.h"
 #include "picsourcetype.h"
 
+
 namespace Ui {
 class DiskBrowserDlg;
 }
+
+
+class DbItem : public QTreeWidgetItem
+{
+public:
+    DbItem(QTreeWidget* parent) : QTreeWidgetItem(parent) {}
+    bool isFolder() const { return data(0, Qt::UserRole).toBool(); }
+    void setFolder(bool folder = true) { setData(0, Qt::UserRole, folder); }
+
+private:
+    bool operator<(const QTreeWidgetItem& other) const override;
+    bool compNumberVal(const QString& index, const QString& other, bool& comp) const;
+};
 
 
 class DiskBrowserDlg : public QDialog
@@ -31,7 +45,6 @@ public:
     int getVertSplitPos();
     void setHorzSplitPos(int pos);
     void setVertSplitPos(int pos);
-    DiskLabel parsePicLabel();
 
 protected:
     void showEvent(QShowEvent *event) override;
@@ -42,7 +55,6 @@ private:
     void setItemIsFolder(QTreeWidgetItem* item, bool isFolder = true);
     bool itemIsFolder(QTreeWidgetItem* item);
     void refreshFoldersCombobox();
-    bool isDiskImage(const QString& name);
     void update();
     QString checkCopyPic(const QString& fname);
     QString findPicFile();
@@ -50,8 +62,9 @@ private:
     QString getMostRecentFolder();
     QString getMostRecentDisk();
     QString getRecentDisk(QString folder);
-    QString getParentDir(QString fileFolder);
     QString browseForPic(const QString& start, const QString& action);
+    QString diskIndex(const QString& folder, const QString& disk);
+    DiskLabel parsePicLabel(const QString& diskName = QString());
 
     const QString FLOPPY_INDEXED_PNG  {":/icons/other-icons/floppy_front.png"};
     const QString FLOPPY_BACKSIDE_PNG {":/icons/other-icons/floppy_back.png"};
@@ -65,7 +78,6 @@ private:
     QString _diskFileName;
     QString _diskFullName;
     PicSourceType _picSource  = PicSource_none;
-    DbSettings*   _dbSettings = nullptr;
 
     void actionSetPic();
     void actionSetDirPic();

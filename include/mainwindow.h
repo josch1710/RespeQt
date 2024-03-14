@@ -55,6 +55,7 @@ public:
   QString g_sessionFilePath;
   QString g_mainWindowTitle;
   void doLogMessage(int type, const QString &msg);
+  bool checkChangeDbSource(DbDataSource dbSourceNew);
   static void logMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
   static MainWindow *instance() { return sInstance; }
 

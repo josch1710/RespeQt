@@ -45,6 +45,8 @@ struct LabelPos
 {
     QRect title;
     QRect index;
+
+    bool isEmpty() { return title.isEmpty() && index.isEmpty(); }
 };
 
 
@@ -68,14 +70,26 @@ public:
     virtual bool save()  = 0;
 //  virtual void clear() = 0;
 
+    bool isEmpty();
+    void clone(DbSettings& other);
+    void merge(DbSettings& other);
+    virtual bool isJson() = 0;          // TBD omit (not used)
+
+    DirMap& getDirMap() { return _dirMap; }
+    QStringList getDirs() { return _dirMap.keys(); }
+    QString getDirPic(const QString& dir) { return _dirMap[dir].pic; }
+    QStringList getDisks(const QString& dir) { return _dirMap[dir].map.keys(); }
+
 protected:
     bool _dirty = false;
 
     QString  _appData;
     QString  _diskPic;
-    QString  _bSidePic;
-    LabelPos _labelPos;
-    LabelPos _bSidePos;
+    QString  _bSidePic; // used?
+//  LabelPos _labelPos; not used
+//  LabelPos _bSidePos; not used
+    QString  _titleFont;
+    QString  _indexFont;
     DirMap   _dirMap;
 };
 

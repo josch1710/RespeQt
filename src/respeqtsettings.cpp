@@ -12,8 +12,7 @@
 
 #include "respeqtsettings.h"
 #include "serialport.h"
-#include "diskbrowser/picsourcetype.h"
-#include "diskbrowser/picpreview.h"
+#include "diskbrowser/diskbrowser.h"
 #include <QFileInfo>
 #include <memory>
 #include <QApplication>
@@ -21,15 +20,20 @@
 
 std::unique_ptr<RespeqtSettings> RespeqtSettings::sInstance;
 
+std::unique_ptr<DbSettings> RespeqtSettings::sDbSettings;
+
 RespeqtSettings::RespeqtSettings() {
-  mSettings = new QSettings();//uses QApplication's info to determine setting to use
+  mSettings = new QSettings();  // uses QApplication's info to determine setting to use
 
   mIsFirstTime = mSettings->value("FirstTime", true).toBool();
   mSettings->setValue("FirstTime", false);
 }
 
-RespeqtSettings::~RespeqtSettings() {
-  delete mSettings;
+RespeqtSettings::~RespeqtSettings()
+{
+    sDbSettings.reset();
+
+    delete mSettings;
 }
 
 // Get session file name from Mainwindow //
@@ -797,6 +801,53 @@ QStringList RespeqtSettings::recentBrowserFolders() {
   return folders;
 }
 
+bool RespeqtSettings::isDiskImage(const QString &name)
+{
+    foreach (const QString &fileType, FileTypes::getDiskImageTypes())
+    {
+        QString ext = fileType.right(4);
+        if (name.endsWith(ext, osCaseSensitivity()))
+            return true;
+    }
+    return false;
+}
+
+QStringList RespeqtSettings::buildBrowserFolders()
+{
+    QStringList folders;
+
+    // build a list of MRU folders for the GUI dropdown list
+
+    foreach (const QString& name, recentBrowserFolders())
+    {
+        auto fileInf = QFileInfo(name);
+        if (fileInf.exists())
+        {
+            QString path = fileInf.isFile() ? fileInf.path() : name;    // don't want file names in dropdown
+            folders += path;
+        }
+        else if (isDiskImage(name)) // MRU missing. First check if a disk is selected
+        {
+            QString path = DbUtils::getParentDir(name);
+            if (QFileInfo::exists(path))
+            {
+                folders += path;    // Keep parent folder of bad disk
+            }
+            else
+            {
+                qDebug() << "!w" << QString("Disk Collection Browser most recent list updated. '%1' not found.").arg(name);
+                delMostRecentBrowserFolder(name);
+            }
+        }
+        else    // Simple case of missing folder
+        {
+            qDebug() << "!w" << QString("Disk Collection Browser most recent list updated. Folder '%1' not found.").arg(name);
+            delMostRecentBrowserFolder(name);
+        }
+    }
+    return folders;
+}
+
 void RespeqtSettings::setMostRecentBrowserFolder(const QString& name) {
   if (mostRecentBrowserFolder() == name)
     return;
@@ -819,7 +870,7 @@ void RespeqtSettings::setMostRecentBrowserFolder(const QString& name) {
   }
   folders.insert(0, name);
 
-  if (folders.count() > maxRecentBrowserFolders)
+  if (folders.count() > 100)    // TBD: warn user?
     folders.removeLast();
 
   writeRecentBrowserFolders(folders);
@@ -886,6 +937,14 @@ void RespeqtSettings::setDiskBrowserVertSplitPos(int pos) {
   mSettings->setValue("/DiskBrowserDlg/VertSplitPos", pos);
 }
 
+void RespeqtSettings::setOptionsDlgSplitPos(int pos) {
+  mSettings->setValue("/OptionsDialog/SplitterPos", pos);
+}
+
+int RespeqtSettings::optionsDialogSplitPos() {
+  return mSettings->value("/OptionsDialog/SplitterPos",-1).toInt();
+}
+
 bool RespeqtSettings::saveMainWinGeometry(QMainWindow* window, bool isMiniMode) {
   if (!window || !saveWindowsPos())
     return false;
@@ -935,13 +994,113 @@ bool RespeqtSettings::restoreWidgetGeometry(QWidget* widget, const QString& name
   return true;
 }
 
-void RespeqtSettings::setDbDataSource(DbDataSource dbSource)
+bool RespeqtSettings::windowPosSaved(QWidget* widget, const QString& name)
 {
-    mSettings->setValue("/DiskBrowserDlg/source", dbSource);
+    if (widget == nullptr)
+        return false;
+
+    QString key = name.isEmpty() ? widget->objectName() : name;
+    if (key.isEmpty())
+        return false;
+
+    key += "/geometry";
+
+    return mSettings->contains(key);
+}
+
+void RespeqtSettings::setDbDataSource(DbDataSource newDbSource)
+{
+    auto curDbSource = dbDataSource();
+    if (curDbSource == newDbSource)     // sanity check
+        return;
+
+    if (!sDbSettings)   // need current artwork data from the source?
+    {
+        if (curDbSource == DbData_appSettings)
+            sDbSettings.reset(new DbIni);
+        else
+            sDbSettings.reset(new DbJson);      // TBD untested (see above)
+    }
+
+    mSettings->setValue("/DiskBrowserDlg/source", newDbSource);
+
+    if (newDbSource == DbData_subDirJson)
+    {
+        // converting from multi-dir source to seperate JSON files
+
+        const DirMap& dirMap = sDbSettings->getDirMap();
+        for (auto itDir = dirMap.begin(); itDir != dirMap.end(); ++itDir)
+        {
+            const QString dir = itDir.key();
+            DbJson* pNew = new DbJson;
+            const QString pic = DbUtils::removePrefix(dir, itDir.value().pic);
+            pNew->setDataDir(dir);
+            pNew->setPicture(pic, itDir.key());
+
+            const ArtMap& artMap = itDir.value().map;
+            for (auto itArt = artMap.begin(); itArt != artMap.end(); ++itArt)
+            {
+                QString disk = itArt.key();
+                const FloppyArt& art = itArt.value();
+                const QString artPic = DbUtils::removePrefix(dir, art.pic);
+                pNew->setPicture(art.pic, dir, disk);
+                pNew->setLabel(art.label, dir, disk);
+            }
+            //pNew->save(); delete does this next
+            delete pNew;
+        }
+    }
+    else //if (!sDbSettings->isEmpty()) TBD where does this optimization go?
+    {
+        // converting to a multi-dir source (app settings or single JSON)
+
+        if (curDbSource == DbData_subDirJson)
+        {
+            // converting from seperate subdirs/JSON (to multi-dir source)
+
+            DbSettings* pNew;
+            if (newDbSource == DbData_appSettings)
+                pNew = new DbIni;
+            else
+                pNew = new DbJson;
+
+            foreach (const QString& dir, buildBrowserFolders())
+            {
+                sDbSettings.reset(new DbJson);
+                sDbSettings->setDataDir(dir);
+                pNew->merge(*sDbSettings);
+            }
+            if (newDbSource == DbData_appFolderJson)
+                pNew->setDataDir(appDataFolder());
+
+            //pNew->save();    not needed (re: next line)
+            delete pNew;    // really not a fan of this save on delete design (TBD refactor)
+        }
+        else
+        {
+            // converting to/from app settings and single JSON
+
+            DbSettings* pNew = nullptr;
+            if (newDbSource == DbData_appSettings)
+                pNew = new DbIni;
+            else
+                pNew = new DbJson;
+
+            pNew->clone(*sDbSettings);
+            pNew->save();
+            sDbSettings.reset(pNew);
+        }
+    }
+    // sDbSettings.reset(); // TBD needed?
+    // Dev Note: The above line asserts (DbJson::save()) when converting single to multi JSON.
+    // That's because properties such as the DB source are changed out from under the
+    // original DbJson object. When the save method runs, the code is checking
+    // to make sure there's one and only one node as it writes it out.
 }
 
 DbDataSource RespeqtSettings::dbDataSource()
 {
+    assert(mSettings->group().isEmpty());
     return static_cast<DbDataSource>(mSettings->value("/DiskBrowserDlg/source", DbData_appSettings).toInt());
 }
 
@@ -1061,4 +1220,16 @@ void RespeqtSettings::setDiskPic(const QString& pic)
 QString RespeqtSettings::diskPic()
 {
     return mSettings->value("/DiskBrowserDlg/disk_pic").toString();
+}
+
+const std::unique_ptr<DbSettings>& RespeqtSettings::dbSettings()
+{
+    if (!sDbSettings)   // instantiate on demand
+    {
+        if (instance()->dbDataSource() == DbData_appSettings)
+            sDbSettings.reset(new DbIni);
+        else
+            sDbSettings.reset(new DbJson);
+    }
+    return sDbSettings;
 }

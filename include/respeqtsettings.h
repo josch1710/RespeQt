@@ -146,6 +146,9 @@ public:
   bool minimizeToTray();
   void setMinimizeToTray(bool tray);
 
+  void setOptionsDlgSplitPos(int pos);
+  int  optionsDialogSplitPos();
+
   // Save window positions and sizes option //
   bool saveWindowsPos();
   void setSaveWindowsPos(bool saveMwp);
@@ -212,6 +215,7 @@ public:
   // save/restore top-level widget geometry
   bool saveWidgetGeometry(QWidget* widget, const QString& name = QString());
   bool restoreWidgetGeometry(QWidget* widget, const QString& name = QString(), const QRect& defRect = QRect());
+  bool windowPosSaved(QWidget* widget, const QString& name = QString());
 
   // Printer Spy Mode
   bool isPrinterSpyMode();
@@ -284,9 +288,11 @@ public:
 
   // Disk Collection Browser
   QString mostRecentBrowserFolder();
-  QStringList recentBrowserFolders();
+  QStringList recentBrowserFolders();   // raw from QSettings map
+  QStringList buildBrowserFolders();    // remove selected disk names from paths and validates exists
   void setMostRecentBrowserFolder(const QString& name);
   void delMostRecentBrowserFolder(const QString& name);
+  bool isDiskImage(const QString& name);
   bool showDiskBrowser();
   void setShowDiskBrowser(bool show = true);
   int  diskBrowserHorzSplitPos();
@@ -298,7 +304,7 @@ public:
 
   // Disk Collection browser options page
   DbDataSource dbDataSource();
-  void setDbDataSource(DbDataSource dbSource);
+  void setDbDataSource(DbDataSource newDbSource);
   void setDbFileNames(bool useFileNames, bool favorJson = false);
   bool dbFavorJson();
   bool dbUseFileNames();
@@ -310,6 +316,11 @@ public:
   void setDbIndexFont(const LabelFont& font);
   QString appDataFolder();
   void setAppFolderDir(const QString& appDataDir);
+
+  // Disk Collection Browser artwork settings -
+  // These settings are kept seperately from above application global settings
+  // when dbDataSource is JSON (DbData_subDirJson and DbData_appFolderJson).
+  static const std::unique_ptr<DbSettings>& dbSettings();
 
   bool debugMenuVisible() const;
   void setDebugMenuVisible(bool menuVisible);
@@ -328,10 +339,12 @@ private:
 
 public:
   QSettings *mSettings;
+
 private:
-  //void writeRecentImageSettings();
+  static std::unique_ptr<DbSettings> sDbSettings;
+
   void writeRecentBrowserFolders(const QStringList& folders);
-  const int maxRecentBrowserFolders = 10;
+//  const int maxRecentBrowserFolders = 10;
 
   bool mIsFirstTime;
 

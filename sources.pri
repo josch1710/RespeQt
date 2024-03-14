@@ -147,6 +147,7 @@ HEADERS += \
     include/diskbrowser/dbsettings.h \
     include/diskbrowser/dbjson.h \
     include/diskbrowser/dbini.h \
+    include/diskbrowser/diskbrowser.h \
     include/diskbrowser/diskbrowserdlg.h
 
 FORMS += \

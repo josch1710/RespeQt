@@ -81,6 +81,11 @@ public:
   }
 };
 
+namespace DbUtils
+{
 QStringList toStringList(const QList<QByteArray>& list);
+QString getParentDir(const QString& fileFolder);
+QString removePrefix(const QString& prefix, const QString& name);
+}
 
 #endif// MISCUTILS_H
