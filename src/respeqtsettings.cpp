@@ -118,7 +118,7 @@ void RespeqtSettings::setSerialPortUsePokeyDivisors(bool use) {
 }
 
 int RespeqtSettings::serialPortPokeyDivisor() {
-  return mSettings->value("").toInt();
+  return mSettings->value("SerialPortPokeyDivisor").toInt();
 }
 
 void RespeqtSettings::setSerialPortPokeyDivisor(int divisor) {
