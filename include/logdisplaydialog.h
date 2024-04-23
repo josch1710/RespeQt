@@ -27,19 +27,17 @@ public:
 
 protected:
   void changeEvent(QEvent *e);
-  void closeEvent(QCloseEvent *);
 
 private:
   Ui::LogDisplayDialog *l_ui;
+  QString savedLog, filter;
 
 public slots:
-  void getLogText(QString logText);
-  void getLogTextChange(QString logChange);
+  void setLogText(QString logText);
+  void addLogTextChange(QString logChange);
 
 private slots:
   void diskFilter();
   void onClick(QAbstractButton *button);
-
-signals:
 };
 #endif// LOGDISPLAYDIALOG_H

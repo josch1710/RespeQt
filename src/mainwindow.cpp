@@ -769,8 +769,8 @@ void MainWindow::showLogWindowTriggered() {
         logWindow_->setGeometry(x + 20, y + 60, w, h * 2);
       }
     }
-    connect(this, &MainWindow::sendLogText, logWindow_, &LogDisplayDialog::getLogText);
-    connect(this, &MainWindow::sendLogTextChange, logWindow_, &LogDisplayDialog::getLogTextChange);
+    connect(this, &MainWindow::sendLogText, logWindow_, &LogDisplayDialog::setLogText);
+    connect(this, &MainWindow::sendLogTextChange, logWindow_, &LogDisplayDialog::addLogTextChange);
     emit sendLogText(ui->textEdit->toHtml());
   }
   logWindow_->show();

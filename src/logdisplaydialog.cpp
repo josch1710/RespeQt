@@ -16,81 +16,91 @@
 #include <QMessageBox>
 #include <QTranslator>
 
-QString g_savedLog, g_filter;
-
 LogDisplayDialog::LogDisplayDialog(QWidget *parent) : QDialog(parent),
-                                                      l_ui(new Ui::LogDisplayDialog) {
-  Qt::WindowFlags flags = windowFlags();
-  flags = flags & (~Qt::WindowContextHelpButtonHint);
-  setWindowFlags(flags);
+                                                      l_ui(new Ui::LogDisplayDialog)
+{
+    Qt::WindowFlags flags = windowFlags() & (~Qt::WindowContextHelpButtonHint);
+    setWindowFlags(flags);
 
-  l_ui->setupUi(this);
+    l_ui->setupUi(this);
 
-  void (QComboBox::*diskFilterChanged)(int) = &QComboBox::currentIndexChanged;
-  connect(l_ui->listByDisk, diskFilterChanged, this, &LogDisplayDialog::diskFilter);
-  connect(l_ui->buttonBox, &QDialogButtonBox::clicked, this, &LogDisplayDialog::onClick);
+    void (QComboBox::*diskFilterChanged)(int) = &QComboBox::currentIndexChanged;
+    connect(l_ui->listByDisk, diskFilterChanged, this, &LogDisplayDialog::diskFilter);
+    connect(l_ui->buttonBox, &QDialogButtonBox::clicked, this, &LogDisplayDialog::onClick);
 }
 
-LogDisplayDialog::~LogDisplayDialog() {
-  delete l_ui;
+LogDisplayDialog::~LogDisplayDialog()
+{
+    delete l_ui;
 }
-void LogDisplayDialog::onClick(QAbstractButton * /*button*/) {
-  this->close();
-}
-
-void LogDisplayDialog::closeEvent(QCloseEvent *) {
-}
-
-void LogDisplayDialog::changeEvent(QEvent *e) {
-  QDialog::changeEvent(e);
-  switch (e->type()) {
-    case QEvent::LanguageChange:
-      l_ui->retranslateUi(this);
-      break;
-    default:
-      break;
-  }
+void LogDisplayDialog::onClick(QAbstractButton * /*button*/)
+{
+    this->close();
 }
 
-void LogDisplayDialog::getLogText(QString logText) {
-  g_savedLog.clear();
-  g_filter = "ALL";
-  l_ui->listByDisk->setCurrentIndex(0);
-  l_ui->textEdit->clear();
-  l_ui->textEdit->ensureCursorVisible();
-  if (!logText.isEmpty()) {
-    l_ui->textEdit->setHtml(logText);
-    g_savedLog.append(logText);
-  }
-}
-void LogDisplayDialog::getLogTextChange(QString logChange) {
-  if (g_filter == "ALL" || logChange.contains("[" + g_filter + "]")) {
-    l_ui->textEdit->append(logChange);
-  }
-  g_savedLog.append(logChange);
-  g_savedLog.append("<br>");
-}
-
-void LogDisplayDialog::diskFilter() {
-  QTextEdit searchResults;
-  QTextDocument *search = l_ui->textEdit->document();
-  QTextCursor cursor;
-  g_filter = l_ui->listByDisk->currentText();
-  searchResults.clear();
-  if (g_filter != "ALL") {
-    cursor.setPosition(0);
-    cursor = search->find(g_filter, cursor, QTextDocument::FindWholeWords);
-    while (!cursor.isNull()) {
-      int i = cursor.position();
-      cursor.setPosition(i - g_filter.length() - 1);
-      cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
-      searchResults.append(cursor.selectedText());
-      cursor.setPosition(cursor.position(), QTextCursor::MoveAnchor);
-      cursor = search->find(g_filter, cursor, QTextDocument::FindWholeWords);
+void LogDisplayDialog::changeEvent(QEvent *e)
+{
+    QDialog::changeEvent(e);
+    switch (e->type())
+    {
+        case QEvent::LanguageChange:
+            l_ui->retranslateUi(this);
+            break;
+        default:
+            break;
     }
-    l_ui->textEdit->setHtml(searchResults.toHtml());
-  } else {
+}
+
+void LogDisplayDialog::setLogText(QString logText)
+{
+    savedLog.clear();
+    filter = "ALL";
+    l_ui->listByDisk->setCurrentIndex(0);
     l_ui->textEdit->clear();
-    l_ui->textEdit->setHtml(g_savedLog);
-  }
+    l_ui->textEdit->ensureCursorVisible();
+    if (!logText.isEmpty())
+    {
+        l_ui->textEdit->setHtml(logText);
+        savedLog.append(logText);
+    }
+}
+
+
+void LogDisplayDialog::addLogTextChange(QString logChange)
+{
+    if (filter == "ALL" || logChange.contains("[" + filter + "]"))
+    {
+        l_ui->textEdit->append(logChange);
+    }
+    savedLog.append(logChange);
+    savedLog.append("<br>");
+}
+
+void LogDisplayDialog::diskFilter()
+{
+    QTextEdit searchResults;
+    QTextDocument *search = l_ui->textEdit->document();
+    QTextCursor cursor;
+    filter = l_ui->listByDisk->currentText();
+    searchResults.clear();
+    if (filter != "ALL")
+    {
+        cursor.setPosition(0);
+        cursor = search->find(filter, cursor, QTextDocument::FindWholeWords);
+        while (!cursor.isNull())
+        {
+            int i = cursor.position();
+            cursor.setPosition(i - filter.length() - 1);
+            cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
+            searchResults.append(cursor.selectedText());
+            cursor.setPosition(cursor.position(), QTextCursor::MoveAnchor);
+            cursor = search->find(filter, cursor, QTextDocument::FindWholeWords);
+        }
+        l_ui->textEdit->setHtml(searchResults.toHtml());
+    }
+    else
+    {
+        l_ui->textEdit->clear();
+        l_ui->textEdit->setHtml(savedLog);
+    }
 }
