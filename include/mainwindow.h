@@ -41,6 +41,8 @@
 #include "diskbrowser/folderdisks.h"
 #include "diskbrowser/diskbrowserdlg.h"
 
+#define MAXBLOCK 500
+
 namespace Ui {
   class MainWindow;
 }

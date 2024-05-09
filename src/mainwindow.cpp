@@ -300,6 +300,7 @@ MainWindow::MainWindow()
   ui->statusBar->addPermanentWidget(limitEntriesLabel);
 
   ui->textEdit->installEventFilter(this);
+  ui->textEdit->document()->setMaximumBlockCount(MAXBLOCK);
   changeFonts();
 
   /* Connect to the network */

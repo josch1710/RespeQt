@@ -27,6 +27,7 @@ LogDisplayDialog::LogDisplayDialog(QWidget *parent) : QDialog(parent),
     void (QComboBox::*diskFilterChanged)(int) = &QComboBox::currentIndexChanged;
     connect(l_ui->listByDisk, diskFilterChanged, this, &LogDisplayDialog::diskFilter);
     connect(l_ui->buttonBox, &QDialogButtonBox::clicked, this, &LogDisplayDialog::onClick);
+    l_ui->textEdit->document()->setMaximumBlockCount(MAXBLOCK);
 }
 
 LogDisplayDialog::~LogDisplayDialog()
