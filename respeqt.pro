@@ -11,7 +11,7 @@
 #
 #CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 VERSION = 5.4
-RC_VERSION = "RC5"
+RC_VERSION = "0"
 DEFINES += VERSION=\\\"v$$VERSION_$$RC_VERSION\\\"
 
 #debug {
