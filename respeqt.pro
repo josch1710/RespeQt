@@ -10,9 +10,9 @@
 # know the specific year(s) please let the current maintainer know.
 #
 #CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
-VERSION = 5.4
-RC_VERSION = "0"
-DEFINES += VERSION=\\\"v$$VERSION_$$RC_VERSION\\\"
+PROJECT_VERSION = 5.4.0
+RC_VERSION = "" ## Begin RC version with underscore
+DEFINES += VERSION=\\\"v$${PROJECT_VERSION}$${RC_VERSION}\\\"
 
 #debug {
   #QMAKE_CXXFLAGS+="-fsanitize=address -fno-omit-frame-pointer"
