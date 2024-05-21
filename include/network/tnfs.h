@@ -44,6 +44,19 @@ namespace Network {
         auto fsFree(const Datagram &datagram) -> Datagram;
         auto fsSize(const Datagram &datagram) -> Datagram;
 
+        template<typename T>
+        auto findFreeSlot(const QVector<QSharedPointer<T>> &list) -> quint8 {
+            quint16 handle{0};
+            while (handle < list.length() && !list[handle].isNull()) {
+                handle++;
+            }
+            if (handle > 255) {
+                throw new std::runtime_error("no more handles");
+            }
+            return handle;
+        }
+
+
     private:
         QUdpSocket *socket;
         quint16 _sessionID{1};

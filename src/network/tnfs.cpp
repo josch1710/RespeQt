@@ -189,13 +189,6 @@ namespace Network {
             return answer;
         }
 
-        /*auto*/QDirIndexVector &openDirs{sessionInfo->openDirectories()};
-        quint8 handle = 0;
-        // Find the free slot for the handle
-        while(handle < openDirs.length() && !openDirs[handle].isNull()) {
-            handle++;
-        }
-
         /*auto*/QDirIndexPtr index{QDirIndexPtr::create()};
         index->isVirtualRoot = dirName == "/";
         index->actualDir = pathName;
@@ -217,8 +210,17 @@ namespace Network {
             index->files = index->actualDir->entryList();
         }
         index->fileListIndex = 0;
-        openDirs[handle] = index;
-        answer[5] = handle;
+
+        try {
+            /*auto*/QDirIndexVector &openDirs{sessionInfo->openDirectories()};
+            quint8 handle{findFreeSlot(openDirs)};
+            openDirs[handle] = index;
+            answer[5] = handle;
+        }
+        catch(...) {
+            answer[4] = EMFILE;
+            return answer;
+        }
 
         return answer;
     }
@@ -419,15 +421,18 @@ namespace Network {
             return answer;
         }
 
-        /*auto*/QFileVector& openFiles{sessionInfo->openFiles()};
-        quint8 handle = 0;
-        // Find the three slot for the handle
-        while(handle < openFiles.length() && !openFiles[handle].isNull()) {
-            handle++;
+        try
+        {
+            /*auto*/ QFileVector &openFiles{sessionInfo->openFiles()};
+            quint8 handle{findFreeSlot(openFiles)};
+            openFiles[handle] = QFilePtr(file);
+            answer[5] = handle;
+        }
+        catch(...) {
+            answer[4] = EMFILE;
+            return answer;
         }
 
-        openFiles[handle] = QFilePtr(file);
-        answer[5] = handle;
         return answer;
     }
 
