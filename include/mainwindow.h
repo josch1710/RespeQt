@@ -30,7 +30,6 @@
 #include "docdisplaywindow.h"
 #include "drivewidget.h"
 #include "logdisplaydialog.h"
-#include "network.h"
 #include "optionsdialog.h"
 #include "printers/outputwindow.h"
 #include "printers/textprinterwindow.h"
@@ -40,6 +39,7 @@
 #include "sioworker.h"
 #include "diskbrowser/folderdisks.h"
 #include "diskbrowser/diskbrowserdlg.h"
+#include "network/tnfs.h"
 
 #define MAXBLOCK 500
 
@@ -96,6 +96,8 @@ private:
   bool isD9DOVisible = true;    // column 2 disks visible
   bool isMiniMode    = false;   // mini mode disk 1 only
   bool isShadeMode   = false;   // mini shade mode main win
+
+  Network::Tnfs tnfs{};
 
   void setSession();//
   void updateRecentFileActions();

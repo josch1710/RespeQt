@@ -76,7 +76,10 @@ SOURCES += \
     src/diskbrowser/dbsettings.cpp \
     src/diskbrowser/dbjson.cpp \
     src/diskbrowser/dbini.cpp \
-    src/diskbrowser/diskbrowserdlg.cpp
+    src/diskbrowser/diskbrowserdlg.cpp \
+    src/network/tnfs.cpp \
+    src/network/sessioninfo.cpp \
+    src/network/datagram.cpp
 
 HEADERS += \
     include/mainwindow.h \
@@ -148,7 +151,10 @@ HEADERS += \
     include/diskbrowser/dbjson.h \
     include/diskbrowser/dbini.h \
     include/diskbrowser/diskbrowser.h \
-    include/diskbrowser/diskbrowserdlg.h
+    include/diskbrowser/diskbrowserdlg.h \
+    include/network/tnfs.h \
+    include/network/sessioninfo.h \
+    include/network/datagram.h
 
 FORMS += \
     ui/mainwindow.ui \

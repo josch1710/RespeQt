@@ -4,8 +4,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 cmake_minimum_required(VERSION 3.5.0)
 set(CMAKE_OSX_ARCHITECTURES x86_64)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.8)
-project(RespeQt VERSION 5.4.0 LANGUAGES CXX)
-set(RC_VERSION "") ## Begin RC version with underscore
+project(RespeQt VERSION 5.4.1 LANGUAGES CXX)
+set(RC_VERSION "_TNFS") ## Begin RC version with underscore
 cmake_policy(SET CMP0071 NEW)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -69,7 +69,6 @@ set(SOURCES
     src/cassettedialog.cpp
     src/docdisplaywindow.cpp
     src/bootoptionsdialog.cpp
-    src/network.cpp
     src/logdisplaydialog.cpp
     src/respeqtsettings.cpp
     src/pclink.cpp
@@ -108,6 +107,9 @@ set(SOURCES
     src/diskimages/atxsectorinfo.cpp
     src/diskimages/atxtrackinfo.cpp
     src/diskimages/board.cpp
+    src/network/tnfs.cpp
+    src/network/sessioninfo.cpp
+    src/network/datagram.cpp
 )
 
 set(HEADERS
@@ -143,7 +145,6 @@ set(HEADERS
     include/cassettedialog.h
     include/docdisplaywindow.h
     include/bootoptionsdialog.h
-    include/network.h
     include/logdisplaydialog.h
     include/respeqtsettings.h
     include/pclink.h
@@ -181,6 +182,9 @@ set(HEADERS
     include/diskimages/atxsectorinfo.h
     include/diskimages/atxtrackinfo.h
     include/diskimages/board.h
+    include/network/tnfs.h
+    include/network/sessioninfo.h
+    include/network/datagram.h
 )
 
 set(FORMS

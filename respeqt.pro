@@ -10,8 +10,8 @@
 # know the specific year(s) please let the current maintainer know.
 #
 #CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
-PROJECT_VERSION = 5.4.0
-RC_VERSION = "" ## Begin RC version with underscore
+PROJECT_VERSION = 5.4.1
+RC_VERSION = "_TNFS" ## Begin RC version with underscore
 DEFINES += VERSION=\\\"v$${PROJECT_VERSION}$${RC_VERSION}\\\"
 
 #debug {

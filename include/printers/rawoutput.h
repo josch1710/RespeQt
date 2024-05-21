@@ -5,6 +5,7 @@
 #include <QObject>
 
 #if defined(Q_OS_WIN)
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #elif defined(Q_OS_MAC) || defined(Q_OS_LINUX)
 #include <cups/cups.h>

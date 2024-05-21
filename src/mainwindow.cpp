@@ -303,21 +303,6 @@ MainWindow::MainWindow()
   ui->textEdit->document()->setMaximumBlockCount(MAXBLOCK);
   changeFonts();
 
-  /* Connect to the network */
-  QString netInterface;
-  auto oNet = new Network();
-  if (oNet->openConnection(netInterface)) {
-    netLabel->setPixmap(QIcon(":/icons/oxygen-icons/16x16/actions/network_connect.png").pixmap(16, 16, QIcon::Normal));
-    netLabel->setToolTip(tr("Connected to the network via: ") + netInterface);
-    netLabel->setStatusTip(netLabel->toolTip());
-  } else {
-    netLabel->setPixmap(QIcon(":/icons/oxygen-icons/16x16/actions/network_disconnect.png").pixmap(16, 16, QIcon::Normal));
-    netLabel->setToolTip(tr("No network connection"));
-    netLabel->setStatusTip(netLabel->toolTip());
-
-    //        QMessageBox::information(this,tr("Network connection cannot be opened"), tr("No network interface was found!"));
-  }
-
   /* Connect SioWorker signals */
   sio = SioWorkerPtr::create();
   connect(sio.data(), &SioWorker::started, this, &MainWindow::sioStarted);
