@@ -27,7 +27,6 @@ SOURCES += \
     src/cassettedialog.cpp \
     src/docdisplaywindow.cpp \
     src/bootoptionsdialog.cpp \
-    src/network.cpp \
     src/logdisplaydialog.cpp \
     src/respeqtsettings.cpp \
     src/pclink.cpp \
@@ -103,7 +102,6 @@ HEADERS += \
     include/cassettedialog.h \
     include/docdisplaywindow.h \
     include/bootoptionsdialog.h \
-    include/network.h \
     include/logdisplaydialog.h \
     include/respeqtsettings.h \
     include/pclink.h \

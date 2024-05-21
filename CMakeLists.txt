@@ -69,7 +69,6 @@ set(SOURCES
     src/cassettedialog.cpp
     src/docdisplaywindow.cpp
     src/bootoptionsdialog.cpp
-    src/network.cpp
     src/logdisplaydialog.cpp
     src/respeqtsettings.cpp
     src/pclink.cpp
