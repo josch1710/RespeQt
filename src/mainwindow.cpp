@@ -269,12 +269,19 @@ MainWindow::MainWindow()
   speedLabel = new QLabel(this);
   onOffLabel = new QLabel(this);
   prtOnOffLabel = new QLabel(this);
-  //netLabel = new QLabel(this);
+  netLabel = new QLabel(this);
   clearMessagesLabel = new QLabel(this);
   speedLabel->setText(tr("19200 bits/sec"));
   onOffLabel->setMinimumWidth(21);
   prtOnOffLabel->setMinimumWidth(18);
-  //netLabel->setMinimumWidth(18);
+  netLabel->setMinimumWidth(18);
+
+  netLabel->setPixmap(QIcon(":/icons/oxygen-icons/16x16/actions/network_disconnect.png").pixmap(16, 16, QIcon::Normal));
+  netLabel->setToolTip(tr("No TNFS connection"));
+  netLabel->setStatusTip(netLabel->toolTip());
+
+  connect(&tnfs, &Network::Tnfs::allSessionsDisconnected, this, &MainWindow::allSessionsDisconnected);
+  connect(&tnfs, &Network::Tnfs::sessionConnected, this, &MainWindow::sessionConnected);
 
   clearMessagesLabel->setMinimumWidth(21);
   clearMessagesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/page_white_c.png").pixmap(16, 16, QIcon::Normal));
@@ -295,7 +302,7 @@ MainWindow::MainWindow()
   ui->statusBar->addPermanentWidget(speedLabel);
   ui->statusBar->addPermanentWidget(onOffLabel);
   ui->statusBar->addPermanentWidget(prtOnOffLabel);
-  //ui->statusBar->addPermanentWidget(netLabel);
+  ui->statusBar->addPermanentWidget(netLabel);
   ui->statusBar->addPermanentWidget(clearMessagesLabel);
   ui->statusBar->addPermanentWidget(limitEntriesLabel);
 
@@ -2082,4 +2089,18 @@ bool MainWindow::checkChangeDbSource(DbDataSource dbSourceNew)
     diskBrowserDlg->close();
     diskBrowserDlg = nullptr;
     return true;
+}
+
+void MainWindow::allSessionsDisconnected()
+{
+    netLabel->setPixmap(QIcon(":/icons/oxygen-icons/16x16/actions/network_disconnect.png").pixmap(16, 16, QIcon::Normal));
+    netLabel->setToolTip(tr("No TNFS connections"));
+    netLabel->setStatusTip(netLabel->toolTip());
+}
+
+void MainWindow::sessionConnected()
+{
+    netLabel->setPixmap(QIcon(":/icons/oxygen-icons/16x16/actions/network_connect.png").pixmap(16, 16, QIcon::Normal));
+    netLabel->setToolTip(tr("TNFS connected"));
+    netLabel->setStatusTip(netLabel->toolTip());
 }

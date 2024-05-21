@@ -3,9 +3,6 @@
 #include "network/tnfs.h"
 
 #include <QStorageInfo>
-#include <iostream>
-using std::cout;
-using std::endl;
 
 namespace Network {
 
@@ -53,6 +50,13 @@ namespace Network {
         return QDirPtr();
     }
     auto SessionInfo::realFileName(const QString &fileName) const -> QString {
+        QFileInfo fileinfo(fileName);
+        /*auto*/QDirPtr dir{realPath(fileinfo.path())};
+        if (!dir.isNull()) {
+            QFileInfo file{dir->absoluteFilePath(fileinfo.fileName())};
+            if (file.exists())
+                return file.absoluteFilePath();
+        }
         return QString();
     }
 

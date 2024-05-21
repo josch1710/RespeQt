@@ -16,11 +16,16 @@ namespace Network {
         virtual ~Tnfs();
 
         auto mountPoints() const -> const QDirVector& { return _mountPoints; }
-        auto addMountPoint(QDir mountPoint) -> void { return _mountPoints.append(QDirPtr::create(mountPoint)); }
+        auto addMountPoint(QDir mountPoint) -> void;
         auto removeMountPoint(QDir mountPoint) -> void;
 
     protected slots:
-        void readPendingDatagrams(); // Not auto -> type notation, because moc.
+        void readPendingDatagrams(); // No auto -> type notation, because moc.
+
+    signals:
+        // No auto -> type notation, because moc.
+        void sessionConnected();
+        void allSessionsDisconnected();
 
     protected:
         auto mount(const Datagram &datagram) -> Datagram;
@@ -36,10 +41,12 @@ namespace Network {
         auto close(const Datagram &datagram) -> Datagram;
         auto read(const Datagram &datagram) -> Datagram;
         auto stat(const Datagram &datagram) -> Datagram;
+        auto fsFree(const Datagram &datagram) -> Datagram;
+        auto fsSize(const Datagram &datagram) -> Datagram;
 
     private:
         QUdpSocket *socket;
-        quint16 sessionID{1};
+        quint16 _sessionID{1};
         // Session infos
         QVector<SessionInfoPtr> sessions{10};
         constexpr static quint8 TNFS_EOF = 0x21;

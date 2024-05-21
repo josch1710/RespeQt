@@ -226,6 +226,10 @@ private slots:
   void trayIconActivated(QSystemTrayIcon::ActivationReason reason);//
   //void keepBootExeOpen();                                          // Signal AutoBootDialog::keepOpen MIA
   void logChanged(QString text);
+
+  // TNFS
+  void sessionConnected();
+  void allSessionsDisconnected();
 };
 
 #endif// MAINWINDOW_H

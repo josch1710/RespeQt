@@ -6,10 +6,6 @@
 #include <algorithm>
 #include <QDateTime>
 #include <QStorageInfo>
-#include <iostream>
-
-using std::cout;
-using std::endl;
 
 namespace Network {
 
@@ -24,6 +20,14 @@ namespace Network {
         disconnect(socket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
         delete socket;
         socket = NULL;
+    }
+
+    auto Tnfs::removeMountPoint(QDir mountPoint) -> void {
+        _mountPoints.removeOne(QDirPtr::create(mountPoint));
+    }
+
+    auto Tnfs::addMountPoint(QDir mountPoint) -> void {
+        _mountPoints.append(QDirPtr::create(mountPoint));
     }
 
     void Tnfs::readPendingDatagrams() {
@@ -87,6 +91,14 @@ namespace Network {
                     answer = stat(datagram);
                     break;
 
+                case 0x30: // SIZE
+                    answer = fsFree(datagram);
+                    break;
+
+                case 0x31: // FREE
+                    answer = fsSize(datagram);
+                    break;
+
                 default:
                 {
                     qDebug() << "!n" << "Unknown command "<< datagram.at(3);
@@ -119,8 +131,8 @@ namespace Network {
             return answer;
         }
 
-        SessionInfoPtr session{SessionInfoPtr::create(sessionID, this)};
-        sessions[sessionID] = session;
+        SessionInfoPtr session{SessionInfoPtr::create(_sessionID, this)};
+        sessions[_sessionID] = session;
 
         answer.setU16At(session.data()->sessionID(), 0);
         // Header fill
@@ -134,7 +146,9 @@ namespace Network {
         answer.append(static_cast<char>(0xE8));
         answer.append(static_cast<char>(0x03));
 
-        sessionID++;
+        emit sessionConnected(); // Inform the main window about session
+
+        _sessionID++;
         return answer;
     }
 
@@ -145,7 +159,15 @@ namespace Network {
             answer[4] = EINVAL;
             return answer;
         }
-        sessions.remove(sessionID);
+        sessions.remove(datagram.getSessionID());
+
+        auto isSessionsEmpty = sessions.end() == std::find_if_not(sessions.begin(), sessions.end(),
+            [](SessionInfoPtr session) {
+              return session.isNull();
+            }
+        );
+        if (isSessionsEmpty)
+            emit allSessionsDisconnected(); // Inform the mainwindow, that all session are closed.
 
         return answer;
     }
@@ -501,8 +523,27 @@ namespace Network {
         return answer;
     }
 
+    auto Tnfs::fsSize(const Datagram &datagram) -> Datagram
+    {
+        /*auto*/quint16 sessionID{datagram.getSessionID()};
+        /*auto*/QString fileName{datagram.getStringAt(4)};
+        /*auto*/Datagram answer{datagram.createAnswer()};
 
-    auto Tnfs::removeMountPoint(QDir mountPoint) -> void {
-        _mountPoints.removeOne(QDirPtr::create(mountPoint));
+        answer[4] = 0;
+        QStorageInfo disk{*(_mountPoints.first())};
+        answer.setU32At(static_cast<quint32>(disk.bytesTotal() / 1024), 5);
+        return answer;
+    }
+
+    auto Tnfs::fsFree(const Datagram &datagram) -> Datagram
+    {
+        /*auto*/quint16 sessionID{datagram.getSessionID()};
+        /*auto*/QString fileName{datagram.getStringAt(4)};
+        /*auto*/Datagram answer{datagram.createAnswer()};
+
+        answer[4] = 0;
+        QStorageInfo disk{*(_mountPoints.first())};
+        answer.setU32At(static_cast<quint32>(disk.bytesAvailable() / 1024), 5);
+        return answer;
     }
 }
