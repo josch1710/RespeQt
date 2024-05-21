@@ -94,9 +94,9 @@ bool StandardSerialPortBackend::open() {
       qCritical() << "!e" << tr("Cannot get serial port status");
       return false;
     }
-    status |= (TIOCM_DTR | TIOCM_RTS);
+    status &= ~(TIOCM_RI | TIOCM_RTS | TIOCM_CTS);
     if (ioctl(mHandle, TIOCMSET, &status) < 0) {
-      qCritical() << "!e" << tr("Cannot set DTR and RTS lines in serial port '%1': %2").arg(name, lastErrorMessage());
+      qCritical() << "!e" << tr("Cannot clear RI, RTS and CTS lines in serial port '%1': %2").arg(name, lastErrorMessage());
       return false;
     }
   }
