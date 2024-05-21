@@ -269,12 +269,12 @@ MainWindow::MainWindow()
   speedLabel = new QLabel(this);
   onOffLabel = new QLabel(this);
   prtOnOffLabel = new QLabel(this);
-  netLabel = new QLabel(this);
+  //netLabel = new QLabel(this);
   clearMessagesLabel = new QLabel(this);
   speedLabel->setText(tr("19200 bits/sec"));
   onOffLabel->setMinimumWidth(21);
   prtOnOffLabel->setMinimumWidth(18);
-  netLabel->setMinimumWidth(18);
+  //netLabel->setMinimumWidth(18);
 
   clearMessagesLabel->setMinimumWidth(21);
   clearMessagesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/page_white_c.png").pixmap(16, 16, QIcon::Normal));
@@ -295,7 +295,7 @@ MainWindow::MainWindow()
   ui->statusBar->addPermanentWidget(speedLabel);
   ui->statusBar->addPermanentWidget(onOffLabel);
   ui->statusBar->addPermanentWidget(prtOnOffLabel);
-  ui->statusBar->addPermanentWidget(netLabel);
+  //ui->statusBar->addPermanentWidget(netLabel);
   ui->statusBar->addPermanentWidget(clearMessagesLabel);
   ui->statusBar->addPermanentWidget(limitEntriesLabel);
 
@@ -1230,6 +1230,9 @@ bool MainWindow::ejectImage(char no, bool ask) {
 
   sio->uninstallDevice(no + DISK_BASE_CDEVIC);
   if (img) {
+    if (typeid(img) == typeid(DiskImages::FolderImage)) {
+        tnfs.removeMountPoint(QDir(img->originalFileName()));
+    }
     delete img;
     diskWidgets[no]->showAsEmpty(RespeqtSettings::instance()->hideHappyMode(), RespeqtSettings::instance()->hideChipMode(), RespeqtSettings::instance()->hideNextImage(), RespeqtSettings::instance()->hideOSBMode(), RespeqtSettings::instance()->hideToolDisk());
     RespeqtSettings::instance()->unmountImage(no);
@@ -1373,6 +1376,8 @@ void MainWindow::mountFile(char no, const QString &fileName, bool /*prot*/) {
   if (type == FileTypes::Dir) {
     disk = new DiskImages::FolderImage(sio, RespeqtSettings::instance()->limitFileEntries() ? 64 : -1);
     isDir = true;
+    // TNFS informieren.
+    tnfs.addMountPoint(fileName);
   } else {
     disk = installDiskImage();
   }
@@ -1490,6 +1495,7 @@ void MainWindow::mountFolderImage(char no) {
   }
   RespeqtSettings::instance()->setLastFolderImageDir(fileName);
   mountFileWithDefaultProtection(no, fileName);
+  //tnfs.addMountPoint(fileName);
 }
 
 void MainWindow::loadNextSide(char no) {

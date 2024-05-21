@@ -13,6 +13,8 @@ using QFileVector = QVector<QFilePtr>;
 
 namespace Network {
 
+    class Tnfs;
+
     struct OpenDirInfo
     {
         QDirPtr virtualDir;
@@ -28,12 +30,9 @@ namespace Network {
     class SessionInfo
     {
     public:
-        SessionInfo(quint16 sessionID)
-            : _sessionID(sessionID) {}
+        SessionInfo(quint16 sessionID, Tnfs* parent)
+            : _sessionID(sessionID), _parent(parent) {}
 
-        // TODO mountpoints should not be in sessioninfo
-        auto mountPoints() const -> const QDirVector& { return _mountPoints; }
-        auto addMountPoint(QDir mountPoint) -> void { return _mountPoints.append(QDirPtr::create(mountPoint)); }
         auto realPath(const QString &path) const -> QDirPtr;
         auto realFileName(const QString &fileName) const -> QString;
         auto sessionID() const -> const quint16 { return _sessionID; }
@@ -42,10 +41,10 @@ namespace Network {
 
     private:
         quint16 _sessionID{0};
-        QDirVector _mountPoints{};
         QDirIndexVector _openDirs{10};
         QVector<quint32> _dirListIndex{10};
         QFileVector _openFiles{10};
+        Tnfs* _parent{nullptr};
     };
 
     using SessionInfoPtr = QSharedPointer<SessionInfo>;

@@ -14,6 +14,11 @@ namespace Network {
     public:
         Tnfs();
         virtual ~Tnfs();
+
+        auto mountPoints() const -> const QDirVector& { return _mountPoints; }
+        auto addMountPoint(QDir mountPoint) -> void { return _mountPoints.append(QDirPtr::create(mountPoint)); }
+        auto removeMountPoint(QDir mountPoint) -> void;
+
     protected slots:
         void readPendingDatagrams(); // Not auto -> type notation, because moc.
 
@@ -39,6 +44,12 @@ namespace Network {
         QVector<SessionInfoPtr> sessions{10};
         constexpr static quint8 TNFS_EOF = 0x21;
         const quint16 MAX_PACKET_SIZE = 512;
+        QDirVector _mountPoints{};
+
+        // Version number 1.2
+        constexpr static quint16 versionSupported = 0x0102;
+        // 1000 (0x03E8) ms timeout
+        constexpr static quint16 timeout = 0x03E8;
     };
 }
 #endif

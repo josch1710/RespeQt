@@ -1,7 +1,8 @@
 
 #include "network/sessioninfo.h"
-#include <QStorageInfo>
+#include "network/tnfs.h"
 
+#include <QStorageInfo>
 #include <iostream>
 using std::cout;
 using std::endl;
@@ -10,7 +11,6 @@ namespace Network {
 
     auto SessionInfo::realPath(const QString &path) const -> QDirPtr {
         if (path == "/") {
-            cout<<"Rootdir exit"<<endl;
             return QDirPtr();
         }
         /*auto*/QStringList pathList{path.split('/')};
@@ -23,9 +23,8 @@ namespace Network {
 #else
         Qt::CaseSensitivity cs = Qt::CaseInsensitive;
 #endif
-        for(auto mountPoint: mountPoints()) {
+        for(auto mountPoint: _parent->mountPoints()) {
             if (mountPoint.isNull()) {
-                cout<<"mount point empty"<<endl;
                 continue;
             }
             if (mountPoint->isRoot()) {

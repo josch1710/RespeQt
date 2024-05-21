@@ -34,7 +34,7 @@ namespace Network {
     auto Datagram::getStringAt(int index) const -> QString {
         QString string{""};
     
-        while(at(index) != 0) { // TODO Algorithm?
+        while(at(index) != 0) {
             string.append(at(index));
             index++;
         }
@@ -49,7 +49,7 @@ namespace Network {
     auto Datagram::copyBytes(QByteArray &dst, int from, int to, int length) const -> void {
         auto i = 0;
     
-        while(i < length && from + i < this->length()) { // TODO foreach?
+        while(i < length && from + i < this->length()) {
             dst[to + i] = (*this)[from + i];
             i++;
         }
@@ -62,5 +62,7 @@ namespace Network {
         answer[4] = 0;
         return answer;
     }
+
+
 
 }

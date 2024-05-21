@@ -114,19 +114,12 @@ namespace Network {
         if (!root.exists()) {
             answer.setU16At(0, 0);
             answer.setU16At(ENOENT, 2);
-            // TODO Version and Timeout => centralize
-            // Version number 1.2
-            answer.append(static_cast<char>(2));
-            answer.append(static_cast<char>(1));
-            // 1000 (0x03E8) ms timeout
-            answer.append(static_cast<char>(0xE8));
-            answer.append(static_cast<char>(0x03));
+            answer.setU16At(versionSupported, 4);
+            answer.setU16At(timeout, 6);
             return answer;
         }
 
-        SessionInfoPtr session{SessionInfoPtr::create(sessionID)};
-        session->addMountPoint(root.absolutePath());
-        session->addMountPoint(QString("D:/"));
+        SessionInfoPtr session{SessionInfoPtr::create(sessionID, this)};
         sessions[sessionID] = session;
 
         answer.setU16At(session.data()->sessionID(), 0);
@@ -182,13 +175,11 @@ namespace Network {
         }
 
         /*auto*/QDirIndexPtr index{QDirIndexPtr::create()};
-cout << "Read dir "<<dirName.toLatin1().constData()<<endl;
         index->isVirtualRoot = dirName == "/";
         index->actualDir = pathName;
         index->virtualDir = QDirPtr::create(dirName);
         if (index->isVirtualRoot) {
-cout << "Read root" << endl;
-            for(auto mountPoint: sessionInfo->mountPoints()){
+            for(auto mountPoint: mountPoints()){
                 if (mountPoint.isNull()){
                     continue;
                 }
@@ -206,8 +197,6 @@ cout << "Read root" << endl;
         index->fileListIndex = 0;
         openDirs[handle] = index;
         answer[5] = handle;
-
-        // TODO Cache file entries
 
         return answer;
     }
@@ -230,8 +219,6 @@ cout << "Read root" << endl;
         }
 
         /*auto*/QDirIndexPtr index{openDirs[handle]};
-//cout<<"vdir "<<index->virtualDir->absolutePath().toLatin1().constData()<<endl;
-//for(auto file: index->files) cout<<"file "<<file.toLatin1().constData()<<endl;
         if (index->fileListIndex >= index->files.length()) {
             answer[4] = TNFS_EOF;
             return answer;
@@ -515,4 +502,7 @@ cout << "Read root" << endl;
     }
 
 
+    auto Tnfs::removeMountPoint(QDir mountPoint) -> void {
+        _mountPoints.removeOne(QDirPtr::create(mountPoint));
+    }
 }
