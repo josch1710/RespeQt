@@ -38,6 +38,7 @@ namespace Network {
             quint16 senderPort;
 
             socket->readDatagram(datagram.data(), datagram.size(),&sender, &senderPort);
+qDebug() << "!n" << "Incoming command"<<(unsigned char)datagram.at(3);
             switch(datagram.at(3)) {
                 case 0x00: // MOUNT
                     answer = mount(datagram);
@@ -101,7 +102,8 @@ namespace Network {
 
                 default:
                 {
-                    qDebug() << "!n" << "Unknown command "<< datagram.at(3);
+                    qDebug() << "!n" << "Unknown command "<< (unsigned char)datagram.at(3);
+                    //for(auto i=0;i<datagram.size();i++) qDebug()<<"!n" << i << " => "<<(unsigned)datagram.at(i);
 
                     answer = datagram.createAnswer();
                     answer[4] = EINVAL;
