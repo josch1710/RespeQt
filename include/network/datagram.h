@@ -14,6 +14,8 @@ namespace Network
         auto setU32At(quint32 value, const int index) -> void;
         auto getStringAt(int index) const -> QString;
         auto setStringAt(const QString &value, int index) -> void;
+        auto getRawBytes(const quint16 length, const int index) const -> QByteArray;
+        auto setRawBytes(const QByteArray& data, int index) -> void;
         auto createAnswer() const -> Datagram;
         auto getSessionID() const -> quint16 { return getU16At(0); }
 

@@ -38,71 +38,99 @@ namespace Network {
             quint16 senderPort;
 
             socket->readDatagram(datagram.data(), datagram.size(),&sender, &senderPort);
-qDebug() << "!n" << "Incoming command"<<(unsigned char)datagram.at(3);
+qDebug() << "!n" << "Incoming command 0x"<<QString::number((unsigned char)datagram.at(3),16);
             switch(datagram.at(3)) {
-                case 0x00: // MOUNT
+                case TNFS_MOUNT:
                     answer = mount(datagram);
                     break;
 
-                case 0x01: // UMOUNT
+                case TNFS_UMOUNT:
                     answer = unmount(datagram);
                     break;
 
-                case 0x10: // OPENDIR
+                case TNFS_OPENDIR:
                     answer = opendir(datagram);
                     break;
 
-                case 0x11: // READDIR
+                case TNFS_READDIR:
                     answer = readdir(datagram);
                     break;
 
-                case 0x15: // TELLDIR
+                case TNFS_OPENDIRX:
+                    answer = opendirx(datagram);
+                    break;
+
+                case TNFS_READDIRX:
+                    answer = readdirx(datagram);
+                    break;
+
+                case TNFS_TELLDIR:
                     answer = telldir(datagram);
                     break;
 
-                case 0x16: // SEEKDIR
+                case TNFS_SEEKDIR:
                     answer = seekdir(datagram);
                     break;
 
-                case 0x12: // CLOSEDIR
+                case TNFS_CLOSEDIR:
                     answer = closedir(datagram);
                     break;
 
-                case 0x13: // MKDIR
+                case TNFS_MKDIR:
                     answer = mkdir(datagram);
                     break;
 
-                case 0x14: // RMDIR
+                case TNFS_RMDIR:
                     answer = rmdir(datagram);
                     break;
 
-                case 0x29: // OPEN
-                    answer = open(datagram);
+                case TNFS_OPENFILE:
+                    answer = openfile(datagram);
                     break;
 
-                case 0x21: // READ
-                    answer = read(datagram);
+                case TNFS_READBLOCK:
+                    answer = readfile(datagram);
                     break;
 
-                case 0x23: // CLOSE
-                    answer = close(datagram);
+                case TNFS_WRITEBLOCK:
+                    answer = writefile(datagram);
                     break;
 
-                case 0x24: // STAT
-                    answer = stat(datagram);
+                case TNFS_CLOSEFILE:
+                    answer = closefile(datagram);
                     break;
 
-                case 0x30: // SIZE
+                case TNFS_STATFILE:
+                    answer = statfile(datagram);
+                    break;
+
+                case TNFS_SEEKFILE:
+                    answer = seekfile(datagram);
+                    break;
+
+                case TNFS_UNLINKFILE:
+                    answer = unlinkfile(datagram);
+                    break;
+
+                case TNFS_CHMODFILE:
+                    answer = chmodfile(datagram);
+                    break;
+
+                case TNFS_RENAMEFILE:
+                    answer = renamefile(datagram);
+                    break;
+
+                case TNFS_FSFREE:
                     answer = fsFree(datagram);
                     break;
 
-                case 0x31: // FREE
+                case TNFS_FSSIZE:
                     answer = fsSize(datagram);
                     break;
 
                 default:
                 {
-                    qDebug() << "!n" << "Unknown command "<< (unsigned char)datagram.at(3);
+                    qDebug() << "!n" << "Unknown command 0x"<< QString::number((unsigned char)datagram.at(3),16);
                     //for(auto i=0;i<datagram.size();i++) qDebug()<<"!n" << i << " => "<<(unsigned)datagram.at(i);
 
                     answer = datagram.createAnswer();
@@ -191,6 +219,14 @@ qDebug() << "!n" << "Incoming command"<<(unsigned char)datagram.at(3);
             return answer;
         }
 
+        /*auto*/QDirIndexVector &openDirs{sessionInfo->openDirectories()};
+        qint16 handle{findFreeSlot(openDirs)};
+        if(handle < 0) {
+            answer[4] = EMFILE;
+            return answer;
+        }
+        answer[5] = handle;
+
         /*auto*/QDirIndexPtr index{QDirIndexPtr::create()};
         index->isVirtualRoot = dirName == "/";
         index->actualDir = pathName;
@@ -212,17 +248,7 @@ qDebug() << "!n" << "Incoming command"<<(unsigned char)datagram.at(3);
             index->files = index->actualDir->entryList();
         }
         index->fileListIndex = 0;
-
-        try {
-            /*auto*/QDirIndexVector &openDirs{sessionInfo->openDirectories()};
-            quint8 handle{findFreeSlot(openDirs)};
-            openDirs[handle] = index;
-            answer[5] = handle;
-        }
-        catch(...) {
-            answer[4] = EMFILE;
-            return answer;
-        }
+        openDirs[handle] = index;
 
         return answer;
     }
@@ -250,7 +276,174 @@ qDebug() << "!n" << "Incoming command"<<(unsigned char)datagram.at(3);
             return answer;
         }
 
-        answer.setStringAt(index->files[index->fileListIndex++], 5);
+        answer.setStringAt(index->files[index->fileListIndex], 5);
+        index->fileListIndex++;
+
+        return answer;
+    }
+
+    auto Tnfs::opendirx(const Datagram &datagram) -> Datagram {
+        /*auto*/quint16 sessionID{datagram.getSessionID()};
+        /*auto*/quint8 diropt{static_cast<quint8>(datagram.at(4))};
+        /*auto*/quint8 dirsort{static_cast<quint8>(datagram.at(5))};
+        /*auto*/quint16 maxcount{datagram.getU16At(6)};
+        /*auto*/QString wildcard{datagram.getStringAt(8)};
+        /*auto*/QString dirName{datagram.getStringAt(9 + wildcard.length())};
+        /*auto*/Datagram answer{datagram.createAnswer()};
+
+        if (sessions.at(sessionID).isNull()) {
+            answer[4] = EINVAL;
+            return answer;
+        }
+
+        /*auto*/SessionInfoPtr sessionInfo{sessions[sessionID]};
+        /*auto*/QDirPtr pathName{sessionInfo->realPath(dirName)};
+        if (dirName != "/" && !pathName.isNull() && !pathName->exists()) {
+            answer[4] = ENOENT;
+            return answer;
+        }
+
+        /*auto*/QDirIndexVector &openDirs{sessionInfo->openDirectories()};
+        qint16 handle{findFreeSlot(openDirs)};
+        if (handle < 0) {
+            answer[4] = EMFILE;
+            return answer;
+        }
+
+        answer[5] = handle;
+qDebug()<<"!n"<<"opendirx "<<dirName.toLatin1().constData()<<endl;
+        /*auto*/QDirIndexPtr index{QDirIndexPtr::create()};
+        index->isVirtualRoot = dirName == "/";
+        index->actualDir = pathName;
+        index->virtualDir = QDirPtr::create(dirName);
+        if (index->isVirtualRoot) {
+            for(auto mountPoint: mountPoints()){
+                if (mountPoint.isNull()){
+                    continue;
+                }
+                if (mountPoint->isRoot()){
+                    QStorageInfo info{mountPoint->absolutePath()};
+                    index->files.append(info.displayName());
+                }
+                else
+                    index->files.append(mountPoint->dirName());
+            }
+        }
+        else {
+            QDir::Filters filter{QDir::NoDotAndDotDot | QDir::Files | QDir::AllDirs};
+            QDir::SortFlags sorting{QDir::DirsFirst | QDir::IgnoreCase | QDir::Name};
+            QStringList nameFilter{};
+            if (diropt & TNFS_DIROPT_NO_FOLDERSFIRST) {
+                sorting &= ~QDir::DirsFirst;
+                sorting |= QDir::DirsLast;
+            }
+            if (diropt & TNFS_DIROPT_NO_SKIPHIDDEN) {
+                filter &= ~QDir::NoDotAndDotDot;
+            }
+            if (diropt & TNFS_DIROPT_NO_SKIPSPECIAL) {
+                filter &= ~QDir::NoDotAndDotDot;
+                filter |= QDir::System;
+            }
+            if (diropt & TNFS_DIROPT_DIR_PATTERN) {
+                filter &= ~QDir::AllDirs;
+                filter |= QDir::Dirs;
+            }
+            if (dirsort & TNFS_DIRSORT_NONE) {
+                sorting &= ~(QDir::DirsFirst | QDir::Name);
+            }
+            if (dirsort & TNFS_DIRSORT_CASE) {
+                sorting &= ~QDir::IgnoreCase;
+            }
+            if (dirsort & TNFS_DIRSORT_DESCENDING) {
+                sorting |= QDir::Reversed;
+            }
+            if (dirsort & TNFS_DIRSORT_MODIFIED) {
+                sorting &= ~QDir::Name;
+                sorting |= QDir::Time;
+            }
+            if (dirsort & TNFS_DIRSORT_SIZE) {
+                sorting &= ~QDir::Name;
+                sorting |= QDir::Size;
+            }
+
+            if (wildcard.isEmpty())
+                wildcard = "*";
+            nameFilter.append(wildcard);
+            index->files = index->actualDir->entryList(nameFilter, filter, sorting);
+        }
+        index->fileListIndex = 0;
+        openDirs[handle] = index;
+
+        if (maxcount > 0 && maxcount < index->files.count()) {
+            // More files than it's asked for. Drop the remaining.
+            while (!index->files.isEmpty() && maxcount < index->files.count()) {
+                index->files.removeLast();
+            }
+        }
+        answer.setU16At(index->files.count(), 6);
+
+        return answer;
+    }
+
+    auto Tnfs::readdirx(const Datagram &datagram) -> Datagram
+    {
+        /*auto*/ quint16 sessionID{datagram.getSessionID()};
+        quint8 handle   = datagram[4];
+        quint8 maxCount = datagram[5];
+        /*auto*/ Datagram answer{datagram.createAnswer()};
+
+        if (sessions.at(sessionID).data() == nullptr)
+        {
+            answer[4] = EINVAL;
+            return answer;
+        }
+
+        /*auto*/ SessionInfoPtr sessionInfo{sessions[sessionID]};
+        /*auto*/ QDirIndexVector &openDirs{sessionInfo->openDirectories()};
+        if (openDirs[handle].isNull())
+        {
+            answer[4] = ENOENT;
+            return answer;
+        }
+
+        /*auto*/ QDirIndexPtr index{openDirs[handle]};
+        if (index->fileListIndex >= index->files.length())
+        {
+            answer[4] = TNFS_EOF;
+            return answer;
+        }
+
+        QString fileName{};
+        if (index->isVirtualRoot) {
+            fileName = "/";
+            fileName.append(index->files.at(index->fileListIndex));
+            /*auto*/QDirPtr dir{sessionInfo->realPath(fileName)};
+            fileName = QDir::toNativeSeparators(dir->absolutePath());
+        }
+        else {
+            fileName = index->actualDir->absoluteFilePath(index->files.at(index->fileListIndex));
+        }
+
+qDebug()<<"!n"<<fileName<<" => "<<QDir::toNativeSeparators(fileName)<<endl;
+        QFileInfo fileInfo{fileName};
+        answer[5] = 1;
+        answer[6] = 0;
+        if (index->fileListIndex + 1 == index->files.count()) { // Last entry
+            answer[6] = TNFS_DIRSTATUS_EOF;
+        }
+        answer.setU16At(index->fileListIndex, 7);
+        quint8 entry{0};
+        if (fileInfo.isDir())
+            entry |= TNFS_DIRENTRY_DIR;
+        if (fileInfo.isHidden())
+            entry |= TNFS_DIRENTRY_HIDDEN;
+        answer[9] = entry;
+qDebug()<<"!n"<<fileInfo.absoluteFilePath()<<" exists"<<fileInfo.exists() <<"entry "<<entry<<endl;
+        answer.setU32At(fileInfo.size(), 10);
+        answer.setU32At(fileInfo.lastModified().toTime_t(), 14);
+        answer.setU32At(fileInfo.lastModified().toTime_t(), 18);
+        answer.setStringAt(index->files[index->fileListIndex], 22);
+        index->fileListIndex++;
 
         return answer;
     }
@@ -287,10 +480,12 @@ qDebug() << "!n" << "Incoming command"<<(unsigned char)datagram.at(3);
             answer[4] = EINVAL;
             return answer;
         }
-
+// TODO openDirs wegmachen
         /*auto*/SessionInfoPtr sessionInfo{sessions[sessionID]};
         /*auto*/QDirIndexVector &openDirs{sessionInfo->openDirectories()};
-        if (openDirs[handle].isNull() || !openDirs[handle]->actualDir->exists()) {
+        if (openDirs[handle].isNull() ||
+            (!openDirs[handle]->isVirtualRoot && !openDirs[handle]->actualDir->exists())
+        ) {
             answer[4] = ENOENT;
             return answer;
         }
@@ -379,7 +574,7 @@ qDebug() << "!n" << "Incoming command"<<(unsigned char)datagram.at(3);
         return answer;
     }
 
-    auto Tnfs::open(const Datagram &datagram) -> Datagram {
+    auto Tnfs::openfile(const Datagram &datagram) -> Datagram {
         /*auto*/quint16 sessionID{datagram.getSessionID()};
         /*auto*/quint16 flags{datagram.getU16At(4)};
         /*auto*/quint16 mode{datagram.getU16At(6)};
@@ -392,6 +587,14 @@ qDebug() << "!n" << "Incoming command"<<(unsigned char)datagram.at(3);
         }
 
         /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
+        /*auto*/ QFileVector &openFiles{sessionInfo->openFiles()};
+        qint16 handle{findFreeSlot(openFiles)};
+        answer[5] = handle;
+        if(handle < 0) {
+            answer[4] = EMFILE;
+            return answer;
+        }
+
         /*auto*/QFile* file = new QFile(sessionInfo->realFileName(fileName));
         /*auto*/QIODevice::OpenMode qflags{QIODevice::NotOpen};
         if((flags & O_WRONLY) == 0) // if WRONLY is not set, we want to readonly
@@ -422,23 +625,12 @@ qDebug() << "!n" << "Incoming command"<<(unsigned char)datagram.at(3);
             answer[4] = EACCES;
             return answer;
         }
-
-        try
-        {
-            /*auto*/ QFileVector &openFiles{sessionInfo->openFiles()};
-            quint8 handle{findFreeSlot(openFiles)};
-            openFiles[handle] = QFilePtr(file);
-            answer[5] = handle;
-        }
-        catch(...) {
-            answer[4] = EMFILE;
-            return answer;
-        }
+        openFiles[handle] = QFilePtr(file);
 
         return answer;
     }
 
-    auto Tnfs::close(const Datagram &datagram) -> Datagram {
+    auto Tnfs::closefile(const Datagram &datagram) -> Datagram {
         /*auto*/quint16 sessionID{datagram.getSessionID()};
         /*auto*/quint8 handle{static_cast<quint8>(datagram.at(4))};
         /*auto*/Datagram answer{datagram.createAnswer()};
@@ -459,7 +651,7 @@ qDebug() << "!n" << "Incoming command"<<(unsigned char)datagram.at(3);
         return answer;
     }
 
-    auto Tnfs::read(const Datagram &datagram) -> Datagram
+    auto Tnfs::readfile(const Datagram &datagram) -> Datagram
     {
         /*auto*/quint16 sessionID{datagram.getSessionID()};
         /*auto*/quint8 handle{static_cast<quint8>(datagram.at(4))};
@@ -491,12 +683,86 @@ qDebug() << "!n" << "Incoming command"<<(unsigned char)datagram.at(3);
         max = std::min(max, MAX_PACKET_SIZE); // Clamp the datagram size
         auto buffer = openFiles[handle]->read(max);
         answer.setU16At(buffer.length(), 5);
-        answer.insert(7, buffer);
+        answer.setRawBytes(buffer, 7);
 
         return answer;
     }
 
-    auto Tnfs::stat(const Datagram &datagram) -> Datagram
+    auto Tnfs::writefile(const Datagram &datagram) -> Datagram
+    {
+        /*auto*/quint16 sessionID{datagram.getSessionID()};
+        /*auto*/quint8 handle{static_cast<quint8>(datagram.at(4))};
+        /*auto*/quint16 length{datagram.getU16At(5)};
+        /*auto*/QByteArray data{datagram.getRawBytes(length, 7)};
+        /*auto*/Datagram answer{datagram.createAnswer()};
+
+        if (sessions.at(sessionID).data() == nullptr) {
+            answer[4] = EINVAL;
+            return answer;
+        }
+
+        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
+        /*auto*/QFileVector& openFiles{sessionInfo->openFiles()};
+        if (openFiles[handle].isNull() || !openFiles[handle]->exists()) {
+            answer[4] = ENOENT;
+            return answer;
+        }
+
+        if (!openFiles[handle]->isWritable()) {
+            answer[4] = EACCES;
+            return answer;
+        }
+
+        /*auto*/qint64 written = openFiles[handle]->write(data);
+        answer.setU16At(written, 5);
+
+        return answer;
+    }
+
+    auto Tnfs::seekfile(const Datagram &datagram) -> Datagram
+    {
+        /*auto*/quint16 sessionID{datagram.getSessionID()};
+        /*auto*/quint8 handle{static_cast<quint8>(datagram.at(4))};
+        /*auto*/quint8 type{static_cast<quint8>(datagram.at(5))};
+        /*auto*/quint32 position{datagram.getU32At(6)};
+        /*auto*/Datagram answer{datagram.createAnswer()};
+
+        if (sessions.at(sessionID).data() == nullptr) {
+            answer[4] = EINVAL;
+            return answer;
+        }
+
+        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
+        /*auto*/QFileVector& openFiles{sessionInfo->openFiles()};
+        if (openFiles[handle].isNull() || !openFiles[handle]->exists()) {
+            answer[4] = ENOENT;
+            return answer;
+        }
+
+        if (!openFiles[handle]->isReadable()) {
+            answer[4] = EACCES;
+            return answer;
+        }
+
+        /*auto*/QFilePtr file{openFiles[handle]};
+        bool success{};
+        if (type == SEEK_SET)
+            success = file->seek(position);
+        else if (type == SEEK_CUR)
+            success = file->seek(file->pos() + position);
+        else if (type == SEEK_END)
+            success = file->seek(file->size());
+
+        if (!success) {
+            answer[4] = EINVAL;
+            return answer;
+        }
+
+        answer.setU32At(file->pos(), 5);
+        return answer;
+    }
+
+    auto Tnfs::statfile(const Datagram &datagram) -> Datagram
     {
         /*auto*/quint16 sessionID{datagram.getSessionID()};
         /*auto*/QString fileName{datagram.getStringAt(4)};
@@ -529,6 +795,81 @@ qDebug() << "!n" << "Incoming command"<<(unsigned char)datagram.at(3);
 
         return answer;
     }
+
+    auto Tnfs::unlinkfile(const Datagram &datagram) -> Datagram
+    {
+        /*auto*/quint16 sessionID{datagram.getSessionID()};
+        /*auto*/QString fileName{datagram.getStringAt(4)};
+        /*auto*/Datagram answer{datagram.createAnswer()};
+
+        if (sessions.at(sessionID).data() == nullptr) {
+            answer[4] = EINVAL;
+            return answer;
+        }
+
+        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
+        QFile file{sessionInfo->realFileName(fileName)};
+        if (file.exists() && !file.remove()) {
+            answer[4] = EACCES;
+            return answer;
+        }
+
+        return answer;
+    }
+
+    auto Tnfs::chmodfile(const Datagram &datagram) -> Datagram
+    {
+        /*auto*/quint16 sessionID{datagram.getSessionID()};
+        /*auto*/quint16 permissions{datagram.getU16At(4)};
+        /*auto*/QString fileName{datagram.getStringAt(6)};
+        /*auto*/Datagram answer{datagram.createAnswer()};
+
+        if (sessions.at(sessionID).data() == nullptr) {
+            answer[4] = EINVAL;
+            return answer;
+        }
+
+        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
+        QFile file{sessionInfo->realFileName(fileName)};
+        if (!file.exists()) {
+            answer[4] = ENOENT;
+            return answer;
+        }
+
+        if (!file.setPermissions(static_cast<QFileDevice::Permissions>(permissions))) {
+            answer[4] = EACCES;
+            return answer;
+        }
+
+        return answer;
+    }
+
+    auto Tnfs::renamefile(const Datagram &datagram) -> Datagram
+    {
+        /*auto*/quint16 sessionID{datagram.getSessionID()};
+        /*auto*/QString fileName{datagram.getStringAt(4)};
+        /*auto*/QString newName{datagram.getStringAt(5 + fileName.length())};
+        /*auto*/Datagram answer{datagram.createAnswer()};
+
+        if (sessions.at(sessionID).data() == nullptr) {
+            answer[4] = EINVAL;
+            return answer;
+        }
+
+        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
+        QFile file{sessionInfo->realFileName(fileName)};
+        if (!file.exists()) {
+            answer[4] = ENOENT;
+            return answer;
+        }
+        if (!file.rename(newName)) {
+            answer[4] = EACCES;
+            return answer;
+        }
+
+        return answer;
+    }
+
 
     auto Tnfs::fsSize(const Datagram &datagram) -> Datagram
     {

@@ -10,6 +10,9 @@
 #include <QSharedPointer>
 #include <iostream>
 
+using std::cout;
+using std::endl;
+
 namespace Tests {
     void SioRecorderTest::initTestCase()
     {}
@@ -37,7 +40,7 @@ namespace Tests {
         // Pause
         recorder->writePauseCommand(500);
         // Write data command
-        recorder->writeSnapshotCommandFrame(PRINTER_BASE_CDEVIC, 0x57, 0, 0x4e);
+        recorder->writeSnapshotCommandFrame(PRINTER_BASE_CDEVIC, 0x57, 0x4e, 0);
         // Pause
         recorder->writePauseCommand(500);
         // Some random test data.
@@ -57,7 +60,7 @@ namespace Tests {
         auto data_test = file.readAll();
         file.close();
 
-        QFile baseline("testdata/writeSioCapture.json");
+        QFile baseline("tests/units/testdata/writeSioCapture.json");
         baseline.open(QIODevice::ReadOnly);
         auto data_baseline = baseline.readAll();
         QVERIFY2(data_baseline.size() > 0, tr("Baseline file couldn't be read.").toLatin1());
@@ -68,14 +71,14 @@ namespace Tests {
 
     void SioRecorderTest::readSioCapture()
     {
-        auto file = new QFile("testdata/writeSioCapture.json");
+        auto file = new QFile("tests/units/testdata/writeSioCapture.json");
         file->open(QIODevice::ReadOnly);
 
         auto recorder = SioRecorder::instance();
         recorder->prepareReplaySnapshot(file, SerialBackend::NONE);
 
         // The test only involves a printer device, so we instanciate one.
-        SioWorkerPtr dummyworker{QSharedPointer<DummyWorker>::create(recorder.get())};
+        SioWorkerPtr dummyworker{QSharedPointer<DummyWorker>::create(recorder.data())};
         Printers::Atari1027 printer(dummyworker);
         printer.setDeviceNo(PRINTER_BASE_CDEVIC);
         Printers::NativeOutputPtr nulloutput(new NullOutput);

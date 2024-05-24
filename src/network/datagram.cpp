@@ -46,6 +46,18 @@ namespace Network {
         (*this)[index + value.length()] = 0;
     }
 
+    auto Datagram::getRawBytes(const quint16 length, const int index) const -> QByteArray
+    {
+        QByteArray data{};
+        copyBytes(data, index, 0, length);
+        return data;
+    }
+
+    auto Datagram::setRawBytes(const QByteArray &data, int index) -> void
+    {
+        insert(index, data);
+    }
+
     auto Datagram::copyBytes(QByteArray &dst, int from, int to, int length) const -> void {
         auto i = 0;
     
