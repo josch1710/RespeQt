@@ -22,14 +22,13 @@ message(STATUS "Build tests ${MAKE_TEST}")
 if (MAKE_TEST)
     message(STATUS "Build test application")
     set(TARGET_SOURCES
-            tests/units/siorecordertest.cpp
-            tests/units/siorecordertest.h
-            tests/units/tnfstest.cpp
-            tests/units/tnfstest.h
-            tests/units/tests.cpp
+        tests/units/siorecordertest.cpp
+        tests/units/siorecordertest.h
+        tests/units/tests.cpp
     )
     set(TARGET RespeQtTest)
     add_definitions(-DRESPEQT_TEST)
+    enable_testing(true)
 else()
     message(STATUS "Build main application")
     set(TARGET_SOURCES src/main.cpp)
