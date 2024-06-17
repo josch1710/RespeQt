@@ -38,7 +38,7 @@ namespace Network {
             quint16 senderPort;
 
             socket->readDatagram(datagram.data(), datagram.size(),&sender, &senderPort);
-qDebug() << "!n" << "Incoming command 0x"<<QString::number((unsigned char)datagram.at(3),16);
+            qDebug() << "!n" << "Incoming command 0x"<<QString::number((unsigned char)datagram.at(3),16);
             switch(datagram.at(3)) {
                 case TNFS_MOUNT:
                     answer = mount(datagram);
@@ -311,7 +311,6 @@ qDebug() << "!n" << "Incoming command 0x"<<QString::number((unsigned char)datagr
         }
 
         answer[5] = handle;
-qDebug()<<"!n"<<"opendirx "<<dirName.toLatin1().constData()<<endl;
         /*auto*/QDirIndexPtr index{QDirIndexPtr::create()};
         index->isVirtualRoot = dirName == "/";
         index->actualDir = pathName;
@@ -424,7 +423,6 @@ qDebug()<<"!n"<<"opendirx "<<dirName.toLatin1().constData()<<endl;
             fileName = index->actualDir->absoluteFilePath(index->files.at(index->fileListIndex));
         }
 
-qDebug()<<"!n"<<fileName<<" => "<<QDir::toNativeSeparators(fileName)<<endl;
         QFileInfo fileInfo{fileName};
         answer[5] = 1;
         answer[6] = 0;
@@ -438,7 +436,6 @@ qDebug()<<"!n"<<fileName<<" => "<<QDir::toNativeSeparators(fileName)<<endl;
         if (fileInfo.isHidden())
             entry |= TNFS_DIRENTRY_HIDDEN;
         answer[9] = entry;
-qDebug()<<"!n"<<fileInfo.absoluteFilePath()<<" exists"<<fileInfo.exists() <<"entry "<<entry<<endl;
         answer.setU32At(fileInfo.size(), 10);
         answer.setU32At(fileInfo.lastModified().toTime_t(), 14);
         answer.setU32At(fileInfo.lastModified().toTime_t(), 18);
@@ -597,24 +594,24 @@ qDebug()<<"!n"<<fileInfo.absoluteFilePath()<<" exists"<<fileInfo.exists() <<"ent
 
         /*auto*/QFile* file = new QFile(sessionInfo->realFileName(fileName));
         /*auto*/QIODevice::OpenMode qflags{QIODevice::NotOpen};
-        if((flags & O_WRONLY) == 0) // if WRONLY is not set, we want to readonly
+        if (flags & 0x0001)
             qflags |= QIODevice::ReadOnly;
-        if (flags & O_WRONLY)
+        if (flags & 0x0002)
             qflags |= QIODevice::WriteOnly;
-        if (flags & O_RDWR)
+        if (flags & 0x0003)
             qflags |= QIODevice::ReadWrite;
         if (flags & O_APPEND)
             qflags |= QIODevice::Append;
         if (flags & O_TRUNC)
             qflags |= QIODevice::Truncate;
         // We must simulate ~O_CREAT and O_EXCL
-        if (((flags & O_WRONLY) | (flags & O_RDWR)) && (flags & O_CREAT) == 0 && !file->exists()) {
+        if (((flags & 0x0002) | (flags & 0x0003)) && (flags & O_CREAT) == 0 && !file->exists()) {
             // Qt always creates a file, when in write mode.
             // So we simulate not to automatically create the file, when O_CREAT is not set.
             answer[4] = ENOENT;
             return answer;
         }
-        if (((flags & O_WRONLY) | (flags & O_RDWR)) && (flags & (O_CREAT | O_EXCL)) && file->exists()) {
+        if (((flags & 0x0002) | (flags & 0x0003)) && (flags & (O_CREAT | O_EXCL)) && file->exists()) {
             // O_EXCL with O_CREAT means that, that a file is only created, if it does not exist.
             answer[4] = EEXIST;
             return answer;
@@ -739,10 +736,10 @@ qDebug()<<"!n"<<fileInfo.absoluteFilePath()<<" exists"<<fileInfo.exists() <<"ent
             return answer;
         }
 
-        if (!openFiles[handle]->isReadable()) {
+        /*if (!openFiles[handle]->isReadable()) {
             answer[4] = EACCES;
             return answer;
-        }
+        }*/
 
         /*auto*/QFilePtr file{openFiles[handle]};
         bool success{};
@@ -776,7 +773,7 @@ qDebug()<<"!n"<<fileInfo.absoluteFilePath()<<" exists"<<fileInfo.exists() <<"ent
         /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
         QFileInfo fileInfo{sessionInfo->realFileName(fileName)};
         answer.setU16At(fileInfo.permissions(), 5);
-        // On Widnows and other system ownerID and groupID will return -2. TNFS needs 0.
+        // On Windows and other system ownerID and groupID will return -2. TNFS needs 0.
         quint16 id{static_cast<quint16>(fileInfo.ownerId())};
         if (id < 0)
             id = 0;
@@ -789,9 +786,8 @@ qDebug()<<"!n"<<fileInfo.absoluteFilePath()<<" exists"<<fileInfo.exists() <<"ent
         answer.setU32At(fileInfo.lastRead().toTime_t(), 15);
         answer.setU32At(fileInfo.lastModified().toTime_t(), 19);
         answer.setU32At(fileInfo.created().toTime_t(), 23);
-        /*auto*/QString owner{fileInfo.owner()};
-        answer.setStringAt(owner, 27);
-        answer.setStringAt(fileInfo.group(), 28 + owner.length());
+        answer.setStringAt(fileInfo.owner(), 27);
+        answer.setStringAt(fileInfo.group(), 28 + fileInfo.owner().length());
 
         return answer;
     }
