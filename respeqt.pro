@@ -10,8 +10,8 @@
 # know the specific year(s) please let the current maintainer know.
 #
 #CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
-PROJECT_VERSION = 5.4.1
-RC_VERSION = "_RC1" ## Begin RC version with underscore
+PROJECT_VERSION = "5.4.1"
+RC_VERSION = "-RC1" ## Begin RC version with minus
 DEFINES += VERSION=\\\"v$${PROJECT_VERSION}$${RC_VERSION}\\\"
 
 #debug {
@@ -72,11 +72,11 @@ macx {
     QMAKE_EXTRA_TARGETS += deploy
 }
 win32 {
-    deploy.commands = $$PWD/deployment/windeploy.bat "$$OUT_PWD/release/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$${VERSION}_$${RC_VERSION}"
+    deploy.commands = $$PWD/deployment/windeploy.bat "$$OUT_PWD/release/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$${VERSION}$${RC_VERSION}"
     QMAKE_EXTRA_TARGETS += deploy
 }
 linux {
-    deploy.commands = $$PWD/deployment/lindeploy.sh "$$OUT_PWD/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$${VERSION}$${RC_VERSION}"
+    deploy.commands = $$PWD/deployment/lindeploy.sh "$$OUT_PWD/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$${PROJECT_VERSION}$${RC_VERSION}"
     QMAKE_EXTRA_TARGETS += deploy
 }
 
