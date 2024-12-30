@@ -280,8 +280,10 @@ MainWindow::MainWindow()
   netLabel->setToolTip(tr("No TNFS connection"));
   netLabel->setStatusTip(netLabel->toolTip());
 
-  connect(&tnfs, &Network::Tnfs::allSessionsDisconnected, this, &MainWindow::allSessionsDisconnected);
-  connect(&tnfs, &Network::Tnfs::sessionConnected, this, &MainWindow::sessionConnected);
+  connect(&tnfsudp, &Network::TnfsUdp::allSessionsDisconnected, this, &MainWindow::allSessionsDisconnected);
+  connect(&tnfsudp, &Network::TnfsUdp::sessionConnected, this, &MainWindow::sessionConnected);
+  connect(&tnfstcp, &Network::TnfsTcp::allSessionsDisconnected, this, &MainWindow::allSessionsDisconnected);
+  connect(&tnfstcp, &Network::TnfsTcp::sessionConnected, this, &MainWindow::sessionConnected);
 
   clearMessagesLabel->setMinimumWidth(21);
   clearMessagesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/page_white_c.png").pixmap(16, 16, QIcon::Normal));
@@ -1238,7 +1240,8 @@ bool MainWindow::ejectImage(char no, bool ask) {
   sio->uninstallDevice(no + DISK_BASE_CDEVIC);
   if (img) {
     if (typeid(img) == typeid(DiskImages::FolderImage)) {
-        tnfs.removeMountPoint(QDir(img->originalFileName()));
+        tnfsudp.removeMountPoint(QDir(img->originalFileName()));
+        tnfstcp.removeMountPoint(QDir(img->originalFileName()));
     }
     delete img;
     diskWidgets[no]->showAsEmpty(RespeqtSettings::instance()->hideHappyMode(), RespeqtSettings::instance()->hideChipMode(), RespeqtSettings::instance()->hideNextImage(), RespeqtSettings::instance()->hideOSBMode(), RespeqtSettings::instance()->hideToolDisk());
@@ -1384,7 +1387,8 @@ void MainWindow::mountFile(char no, const QString &fileName, bool /*prot*/) {
     disk = new DiskImages::FolderImage(sio, RespeqtSettings::instance()->limitFileEntries() ? 64 : -1);
     isDir = true;
     // TNFS informieren.
-    tnfs.addMountPoint(fileName);
+    tnfsudp.addMountPoint(fileName);
+    tnfstcp.addMountPoint(fileName);
   } else {
     disk = installDiskImage();
   }

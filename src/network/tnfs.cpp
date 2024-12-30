@@ -1,6 +1,7 @@
 #include "network/tnfs.h"
 #include "network/sessioninfo.h"
 #include "network/datagram.h"
+#include "mainwindow.h"
 
 #include <fcntl.h>
 #include <algorithm>
@@ -8,20 +9,32 @@
 #include <QStorageInfo>
 
 namespace Network {
+    Tnfs::Tnfs() : QObject() {
+        commandTexts[0x00] = QString("Mount");
+        commandTexts[0x01] = QString("Unmount");
+        commandTexts[0x10] = QString("Open Dir");
+        commandTexts[0x11] = QString("Read Dir");
+        commandTexts[0x12] = QString("Close Dir");
+        commandTexts[0x13] = QString("Make Dir");
+        commandTexts[0x14] = QString("Remove Dir");
+        commandTexts[0x15] = QString("Tell Dir");
+        commandTexts[0x16] = QString("Seek Dir");
+        commandTexts[0x17] = QString("Open Dir Extended");
+        commandTexts[0x18] = QString("Read Dir Extended");
+        commandTexts[0x21] = QString("Read Block");
+        commandTexts[0x22] = QString("Write Block");
+        commandTexts[0x23] = QString("Close File");
+        commandTexts[0x24] = QString("Stat File");
+        commandTexts[0x25] = QString("Seek File");
+        commandTexts[0x26] = QString("Unlink File");
+        commandTexts[0x27] = QString("Chmod File");
+        commandTexts[0x28] = QString("Rename File");
+        commandTexts[0x29] = QString("Open File");
+        commandTexts[0x30] = QString("Filesystem Size");
+        commandTexts[0x31] = QString("Filesystem Free");
+    };
 
-    Tnfs::Tnfs(): QObject() {
-        socket = new QUdpSocket(this);
-        socket->bind(QHostAddress::Any, 16384);
-
-        connect(socket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
-    }
-
-    Tnfs::~Tnfs() {
-        disconnect(socket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
-        delete socket;
-        socket = NULL;
-    }
-
+// TODO Make static
     auto Tnfs::removeMountPoint(QDir mountPoint) -> void {
         _mountPoints.removeOne(QDirPtr::create(mountPoint));
     }
@@ -30,117 +43,116 @@ namespace Network {
         _mountPoints.append(QDirPtr::create(mountPoint));
     }
 
-    void Tnfs::readPendingDatagrams() {
-        while (socket->hasPendingDatagrams()) {
-            Datagram datagram, answer;
-            datagram.resize(socket->pendingDatagramSize());
-            QHostAddress sender;
-            quint16 senderPort;
+    auto Tnfs::handleDatagram(const Network::Datagram &datagram) -> Datagram {
+        Datagram answer{};
+        QString commandname{};
 
-            socket->readDatagram(datagram.data(), datagram.size(),&sender, &senderPort);
-            qDebug() << "!n" << "Incoming command 0x"<<QString::number((unsigned char)datagram.at(3),16);
-            switch(datagram.at(3)) {
-                case TNFS_MOUNT:
-                    answer = mount(datagram);
-                    break;
+        if (commandTexts.contains(datagram.at(3))) {
+            commandname = " (";
+            commandname.append(commandTexts[datagram.at(3)]);
+            commandname.append(')');
+        }
 
-                case TNFS_UMOUNT:
-                    answer = unmount(datagram);
-                    break;
+        qDebug() << "!e" << "Incoming command 0x" << QString::number((unsigned char)datagram.at(3),16) << commandname;
+        switch(datagram.at(3)) {
+            case TNFS_MOUNT:
+                answer = mount(datagram);
+                break;
 
-                case TNFS_OPENDIR:
-                    answer = opendir(datagram);
-                    break;
+            case TNFS_UMOUNT:
+                answer = unmount(datagram);
+                break;
 
-                case TNFS_READDIR:
-                    answer = readdir(datagram);
-                    break;
+            case TNFS_OPENDIR:
+                answer = opendir(datagram);
+                break;
 
-                case TNFS_OPENDIRX:
-                    answer = opendirx(datagram);
-                    break;
+            case TNFS_READDIR:
+                answer = readdir(datagram);
+                break;
 
-                case TNFS_READDIRX:
-                    answer = readdirx(datagram);
-                    break;
+            case TNFS_OPENDIRX:
+                answer = opendirx(datagram);
+                break;
 
-                case TNFS_TELLDIR:
-                    answer = telldir(datagram);
-                    break;
+            case TNFS_READDIRX:
+                answer = readdirx(datagram);
+                break;
 
-                case TNFS_SEEKDIR:
-                    answer = seekdir(datagram);
-                    break;
+            case TNFS_TELLDIR:
+                answer = telldir(datagram);
+                break;
 
-                case TNFS_CLOSEDIR:
-                    answer = closedir(datagram);
-                    break;
+            case TNFS_SEEKDIR:
+                answer = seekdir(datagram);
+                break;
 
-                case TNFS_MKDIR:
-                    answer = mkdir(datagram);
-                    break;
+            case TNFS_CLOSEDIR:
+                answer = closedir(datagram);
+                break;
 
-                case TNFS_RMDIR:
-                    answer = rmdir(datagram);
-                    break;
+            case TNFS_MKDIR:
+                answer = mkdir(datagram);
+                break;
 
-                case TNFS_OPENFILE:
-                    answer = openfile(datagram);
-                    break;
+            case TNFS_RMDIR:
+                answer = rmdir(datagram);
+                break;
 
-                case TNFS_READBLOCK:
-                    answer = readfile(datagram);
-                    break;
+            case TNFS_OPENFILE:
+                answer = openfile(datagram);
+                break;
 
-                case TNFS_WRITEBLOCK:
-                    answer = writefile(datagram);
-                    break;
+            case TNFS_READBLOCK:
+                answer = readfile(datagram);
+                break;
 
-                case TNFS_CLOSEFILE:
-                    answer = closefile(datagram);
-                    break;
+            case TNFS_WRITEBLOCK:
+                answer = writefile(datagram);
+                break;
 
-                case TNFS_STATFILE:
-                    answer = statfile(datagram);
-                    break;
+            case TNFS_CLOSEFILE:
+                answer = closefile(datagram);
+                break;
 
-                case TNFS_SEEKFILE:
-                    answer = seekfile(datagram);
-                    break;
+            case TNFS_STATFILE:
+                answer = statfile(datagram);
+                break;
 
-                case TNFS_UNLINKFILE:
-                    answer = unlinkfile(datagram);
-                    break;
+            case TNFS_SEEKFILE:
+                answer = seekfile(datagram);
+                break;
 
-                case TNFS_CHMODFILE:
-                    answer = chmodfile(datagram);
-                    break;
+            case TNFS_UNLINKFILE:
+                answer = unlinkfile(datagram);
+                break;
 
-                case TNFS_RENAMEFILE:
-                    answer = renamefile(datagram);
-                    break;
+            case TNFS_CHMODFILE:
+                answer = chmodfile(datagram);
+                break;
 
-                case TNFS_FSFREE:
-                    answer = fsFree(datagram);
-                    break;
+            case TNFS_RENAMEFILE:
+                answer = renamefile(datagram);
+                break;
 
-                case TNFS_FSSIZE:
-                    answer = fsSize(datagram);
-                    break;
+            case TNFS_FSFREE:
+                answer = fsFree(datagram);
+                break;
 
-                default:
-                {
-                    qDebug() << "!n" << "Unknown command 0x"<< QString::number((unsigned char)datagram.at(3),16);
-                    //for(auto i=0;i<datagram.size();i++) qDebug()<<"!n" << i << " => "<<(unsigned)datagram.at(i);
+            case TNFS_FSSIZE:
+                answer = fsSize(datagram);
+                break;
 
-                    answer = datagram.createAnswer();
-                    answer[4] = EINVAL;
-                }
-            }
-            if (answer.length() > 0) {
-                socket->writeDatagram(answer, sender, senderPort);
+            default:
+            {
+                qDebug() << "!n" << "Unknown command 0x"<< QString::number((unsigned char)datagram.at(3),16);
+                //for(auto i=0;i<datagram.size();i++) qDebug()<<"!n" << i << " => "<<(unsigned)datagram.at(i);
+
+                answer = datagram.createAnswer();
+                answer[4] = EINVAL;
             }
         }
+        return answer;
     }
 
     /* -------------------- TNFS commands --------------- */
@@ -721,7 +733,11 @@ namespace Network {
         /*auto*/quint16 sessionID{datagram.getSessionID()};
         /*auto*/quint8 handle{static_cast<quint8>(datagram.at(4))};
         /*auto*/quint8 type{static_cast<quint8>(datagram.at(5))};
-        /*auto*/quint32 position{datagram.getU32At(6)};
+        unsigned char a = datagram.at(6);
+        unsigned char b = datagram.at(7);
+        unsigned char c = datagram.at(8);
+        unsigned char d = datagram.at(9);
+        qint32 position = a | b << 8 | c << 16 | d << 24;
         /*auto*/Datagram answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
@@ -748,7 +764,7 @@ namespace Network {
         else if (type == SEEK_CUR)
             success = file->seek(file->pos() + position);
         else if (type == SEEK_END)
-            success = file->seek(file->size());
+            success = file->seek(file->size() + position);
 
         if (!success) {
             answer[4] = EINVAL;

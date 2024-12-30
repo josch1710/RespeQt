@@ -14,6 +14,8 @@
 #include <QDialog>
 #include <QTextEdit>
 
+constexpr int maxLogSize = 1 * 1024 * 1024; // 1 MB max size.
+
 namespace Ui {
   class LogDisplayDialog;
 }

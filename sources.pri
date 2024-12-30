@@ -77,6 +77,8 @@ SOURCES += \
     src/diskbrowser/dbini.cpp \
     src/diskbrowser/diskbrowserdlg.cpp \
     src/network/tnfs.cpp \
+    src/network/tnfsudp.cpp \
+    src/network/tnfstcp.cpp \
     src/network/sessioninfo.cpp \
     src/network/datagram.cpp
 
@@ -151,6 +153,8 @@ HEADERS += \
     include/diskbrowser/diskbrowser.h \
     include/diskbrowser/diskbrowserdlg.h \
     include/network/tnfs.h \
+    include/network/tnfsudp.h \
+    include/network/tnfstcp.h \
     include/network/sessioninfo.h \
     include/network/datagram.h
 

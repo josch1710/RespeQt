@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.5.0)
 set(CMAKE_OSX_ARCHITECTURES x86_64)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.8)
 project(RespeQt VERSION 5.4.1 LANGUAGES CXX)
-set(RC_VERSION "_RC1") ## Begin RC version with underscore
+set(RC_VERSION "_RC2") ## Begin RC version with underscore
 cmake_policy(SET CMP0071 NEW)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -113,6 +113,8 @@ set(SOURCES
     src/diskimages/atxtrackinfo.cpp
     src/diskimages/board.cpp
     src/network/tnfs.cpp
+    src/network/tnfsudp.cpp
+    src/network/tnfstcp.cpp
     src/network/sessioninfo.cpp
     src/network/datagram.cpp
 )
@@ -188,6 +190,8 @@ set(HEADERS
     include/diskimages/atxtrackinfo.h
     include/diskimages/board.h
     include/network/tnfs.h
+    include/network/tnfsudp.h
+    include/network/tnfstcp.h
     include/network/sessioninfo.h
     include/network/datagram.h
 )

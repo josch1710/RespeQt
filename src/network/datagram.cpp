@@ -30,7 +30,7 @@ namespace Network {
         };
         replace(index, 4, bytesValue, 4);
     }
-    
+
     auto Datagram::getStringAt(int index) const -> QString {
         QString string{""};
     

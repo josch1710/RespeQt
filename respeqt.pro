@@ -11,7 +11,7 @@
 #
 #CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 PROJECT_VERSION = "5.4.1"
-RC_VERSION = "-RC1" ## Begin RC version with minus
+RC_VERSION = "-RC2" ## Begin RC version with minus
 DEFINES += VERSION=\\\"v$${PROJECT_VERSION}$${RC_VERSION}\\\"
 
 #debug {
@@ -72,7 +72,7 @@ macx {
     QMAKE_EXTRA_TARGETS += deploy
 }
 win32 {
-    deploy.commands = $$PWD/deployment/windeploy.bat "$$OUT_PWD/release/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$${VERSION}$${RC_VERSION}"
+    deploy.commands = $$PWD/deployment/windeploy.bat "$$OUT_PWD/release/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$${PROJECT_VERSION}$${RC_VERSION}"
     QMAKE_EXTRA_TARGETS += deploy
 }
 linux {

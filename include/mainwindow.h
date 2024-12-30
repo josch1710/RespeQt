@@ -39,7 +39,8 @@
 #include "sioworker.h"
 #include "diskbrowser/folderdisks.h"
 #include "diskbrowser/diskbrowserdlg.h"
-#include "network/tnfs.h"
+#include "network/tnfsudp.h"
+#include "network/tnfstcp.h"
 
 #define MAXBLOCK 500
 
@@ -97,7 +98,8 @@ private:
   bool isMiniMode    = false;   // mini mode disk 1 only
   bool isShadeMode   = false;   // mini shade mode main win
 
-  Network::Tnfs tnfs{};
+  Network::TnfsUdp tnfsudp{};
+  Network::TnfsTcp tnfstcp{};
 
   void setSession();//
   void updateRecentFileActions();

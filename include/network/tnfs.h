@@ -1,8 +1,7 @@
 #ifndef TNFS_H
 #define TNFS_H
 
-#include <QUdpSocket>
-#include <QVector>
+#include <QMap>
 
 #include "network/sessioninfo.h"
 #include "network/datagram.h"
@@ -13,14 +12,11 @@ namespace Network {
         Q_OBJECT
     public:
         Tnfs();
-        virtual ~Tnfs();
+        virtual ~Tnfs() = default;
 
         auto mountPoints() const -> const QDirVector& { return _mountPoints; }
         auto addMountPoint(QDir mountPoint) -> void;
         auto removeMountPoint(QDir mountPoint) -> void;
-
-    protected slots:
-        void readPendingDatagrams(); // No auto -> type notation, because moc.
 
     signals:
         // No auto -> type notation, because moc.
@@ -66,9 +62,10 @@ namespace Network {
             return handle;
         }
 
+        // No rvalue return, let the compiler do the optimization
+        auto handleDatagram(const Datagram &datagram) -> Datagram;
 
     private:
-        QUdpSocket *socket;
         quint16 _sessionID{1};
         // Session infos
         QVector<SessionInfoPtr> sessions{10};
@@ -123,6 +120,8 @@ namespace Network {
         constexpr static quint8 TNFS_DIRENTRY_DIR = 0x01;
         constexpr static quint8 TNFS_DIRENTRY_HIDDEN = 0x02;
         constexpr static quint8 TNFS_DIRENTRY_SPECIAL = 0x04;
+
+        QMap<quint8, QString> commandTexts;
     };
 }
 #endif
