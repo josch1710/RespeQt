@@ -77,7 +77,7 @@ namespace DiskImages {
 
     // Copy the source file to temporary file
     while (!sourceFile->atEnd()) {
-      int bufsize = 16777216;
+      constexpr quint32 bufsize = 16777216;
       QByteArray buffer = sourceFile->read(bufsize);
       if (buffer.length() != bufsize && !sourceFile->atEnd()) {
         qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot read from file: %1.").arg(sourceFile->errorString()));
@@ -122,35 +122,39 @@ namespace DiskImages {
     // in .atr file header ---
 
     // Validate the image size
-    bool sizeValid = true;
+    bool sizeValid = false;
     if (secSize == 256) {
       // Handle double density images
-      if (size <= 384) {
+      if (size <= 384 && size % 128 == 0) {
         // Handle double density images with less than 4 sectors
-        if (size % 128 != 0) {
-          sizeValid = false;
-        }
+        sizeValid = true;
       } else {
         // Handle double density images with 4 or more sectors
-        if ((size - 384) % 256 != 0 && ((size + 384) / 256) % 720 != 0) {
-          sizeValid = false;
+        const quint32 sectorsWithPadding = (size - 768) % 256;
+        const quint32 sectorsWithoutPadding = (size - 384) % 256;
+        const quint32 sizeWithPadding = (size / 256) % 720;
+        const quint32 sizeWithoutPadding = ((size + 384) / 256) % 720;
+        if (
+            (sectorsWithoutPadding == 0 && sizeWithoutPadding == 0)
+            || (sectorsWithPadding == 0 && sizeWithPadding == 0)
+        ) {
+          sizeValid = true;
         }
       }
     } else {
       // Handle non-double density images
-      if (size % secSize != 0) {
+      if (size % secSize == 0) {
         // Single Density
-        if ((size < 133120) && (size / secSize < 720)) {
-          sizeValid = false;
+        if ((size < 133120) && (size / secSize == 720)) {
+          sizeValid = true;
         } else {
           // Enhanced Density
-          if ((size >= 133120) && (size / secSize < 1040)) {
-            sizeValid = false;
+          if ((size >= 133120) && (size / secSize == 1040)) {
+            sizeValid = true;
           }
         }
       }
     }
-
 
     if (!sizeValid) {
       qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Invalid image size (%1).").arg(size));
