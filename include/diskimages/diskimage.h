@@ -30,6 +30,12 @@
 class DiskEditDialog;
 
 namespace DiskImages {
+  enum Padding: uint8_t {
+      None = 0,
+      FilledAfterBootArea = 1,
+      SameSectorSize = 2
+  };
+
   class SimpleDiskImage : public SioDevice {
     Q_OBJECT
 
@@ -57,6 +63,7 @@ namespace DiskImages {
     inline bool isTranslatorActive() const { return m_board.isTranslatorActive(); }
     inline bool isToolDiskActive() const { return m_board.isToolDiskActive(); }
     inline bool hasSeveralSides() const { return m_numberOfSides > 1; }
+    inline bool hasPadding() const { return m_hasPadding; }
     virtual QString getNextSideLabel();
     __attribute__((unused)) inline QString getNextSideFilename() { return m_nextSideFilename; }
     inline void setEditDialog(DiskEditDialog *aDialog) {
@@ -164,6 +171,7 @@ namespace DiskImages {
     SimpleDiskImage *m_toolDisk;
     bool m_activateChipModeWithTool;
     bool m_activateHappyModeWithTool;
+    Padding m_hasPadding{None};
 
     bool seekToSector(quint16 sector);
     void refreshNewGeometry();

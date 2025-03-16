@@ -62,8 +62,8 @@ namespace DiskImages {
 
     // Decode image meta-data
     quint16 sizeLo = static_cast<quint8>(header[2]) + static_cast<quint8>(header[3]) * 256;
+    quint16 sizeHi = static_cast<quint8>(header[6]) + static_cast<quint8>(header[7]) * 256;
     quint16 secSize = static_cast<quint8>(header[4]) + static_cast<quint8>(header[5]) * 256;
-    quint32 sizeHi = static_cast<quint8>(header[6]) + static_cast<quint8>(header[7]) * 256;
     quint64 size = (sizeLo + sizeHi * 65536) * 16;
 
     // Try to create the temporary file
@@ -128,19 +128,62 @@ namespace DiskImages {
       if (size <= 384 && size % 128 == 0) {
         // Handle double density images with less than 4 sectors
         sizeValid = true;
-      } else {
-        // Handle double density images with 4 or more sectors
-        const quint32 sectorsWithPadding = (size - 768) % 256;
-        const quint32 sectorsWithoutPadding = (size - 384) % 256;
-        const quint32 sizeWithPadding = (size / 256) % 720;
-        const quint32 sizeWithoutPadding = ((size + 384) / 256) % 720;
-        if (
-            (sectorsWithoutPadding == 0 && sizeWithoutPadding == 0)
-            || (sectorsWithPadding == 0 && sizeWithPadding == 0)
-        ) {
-          sizeValid = true;
-        }
       }
+      else
+      {
+          // Handle double density images with 4 or more sectors
+          const quint32 sectorsWithPadding = (size - 768) % 256;
+          const quint32 sectorsWithoutPadding = (size - 384) % 256;
+          const quint32 sizeWithPadding = size % 256;
+          const quint32 sizeWithoutPadding = (size + 384) % 256;
+
+          if (sizeWithPadding == 0 || sizeWithoutPadding == 0)
+              sizeValid = true;
+
+          if (sizeValid) {
+              if (sectorsWithoutPadding == 0) {
+                  m_hasPadding = Padding::None;
+              }
+              else if (sectorsWithPadding == 0) {
+                  // Heuristic: We look at the data of the boot sectors,
+                  // and try to determine, whether the padding, is
+                  // after each sector, or after the three sectors themselves.
+                  // For testing, we assume the padding is after the 3 SD boot sectors,
+                  // and they are empty.
+                  // Since size check is done, we should be able to read everything.
+                  QByteArray emptySector{3 * 128, '\0'};
+                  char *imageSector{new char[3 * 128]};
+
+                  // We seek after file header (16 bytes) and 3 SD sectors.
+                  sourceFile->seek(16 + 3 * 128);
+                  sourceFile->read(imageSector, 3 * 128);
+                  /*auto*/bool equals{true};
+                  for (auto i = 0; i < 3 * 128; i++) {
+                      if (emptySector.at(i) != imageSector[i]) {
+                          equals = false;
+                          break;
+                      }
+                  }
+                  // equals == true, area after 3 SD boot sectors is empty,
+                  // so file is padded after each boot sector
+                  // equals == false, area after 3 SD boot sectors contains data,
+                  // so we assume, the padding is after each sector
+                  m_hasPadding = equals ? Padding::FilledAfterBootArea : Padding::SameSectorSize;
+              }
+          }
+      }
+        switch (m_hasPadding)
+        {
+            case Padding::None:
+                qDebug()<<"!n"<<"DD No Padding";
+            break;
+            case Padding::SameSectorSize:
+                qDebug()<<"!n"<<"DD Same Sector Size";
+            break;
+            case Padding::FilledAfterBootArea:
+                qDebug()<<"!n"<<"DD Filled after Boot";
+            break;
+        }
     } else {
       // Handle non-double density images
       if (size % secSize == 0) {
@@ -719,13 +762,16 @@ namespace DiskImages {
     qint64 pos = (sector - 1) * m_geometry.bytesPerSector();
     // all sectors in a XFD file have the same size (this is the difference with the ATR format).
     // For example, XFD files are used to store CP/M disk images with 256 bytes boot sectors for Indus GT with RamCharger (not possible with ATR files).
-    if ((m_geometry.bytesPerSector() == 256) && (m_originalImageType != FileTypes::Xfd) && (m_originalImageType != FileTypes::XfdGz)) {
-      if (sector <= 3) {
+    if ((m_geometry.bytesPerSector() == 256)
+        && (m_originalImageType != FileTypes::Xfd) && (m_originalImageType != FileTypes::XfdGz)) {
+      if (sector <= 3 && m_hasPadding != Padding::SameSectorSize) {
         pos = (sector - 1) * 128;
-      } else {
-        pos -= 384;
+      } else if (m_hasPadding == Padding::None) {
+        pos -= 384; // Substract 3 * 128 bytes
       }
+      // If padded after each sector, we have the same size for each sector
     }
+    qDebug() << "!n" << "sector " << sector << " => pos " << pos;
     if (!file.seek(pos)) {
       qCritical() << "!e" << tr("[%1] Cannot seek to sector %2: %3").arg(deviceName()).arg(sector).arg(file.errorString());
       return false;
