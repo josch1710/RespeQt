@@ -13,13 +13,18 @@ namespace Network
         Q_OBJECT
     public:
         TnfsUdp();
-        virtual ~TnfsUdp();
+        ~TnfsUdp() override;
+
+    public slots:
+        // No auto -> type notation, because moc.
+        void start();
+        void stop();
 
     protected slots:
         void readPendingDatagrams(); // No auto -> type notation, because moc.
 
     private:
-        QUdpSocket *udpSocket;
+        QUdpSocket *udpSocket{nullptr};
     };
 
 }  // namespace Network

@@ -37,7 +37,7 @@ protected:
 private:
   Ui::OptionsDialog *m_ui;
   QTreeWidgetItem *itemPassthrough, *itemAtari1027, *itemPrinterProtocol, *item1020Options,
-          *itemStandard, *itemAtariSio, *itemEmulation, *itemDiskBrowser, *itemDiskOptions, *itemDiskOSB, *itemDiskIcons, *itemDiskFavorite, *itemI18n,
+          *itemStandard, *itemAtariSio, *itemNetSIO, *itemEmulation, *itemDiskBrowser, *itemDiskOptions, *itemDiskOSB, *itemDiskIcons, *itemDiskFavorite, *itemI18n,
           *itemFirmware810Path, *itemFirmware1050Path, *itemFirmwareEmulation, *itemTraceOptions, *itemDiskImages;
 
   void selectFirmware(QLineEdit *edit, QString title, QString filters);

@@ -32,6 +32,7 @@ OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent),
   m_ui->optionSections->expandAll();
   itemStandard = m_ui->optionSections->topLevelItem(0)->child(0);
   itemAtariSio = m_ui->optionSections->topLevelItem(0)->child(1);
+  itemNetSIO = m_ui->optionSections->topLevelItem(0)->child(2);
   itemEmulation = m_ui->optionSections->topLevelItem(1);
   itemDiskBrowser = m_ui->optionSections->topLevelItem(2);
   itemDiskOptions = m_ui->optionSections->topLevelItem(3)->child(0);
@@ -46,6 +47,9 @@ OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent),
 
 #ifndef Q_OS_LINUX
   m_ui->optionSections->topLevelItem(0)->removeChild(itemAtariSio);
+#endif
+#if !defined(Q_OS_WIN) || defined(QT_NO_DEBUG)
+  m_ui->optionSections->topLevelItem(0)->removeChild(itemNetSIO);
 #endif
 
   connectSignals();
@@ -113,6 +117,7 @@ void OptionsDialog::setupSettings() {
   m_ui->cb_filename->setChecked(RespeqtSettings::instance()->dbUseFileNames());
   m_ui->cb_favor_json->setChecked(RespeqtSettings::instance()->dbFavorJson());
   m_ui->cb_copypics->setChecked(RespeqtSettings::instance()->dbCopyPics());
+  m_ui->tnfsEnabled->setChecked(RespeqtSettings::instance()->isTnfsEnabled());
 
   switch (RespeqtSettings::instance()->dbDataSource())
   {
@@ -177,11 +182,13 @@ void OptionsDialog::setupSettings() {
     case SerialBackend::STANDARD:
       itemStandard->setCheckState(0, Qt::Checked);
       itemAtariSio->setCheckState(0, Qt::Unchecked);
+      itemNetSIO->setCheckState(0, Qt::Unchecked);
       m_ui->optionSections->setCurrentItem(itemStandard);
       break;
     case SerialBackend::SIO_DRIVER:
       itemStandard->setCheckState(0, Qt::Unchecked);
       itemAtariSio->setCheckState(0, Qt::Checked);
+      itemNetSIO->setCheckState(0, Qt::Unchecked);
       m_ui->optionSections->setCurrentItem(itemAtariSio);
       break;
   }
@@ -482,6 +489,7 @@ void OptionsDialog::saveSettings() {
   RespeqtSettings::instance()->setClearOnStatus(m_ui->clearOnStatus->isChecked());
   RespeqtSettings::instance()->setDbFileNames(m_ui->cb_filename->isChecked(), m_ui->cb_favor_json->isChecked());
   RespeqtSettings::instance()->setDbCopyPics(m_ui->cb_copypics->isChecked());
+  RespeqtSettings::instance()->setTnfsEnabled(m_ui->tnfsEnabled->isChecked());
 
   DbDataSource dbSourceNew = DbData_appSettings;
   if (m_ui->rb_dbset_app_data_dir->isChecked())

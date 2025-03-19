@@ -286,6 +286,9 @@ public:
   void setRawPrinterName(const QString &name);
   QString rawPrinterName() const;
 
+  auto setTnfsEnabled(bool enable) -> void;
+  auto isTnfsEnabled() const -> bool;
+
   // Disk Collection Browser
   QString mostRecentBrowserFolder();
   QStringList recentBrowserFolders();   // raw from QSettings map

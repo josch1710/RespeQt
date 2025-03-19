@@ -20,13 +20,18 @@ namespace Network
         TnfsTcp();
         ~TnfsTcp() override;
 
+    public slots:
+        // No auto -> type notation, because moc.
+        void start();
+        void stop();
+
     protected slots:
         // No auto -> type notation, because moc.
         void newConnection();
         void readPendingData(QTcpSocket *const socket);
 
     private:
-        QTcpServer *tcpServer;
+        QTcpServer *tcpServer{nullptr};
         QVector<QTcpSocketPtr> tcpConnections{10};
     };
 

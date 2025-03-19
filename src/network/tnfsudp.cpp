@@ -2,20 +2,39 @@
 
 namespace Network
 {
-    TnfsUdp::TnfsUdp() : Tnfs() {
+    TnfsUdp::TnfsUdp()
+    {}
+
+    TnfsUdp::~TnfsUdp()
+    {
+        stop();
+    }
+
+    void TnfsUdp::start()
+    {
+        if (udpSocket)
+            return; // Already started, don't do anything
+
         udpSocket = new QUdpSocket(this);
         udpSocket->bind(QHostAddress::Any, 16384);
 
         connect(udpSocket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
+        qDebug() << "!n" << tr("Tnfs via UDP started");
     }
 
-    TnfsUdp::~TnfsUdp() {
+    void TnfsUdp::stop()
+    {
         disconnect(udpSocket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
         delete udpSocket;
-        udpSocket = NULL;
+        udpSocket = nullptr;
+        reset();
+        qDebug() << "!n" << tr("Tnfs via UDP stopped");
     }
 
     void TnfsUdp::readPendingDatagrams() {
+        if (!udpSocket)
+            return;
+
         while (udpSocket->hasPendingDatagrams()) {
             Datagram datagram;
             datagram.resize(udpSocket->pendingDatagramSize());

@@ -24,6 +24,7 @@ namespace Network {
         void allSessionsDisconnected();
 
     protected:
+        auto reset() -> void;
         auto mount(const Datagram &datagram) -> Datagram;
         auto unmount(const Datagram &datagram) -> Datagram;
 
@@ -34,18 +35,18 @@ namespace Network {
         auto telldir(const Datagram &datagram) -> Datagram;
         auto seekdir(const Datagram &datagram) -> Datagram;
         auto closedir(const Datagram &datagram) -> Datagram;
-        auto mkdir(const Datagram &datagram) -> Datagram;
-        auto rmdir(const Datagram &datagram) -> Datagram;
+        auto mkdir(const Datagram &datagram) const -> Datagram;
+        auto rmdir(const Datagram &datagram) const -> Datagram;
 
         auto openfile(const Datagram &datagram) -> Datagram;
-        auto closefile(const Datagram &datagram) -> Datagram;
-        auto readfile(const Datagram &datagram) -> Datagram;
-        auto writefile(const Datagram &datagram) -> Datagram;
-        auto statfile(const Datagram &datagram) -> Datagram;
-        auto seekfile(const Datagram &datagram) -> Datagram;
-        auto unlinkfile(const Datagram &datagram) -> Datagram;
-        auto chmodfile(const Datagram &datagram) -> Datagram;
-        auto renamefile(const Datagram &datagram) -> Datagram;
+        auto closefile(const Datagram &datagram) const -> Datagram;
+        auto readfile(const Datagram &datagram) const -> Datagram;
+        auto writefile(const Datagram &datagram) const -> Datagram;
+        auto statfile(const Datagram &datagram) const -> Datagram;
+        auto seekfile(const Datagram &datagram) const -> Datagram;
+        auto unlinkfile(const Datagram &datagram) const -> Datagram;
+        auto chmodfile(const Datagram &datagram) const -> Datagram;
+        auto renamefile(const Datagram &datagram) const -> Datagram;
 
         auto fsFree(const Datagram &datagram) -> Datagram;
         auto fsSize(const Datagram &datagram) -> Datagram;

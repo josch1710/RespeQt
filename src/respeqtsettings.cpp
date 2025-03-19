@@ -766,16 +766,28 @@ void RespeqtSettings::setRawPrinterName(const QString &name) {
   mSettings->setValue("RawPrinterName", name);
 }
 
-QString RespeqtSettings::rawPrinterName() const {
-  return mSettings->value("RawPrinterName").toString();
+QString RespeqtSettings::rawPrinterName() const
+{
+    return mSettings->value("RawPrinterName").toString();
 }
 
 bool RespeqtSettings::debugMenuVisible() const {
   return mSettings->value("DebugMenuVisible").toBool();
 }
 
-void RespeqtSettings::setDebugMenuVisible(bool menuVisible) {
-  mSettings->setValue("DebugMenuVisible", menuVisible);
+void RespeqtSettings::setDebugMenuVisible(bool menuVisible)
+{
+    mSettings->setValue("DebugMenuVisible", menuVisible);
+}
+
+auto RespeqtSettings::isTnfsEnabled() const -> bool
+{
+    return mSettings->value("IsTnfsEnabled", false).toBool();
+}
+
+auto RespeqtSettings::setTnfsEnabled(bool enable) -> void
+{
+    mSettings->setValue("IsTnfsEnabled", enable);
 }
 
 QString RespeqtSettings::mostRecentBrowserFolder() {

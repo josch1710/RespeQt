@@ -27,6 +27,7 @@ enum class SerialBackend : int {
   NONE = -1,
   STANDARD = 0,
   SIO_DRIVER = 1,
+  NETSIO_DRIVER = 2,
   TEST = 99
 };
 

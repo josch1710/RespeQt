@@ -43,18 +43,21 @@ namespace Network {
         _mountPoints.append(QDirPtr::create(mountPoint));
     }
 
-    auto Tnfs::handleDatagram(const Network::Datagram &datagram) -> Datagram {
+    auto Tnfs::handleDatagram(const Network::Datagram &datagram) -> Datagram
+    {
         Datagram answer{};
         QString commandname{};
 
-        if (commandTexts.contains(datagram.at(3))) {
+        if (commandTexts.contains(datagram.at(3)))
+        {
             commandname = " (";
             commandname.append(commandTexts[datagram.at(3)]);
             commandname.append(')');
         }
 
-        qDebug() << "!e" << "Incoming command 0x" << QString::number((unsigned char)datagram.at(3),16) << commandname;
-        switch(datagram.at(3)) {
+        qDebug() << "!e" << "Incoming command 0x" << QString::number((unsigned char) datagram.at(3), 16) << commandname;
+        switch (datagram.at(3))
+        {
             case TNFS_MOUNT:
                 answer = mount(datagram);
                 break;
@@ -143,16 +146,22 @@ namespace Network {
                 answer = fsSize(datagram);
                 break;
 
-            default:
-            {
-                qDebug() << "!n" << "Unknown command 0x"<< QString::number((unsigned char)datagram.at(3),16);
+            default: {
+                qDebug() << "!n" << "Unknown command 0x" << QString::number((unsigned char) datagram.at(3), 16);
                 //for(auto i=0;i<datagram.size();i++) qDebug()<<"!n" << i << " => "<<(unsigned)datagram.at(i);
 
-                answer = datagram.createAnswer();
+                answer    = datagram.createAnswer();
                 answer[4] = EINVAL;
             }
         }
         return answer;
+    }
+
+    auto Tnfs::reset() -> void
+    {
+        emit allSessionsDisconnected();
+        _sessionID = 1;
+        sessions.clear();
     }
 
     /* -------------------- TNFS commands --------------- */
@@ -529,7 +538,7 @@ namespace Network {
         return answer;
     }
 
-    auto Tnfs::mkdir(const Datagram &datagram) -> Datagram {
+    auto Tnfs::mkdir(const Datagram &datagram) const -> Datagram {
         /*auto*/quint16 sessionID{datagram.getSessionID()};
         /*auto*/QString dirName{datagram.getStringAt(4)};
         /*auto*/Datagram answer{datagram.createAnswer()};
@@ -556,7 +565,7 @@ namespace Network {
         return answer;
     }
 
-    auto Tnfs::rmdir(const Datagram &datagram) -> Datagram {
+    auto Tnfs::rmdir(const Datagram &datagram) const -> Datagram {
         /*auto*/quint16 sessionID{datagram.getSessionID()};
         /*auto*/QString dirName{datagram.getStringAt(4)};
         /*auto*/Datagram answer{datagram.createAnswer()};
@@ -639,7 +648,7 @@ namespace Network {
         return answer;
     }
 
-    auto Tnfs::closefile(const Datagram &datagram) -> Datagram {
+    auto Tnfs::closefile(const Datagram &datagram) const -> Datagram {
         /*auto*/quint16 sessionID{datagram.getSessionID()};
         /*auto*/quint8 handle{static_cast<quint8>(datagram.at(4))};
         /*auto*/Datagram answer{datagram.createAnswer()};
@@ -660,7 +669,7 @@ namespace Network {
         return answer;
     }
 
-    auto Tnfs::readfile(const Datagram &datagram) -> Datagram
+    auto Tnfs::readfile(const Datagram &datagram) const -> Datagram
     {
         /*auto*/quint16 sessionID{datagram.getSessionID()};
         /*auto*/quint8 handle{static_cast<quint8>(datagram.at(4))};
@@ -689,15 +698,19 @@ namespace Network {
             return answer;
         }
 
+qDebug() << "!n" << "read file " << max << " bytes";
         max = std::min(max, MAX_PACKET_SIZE); // Clamp the datagram size
+qDebug() << "!n" << "read file (clamped) " << max << " bytes";
         auto buffer = openFiles[handle]->read(max);
         answer.setU16At(buffer.length(), 5);
+qDebug() << "!n" << "read file done " << buffer.length() << " bytes";
+qDebug() << "!n" << "new position " << openFiles[handle]->pos();
         answer.setRawBytes(buffer, 7);
 
         return answer;
     }
 
-    auto Tnfs::writefile(const Datagram &datagram) -> Datagram
+    auto Tnfs::writefile(const Datagram &datagram) const -> Datagram
     {
         /*auto*/quint16 sessionID{datagram.getSessionID()};
         /*auto*/quint8 handle{static_cast<quint8>(datagram.at(4))};
@@ -728,7 +741,7 @@ namespace Network {
         return answer;
     }
 
-    auto Tnfs::seekfile(const Datagram &datagram) -> Datagram
+    auto Tnfs::seekfile(const Datagram &datagram) const -> Datagram
     {
         /*auto*/quint16 sessionID{datagram.getSessionID()};
         /*auto*/quint8 handle{static_cast<quint8>(datagram.at(4))};
@@ -771,11 +784,17 @@ namespace Network {
             return answer;
         }
 
+    qDebug() << "!n" << "seek file position" << position;
+    if (type==SEEK_CUR) qDebug() << "!n" << "seek file mode SEEK_CUR";
+    else if (type==SEEK_END) qDebug() << "!n" << "seek file mode SEEK_END";
+    else if (type==SEEK_SET) qDebug() << "!n" << "seek file mode SEEK_SET";
+    else qDebug() << "!n" << "seek file mode unknown";
+    qDebug() << "!n" << "seek file new position" << file->pos();
         answer.setU32At(file->pos(), 5);
         return answer;
     }
 
-    auto Tnfs::statfile(const Datagram &datagram) -> Datagram
+    auto Tnfs::statfile(const Datagram &datagram) const -> Datagram
     {
         /*auto*/quint16 sessionID{datagram.getSessionID()};
         /*auto*/QString fileName{datagram.getStringAt(4)};
@@ -808,7 +827,7 @@ namespace Network {
         return answer;
     }
 
-    auto Tnfs::unlinkfile(const Datagram &datagram) -> Datagram
+    auto Tnfs::unlinkfile(const Datagram &datagram) const -> Datagram
     {
         /*auto*/quint16 sessionID{datagram.getSessionID()};
         /*auto*/QString fileName{datagram.getStringAt(4)};
@@ -829,7 +848,7 @@ namespace Network {
         return answer;
     }
 
-    auto Tnfs::chmodfile(const Datagram &datagram) -> Datagram
+    auto Tnfs::chmodfile(const Datagram &datagram) const -> Datagram
     {
         /*auto*/quint16 sessionID{datagram.getSessionID()};
         /*auto*/quint16 permissions{datagram.getU16At(4)};
@@ -856,7 +875,7 @@ namespace Network {
         return answer;
     }
 
-    auto Tnfs::renamefile(const Datagram &datagram) -> Datagram
+    auto Tnfs::renamefile(const Datagram &datagram) const -> Datagram
     {
         /*auto*/quint16 sessionID{datagram.getSessionID()};
         /*auto*/QString fileName{datagram.getStringAt(4)};

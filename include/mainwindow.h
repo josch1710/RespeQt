@@ -165,6 +165,8 @@ signals:
   void sendLogText(QString logText);
   void sendLogTextChange(QString logTextChange);
   void fontChanged(const QFont &font);
+  void startTnfs();
+  void stopTnfs();
 
 public slots:
   char firstEmptyDiskSlot(char startFrom = 0, bool createOne = true);   //

@@ -282,8 +282,15 @@ MainWindow::MainWindow()
 
   connect(&tnfsudp, &Network::TnfsUdp::allSessionsDisconnected, this, &MainWindow::allSessionsDisconnected);
   connect(&tnfsudp, &Network::TnfsUdp::sessionConnected, this, &MainWindow::sessionConnected);
+  connect(this, &MainWindow::startTnfs, &tnfsudp, &Network::TnfsUdp::start);
+  connect(this, &MainWindow::stopTnfs, &tnfsudp, &Network::TnfsUdp::stop);
   connect(&tnfstcp, &Network::TnfsTcp::allSessionsDisconnected, this, &MainWindow::allSessionsDisconnected);
   connect(&tnfstcp, &Network::TnfsTcp::sessionConnected, this, &MainWindow::sessionConnected);
+  connect(this, &MainWindow::startTnfs, &tnfstcp, &Network::TnfsTcp::start);
+  connect(this, &MainWindow::stopTnfs, &tnfstcp, &Network::TnfsTcp::stop);
+
+  if (RespeqtSettings::instance()->isTnfsEnabled())
+      emit startTnfs();
 
   clearMessagesLabel->setMinimumWidth(21);
   clearMessagesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/page_white_c.png").pixmap(16, 16, QIcon::Normal));
@@ -1146,6 +1153,10 @@ void MainWindow::showOptionsTriggered() {
   sio->setAutoReconnect(RespeqtSettings::instance()->sioAutoReconnect());
 
   ui->actionStartEmulation->trigger();
+  if (RespeqtSettings::instance()->isTnfsEnabled())
+      emit startTnfs();
+  else
+      emit stopTnfs();
 }
 
 void MainWindow::changeFonts() {
@@ -1506,7 +1517,6 @@ void MainWindow::mountFolderImage(char no) {
   }
   RespeqtSettings::instance()->setLastFolderImageDir(fileName);
   mountFileWithDefaultProtection(no, fileName);
-  //tnfs.addMountPoint(fileName);
 }
 
 void MainWindow::loadNextSide(char no) {
