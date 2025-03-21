@@ -76,12 +76,12 @@ void SioWorker::start(Priority p) {
   switch (RespeqtSettings::instance()->backend()) {
     default:
     case SerialBackend::STANDARD: {
-      auto temp = QSharedPointer<StandardSerialPortBackend>(new StandardSerialPortBackend(this));
+      const auto temp = QSharedPointer<StandardSerialPortBackend>(new StandardSerialPortBackend(this));
       mPort = qSharedPointerDynamicCast<AbstractSerialPortBackend>(temp);
       break;
     }
     case SerialBackend::SIO_DRIVER: {
-      auto temp = QSharedPointer<AtariSioBackend>(new AtariSioBackend(this));
+      const auto temp = QSharedPointer<AtariSioBackend>(new AtariSioBackend(this));
       mPort = qSharedPointerDynamicCast<AbstractSerialPortBackend>(temp);
       break;
     }
@@ -670,13 +670,13 @@ void CassetteWorker::start(Priority p) {
   switch (RespeqtSettings::instance()->backend()) {
     default:
     case SerialBackend::STANDARD: {
-      auto temp = QSharedPointer<StandardSerialPortBackend>(new StandardSerialPortBackend(this));
+      const auto temp = QSharedPointer<StandardSerialPortBackend>(new StandardSerialPortBackend(this));
       mPort = qSharedPointerDynamicCast<AbstractSerialPortBackend>(temp);
       break;
     }
 
     case SerialBackend::SIO_DRIVER: {
-      auto temp = QSharedPointer<AtariSioBackend>(new AtariSioBackend(this));
+      const auto temp = QSharedPointer<AtariSioBackend>(new AtariSioBackend(this));
       mPort = qSharedPointerDynamicCast<AbstractSerialPortBackend>(temp);
       break;
     }
