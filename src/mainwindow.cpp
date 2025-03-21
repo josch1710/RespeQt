@@ -40,16 +40,10 @@
 #include <QScreen>
 #include <QDrag>
 #include <QDragEnterEvent>
-//#include <QDropEvent>
 #include <QEvent>
 #include <QFont>
-#include <QHBoxLayout>
 #include <QMessageBox>
-//#include <QPrintDialog>
-//#include <QPrinter>
-//#include <QPrinterInfo>
 #include <QScrollBar>
-#include <QToolButton>
 #include <QTranslator>
 #include <QUrl>
 #include <QWidget>
@@ -63,7 +57,7 @@
 #include <QFontDatabase>
 #include <utility>
 
-#ifndef QT_NO_QDEBUG
+#if !defined(QT_NO_DEBUG)
 #include "siorecorder.h"
 #endif
 
