@@ -26,28 +26,13 @@ jobs:
         with:
           msystem: MINGW32
           update: true
-          install: git make base-devel mingw-w64-i686-toolchain mingw-w64-i686-libtool mingw-w64-i686-nasm autoconf automake mingw-w64-i686-ncurses mingw-w64-i686-binutils mingw-w64-i686-libslirp
-      - name: Ins<<tall Qt
-          uses: jurplel/install-qt-action@v4
-          with:
-            version: '5.6.3'
-            host: 'windows'
-            target: 'desktop'
-            arch: 'win32_mingw492'
-            dir: '${{ github.workspace }}/Qt563/'
-            install-deps: 'true'
-            modules: 'qtpdf'
-            archives: 'qtbase qtsvg qtcore qtwidgets qtgui qtnetwork qtprintsupport qtserialport qtlinguisttools'
-            cache: 'false'
-            cache-key-prefix: 'install-qt-action'
-            setup-python: 'true'
-            tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
-            set-env: 'true'
-            tools-only: 'false'
-      - name: Build MinGW32 CMAKE
-        run: |
-          top=`pwd`
-          mkdir -p $top/build
-          cmake -B $top/build -S $top
-          make -j4
-          
+          install: git make base-devel mingw-w64-i686-toolchain mingw-w64-i686-libtool cmake
+      - name: Install MingW Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "5.15.2"
+          host: "windows"
+          arch: "win32_mingw81"
+          target: "desktop"
+          dir: '${{ github.workspace }}/example/'
+          install-deps: 'true'
