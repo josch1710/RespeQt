@@ -26,7 +26,7 @@ jobs:
         with:
           msystem: MINGW32
           update: true
-          install: git make base-devel mingw-w64-i686-toolchain mingw-w64-i686-libtool cmake
+          install: git make base-devel mingw-w64-i686-toolchain mingw-w64-i686-libtool cmake mingw-w64-i686-binutils
       - name: Install MingW Qt
         uses: jurplel/install-qt-action@v4
         with:
