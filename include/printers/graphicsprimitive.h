@@ -48,6 +48,8 @@ namespace Printers {
     GraphicsSetPoint(const QPoint point, const QPen);
     virtual ~GraphicsSetPoint() = default;
 
+    virtual void execute(QGraphicsScene *graphicsScene) override;
+
     static QString typeName() {
       return "GraphicsSetPoint";
     }
