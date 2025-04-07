@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 jobs:
-  MinGW32_CI_build:
+  MinGW32_CI_build_gui:
     permissions:
       actions: write  # for styfle/cancel-workflow-action to cancel/stop running workflows
       contents: write # for actions/checkout to fetch code and softprops/action-gh-release
@@ -44,3 +44,40 @@ jobs:
           /mingw32/bin/cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' -DZLIB_LIBRARY='/mingw32/lib' -DZLIB_INCLUDE_DIR='/mingw32/include'
           /mingw32/bin/cmake --build $top/build
 
+  MinGW32_CI_build_test:
+    permissions:
+      actions: write  # for styfle/cancel-workflow-action to cancel/stop running workflows
+      contents: write # for actions/checkout to fetch code and softprops/action-gh-release
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW32
+          update: true
+          install: git make base-devel mingw-w64-i686-toolchain mingw-w64-i686-libtool mingw-w64-i686-binutils mingw-w64-i686-zlib mingw-w64-i686-cmake
+      - name: Install MingW Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "5.15.2"
+          host: "windows"
+          arch: "win32_mingw81"
+          target: "desktop"
+          dir: '${{ github.workspace }}/Qt5/'
+          install-deps: 'true'
+
+      - name: Build via Cmake
+        run: |
+          top=`pwd`
+          mkdir -p $top/build
+          /mingw32/bin/cmake -DMAKE_TEST=ON -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' -DZLIB_LIBRARY='/mingw32/lib' -DZLIB_INCLUDE_DIR='/mingw32/include'
+          /mingw32/bin/cmake --build $top/build
+          dir $top/build/*.exe
