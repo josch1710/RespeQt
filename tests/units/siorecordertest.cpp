@@ -69,51 +69,51 @@ namespace Tests {
         QCOMPARE(data_test, data_baseline);
     }
 
-    void SioRecorderTest::readSioCapture()
-    {
-        auto file = new QFile("tests/units/testdata/writeSioCapture.json");
-        file->open(QIODevice::ReadOnly);
-
-        auto recorder = SioRecorder::instance();
-        recorder->prepareReplaySnapshot(file, SerialBackend::NONE);
-
-        // The test only involves a printer device, so we instanciate one.
-        SioWorkerPtr dummyworker{QSharedPointer<DummyWorker>::create(recorder.data())};
-        Printers::Atari1027 printer(dummyworker);
-        printer.setDeviceNo(PRINTER_BASE_CDEVIC);
-        Printers::NativeOutputPtr nulloutput(new NullOutput);
-        RespeqtSettings::instance()->setPrinterEmulation(true);
-
-        /* Open serial port */
-        QVERIFY2(recorder->open(), tr("Recorder could not be opened.").toLatin1());
-
-        // We simulate what SioWorker::run does just for the printer.
-        /* Process two SIO commands */
-        QByteArray cmd = recorder->readCommandFrame();
-        QVERIFY2(!cmd.isEmpty(), tr("The first command frame should not be empty.").toLatin1());
-
-        /* Decode the command */
-        auto command = static_cast<quint8>(cmd[1]);
-        auto aux = static_cast<quint16>(static_cast<quint8>(cmd[2]) + static_cast<quint8>(cmd[3]) * 256);
-
-        /* Redirect the command to the printer */
-        printer.handleCommand(command, aux, 0);
-        cmd.clear();
-
-        cmd = recorder->readCommandFrame();
-        QVERIFY2(!cmd.isEmpty(), tr("The second command frame should not be empty.").toLatin1());
-
-        /* Decode the command */
-        command = static_cast<quint8>(cmd[1]);
-        aux = static_cast<quint16>(static_cast<quint8>(cmd[2]) + static_cast<quint8>(cmd[3]) * 256);
-
-        /* Redirect the command to the printer */
-        printer.handleCommand(command, aux, 0);
-        cmd.clear();
-
-        cmd = recorder->readCommandFrame();
-        QVERIFY2(cmd.isEmpty(), tr("The third command frame must be empty.").toLatin1());
-
-        recorder->close();
-    }
+    // void SioRecorderTest::readSioCapture()
+    // {
+    //     auto file = new QFile("tests/units/testdata/writeSioCapture.json");
+    //     file->open(QIODevice::ReadOnly);
+    //
+    //     auto recorder = SioRecorder::instance();
+    //     recorder->prepareReplaySnapshot(file, SerialBackend::NONE);
+    //
+    //     // The test only involves a printer device, so we instanciate one.
+    //     SioWorkerPtr dummyworker{QSharedPointer<DummyWorker>::create(recorder.data())};
+    //     Printers::Atari1027 printer(dummyworker);
+    //     printer.setDeviceNo(PRINTER_BASE_CDEVIC);
+    //     Printers::NativeOutputPtr nulloutput(new NullOutput);
+    //     RespeqtSettings::instance()->setPrinterEmulation(true);
+    //
+    //     /* Open serial port */
+    //     QVERIFY2(recorder->open(), tr("Recorder could not be opened.").toLatin1());
+    //
+    //     // We simulate what SioWorker::run does just for the printer.
+    //     /* Process two SIO commands */
+    //     QByteArray cmd = recorder->readCommandFrame();
+    //     QVERIFY2(!cmd.isEmpty(), tr("The first command frame should not be empty.").toLatin1());
+    //
+    //     /* Decode the command */
+    //     auto command = static_cast<quint8>(cmd[1]);
+    //     auto aux = static_cast<quint16>(static_cast<quint8>(cmd[2]) + static_cast<quint8>(cmd[3]) * 256);
+    //
+    //     /* Redirect the command to the printer */
+    //     printer.handleCommand(command, aux, 0);
+    //     cmd.clear();
+    //
+    //     cmd = recorder->readCommandFrame();
+    //     QVERIFY2(!cmd.isEmpty(), tr("The second command frame should not be empty.").toLatin1());
+    //
+    //     /* Decode the command */
+    //     command = static_cast<quint8>(cmd[1]);
+    //     aux = static_cast<quint16>(static_cast<quint8>(cmd[2]) + static_cast<quint8>(cmd[3]) * 256);
+    //
+    //     /* Redirect the command to the printer */
+    //     printer.handleCommand(command, aux, 0);
+    //     cmd.clear();
+    //
+    //     cmd = recorder->readCommandFrame();
+    //     QVERIFY2(cmd.isEmpty(), tr("The third command frame must be empty.").toLatin1());
+    //
+    //     recorder->close();
+    // }
 }

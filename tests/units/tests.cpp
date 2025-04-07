@@ -1,6 +1,5 @@
 #include "siorecordertest.h"
 
-
 #include <QTest>
 #include <unistd.h>
 
