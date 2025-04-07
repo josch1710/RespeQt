@@ -36,3 +36,11 @@ jobs:
           target: "desktop"
           dir: '${{ github.workspace }}/example/'
           install-deps: 'true'
+          
+      - name: Build via Cmake
+        run: |
+          top = `pwd`
+          mkdir -p $top/build
+          cmake -S $top -B $top/build
+          make -j4
+
