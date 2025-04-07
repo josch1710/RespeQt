@@ -39,7 +39,7 @@ jobs:
           
       - name: Build via Cmake
         run: |
-          top = `pwd`
+          top=`pwd`
           mkdir -p $top/build
           cmake -S $top -B $top/build
           make -j4
