@@ -41,8 +41,6 @@ jobs:
         run: |
           top=`pwd`
           mkdir -p $top/build
-          set ZLIB_LIBRARY=/mingw32/lib
-          set ZLIB_INCLUDE_DIR=/mingw32/include
-          cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake'
+          cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH="Qt5/Qt/5.15.2/mingw81_32/lib/cmake" -DCMAKE_INSTALL_RPATH="/mingw32/lib"
           make -j4
 
