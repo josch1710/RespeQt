@@ -222,11 +222,11 @@ set(RESOURCES
     resources/fonts.qrc
 )
 
-if (UNIX AND NOT MINGW)
+if (UNIX)
     set(SOURCES ${SOURCES} src/serialport-unix.cpp src/printers/rawoutput_cups.cpp)
     set(HEADERS ${HEADERS} include/serialport-unix.h)
 endif()
-if (WIN32 OR MINGW)
+if (WIN32)
     set(CMAKE_RC_COMPILER_INIT windres)
     ENABLE_LANGUAGE(RC)
     SET(CMAKE_RC_COMPILE_OBJECT
@@ -245,9 +245,9 @@ if (MAKE_TEST)
 endif()
 if (APPLE)
     find_package(Qt5 COMPONENTS MacExtras)
-elseif(UNIX AND NOT MINGW)
+elseif(UNIX)
     find_package(Qt5 COMPONENTS X11Extras)
-elseif(WIN32 OR MINGW)
+elseif(WIN32)
     find_package(Qt5 COMPONENTS WinExtras)
 endif()
 
@@ -302,10 +302,10 @@ if (WIN32 AND Qt5WinExtras_FOUND)
     target_link_libraries(${TARGET} Qt5::WinExtras)
 endif()
 
-if (UNIX AND NOT MINGW)
+if (UNIX)
     target_link_libraries(${TARGET} z cups)
 endif()
-if (WIN32 OR MINGW)
+if (WIN32)
     target_link_libraries(${TARGET} winmm z winspool)
 endif()
 
@@ -313,6 +313,6 @@ endif()
 # add_subdirectory(docs) # commented out (experimental)
 
 # Deployment
-if (LINUX AND NOT MINGW)
+if (LINUX)
     add_custom_target(deploy deployment/lindeploy.sh )
 endif()
