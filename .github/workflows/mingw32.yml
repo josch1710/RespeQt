@@ -80,4 +80,4 @@ jobs:
           mkdir -p $top/build
           /mingw32/bin/cmake -DMAKE_TEST=ON -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' -DZLIB_LIBRARY='/mingw32/lib' -DZLIB_INCLUDE_DIR='/mingw32/include'
           /mingw32/bin/cmake --build $top/build
-          dir $top/build/*.exe
+          $top/build/RespeQtTest.exe
