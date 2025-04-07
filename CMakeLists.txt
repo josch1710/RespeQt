@@ -1,7 +1,7 @@
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 ### RespeQt CMAKE version
-cmake_minimum_required(VERSION 3.5.0)
+cmake_minimum_required(VERSION 3.5)
 set(CMAKE_OSX_ARCHITECTURES x86_64)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.8)
 project(RespeQt VERSION 5.4.1 LANGUAGES CXX)
@@ -222,6 +222,9 @@ set(RESOURCES
     resources/fonts.qrc
 )
 
+message(STATUS $UNIX)
+message(STATUS $WIN32)
+message(STATUS $APPLE)
 if (UNIX)
     set(SOURCES ${SOURCES} src/serialport-unix.cpp src/printers/rawoutput_cups.cpp)
     set(HEADERS ${HEADERS} include/serialport-unix.h)
