@@ -34,13 +34,13 @@ jobs:
           host: "windows"
           arch: "win32_mingw81"
           target: "desktop"
-          dir: '${{ github.workspace }}/example/'
+          dir: '${{ github.workspace }}/Qt5/'
           install-deps: 'true'
           
       - name: Build via Cmake
         run: |
           top=`pwd`
           mkdir -p $top/build
-          cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH=D:\a\RespeQt\RespeQt\example\Qt\5.15.2\mingw81_32\lib\cmake
+          cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='${{ github.workspace }}\Qt5\Qt\5.15.2\mingw81_32\lib\cmake
           make -j4
 
