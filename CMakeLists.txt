@@ -237,18 +237,18 @@ if (WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE")
 endif()
 
-find_package(Qt5 5.0...<5.7 REQUIRED
+find_package(Qt5 REQUIRED
     COMPONENTS Core Widgets Gui Network PrintSupport SerialPort Svg LinguistTools
 )
 if (MAKE_TEST)
-    find_package(Qt5 5.0...<5.7 REQUIRED COMPONENTS Test)
+    find_package(Qt5 REQUIRED COMPONENTS Test)
 endif()
 if (APPLE)
-    find_package(Qt5 5.0...<5.7 COMPONENTS MacExtras)
+    find_package(Qt5 COMPONENTS MacExtras)
 elseif(UNIX)
-    find_package(Qt5 5.0...<5.7 COMPONENTS X11Extras)
+    find_package(Qt5 COMPONENTS X11Extras)
 elseif(WIN32)
-    find_package(Qt5 5.0...<5.7 COMPONENTS WinExtras)
+    find_package(Qt5 COMPONENTS WinExtras)
 endif()
 
 # Translations
