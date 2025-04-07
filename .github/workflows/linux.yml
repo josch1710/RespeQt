@@ -61,7 +61,7 @@ jobs:
       - name: Install libraries
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y nasm cmake zlib1g-dev
+          sudo apt-get install -y nasm cmake zlib1g-dev libcups2-dev
           mkdir src/bin
       - name: Install Linux Qt 5
         uses: jurplel/install-qt-action@v4
@@ -78,3 +78,5 @@ jobs:
           mkdir -p $top/build
           cmake -DMAKE_TEST=on -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' 
           cmake --build $top/build
+          ls $top/build/RespeQt*
+          $top/build/RespeQtTest
