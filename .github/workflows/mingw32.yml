@@ -41,6 +41,7 @@ jobs:
         run: |
           top=`pwd`
           mkdir -p $top/build
-          cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake'
+          ls -la /usr/lib
+          cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' -DZLIB_DIR=/usr/lib -DZLIB_INCLUDE_DIR=/usr/include
           make -j4
 
