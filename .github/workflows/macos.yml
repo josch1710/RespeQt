@@ -68,3 +68,7 @@ jobs:
           mkdir -p $top/build
           cmake -DMAKE_TEST=on -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' 
           cmake --build $top/build
+      - name: Run the test
+        run: |
+          top=`pwd`
+          $top/build/RespeQtTest
