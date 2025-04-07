@@ -25,7 +25,7 @@ jobs:
       - name: Install libraries
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y nasm cmake zlib
+          sudo apt-get install -y nasm cmake zlib1g-dev
           mkdir src/bin
       - name: Install Linux Qt 5
         uses: jurplel/install-qt-action@v4
@@ -61,7 +61,7 @@ jobs:
       - name: Install libraries
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y nasm cmake zlib
+          sudo apt-get install -y nasm cmake zlib1g-dev
           mkdir src/bin
       - name: Install Linux Qt 5
         uses: jurplel/install-qt-action@v4
