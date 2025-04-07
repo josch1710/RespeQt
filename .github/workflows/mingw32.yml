@@ -42,5 +42,5 @@ jobs:
           top=`pwd`
           mkdir -p $top/build
           cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' -DZLIB_LIBRARY='/mingw32/lib' -DZLIB_INCLUDE_DIR='/mingw32/include'
-          make -j4
+          cmake --build
 
