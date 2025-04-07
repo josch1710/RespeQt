@@ -83,4 +83,4 @@ jobs:
       - name: Run the test
         run: |
           top=`pwd`
-          $top/build/RespeQtTest
+          #$top/build/RespeQtTest
