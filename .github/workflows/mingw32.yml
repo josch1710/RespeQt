@@ -85,5 +85,5 @@ jobs:
           top=`pwd`
           mkdir -p $top/deploy
           cd $top/deploy
-          ${{ github.workspace }}/Qt5/Qt/5.15.2/mingw81_32/bin/windeployqt --release $top/build
+          '${{ github.workspace }}/Qt5/Qt/5.15.2/mingw81_32/bin/windeployqt' --release $top/build
           RespeQtTest
