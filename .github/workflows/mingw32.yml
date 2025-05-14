@@ -41,7 +41,7 @@ jobs:
         run: |
           top=`pwd`
           mkdir -p $top/build
-          /mingw32/bin/cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' -DZLIB_LIBRARY='/mingw32/lib' -DZLIB_INCLUDE_DIR='/mingw32/include'
+          /mingw32/bin/cmake -DCMAKE_BUILD_TYPE=Release -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' -DZLIB_LIBRARY='/mingw32/lib' -DZLIB_INCLUDE_DIR='/mingw32/include'
           /mingw32/bin/cmake --build $top/build
 
   MinGW32_CI_build_test:
@@ -78,9 +78,12 @@ jobs:
         run: |
           top=`pwd`
           mkdir -p $top/build
-          /mingw32/bin/cmake -DMAKE_TEST=ON -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' -DZLIB_LIBRARY='/mingw32/lib' -DZLIB_INCLUDE_DIR='/mingw32/include'
+          /mingw32/bin/cmake -DCMAKE_BUILD_TYPE=Release -DMAKE_TEST=ON -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' -DZLIB_LIBRARY='/mingw32/lib' -DZLIB_INCLUDE_DIR='/mingw32/include'
           /mingw32/bin/cmake --build $top/build
       - name: Run the test
         run: |
           top=`pwd`
-          #$top/build/RespeQtTest
+          mkdir -p $top/deploy
+          cd $top/deploy
+          windeployqt --release $top/build
+          RespeQtTest
