@@ -83,8 +83,8 @@ jobs:
       - name: Run the test
         run: |
           top=`pwd`
-          dir D:\a\RespeQt\RespeQt\Qt5\Qt\5.15.2\mingw81_32\plugins
-          dir D:\a\RespeQt\RespeQt\Qt5\Qt\5.15.2\mingw81_32\plugins\platforms
+          dir 'D:\a\RespeQt\RespeQt\Qt5\Qt\5.15.2\mingw81_32\plugins'
+          dir 'D:\a\RespeQt\RespeQt\Qt5\Qt\5.15.2\mingw81_32\plugins\platforms'
           #mkdir -p $top/deploy
           #cd $top/deploy
           #'${{ github.workspace }}/Qt5/Qt/5.15.2/mingw81_32/bin/windeployqt' --release $top/build
