@@ -1515,39 +1515,48 @@ void MainWindow::mountFolderImage(char no) {
 
 void MainWindow::loadNextSide(char no) {
   auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
-  mountFileWithDefaultProtection(no, img->getNextSideFilename());
+  if (img != nullptr)
+    mountFileWithDefaultProtection(no, img->getNextSideFilename());
 }
 
 void MainWindow::toggleHappy(char no, bool enabled) {
   auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
-  img->setHappyMode(enabled);
+  if (img != nullptr)
+    img->setHappyMode(enabled);
 }
 
 void MainWindow::toggleChip(char no, bool open) {
   auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
-  img->setChipMode(open);
+  if (img != nullptr)
+    img->setChipMode(open);
   updateHighSpeed();
 }
 
 void MainWindow::toggleOSB(char no, bool open) {
   auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
-  img->setOSBMode(open);
+  if (img != nullptr)
+    img->setOSBMode(open);
 }
 
 void MainWindow::toggleToolDisk(char no, bool enabled) {
   auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
-  img->setToolDiskMode(enabled);
+  if (img != nullptr)
+    img->setToolDiskMode(enabled);
   updateHighSpeed();
 }
 
 void MainWindow::toggleWriteProtection(char no, bool protectionEnabled) {
   auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
-  img->setReadOnly(protectionEnabled);
+  if (img != nullptr)
+    img->setReadOnly(protectionEnabled);
   RespeqtSettings::instance()->setMountedImageProtection(no, protectionEnabled);
 }
 
 void MainWindow::openEditor(char no) {
   auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
+  if (img == nullptr)
+    return;
+
   if (img->editDialog()) {
     img->editDialog()->close();
   } else {
