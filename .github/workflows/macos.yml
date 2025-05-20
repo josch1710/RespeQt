@@ -1,0 +1,74 @@
+name: macOS builds
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  macOS_CI_build_gui:
+    permissions:
+      actions: write  # for styfle/cancel-workflow-action to cancel/stop running workflows
+      contents: write # for actions/checkout to fetch code and softprops/action-gh-release
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    runs-on: macos-13
+    steps:
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+      - uses: actions/checkout@v4
+      - name: Install libraries
+        run: |
+          brew install nasm coreutils zlib cmake
+      - name: Install Mac Qt 5
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "5.15.2"
+          host: "mac"
+          arch: "clang_64"
+          target: "desktop"
+          dir: '${{ github.workspace }}/Qt5/'
+          install-deps: 'true'
+      - name: Build via Cmake
+        run: |
+          top=`pwd`
+          mkdir -p $top/build
+          cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' 
+          cmake --build $top/build
+          
+  macOS_CI_build_test:
+    permissions:
+      actions: write  # for styfle/cancel-workflow-action to cancel/stop running workflows
+      contents: write # for actions/checkout to fetch code and softprops/action-gh-release
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    runs-on: macos-13
+    steps:
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+      - uses: actions/checkout@v4
+      - name: Install libraries
+        run: |
+          brew install nasm coreutils zlib cmake
+      - name: Install Mac Qt 5
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "5.15.2"
+          host: "mac"
+          arch: "clang_64"
+          target: "desktop"
+          dir: '${{ github.workspace }}/Qt5/'
+          install-deps: 'true'
+      - name: Build via Cmake
+        run: |
+          top=`pwd`
+          mkdir -p $top/build
+          cmake -DMAKE_TEST=on -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' 
+          cmake --build $top/build
+      - name: Run the test
+        run: |
+          top=`pwd`
+          #$top/build/RespeQtTest

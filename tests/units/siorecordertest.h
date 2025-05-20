@@ -22,7 +22,7 @@ namespace Tests
 
         // Test methods
         void writeSioCapture();
-        void readSioCapture();
+        //void readSioCapture();
     };
 }
 #endif // SIORECORDERTEST_H

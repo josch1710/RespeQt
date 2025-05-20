@@ -15,6 +15,11 @@ namespace Printers {
                                                                            mPen(pen) {
   }
 
+  void GraphicsSetPoint::execute(QGraphicsScene *graphicsScene) {
+      graphicsScene->addLine(mPoint.x(), -mPoint.y(), mPoint.x(), -mPoint.y(), mPen);
+//qDebug() << "!n" << "Set Point "<<mPoint;
+  }
+
   GraphicsDrawLine::GraphicsDrawLine(const QPoint srcPoint, const QPen pen, const QPoint destPoint)
       : GraphicsSetPoint(srcPoint, pen),
         mDestPoint(destPoint) {

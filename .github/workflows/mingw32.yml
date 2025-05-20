@@ -7,7 +7,6 @@ permissions:
   contents: read
 
 jobs:
-  MinGW32_CI_build:
     permissions:
       actions: write  # for styfle/cancel-workflow-action to cancel/stop running workflows
       contents: write # for actions/checkout to fetch code and softprops/action-gh-release
@@ -26,28 +25,25 @@ jobs:
         with:
           msystem: MINGW32
           update: true
-          install: git make base-devel mingw-w64-i686-toolchain mingw-w64-i686-libtool mingw-w64-i686-nasm autoconf automake mingw-w64-i686-ncurses mingw-w64-i686-binutils mingw-w64-i686-libslirp
-      - name: Ins<<tall Qt
-          uses: jurplel/install-qt-action@v4
-          with:
-            version: '5.6.3'
-            host: 'windows'
-            target: 'desktop'
-            arch: 'win32_mingw492'
-            dir: '${{ github.workspace }}/Qt563/'
-            install-deps: 'true'
-            modules: 'qtpdf'
-            archives: 'qtbase qtsvg qtcore qtwidgets qtgui qtnetwork qtprintsupport qtserialport qtlinguisttools'
-            cache: 'false'
-            cache-key-prefix: 'install-qt-action'
-            setup-python: 'true'
-            tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
-            set-env: 'true'
-            tools-only: 'false'
-      - name: Build MinGW32 CMAKE
+          install: git make base-devel mingw-w64-i686-toolchain mingw-w64-i686-libtool mingw-w64-i686-binutils mingw-w64-i686-zlib mingw-w64-i686-cmake
+      - name: Install MingW Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "5.15.2"
+          host: "windows"
+          arch: "win32_mingw81"
+          target: "desktop"
+          dir: '${{ github.workspace }}/Qt5/'
+          install-deps: 'true'
+
+      - name: Build via Cmake
         run: |
           top=`pwd`
           mkdir -p $top/build
-          cmake -B $top/build -S $top
-          make -j4
-          
+          /mingw32/bin/cmake -DCMAKE_BUILD_TYPE=Release -DMAKE_TEST=ON -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' -DZLIB_LIBRARY='/mingw32/lib' -DZLIB_INCLUDE_DIR='/mingw32/include'
+          /mingw32/bin/cmake --build $top/build
+      - name: Run the test
+        run: |
+          top=`pwd`
+          #$top/build/RespeQtTest
+          # TODO Deploying and running?
