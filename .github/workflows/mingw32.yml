@@ -54,8 +54,7 @@ jobs:
       - name: Build packages
         run: |
           top=`pwd`
-          doskey cqtdeployer=$top/cqtdeployer/1.6/cqtdeployer.bat
-          alias cqtdeployer=$top/cqtdeployer/1.6./cqtdeployer.bat
+          export PATH="$top/cqtdeployer/1.6:$PATH"
           /mingw32/bin/cmake --build $top/build -j4 --target deploy
 
       - name: Upload artifacts
