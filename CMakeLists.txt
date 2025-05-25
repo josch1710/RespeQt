@@ -315,13 +315,13 @@ endif()
 
 # Deployment
 if (NOT MAKE_TEST AND CMAKE_BUILD_TYPE STREQUAL "Release")
-    message(STATUS "Deployment target activated")
+    message(STATUS "Deployment target activated ${Qt5_DIR}")
     if (LINUX)
         add_custom_target(deploy deployment/lindeploy.sh )
     endif()
     if (WIN32)
         add_custom_target(deploy 
-            COMMAND ${CMAKE_SOURCE_DIR}\\deployment\\windeploy.bat "${EXECUTABLE_OUTPUT_PATH}\\RespeQt" qmake "${CMAKE_SOURCE_DIR}" ${PROJECT_VERSION}${RC_VERSION}
+            COMMAND ${CMAKE_SOURCE_DIR}\\deployment\\windeploy.bat "${EXECUTABLE_OUTPUT_PATH}\\RespeQt" "${Qt5_DIR}/../../../bin/qmake.exe" "${CMAKE_SOURCE_DIR}" ${PROJECT_VERSION}${RC_VERSION}
             DEPENDS ${TARGET}
         )
     endif()
