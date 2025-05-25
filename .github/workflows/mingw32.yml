@@ -55,8 +55,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: "*"
-          path: ${{ github.workspace }}/build/DistributionKit
+          name: Relase packages
+          path: ${{ github.workspace }}/build/DistributionKit/
 
 
   MinGW32_CI_build_test:
