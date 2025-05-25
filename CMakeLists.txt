@@ -16,6 +16,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_AUTOUIC_SEARCH_PATHS} ui ui/printers ui/filesystems)
 add_definitions(-DQT_DEPRECATED_WARNINGS -DQT_DISABLE_DEPRECATED_BEFORE=0x050000)
 add_definitions(-DVERSION=\"v${PROJECT_VERSION}${RC_VERSION}\")
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
 option(MAKE_TEST "Build the test application" OFF)
 message(STATUS "Build tests ${MAKE_TEST}")
@@ -313,6 +314,18 @@ endif()
 # add_subdirectory(docs) # commented out (experimental)
 
 # Deployment
-if (LINUX)
-    add_custom_target(deploy deployment/lindeploy.sh )
+if (NOT MAKE_TEST AND CMAKE_BUILD_TYPE STREQUAL "Release")
+    message(STATUS "Deployment target activated")
+    if (LINUX)
+        add_custom_target(deploy deployment/lindeploy.sh )
+    endif()
+    if (WIN32)
+        add_custom_target(deploy 
+            COMMAND ${CMAKE_SOURCE_DIR}\\deployment\\windeploy.bat "${EXECUTABLE_OUTPUT_PATH}\\RespeQt" qmake "${CMAKE_SOURCE_DIR}" ${PROJECT_VERSION}${RC_VERSION}
+            DEPENDS ${TARGET}
+        )
+    endif()
+    if (APPLE)
+        add_custom_target(deploy ${CMAKE_SOURCE_DIR}/deployment/macdeploy.sh "\"${CMAKE_SOURCE_DIR}\"" "\"${CMAKE_BINARY_DIR}\"" "${PROJECT_VERSION}" "${RC_VERSION}")
+    endif()
 endif()
