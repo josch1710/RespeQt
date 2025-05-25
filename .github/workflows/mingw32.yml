@@ -55,7 +55,7 @@ jobs:
         run: |
           top=`pwd`
           export PATH="$top/cqtdeployer/1.6:$PATH"
-          /mingw32/bin/cmake -B $top/build -j4 --target deploy
+          /mingw32/bin/cmake --build $top --target deploy
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
