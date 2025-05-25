@@ -52,11 +52,6 @@ jobs:
           /mingw32/bin/cmake -DCMAKE_BUILD_TYPE=Release -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' -DZLIB_LIBRARY='/mingw32/lib' -DZLIB_INCLUDE_DIR='/mingw32/include'
           /mingw32/bin/cmake --build $top/build --target deploy -j4
 
-      - name: Build packages
-        run: |
-          top=`pwd`
-          /mingw32/bin/cmake --build $top --target deploy
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
