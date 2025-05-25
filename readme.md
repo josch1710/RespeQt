@@ -1,3 +1,5 @@
+[![32-bit MinGW builds](https://github.com/josch1710/RespeQt/actions/workflows/mingw32.yml/badge.svg)](https://github.com/josch1710/RespeQt/actions/workflows/mingw32.yml)
+
 RespeQt, Atari Serial Peripheral Emulator for Qt
 
 Summary
