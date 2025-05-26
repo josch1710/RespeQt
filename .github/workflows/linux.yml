@@ -40,7 +40,7 @@ jobs:
         run: |
           top=`pwd`
           mkdir -p $top/cqtdeployer
-          wget https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2365/CQtDeployer_1.6.2365.7cce7f3_Linux_x86_64.zip
+          wget -q https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2365/CQtDeployer_1.6.2365.7cce7f3_Linux_x86_64.zip
           unzip CQtDeployer_1.6.2365.7cce7f3_Linux_x86_64.zip -d $top/cqtdeployer 
           chmod u+x $top/cqtdeployer/CQtDeployer.sh
           ln -s $top/cqtdeployer/CQtDeployer.sh $top/cqtdeployer/cqtdeployer
@@ -50,7 +50,7 @@ jobs:
         run: |
           top=`pwd`
           mkdir -p $top/build
-          cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' 
+          cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='${{ github.workspace }}/Qt5/5.15.2/lib/cmake' -DCMAKE_BUILD_TYPE=Release
           cmake --build $top/build --target deploy -j4
           
       - name: Upload artifacts
