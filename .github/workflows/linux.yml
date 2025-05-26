@@ -27,6 +27,7 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y nasm cmake zlib1g-dev
           sudo apt-get install -y libcups2-dev
+          sudo apt-get install snapd
       - name: Install Linux Qt 5
         uses: jurplel/install-qt-action@v4
         with:
@@ -36,11 +37,9 @@ jobs:
           target: "desktop"
           dir: '${{ github.workspace }}/Qt5/'
           install-deps: 'true'
-      - name: Install Snapcraft
-        uses: samuelmeuli/action-snapcraft@v3
       - name: Install CQtDeployer
         run: |
-          snapcraft install cqtdeployer
+          sudo snap install cqtdeployer
           
       - name: Build via Cmake and Package
         run: |
