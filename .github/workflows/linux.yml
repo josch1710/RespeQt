@@ -36,15 +36,11 @@ jobs:
           target: "desktop"
           dir: '${{ github.workspace }}/Qt5/'
           install-deps: 'true'
+      - name: Install Snapcraft
+        uses: samuelmeuli/action-snapcraft@v3
       - name: Install CQtDeployer
         run: |
-          top=`pwd`
-          mkdir -p $top/cqtdeployer
-          wget -q https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2365/CQtDeployer_1.6.2365.7cce7f3_Linux_x86_64.zip
-          unzip CQtDeployer_1.6.2365.7cce7f3_Linux_x86_64.zip -d $top/cqtdeployer 
-          chmod u+x $top/cqtdeployer/CQtDeployer.sh $top/cqtdeployer/bin/*
-          ln -s $top/cqtdeployer/CQtDeployer.sh $top/cqtdeployer/cqtdeployer
-          echo "$top/cqtdeployer" >> "$GITHUB_PATH"
+          snapcraft install cqtdeployer
           
       - name: Build via Cmake and Package
         run: |

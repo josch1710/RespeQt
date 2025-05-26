@@ -319,7 +319,7 @@ if (NOT MAKE_TEST AND CMAKE_BUILD_TYPE STREQUAL "Release")
     if (LINUX)
         message(STATUS ${Qt5_DIR})
         add_custom_target(deploy 
-            COMMAND ${CMAKE_SOURCE_DIR}/deployment/lindeploy.sh  "${EXECUTABLE_OUTPUT_PATH}/RespeQt" "${Qt5_DIR}/../../../bin/qmake" "${CMAKE_SOURCE_DIR}" ${PROJECT_VERSION}${RC_VERSION}
+            COMMAND ${CMAKE_SOURCE_DIR}/deployment/lindeploy.sh  "${EXECUTABLE_OUTPUT_PATH}/RespeQt" "${Qt5_DIR}/../../../bin/qmake" "${CMAKE_SOURCE_DIR}" ${PROJECT_VERSION} ${RC_VERSION}
             DEPENDS ${TARGET}
         )
     endif()

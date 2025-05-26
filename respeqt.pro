@@ -76,7 +76,7 @@ win32 {
     QMAKE_EXTRA_TARGETS += deploy
 }
 linux {
-    deploy.commands = $$PWD/deployment/lindeploy.sh "$$OUT_PWD/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$${PROJECT_VERSION}$${RC_VERSION}"
+    deploy.commands = $$PWD/deployment/lindeploy.sh "$$OUT_PWD/$$TARGET" "$$QMAKE_QMAKE" "$$PWD" "$${PROJECT_VERSION}" "$${RC_VERSION}"
     QMAKE_EXTRA_TARGETS += deploy
 }
 
