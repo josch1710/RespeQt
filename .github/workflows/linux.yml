@@ -40,10 +40,11 @@ jobs:
         run: |
           top=`pwd`
           mkdir -p $top/cqtdeployer
-          wget https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2365/CQtDeployer_1.6.2365.7cce7f3_Linux_x86_64.run
-          chmod u+x CQtDeployer_1.6.2365.7cce7f3_Linux_x86_64.run
-          $HOME=$top ./CQtDeployer_1.6.2365.7cce7f3_Linux_x86_64.run install -t $top/cqtdeployer -c --am
-          echo "$top/cqtdeployer/1.6" >> "$GITHUB_PATH"
+          wget https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2365/CQtDeployer_1.6.2365.7cce7f3_Linux_x86_64.zip
+          unzip CQtDeployer_1.6.2365.7cce7f3_Linux_x86_64.zip -d $top/cqtdeployer 
+          chmod u+x $top/cqtdeployer/CQtDeployer.sh
+          ln -s $top/cqtdeployer/cqtdeployer $top/cqtdeployer/CQtDeployer.sh
+          echo "$top/cqtdeployer" >> "$GITHUB_PATH"
           
       - name: Build via Cmake and Package
         run: |
