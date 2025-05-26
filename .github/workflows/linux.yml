@@ -42,7 +42,7 @@ jobs:
           mkdir -p $top/cqtdeployer
           wget https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2365/CQtDeployer_1.6.2365.7cce7f3_Linux_x86_64.run
           chmod u+x CQtDeployer_1.6.2365.7cce7f3_Linux_x86_64.run
-          ./CQtDeployer_1.6.2365.7cce7f3_Linux_x86_64.run install -t $top/cqtdeployer -c --am
+          $HOME=$top ./CQtDeployer_1.6.2365.7cce7f3_Linux_x86_64.run install -t $top/cqtdeployer -c --am
           echo "$top/cqtdeployer/1.6" >> "$GITHUB_PATH"
           
       - name: Build via Cmake and Package
