@@ -330,6 +330,9 @@ if (NOT MAKE_TEST AND CMAKE_BUILD_TYPE STREQUAL "Release")
         )
     endif()
     if (APPLE)
-        add_custom_target(deploy ${CMAKE_SOURCE_DIR}/deployment/macdeploy.sh "\"${CMAKE_SOURCE_DIR}\"" "\"${CMAKE_BINARY_DIR}\"" "${PROJECT_VERSION}" "${RC_VERSION}")
+        add_custom_target(deploy 
+            COMMAND ${CMAKE_SOURCE_DIR}/deployment/macdeploy.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" "${PROJECT_VERSION}" "${RC_VERSION}"
+            DEPENDS ${TARGET}
+        )
     endif()
 endif()

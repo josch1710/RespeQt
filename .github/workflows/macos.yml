@@ -31,13 +31,20 @@ jobs:
           target: "desktop"
           dir: '${{ github.workspace }}/Qt5/'
           install-deps: 'true'
-      - name: Build via Cmake
+      - name: Build via Cmake and package
         run: |
           top=`pwd`
           mkdir -p $top/build
           cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' 
-          cmake --build $top/build
+          cmake --build $top/build --target deploy
           
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: Relase packages
+          path: ${{ github.workspace }}/build/DistributionKit/
+  
+  
   macOS_CI_build_test:
     permissions:
       actions: write  # for styfle/cancel-workflow-action to cancel/stop running workflows

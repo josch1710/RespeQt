@@ -41,7 +41,7 @@ jobs:
         run: |
           sudo snap install cqtdeployer
           
-      - name: Build via Cmake and Package
+      - name: Build via Cmake and package
         run: |
           top=`pwd`
           mkdir -p $top/build
