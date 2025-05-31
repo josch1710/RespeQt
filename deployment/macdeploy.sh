@@ -9,7 +9,7 @@ fi
 cd "$1" || exit 1
 longversion=$3
 if [[ "$4" != "" ]]; then
-  longversion="${longversion}_$4"
+  longversion="${longversion}$4"
 fi
 deploydir="$2/RespeQt_v${longversion}"
 
