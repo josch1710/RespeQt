@@ -11,7 +11,7 @@ longversion=$3
 if [[ "$4" != "" ]]; then
   longversion="${longversion}$4"
 fi
-deploydir="$2/RespeQt_v${longversion}"
+deploydir="$2/RespeQt"
 
 install -d "${deploydir}"
 rm -rf "${deploydir}"/RespeQt.app
@@ -46,7 +46,7 @@ test -f "RespeQt_${longversion}.zip" && rm "RespeQt_${longversion}.zip"
 zip -9r -D "RespeQt_${longversion}.zip" "$(basename "${deploydir}")"
 test -f "RespeQt_${longversion}.dmg" && rm "RespeQt_${longversion}.dmg"
 
-/usr/local/bin/create-dmg --volname "RespeQt_${longversion}" \
+create-dmg --volname "RespeQt_${longversion}" \
     --icon-size 32 \
     --volicon "$1/resources/RespeQt.icns" \
     --eula "$1/license.txt" \
