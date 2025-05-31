@@ -45,7 +45,7 @@ cd "$2" || exit 2
 test -f "RespeQt_${longversion}.zip" && rm "RespeQt_${longversion}.zip"
 zip -9r -D "RespeQt_${longversion}.zip" "$(basename "${deploydir}")"
 test -f "RespeQt_${longversion}.dmg" && rm "RespeQt_${longversion}.dmg"
-
+echo "${deploydir}"
 create-dmg --volname "RespeQt_${longversion}" \
     --icon-size 32 \
     --volicon "$1/resources/RespeQt.icns" \
