@@ -1,5 +1,5 @@
 
-VERSION = r5.3
+VERSION = r5.4.1
 DEFINES += VERSION=\\\"$$VERSION\\\"
 
 QT += testlib
