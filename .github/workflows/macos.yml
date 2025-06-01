@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v4.6.2
         with:
           name: Relase packages
-          path: ${{ github.workspace }}/build/RespeQt/packages
+          path: ${{ github.workspace }}/packages
   
   
   macOS_CI_build_test:
