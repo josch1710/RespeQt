@@ -55,3 +55,8 @@ create-dmg --volname "RespeQt_${longversion}" \
 
 md5 -r "RespeQt_${longversion}.zip" > "RespeQt_${longversion}.zip.md5"
 md5 -r "RespeQt_${longversion}.dmg" > "RespeQt_${longversion}.dmg.md5"
+
+# Move package to special directory (makes the GH action easier)
+packagedir="$2/packages"
+install -d "${packagedir}"
+mv "RespeQt_${longversion}.zip" "RespeQt_${longversion}.dmg" "RespeQt_${longversion}.zip.md5" "RespeQt_${longversion}.dmg.md5" "${packagedir}"
