@@ -36,7 +36,7 @@ jobs:
           top=`pwd`
           mkdir -p $top/build
           cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' 
-          cmake --build $top/build --target deploy
+          cmake --build $top/build --target deploy -j4
           
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
