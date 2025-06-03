@@ -282,6 +282,7 @@ MainWindow::MainWindow()
   connect(&tnfstcp, &Network::TnfsTcp::sessionConnected, this, &MainWindow::sessionConnected);
   connect(this, &MainWindow::startTnfs, &tnfstcp, &Network::TnfsTcp::start);
   connect(this, &MainWindow::stopTnfs, &tnfstcp, &Network::TnfsTcp::stop);
+  connect(this, &MainWindow::startBootExe, this, &MainWindow::bootExe, Qt::QueuedConnection);
 
   if (RespeqtSettings::instance()->isTnfsEnabled())
       emit startTnfs();
@@ -551,7 +552,7 @@ void MainWindow::dropEvent(QDropEvent *event) {
 
   if (type == FileTypes::Xex) {
     g_exefileName = files.at(0);//
-    bootExe(files.at(0));
+    emit startBootExe(files.at(0));
     return;
   }
 
@@ -1320,7 +1321,7 @@ void MainWindow::bootExe(const QString &fileName) {
     sio->getDevice(DISK_BASE_CDEVIC);
   }
   if (!g_exefileName.isEmpty())
-    bootExe(g_exefileName);
+    emit startBootExe(g_exefileName);
 }
 
 // Make boot executable dialog persistant until it's manually closed //
@@ -1333,7 +1334,7 @@ void MainWindow::bootExeTriggered(const QString &fileName) {
   g_exefileName = path + "/" + fileName;
   if (!g_exefileName.isEmpty()) {
     RespeqtSettings::instance()->setLastExeDir(QFileInfo(g_exefileName).absolutePath());
-    bootExe(g_exefileName);
+    emit startBootExe(g_exefileName);
   }
 }
 
@@ -1347,7 +1348,7 @@ void MainWindow::selectBootExeTriggered() {
 
   if (!g_exefileName.isEmpty()) {
     RespeqtSettings::instance()->setLastExeDir(QFileInfo(g_exefileName).absolutePath());
-    bootExe(g_exefileName);
+    emit startBootExe(g_exefileName);
   }
 }
 
