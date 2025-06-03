@@ -266,8 +266,6 @@ if (APPLE)
     set(APP_ICON resources/RespeQt.icns)
     set_source_files_properties(${APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     add_executable(${TARGET} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES} ${APP_ICON})
-
-    add_custom_target(deploy ${CMAKE_SOURCE_DIR}/deployment/macdeploy.sh "\"${CMAKE_SOURCE_DIR}\"" "\"${CMAKE_BINARY_DIR}\"" "${PROJECT_VERSION}" "${RC_VERSION}")
 else()
     add_executable(${TARGET} ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES})
 endif()
@@ -330,6 +328,7 @@ if (NOT MAKE_TEST AND CMAKE_BUILD_TYPE STREQUAL "Release")
         )
     endif()
     if (APPLE)
+message(STATUS "Added deploy target for Mac")
         add_custom_target(deploy 
             COMMAND ${CMAKE_SOURCE_DIR}/deployment/macdeploy.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" "${PROJECT_VERSION}" "${RC_VERSION}"
             DEPENDS ${TARGET}
