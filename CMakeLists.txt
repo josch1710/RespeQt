@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.5)
 set(CMAKE_OSX_ARCHITECTURES x86_64)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.8)
 project(RespeQt VERSION 5.4.1 LANGUAGES CXX)
-set(RC_VERSION "_RC2") ## Begin RC version with underscore
+set(RC_VERSION "_RC3") ## Begin RC version with underscore
 cmake_policy(SET CMP0071 NEW)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,6 +16,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_AUTOUIC_SEARCH_PATHS} ui ui/printers ui/filesystems)
 add_definitions(-DQT_DEPRECATED_WARNINGS -DQT_DISABLE_DEPRECATED_BEFORE=0x050000)
 add_definitions(-DVERSION=\"v${PROJECT_VERSION}${RC_VERSION}\")
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
 option(MAKE_TEST "Build the test application" OFF)
 message(STATUS "Build tests ${MAKE_TEST}")
@@ -265,8 +266,6 @@ if (APPLE)
     set(APP_ICON resources/RespeQt.icns)
     set_source_files_properties(${APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     add_executable(${TARGET} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES} ${APP_ICON})
-
-    add_custom_target(deploy ${CMAKE_SOURCE_DIR}/deployment/macdeploy.sh "\"${CMAKE_SOURCE_DIR}\"" "\"${CMAKE_BINARY_DIR}\"" "${PROJECT_VERSION}" "${RC_VERSION}")
 else()
     add_executable(${TARGET} ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES})
 endif()
@@ -313,6 +312,26 @@ endif()
 # add_subdirectory(docs) # commented out (experimental)
 
 # Deployment
-if (LINUX)
-    add_custom_target(deploy deployment/lindeploy.sh )
+if (NOT MAKE_TEST AND CMAKE_BUILD_TYPE STREQUAL "Release")
+    message(STATUS "Deployment target activated ${Qt5_DIR}")
+    if (LINUX)
+        message(STATUS ${Qt5_DIR})
+        add_custom_target(deploy 
+            COMMAND ${CMAKE_SOURCE_DIR}/deployment/lindeploy.sh  "${EXECUTABLE_OUTPUT_PATH}/RespeQt" "${Qt5_DIR}/../../../bin/qmake" "${CMAKE_SOURCE_DIR}" ${PROJECT_VERSION} ${RC_VERSION}
+            DEPENDS ${TARGET}
+        )
+    endif()
+    if (WIN32)
+        add_custom_target(deploy 
+            COMMAND ${CMAKE_SOURCE_DIR}\\deployment\\windeploy.bat "${EXECUTABLE_OUTPUT_PATH}\\RespeQt" "${Qt5_DIR}/../../../bin/qmake.exe" "${CMAKE_SOURCE_DIR}" ${PROJECT_VERSION}${RC_VERSION}
+            DEPENDS ${TARGET}
+        )
+    endif()
+    if (APPLE)
+message(STATUS "Added deploy target for Mac")
+        add_custom_target(deploy 
+            COMMAND ${CMAKE_SOURCE_DIR}/deployment/macdeploy.sh "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" "${PROJECT_VERSION}" "${RC_VERSION}"
+            DEPENDS ${TARGET}
+        )
+    endif()
 endif()

@@ -122,7 +122,7 @@ namespace DiskImages {
     // in .atr file header ---
 
     // Validate the image size
-    bool sizeValid = false;
+    bool sizeValid{false};
     if (secSize == 256) {
       // Handle double density images
       if (size <= 384 && size % 128 == 0) {
@@ -152,7 +152,7 @@ namespace DiskImages {
                   // and they are empty.
                   // Since size check is done, we should be able to read everything.
                   QByteArray emptySector{3 * 128, '\0'};
-                  char *imageSector{new char[3 * 128]};
+                  /*auto*/char *imageSector{new char[3 * 128]};
 
                   // We seek after file header (16 bytes) and 3 SD sectors.
                   sourceFile->seek(16 + 3 * 128);
@@ -166,9 +166,38 @@ namespace DiskImages {
                   }
                   // equals == true, area after 3 SD boot sectors is empty,
                   // so file is padded after each boot sector
-                  // equals == false, area after 3 SD boot sectors contains data,
-                  // so we assume, the padding is after each sector
-                  m_hasPadding = equals ? Padding::FilledAfterBootArea : Padding::SameSectorSize;
+                  if (equals)
+                      m_hasPadding = Padding::FilledAfterBootArea;
+                  else {
+                      // Now we check, whether the first three sector is
+                      // padded after each sector
+                      /*auto*/bool equals{true};
+                      for (auto sector = 0; sector < 3; sector++) {
+                          sourceFile->seek(16 + sector * 256 + 128);
+                          sourceFile->read(imageSector, 128);
+                          
+                          for (auto i = 0; i < 128; i++) {
+                              if (emptySector.at(i) != imageSector[i]) {
+                                  equals = false;
+                                  break;
+                              }
+                          }
+                          if (!equals)
+                              break;
+                      }
+                      // equals == true, area after each of the 3 SD boot sectors is empty,
+                      // so we assume, the padding is after each sector
+                      if (equals)
+                          m_hasPadding = Padding::SameSectorSize;
+                      else {
+                          // padding is not discernible, so we assume the format is invalid
+                          qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Invalid padding."));
+                          sourceFile->close();
+                          delete sourceFile;
+                          file.close();
+                          return false;
+                      }
+                  }
               }
           }
       }

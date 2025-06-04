@@ -27,6 +27,7 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y nasm cmake zlib1g-dev
           sudo apt-get install -y libcups2-dev
+          sudo apt-get install snapd
       - name: Install Linux Qt 5
         uses: jurplel/install-qt-action@v4
         with:
@@ -36,12 +37,23 @@ jobs:
           target: "desktop"
           dir: '${{ github.workspace }}/Qt5/'
           install-deps: 'true'
-      - name: Build via Cmake
+      - name: Install CQtDeployer
+        run: |
+          sudo snap install cqtdeployer
+          
+      - name: Build via Cmake and package
         run: |
           top=`pwd`
           mkdir -p $top/build
-          cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' 
-          cmake --build $top/build
+          cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='${{ github.workspace }}/Qt5/5.15.2/lib/cmake' -DCMAKE_BUILD_TYPE=Release
+          cmake --build $top/build --target deploy -j4
+          
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: Relase packages
+          path: ${{ github.workspace }}/build/DistributionKit/
+
 
   Linux_CI_build_test:
     permissions:

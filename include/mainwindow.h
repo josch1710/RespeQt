@@ -104,7 +104,6 @@ private:
   void setSession();//
   void updateRecentFileActions();
   char containingDiskSlot(const QPoint &point);
-  void bootExe(const QString &fileName);
   void mountFile(char no, const QString &fileName, bool prot);
   void mountDiskImage(char no);
   void mountFolderImage(char no);
@@ -167,6 +166,7 @@ signals:
   void fontChanged(const QFont &font);
   void startTnfs();
   void stopTnfs();
+  void startBootExe(const QString &fileName);
 
 public slots:
   char firstEmptyDiskSlot(char startFrom = 0, bool createOne = true);   //
@@ -177,6 +177,8 @@ public slots:
   void bootExeTriggered(const QString &fileName);
   void toggleSnapshotCapture(bool toggle);
   void replaySnapshot();
+  void bootExe(const QString &fileName);
+
   //void closeTextPrinterWindow(const Printers::TextPrinterWindow *window);
 
 private slots:
