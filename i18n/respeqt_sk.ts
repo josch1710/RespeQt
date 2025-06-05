@@ -38,7 +38,7 @@
     </message>
 </context>
 <context>
-    <name>AspeCl</name>
+    <name>RCL</name>
     <message>
         <source>[%1] Date/time sent to client (%2).</source>
         <translation type="vanished">[%1] Dátum/čas poslaný na klienta (%2).</translation>
@@ -2312,14 +2312,6 @@ Zostávajúci čas: %1: %2</translation>
         <location filename="../miscutils.cpp" line="208"/>
         <source>gzseek() failed.</source>
         <translation>gzseek()failed.</translation>
-    </message>
-</context>
-<context>
-    <name>InfoWidget</name>
-    <message>
-        <location filename="../infowidget.ui" line="26"/>
-        <source>Form</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

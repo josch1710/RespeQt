@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/documentation">
+        <file>../history.txt</file>
+        <file>../license.txt</file>
+        <file>../about.html</file>
+        <file>../RespeQt User Manual-English.html</file>
+    </qresource>
+    <qresource prefix="/documentation" lang="es">
+	    <file>../about_spanish.html</file>
+    </qresource>
+</RCC>

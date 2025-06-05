@@ -104,7 +104,7 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
-    <name>AspeCl</name>
+    <name>RCL</name>
     <message>
         <source>[%1] Date/time sent to client (%2).</source>
         <translation type="vanished">[%1] Data/czas wysłane do klienta (%2).</translation>
@@ -2429,14 +2429,6 @@ Kiedy usłyszysz sygnał, naciśnij przycisk OK poniżej i jednocześnie naciśn
         <location filename="../miscutils.cpp" line="208"/>
         <source>gzseek() failed.</source>
         <translation>Nieudane gzseek().</translation>
-    </message>
-</context>
-<context>
-    <name>InfoWidget</name>
-    <message>
-        <location filename="../infowidget.ui" line="26"/>
-        <source>Form</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

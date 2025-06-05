@@ -1,0 +1,96 @@
+name: Linux builds
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  Linux_CI_build_gui:
+    permissions:
+      actions: write  # for styfle/cancel-workflow-action to cancel/stop running workflows
+      contents: read  # for actions/checkout to fetch code
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '14'
+      - name: Install libraries
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y nasm cmake zlib1g-dev
+          sudo apt-get install -y libcups2-dev
+          sudo apt-get install snapd
+      - name: Install Linux Qt 5
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "5.15.2"
+          host: "linux"
+          arch: "gcc_64"
+          target: "desktop"
+          dir: '${{ github.workspace }}/Qt5/'
+          install-deps: 'true'
+      - name: Install CQtDeployer
+        run: |
+          sudo snap install cqtdeployer
+          
+      - name: Build via Cmake and package
+        run: |
+          top=`pwd`
+          mkdir -p $top/build
+          cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='${{ github.workspace }}/Qt5/5.15.2/lib/cmake' -DCMAKE_BUILD_TYPE=Release
+          cmake --build $top/build --target deploy -j4
+          
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: Relase packages
+          path: ${{ github.workspace }}/build/DistributionKit/
+
+
+  Linux_CI_build_test:
+    permissions:
+      actions: write  # for styfle/cancel-workflow-action to cancel/stop running workflows
+      contents: read  # for actions/checkout to fetch code
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel previous runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '14'
+      - name: Install libraries
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y nasm cmake zlib1g-dev 
+          sudo apt-get install -y libcups2-dev
+      - name: Install Linux Qt 5
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "5.15.2"
+          host: "linux"
+          arch: "gcc_64"
+          target: "desktop"
+          dir: '${{ github.workspace }}/Qt5/'
+          install-deps: 'true'
+      - name: Build via Cmake
+        run: |
+          top=`pwd`
+          mkdir -p $top/build
+          cmake -DMAKE_TEST=on -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' 
+          cmake --build $top/build
+      - name: Run the test
+        run: |
+          top=`pwd`
+          #$top/build/RespeQtTest

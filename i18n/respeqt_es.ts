@@ -1287,14 +1287,6 @@ Tiempo restante estimado: %1:%2</translation>
     </message>
 </context>
 <context>
-    <name>InfoWidget</name>
-    <message>
-        <location filename="../infowidget.ui" line="26"/>
-        <source>Form</source>
-        <translation>Información</translation>
-    </message>
-</context>
-<context>
     <name>LogDisplayDialog</name>
     <message>
         <location filename="../logdisplaydialog.ui" line="14"/>
@@ -6046,7 +6038,7 @@ Do you want to open the options dialog?</source>
     <message>
         <location filename="../sioworker.cpp" line="426"/>
         <source>RespeQt Client</source>
-        <translation>AspeQt Cliente</translation>
+        <translation>RespeQt Cliente</translation>
     </message>
     <message>
         <location filename="../sioworker.cpp" line="432"/>

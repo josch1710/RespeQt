@@ -37,7 +37,7 @@
     </message>
 </context>
 <context>
-    <name>AspeCl</name>
+    <name>RCL</name>
     <message>
         <source>Swapped disk %1 with disk %2.</source>
         <translation type="obsolete">Диск %1 заменен на диск %2.</translation>
@@ -2247,14 +2247,6 @@ Estimated time left: %1:%2</source>
         <location filename="../miscutils.cpp" line="208"/>
         <source>gzseek() failed.</source>
         <translation>Ошибка gzseek().</translation>
-    </message>
-</context>
-<context>
-    <name>InfoWidget</name>
-    <message>
-        <location filename="../infowidget.ui" line="26"/>
-        <source>Form</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
