@@ -1,4 +1,6 @@
 [![32-bit MinGW builds](https://github.com/josch1710/RespeQt/actions/workflows/mingw32.yml/badge.svg)](https://github.com/josch1710/RespeQt/actions/workflows/mingw32.yml)
+[![Linux builds](https://github.com/josch1710/RespeQt/actions/workflows/linux.yml/badge.svg)](https://github.com/josch1710/RespeQt/actions/workflows/linux.yml)
+[![Macos builds](https://github.com/josch1710/RespeQt/actions/workflows/macos.yml/badge.svg)](https://github.com/josch1710/RespeQt/actions/workflows/macos.yml)
 
 RespeQt, Atari Serial Peripheral Emulator for Qt
 

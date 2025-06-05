@@ -11,7 +11,7 @@ namespace Printers {
     graphicsScene->clear();
   }
 
-  GraphicsSetPoint::GraphicsSetPoint(const QPoint point, const QPen pen) : mPoint(point),
+  GraphicsSetPoint::GraphicsSetPoint(const QPointF point, const QPen pen) : mPoint(point),
                                                                            mPen(pen) {
   }
 
@@ -20,7 +20,7 @@ namespace Printers {
 //qDebug() << "!n" << "Set Point "<<mPoint;
   }
 
-  GraphicsDrawLine::GraphicsDrawLine(const QPoint srcPoint, const QPen pen, const QPoint destPoint)
+  GraphicsDrawLine::GraphicsDrawLine(const QPointF srcPoint, const QPen pen, const QPointF destPoint)
       : GraphicsSetPoint(srcPoint, pen),
         mDestPoint(destPoint) {
   }
@@ -29,7 +29,7 @@ namespace Printers {
     graphicsScene->addLine(mPoint.x(), -mPoint.y(), mDestPoint.x(), -mDestPoint.y(), mPen);
   }
 
-  GraphicsDrawText::GraphicsDrawText(const QPoint point, const QPen pen, const int orientation, const QFont font, QString text)
+  GraphicsDrawText::GraphicsDrawText(const QPointF point, const QPen pen, const int orientation, const QFont font, QString text)
       : GraphicsSetPoint(point, pen),
         mOrientation(orientation),
         mFont(font),
@@ -40,13 +40,13 @@ namespace Printers {
     QGraphicsTextItem *text = graphicsScene->addText(mText, mFont);
     text->setDefaultTextColor(mPen.color());
     text->setRotation(mOrientation);
-    QPoint adjusted = computeTextCoordinates();
+    QPointF adjusted = computeTextCoordinates();
     text->setPos(adjusted.x(), adjusted.y());
   }
 
-  QPoint GraphicsDrawText::computeTextCoordinates() {
+  QPointF GraphicsDrawText::computeTextCoordinates() {
     // fix position because (0,0) on Windows/Linux is top left but on the 1020 it is bottom left.
-    QPoint adjusted(mPoint.x(), -mPoint.y());
+    QPointF adjusted(mPoint.x(), -mPoint.y());
     QFontMetrics metrics(mFont);
     switch (mOrientation) {
 

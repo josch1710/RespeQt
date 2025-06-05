@@ -23,7 +23,7 @@ namespace Printers {
     }
 
   protected:
-    QPoint mPoint;
+    QPointF mPoint;
     int mColor;
   };
 
@@ -45,7 +45,7 @@ namespace Printers {
     Q_OBJECT
 
   public:
-    GraphicsSetPoint(const QPoint point, const QPen);
+    GraphicsSetPoint(const QPointF point, const QPen);
     virtual ~GraphicsSetPoint() = default;
 
     virtual void execute(QGraphicsScene *graphicsScene) override;
@@ -55,7 +55,7 @@ namespace Printers {
     }
 
   protected:
-    QPoint mPoint;
+    QPointF mPoint;
     QPen mPen;
   };
 
@@ -63,7 +63,7 @@ namespace Printers {
     Q_OBJECT
 
   public:
-    GraphicsDrawLine(const QPoint srcPoint, const QPen pen, const QPoint destPoint);
+    GraphicsDrawLine(const QPointF srcPoint, const QPen pen, const QPointF destPoint);
     virtual ~GraphicsDrawLine() = default;
 
     virtual void execute(QGraphicsScene *graphicsScene) override;
@@ -73,14 +73,14 @@ namespace Printers {
     }
 
   protected:
-    QPoint mDestPoint;
+    QPointF mDestPoint;
   };
 
   class GraphicsDrawText : public GraphicsSetPoint {
     Q_OBJECT
 
   public:
-    GraphicsDrawText(const QPoint point, const QPen pen, const int orientation, const QFont font, QString text);
+    GraphicsDrawText(const QPointF point, const QPen pen, const int orientation, const QFont font, QString text);
     virtual ~GraphicsDrawText() = default;
 
     virtual void execute(QGraphicsScene *graphicsScene) override;
@@ -94,7 +94,7 @@ namespace Printers {
     QFont mFont;
     QString mText;
 
-    QPoint computeTextCoordinates();
+    QPointF computeTextCoordinates();
   };
 }// namespace Printers
 #endif// GRAPHICSPRIMITIVE_H

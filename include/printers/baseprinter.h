@@ -58,8 +58,9 @@ namespace Printers {
     QFont mFont;
     QString buffer{};
     bool mClearPane;
-    QPoint mPenPoint;
+    QPointF mPenPoint;
     QPen mPen;
+    float mLineHeightPixels;
 
   private:
     char m_lastOperation;

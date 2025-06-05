@@ -32,13 +32,14 @@ namespace Printers {
     bool mESC;
     bool mElongatedMode;
     GraphicsMode mGraphicsMode{GraphicsMode::NOT_GRAPHICS};
-    uint16_t mGraphicsColumns;
+    uint16_t mGraphicsColumns, mTotalColums;
 
     bool handleEscapedCodes(const unsigned char b);
     bool handlePrintableCodes(const unsigned char b);
     bool elongatedMode() { return mElongatedMode; }
     void setElongatedMode(bool elongatedMode);
     bool handleGraphicsMode(const unsigned char b);
+    void newLine();  
   };
 }// namespace Printers
 #endif// ATARI1029_H

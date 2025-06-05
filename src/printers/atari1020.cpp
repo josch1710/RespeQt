@@ -686,7 +686,7 @@ namespace Printers {
           auto x = getFirstNumber();
           auto y = getSecondNumber();
           if ((x >= 0) && (x <= 480)) {
-            QPoint point(x, y);
+            QPointF point(x, y);
 
             switch (mCurrentCommand) {
               case 'D':
@@ -820,7 +820,7 @@ namespace Printers {
   }
 
   bool Atari1020::drawAxis(bool xAxis, int size, int count) {
-    QPoint end = QPoint(mPenPoint);
+    QPointF end{QPointF(mPenPoint)};
 
     if (xAxis) {
       end.setX(end.x() + (size * count));
