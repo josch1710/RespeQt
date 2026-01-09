@@ -119,10 +119,8 @@ namespace DiskImages {
     if (m_board.isHappyEnabled()) {
       m_board.setChipOpen(false);
       if (m_board.m_happyRam.size() == 0) {
-        m_board.m_happyRam.reserve(6144);
-        for (unsigned int i = 0; i < 6144; i++) {
-          m_board.m_happyRam[i] = 0;
-        }
+        m_board.m_happyRam.resize(6144);
+        m_board.m_happyRam.fill(0);
         m_board.m_happyRam[0] = 0x80;
         for (unsigned int i = 0; i < sizeof(HAPPY_INITIAL_SECTOR_LIST); i++) {
           m_board.m_happyRam[0x280 + i] = HAPPY_INITIAL_SECTOR_LIST[i];
