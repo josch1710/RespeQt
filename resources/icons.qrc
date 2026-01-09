@@ -82,4 +82,77 @@
         <file>silk-icons/icons/folder_image.png</file>
         <file>other-icons/sideb.png</file>
     </qresource>
+    <qresource prefix="/iconoir">
+        <!-- Dateisystem -->
+        <file alias="folder">iconoir/folder.svg</file>
+        <file alias="folder-settings">iconoir/folder-settings.svg</file>
+        <file alias="folder-search">iconoir/folder.svg</file>
+        <file alias="file">iconoir/folder.svg</file>
+        <file alias="file-text">iconoir/text.svg</file>
+        <file alias="file-code">iconoir/code.svg</file>
+        <file alias="media-image">iconoir/media-image.svg</file>
+        <file alias="auto-save">iconoir/arrow-right-tag.svg</file>
+
+        <!-- Laufwerk/Datenbank -->
+        <file alias="database">iconoir/database.svg</file>
+        <file alias="database-settings">iconoir/database-settings.svg</file>
+        <file alias="database-remove">iconoir/database-script-minus.svg</file>
+        <file alias="database-restore">iconoir/database-restore.svg</file>
+        <file alias="database-export">iconoir/database-export.svg</file>
+        <file alias="database-backup">iconoir/database-check.svg</file>
+        <file alias="eject">iconoir/eject.svg</file>
+        <file alias="play">iconoir/play.svg</file>
+        <file alias="cd">iconoir/one-point-circle.svg</file>
+        <file alias="save-floppy-disk">iconoir/floppy-disk.svg</file>
+        <file alias="delete-circle">iconoir/floppy-disk-arrow-in.svg</file>
+        <file alias="media-video">iconoir/media-video.svg</file>
+
+        <!-- Allgemeine Funktionen -->
+        <file alias="plug-connect">iconoir/ev-plug-charging.svg</file>
+        <file alias="plug-disconnect">iconoir/ev-plug-xmark.svg</file>
+        <file alias="internet">iconoir/internet.svg</file>
+        <file alias="no-link">iconoir/link-xmark.svg</file>
+        <file alias="printer">iconoir/printer.svg</file>
+        <file alias="printer-remove">iconoir/printer.svg</file>
+        <file alias="log-out">iconoir/log-out.svg</file>
+        <file alias="help-circle">iconoir/help-circle.svg</file>
+        <file alias="info-circle">iconoir/info-circle.svg</file>
+        <file alias="desktop">iconoir/desk.svg</file>
+        <file alias="desktop-apps">iconoir/developer.svg</file>
+        <file alias="text">iconoir/text.svg</file>
+        <file alias="text-size">iconoir/text-size.svg</file>
+        <file alias="package">iconoir/package.svg</file>
+        <file alias="package-remove">iconoir/package-lock.svg</file>
+        <file alias="camera">iconoir/camera.svg</file>
+        <file alias="apps">iconoir/app-store.svg</file>
+        <file alias="shield">iconoir/shield.svg</file>
+        <file alias="shield-check">iconoir/shield-check.svg</file>
+
+        <!-- Steuerung -->
+        <file alias="add-circle">iconoir/circle.svg</file>
+        <file alias="delete-circle">iconoir/circle-spark.svg</file>
+        <file alias="cut">iconoir/cut.svg</file>
+        <file alias="arrow-right">iconoir/arrow-right.svg</file>
+        <file alias="arrow-left">iconoir/arrow-left.svg</file>
+        <file alias="arrow-up">iconoir/arrow-up.svg</file>
+        <file alias="move">iconoir/arrow-right-tag.svg</file>
+        <file alias="undo">iconoir/undo.svg</file>
+        <file alias="fast-arrow-right">iconoir/fast-arrow-right.svg</file>
+        <file alias="arrow-left-circle">iconoir/arrow-left-circle.svg</file>
+        <file alias="arrow-right-circle">iconoir/arrow-right-circle.svg</file>
+        <file alias="lock">iconoir/lock.svg</file>
+        <file alias="lock-open">iconoir/lock-square.svg</file>
+        <file alias="save-action-floppy">iconoir/floppy-disk-arrow-in.svg</file>
+
+        <!-- Status -->
+        <file alias="check-circle">iconoir/check-circle.svg</file>
+        <file alias="warning-circle">iconoir/warning-circle.svg</file>
+        <file alias="emoji-satisfied">iconoir/emoji-satisfied.svg</file>
+        <file alias="emoji-sad">iconoir/emoji-sad.svg</file>
+
+        <!-- Spezielle Symbole -->
+        <file alias="list">iconoir/list.svg</file>
+        <file alias="text-align-left">iconoir/align-left.svg</file>
+    </qresource>
+
 </RCC>

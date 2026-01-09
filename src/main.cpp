@@ -9,7 +9,6 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <QTextCodec>
-#include <memory>
 #include <QStyleFactory>
 
 #ifdef Q_OS_WIN

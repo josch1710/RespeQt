@@ -23,6 +23,7 @@
 #include "autobootdialog.h"
 #include "bootoptionsdialog.h"
 #include "cassettedialog.h"
+#include "diskimages/folderimage.h"
 #include "drivewidget.h"
 #include "include/diskimages/folderimage.h"
 #include "logdisplaydialog.h"
@@ -35,6 +36,8 @@
 #include "printers/printers.h"
 //#include "printers/outputs.h"
 #include "respeqtsettings.h"
+#include "gui/stylesheets/stylesheetmanager.h"
+#include "gui/stylesheets/stylesheet.h"
 
 //#include <QDesktopWidget> deprecated in Qt 5. Use QScreen:
 #include <QScreen>
@@ -72,6 +75,8 @@ bool g_disablePicoHiSpeed;
 //static int g_savedWidth;
 
 MainWindow *MainWindow::sInstance{nullptr};
+
+using namespace gui::stylesheets;
 
 // ****************************** END OF GLOBALS ************************************//
 
@@ -171,7 +176,7 @@ MainWindow::MainWindow()
     deltree(file.absoluteFilePath());
   }
 
-  QCoreApplication::setOrganizationName("ZeeSoft");
+  QCoreApplication::setOrganizationName("RespeQt");
   QCoreApplication::setOrganizationDomain("org.respeqt");
   QCoreApplication::setApplicationName("RespeQt");
 
@@ -186,6 +191,8 @@ MainWindow::MainWindow()
 
   /* Setup UI */
   ui->setupUi(this);
+
+  setupStylesheet();
 
   connectUISignal();
 
@@ -2065,9 +2072,9 @@ void MainWindow::restoreLayout()
     {
         isMiniMode = RespeqtSettings::instance()->miniMode();
         if (isMiniMode)
-        {                                           // check if mini-mode was last used
-            isMiniMode = false;                     // reset now so we can toggle it ON
-            ui->actionToggleMiniMode->trigger();    // trigger mini-mode toggle action
+        {                                         // check if mini-mode was last used
+            isMiniMode = false;                   // reset now so we can toggle it ON
+            ui->actionToggleMiniMode->trigger();  // trigger mini-mode toggle action
         }
         else
         {
@@ -2081,6 +2088,38 @@ void MainWindow::restoreLayout()
         if (RespeqtSettings::instance()->showLogWindow() && !(logWindow_ && logWindow_->isVisible()))
             showLogWindowTriggered();
     }
+}
+
+void MainWindow::setupStylesheet()
+{
+    /*auto*/ StylesheetManager *styleManager{StylesheetManager::getInstance()};
+    /*auto*/ QSharedPointer<Stylesheet> stylesheet{styleManager->getStylesheet(StylesheetManager::ClassicStyle)};
+    
+    styleManager->applyStyleToApplication(qApp, StylesheetManager::ClassicStyle);
+
+    // Set all the icon according to the stylesheet
+    ui->actionEjectAll->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconDriveEject));
+    // TBD ui->actionOptions->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconOptions));
+    // TBD ui->actionStartEmulation->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconStartEmulation));
+    ui->actionMountDisk->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconFloppyMount));
+    ui->actionMountFolder->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconFolder));
+    ui->actionNewImage->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconMediaFloppy));
+    ui->actionSaveSession->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconMonitorGo));
+    ui->actionOpenSession->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconMonitor));
+    ui->actionBootExe->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconAtari));
+    ui->actionSave_1->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconDriveDisk));
+    ui->actionPlaybackCassette->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconMediaTape));
+    ui->actionQuit->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconExit));
+    ui->actionAbout->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconAbout));
+    ui->actionDocumentation->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconHelp));
+    ui->actionDefaultImageGroup->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconSaveAll));
+    ui->actionPrinterEmulation->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconPrinter));
+    ui->actionHideShowDrives->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconDriveAdd));
+    ui->actionToggleMiniMode->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconMiniCooper));
+    ui->actionToggleShade->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconFadeIn));
+    ui->actionLogWindow->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconFile));
+    ui->actionLimitFileEntries->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconLock));
+    ui->actionDiskBrowser->setIcon(stylesheet->createMultipleSizeIcon(Stylesheet::IconFolderHtml));
 }
 
 bool MainWindow::checkChangeDbSource(DbDataSource dbSourceNew)

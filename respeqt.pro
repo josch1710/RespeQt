@@ -10,8 +10,8 @@
 # know the specific year(s) please let the current maintainer know.
 #
 #CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
-PROJECT_VERSION = "5.4.1"
-RC_VERSION = "-RC3" ## Begin RC version with minus
+PROJECT_VERSION = "5.4.2"
+RC_VERSION = "-RC1" ## Begin RC version with minus
 DEFINES += VERSION=\\\"v$${PROJECT_VERSION}$${RC_VERSION}\\\"
 
 #debug {

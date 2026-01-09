@@ -1,0 +1,20 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/qml">
+        <file>aboutdialog.qml</file>
+        <file>autobootdialog.qml</file>
+        <file>bootoptionsdialog.qml</file>
+        <file>cassettedialog.qml</file>
+        <file>createimagedialog.qml</file>
+        <file>diskbrowserdialog.qml</file>
+        <file>diskeditdialog.qml</file>
+        <file>docdisplaywindow.qml</file>
+        <file>drivewidget.qml</file>
+        <file>logdisplaydialog.qml</file>
+        <file>mainwindow.qml</file>
+        <file>optionsdialog.qml</file>
+        <file>printerwidget.qml</file>
+        <file>printers/printeroutputwindow.qml</file>
+        <file>printers/textprinterwindow.qml</file>
+    </qresource>
+</RCC>

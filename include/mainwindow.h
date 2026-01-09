@@ -26,10 +26,14 @@
 
 #include "aboutdialog.h"
 #include "createimagedialog.h"
+#include "diskbrowser/diskbrowserdlg.h"
+#include "diskbrowser/folderdisks.h"
 #include "diskeditdialog.h"
 #include "docdisplaywindow.h"
 #include "drivewidget.h"
 #include "logdisplaydialog.h"
+#include "network/tnfstcp.h"
+#include "network/tnfsudp.h"
 #include "optionsdialog.h"
 #include "printers/outputwindow.h"
 #include "printers/textprinterwindow.h"
@@ -37,10 +41,6 @@
 #include "serialport.h"
 #include "siorecorder.h"
 #include "sioworker.h"
-#include "diskbrowser/folderdisks.h"
-#include "diskbrowser/diskbrowserdlg.h"
-#include "network/tnfsudp.h"
-#include "network/tnfstcp.h"
 
 #define MAXBLOCK 500
 
@@ -134,6 +134,8 @@ private:
   void setupDebugItems();
 
   void restoreLayout();
+
+  void setupStylesheet();
 
 protected:
   void showEvent(QShowEvent *event) override;

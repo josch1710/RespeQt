@@ -4,8 +4,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 cmake_minimum_required(VERSION 3.5)
 set(CMAKE_OSX_ARCHITECTURES x86_64)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.8)
-project(RespeQt VERSION 5.4.1 LANGUAGES CXX)
-set(RC_VERSION "_RC3") ## Begin RC version with underscore
+project(RespeQt VERSION 5.5 LANGUAGES CXX)
+set(RC_VERSION "_RC1") ## Begin RC version with underscore
 cmake_policy(SET CMP0071 NEW)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -118,6 +118,14 @@ set(SOURCES
     src/network/tnfstcp.cpp
     src/network/sessioninfo.cpp
     src/network/datagram.cpp
+    src/gui/stylesheets/stylesheetmanager.cpp
+    src/gui/stylesheets/stylesheet.cpp
+    src/gui/stylesheets/classic_stylesheet.cpp
+    src/gui/stylesheets/modern_stylesheet.cpp
+    src/gui/stylesheets/dark_stylesheet.cpp
+    src/gui/stylesheets/custom_stylesheet.cpp
+    src/gui/drivewidget.cpp
+    src/gui/driverwidgetwrapper.cpp
 )
 
 set(HEADERS
@@ -195,6 +203,14 @@ set(HEADERS
     include/network/tnfstcp.h
     include/network/sessioninfo.h
     include/network/datagram.h
+    include/gui/stylesheets/stylesheetmanager.h
+    include/gui/stylesheets/stylesheet.h
+    include/gui/stylesheets/classic_stylesheet.h
+    include/gui/stylesheets/modern_stylesheet.h
+    include/gui/stylesheets/dark_stylesheet.h
+    include/gui/stylesheets/custom_stylesheet.h
+    include/gui/drivewidget.h
+    include/gui/drivewidgetwrapper.h
 )
 
 set(FORMS
@@ -221,6 +237,7 @@ set(RESOURCES
     resources/i18n.qrc
     resources/documentation.qrc
     resources/fonts.qrc
+    ui/qml.qrc
 )
 
 if (UNIX)
@@ -239,7 +256,7 @@ if (WIN32)
 endif()
 
 find_package(Qt5 REQUIRED
-    COMPONENTS Core Widgets Gui Network PrintSupport SerialPort Svg LinguistTools
+    COMPONENTS Core Widgets Gui Network PrintSupport SerialPort Svg LinguistTools Quick QuickWidgets QuickControls2
 )
 if (MAKE_TEST)
     find_package(Qt5 REQUIRED COMPONENTS Test)
@@ -283,6 +300,9 @@ target_link_libraries(${TARGET} Qt5::Network)
 target_link_libraries(${TARGET} Qt5::PrintSupport)
 target_link_libraries(${TARGET} Qt5::SerialPort)
 target_link_libraries(${TARGET} Qt5::Svg)
+target_link_libraries(${TARGET} Qt5::Quick)
+target_link_libraries(${TARGET} Qt5::QuickWidgets)
+target_link_libraries(${TARGET} Qt5::QuickControls2)
 if (MAKE_TEST)
     target_link_libraries(${TARGET} Qt5::Test)
 endif()

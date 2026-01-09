@@ -16,6 +16,12 @@ SOURCES += \
     src/rcl.cpp \
     src/sdxprotocol.cpp \
     src/sioworker.cpp \
+    src/gui/stylesheetmanager.cpp \
+    src/gui/stylesheet.cpp \
+    src/gui/stylesheets/classic_stylesheet.cpp \
+    src/gui/stylesheets/modern_stylesheet.cpp \
+    src/gui/stylesheets/dark_stylesheet.cpp \
+    src/gui/stylesheets/custom_stylesheet.cpp \
     src/optionsdialog.cpp \
     src/aboutdialog.cpp \
     src/createimagedialog.cpp \
@@ -83,6 +89,12 @@ SOURCES += \
     src/network/datagram.cpp
 
 HEADERS += \
+    include/gui/stylesheet.h \
+    include/gui/stylesheetmanager.h \
+    include/gui/stylesheets/classic_stylesheet.h
+    include/gui/stylesheets/modern_stylesheet.h
+    include/gui/stylesheets/dark_stylesheet.h
+    include/gui/stylesheets/custom_stylesheet.h
     include/mainwindow.h \
     include/printers/outputwindow.h \
     include/printers/rawoutput.h \
