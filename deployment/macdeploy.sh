@@ -7,16 +7,21 @@ fi
 
 # Build a deployment directory with the correct version number
 cd "$1" || exit 1
-longversion=$3
-if [[ "$4" != "" ]]; then
-  longversion="${longversion}$4"
+longversion=$4
+if [[ "$5" != "" && "$5" != "_" ]]; then
+  longversion="${longversion}$5"
 fi
 deploydir="$2/RespeQt"
 
 install -d "${deploydir}"
 rm -rf "${deploydir}"/RespeQt.app
 cp -aR "$2/RespeQt.app" "${deploydir}"
-macdeployqt "$deploydir"/RespeQt.app -always-overwrite
+
+DEPLOYCMD=macdeployqt
+if [[ "$3" != "" ]]; then
+  DEPLOYCMD=$3/../../../bin/${DEPLOYCMD}
+fi
+$DEPLOYCMD "$deploydir"/RespeQt.app -always-overwrite
 
 install -p "$1/deployment/Info.plist.app" "${deploydir}"/RespeQt.app/Contents/Info.plist
 sed -i '' -e "s/@SHORTVERSION@/$3/g" "${deploydir}"/RespeQt.app/Contents/Info.plist
