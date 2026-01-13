@@ -12,7 +12,7 @@ jobs:
       actions: write  # for styfle/cancel-workflow-action to cancel/stop running workflows
       contents: write # for actions/checkout to fetch code and softprops/action-gh-release
     if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
-    runs-on: macos-14
+    runs-on: macos-14-intel
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.12.1
@@ -25,7 +25,7 @@ jobs:
       - name: Install Mac Qt 5
         uses: jurplel/install-qt-action@v4
         with:
-          version: "5.15.2"
+          version: "5.15.14"
           host: "mac"
           arch: "clang_64"
           target: "desktop"
@@ -35,7 +35,7 @@ jobs:
         run: |
           top=`pwd`
           mkdir -p $top/build
-          cmake -S $top -B $top/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' 
+          cmake -S $top -B $top/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.14/mingw81_32/lib/cmake' 
           cmake --build $top/build --target deploy -j4
           
       - name: Upload artifacts
@@ -50,7 +50,7 @@ jobs:
       actions: write  # for styfle/cancel-workflow-action to cancel/stop running workflows
       contents: write # for actions/checkout to fetch code and softprops/action-gh-release
     if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
-    runs-on: macos-14
+    runs-on: macos-14-intel
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.12.1
@@ -63,7 +63,7 @@ jobs:
       - name: Install Mac Qt 5
         uses: jurplel/install-qt-action@v4
         with:
-          version: "5.15.2"
+          version: "5.15.14"
           host: "mac"
           arch: "clang_64"
           target: "desktop"
@@ -73,7 +73,7 @@ jobs:
         run: |
           top=`pwd`
           mkdir -p $top/build
-          cmake -DMAKE_TEST=on -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' 
+          cmake -DMAKE_TEST=on -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.14/mingw81_32/lib/cmake' 
           cmake --build $top/build
       - name: Run the test
         run: |
