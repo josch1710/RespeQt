@@ -44,6 +44,7 @@ namespace Printers {
 
   signals:
     void setSceneRect(const QRect &rect);
+    void addItem(QGraphicsItem *item);
 
   protected:
     Atascii mAtascii;
@@ -53,7 +54,7 @@ namespace Printers {
     bool writeDataFrame(QByteArray data);
     void dumpBuffer(unsigned char *buf, int len);
     void fillBuffer(char *line, unsigned char *buf, int len, int ofs, bool dumpAscii);
-    void executeGraphicsPrimitive(GraphicsPrimitive *primitive);
+    //void executeGraphicsPrimitive(GraphicsPrimitive *primitive);
 
     QFont mFont;
     QString buffer{};

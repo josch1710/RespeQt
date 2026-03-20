@@ -137,9 +137,9 @@ namespace Printers {
     QChar qb = translateAtascii(b & 127); // Masking inverse characters.
     buffer.push_back(qb);
     if (buffer.size() >= mLineChars || b == 192 /* EOL */) {
-      executeGraphicsPrimitive(
-        new GraphicsDrawText(mPenPoint, mPen, 0, mFont, buffer)
-      );
+      // executeGraphicsPrimitive(
+      //   new GraphicsDrawText(mPenPoint, mPen, 0, mFont, buffer)
+      // );
 
       // update head position
       QFontMetrics metrics(mFont);

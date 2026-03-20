@@ -7,9 +7,12 @@
 
 namespace Printers {
   BasePrinter::BasePrinter(SioWorkerPtr worker)
-      : SioDevice(std::move(worker))//,
-                                    //mOutput()
-  {}
+      : SioDevice(std::move(worker))
+  {
+      mPenPoint.setX(0);
+      mPenPoint.setY(0);
+      mPen.setBrush(Qt::black);
+  }
 
   BasePrinter::~BasePrinter() = default;
 
@@ -99,10 +102,13 @@ namespace Printers {
 
   void BasePrinter::setOutputWindow(OutputWindowPtr outputWindow) {
     if (mOutputWindow) {
+      disconnect(this, &BasePrinter::addItem, mOutputWindow.data(), &OutputWindow::addItem);
       mOutputWindow->close();
     }
+    
     mOutputWindow = outputWindow;
     mOutputWindow->setSceneRect(getSceneRect());
+    connect(this, &BasePrinter::addItem, mOutputWindow.data(), &OutputWindow::addItem);
   }
 
   const QRectF BasePrinter::getSceneRect() const {
@@ -196,14 +202,14 @@ namespace Printers {
     }
   }
 
-  void BasePrinter::executeGraphicsPrimitive(GraphicsPrimitive *primitive) {
-    if (mOutputWindow) {
-      if (mClearPane) {
-        mClearPane = false;
-        mOutputWindow->executeGraphicsPrimitive(new GraphicsClearPane());
-      }
-      mOutputWindow->executeGraphicsPrimitive(primitive);
-    }
-  }
+  // void BasePrinter::executeGraphicsPrimitive(GraphicsPrimitive *primitive) {
+  //   if (mOutputWindow) {
+  //     if (mClearPane) {
+  //       mClearPane = false;
+  //       mOutputWindow->executeGraphicsPrimitive(new GraphicsClearPane());
+  //     }
+  //     mOutputWindow->executeGraphicsPrimitive(primitive);
+  //   }
+  // }
 
 }// namespace Printers

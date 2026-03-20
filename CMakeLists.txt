@@ -98,7 +98,7 @@ set(SOURCES
     src/printers/printerfactory.cpp
     src/printers/atari1025.cpp
     src/printers/passthrough.cpp
-    src/printers/graphicsprimitive.cpp
+    # src/printers/graphicsprimitive.cpp
     src/crc16.cpp
     src/diskimages/cpu6502.cpp
     src/filesystems/ataridirentry.cpp
@@ -174,7 +174,7 @@ set(HEADERS
     include/printers/atari1025.h
     include/printers/passthrough.h
     include/smartdevice.h
-    include/printers/graphicsprimitive.h
+    # include/printers/graphicsprimitive.h
     include/crc16.h
     include/diskimages/cpu6502.h
     headers/atarisio.h
@@ -323,7 +323,7 @@ if (NOT MAKE_TEST AND CMAKE_BUILD_TYPE STREQUAL "Release")
     endif()
     if (WIN32)
         add_custom_target(deploy 
-            COMMAND ${CMAKE_SOURCE_DIR}\\deployment\\windeploy.bat "${EXECUTABLE_OUTPUT_PATH}\\RespeQt" "${Qt5_DIR}/../../../bin/qmake.exe" "${CMAKE_SOURCE_DIR}" ${PROJECT_VERSION}${RC_VERSION}
+            COMMAND ${CMAKE_SOURCE_DIR}\\deployment\\windeploy.bat "${EXECUTABLE_OUTPUT_PATH}" "${Qt5_DIR}/../../../bin/qmake.exe" "${CMAKE_SOURCE_DIR}" ${PROJECT_VERSION}${RC_VERSION}
             DEPENDS ${TARGET}
         )
     endif()

@@ -33,7 +33,7 @@ namespace Printers {
     ui->printerGraphics->setScene(&mGraphicsScene);
 
     connect(this, &OutputWindow::textPrint, this, &OutputWindow::print);
-    connect(this, &OutputWindow::graphicsPrint, this, &OutputWindow::printGraphics);
+    //connect(this, &OutputWindow::graphicsPrint, this, &OutputWindow::printGraphics);
     connect(ui->actionSave, &QAction::triggered, this, &OutputWindow::saveTriggered);
     connect(ui->actionClear, &QAction::triggered, this, &OutputWindow::clearTriggered);
     connect(ui->actionPrint, &QAction::triggered, this, &OutputWindow::printTriggered);
@@ -84,16 +84,16 @@ namespace Printers {
     // TODO Print
   }
 
-  void OutputWindow::printGraphics(GraphicsPrimitive *primitive) {
-    primitive->execute(ui->printerGraphics->scene());
-    delete primitive;
-  }
+  // void OutputWindow::printGraphics(GraphicsPrimitive *primitive) {
+  //   primitive->execute(ui->printerGraphics->scene());
+  //   delete primitive;
+  // }
 
 
   void OutputWindow::clearTriggered() {
-    auto primitive = new GraphicsClearPane;
-    primitive->execute(ui->printerGraphics->scene());
-    delete primitive;
+    // auto primitive = new GraphicsClearPane;
+    // primitive->execute(ui->printerGraphics->scene());
+    // delete primitive;
   }
 
   // Send to Printer Action   //
@@ -120,9 +120,9 @@ namespace Printers {
 
   void OutputWindow::saveTriggered() {
     QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Save printer text output"),
-                                                    RespeqtSettings::instance()->lastPrinterTextDir(),
-                                                    tr("SVG files (*.svg);;All files (*)"), nullptr);
+        tr("Save printer text output"),
+        RespeqtSettings::instance()->lastPrinterTextDir(),
+        tr("SVG files (*.svg);;All files (*)"), nullptr);
     if (fileName.isEmpty()) {
       return;
     }
@@ -156,12 +156,21 @@ bool OutputWindow::setupOutput()
     return true;
 }*/
 
-  void OutputWindow::executeGraphicsPrimitive(GraphicsPrimitive *primitive) {
-    emit graphicsPrint(primitive);
-  }
+  // void OutputWindow::executeGraphicsPrimitive(GraphicsPrimitive *primitive) {
+  //   emit graphicsPrint(primitive);
+  // }
 
   void OutputWindow::setSceneRect(const QRectF &sceneRect) {
     mGraphicsScene.setSceneRect(sceneRect);
   }
 
-}// namespace Printers
+  void OutputWindow::addItem(QGraphicsItem *item)
+  {
+      mGraphicsScene.addItem(item);
+  }
+  void OutputWindow::playScene()
+  {
+      mGraphicsScene.update();
+  }
+
+  }  // namespace Printers

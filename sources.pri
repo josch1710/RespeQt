@@ -47,7 +47,7 @@ SOURCES += \
     src/printers/printerfactory.cpp \
     src/printers/atari1025.cpp \
     src/printers/passthrough.cpp \
-    src/printers/graphicsprimitive.cpp \
+    # src/printers/graphicsprimitive.cpp \
     src/crc16.cpp \
     src/filesystems/ataridirentry.cpp \
     src/filesystems/atarifilesystem.cpp \
@@ -123,7 +123,7 @@ HEADERS += \
     include/printers/atari1025.h \
     include/printers/passthrough.h \
     include/smartdevice.h  \
-    include/printers/graphicsprimitive.h \
+    # include/printers/graphicsprimitive.h \
     include/crc16.h \
     headers/atarisio.h \
     include/filesystems/ataridirentry.h \

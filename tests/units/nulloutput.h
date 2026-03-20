@@ -12,7 +12,7 @@ namespace Tests {
         virtual ~NullOutput() = default;
 
         bool setupOutput() override { return true; }
-        void executeGraphicsPrimitive(Printers::GraphicsPrimitive *primitive) override {}
+        //void executeGraphicsPrimitive(Printers::GraphicsPrimitive *primitive) override {}
         bool beginOutput() override { return true; }
         bool endOutput() override { return true; }
         void newPage(bool) override {}

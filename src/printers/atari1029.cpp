@@ -46,6 +46,7 @@ namespace Printers {
           {
             mESC = false;
             setElongatedMode(false);
+            
             /*if (mOutput->font())
                         {
                             mOutput->font()->setUnderline(false);
@@ -177,18 +178,23 @@ namespace Printers {
       case GraphicsMode::PLOT_DOTS: {
         // Now we fetch the graphics data, until mGraphicsColumns is 0
         // Paint the dots;
-        /*QPoint point(mOutput->x(), mOutput->y() + 6);
-                for(int i = 0; i < 7; i++)
-                {
-                    // Mask the point we want to draw.
-                    mOutput->plot(point, b & (1 << i));
-                    point.setY(point.y() - 1);
-                }
-                mGraphicsColumns --;
-                mOutput->setX(mOutput->x() + 1); // Move to next column;
-                */
+        QPoint point(mPenPoint.x(), mPenPoint.y() + 6);
+            for(int i = 0; i < 7; i++) 
+            {
+                // Mask the point we want to draw.
+                auto line = new QGraphicsLineItem(point.x(), point.y(), point.x(), point.y());
+                line->setPen(QPen(b & (1 << i) ? Qt::black : Qt::white, 1));
+                emit addItem(line);
+                point.setY(point.y() - 1);
+            }
+            mGraphicsColumns --;
+            mPenPoint.setX(mPenPoint.x() + 1); // Move to next column;
         if (mGraphicsColumns == 0)
-          mGraphicsMode = GraphicsMode::NOT_GRAPHICS;
+        {
+            mPenPoint.setX(0);
+            mPenPoint.setY(mPenPoint.y() + 7);
+            mGraphicsMode = GraphicsMode::NOT_GRAPHICS;
+        }
       } break;
 
       case GraphicsMode::NOT_GRAPHICS://Should not happen.

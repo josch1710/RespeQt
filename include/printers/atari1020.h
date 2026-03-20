@@ -2,7 +2,7 @@
 #define ATARI1020_H
 
 #include "atariprinter.h"
-#include "graphicsprimitive.h"
+//#include "graphicsprimitive.h"
 
 enum AUTOMATA_STATES {
   AUTOMATA_START = 0,
