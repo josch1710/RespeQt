@@ -123,7 +123,7 @@ namespace DiskImages {
 
     // Validate the image size
     bool sizeValid{false};
-    if (secSize == 256) {
+    if (secSize == 256 || secSize == 512) {
       // Handle double density images
       if (size <= 384 && size % 128 == 0) {
         // Handle double density images with less than 4 sectors
@@ -132,10 +132,10 @@ namespace DiskImages {
       else
       {
           // Handle double density images with 4 or more sectors
-          const quint32 sectorsWithPadding = (size - 768) % 256;
-          const quint32 sectorsWithoutPadding = (size - 384) % 256;
-          const quint32 sizeWithPadding = size % 256;
-          const quint32 sizeWithoutPadding = (size + 384) % 256;
+          const quint32 sectorsWithPadding = (size - 768) % secSize;
+          const quint32 sectorsWithoutPadding = (size - 384) % secSize;
+          const quint32 sizeWithPadding = size % secSize;
+          const quint32 sizeWithoutPadding = (size + 384) % secSize;
 
           if (sizeWithPadding == 0 || sizeWithoutPadding == 0)
               sizeValid = true;
@@ -173,9 +173,9 @@ namespace DiskImages {
                       // padded after each sector
                       /*auto*/bool equals{true};
                       for (auto sector = 0; sector < 3; sector++) {
-                          sourceFile->seek(16 + sector * 256 + 128);
+                          sourceFile->seek(16 + sector * secSize + 128);
                           sourceFile->read(imageSector, 128);
-                          
+
                           for (auto i = 0; i < 128; i++) {
                               if (emptySector.at(i) != imageSector[i]) {
                                   equals = false;
@@ -201,18 +201,22 @@ namespace DiskImages {
               }
           }
       }
-        switch (m_hasPadding)
-        {
-            case Padding::None:
-                qDebug()<<"!n"<<"DD No Padding";
-            break;
-            case Padding::SameSectorSize:
-                qDebug()<<"!n"<<"DD Same Sector Size";
-            break;
-            case Padding::FilledAfterBootArea:
-                qDebug()<<"!n"<<"DD Filled after Boot";
-            break;
-        }
+
+      char densityText[3];
+      strcpy(densityText, (secSize == 256) ? "DD" : "QD");
+
+      switch (m_hasPadding)
+      {
+          case Padding::None:
+              qDebug()<<"!n"<<densityText<<" No Padding";
+          break;
+          case Padding::SameSectorSize:
+              qDebug()<<"!n"<<densityText<<" Same Sector Size";
+          break;
+          case Padding::FilledAfterBootArea:
+              qDebug()<<"!n"<<densityText<<" Filled after Boot";
+          break;
+      }
     } else {
       // Handle non-double density images
       if (size % secSize == 0) {
