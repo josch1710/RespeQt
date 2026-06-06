@@ -3,8 +3,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 ### RespeQt CMAKE version
 cmake_minimum_required(VERSION 3.5)
 set(CMAKE_OSX_ARCHITECTURES x86_64)
-project(RespeQt VERSION 5.4.1 LANGUAGES CXX)
-set(RC_VERSION "") ## Begin RC version with underscore
+project(RespeQt VERSION 5.4.2 LANGUAGES CXX)
+set(RC_VERSION "_RC1") ## Begin RC version with underscore
 cmake_policy(SET CMP0071 NEW)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
