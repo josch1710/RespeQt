@@ -123,7 +123,7 @@ namespace DiskImages {
 
     // Validate the image size
     bool sizeValid{false};
-    if (secSize == 256 || secSize == 512) {
+    if (secSize >= 256) {
       // Handle double density images
       if (size <= 384 && size % 128 == 0) {
         // Handle double density images with less than 4 sectors
@@ -203,18 +203,18 @@ namespace DiskImages {
       }
 
       char densityText[3];
-      strcpy(densityText, (secSize == 256) ? "DD" : "QD");
+      strcpy(densityText, (secSize == 256) ? "DD" : (secSize == 512 ? "QD" : "QD+"));
 
       switch (m_hasPadding)
       {
           case Padding::None:
-              qDebug()<<"!n"<<densityText<<" No Padding";
+              qDebug() << "!n" << "Found " << densityText << " No Padding";
           break;
           case Padding::SameSectorSize:
-              qDebug()<<"!n"<<densityText<<" Same Sector Size";
+              qDebug() << "!n" << "Found " << densityText << " Same Sector Size";
           break;
           case Padding::FilledAfterBootArea:
-              qDebug()<<"!n"<<densityText<<" Filled after Boot";
+              qDebug() << "!n" << "Found " << densityText << " Filled after Boot";
           break;
       }
     } else {
