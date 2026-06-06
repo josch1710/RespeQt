@@ -28,7 +28,7 @@ char RCl::rclSlotNo;
 // RespeQt Client ()
 void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) {
   QByteArray data(6, 0);
-  QByteArray fdata(21, 0);
+  QByteArray fdata(22, 0);
   QDateTime dateTime = QDateTime::currentDateTime();
 
   switch (command) {
@@ -39,68 +39,53 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
         return;
       }
 
-      quint8 list = aux2;
       quint8 offset = aux1;
 
-      if (!list) {
-        QByteArray ddata = sio->port()->readDataFrame(32, false);
-        if (ddata.isEmpty()) {
-          qCritical() << "!e" << tr("[%1] Read data frame failed").arg(deviceName());
-          sio->port()->writeDataNak();
-          sio->port()->writeError();
-          g_fileFilter = "*";
-          return;
+      QByteArray ddata(255, 0);
+      quint8 index = 0;
+      QString pth = RespeqtSettings::instance()->lastRclDir();
+      QDir dir(pth);
+      QStringList filters;
+      QString fileFilter = g_fileFilter.trimmed();
+      (fileFilter == "*" || fileFilter == "") ? filters << "*.atr"
+                                                        << "*.xfd"
+                                                        << "*.atx"
+                                                        << "*.pro"
+                                                        << "*.xex"
+                                                        << "*.exe"
+                                                        << "*.com"
+                                              : filters << (fileFilter + ".atr") << (fileFilter + ".xfd") << (fileFilter + ".atx") << (fileFilter + "+.pro") << (fileFilter + ".xex") << (fileFilter + "+.exe") << (fileFilter + "+.com");
+
+      dir.setNameFilters(filters);
+      QFileInfoList filelist = dir.entryInfoList();
+
+      QByteArray fn = ("Path: " + pth).toUtf8();
+      for (int n = 0; n < fn.length() && n < 37; n++)
+        ddata[index++] = fn[n] & 0xff;
+
+      ddata[index++] = static_cast<char>(155);
+
+      for (quint8 i = offset; i < filelist.size() && i < 250; ++i) {
+        QFileInfo fileInfo = filelist.at(i);
+        QString dosfilname = fileInfo.fileName();
+        QString atarifilname = toAtariFileName(dosfilname);
+        QString atariFilenum = QString(QChar::fromLatin1(i - offset + 0x41));
+        QByteArray fnumber = (" " + atariFilenum + " " + atarifilname).toUtf8();
+        if (index + fnumber.length() < 252 && i - offset < 16) {
+          for (int n = 0; n < fnumber.length(); n++)
+            ddata[index++] = fnumber[n] & 0xff;
+          ddata[index++] = static_cast<char>(155);
+          ddata[254] = 0x00;
+        } else {
+          ddata[254] = i;
+          break;
         }
-        sio->port()->writeDataAck();
-        sio->port()->writeComplete();
-        g_fileFilter = ddata;
-        qCritical() << "!i" << tr("[%1] List filter set: [%2]").arg(deviceName(), g_fileFilter);
-      } else {
-        QByteArray ddata(255, 0);
-        quint8 index = 0;
-        QString pth = RespeqtSettings::instance()->lastRclDir();
-        QDir dir(pth);
-        QStringList filters;
-        QString fileFilter = g_fileFilter.trimmed();
-        (fileFilter == "*" || fileFilter == "") ? filters << "*.atr"
-                                                          << "*.xfd"
-                                                          << "*.atx"
-                                                          << "*.pro"
-                                                          << "*.xex"
-                                                          << "*.exe"
-                                                          << "*.com"
-                                                : filters << (fileFilter + ".atr") << (fileFilter + ".xfd") << (fileFilter + ".atx") << (fileFilter + "+.pro") << (fileFilter + ".xex") << (fileFilter + "+.exe") << (fileFilter + "+.com");
-
-        dir.setNameFilters(filters);
-        QFileInfoList filelist = dir.entryInfoList();
-
-        QByteArray fn = ("Path: " + pth).toUtf8();
-        for (int n = 0; n < fn.length() && n < 37; n++)
-          ddata[index++] = fn[n] & 0xff;
-
-        ddata[index++] = 155;
-
-        for (quint8 i = offset; i < filelist.size() && i < 250; ++i) {
-          QFileInfo fileInfo = filelist.at(i);
-          QString dosfilname = fileInfo.fileName();
-          QString atarifilname = toAtariFileName(dosfilname);
-          QString atariFilenum = QString(QChar::fromLatin1(i - offset + 0x41));
-          QByteArray fnumber = (" " + atariFilenum + " " + atarifilname).toUtf8();
-          if (index + fnumber.length() < 252 && i - offset < 16) {
-            for (int n = 0; n < fnumber.length(); n++)
-              ddata[index++] = fnumber[n] & 0xff;
-            ddata[index++] = 155;
-            ddata[254] = 0x00;
-          } else {
-            ddata[254] = i;
-            break;
-          }
-        }
-
-        for (int n = index; n < 253; n++) ddata[index++] = 0x00;
-        sio->port()->writeComplete();
-        sio->port()->writeDataFrame(ddata);
       }
+
+      for (int n = index; n < 253; n++) ddata[index++] = 0x00;
+      sio->port()->writeComplete();
+      sio->port()->writeDataFrame(ddata);
+
       return;
     }
 
@@ -125,7 +110,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
 
 
         QByteArray fn = filename.toUtf8();
-        for (int i = 0; i < 22; i++)
+        for (int i = 0; i < fdata.length(); i++)
           fdata[i] = (fn.length() > i) ? (fn[i] & 0xff) : 0x00;
 
         sio->port()->writeComplete();
@@ -180,7 +165,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
 
     case 0x95:// Unmount Disk(s)
     {
-      auto unmountDisk = static_cast<qint8>(aux1);
+      auto unmountDisk = static_cast<qint8>(aux2);
       if (unmountDisk == -6)
         unmountDisk = 0;// All drives
       if (unmountDisk > 25)
@@ -281,9 +266,10 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
             return;
           }
           imageFileName = imageFileName.left(i);
+
           QFile file(RespeqtSettings::instance()->lastRclDir() + "/" + imageFileName);
           if (!file.open(QIODevice::WriteOnly)) {
-            qCritical() << "!e" << tr("[%1] Can not create PC File: %2").arg(deviceName(), imageFileName);
+            qCritical() << "!e" << tr("[%1] Can not create PC File: %2").arg(deviceName(), file.fileName());
             sio->port()->writeDataNak();
             sio->port()->writeError();
             return;
@@ -370,6 +356,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
         // Ask the MainWindow for the next available slot number
         mutex.lock();
         emit findNewSlot(0, true);
+        mutex.unlock();
 
       } else {
 
