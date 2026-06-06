@@ -24,7 +24,10 @@ namespace Network
 
     void TnfsUdp::stop()
     {
-        disconnect(udpSocket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
+        if (udpSocket != nullptr)
+        {
+            disconnect(udpSocket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
+        }
         delete udpSocket;
         udpSocket = nullptr;
         reset();

@@ -28,7 +28,9 @@ namespace Network
 
     void TnfsTcp::stop()
     {
-        disconnect(tcpServer, &QTcpServer::newConnection, this, &TnfsTcp::newConnection);
+        if (tcpServer != nullptr) {
+            disconnect(tcpServer, &QTcpServer::newConnection, this, &TnfsTcp::newConnection);
+        }
         delete tcpServer;
         tcpServer = nullptr;
         reset();
