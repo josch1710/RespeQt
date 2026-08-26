@@ -13,6 +13,7 @@
 #include "ui_textprinterwindow.h"
 
 #include <QFileDialog>
+#include <QFontDatabase>
 #include <QGraphicsEllipseItem>
 #include <QPrintDialog>
 #include <QPrinter>
@@ -36,11 +37,15 @@ namespace Printers {
                                                           atasciiFont("Atari Classic Chunky") {
     ui->setupUi(this);
 
-    // Set initial font for ASCII text window
-    QFont f;
+    // Set initial font for ASCII text window. "monospace" is a fontconfig
+    // generic that does not resolve to anything on Windows or macOS, so ask
+    // the platform for its own fixed pitch font instead.
+    QFont f = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     f.setFixedPitch(true);
-    f.setFamily("monospace");
     ui->printerTextEditASCII->setFont(f);
+    // The form preselected Arial here while the view actually used monospace.
+    // Runs before the currentFontChanged connect below, so no signal fires.
+    ui->asciiFontName->setCurrentFont(f);
 
     // Set initial font for ATASCII text window //
     QFont a;
@@ -181,7 +186,7 @@ namespace Printers {
     ui->printerTextEdit->setFont(a);
     ui->atasciiFontName->setText(atasciiFont + " - " + QString("%1").arg(fontSize));
     QFont f;
-    f.setFamily(ui->asciiFontName->currentFont().toString());
+    f.setFamily(ui->asciiFontName->currentFont().family());
     f.setPointSize(fontSize);
     ui->printerTextEditASCII->setFont(f);
   }

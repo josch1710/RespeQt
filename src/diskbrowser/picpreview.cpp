@@ -205,11 +205,15 @@ void PicPreview::moveLabels()
 
 void PicPreview::scaleFonts()
 {
+    // The label is painted into the disk picture, so its size follows the label
+    // rectangle rather than the system font -- but the quotient can round down
+    // to zero before the picture is loaded and the labels have a geometry, and
+    // setPixelSize(0) is rejected by Qt with a warning.
     LabelFont font = RespeqtSettings::instance()->dbTitleFont();
     double scl = font.scale();
     double pix = round((double)_title.size().height() / scl);
 
-    font.setPixelSize((int)pix);
+    font.setPixelSize(qMax(1, (int)pix));
 
     _title.setFont(font);
 
@@ -217,7 +221,7 @@ void PicPreview::scaleFonts()
     scl = font.scale();
     pix = round((double)_index.size().height() / scl);
 
-    font.setPixelSize((int)pix);
+    font.setPixelSize(qMax(1, (int)pix));
 
     _index.setFont(font);
 }

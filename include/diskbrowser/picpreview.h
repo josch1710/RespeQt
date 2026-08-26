@@ -11,6 +11,7 @@
 #include <QPixmap>
 #include <QTextEdit>
 #include "folderdisks.h"
+#include "uiscale.h"
 
 class LabelFont : public QFont
 {
@@ -18,12 +19,12 @@ class LabelFont : public QFont
 public:
     LabelFont() {}
 
-    LabelFont(const QFont& font)
+    // Copying the four attributes by hand used to lose the size: a font that
+    // carries a point size has pixelSize() == -1, so setPixelSize(-1) was
+    // rejected by Qt with a warning and the size fell back to the default. The
+    // base class copy keeps the size in whichever unit the source uses.
+    LabelFont(const QFont& font) : QFont(font)
     {
-        setFamily(font.family());
-        setBold(font.bold());
-        setItalic(font.italic());
-        setPixelSize(font.pixelSize());
         _color = QRgb(0);
         _scale = 3.0;
     }
@@ -33,6 +34,10 @@ public:
         setFamily(family);
         setBold(bold);
         setItalic(italic);
+        // PicPreview::scaleFonts() derives the size that actually gets painted
+        // from the label rectangle, but until then the font has to have a valid
+        // size, otherwise it reaches the settings as -1.
+        setPointSize(UiScale::defaultPointSize());
         _color = color;
         _scale = scale;
     }

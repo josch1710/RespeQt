@@ -21,8 +21,10 @@ int main(int argc, char *argv[]) {
   timeBeginPeriod(1);
 #endif
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+  QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
   QApplication::setStyle(QStyleFactory::create("Fusion"));
   QApplication a(argc, argv);
+  QIcon::setThemeName("Classic");
   a.setFont(a.font("QMenu"));
   QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
   auto w = new MainWindow;

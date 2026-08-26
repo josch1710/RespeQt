@@ -28,12 +28,6 @@
      </item>
      <item>
       <widget class="QPushButton" name="btnBrowse">
-       <property name="maximumSize">
-        <size>
-         <width>70</width>
-         <height>16777215</height>
-        </size>
-       </property>
        <property name="text">
         <string>Browse</string>
        </property>
@@ -129,12 +123,6 @@
           <height>450</height>
          </rect>
         </property>
-        <property name="font">
-         <font>
-          <family>Courier10 BT</family>
-          <pointsize>10</pointsize>
-         </font>
-        </property>
         <property name="autoFillBackground">
          <bool>true</bool>
         </property>
@@ -170,13 +158,6 @@
          <width>0</width>
          <height>0</height>
         </size>
-       </property>
-       <property name="font">
-        <font>
-         <family>Arial</family>
-         <pointsize>24</pointsize>
-         <bold>true</bold>
-        </font>
        </property>
        <property name="autoFillBackground">
         <bool>true</bool>

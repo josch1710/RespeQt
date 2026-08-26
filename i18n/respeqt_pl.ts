@@ -183,7 +183,7 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
-    <name>AtariFileSystem</name>
+    <name>Filesystems::AtariFileSystem</name>
     <message>
         <location filename="../atarifilesystem.cpp" line="261"/>
         <source>Atari file system error</source>
@@ -871,7 +871,7 @@ Kiedy usłyszysz sygnał, naciśnij przycisk OK poniżej i jednocześnie naciśn
     </message>
 </context>
 <context>
-    <name>DiskGeometry</name>
+    <name>DiskImages::DiskGeometry</name>
     <message>
         <source>Single density diskette</source>
         <translation type="obsolete">Dyskietka o pojedynczej gęstości</translation>
@@ -1110,7 +1110,7 @@ Kiedy usłyszysz sygnał, naciśnij przycisk OK poniżej i jednocześnie naciśn
     </message>
 </context>
 <context>
-    <name>Dos10FileSystem</name>
+    <name>Filesystems::Dos10FileSystem</name>
     <message>
         <location filename="../atarifilesystem.cpp" line="483"/>
         <location filename="../atarifilesystem.cpp" line="491"/>
@@ -2401,7 +2401,7 @@ Kiedy usłyszysz sygnał, naciśnij przycisk OK poniżej i jednocześnie naciśn
     </message>
 </context>
 <context>
-    <name>FolderImage</name>
+    <name>DiskImages::FolderImage</name>
     <message>
         <location filename="../folderimage.cpp" line="122"/>
         <source>Cannot mirror &apos;%1&apos; in &apos;%2&apos;: No suitable Atari name can be found.</source>
@@ -5486,7 +5486,7 @@ Czy chcesz otworzyć opcje?</translation>
     </message>
 </context>
 <context>
-    <name>SimpleDiskImage</name>
+    <name>DiskImages::SimpleDiskImage</name>
     <message>
         <location filename="../diskimageatr.cpp" line="113"/>
         <source>Image size of &apos;%1&apos; is reported as %2 bytes in the header but it&apos;s actually %3.</source>
@@ -7647,7 +7647,7 @@ Czy chcesz otworzyć opcje?</translation>
     </message>
 </context>
 <context>
-    <name>SpartaDosFileSystem</name>
+    <name>Filesystems::SpartaDosFileSystem</name>
     <message>
         <location filename="../atarifilesystem.cpp" line="1260"/>
         <location filename="../atarifilesystem.cpp" line="1289"/>

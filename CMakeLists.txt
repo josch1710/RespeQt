@@ -6,7 +6,6 @@ set(CMAKE_OSX_ARCHITECTURES x86_64)
 project(RespeQt VERSION 5.4.2 LANGUAGES CXX)
 set(RC_VERSION "_RC1") ## Begin RC version with underscore
 cmake_policy(SET CMP0071 NEW)
-set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -159,6 +158,8 @@ set(HEADERS
     include/printers/atari1027.h
     include/atascii.h
     include/drivewidget.h
+    include/uicolors.h
+    include/uiscale.h
     include/printerwidget.h
     include/atasciiinternational.h
     include/printers/atariprinter.h
@@ -259,6 +260,12 @@ qt5_add_translation(QM_FILES ${TS_FILES})
 # Resources
 qt5_wrap_ui(UI_HEADERS ${FORMS})
 qt5_add_resources(UI_RESOURCES ${RESOURCES})
+
+if (Qt5Widgets_VERSION VERSION_LESS 5.13.0)
+    set(CMAKE_CXX_STANDARD 11)
+else()
+    set(CMAKE_CXX_STANDARD 14)
+endif()
 
 if (APPLE)
     if (Qt5Widgets_VERSION VERSION_LESS 5.14.0)

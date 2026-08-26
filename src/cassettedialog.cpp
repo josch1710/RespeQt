@@ -13,6 +13,7 @@
 
 #include <QTimer>
 #include <QtDebug>
+#include <QIcon>
 
 CassetteDialog::CassetteDialog(QWidget *parent, const QString &fileName)
     : QDialog(parent), ui(new Ui::CassetteDialog) {

@@ -13,6 +13,7 @@
 
 #include <QDebug>
 #include <QFileDialog>
+#include <QIcon>
 #include <QMessageBox>
 #include <QPrintDialog>
 #include <QPrinter>
@@ -66,9 +67,9 @@ QVariant FileModel::data(const QModelIndex &index, int role) const {
   }
   if (index.column() == 1 && role == Qt::DecorationRole) {
     if ((entries.at(index.row()).attributes & Filesystems::AtariDirEntry::Directory) != 0) {
-      return QPixmap(":/icons/silk-icons/icons/folder.png");
+      return QIcon::fromTheme("folder");
     } else {
-      return QPixmap(":/icons/silk-icons/icons/page_white.png");
+      return QIcon::fromTheme("page_white");
     }
   }
 

@@ -215,7 +215,7 @@ private slots:
   void saveAsTriggered(char no);                           // MIA
   void revertTriggered(char no);                           // MIA
 
-  void bootOptionTriggered();    //
+  void bootOptionTriggered(char no);//
   void toggleMiniModeTriggered();//
   void toggleShadeTriggered();   //
   void showLogWindowTriggered(); //

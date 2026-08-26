@@ -83,9 +83,16 @@ private slots:
   void autoSaveToggled(bool arg1);
   void bootOptionTriggered();
 
+protected:
+  void changeEvent(QEvent *e) override;
+
 private:
+  void setFileNameHighlight(bool highlighted);
+  void applyPaletteColors();
+
   Ui::DriveWidget *ui;
   int driveNo_;
+  bool fileNameHighlighted_{false};
 };
 
 #endif// DRIVEWIDGET_H

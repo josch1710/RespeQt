@@ -270,7 +270,7 @@ MainWindow::MainWindow()
   prtOnOffLabel->setMinimumWidth(18);
   netLabel->setMinimumWidth(18);
 
-  netLabel->setPixmap(QIcon(":/icons/oxygen-icons/16x16/actions/network_disconnect.png").pixmap(16, 16, QIcon::Normal));
+  netLabel->setPixmap(QIcon::fromTheme("network_disconnect").pixmap(16, 16, QIcon::Normal));
   netLabel->setToolTip(tr("No TNFS connection"));
   netLabel->setStatusTip(netLabel->toolTip());
 
@@ -288,7 +288,7 @@ MainWindow::MainWindow()
       emit startTnfs();
 
   clearMessagesLabel->setMinimumWidth(21);
-  clearMessagesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/page_white_c.png").pixmap(16, 16, QIcon::Normal));
+  clearMessagesLabel->setPixmap(QIcon::fromTheme("page_white_c").pixmap(16, 16, QIcon::Normal));
   clearMessagesLabel->setToolTip(tr("Clear messages"));
   clearMessagesLabel->setStatusTip(clearMessagesLabel->toolTip());
 
@@ -299,9 +299,9 @@ MainWindow::MainWindow()
   limitEntriesLabel->setToolTip(tr("Should the file entry limit be 64."));
   limitEntriesLabel->setStatusTip(limitEntriesLabel->toolTip());
   if (RespeqtSettings::instance()->limitFileEntries())
-    limitEntriesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/lock.png").pixmap(16, 16, QIcon::Normal));
+    limitEntriesLabel->setPixmap(QIcon::fromTheme("lock").pixmap(16, 16, QIcon::Normal));
   else
-    limitEntriesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/lock_open.png").pixmap(16, 16, QIcon::Normal));
+    limitEntriesLabel->setPixmap(QIcon::fromTheme("lock_open").pixmap(16, 16, QIcon::Normal));
 
   ui->statusBar->addPermanentWidget(speedLabel);
   ui->statusBar->addPermanentWidget(onOffLabel);
@@ -860,12 +860,12 @@ void MainWindow::showHideDrives() {
   if (isD9DOVisible) {
     ui->actionHideShowDrives->setText(QApplication::translate("MainWindow", "Hide drives D9-DO", nullptr));
     ui->actionHideShowDrives->setStatusTip(QApplication::translate("MainWindow", "Hide drives D9-DO", nullptr));
-    ui->actionHideShowDrives->setIcon(QIcon(":/icons/silk-icons/icons/drive_add.png").pixmap(16, 16, QIcon::Normal, QIcon::On));
+    ui->actionHideShowDrives->setIcon(QIcon::fromTheme("drive_add"));
     //setMinimumWidth(688);
   } else {
     ui->actionHideShowDrives->setText(QApplication::translate("MainWindow", "Show drives D9-DO", nullptr));
     ui->actionHideShowDrives->setStatusTip(QApplication::translate("MainWindow", "Show drives D9-DO", nullptr));
-    ui->actionHideShowDrives->setIcon(QIcon(":/icons/silk-icons/icons/drive_delete.png").pixmap(16, 16, QIcon::Normal, QIcon::On));
+    ui->actionHideShowDrives->setIcon(QIcon::fromTheme("drive_delete"));
     //setMinimumWidth(344);
   }
 }
@@ -897,13 +897,13 @@ void MainWindow::setUpPrinterEmulationWidgets(bool enable) {
   if (enable) {
     ui->actionPrinterEmulation->setText(QApplication::translate("MainWindow", "Stop printer emulation", nullptr));
     ui->actionPrinterEmulation->setStatusTip(QApplication::translate("MainWindow", "Stop printer emulation", nullptr));
-    ui->actionPrinterEmulation->setIcon(QIcon(":/icons/silk-icons/icons/printer.png").pixmap(16, 16, QIcon::Normal, QIcon::On));
-    prtOnOffLabel->setPixmap(QIcon(":/icons/silk-icons/icons/printer.png").pixmap(16, 16, QIcon::Normal, QIcon::On));
+    ui->actionPrinterEmulation->setIcon(QIcon::fromTheme("printer"));
+    prtOnOffLabel->setPixmap(QIcon::fromTheme("printer").pixmap(16, 16, QIcon::Normal, QIcon::On));
   } else {
     ui->actionPrinterEmulation->setText(QApplication::translate("MainWindow", "Start printer emulation", nullptr));
     ui->actionPrinterEmulation->setStatusTip(QApplication::translate("MainWindow", "Start printer emulation", nullptr));
-    ui->actionPrinterEmulation->setIcon(QIcon(":/icons/silk-icons/icons/printer_delete.png").pixmap(16, 16, QIcon::Normal, QIcon::On));
-    prtOnOffLabel->setPixmap(QIcon(":/icons/silk-icons/icons/printer_delete.png").pixmap(16, 16, QIcon::Normal, QIcon::On));
+    ui->actionPrinterEmulation->setIcon(QIcon::fromTheme("printer_delete"));
+    prtOnOffLabel->setPixmap(QIcon::fromTheme("printer_delete").pixmap(16, 16, QIcon::Normal, QIcon::On));
   }
   prtOnOffLabel->setToolTip(ui->actionPrinterEmulation->toolTip());
   prtOnOffLabel->setStatusTip(ui->actionPrinterEmulation->statusTip());
@@ -958,11 +958,19 @@ void MainWindow::deviceStatusChanged(unsigned char deviceNo) {
 
     if (img) {
 
+      // Ask the image what it is instead of comparing its description against a
+      // translated string. The two tr("Folder image") calls live in different
+      // translation contexts -- MainWindow here, DiskImages::FolderImage in the
+      // image -- so with any translation loaded they returned different text and
+      // every folder was treated as a disk image. That is what kept the "Folder
+      // Boot Options" context menu entry disabled.
+      const bool isFolder = qobject_cast<DiskImages::FolderImage *>(img) != nullptr;
+
       // Show file name without the path and set toolTip & statusTip to show the path separately //
       QString filenamelabel;
       int i = -1;
 
-      if (img->description() == tr("Folder image")) {
+      if (isFolder) {
         i = img->originalFileName().lastIndexOf("\\");// NOTE: This expects folder separators to be '\\'
       } else {
         i = img->originalFileName().lastIndexOf("/");
@@ -982,7 +990,7 @@ void MainWindow::deviceStatusChanged(unsigned char deviceNo) {
 
       bool enableEdit = img->editDialog() != nullptr;
 
-      if (img->description() == tr("Folder image")) {
+      if (isFolder) {
         diskWidget->showAsFolderMounted(filenamelabel, img->description(), enableEdit);
       } else {
         bool enableSave = false;
@@ -1137,9 +1145,9 @@ void MainWindow::showOptionsTriggered() {
   setupDebugItems();
 
   if (RespeqtSettings::instance()->limitFileEntries()) {
-    limitEntriesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/lock.png").pixmap(16, 16, QIcon::Normal));
+    limitEntriesLabel->setPixmap(QIcon::fromTheme("lock").pixmap(16, 16, QIcon::Normal));
   } else {
-    limitEntriesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/lock_open.png").pixmap(16, 16, QIcon::Normal));
+    limitEntriesLabel->setPixmap(QIcon::fromTheme("lock_open").pixmap(16, 16, QIcon::Normal));
   }
 
   for (char i = DISK_BASE_CDEVIC; i < (DISK_BASE_CDEVIC + DISK_COUNT); i++) {// 0x31 - 0x3E
@@ -1155,14 +1163,13 @@ void MainWindow::showOptionsTriggered() {
 }
 
 void MainWindow::changeFonts() {
-  QFont font = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
-  if (RespeqtSettings::instance()->useLargeFont()) {
-    font.setPointSize(10);
-    emit fontChanged(font);
-  } else {
-    font.setPointSize(8);
-  }
-  emit fontChanged(font);
+  // Use the platform UI font for the drive slot labels instead of hardcoded
+  // point sizes. The former absolute 8pt/10pt were tuned for the 9pt Windows
+  // default and came out at 62%/77% of the 13pt macOS system font, which made
+  // the drive slots look undersized there. Since the labels now follow the
+  // system font, the OS text size settings apply and the former "use larger
+  // font" option is obsolete.
+  emit fontChanged(QFontDatabase::systemFont(QFontDatabase::GeneralFont));
 }
 
 void MainWindow::showAboutTriggered() {
@@ -1963,8 +1970,11 @@ void MainWindow::trayIconActivated(QSystemTrayIcon::ActivationReason reason) {
 #endif
 }
 
-void MainWindow::bootOptionTriggered() {
-  QString folderPath = RespeqtSettings::instance()->mountedImageSetting(0).fileName;
+// The context menu entry only exists in the first drive slot, but take the slot
+// from the signal rather than assuming 0: writing the boot files of one folder
+// into another one would be hard to notice and impossible to undo.
+void MainWindow::bootOptionTriggered(char no) {
+  QString folderPath = RespeqtSettings::instance()->mountedImageSetting(no).fileName;
   BootOptionsDialog bod(folderPath, this);
   bod.exec();
 }
@@ -2049,9 +2059,9 @@ void MainWindow::setupDebugItems() {
 
 void MainWindow::toggleLimitEntriesTriggered() {
   if (RespeqtSettings::instance()->limitFileEntries()) {
-    limitEntriesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/lock_open.png").pixmap(16, 16, QIcon::Normal));
+    limitEntriesLabel->setPixmap(QIcon::fromTheme("lock_open").pixmap(16, 16, QIcon::Normal));
   } else {
-    limitEntriesLabel->setPixmap(QIcon(":/icons/silk-icons/icons/lock.png").pixmap(16, 16, QIcon::Normal));
+    limitEntriesLabel->setPixmap(QIcon::fromTheme("lock").pixmap(16, 16, QIcon::Normal));
   }
   RespeqtSettings::instance()->setlimitFileEntries(!RespeqtSettings::instance()->limitFileEntries());
 }
@@ -2111,14 +2121,14 @@ bool MainWindow::checkChangeDbSource(DbDataSource dbSourceNew)
 
 void MainWindow::allSessionsDisconnected()
 {
-    netLabel->setPixmap(QIcon(":/icons/oxygen-icons/16x16/actions/network_disconnect.png").pixmap(16, 16, QIcon::Normal));
+    netLabel->setPixmap(QIcon::fromTheme("network_disconnect").pixmap(16, 16, QIcon::Normal));
     netLabel->setToolTip(tr("No TNFS connections"));
     netLabel->setStatusTip(netLabel->toolTip());
 }
 
 void MainWindow::sessionConnected()
 {
-    netLabel->setPixmap(QIcon(":/icons/oxygen-icons/16x16/actions/network_connect.png").pixmap(16, 16, QIcon::Normal));
+    netLabel->setPixmap(QIcon::fromTheme("network_connect").pixmap(16, 16, QIcon::Normal));
     netLabel->setToolTip(tr("TNFS connected"));
     netLabel->setStatusTip(netLabel->toolTip());
 }

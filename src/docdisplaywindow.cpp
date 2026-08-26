@@ -12,15 +12,18 @@
 #include "respeqtsettings.h"
 #include "ui_docdisplaywindow.h"
 
+#include <QFontDatabase>
 #include <QPrintDialog>
 #include <QPrinter>
 
 DocDisplayWindow::DocDisplayWindow(QWidget *parent) : QMainWindow(parent),
                                                       ui(new Ui::DocDisplayWindow) {
   ui->setupUi(this);
-  QFont f;
+  // "monospace" is a fontconfig generic that does not resolve on Windows or
+  // macOS -- there Qt substituted a proportional font. Ask the platform for
+  // its own fixed pitch font instead.
+  QFont f = QFontDatabase::systemFont(QFontDatabase::FixedFont);
   f.setFixedPitch(true);
-  f.setFamily("monospace");
   ui->docDisplay->setFont(f);
 
   connect(ui->actionPrint, &QAction::triggered, this, &DocDisplayWindow::printTriggered);
