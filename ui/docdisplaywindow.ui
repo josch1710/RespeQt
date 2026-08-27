@@ -17,8 +17,7 @@
    <string>RespeQt User Manual</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>silk-icons/icons/report.png</normaloff>silk-icons/icons/report.png</iconset>
+   <iconset theme="report"/>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -69,8 +68,7 @@
   </widget>
   <action name="actionPrint">
    <property name="icon">
-    <iconset resource="../resources/icons.qrc">
-     <normaloff>:/icons/silk-icons/icons/printer.png</normaloff>:/icons/silk-icons/icons/printer.png</iconset>
+    <iconset theme="printer"/>
    </property>
    <property name="text">
     <string>Print</string>

@@ -3,11 +3,9 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 ### RespeQt CMAKE version
 cmake_minimum_required(VERSION 3.5)
 set(CMAKE_OSX_ARCHITECTURES x86_64)
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.8)
-project(RespeQt VERSION 5.4.1 LANGUAGES CXX)
-set(RC_VERSION "") ## Begin RC version with underscore
+project(RespeQt VERSION 5.4.2 LANGUAGES CXX)
+set(RC_VERSION "_RC1") ## Begin RC version with underscore
 cmake_policy(SET CMP0071 NEW)
-set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -160,6 +158,8 @@ set(HEADERS
     include/printers/atari1027.h
     include/atascii.h
     include/drivewidget.h
+    include/uicolors.h
+    include/uiscale.h
     include/printerwidget.h
     include/atasciiinternational.h
     include/printers/atariprinter.h
@@ -261,11 +261,24 @@ qt5_add_translation(QM_FILES ${TS_FILES})
 qt5_wrap_ui(UI_HEADERS ${FORMS})
 qt5_add_resources(UI_RESOURCES ${RESOURCES})
 
+if (Qt5Widgets_VERSION VERSION_LESS 5.13.0)
+    set(CMAKE_CXX_STANDARD 11)
+else()
+    set(CMAKE_CXX_STANDARD 14)
+endif()
+
 if (APPLE)
+    if (Qt5Widgets_VERSION VERSION_LESS 5.14.0)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-constexpr-conversion")
+        set(CMAKE_OSX_DEPLOYMENT_TARGET 10.8)
+    else()
+        set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
+    endif()
     set(MACOSX_BUNDLE_ICON_FILE RespeQt.icns)
     set(APP_ICON resources/RespeQt.icns)
     set_source_files_properties(${APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     add_executable(${TARGET} MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES} ${APP_ICON})
+    set_target_properties(${TARGET} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/deployment/Info.plist.app")
 else()
     add_executable(${TARGET} ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES})
 endif()

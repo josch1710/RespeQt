@@ -20,6 +20,7 @@
 #include "respeqtsettings.h"
 #include "ui_diskbrowserdlg.h"
 #include <QFileDialog>
+#include <QFontDatabase>
 #include <QObject>
 #include <QImageReader>
 #include <QMenu>
@@ -32,6 +33,12 @@ DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent)
     sio = std::move(pSio);
 
     ui->setupUi(this);
+
+    // The listing is column aligned Atari directory output and needs a fixed
+    // pitch font. The form named Courier10 BT, which exists on Windows only --
+    // everywhere else Qt silently substituted a proportional font and the
+    // columns fell apart. Ask the platform for its own monospace font.
+    ui->lblFileList->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
 
     ui->treeDisks->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
     ui->treeDisks->setSortingEnabled(true);
@@ -142,7 +149,7 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
             continue;
 
         auto item = new DbItem(ui->treeDisks);
-        auto icon = QIcon{":/icons/silk-icons/icons/folder.png"};
+        auto icon = QIcon::fromTheme("folder");
         item->setIcon(1, icon);
         item->setText(1, subdir);
         item->setFolder(true);
@@ -571,20 +578,20 @@ QString DiskBrowserDlg::getFloppyPic()  // 5. load built-in image of a 5 1/2-inc
 void DiskBrowserDlg::popupMenuReq(const QPoint& pos)
 {
     QMenu menu;
-    menu.addAction(QIcon(":/icons/silk-icons/icons/image.png"), "Set Default Preview...", this, &DiskBrowserDlg::actionSetDefault);
-    menu.addAction(QIcon(":/icons/silk-icons/icons/folder_image.png"), "Set Folder Preview Pic...", this, &DiskBrowserDlg::actionSetDirPic);
+    menu.addAction(QIcon::fromTheme("image"), "Set Default Preview...", this, &DiskBrowserDlg::actionSetDefault);
+    menu.addAction(QIcon::fromTheme("folder_image"), "Set Folder Preview Pic...", this, &DiskBrowserDlg::actionSetDirPic);
     if (_picSource != PicSource_none)
     {
-        menu.addAction(QIcon(":/icons/silk-icons/icons/image_add.png"), "Set Disk Preview Pic...", this, &DiskBrowserDlg::actionSetPic);
-        menu.addAction(QIcon(":/icons/silk-icons/icons/image_delete.png"), "Clear Preview", this, &DiskBrowserDlg::actionClearPic);
+        menu.addAction(QIcon::fromTheme("image_add"), "Set Disk Preview Pic...", this, &DiskBrowserDlg::actionSetPic);
+        menu.addAction(QIcon::fromTheme("image_delete"), "Clear Preview", this, &DiskBrowserDlg::actionClearPic);
     }
     if (_picSource == PicSource_floppy)
     {
         menu.addSeparator();
-        menu.addAction(QIcon(":/icons/silk-icons/icons/font.png"), "Set Disk Title", this, &DiskBrowserDlg::actionSetTitle);
-        menu.addAction(QIcon(":/icons/silk-icons/icons/text_list_numbers.png"), "Set Disk Index", this, &DiskBrowserDlg::actionSetIndex);
+        menu.addAction(QIcon::fromTheme("font"), "Set Disk Title", this, &DiskBrowserDlg::actionSetTitle);
+        menu.addAction(QIcon::fromTheme("text_list_numbers"), "Set Disk Index", this, &DiskBrowserDlg::actionSetIndex);
         QString text = QString("Label Side %1").arg(_picInfo.label.sideB ? "A" : "B");
-        menu.addAction(QIcon(":/icons/other-icons/sideb.png"), text, this, &DiskBrowserDlg::actionBackSide);
+        menu.addAction(QIcon::fromTheme("sideb"), text, this, &DiskBrowserDlg::actionBackSide);
     }
 
     if (sender() == ui->treeDisks)
@@ -659,6 +666,8 @@ QString DiskBrowserDlg::checkCopyPic(const QString& fname)
     case DbData_appFolderJson:
         newPath = RespeqtSettings::instance()->appDataFolder() + "/.respeqt_db/" + QDir(_currentDir).dirName();
         QDir(newPath).mkpath(".");
+        break;
+    case DbData_none:
         break;
     }
     QString newName = newPath + "/" + fileName;

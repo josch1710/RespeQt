@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>703</width>
-    <height>637</height>
+    <width>840</width>
+    <height>640</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -689,21 +689,8 @@
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>28</width>
-                  <height>28</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>28</width>
-                  <height>28</height>
-                 </size>
-                </property>
                 <property name="icon">
-                 <iconset resource="../resources/icons.qrc">
-                  <normaloff>:/icons/silk-icons/icons/drive.png</normaloff>:/icons/silk-icons/icons/drive.png</iconset>
+                 <iconset theme="drive"/>
                 </property>
                </widget>
               </item>
@@ -961,18 +948,6 @@
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>22</width>
-                     <height>22</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>22</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
                    <property name="text">
                     <string>B</string>
                    </property>
@@ -989,18 +964,6 @@
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>23</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>50</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
                    <property name="decimals">
                     <number>1</number>
                    </property>
@@ -1014,18 +977,6 @@
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>23</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>50</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
                    <property name="decimals">
                     <number>1</number>
                    </property>
@@ -1038,23 +989,6 @@
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>22</width>
-                     <height>22</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>22</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <family>Century Schoolbook</family>
-                    </font>
                    </property>
                    <property name="text">
                     <string>I</string>
@@ -1082,18 +1016,6 @@
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>22</width>
-                     <height>22</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>22</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
                    <property name="text">
                     <string>B</string>
                    </property>
@@ -1120,23 +1042,6 @@
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>22</width>
-                     <height>22</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>22</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
-                   <property name="font">
-                    <font>
-                     <family>Century Schoolbook</family>
-                    </font>
-                   </property>
                    <property name="text">
                     <string>I</string>
                    </property>
@@ -1153,18 +1058,6 @@
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>22</width>
-                     <height>22</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>22</width>
-                     <height>16777215</height>
-                    </size>
-                   </property>
                    <property name="text">
                     <string>■</string>
                    </property>
@@ -1177,18 +1070,6 @@
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
-                   </property>
-                   <property name="minimumSize">
-                    <size>
-                     <width>22</width>
-                     <height>22</height>
-                    </size>
-                   </property>
-                   <property name="maximumSize">
-                    <size>
-                     <width>22</width>
-                     <height>16777215</height>
-                    </size>
                    </property>
                    <property name="text">
                     <string>■</string>
@@ -1281,19 +1162,11 @@
                        <verstretch>0</verstretch>
                       </sizepolicy>
                      </property>
-                     <property name="maximumSize">
-                      <size>
-                       <width>35</width>
-                       <height>35</height>
-                      </size>
-                     </property>
                      <property name="text">
                       <string/>
                      </property>
                      <property name="icon">
-                      <iconset theme="folder-open">
-                       <normalon>:/icons/silk-icons/icons/folder_explore.png</normalon>
-                      </iconset>
+                      <iconset theme="folder_explore"/>
                      </property>
                     </widget>
                    </item>
@@ -1450,19 +1323,6 @@
              <layout class="QGridLayout" name="gridLayout_2">
               <item row="1" column="0">
                <widget class="QComboBox" name="i18nLanguageCombo"/>
-              </item>
-              <item row="8" column="0">
-               <widget class="QCheckBox" name="useLargerFont">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="text">
-                 <string>Use larger font in drive slot descriptions</string>
-                </property>
-                <property name="checked">
-                 <bool>false</bool>
-                </property>
-               </widget>
               </item>
               <item row="5" column="0">
                <widget class="QCheckBox" name="saveWinPosBox">
@@ -1794,21 +1654,8 @@
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
                 <property name="icon">
-                 <iconset resource="../resources/icons.qrc">
-                  <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
+                 <iconset theme="folder"/>
                 </property>
                </widget>
               </item>
@@ -1817,21 +1664,8 @@
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
                 <property name="icon">
-                 <iconset resource="../resources/icons.qrc">
-                  <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
+                 <iconset theme="folder"/>
                 </property>
                </widget>
               </item>
@@ -1840,21 +1674,8 @@
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
                 <property name="icon">
-                 <iconset resource="../resources/icons.qrc">
-                  <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
+                 <iconset theme="folder"/>
                 </property>
                </widget>
               </item>
@@ -1917,21 +1738,8 @@
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
                 <property name="icon">
-                 <iconset resource="../resources/icons.qrc">
-                  <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
+                 <iconset theme="folder"/>
                 </property>
                </widget>
               </item>
@@ -2016,21 +1824,8 @@
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
                 <property name="icon">
-                 <iconset resource="../resources/icons.qrc">
-                  <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
+                 <iconset theme="folder"/>
                 </property>
                </widget>
               </item>
@@ -2039,21 +1834,8 @@
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
                 <property name="icon">
-                 <iconset resource="../resources/icons.qrc">
-                  <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
+                 <iconset theme="folder"/>
                 </property>
                </widget>
               </item>
@@ -2062,21 +1844,8 @@
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
                 <property name="icon">
-                 <iconset resource="../resources/icons.qrc">
-                  <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
+                 <iconset theme="folder"/>
                 </property>
                </widget>
               </item>
@@ -2085,21 +1854,8 @@
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
                 <property name="icon">
-                 <iconset resource="../resources/icons.qrc">
-                  <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
+                 <iconset theme="folder"/>
                 </property>
                </widget>
               </item>
@@ -2115,21 +1871,8 @@
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
                 <property name="icon">
-                 <iconset resource="../resources/icons.qrc">
-                  <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
+                 <iconset theme="folder"/>
                 </property>
                </widget>
               </item>
@@ -2714,21 +2457,8 @@
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
-                </property>
                 <property name="icon">
-                 <iconset resource="../resources/icons.qrc">
-                  <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
+                 <iconset theme="folder"/>
                 </property>
                </widget>
               </item>
@@ -2924,21 +2654,8 @@
                   <property name="enabled">
                    <bool>true</bool>
                   </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>24</width>
-                    <height>24</height>
-                   </size>
-                  </property>
                   <property name="icon">
-                   <iconset resource="../resources/icons.qrc">
-                    <normaloff>:/icons/silk-icons/icons/folder.png</normaloff>:/icons/silk-icons/icons/folder.png</iconset>
+                   <iconset theme="folder"/>
                   </property>
                  </widget>
                 </item>

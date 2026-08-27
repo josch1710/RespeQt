@@ -14,8 +14,8 @@
    <string>RespeQt - Printer text output</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../resources/icons.qrc">
-    <normaloff>:/icons/silk-icons/icons/printer.png</normaloff>:/icons/silk-icons/icons/printer.png</iconset>
+   <iconset theme="printer">
+    <normaloff>.</normaloff>.</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
@@ -26,19 +26,7 @@
    </property>
    <layout class="QGridLayout" name="gridLayout">
     <item row="1" column="1">
-     <widget class="QFontComboBox" name="asciiFontName">
-      <property name="font">
-       <font>
-        <family>MS Shell Dlg 2</family>
-        <pointsize>8</pointsize>
-       </font>
-      </property>
-      <property name="currentFont">
-       <font>
-        <family>Arial</family>
-       </font>
-      </property>
-     </widget>
+     <widget class="QFontComboBox" name="asciiFontName"/>
     </item>
     <item row="0" column="1">
      <widget class="QPlainTextEdit" name="printerTextEditASCII">
@@ -50,6 +38,9 @@
       </property>
       <property name="statusTip">
        <string>Atari Output (Ascii)</string>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: #FFFFFF</string>
       </property>
       <property name="readOnly">
        <bool>true</bool>
@@ -83,12 +74,6 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <property name="font">
-       <font>
-        <family>MS Shell Dlg 2</family>
-        <bold>true</bold>
-       </font>
-      </property>
       <property name="mouseTracking">
        <bool>false</bool>
       </property>
@@ -97,6 +82,12 @@
       </property>
       <property name="statusTip">
        <string>Atari Output (Atascii)</string>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: #FFFFFF</string>
       </property>
       <property name="lineWrapMode">
        <enum>QPlainTextEdit::WidgetWidth</enum>
@@ -152,8 +143,8 @@
   </widget>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="../../resources/icons.qrc">
-     <normaloff>:/icons/silk-icons/icons/disk.png</normaloff>:/icons/silk-icons/icons/disk.png</iconset>
+    <iconset theme="disk">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Save to a file...</string>
@@ -170,8 +161,8 @@
   </action>
   <action name="actionClear">
    <property name="icon">
-    <iconset resource="../../resources/icons.qrc">
-     <normaloff>:/icons/silk-icons/icons/page_white.png</normaloff>:/icons/silk-icons/icons/page_white.png</iconset>
+    <iconset theme="page_white">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Clear</string>
@@ -194,8 +185,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../resources/icons.qrc">
-     <normaloff>:/icons/silk-icons/icons/text_align_left.png</normaloff>:/icons/silk-icons/icons/text_align_left.png</iconset>
+    <iconset theme="text_align_left">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Word wrap</string>
@@ -212,8 +203,8 @@
   </action>
   <action name="actionPrint">
    <property name="icon">
-    <iconset resource="../../resources/icons.qrc">
-     <normaloff>:/icons/silk-icons/icons/printer.png</normaloff>:/icons/silk-icons/icons/printer.png</iconset>
+    <iconset theme="printer">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Print</string>
@@ -230,9 +221,8 @@
   </action>
   <action name="actionAtasciiFont">
    <property name="icon">
-    <iconset resource="../../resources/icons.qrc">
-     <normaloff>:/icons/silk-icons/icons/font_go.png</normaloff>
-     <normalon>:/icons/silk-icons/icons/font_go.png</normalon>:/icons/silk-icons/icons/font_go.png</iconset>
+    <iconset theme="font_go">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Atascii Font</string>
@@ -339,8 +329,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="../../resources/icons.qrc">
-     <normaloff>:/icons/silk-icons/icons/cut_red.png</normaloff>:/icons/silk-icons/icons/cut_red.png</iconset>
+    <iconset theme="cut_red">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Strip Line Numbers</string>

@@ -259,7 +259,7 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
-    <name>AtariFileSystem</name>
+    <name>Filesystems::AtariFileSystem</name>
     <message>
         <location filename="../atarifilesystem.cpp" line="261"/>
         <source>Atari file system error</source>
@@ -951,7 +951,7 @@ Kalan süre: %1:%2</translation>
     </message>
 </context>
 <context>
-    <name>DiskGeometry</name>
+    <name>DiskImages::DiskGeometry</name>
     <message>
         <source>Single density diskette</source>
         <translation type="obsolete">Tek yoğunluklu disket (720 sektör)</translation>
@@ -1206,7 +1206,7 @@ Kalan süre: %1:%2</translation>
     </message>
 </context>
 <context>
-    <name>Dos10FileSystem</name>
+    <name>Filesystems::Dos10FileSystem</name>
     <message>
         <location filename="../atarifilesystem.cpp" line="483"/>
         <location filename="../atarifilesystem.cpp" line="491"/>
@@ -2497,7 +2497,7 @@ Kalan süre: %1:%2</translation>
     </message>
 </context>
 <context>
-    <name>FolderImage</name>
+    <name>DiskImages::FolderImage</name>
     <message>
         <location filename="../folderimage.cpp" line="122"/>
         <source>Cannot mirror &apos;%1&apos; in &apos;%2&apos;: No suitable Atari name can be found.</source>
@@ -5590,7 +5590,7 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
 </context>
 <context>
-    <name>SimpleDiskImage</name>
+    <name>DiskImages::SimpleDiskImage</name>
     <message>
         <location filename="../diskimage.cpp" line="656"/>
         <location filename="../diskimage.cpp" line="662"/>
@@ -7751,7 +7751,7 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
 </context>
 <context>
-    <name>SpartaDosFileSystem</name>
+    <name>Filesystems::SpartaDosFileSystem</name>
     <message>
         <location filename="../atarifilesystem.cpp" line="1260"/>
         <location filename="../atarifilesystem.cpp" line="1289"/>

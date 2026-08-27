@@ -204,10 +204,6 @@ public:
   bool enableShade();
   void setEnableShade(bool shade);
 
-  // Use Large Font //
-  bool useLargeFont();
-  void setUseLargeFont(bool largeFont);
-
   // Explorer Window On Top
   bool explorerOnTop();
   void setExplorerOnTop(bool expOnTop);

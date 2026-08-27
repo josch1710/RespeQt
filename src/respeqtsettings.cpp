@@ -13,6 +13,7 @@
 #include "respeqtsettings.h"
 #include "serialport.h"
 #include "diskbrowser/diskbrowser.h"
+#include "uiscale.h"
 #include <QFileInfo>
 #include <memory>
 #include <QApplication>
@@ -378,15 +379,6 @@ bool RespeqtSettings::enableShade() {
 
 void RespeqtSettings::setEnableShade(bool shade) {
   mSettings->setValue("EnableShadeByDefault", shade);
-}
-
-// Use Large Font //
-bool RespeqtSettings::useLargeFont() {
-  return mSettings->value("UseLargeFont", false).toBool();
-}
-
-void RespeqtSettings::setUseLargeFont(bool largeFont) {
-  mSettings->setValue("UseLargeFont", largeFont);
 }
 
 // Explorer Window always on top
@@ -1164,12 +1156,28 @@ void RespeqtSettings::setAppFolderDir(const QString& appDataDir)
     mSettings->setValue("/DiskBrowserDlg/appData_folder", appDataDir);
 }
 
+// The two disk label fonts are stored by size in points, and the stored value
+// has to be one Qt accepts on the way back in. It used to be a pixel size taken
+// straight from the font, which is -1 whenever the font was built with a point
+// size instead -- OptionsDialog builds exactly such a font, so "size" ended up
+// as -1 in the settings and setPixelSize(-1) then failed on every read. Note
+// that the number is a starting value only: PicPreview::scaleFonts() replaces
+// it with a size derived from the label rectangle and the user's scale factor
+// before anything is painted.
+static int labelFontPointSize(int points) {
+    return points > 0 ? points : UiScale::defaultPointSize();
+}
+
+static int labelFontPointSize(const QFont& font) {
+    return labelFontPointSize(font.pointSize());
+}
+
 void RespeqtSettings::setDbTitleFont(const LabelFont& font)
 {
     mSettings->beginGroup("/DiskBrowserDlg");
     mSettings->beginGroup("title_font");
     mSettings->setValue("family", font.family());
-    mSettings->setValue("size", font.pixelSize() <= 0 ? 10 : font.pixelSize());
+    mSettings->setValue("size", labelFontPointSize(font));
     mSettings->setValue("bold", font.bold());
     mSettings->setValue("italic", font.italic());
     mSettings->setValue("color", font.color().name());
@@ -1184,7 +1192,7 @@ LabelFont RespeqtSettings::dbTitleFont()
     mSettings->beginGroup("/DiskBrowserDlg");
     mSettings->beginGroup("title_font");
     font.setFamily(mSettings->value("family", Label::DEF_TITLE_FNT).toString());
-    font.setPixelSize(mSettings->value("size", 10).toInt());
+    font.setPointSize(labelFontPointSize(mSettings->value("size", 0).toInt()));
     font.setBold(mSettings->value("bold", Label::DEF_TITLE_BOLD).toBool());
     font.setItalic(mSettings->value("italic", false).toBool());
     font.setColor(mSettings->value("color", "black").toString());
@@ -1199,7 +1207,7 @@ void RespeqtSettings::setDbIndexFont(const LabelFont& font)
     mSettings->beginGroup("/DiskBrowserDlg");
     mSettings->beginGroup("index_font");
     mSettings->setValue("family", font.family());
-    mSettings->setValue("size", font.pixelSize());
+    mSettings->setValue("size", labelFontPointSize(font));
     mSettings->setValue("bold", font.bold());
     mSettings->setValue("italic", font.italic());
     mSettings->setValue("color", font.color().name());
@@ -1214,7 +1222,7 @@ LabelFont RespeqtSettings::dbIndexFont()
     mSettings->beginGroup("/DiskBrowserDlg");
     mSettings->beginGroup("index_font");
     font.setFamily(mSettings->value("family", Label::DEF_INDEX_FNT).toString());
-    font.setPixelSize(mSettings->value("size", 10).toInt());
+    font.setPointSize(labelFontPointSize(mSettings->value("size", 0).toInt()));
     font.setBold(mSettings->value("bold", false).toBool());
     font.setItalic(mSettings->value("italic", false).toBool());
     font.setColor(mSettings->value("color", "black").toString());

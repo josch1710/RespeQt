@@ -13,7 +13,10 @@
 #include "mainwindow.h"
 #include "ui_bootoptionsdialog.h"
 
+#include "uicolors.h"
+
 #include <QDir>
+#include <QRadioButton>
 #include <QTranslator>
 
 extern QString g_respeQtAppPath;
@@ -29,6 +32,19 @@ BootOptionsDialog::BootOptionsDialog(const QString &bootFolderPath, QWidget *par
   setWindowFlags(flags);
 
   m_ui->setupUi(this);
+
+  // The form painted the six DOS radio buttons in a literal mauve and the hint
+  // above them in a literal grey. Both were picked for a light window and fail
+  // on a dark one: against a #1e1e1e window the mauve rgb(140, 96, 115) only
+  // reaches 3.2:1 and the grey rgb(111, 111, 111) 3.3:1, short of the 4.5:1
+  // that text needs. So keep the intended mauve accent but tune it to the
+  // palette at hand, and let the palette supply the muted hint colour.
+  const QColor accent = UiColors::isDark(this) ? QColor(186, 154, 168)
+                                              : QColor(119, 81, 97);
+  for (QRadioButton *button : findChildren<QRadioButton *>()) {
+    UiColors::setTextColor(button, accent);
+  }
+  UiColors::setTextColor(m_ui->label, UiColors::mutedText(this));
 
   connect(m_ui->myPicoDOS, SIGNAL(toggled(bool)), this, SLOT(picoDOSToggled()));
 }

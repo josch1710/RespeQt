@@ -13,13 +13,43 @@
 #include "printers/rawoutput.h"
 #include "respeqtsettings.h"
 #include "ui_optionsdialog.h"
+#include "uiscale.h"
 #include <QDir>
 #include <QFileDialog>
+#include <QFontDatabase>
 #include <QFontDialog>
 #include <QTranslator>
 #include <QtSerialPort>
 #include <QColorDialog>
 #include <QScreen>
+
+// A sans serif capital "I" is hard to tell apart from a lowercase L or a pipe,
+// which is why the italic buttons asked for a serif family. The form named
+// Century Schoolbook, which exists on Windows only -- elsewhere Qt fell back to
+// the sans serif UI font and the distinction was lost. So pick the first serif
+// family that is actually installed. Naming a family that is not there, even
+// the generic "Serif", makes Qt populate its font family aliases: that costs
+// ~75 ms on first use and logs a warning.
+static QFont serifButtonFont(const QFont &base) {
+  static const QString family = [] {
+    const QStringList installed = QFontDatabase().families();
+    for (const QString &candidate :
+         {QStringLiteral("Times New Roman"), QStringLiteral("Georgia"),
+          QStringLiteral("DejaVu Serif"), QStringLiteral("Liberation Serif"),
+          QStringLiteral("Nimbus Roman"), QStringLiteral("Times")}) {
+      if (installed.contains(candidate))
+        return candidate;
+    }
+    return QString();
+  }();
+
+  QFont font = base;
+  if (!family.isEmpty()) {
+    font.setFamily(family);
+    font.setStyleHint(QFont::Serif);
+  }
+  return font;
+}
 
 OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent),
                                                 m_ui(new Ui::OptionsDialog) {
@@ -28,6 +58,22 @@ OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent),
   setWindowFlags(flags);
 
   m_ui->setupUi(this);
+
+  // The twelve browse buttons were pinned to 24x24 (28x28 for the RCL folder)
+  // without ever getting an icon size. Let the style decide instead.
+  UiScale::applyToolButtonIconSizes(this);
+
+  // Same for the seven single glyph buttons of the disk browser section, which
+  // the form pinned to 22 or 35 pixels. The icon button also never got an icon
+  // size of its own.
+  m_ui->btn_appdata_browse->setIconSize(
+          QSize(UiScale::iconExtent(this), UiScale::iconExtent(this)));
+  for (QPushButton *button : {m_ui->btn_bold_title, m_ui->btn_italic_title,
+                              m_ui->btn_color_title, m_ui->btn_bold_index,
+                              m_ui->btn_italic_index, m_ui->btn_color_index,
+                              m_ui->btn_appdata_browse}) {
+    UiScale::applySquareSize(button);
+  }
 
   m_ui->optionSections->expandAll();
   itemStandard = m_ui->optionSections->topLevelItem(0)->child(0);
@@ -108,7 +154,6 @@ void OptionsDialog::setupSettings() {
   m_ui->toolDiskImagePath->setText(RespeqtSettings::instance()->toolDiskImagePath());
   m_ui->activateChipModeWithTool->setChecked(RespeqtSettings::instance()->activateChipModeWithTool());
   m_ui->activateHappyModeWithTool->setChecked(RespeqtSettings::instance()->activateHappyModeWithTool());
-  m_ui->useLargerFont->setChecked(RespeqtSettings::instance()->useLargeFont());
   m_ui->enableShade->setChecked(RespeqtSettings::instance()->enableShade());
   m_ui->RclNameEdit->setText(RespeqtSettings::instance()->lastRclDir());
   m_ui->printerSpyMode->setChecked(RespeqtSettings::instance()->isPrinterSpyMode());
@@ -140,7 +185,7 @@ void OptionsDialog::setupSettings() {
   m_ui->btn_bold_title->setChecked(dbfnt.bold());
   m_ui->btn_bold_title->setFont(btnFont);
   m_ui->btn_bold_title->update();
-  btnFont = m_ui->btn_italic_title->font();
+  btnFont = serifButtonFont(m_ui->btn_italic_title->font());
   btnFont.setItalic(dbfnt.italic());
   m_ui->btn_italic_title->setChecked(dbfnt.italic());
   m_ui->btn_italic_title->setFont(btnFont);
@@ -156,7 +201,7 @@ void OptionsDialog::setupSettings() {
   btnFont.setBold(dbfnt.bold());
   m_ui->btn_bold_index->setChecked(dbfnt.bold());
   m_ui->btn_bold_index->setFont(btnFont);
-  btnFont = m_ui->btn_italic_index->font();
+  btnFont = serifButtonFont(m_ui->btn_italic_index->font());
   btnFont.setItalic(dbfnt.italic());
   m_ui->btn_italic_index->setChecked(dbfnt.italic());
   m_ui->btn_italic_index->setFont(btnFont);
@@ -481,7 +526,6 @@ void OptionsDialog::saveSettings() {
   RespeqtSettings::instance()->setToolDiskImagePath(m_ui->toolDiskImagePath->text());
   RespeqtSettings::instance()->setActivateChipModeWithTool(m_ui->activateChipModeWithTool->isChecked());
   RespeqtSettings::instance()->setActivateHappyModeWithTool(m_ui->activateHappyModeWithTool->isChecked());
-  RespeqtSettings::instance()->setUseLargeFont(m_ui->useLargerFont->isChecked());
   RespeqtSettings::instance()->setEnableShade(m_ui->enableShade->isChecked());
   RespeqtSettings::instance()->setRclDir(m_ui->RclNameEdit->text());
   RespeqtSettings::instance()->setPrinterSpyMode(m_ui->printerSpyMode->isChecked());

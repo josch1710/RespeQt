@@ -3,6 +3,7 @@
 #include "printers/printers.h"
 #include "respeqtsettings.h"
 #include "ui_printerwidget.h"
+#include "uiscale.h"
 
 #include <QMessageBox>
 #include <QString>
@@ -15,6 +16,8 @@ PrinterWidget::PrinterWidget(int printerNum, QWidget *parent)
       ,
       mSio(nullptr) {
   ui->setupUi(this);
+  // See DriveWidget: the form pinned the buttons and set no icon size.
+  UiScale::applyToolButtonIconSizes(this);
   setup();
 
   // Connect the printer selection combobox
@@ -36,6 +39,10 @@ PrinterWidget::~PrinterWidget() {
 void PrinterWidget::setup() {
   QString printerTxt = QString("P%1").arg(printerNo_ + 1);
   ui->printerLabel->setText(printerTxt);
+
+  // Keep the printer number column aligned without pinning the label to 26x26.
+  ui->printerLabel->setMinimumWidth(
+      ui->printerLabel->fontMetrics().horizontalAdvance(QStringLiteral("P9")));
 
   ui->atariPrinters->clear();
   std::map<QString, int> list;
