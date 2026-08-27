@@ -14,7 +14,8 @@
    <string>RespeQt - Printer text output</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="printer"/>
+   <iconset theme="printer">
+    <normaloff>.</normaloff>.</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
@@ -34,6 +35,12 @@
       </property>
       <property name="statusTip">
        <string>Atari Output (Graphics)</string>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: #FFFFFF</string>
       </property>
      </widget>
     </item>
@@ -74,7 +81,8 @@
   </widget>
   <action name="actionSave">
    <property name="icon">
-    <iconset theme="disk"/>
+    <iconset theme="disk">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Save to a file...</string>
@@ -91,7 +99,8 @@
   </action>
   <action name="actionClear">
    <property name="icon">
-    <iconset theme="page_white"/>
+    <iconset theme="page_white">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Clear</string>
@@ -114,7 +123,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset theme="text_align_left"/>
+    <iconset theme="text_align_left">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Word wrap</string>
@@ -131,7 +141,8 @@
   </action>
   <action name="actionPrint">
    <property name="icon">
-    <iconset theme="printer"/>
+    <iconset theme="printer">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Print</string>
@@ -148,7 +159,8 @@
   </action>
   <action name="actionAtasciiFont">
    <property name="icon">
-    <iconset theme="font_go"/>
+    <iconset theme="font_go">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Atascii Font</string>
@@ -255,7 +267,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset theme="cut_red"/>
+    <iconset theme="cut_red">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Strip Line Numbers</string>

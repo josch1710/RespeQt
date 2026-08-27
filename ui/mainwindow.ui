@@ -141,6 +141,9 @@
       <property name="contextMenuPolicy">
        <enum>Qt::DefaultContextMenu</enum>
       </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: #FFFFFF</string>
+      </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
@@ -182,7 +185,7 @@
      <x>0</x>
      <y>0</y>
      <width>587</width>
-     <height>25</height>
+     <height>33</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Disk">
@@ -265,7 +268,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset theme="control_eject"/>
+    <iconset theme="control_eject">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Unmount &amp;all</string>
@@ -282,7 +286,8 @@
   </action>
   <action name="actionOptions">
    <property name="icon">
-    <iconset theme="run"/>
+    <iconset theme="run">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>&amp;Options...</string>
@@ -338,7 +343,8 @@
   </action>
   <action name="actionMountDisk">
    <property name="icon">
-    <iconset theme="3floppy_unmount"/>
+    <iconset theme="3floppy_unmount">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Mount &amp;disk image...</string>
@@ -355,7 +361,8 @@
   </action>
   <action name="actionMountFolder">
    <property name="icon">
-    <iconset theme="folder"/>
+    <iconset theme="folder">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Mount &amp;folder image...</string>
@@ -372,7 +379,8 @@
   </action>
   <action name="actionNewImage">
    <property name="icon">
-    <iconset theme="media_floppy"/>
+    <iconset theme="media_floppy">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>New disk image...</string>
@@ -392,7 +400,8 @@
   </action>
   <action name="actionSaveSession">
    <property name="icon">
-    <iconset theme="monitor_go"/>
+    <iconset theme="monitor_go">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>&amp;Save session</string>
@@ -409,7 +418,8 @@
   </action>
   <action name="actionOpenSession">
    <property name="icon">
-    <iconset theme="monitor"/>
+    <iconset theme="monitor">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>&amp;Open session...</string>
@@ -426,7 +436,8 @@
   </action>
   <action name="actionBootExe">
    <property name="icon">
-    <iconset theme="Atari"/>
+    <iconset theme="Atari">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>&amp;Boot Atari executable...</string>
@@ -452,7 +463,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset theme="drive_disk"/>
+    <iconset theme="drive_disk">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Save</string>
@@ -469,7 +481,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset theme="printer1"/>
+    <iconset theme="printer1">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Show printer text output</string>
@@ -486,7 +499,8 @@
   </action>
   <action name="actionPlaybackCassette">
    <property name="icon">
-    <iconset theme="media_tape"/>
+    <iconset theme="media_tape">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Playback cassette image...</string>
@@ -503,7 +517,8 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset theme="exit"/>
+    <iconset theme="exit">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>&amp;Quit</string>
@@ -517,7 +532,8 @@
   </action>
   <action name="actionAbout">
    <property name="icon">
-    <iconset theme="help_about"/>
+    <iconset theme="help_about">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>&amp;About RespeQt</string>
@@ -549,7 +565,8 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset theme="help_contents"/>
+    <iconset theme="help_contents">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>User Manual</string>
@@ -566,7 +583,8 @@
   </action>
   <action name="actionDefaultImageGroup">
    <property name="icon">
-    <iconset theme="document_save_all"/>
+    <iconset theme="document_save_all">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Save mounted image group as default</string>
@@ -580,7 +598,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset theme="printer"/>
+    <iconset theme="printer">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Stop printer emulation</string>
@@ -594,7 +613,8 @@
   </action>
   <action name="actionHideShowDrives">
    <property name="icon">
-    <iconset theme="drive_add"/>
+    <iconset theme="drive_add">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Hide drives D9-DO</string>
@@ -605,7 +625,8 @@
   </action>
   <action name="actionToggleMiniMode">
    <property name="icon">
-    <iconset theme="minicooper"/>
+    <iconset theme="minicooper">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Toggle mini mode</string>
@@ -619,7 +640,8 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset theme="fade"/>
+    <iconset theme="fade">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Toggle shade mode</string>
@@ -630,7 +652,8 @@
   </action>
   <action name="actionLogWindow">
    <property name="icon">
-    <iconset theme="page_white_text"/>
+    <iconset theme="page_white_text">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Open log window</string>
@@ -671,7 +694,8 @@
   </action>
   <action name="actionDiskBrowser">
    <property name="icon">
-    <iconset theme="folder_html"/>
+    <iconset theme="folder_html">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Open Disk Collection Browser</string>
