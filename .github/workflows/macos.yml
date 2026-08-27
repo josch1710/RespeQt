@@ -12,7 +12,7 @@ jobs:
       actions: write  # for styfle/cancel-workflow-action to cancel/stop running workflows
       contents: write # for actions/checkout to fetch code and softprops/action-gh-release
     if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
-    runs-on: macos-14-intel
+    runs-on: macos-26-intel
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.13.1
@@ -25,7 +25,7 @@ jobs:
       - name: Install Mac Qt 5
         uses: jurplel/install-qt-action@v4
         with:
-          version: "5.15.2"
+          version: "5.15.4"
           host: "mac"
           arch: "clang_64"
           target: "desktop"
@@ -50,7 +50,7 @@ jobs:
       actions: write  # for styfle/cancel-workflow-action to cancel/stop running workflows
       contents: write # for actions/checkout to fetch code and softprops/action-gh-release
     if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
-    runs-on: macos-14-intel
+    runs-on: macos-26-intel
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.13.1
@@ -63,7 +63,7 @@ jobs:
       - name: Install Mac Qt 5
         uses: jurplel/install-qt-action@v4
         with:
-          version: "5.15.2"
+          version: "5.15.4"
           host: "mac"
           arch: "clang_64"
           target: "desktop"

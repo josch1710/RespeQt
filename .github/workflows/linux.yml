@@ -31,7 +31,7 @@ jobs:
       - name: Install Linux Qt 5
         uses: jurplel/install-qt-action@v4
         with:
-          version: "5.15.2"
+          version: "5.13.2"
           host: "linux"
           arch: "gcc_64"
           target: "desktop"
@@ -78,7 +78,7 @@ jobs:
       - name: Install Linux Qt 5
         uses: jurplel/install-qt-action@v4
         with:
-          version: "5.15.2"
+          version: "5.13.2"
           host: "linux"
           arch: "gcc_64"
           target: "desktop"

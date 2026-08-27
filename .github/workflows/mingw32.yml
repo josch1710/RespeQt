@@ -30,7 +30,7 @@ jobs:
       - name: Install MingW Qt 5
         uses: jurplel/install-qt-action@v4
         with:
-          version: "5.15.2"
+          version: "5.15.14"
           host: "windows"
           arch: "win32_mingw81"
           target: "desktop"
@@ -82,7 +82,7 @@ jobs:
       - name: Install MingW Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: "5.15.2"
+          version: "5.15.14"
           host: "windows"
           arch: "win32_mingw81"
           target: "desktop"
