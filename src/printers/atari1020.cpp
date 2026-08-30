@@ -407,6 +407,11 @@ bool Atari1020::handleBuffer(const QByteArray &buffer, const unsigned int len)
     return true;
 }
 
+QRectF Atari1020::printerDimension() const
+{
+    return {0, 0, 0, 0};
+}
+
 void Atari1020::resetGraphics()
 {
     mCurrentCommand     = 0;
@@ -821,7 +826,7 @@ void Atari1020::executeGraphicsCommand()
                 auto y = getSecondNumber();
                 if ((x >= 0) && (x <= 480))
                 {
-                    QPoint point(x, y);
+                    QPointF point(x, y);
 
                     switch (mCurrentCommand)
                     {
@@ -986,7 +991,7 @@ int Atari1020::getNumber(const QString number, const bool negative,
 
 bool Atari1020::drawAxis(bool xAxis, int size, int count)
 {
-    QPoint end = QPoint(mPenPoint);
+    auto end{QPointF(mPenPoint)};
 
     if (xAxis)
     {

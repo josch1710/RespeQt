@@ -14,7 +14,6 @@
 #include <QString>
 #include <QGraphicsItem>
 #include <memory>
-//#include "graphicsprimitive.h"
 
 namespace Ui {
   class OutputWindow;
@@ -33,24 +32,28 @@ namespace Printers {
     //virtual void translate(const QPointF &) {}
     //virtual void drawLine(const QPointF &, const QPointF &) {}
     //virtual void calculateFixedFontSize(uint8_t) override {}
-    //virtual bool setupOutput() override;
-    //virtual void executeGraphicsPrimitive(GraphicsPrimitive *primitive);
 
   public slots:
     void setSceneRect(const QRectF &sceneRect);
     void addItem(QGraphicsItem *item);
     void playScene();
+    // Set printer dimension for scaling operations
+    void updatePrinterDimension(const QRectF &dimension);
+
 
   protected:
     void changeEvent(QEvent *e) override;
     void closeEvent(QCloseEvent *e) override;
+    void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent *e) override;
+    qreal calculateScaleFactor() const;
+
 
   private:
     Ui::OutputWindow *ui;
     QPen mPen;
     QGraphicsScene mGraphicsScene;
-    
+    QRectF printerDimension{0, 0, 0, 0};
 
   protected slots:
     void saveTriggered();
@@ -59,12 +62,10 @@ namespace Printers {
 
     // To manipulate fonts and ascii/atascii windows  //
     void print(const QString &text);
-    //void printGraphics(GraphicsPrimitive *primitive);
 
   signals:
     void closed(const Printers::OutputWindow *window);
     void textPrint(const QString &text);
-    //void graphicsPrint(GraphicsPrimitive *primitive);
   };
 
   using OutputWindowPtr = QSharedPointer<OutputWindow>;

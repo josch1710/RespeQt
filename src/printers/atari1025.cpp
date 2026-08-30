@@ -16,6 +16,11 @@ namespace Printers {
     mPenPoint.setY(10);
   }
 
+  QRectF Atari1025::printerDimension() const
+  {
+    return {0, 0, 0, 0};
+  }
+
   bool Atari1025::handleBuffer(const QByteArray &buffer, const unsigned int len) {
     for (unsigned int i = 0; i < len; i++) {
       auto b = static_cast<unsigned char>(

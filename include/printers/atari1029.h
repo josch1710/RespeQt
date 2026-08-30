@@ -3,8 +3,6 @@
 
 #include "atariprinter.h"
 
-#include <QFont>
-#include <QFontMetrics>
 #include <QPrinter>
 #include <QRect>
 
@@ -21,24 +19,24 @@ namespace Printers {
   public:
     Atari1029(SioWorkerPtr worker);
 
-    virtual bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
-    virtual void setupFont() override;
+    bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
+    void setupFont() override;
 
     static QString typeName() {
       return "Atari 1029";
     }
 
-  private:
-    bool mESC;
-    bool mElongatedMode;
-    GraphicsMode mGraphicsMode{GraphicsMode::NOT_GRAPHICS};
-    uint16_t mGraphicsColumns;
+  protected:
+    QRectF printerDimension() const override;
 
+  private:
     bool handleEscapedCodes(const unsigned char b);
     bool handlePrintableCodes(const unsigned char b);
-    bool elongatedMode() { return mElongatedMode; }
+    bool elongatedMode() const { return mElongatedMode; }
     void setElongatedMode(bool elongatedMode);
     bool handleGraphicsMode(const unsigned char b);
+
+    GraphicsMode mGraphicsMode{GraphicsMode::NOT_GRAPHICS};
   };
 }// namespace Printers
 #endif// ATARI1029_H

@@ -3,6 +3,11 @@
 #include <utility>
 
 namespace Printers {
+  QRectF Atari1027::printerDimension() const
+  {
+    return {0, 0, 0, 0};
+  }
+
   Atari1027::Atari1027(SioWorkerPtr worker)
       : AtariPrinter(std::move(worker)),
         mESC(false) {}

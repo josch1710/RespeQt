@@ -820,7 +820,7 @@ qDebug() << "!n" << "new position " << openFiles[handle]->pos();
         answer.setU32At(fileInfo.size(), 11);
         answer.setU32At(fileInfo.lastRead().toTime_t(), 15);
         answer.setU32At(fileInfo.lastModified().toTime_t(), 19);
-        answer.setU32At(fileInfo.created().toTime_t(), 23);
+        answer.setU32At(fileInfo.birthTime().toTime_t(), 23);
         answer.setStringAt(fileInfo.owner(), 27);
         answer.setStringAt(fileInfo.group(), 28 + fileInfo.owner().length());
 

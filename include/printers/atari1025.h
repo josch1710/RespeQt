@@ -17,6 +17,10 @@ namespace Printers {
     virtual bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
     virtual void setupFont() override;
 
+  protected:
+    QRectF printerDimension() const override;
+
+  public:
     static QString typeName() {
       return "Atari 1025";
     }

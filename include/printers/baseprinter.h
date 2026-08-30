@@ -45,6 +45,7 @@ namespace Printers {
   signals:
     void setSceneRect(const QRect &rect);
     void addItem(QGraphicsItem *item);
+    void setPrinterDimension(const QRectF &dimension);
 
   protected:
     Atascii mAtascii;
@@ -54,13 +55,19 @@ namespace Printers {
     bool writeDataFrame(QByteArray data);
     void dumpBuffer(unsigned char *buf, int len);
     void fillBuffer(char *line, unsigned char *buf, int len, int ofs, bool dumpAscii);
-    //void executeGraphicsPrimitive(GraphicsPrimitive *primitive);
+    virtual QRectF printerDimension() const = 0;
 
-    QFont mFont;
+    QFont mFont{};
+    bool mIsFontInitialized{false};
     QString buffer{};
-    bool mClearPane;
-    QPoint mPenPoint;
+    bool mClearPane{false};
+    QPointF mPenPoint;
     QPen mPen;
+    qreal mLineHeight{0};
+    bool mESC;
+    bool mElongatedMode;
+    uint16_t mGraphicsColumns{0};
+
 
   private:
     char m_lastOperation;

@@ -23,14 +23,18 @@
 #include <QSharedPointer>
 #include <QString>
 #include <QSvgGenerator>
+#include <QScrollBar>
 
 namespace Printers {
 
-  OutputWindow::OutputWindow(QWidget *parent) : QMainWindow(parent), /* NativeOutput(),*/
+  OutputWindow::OutputWindow(QWidget *parent) : QMainWindow(parent),
                                                 ui(new Ui::OutputWindow) {
     ui->setupUi(this);
 
     ui->printerGraphics->setScene(&mGraphicsScene);
+    
+    // Force the view to align the scene to the top-left corner
+    ui->printerGraphics->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
     connect(this, &OutputWindow::textPrint, this, &OutputWindow::print);
     //connect(this, &OutputWindow::graphicsPrint, this, &OutputWindow::printGraphics);
@@ -65,6 +69,7 @@ namespace Printers {
           QString name = QString("Printer%1").arg(parent->getPrinterNumber()+1);
           RespeqtSettings::instance()->restoreWidgetGeometry(this, name);
       }
+      playScene();
   }
 
   void OutputWindow::closeEvent(QCloseEvent *e)
@@ -78,6 +83,11 @@ namespace Printers {
     }
     emit closed(this);
     e->accept();
+  }
+
+  void OutputWindow::resizeEvent(QResizeEvent *event) {
+    QMainWindow::resizeEvent(event);
+    playScene();
   }
 
   void OutputWindow::print(const QString &) {
@@ -156,21 +166,46 @@ bool OutputWindow::setupOutput()
     return true;
 }*/
 
-  // void OutputWindow::executeGraphicsPrimitive(GraphicsPrimitive *primitive) {
-  //   emit graphicsPrint(primitive);
-  // }
-
   void OutputWindow::setSceneRect(const QRectF &sceneRect) {
     mGraphicsScene.setSceneRect(sceneRect);
   }
 
   void OutputWindow::addItem(QGraphicsItem *item)
   {
+      // Ensure items are positioned at top-left corner (0, 0) 
       mGraphicsScene.addItem(item);
   }
+  
   void OutputWindow::playScene()
   {
-      mGraphicsScene.update();
+    auto scale{calculateScaleFactor()};
+
+    setSceneRect(QRectF(0, 0, printerDimension.width(), ui->printerGraphics->height()));
+    ui->printerGraphics->setTransform(QTransform().scale(scale, scale));
+
+    // Ensure scene is properly updated and positioned
+    mGraphicsScene.update();
+    ui->printerGraphics->update(); // Force update of the graphics view
   }
 
-  }  // namespace Printers
+  void OutputWindow::updatePrinterDimension(const QRectF &dimension)
+  {
+    printerDimension = dimension;
+  }
+
+  qreal OutputWindow::calculateScaleFactor() const
+  {
+    if (printerDimension.width() == 0)
+    {
+      return 1.0;
+    }
+
+    auto width{ui->printerGraphics->width()};
+  //   if (!ui->printerGraphics->verticalScrollBar()->isHidden())
+  //   {
+  //     width -= ui->printerGraphics->viewport()->width();
+  //   }
+    return static_cast<qreal>(width) / printerDimension.width();
+  }
+
+}  // namespace Printers

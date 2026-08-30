@@ -36,10 +36,6 @@ endif()
 
 include_directories(include headers tests tools)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-endif()
 # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -fno-omit-frame-pointer -stdlib=libc++")
 if (NOT WIN32)
     set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address -fno-omit-frame-pointer")
@@ -96,7 +92,6 @@ set(SOURCES
     src/printers/printerfactory.cpp
     src/printers/atari1025.cpp
     src/printers/passthrough.cpp
-    # src/printers/graphicsprimitive.cpp
     src/crc16.cpp
     src/diskimages/cpu6502.cpp
     src/filesystems/ataridirentry.cpp
@@ -174,7 +169,6 @@ set(HEADERS
     include/printers/atari1025.h
     include/printers/passthrough.h
     include/smartdevice.h
-    # include/printers/graphicsprimitive.h
     include/crc16.h
     include/diskimages/cpu6502.h
     headers/atarisio.h
@@ -263,6 +257,10 @@ qt5_add_resources(UI_RESOURCES ${RESOURCES})
 
 if (Qt5Widgets_VERSION VERSION_LESS 5.13.0)
     set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+    endif()
 else()
     set(CMAKE_CXX_STANDARD 14)
 endif()

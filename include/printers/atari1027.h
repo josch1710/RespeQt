@@ -10,7 +10,12 @@
 
 namespace Printers {
   class Atari1027 : public AtariPrinter {
+  protected:
+    QRectF printerDimension() const override;
+
+  private:
     Q_OBJECT
+
   public:
     Atari1027(SioWorkerPtr worker);
 

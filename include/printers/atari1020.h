@@ -2,7 +2,6 @@
 #define ATARI1020_H
 
 #include "atariprinter.h"
-//#include "graphicsprimitive.h"
 
 enum AUTOMATA_STATES {
   AUTOMATA_START = 0,
@@ -32,6 +31,11 @@ namespace Printers {
 
     void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) override;
     bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
+
+  protected:
+    QRectF printerDimension() const override;
+
+  public:
     // void setupFont() override;
     // void setupOutput() override;
 

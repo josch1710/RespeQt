@@ -20,7 +20,6 @@ namespace Printers {
 }// namespace Printers
 
 #include "baseprinter.h"
-//#include "graphicsprimitive.h"
 #include "sioworker.h"
 
 using QPaintDevicePtr = std::shared_ptr<QPaintDevice>;
