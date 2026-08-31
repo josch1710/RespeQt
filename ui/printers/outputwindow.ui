@@ -40,7 +40,7 @@
        <bool>false</bool>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color: #FFFFFF</string>
+       <string notr="true"/>
       </property>
      </widget>
     </item>

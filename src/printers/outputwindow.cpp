@@ -15,15 +15,13 @@
 #include <QFileDialog>
 #include <QPrintDialog>
 #include <QPrinter>
-#include <memory>
 
 // Includes, Globals and various additional class declarations //
-#include <QMessageBox>
 #include <QPainter>
-#include <QSharedPointer>
 #include <QString>
 #include <QSvgGenerator>
-#include <QScrollBar>
+
+#include "uicolors.h"
 
 namespace Printers {
 
@@ -41,6 +39,8 @@ namespace Printers {
     connect(ui->actionSave, &QAction::triggered, this, &OutputWindow::saveTriggered);
     connect(ui->actionClear, &QAction::triggered, this, &OutputWindow::clearTriggered);
     connect(ui->actionPrint, &QAction::triggered, this, &OutputWindow::printTriggered);
+
+    applyPaletteColors();
   }
 
   OutputWindow::~OutputWindow() {
@@ -53,6 +53,11 @@ namespace Printers {
       case QEvent::LanguageChange:
         ui->retranslateUi(this);
         break;
+
+    case QEvent::PaletteChange:
+        applyPaletteColors();
+        break;
+
       default:
         break;
     }
@@ -94,11 +99,6 @@ namespace Printers {
     // TODO Print
   }
 
-  // void OutputWindow::printGraphics(GraphicsPrimitive *primitive) {
-  //   primitive->execute(ui->printerGraphics->scene());
-  //   delete primitive;
-  // }
-
 
   void OutputWindow::clearTriggered() {
     // auto primitive = new GraphicsClearPane;
@@ -122,7 +122,7 @@ namespace Printers {
     painter.translate(printer.paperRect(QPrinter::DevicePixel).x() + printer.pageRect(QPrinter::DevicePixel).width() / 2,
                       printer.paperRect(QPrinter::DevicePixel).y() + printer.pageRect(QPrinter::DevicePixel).height() / 2);
     painter.scale(scale, scale);
-    painter.translate(-width() / 2, -height() / 2);
+    painter.translate(-width() / 2.0, -height() / 2.0);
     // Now render the scene on the printer.
     ui->printerGraphics->render(&painter);
     painter.end();
@@ -147,24 +147,6 @@ namespace Printers {
     painter.end();
     file.close();
   }
-
-  /*void OutputWindow::printChar(const QChar &c)
-{
-    emit textPrint(QString(c));
-}
-
-void OutputWindow::printString(const QString &s)
-{
-    emit textPrint(s);
-}
-
-bool OutputWindow::setupOutput()
-{
-    this->setGeometry(RespeqtSettings::instance()->lastPrtHorizontalPos(), RespeqtSettings::instance()->lastPrtVerticalPos(), RespeqtSettings::instance()->lastPrtWidth(), RespeqtSettings::instance()->lastPrtHeight());
-    this->show();
-
-    return true;
-}*/
 
   void OutputWindow::setSceneRect(const QRectF &sceneRect) {
     mGraphicsScene.setSceneRect(sceneRect);
@@ -200,12 +182,11 @@ bool OutputWindow::setupOutput()
       return 1.0;
     }
 
-    auto width{ui->printerGraphics->width()};
-  //   if (!ui->printerGraphics->verticalScrollBar()->isHidden())
-  //   {
-  //     width -= ui->printerGraphics->viewport()->width();
-  //   }
-    return static_cast<qreal>(width) / printerDimension.width();
+    return static_cast<qreal>(ui->printerGraphics->width()) / printerDimension.width();
   }
 
+  void OutputWindow::applyPaletteColors() const
+  {
+    UiColors::setBaseColor(ui->printerGraphics, Qt::white);
+  }
 }  // namespace Printers

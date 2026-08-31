@@ -256,8 +256,6 @@ namespace Printers {
 
         if (mGraphicsColumns == 0)
         {
-            mPenPoint.setX(0);
-            mPenPoint.setY(mPenPoint.y() + 7);
             mGraphicsMode = GraphicsMode::NOT_GRAPHICS;
         }
       }

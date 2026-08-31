@@ -50,6 +50,8 @@ namespace Printers {
 
 
   private:
+    void applyPaletteColors() const;
+
     Ui::OutputWindow *ui;
     QPen mPen;
     QGraphicsScene mGraphicsScene;

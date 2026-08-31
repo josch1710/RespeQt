@@ -55,6 +55,12 @@ namespace UiColors {
     widget->setPalette(pal);
   }
 
+  inline void setBaseColor(QWidget *widget, const QColor &color) {
+    QPalette pal = widget->palette();
+    pal.setColor(QPalette::Base, color);
+    widget->setPalette(pal);
+  }
+
 }// namespace UiColors
 
 #endif// UICOLORS_H
