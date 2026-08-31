@@ -85,9 +85,9 @@ MainWindow *MainWindow::sInstance{nullptr};
 // Error           (red)           "!e"
 // (???)           (purple)        "!"      (not used?)
 //
-void MainWindow::logMessageOutput(QtMsgType type, const QMessageLogContext & /*context*/, const QString &msg) {
+void MainWindow::logMessageOutput(const QtMsgType type, const QMessageLogContext & /*context*/, const QString &msg) {
   logMutex->lock();
-  logFile->write(QString::number((quint64) QThread::currentThreadId(), 16).toLatin1());
+  logFile->write(QString::number(reinterpret_cast<quint64>(QThread::currentThreadId()), 16).toLatin1());
   switch (type) {
 #if QT_VERSION >= 0x050500
     case QtInfoMsg:
@@ -1096,7 +1096,7 @@ void MainWindow::uiMessage(int t, QString message) {
       }
       break;
     case 'n':
-      message = QString("<span style='color:black'>%1</span>").arg(message);
+      message = QString("<span>%1</span>").arg(message);
       break;
     case 'i':
       message = QString("<span style='color:blue'>%1</span>").arg(message);

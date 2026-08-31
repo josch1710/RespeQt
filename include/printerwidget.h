@@ -7,6 +7,7 @@
 #include "printers/outputwindow.h"
 
 #include <QFrame>
+#include <utility>
 
 namespace Ui {
   class PrinterWidget;
@@ -17,12 +18,12 @@ class PrinterWidget : public QFrame {
 
 public:
   explicit PrinterWidget(int printerNum, QWidget *parent = nullptr);
-  ~PrinterWidget();
+  ~PrinterWidget() override;
 
   int getPrinterNumber() const { return printerNo_; }
 
   Printers::BasePrinterPtr printer() const { return mPrinter; }
-  void setPrinter(Printers::BasePrinterPtr printer) { mPrinter = printer; }
+  void setPrinter(Printers::BasePrinterPtr printer) { mPrinter = std::move(printer); }
 
   void setSioWorker(SioWorkerPtr sio);
 
@@ -39,6 +40,9 @@ signals:
 public slots:
   void disconnectPrinter();
 
+protected:
+  void changeEvent(QEvent *e) override;
+
 private slots:
   void connectPrinter();
   void printerSelectionChanged(const QString &printerName);
@@ -46,11 +50,12 @@ private slots:
 private:
   void setup();
   bool selectPrinter();
+  void applyPaletteColors();
+
 
   Ui::PrinterWidget *ui;
   int printerNo_;
   Printers::BasePrinterPtr mPrinter;
-  //Printers::NativeOutputPtr mDevice;
   Printers::OutputWindowPtr mOutputWindow;
 
   SioWorkerPtr mSio;

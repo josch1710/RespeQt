@@ -25,10 +25,6 @@
    </property>
    <item row="0" column="0" colspan="2">
     <widget class="QTextEdit" name="textEdit">
-     <property name="styleSheet">
-      <string notr="true">background-color: #FFFFFF
-</string>
-     </property>
      <property name="undoRedoEnabled">
       <bool>false</bool>
      </property>

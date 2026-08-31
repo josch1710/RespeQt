@@ -141,9 +141,6 @@
       <property name="contextMenuPolicy">
        <enum>Qt::DefaultContextMenu</enum>
       </property>
-      <property name="styleSheet">
-       <string notr="true">background-color: #FFFFFF</string>
-      </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
@@ -185,7 +182,7 @@
      <x>0</x>
      <y>0</y>
      <width>587</width>
-     <height>33</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_Disk">

@@ -49,6 +49,12 @@ namespace UiColors {
     widget->setPalette(pal);
   }
 
+  inline void setButtonColor(QWidget *widget, const QColor &color) {
+    QPalette pal = widget->palette();
+    pal.setColor(QPalette::ButtonText, color);
+    widget->setPalette(pal);
+  }
+
 }// namespace UiColors
 
 #endif// UICOLORS_H

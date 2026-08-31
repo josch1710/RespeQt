@@ -4,12 +4,15 @@
 #include "respeqtsettings.h"
 #include "ui_printerwidget.h"
 #include "uiscale.h"
+#include "uicolors.h"
 
 #include <QMessageBox>
 #include <QString>
 #include <QVector>
+#include <QPalette>
 #include <memory>
 #include <utility>
+
 PrinterWidget::PrinterWidget(int printerNum, QWidget *parent)
     : QFrame(parent), ui(new Ui::PrinterWidget), printerNo_(printerNum), mPrinter(nullptr)
       //, mDevice(nullptr)
@@ -29,6 +32,8 @@ PrinterWidget::PrinterWidget(int printerNum, QWidget *parent)
   // Connect widget actions to buttons
   ui->buttonDisconnectPrinter->setDefaultAction(ui->actionDisconnectPrinter);
   ui->buttonConnectPrinter->setDefaultAction(ui->actionConnectPrinter);
+
+  applyPaletteColors();
 }
 
 PrinterWidget::~PrinterWidget() {
@@ -67,6 +72,25 @@ void PrinterWidget::setup() {
   ui->actionDisconnectPrinter->setEnabled(false);
   ui->actionConnectPrinter->setEnabled(true);
 }
+
+// The drive number and the image details are secondary information and were
+// dimmed by the form through a literal palette override, rgb(104, 104, 104)
+// and rgb(128, 128, 128). Both were chosen for a light window and drop to
+// about 3:1 on a dark one, so derive the dimming from the palette instead.
+void PrinterWidget::applyPaletteColors() {
+  const auto color{QColor(UiColors::isDark(ui->atariPrinters) ? Qt::black : Qt::white)};
+  UiColors::setButtonColor(ui->atariPrinters, color);
+}
+
+// The colours above are derived once, so they would go stale when the user
+// switches the system to dark mode while the window is open.
+void PrinterWidget::changeEvent(QEvent *e) {
+  QFrame::changeEvent(e);
+  if (e->type() == QEvent::PaletteChange) {
+    applyPaletteColors();
+  }
+}
+
 
 void PrinterWidget::setSioWorker(SioWorkerPtr sio) {
   mSio = std::move(sio);
