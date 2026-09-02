@@ -529,7 +529,7 @@ int PCLINK::check_dos_name(char *newpath, struct dirent *dp, struct stat *sb) {
   strcpy(fname, dp->d_name);
 
   if (is_fname_encoded(dp->d_name)) {
-    memcpy(dp->d_name, (dp->d_name) + 1, strlen(dp->d_name) + 1);
+    memmove(dp->d_name, (dp->d_name) + 1, strlen(dp->d_name));
   }
 
   if (D) qDebug() << "!n" << tr("%1: got fname '%2'").arg(__extension__ __FUNCTION__, dp->d_name);
@@ -668,7 +668,7 @@ DIRENTRY *PCLINK::cache_dir(uchar handle) {
   bs = strrchr(cwd, HOST_SEPARATOR_CHAR);
 
   if (bs == nullptr)
-    memcpy(dir->fname, "MAIN", 4);
+    (dir->fname, "MAIN", 4);
   else {
     char *cp = cwd;
 
@@ -676,7 +676,7 @@ DIRENTRY *PCLINK::cache_dir(uchar handle) {
     ugefina(bs + 1, (char *) dir->fname);
 
     if (is_fname_encoded(bs + 1)) {
-      memcpy(dir->fname, (dir->fname) + 1, strlen(dir->fname) + 1);
+      memmove(dir->fname, (dir->fname) + 1, strlen(dir->fname));
     }
 
     node = 0;

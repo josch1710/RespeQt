@@ -35,7 +35,7 @@ namespace Network {
 
         auto realPath(const QString &path) const -> QDirPtr;
         auto realFileName(const QString &fileName) const -> QString;
-        auto sessionID() const -> const quint16 { return _sessionID; }
+        auto sessionID() const -> quint16 { return _sessionID; }
         auto openDirectories() -> QDirIndexVector& { return _openDirs; }
         auto openFiles() -> QFileVector& { return _openFiles; }
 

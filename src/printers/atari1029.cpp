@@ -7,6 +7,7 @@
 #include <QString>
 #include <QFont>
 #include <QGraphicsTextItem>
+#include <QGraphicsLineItem>
 
 namespace Printers {
   Atari1029::Atari1029(SioWorkerPtr worker)
@@ -43,12 +44,13 @@ namespace Printers {
           // Calculate the width for 80 characters based on the test string
           // (assumption: the test string represents the average width)
           double averageCharWidth = tempItem->boundingRect().width() / testString.length();
+          delete tempItem;
+
           if (averageCharWidth * max_chars > max_width) {
             font.setPointSize(font.pointSize() - 1);
           } else {
             break; // Size fits!
           }
-          delete tempItem;
         }
 
         mFont = font;
@@ -194,6 +196,10 @@ namespace Printers {
         mGraphicsMode = GraphicsMode::FETCH_MSB;
         mESC = false;
         return true;
+
+      default:
+        mESC = false;
+        break;
     }
     return false;
   }
@@ -242,7 +248,7 @@ namespace Printers {
       case GraphicsMode::PLOT_DOTS: {
         // Now we fetch the graphics data, until mGraphicsColumns is 0
         // Paint the dots;
-        QPoint point(mPenPoint.x(), mPenPoint.y() + 6);
+        QPointF point(mPenPoint.x(), mPenPoint.y() + 6);
         for(int i = 0; i < 7; i++)
         {
             // Mask the point we want to draw.
