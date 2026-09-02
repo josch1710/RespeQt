@@ -49,9 +49,9 @@ void DbIni::setPicture(const QString& pic, const QString& dir, const QString& di
 
 QString DbIni::getPicture(const QDir& dir, const QString& disk, PicSourceType& picSource)
 {
-    QString dirStr  = dir.absolutePath();
-    QString lnxDir  = QDir::fromNativeSeparators(dirStr);
-    auto    dirInfo = _dirMap[lnxDir];
+    QString dirStr  {dir.absolutePath()};
+    QString lnxDir  {QDir::fromNativeSeparators(dirStr)};
+    auto    dirInfo {_dirMap[lnxDir]};
 
     QString pic;
     picSource = PicSource_none;
@@ -164,7 +164,7 @@ bool DbIni::save()
     if (!_diskPic.isEmpty())
         _settings->setValue("pic", _diskPic.replace('/','@'));
 
-    for (auto it = _dirMap.begin(); it != _dirMap.end(); ++it)
+    for (auto it {_dirMap.begin()}; it != _dirMap.end(); ++it)
     {
         DirInfo& dirInfo = it.value();
         QString  escDir  = it.key();
@@ -175,10 +175,10 @@ bool DbIni::save()
         if (!dirInfo.pic.isEmpty())
             _settings->setValue("pic", dirInfo.pic.replace('/','@'));
 
-        for (auto it = dirInfo.map.begin(); it != dirInfo.map.end(); ++it)
+        for (auto it2 {dirInfo.map.begin()}; it2 != dirInfo.map.end(); ++it2)
         {
-            FloppyArt art = it.value();
-            QString group = it.key();
+            FloppyArt art {it2.value()};
+            QString group {it2.key()};
 
             if (art.isEmpty())
                 continue;

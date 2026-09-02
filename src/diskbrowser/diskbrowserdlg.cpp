@@ -142,25 +142,25 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
     clear();    // clear disk collection browser contents
 
     // fill in any sub-directories
-    auto folders = _folderDisks.folders();
+    auto folders {_folderDisks.folders()};
     foreach (const QString &subdir, folders)
     {
         if (subdir.startsWith('.') && (subdir != ".."))     // hide .folders on Windows
             continue;
 
-        auto item = new DbItem(ui->treeDisks);
-        auto icon = QIcon::fromTheme("folder");
+        auto item {new DbItem(ui->treeDisks)};
+        auto icon {QIcon::fromTheme("folder")};
         item->setIcon(1, icon);
         item->setText(1, subdir);
         item->setFolder(true);
     }
 
     // fill in all disk image files
-    auto disks = _folderDisks.disks();
+    auto disks {_folderDisks.disks()};
     foreach (const QString &disk, disks)
     {
-        auto index = diskIndex(folder, disk);
-        auto item = new DbItem(ui->treeDisks);
+        auto index {diskIndex(folder, disk)};
+        auto item {new DbItem(ui->treeDisks)};
         item->setText(0, index);
         if (!index.isEmpty() && disk.startsWith(index))
         {
@@ -174,8 +174,8 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
     if (disk.isEmpty())
     {
         // select the currently mounted disk if present in the list
-        auto imageSet = RespeqtSettings::instance()->mountedImageSetting(0);
-        QString pathName = imageSet.fileName;
+        auto imageSet {RespeqtSettings::instance()->mountedImageSetting(0)};
+        QString pathName {imageSet.fileName};
 
         disk = QFileInfo(pathName).fileName();
     }
@@ -183,10 +183,10 @@ void DiskBrowserDlg::onFolderChanged(QString folder)
     if (!disk.isEmpty() && disks.contains(disk))
     {
         QString col1text = disk;
-        auto index = diskIndex(folder, disk);
+        auto index {diskIndex(folder, disk)};
         if (!index.isEmpty() && disk.startsWith(index))
             col1text = disk.mid(index.length() + 1);
-        auto items = ui->treeDisks->findItems(col1text, Qt::MatchExactly, 1);
+        auto items {ui->treeDisks->findItems(col1text, Qt::MatchExactly, 1)};
         QTreeWidgetItem* item = (items.length() > 0) ? items[0] : nullptr;
         ui->treeDisks->setCurrentItem(item);
     }
@@ -216,7 +216,7 @@ void DiskBrowserDlg::update()
     if (!ui->treeDisks->topLevelItemCount() || !ui->treeDisks->currentItem())
         return;
 
-    auto currentItem = ui->treeDisks->currentItem();
+    auto currentItem {ui->treeDisks->currentItem()};
 
     if (itemIsFolder(currentItem))
     {
@@ -253,7 +253,7 @@ void DiskBrowserDlg::update()
     if (sio)
     {
         const int deviceNo = 0;
-        auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(deviceNo + DISK_BASE_CDEVIC));
+        auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(deviceNo + DISK_BASE_CDEVIC))};
         int fs = img->defaultFileSystem();
         Filesystems::AtariFileSystem *atariFs = nullptr;
 
@@ -270,7 +270,7 @@ void DiskBrowserDlg::update()
         if (atariFs)
         {
             int dir = atariFs->rootDir();
-            auto entries = atariFs->getEntries(dir);
+            auto entries {atariFs->getEntries(dir)};
 
             foreach (const Filesystems::AtariDirEntry& entry, entries)
                 fileList += entry.name() + "\n";
@@ -320,7 +320,7 @@ void DiskBrowserDlg::update()
     }
     if (_picInfo.label.isEmpty() || favorJson)
     {
-        auto jsonLabel = RespeqtSettings::dbSettings()->getLabel(dir, _diskFileName);
+        auto jsonLabel {RespeqtSettings::dbSettings()->getLabel(dir, _diskFileName)};
         if (_picInfo.label.isEmpty() || !jsonLabel.isEmpty())
             _picInfo.label = jsonLabel;
     }
@@ -358,7 +358,7 @@ QString DiskBrowserDlg::getRecentDisk(QString folder)
 {
     foreach (const QString &text, RespeqtSettings::instance()->recentBrowserFolders())
     {
-        auto fi = QFileInfo(text);
+        auto fi {QFileInfo(text)};
         if (fi.isFile() && (fi.path() == folder))
             return fi.fileName();
     }
@@ -402,8 +402,8 @@ void DiskBrowserDlg::setVertSplitPos(int pos)
 
 void DiskBrowserDlg::itemDoubleClicked(QTreeWidgetItem *item, int)
 {
-    QString text = item->text(1);
-    auto path = ui->cboFolderPath->currentText();
+    QString text {item->text(1)};
+    auto path {ui->cboFolderPath->currentText()};
 
     if (text == "..")
     {
@@ -463,18 +463,18 @@ void DiskBrowserDlg::showEvent(QShowEvent *event)
 
 DiskLabel DiskBrowserDlg::parsePicLabel(const QString& diskName)
 {
-    QString baseName = diskName;
+    QString baseName {diskName};
 
     if (baseName.isEmpty())
     {
-        auto fileInfo = QFileInfo {_diskFullName};
+        const QFileInfo fileInfo {_diskFullName};
         Q_ASSERT(fileInfo.exists());                // validated prior to this call
         baseName = fileInfo.completeBaseName();
     }
 
     DiskLabel label;
-    static QRegularExpression re("(^\\d+)([b|B]?)(\\.?)(.*)");
-    auto rem = re.match(baseName);
+    static QRegularExpression re{"(^\\d+)([b|B]?)(\\.?)(.*)"};
+    auto rem {re.match(baseName)};
 
     if (rem.hasMatch())
     {
@@ -510,16 +510,16 @@ DiskLabel DiskBrowserDlg::parsePicLabel(const QString& diskName)
 //
 QString DiskBrowserDlg::findPicFile()
 {
-    auto fileInfo = QFileInfo {_diskFullName};
-    auto diskBase = fileInfo.completeBaseName();
+    QFileInfo fileInfo {_diskFullName};
+    auto diskBase {fileInfo.completeBaseName()};
     QDir dir {fileInfo.absolutePath()};
     QDir subdir {fileInfo.absolutePath() + "/.respeqt_db"};
-    auto formats = QImageReader::supportedImageFormats();
-    auto fmtlist = DbUtils::toStringList(formats);
-    auto entries = dir.entryInfoList(fmtlist);
-    auto bsidexp = _picInfo.label.sideB ? QString("[b|B]") : QString();
-    auto sregexp = QString("^(%1)(%2)(\\.)(.*)").arg(_picInfo.label.index).arg(bsidexp);
-    auto qregexp = QRegularExpression {sregexp};
+    auto formats {QImageReader::supportedImageFormats()};
+    auto fmtlist {DbUtils::toStringList(formats)};
+    auto entries {dir.entryInfoList(fmtlist)};
+    auto bsidexp {_picInfo.label.sideB ? QString("[b|B]") : QString()};
+    auto sregexp {QString("^(%1)(%2)(\\.)(.*)").arg(_picInfo.label.index).arg(bsidexp)};
+    QRegularExpression qregexp {sregexp};
 
     if (subdir.exists())
         entries += subdir.entryInfoList(fmtlist);   // also scan ./.respeqt_db sub-dir for pics
@@ -540,8 +540,8 @@ QString DiskBrowserDlg::findPicFile()
 
         if (!_picInfo.label.index.isEmpty())     // check if current disk has index prefix NN. or NNb.
         {
-            auto basename = entry.completeBaseName();
-            auto matcher = qregexp.match(basename);
+            auto basename {entry.completeBaseName()};
+            auto matcher {qregexp.match(basename)};
             if (matcher.hasMatch())
             {
                 QString tip = matcher.captured(4);  // use mid string as tooltip
@@ -553,7 +553,7 @@ QString DiskBrowserDlg::findPicFile()
 
         // 3. use generic name (i.e. "respeqt_db.png") for default thumbnail
 
-        auto imagePath = fileInfo.path() + "/respeqt_db." + entry.suffix();
+        auto imagePath {fileInfo.path() + "/respeqt_db." + entry.suffix()};
         if (!QFileInfo::exists(imagePath))
             imagePath = fileInfo.path() + "/.respeqt_db/respeqt_db." + entry.suffix();
         if (QFileInfo::exists(imagePath))
@@ -632,17 +632,17 @@ void DiskBrowserDlg::indexChanged(QString index)
 
 QString DiskBrowserDlg::browseForPic(const QString& start, const QString& action)
 {
-    auto formats = QImageReader::supportedImageFormats();
-    auto fmtList = DbUtils::toStringList(formats);
-    auto fmtStrs = fmtList.join(' ');
-    auto filters = QString("Images (%1)").arg(fmtStrs);
+    auto formats {QImageReader::supportedImageFormats()};
+    auto fmtList {DbUtils::toStringList(formats)};
+    auto fmtStrs {fmtList.join(' ')};
+    auto filters {QString("Images (%1)").arg(fmtStrs)};
 
 #ifdef Q_OS_LINUX
     // Quirks on linux: getOpenFileName will use case sensitive filters (i.e. it won't find all caps *.JPG)
     // The non-native/Qt version is better, but resizes rediculously wide to fit the long filter string! (TBD: fix)
-    auto fname = QFileDialog::getOpenFileName(this, action, start, filters, nullptr, QFileDialog::DontUseNativeDialog);
+    auto fname {QFileDialog::getOpenFileName(this, action, start, filters, nullptr, QFileDialog::DontUseNativeDialog)};
 #else
-    auto fname = QFileDialog::getOpenFileName(this, action, start, filters, nullptr);
+    auto fname {QFileDialog::getOpenFileName(this, action, start, filters, nullptr)};
 #endif
     return fname;
 }
@@ -787,14 +787,14 @@ QString DiskBrowserDlg::diskIndex(const QString& folder, const QString& disk)
 
     if (RespeqtSettings::instance()->dbUseFileNames())
     {
-        auto label = parsePicLabel(disk);
+        auto label {parsePicLabel(disk)};
         index = label.index;
         if (label.sideB)
             index += 'b';
     }
     if (index.isEmpty() || RespeqtSettings::instance()->dbFavorJson())
     {
-        auto label = RespeqtSettings::dbSettings()->getLabel(folder, disk);
+        auto label {RespeqtSettings::dbSettings()->getLabel(folder, disk)};
         if (index.isEmpty() || !label.isEmpty())
             index = label.index;
     }
@@ -831,19 +831,19 @@ bool DbItem::operator<(const QTreeWidgetItem& other) const
 bool DbItem::compNumberVal(const QString& index, const QString& other, bool& comp) const
 {
     static QRegularExpression re("^(\\d+)([b|B]?)$");
-    auto remIndex = re.match(index);
-    auto remOther = re.match(other);
-    bool bothNums = remIndex.hasMatch() && remOther.hasMatch();
+    auto remIndex {re.match(index)};
+    auto remOther {re.match(other)};
+    bool bothNums {remIndex.hasMatch() && remOther.hasMatch()};
 
     if (bothNums)
     {
-        int nIndex = remIndex.captured(1).toInt();
-        int nOther = remOther.captured(1).toInt();
+        int nIndex {remIndex.captured(1).toInt()};
+        int nOther {remOther.captured(1).toInt()};
 
         if (nIndex == nOther)
         {
-            bool bIndex = !remIndex.captured(2).isEmpty();
-            bool bOther = !remOther.captured(2).isEmpty();
+            bool bIndex {!remIndex.captured(2).isEmpty()};
+            bool bOther {!remOther.captured(2).isEmpty()};
 
             comp = !bIndex && bOther;
         }

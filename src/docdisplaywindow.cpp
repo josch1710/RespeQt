@@ -51,7 +51,7 @@ void DocDisplayWindow::closeEvent(QCloseEvent *e) {
 
 void DocDisplayWindow::printTriggered() {
   QPrinter printer;
-  auto *dialog = new QPrintDialog(&printer, this);
+  auto dialog {new QPrintDialog(&printer, this)};
   if (dialog->exec() != QDialog::Accepted)
     return;
   ui->docDisplay->print(&printer);

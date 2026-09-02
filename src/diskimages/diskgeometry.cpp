@@ -134,7 +134,7 @@ namespace DiskImages {
   }
 
   void DiskGeometry::initialize(const QByteArray &percom) {
-    auto aTracksPerSide = (quint8) percom.at(0);
+    auto aTracksPerSide {(quint8) percom.at(0)};
     quint16 aSectorsPerTrack = (quint8) percom.at(2) * 256 + (quint8) percom.at(3);
     bool aIsDoubleSided = (quint8) percom.at(4);
     quint16 aBytesPerSector = (quint8) percom.at(6) * 256 + (quint8) percom.at(7);

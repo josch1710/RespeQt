@@ -47,8 +47,9 @@ const QRectF Atari1020::getSceneRect() const
             }
 
             // TODO calculate the correct font size.
-            auto font = std::make_shared<QFont>("ATARI 1020 VECTOR FONT
-   APPROXIM", 10); font->setUnderline(false); mOutput->setFont(font);
+            auto font { std::make_shared<QFont>("ATARI 1020 VECTOR FONT APPROXIM", 10)};
+            font->setUnderline(false);
+            mOutput->setFont(font);
             mOutput->calculateFixedFontSize(80);
             if (mOutput->painter()) {
                 mOutput->painter()->setPen(QColor("black"));

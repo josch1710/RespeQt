@@ -119,18 +119,18 @@ bool DbJson::load()
     QFile file {_fileName};
     file.open(QIODevice::ReadOnly);
 
-    auto data = file.readAll();
+    auto data {file.readAll()};
     file.close();
 
     _jsDoc = QJsonDocument::fromJson(data);
 
-    auto jsRoot = _jsDoc.object();
+    auto jsRoot {_jsDoc.object()};
 
-    for (auto itRoot = jsRoot.begin(); itRoot != jsRoot.end(); ++itRoot)
+    for (auto itRoot {jsRoot.begin()}; itRoot != jsRoot.end(); ++itRoot)
     {
-        auto key   = itRoot.key();
-        auto jsObj = itRoot.value().toObject();
-        auto pic   = jsObj["pic"].toString();
+        auto key   {itRoot.key()};
+        auto jsObj {itRoot.value().toObject()};
+        auto pic   {jsObj["pic"].toString()};
 
         pic = makeFullPath(pic);    // prepend path to copied pics
 
@@ -143,10 +143,10 @@ bool DbJson::load()
         DirInfo dirInfo;
         dirInfo.pic = pic;
 
-        for (auto itChild = jsObj.begin(); itChild != jsObj.end(); ++itChild)
+        for (auto itChild {jsObj.begin()}; itChild != jsObj.end(); ++itChild)
         {
-            auto disk = itChild.key();
-            auto obj = itChild.value().toObject();
+            auto disk {itChild.key()};
+            auto obj {itChild.value().toObject()};
 
             if (obj.contains("pic"))
                 dirInfo.map[disk].pic = makeFullPath(obj["pic"].toString());
@@ -207,9 +207,9 @@ bool DbJson::save()
         jsRoot["db"] = jsObj;
     }
 
-    auto it = _dirMap.begin();  // set iterator to the first disk collection folder
+    auto it {_dirMap.begin()};  // set iterator to the first disk collection folder
 
-    bool useSubDir = (RespeqtSettings::instance()->dbDataSource() == DbData_subDirJson);
+    bool useSubDir {RespeqtSettings::instance()->dbDataSource() == DbData_subDirJson};
     if (useSubDir)
     {
         QDir upDir(_dataDir);               // disk collection dir will be the parent
@@ -232,10 +232,10 @@ bool DbJson::save()
         if (!dirInfo.pic.isEmpty())
             jsDirObj["pic"] = checkCopyPic(dirInfo.pic);
 
-        for (auto it = dirInfo.map.begin(); it != dirInfo.map.end(); ++it)
+        for (auto it {dirInfo.map.begin()}; it != dirInfo.map.end(); ++it)
         {
-            const QString   disk = it.key();
-            const FloppyArt& art = it.value();
+            const QString   disk {it.key()};
+            const FloppyArt& art {it.value()};
 
             QJsonObject jsNode;
 
@@ -266,7 +266,7 @@ bool DbJson::save()
 
     _jsDoc = QJsonDocument(jsRoot);
 
-    auto jsData = _jsDoc.toJson(QJsonDocument::Indented);
+    auto jsData {_jsDoc.toJson(QJsonDocument::Indented)};
     file.write(jsData);
     file.close();
 

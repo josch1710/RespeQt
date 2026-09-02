@@ -84,7 +84,7 @@ namespace Printers {
         mDest = nullptr;
         for(int i = 0; i < user_data.num_dests; i++)
         {
-            auto *dest = reinterpret_cast<cups_dest_t*>(&user_data.dests[i]);
+            auto dest {reinterpret_cast<cups_dest_t*>(&user_data.dests[i])};
             if (rawPrinterName == QString::fromLocal8Bit(dest->name))
             {
 #if defined(Q_OS_MAC)

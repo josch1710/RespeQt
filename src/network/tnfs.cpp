@@ -168,12 +168,12 @@ namespace Network {
     auto Tnfs::mount(const Datagram &datagram) -> Datagram {
         //auto retry{datagram.at(2)};
         //auto version{getU16At(datagram, 4)};
-        /*auto*/QString mountPoint{datagram.getStringAt(6)};
-        /*auto*/QString userID{datagram.getStringAt(7 + mountPoint.length())};
-        /*auto*/QString password{datagram.getStringAt(7 + mountPoint.length() + userID.length())};
+        auto mountPoint{datagram.getStringAt(6)};
+        auto userID{datagram.getStringAt(7 + mountPoint.length())};
+        auto password{datagram.getStringAt(7 + mountPoint.length() + userID.length())};
         Datagram answer{};
 
-        /*auto*/QDir root{QDir::homePath().append(mountPoint)};
+        const QDir root{QDir::homePath().append(mountPoint)};
         if (!root.exists()) {
             answer.setU16At(0, 0);
             answer.setU16At(ENOENT, 2);
@@ -204,7 +204,7 @@ namespace Network {
     }
 
     auto Tnfs::unmount(const Datagram &datagram) -> Datagram {
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(datagram.getSessionID()).isNull()) {
             answer[4] = EINVAL;
@@ -212,11 +212,12 @@ namespace Network {
         }
         sessions.remove(datagram.getSessionID());
 
-        auto isSessionsEmpty = sessions.end() == std::find_if_not(sessions.begin(), sessions.end(),
-            [](SessionInfoPtr session) {
-              return session.isNull();
-            }
-        );
+        auto isSessionsEmpty {
+            sessions.end() == std::find_if_not(sessions.begin(), sessions.end(),
+                [](SessionInfoPtr session) {
+                    return session.isNull();
+                })
+        };
         if (isSessionsEmpty)
             emit allSessionsDisconnected(); // Inform the mainwindow, that all session are closed.
 
@@ -224,23 +225,23 @@ namespace Network {
     }
 
     auto Tnfs::opendir(const Datagram &datagram) -> Datagram {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
-        /*auto*/QString dirName{datagram.getStringAt(4)};
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto sessionID{datagram.getSessionID()};
+        auto dirName{datagram.getStringAt(4)};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).isNull()) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions[sessionID]};
-        /*auto*/QDirPtr pathName{sessionInfo->realPath(dirName)};
+        auto sessionInfo{sessions[sessionID]};
+        auto pathName{sessionInfo->realPath(dirName)};
         if (dirName != "/" && !pathName.isNull() && !pathName->exists()) {
             answer[4] = ENOENT;
             return answer;
         }
 
-        /*auto*/QDirIndexVector &openDirs{sessionInfo->openDirectories()};
+        auto &openDirs{sessionInfo->openDirectories()};
         qint16 handle{findFreeSlot(openDirs)};
         if(handle < 0) {
             answer[4] = EMFILE;
@@ -248,7 +249,7 @@ namespace Network {
         }
         answer[5] = handle;
 
-        /*auto*/QDirIndexPtr index{QDirIndexPtr::create()};
+        auto index{QDirIndexPtr::create()};
         index->isVirtualRoot = dirName == "/";
         index->actualDir = pathName;
         index->virtualDir = QDirPtr::create(dirName);
@@ -275,23 +276,23 @@ namespace Network {
     }
 
     auto Tnfs::readdir(const Datagram &datagram) -> Datagram {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
+        auto sessionID{datagram.getSessionID()};
         quint8 handle = datagram[4];
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions[sessionID]};
-        /*auto*/QDirIndexVector &openDirs{sessionInfo->openDirectories()};
+        auto sessionInfo{sessions[sessionID]};
+        auto &openDirs{sessionInfo->openDirectories()};
         if (openDirs[handle].isNull()) {
             answer[4] = ENOENT;
             return answer;
         }
 
-        /*auto*/QDirIndexPtr index{openDirs[handle]};
+        auto index{openDirs[handle]};
         if (index->fileListIndex >= index->files.length()) {
             answer[4] = TNFS_EOF;
             return answer;
@@ -304,27 +305,27 @@ namespace Network {
     }
 
     auto Tnfs::opendirx(const Datagram &datagram) -> Datagram {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
-        /*auto*/quint8 diropt{static_cast<quint8>(datagram.at(4))};
-        /*auto*/quint8 dirsort{static_cast<quint8>(datagram.at(5))};
-        /*auto*/quint16 maxcount{datagram.getU16At(6)};
-        /*auto*/QString wildcard{datagram.getStringAt(8)};
-        /*auto*/QString dirName{datagram.getStringAt(9 + wildcard.length())};
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto sessionID{datagram.getSessionID()};
+        auto diropt{static_cast<quint8>(datagram.at(4))};
+        auto dirsort{static_cast<quint8>(datagram.at(5))};
+        auto maxcount{datagram.getU16At(6)};
+        auto wildcard{datagram.getStringAt(8)};
+        auto dirName{datagram.getStringAt(9 + wildcard.length())};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).isNull()) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions[sessionID]};
-        /*auto*/QDirPtr pathName{sessionInfo->realPath(dirName)};
+        auto sessionInfo{sessions[sessionID]};
+        auto pathName{sessionInfo->realPath(dirName)};
         if (dirName != "/" && !pathName.isNull() && !pathName->exists()) {
             answer[4] = ENOENT;
             return answer;
         }
 
-        /*auto*/QDirIndexVector &openDirs{sessionInfo->openDirectories()};
+        auto &openDirs{sessionInfo->openDirectories()};
         qint16 handle{findFreeSlot(openDirs)};
         if (handle < 0) {
             answer[4] = EMFILE;
@@ -332,12 +333,12 @@ namespace Network {
         }
 
         answer[5] = handle;
-        /*auto*/QDirIndexPtr index{QDirIndexPtr::create()};
+        auto index{QDirIndexPtr::create()};
         index->isVirtualRoot = dirName == "/";
         index->actualDir = pathName;
         index->virtualDir = QDirPtr::create(dirName);
         if (index->isVirtualRoot) {
-            for(auto mountPoint: mountPoints()){
+            for(const auto& mountPoint: mountPoints()){
                 if (mountPoint.isNull()){
                     continue;
                 }
@@ -407,10 +408,10 @@ namespace Network {
 
     auto Tnfs::readdirx(const Datagram &datagram) -> Datagram
     {
-        /*auto*/ quint16 sessionID{datagram.getSessionID()};
+        auto sessionID{datagram.getSessionID()};
         quint8 handle   = datagram[4];
         quint8 maxCount = datagram[5];
-        /*auto*/ Datagram answer{datagram.createAnswer()};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr)
         {
@@ -418,15 +419,15 @@ namespace Network {
             return answer;
         }
 
-        /*auto*/ SessionInfoPtr sessionInfo{sessions[sessionID]};
-        /*auto*/ QDirIndexVector &openDirs{sessionInfo->openDirectories()};
+        auto sessionInfo{sessions[sessionID]};
+        auto &openDirs{sessionInfo->openDirectories()};
         if (openDirs[handle].isNull())
         {
             answer[4] = ENOENT;
             return answer;
         }
 
-        /*auto*/ QDirIndexPtr index{openDirs[handle]};
+        auto index{openDirs[handle]};
         if (index->fileListIndex >= index->files.length())
         {
             answer[4] = TNFS_EOF;
@@ -437,7 +438,7 @@ namespace Network {
         if (index->isVirtualRoot) {
             fileName = "/";
             fileName.append(index->files.at(index->fileListIndex));
-            /*auto*/QDirPtr dir{sessionInfo->realPath(fileName)};
+            auto dir{sessionInfo->realPath(fileName)};
             fileName = QDir::toNativeSeparators(dir->absolutePath());
         }
         else {
@@ -467,17 +468,17 @@ namespace Network {
     }
 
     auto Tnfs::telldir(const Datagram &datagram) -> Datagram {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
+        auto sessionID{datagram.getSessionID()};
         quint8 handle = datagram[4];
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions[sessionID]};
-        /*auto*/QDirIndexVector &openDirs{sessionInfo->openDirectories()};
+        auto sessionInfo{sessions[sessionID]};
+        auto &openDirs{sessionInfo->openDirectories()};
         if (openDirs[handle].isNull() || !openDirs[handle]->actualDir->exists()) {
             answer[4] = ENOENT;
             return answer;
@@ -489,18 +490,18 @@ namespace Network {
     }
 
     auto Tnfs::seekdir(const Datagram &datagram) -> Datagram {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
+        auto sessionID{datagram.getSessionID()};
         quint8 handle = datagram[4];
-        /*auto*/quint32 seekIndex{datagram.getU32At(5)};
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto seekIndex{datagram.getU32At(5)};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
-// TODO openDirs wegmachen
-        /*auto*/SessionInfoPtr sessionInfo{sessions[sessionID]};
-        /*auto*/QDirIndexVector &openDirs{sessionInfo->openDirectories()};
+// TODO remove openDirs
+        auto sessionInfo{sessions[sessionID]};
+        auto &openDirs{sessionInfo->openDirectories()};
         if (openDirs[handle].isNull() ||
             (!openDirs[handle]->isVirtualRoot && !openDirs[handle]->actualDir->exists())
         ) {
@@ -518,17 +519,17 @@ namespace Network {
     }
 
     auto Tnfs::closedir(const Datagram &datagram) -> Datagram {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
+        auto sessionID{datagram.getSessionID()};
         quint8 handle = datagram[4];
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions[sessionID]};
-        /*auto*/QDirIndexVector &openDirs{sessionInfo->openDirectories()};
+        auto sessionInfo{sessions[sessionID]};
+        auto &openDirs{sessionInfo->openDirectories()};
         if (openDirs[handle].isNull()) {
             answer[4] = ENOENT;
             return answer;
@@ -539,19 +540,19 @@ namespace Network {
     }
 
     auto Tnfs::mkdir(const Datagram &datagram) const -> Datagram {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
-        /*auto*/QString dirName{datagram.getStringAt(4)};
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto sessionID{datagram.getSessionID()};
+        auto dirName{datagram.getStringAt(4)};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
+        auto sessionInfo{sessions.at(sessionID)};
         if (dirName.startsWith('/'))
             dirName.remove(0, 1);
-        /*auto*/QDirPtr realPath{sessionInfo->realPath(dirName)};
+        auto realPath{sessionInfo->realPath(dirName)};
         if (realPath->exists()) {
             answer[4] = EEXIST;
             return answer;
@@ -566,19 +567,19 @@ namespace Network {
     }
 
     auto Tnfs::rmdir(const Datagram &datagram) const -> Datagram {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
-        /*auto*/QString dirName{datagram.getStringAt(4)};
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto sessionID{datagram.getSessionID()};
+        auto dirName{datagram.getStringAt(4)};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
+        auto sessionInfo{sessions.at(sessionID)};
         if (dirName.startsWith('/'))
             dirName.remove(0, 1);
-        /*auto*/QDirPtr realPath{sessionInfo->realPath(dirName)};
+        auto realPath{sessionInfo->realPath(dirName)};
         if (!realPath->exists()) {
             answer[4] = ENOENT;
             return answer;
@@ -593,19 +594,19 @@ namespace Network {
     }
 
     auto Tnfs::openfile(const Datagram &datagram) -> Datagram {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
-        /*auto*/quint16 flags{datagram.getU16At(4)};
-        /*auto*/quint16 mode{datagram.getU16At(6)};
-        /*auto*/QString fileName{datagram.getStringAt(8)};
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto sessionID{datagram.getSessionID()};
+        auto flags{datagram.getU16At(4)};
+        auto mode{datagram.getU16At(6)};
+        auto fileName{datagram.getStringAt(8)};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
-        /*auto*/ QFileVector &openFiles{sessionInfo->openFiles()};
+        auto sessionInfo{sessions.at(sessionID)};
+        auto &openFiles{sessionInfo->openFiles()};
         qint16 handle{findFreeSlot(openFiles)};
         answer[5] = handle;
         if(handle < 0) {
@@ -613,8 +614,8 @@ namespace Network {
             return answer;
         }
 
-        /*auto*/QFile* file = new QFile(sessionInfo->realFileName(fileName));
-        /*auto*/QIODevice::OpenMode qflags{QIODevice::NotOpen};
+        auto file = new QFile(sessionInfo->realFileName(fileName));
+        QIODevice::OpenMode qflags{QIODevice::NotOpen};
         if (flags & 0x0001)
             qflags |= QIODevice::ReadOnly;
         if (flags & 0x0002)
@@ -649,17 +650,17 @@ namespace Network {
     }
 
     auto Tnfs::closefile(const Datagram &datagram) const -> Datagram {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
-        /*auto*/quint8 handle{static_cast<quint8>(datagram.at(4))};
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto sessionID{datagram.getSessionID()};
+        quint8 handle{static_cast<quint8>(datagram.at(4))};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
-        /*auto*/QDirIndexVector& openFiles{sessionInfo->openDirectories()};
+        auto sessionInfo{sessions.at(sessionID)};
+        auto& openFiles{sessionInfo->openDirectories()};
         if (!openFiles[handle].isNull()) {
             answer[4] = ENOENT;
             return answer;
@@ -671,18 +672,18 @@ namespace Network {
 
     auto Tnfs::readfile(const Datagram &datagram) const -> Datagram
     {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
-        /*auto*/quint8 handle{static_cast<quint8>(datagram.at(4))};
-        /*auto*/quint16 max{datagram.getU16At(5)};
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto sessionID{datagram.getSessionID()};
+        auto handle{static_cast<quint8>(datagram.at(4))};
+        auto max{datagram.getU16At(5)};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
-        /*auto*/QFileVector& openFiles{sessionInfo->openFiles()};
+        auto sessionInfo{sessions.at(sessionID)};
+        auto& openFiles{sessionInfo->openFiles()};
         if (openFiles[handle].isNull() || !openFiles[handle]->exists()) {
             answer[4] = ENOENT;
             return answer;
@@ -698,13 +699,9 @@ namespace Network {
             return answer;
         }
 
-qDebug() << "!n" << "read file " << max << " bytes";
         max = std::min(max, MAX_PACKET_SIZE); // Clamp the datagram size
-qDebug() << "!n" << "read file (clamped) " << max << " bytes";
-        auto buffer = openFiles[handle]->read(max);
+        auto buffer {openFiles[handle]->read(max)};
         answer.setU16At(buffer.length(), 5);
-qDebug() << "!n" << "read file done " << buffer.length() << " bytes";
-qDebug() << "!n" << "new position " << openFiles[handle]->pos();
         answer.setRawBytes(buffer, 7);
 
         return answer;
@@ -712,19 +709,19 @@ qDebug() << "!n" << "new position " << openFiles[handle]->pos();
 
     auto Tnfs::writefile(const Datagram &datagram) const -> Datagram
     {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
-        /*auto*/quint8 handle{static_cast<quint8>(datagram.at(4))};
-        /*auto*/quint16 length{datagram.getU16At(5)};
-        /*auto*/QByteArray data{datagram.getRawBytes(length, 7)};
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto sessionID{datagram.getSessionID()};
+        auto handle{static_cast<quint8>(datagram.at(4))};
+        auto length{datagram.getU16At(5)};
+        auto data{datagram.getRawBytes(length, 7)};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
-        /*auto*/QFileVector& openFiles{sessionInfo->openFiles()};
+        auto sessionInfo{sessions.at(sessionID)};
+        auto& openFiles{sessionInfo->openFiles()};
         if (openFiles[handle].isNull() || !openFiles[handle]->exists()) {
             answer[4] = ENOENT;
             return answer;
@@ -735,7 +732,7 @@ qDebug() << "!n" << "new position " << openFiles[handle]->pos();
             return answer;
         }
 
-        /*auto*/qint64 written = openFiles[handle]->write(data);
+        auto written = openFiles[handle]->write(data);
         answer.setU16At(written, 5);
 
         return answer;
@@ -743,23 +740,23 @@ qDebug() << "!n" << "new position " << openFiles[handle]->pos();
 
     auto Tnfs::seekfile(const Datagram &datagram) const -> Datagram
     {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
-        /*auto*/quint8 handle{static_cast<quint8>(datagram.at(4))};
-        /*auto*/quint8 type{static_cast<quint8>(datagram.at(5))};
+        auto sessionID{datagram.getSessionID()};
+        auto handle{static_cast<quint8>(datagram.at(4))};
+        auto type{static_cast<quint8>(datagram.at(5))};
         unsigned char a = datagram.at(6);
         unsigned char b = datagram.at(7);
         unsigned char c = datagram.at(8);
         unsigned char d = datagram.at(9);
         qint32 position = a | b << 8 | c << 16 | d << 24;
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
-        /*auto*/QFileVector& openFiles{sessionInfo->openFiles()};
+        auto sessionInfo{sessions.at(sessionID)};
+        auto& openFiles{sessionInfo->openFiles()};
         if (openFiles[handle].isNull() || !openFiles[handle]->exists()) {
             answer[4] = ENOENT;
             return answer;
@@ -770,7 +767,7 @@ qDebug() << "!n" << "new position " << openFiles[handle]->pos();
             return answer;
         }*/
 
-        /*auto*/QFilePtr file{openFiles[handle]};
+        auto file{openFiles[handle]};
         bool success{};
         if (type == SEEK_SET)
             success = file->seek(position);
@@ -784,28 +781,22 @@ qDebug() << "!n" << "new position " << openFiles[handle]->pos();
             return answer;
         }
 
-    qDebug() << "!n" << "seek file position" << position;
-    if (type==SEEK_CUR) qDebug() << "!n" << "seek file mode SEEK_CUR";
-    else if (type==SEEK_END) qDebug() << "!n" << "seek file mode SEEK_END";
-    else if (type==SEEK_SET) qDebug() << "!n" << "seek file mode SEEK_SET";
-    else qDebug() << "!n" << "seek file mode unknown";
-    qDebug() << "!n" << "seek file new position" << file->pos();
         answer.setU32At(file->pos(), 5);
         return answer;
     }
 
     auto Tnfs::statfile(const Datagram &datagram) const -> Datagram
     {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
-        /*auto*/QString fileName{datagram.getStringAt(4)};
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        quint16 sessionID{datagram.getSessionID()};
+        auto fileName{datagram.getStringAt(4)};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
+        auto sessionInfo{sessions.at(sessionID)};
         QFileInfo fileInfo{sessionInfo->realFileName(fileName)};
         answer.setU16At(fileInfo.permissions(), 5);
         // On Windows and other system ownerID and groupID will return -2. TNFS needs 0.
@@ -829,16 +820,16 @@ qDebug() << "!n" << "new position " << openFiles[handle]->pos();
 
     auto Tnfs::unlinkfile(const Datagram &datagram) const -> Datagram
     {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
-        /*auto*/QString fileName{datagram.getStringAt(4)};
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto sessionID{datagram.getSessionID()};
+        auto fileName{datagram.getStringAt(4)};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
+        auto sessionInfo{sessions.at(sessionID)};
         QFile file{sessionInfo->realFileName(fileName)};
         if (file.exists() && !file.remove()) {
             answer[4] = EACCES;
@@ -850,17 +841,17 @@ qDebug() << "!n" << "new position " << openFiles[handle]->pos();
 
     auto Tnfs::chmodfile(const Datagram &datagram) const -> Datagram
     {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
-        /*auto*/quint16 permissions{datagram.getU16At(4)};
-        /*auto*/QString fileName{datagram.getStringAt(6)};
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto sessionID{datagram.getSessionID()};
+        auto permissions{datagram.getU16At(4)};
+        auto fileName{datagram.getStringAt(6)};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
+        auto sessionInfo{sessions.at(sessionID)};
         QFile file{sessionInfo->realFileName(fileName)};
         if (!file.exists()) {
             answer[4] = ENOENT;
@@ -877,17 +868,17 @@ qDebug() << "!n" << "new position " << openFiles[handle]->pos();
 
     auto Tnfs::renamefile(const Datagram &datagram) const -> Datagram
     {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
-        /*auto*/QString fileName{datagram.getStringAt(4)};
-        /*auto*/QString newName{datagram.getStringAt(5 + fileName.length())};
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        auto sessionID{datagram.getSessionID()};
+        auto fileName{datagram.getStringAt(4)};
+        auto newName{datagram.getStringAt(5 + fileName.length())};
+        auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
 
-        /*auto*/SessionInfoPtr sessionInfo{sessions.at(sessionID)};
+        auto sessionInfo{sessions.at(sessionID)};
         QFile file{sessionInfo->realFileName(fileName)};
         if (!file.exists()) {
             answer[4] = ENOENT;
@@ -904,9 +895,9 @@ qDebug() << "!n" << "new position " << openFiles[handle]->pos();
 
     auto Tnfs::fsSize(const Datagram &datagram) -> Datagram
     {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
-        /*auto*/QString fileName{datagram.getStringAt(4)};
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        //auto sessionID{datagram.getSessionID()};
+        auto fileName{datagram.getStringAt(4)};
+        auto answer{datagram.createAnswer()};
 
         answer[4] = 0;
         QStorageInfo disk{*(_mountPoints.first())};
@@ -916,9 +907,9 @@ qDebug() << "!n" << "new position " << openFiles[handle]->pos();
 
     auto Tnfs::fsFree(const Datagram &datagram) -> Datagram
     {
-        /*auto*/quint16 sessionID{datagram.getSessionID()};
-        /*auto*/QString fileName{datagram.getStringAt(4)};
-        /*auto*/Datagram answer{datagram.createAnswer()};
+        //auto sessionID{datagram.getSessionID()};
+        auto fileName{datagram.getStringAt(4)};
+        auto answer{datagram.createAnswer()};
 
         answer[4] = 0;
         QStorageInfo disk{*(_mountPoints.first())};

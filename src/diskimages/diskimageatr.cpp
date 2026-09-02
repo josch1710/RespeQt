@@ -95,7 +95,7 @@ namespace DiskImages {
       }
     }
 
-    auto imageSize = static_cast<quint64>(file.size());
+    auto imageSize {static_cast<quint64>(file.size())};
 
     // Check if the reported image size is consistent with the actual size
     //
@@ -152,13 +152,13 @@ namespace DiskImages {
                   // and they are empty.
                   // Since size check is done, we should be able to read everything.
                   QByteArray emptySector{3 * 128, '\0'};
-                  /*auto*/char *imageSector{new char[3 * 128]};
+                  auto imageSector{new char[3 * 128]};
 
                   // We seek after file header (16 bytes) and 3 SD sectors.
                   sourceFile->seek(16 + 3 * 128);
                   sourceFile->read(imageSector, 3 * 128);
-                  /*auto*/bool equals{true};
-                  for (auto i = 0; i < 3 * 128; i++) {
+                  auto equals{true};
+                  for (auto i{0}; i < 3 * 128; i++) {
                       if (emptySector.at(i) != imageSector[i]) {
                           equals = false;
                           break;
@@ -171,12 +171,12 @@ namespace DiskImages {
                   else {
                       // Now we check, whether the first three sector is
                       // padded after each sector
-                      /*auto*/bool equals{true};
-                      for (auto sector = 0; sector < 3; sector++) {
+                      auto equals{true};
+                      for (auto sector {0}; sector < 3; sector++) {
                           sourceFile->seek(16 + sector * secSize + 128);
                           sourceFile->read(imageSector, 128);
 
-                          for (auto i = 0; i < 128; i++) {
+                          for (auto i {0}; i < 128; i++) {
                               if (emptySector.at(i) != imageSector[i]) {
                                   equals = false;
                                   break;
@@ -322,7 +322,7 @@ namespace DiskImages {
       }
     }
 
-    auto size = static_cast<quint64>(file.size());
+    auto size {static_cast<quint64>(file.size())};
 
     if ((size % 128) != 0) {
       qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Invalid image size (%1).").arg(size));
@@ -696,7 +696,7 @@ namespace DiskImages {
     int nbSectors = 0;
     int startOffset = happy1050 ? 0xD00 : 0x300;
     int offset = startOffset;
-    auto invertedTrack = (quint8) (0xFF - trackNumber);
+    auto invertedTrack {(quint8) (0xFF - trackNumber)};
     while (offset < (startOffset + 0x100)) {
       quint8 code = m_board.m_happyRam[offset++];
       if (code == 0) {
@@ -934,7 +934,7 @@ namespace DiskImages {
     // skew alignment is not useful for ATR. Return default values
     m_board.m_trackData.clear();
     m_board.m_trackData.append(data);
-    auto track = (quint8) ((aux >> 8) & 0xFF);
+    auto track {(quint8) ((aux >> 8) & 0xFF)};
     if (!timingOnly) {
       quint16 *sectorPositions = m_geometry.sectorsPerTrack() == 26 ? ATX_SECTOR_POSITIONS_ED : ATX_SECTOR_POSITIONS_SD;
       int nbSectors = m_geometry.sectorsPerTrack();
@@ -946,7 +946,7 @@ namespace DiskImages {
           sectorIndex -= m_geometry.sectorsPerTrack() - 1;
         }
         quint8 sectorNumber = sectorIndex - 1;
-        auto sectorPosition = (quint16) (sectorPositions[i] >> 3);
+        auto sectorPosition {(quint16) (sectorPositions[i] >> 3)};
         m_board.m_trackData[0x08 + i] = sectorNumber;
         m_board.m_trackData[0x28 + i] = (sectorPosition >> 8) & 0xFF;
         m_board.m_trackData[0x48 + i] = sectorPosition & 0xFF;

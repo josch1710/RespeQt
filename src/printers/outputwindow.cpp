@@ -101,7 +101,7 @@ namespace Printers {
 
 
   void OutputWindow::clearTriggered() {
-    // auto primitive = new GraphicsClearPane;
+    // auto primitive {new GraphicsClearPane};
     // primitive->execute(ui->printerGraphics->scene());
     // delete primitive;
   }

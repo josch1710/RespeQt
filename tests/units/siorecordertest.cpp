@@ -71,10 +71,10 @@ namespace Tests {
 
     // void SioRecorderTest::readSioCapture()
     // {
-    //     auto file = new QFile("tests/units/testdata/writeSioCapture.json");
+    //     auto file {new QFile("tests/units/testdata/writeSioCapture.json")};
     //     file->open(QIODevice::ReadOnly);
     //
-    //     auto recorder = SioRecorder::instance();
+    //     auto recorder {SioRecorder::instance()};
     //     recorder->prepareReplaySnapshot(file, SerialBackend::NONE);
     //
     //     // The test only involves a printer device, so we instanciate one.
@@ -93,8 +93,8 @@ namespace Tests {
     //     QVERIFY2(!cmd.isEmpty(), tr("The first command frame should not be empty.").toLatin1());
     //
     //     /* Decode the command */
-    //     auto command = static_cast<quint8>(cmd[1]);
-    //     auto aux = static_cast<quint16>(static_cast<quint8>(cmd[2]) + static_cast<quint8>(cmd[3]) * 256);
+    //     auto command {static_cast<quint8>(cmd[1])};
+    //     auto aux {static_cast<quint16>(static_cast<quint8>(cmd[2]) + static_cast<quint8>(cmd[3]) * 256)};
     //
     //     /* Redirect the command to the printer */
     //     printer.handleCommand(command, aux, 0);

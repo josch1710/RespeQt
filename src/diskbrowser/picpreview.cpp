@@ -333,7 +333,7 @@ void Label::setText(const QString& text)
     if (_isIndex)
         blockFmt.setAlignment(Qt::AlignCenter);
 
-    auto theCursor = textCursor();
+    auto theCursor {textCursor()};
     theCursor.clearSelection();
     theCursor.select(QTextCursor::Document);
     theCursor.mergeBlockFormat(blockFmt);
@@ -372,7 +372,7 @@ void Label::keyPressEvent(QKeyEvent* evt)
             case Qt::Key_Enter:
             {
                 // if the shift key is down, process the return/enter key
-                auto mods = QGuiApplication::queryKeyboardModifiers();
+                auto mods {QGuiApplication::queryKeyboardModifiers()};
                 if (mods & Qt::ShiftModifier)
                     break;
 
@@ -420,7 +420,7 @@ void Label::setFont(const LabelFont& font)
     if (_font.italic())
         style += "font-style: italic;";
     setStyleSheet(style);
-    auto pal = palette();
+    auto pal {palette()};
     pal.setColor(QPalette::Base, QColor(0,0,0,0));
     setPalette(pal);
 
@@ -437,7 +437,7 @@ void Label::focusOutEvent(QFocusEvent* event)
     if (_editMode)
     {
         // select nothing (work-around for strange background color glitch)
-        auto cursor = textCursor();
+        auto cursor {textCursor()};
         cursor.movePosition(QTextCursor::End);
         setTextCursor(cursor);
 

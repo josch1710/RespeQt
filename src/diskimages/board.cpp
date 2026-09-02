@@ -21,7 +21,7 @@ namespace DiskImages {
   }
 
   Board *Board::getCopy() {
-    auto copy = new Board();
+    auto copy {new Board()};
     copy->m_chipOpen = m_chipOpen;
     memcpy(copy->m_chipRam, m_chipRam, sizeof(m_chipRam));
     copy->m_lastArchiverUploadCrc16 = m_lastArchiverUploadCrc16;
@@ -57,7 +57,7 @@ namespace DiskImages {
   }
 
   bool Board::hasHappySignature() {
-    auto ram = (unsigned char *) m_happyRam.data();
+    auto ram {reinterpret_cast<unsigned char*>(m_happyRam.data())};
     for (unsigned int i = 0; i < sizeof(HAPPY_SIGNATURE); i++) {
       if (ram[i] != HAPPY_SIGNATURE[i]) {
         return false;

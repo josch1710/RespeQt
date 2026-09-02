@@ -51,8 +51,12 @@ FileModel::~FileModel() {
 }
 
 Qt::ItemFlags FileModel::flags(const QModelIndex &index) const {
-  auto flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled
-          | Qt::ItemIsDropEnabled;
+  auto flags {
+    Qt::ItemIsSelectable
+    | Qt::ItemIsEnabled
+    | Qt::ItemIsDragEnabled
+    | Qt::ItemIsDropEnabled
+  };
 
   if (index.column() == 1 || index.column() == 2
       || (index.column() == 4 && typeid(*fileSystem) == typeid(Filesystems::SpartaDosFileSystem)))
@@ -270,54 +274,57 @@ void FileModel::sort(int column, Qt::SortOrder order) {
   }
   emit layoutAboutToBeChanged();
 
-  auto sorting = [column, order](const Filesystems::AtariDirEntry &e1, const Filesystems::AtariDirEntry &e2) {
-    switch (column) {
-      case 0:
-        if (order == Qt::AscendingOrder) {
-          return e1.no < e2.no;
-        } else {
-          return e1.no > e2.no;
-        }
+  auto sorting {
+    [column, order](const Filesystems::AtariDirEntry &e1, const Filesystems::AtariDirEntry &e2) {
+      switch (column) {
+        case 0:
+          if (order == Qt::AscendingOrder) {
+            return e1.no < e2.no;
+          } else {
+            return e1.no > e2.no;
+          }
 
-      case 1:
-        if (order == Qt::AscendingOrder) {
-          return e1.baseName() < e2.baseName();
-        } else {
-          return e1.baseName() > e2.baseName();
-        }
+        case 1:
+          if (order == Qt::AscendingOrder) {
+            return e1.baseName() < e2.baseName();
+          } else {
+            return e1.baseName() > e2.baseName();
+          }
 
-      case 2:
-        if (order == Qt::AscendingOrder) {
-          return e1.suffix() < e2.suffix();
-        } else {
-          return e1.suffix() > e2.suffix();
-        }
+        case 2:
+          if (order == Qt::AscendingOrder) {
+            return e1.suffix() < e2.suffix();
+          } else {
+            return e1.suffix() > e2.suffix();
+          }
 
-      case 3:
-        if (order == Qt::AscendingOrder) {
-          return e1.size < e2.size;
-        } else {
-          return e1.size > e2.size;
-        }
+        case 3:
+          if (order == Qt::AscendingOrder) {
+            return e1.size < e2.size;
+          } else {
+            return e1.size > e2.size;
+          }
 
-      case 4:
-        if (order == Qt::AscendingOrder) {
-          return e1.dateTime < e2.dateTime;
-        } else {
-          return e1.dateTime > e2.dateTime;
-        }
+        case 4:
+          if (order == Qt::AscendingOrder) {
+            return e1.dateTime < e2.dateTime;
+          } else {
+            return e1.dateTime > e2.dateTime;
+          }
 
-      case 5:
-        if (order == Qt::AscendingOrder) {
-          return e1.attributeNames() < e2.attributeNames();
-        } else {
-          return e1.attributeNames() > e2.attributeNames();
-        }
+        case 5:
+          if (order == Qt::AscendingOrder) {
+            return e1.attributeNames() < e2.attributeNames();
+          } else {
+            return e1.attributeNames() > e2.attributeNames();
+          }
 
+      }
+
+      return false;
     }
-
-    return false;
   };
+
   std::stable_sort(entries.begin(), entries.end(), sorting);
 
   emit layoutChanged();
@@ -404,7 +411,7 @@ QStringList FileModel::mimeTypes() const {
 }
 
 QMimeData *FileModel::mimeData(const QModelIndexList &indexes) const {
-  auto data = new QMimeData();
+  auto data {new QMimeData()};
   QList<Filesystems::AtariDirEntry> selectedEntries;
   QList<QUrl> urls;
 
@@ -640,7 +647,7 @@ void DiskEditDialog::printTriggered() {
 
   QPrinter printer;
 
-  auto dialog = new QPrintDialog(&printer, this);
+  auto dialog {new QPrintDialog(&printer, this)};
   if (dialog->exec() != QDialog::Accepted)
     return;
 

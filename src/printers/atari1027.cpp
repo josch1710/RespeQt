@@ -15,7 +15,7 @@ namespace Printers {
   void Atari1027::setupFont() {
     /*if (mOutput)
         {
-            auto font = std::make_shared<QFont>(RespeqtSettings::instance()->atariFixedFontFamily(), 12);
+            auto font {std::make_shared<QFont>(RespeqtSettings::instance()->atariFixedFontFamily(), 12)};
             font->setUnderline(false);
             mOutput->setFont(font);
             mOutput->calculateFixedFontSize(80);
@@ -29,7 +29,7 @@ namespace Printers {
       switch (b) {
         case 15:// CTRL+O starts underline mode
         {
-          /*auto font = mOutput->font();
+          /*auto font {mOutput->font()};
                     if (font)
                     {
                         font->setUnderline(true);
@@ -41,7 +41,7 @@ namespace Printers {
 
         case 14:// CTRL+N ends underline mode
         {
-          /*auto font = mOutput->font();
+          /*auto font {mOutput->font()};
                     if (font)
                     {
                         font->setUnderline(false);
@@ -67,7 +67,7 @@ namespace Printers {
         case 155:// EOL
         {
           mESC = false;
-          /*auto font = mOutput->font();
+          /*auto font {mOutput->font()};
                     if (font)
                     {
                         font->setUnderline(false);
@@ -108,7 +108,7 @@ namespace Printers {
     switch (b) {
       case 25:// CTRL+Y starts underline mode
       {
-        /*auto font = mOutput->font();
+        /*auto font {mOutput->font()};
                 if (font)
                 {
                     font->setUnderline(true);
@@ -121,7 +121,7 @@ namespace Printers {
       }
       case 26:// CTRL+Z ends underline mode
       {
-        /*auto font = mOutput->font();
+        /*auto font {mOutput->font()};
                 if (font)
                 {
                     font->setUnderline(false);

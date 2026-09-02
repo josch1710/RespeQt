@@ -27,9 +27,9 @@ int main(int argc, char *argv[]) {
   QIcon::setThemeName("Classic");
   a.setFont(a.font("QMenu"));
   QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
-  auto w = new MainWindow;
+  auto w {new MainWindow};
   w->show();
-  auto ret = a.exec();
+  auto ret {a.exec()};
 #ifdef Q_OS_WIN
   timeEndPeriod(1);
 #endif

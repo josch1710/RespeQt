@@ -62,7 +62,7 @@ namespace DiskImages {
     QList<QString> knownNames, duplicateNames;
 
     atariFiles.clear();
-    auto count = infos.count();
+    auto count {infos.count()};
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "UnusedValue"
     if (maxEntries > 0 && count > maxEntries)
@@ -91,7 +91,7 @@ namespace DiskImages {
       ext = ext.left(3);
 
       // Check, whether we have to shorten the filename because of duplicates, and record them.
-      auto completeName = QString("%1.%2").arg(name, ext);
+      auto completeName {QString("%1.%2").arg(name, ext)};
       if (!knownNames.contains(completeName))
         knownNames.push_back(completeName);
       else
@@ -111,17 +111,17 @@ namespace DiskImages {
 
     // Process duplicate file names
     for (auto duplicate: duplicateNames) {
-      auto i = 1;
-      for (auto j = 0; j < atariFiles.count(); j++) {
-        auto file = atariFiles[j];
-        auto completeName = QString("%1.%2").arg(file.atariName, file.atariExt);
+      auto i {1};
+      for (auto j {0}; j < atariFiles.count(); j++) {
+        auto file {atariFiles[j]};
+        auto completeName {QString("%1.%2").arg(file.atariName, file.atariExt)};
         if (QString::compare(duplicate, completeName) != 0)
           continue;  // Not a duplicate
         if (i == 1) {// First filename doesn't need to be fixed.
           i++;
           continue;
         }
-        auto digits = i / 10;// Integer division gives us the count of digits, we need to cut.
+        auto digits {i / 10};// Integer division gives us the count of digits, we need to cut.
         if (digits > 7)      // We remove the file, because it will get shortened too much.
         {
           atariFiles[j].exists = false;

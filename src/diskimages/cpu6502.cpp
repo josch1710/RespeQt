@@ -579,8 +579,8 @@ namespace DiskImages {
 
   void Cpu6502::Adc(unsigned char val) {
     unsigned char oldA = m_A;
-    unsigned short sum = ((unsigned short) val + (unsigned short) m_A) + (m_SR & CPU6502_FLAG_C);
-    auto lowSum = (unsigned char) sum;
+    unsigned short sum = (static_cast<unsigned short>(val) + static_cast<unsigned short>(m_A)) + (m_SR & CPU6502_FLAG_C);
+    auto lowSum {static_cast<unsigned char>(sum)};
     SetFlagN(lowSum);
     SetFlagV(((lowSum ^ oldA) & 0x80) && ((lowSum ^ val) & 0x80));
 

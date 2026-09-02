@@ -180,7 +180,7 @@ MainWindow::MainWindow()
 
 #ifdef Q_OS_MAC
   /// This HAS to be executed before setupUi
-  auto noNative = !(RespeqtSettings::instance()->nativeMenu());
+  auto noNative {!(RespeqtSettings::instance()->nativeMenu())};
   QApplication::setAttribute(Qt::AA_DontUseNativeMenuBar, noNative);
 #endif
 
@@ -190,7 +190,7 @@ MainWindow::MainWindow()
   connectUISignal();
 
   /* Setup the printer factory */
-  auto pfactory = Printers::PrinterFactory::instance();
+  auto pfactory {Printers::PrinterFactory::instance()};
   pfactory->registerPrinter<Printers::Atari1020>(Printers::Atari1020::typeName());
   pfactory->registerPrinter<Printers::Atari1025>(Printers::Atari1025::typeName());
   pfactory->registerPrinter<Printers::Atari1027>(Printers::Atari1027::typeName());
@@ -199,12 +199,12 @@ MainWindow::MainWindow()
 
   /* Add QActions for most recent */
   for (int i = 0; i < NUM_RECENT_FILES; ++i) {
-    auto recentAction = new QAction(this);
+    auto recentAction {new QAction(this)};
     connect(recentAction, &QAction::triggered, this, &MainWindow::openRecent);
     recentFilesActions_.append(recentAction);
   }
 
-  auto diskMenu = (QWidget *) menuBar()->children().at(1);
+  auto diskMenu {(QWidget *) menuBar()->children().at(1)};
 
   diskMenu->addActions(recentFilesActions_);
 
@@ -322,7 +322,7 @@ MainWindow::MainWindow()
   shownFirstTime = true;
   sio->setAutoReconnect(RespeqtSettings::instance()->sioAutoReconnect());
 
-  auto pclink = new PCLINK(sio);
+  auto pclink {new PCLINK(sio)};
   sio->installDevice(PCLINK_CDEVIC, pclink);
 
   /* Restore application state */
@@ -335,11 +335,11 @@ MainWindow::MainWindow()
   setAcceptDrops(true);
 
   // SmartDevice (ApeTime + URL submit)
-  auto smart = new SmartDevice(sio);
+  const auto smart {new SmartDevice(sio)};
   sio->installDevice(SMART_CDEVIC, smart);
 
   // RespeQt Client  //
-  RCl *rcl = new RCl(sio);
+  const auto rcl {new RCl(sio)};
   sio->installDevice(RESPEQT_CLIENT_CDEVIC, rcl);
 
   // Documentation Display
@@ -385,7 +385,7 @@ void MainWindow::createDeviceWidgets() {
   ui->rightColumn->setAlignment(Qt::AlignTop);
 
   for (int i = 0; i < DISK_COUNT; i++) {//
-    auto driveWidget = new DriveWidget(i);
+    auto driveWidget {new DriveWidget(i)};
 
     if (i < 8) {
       ui->leftColumn->addWidget(driveWidget);
@@ -416,7 +416,7 @@ void MainWindow::createDeviceWidgets() {
   }
 
   for(int i = 0; i < PRINTER_COUNT; i++) {//
-    auto printerWidget = new PrinterWidget(i);
+    auto printerWidget {new PrinterWidget(i)};
     if (i < 2) {
       ui->leftColumn2->addWidget(printerWidget);
     } else {
@@ -430,7 +430,7 @@ void MainWindow::createDeviceWidgets() {
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event) {
   if (isMiniMode && isShadeMode) {
-    auto delta = QPoint(event->globalPos() - savedPosition);
+    const auto delta {QPoint(event->globalPos() - savedPosition)};
     move(x() + delta.x(), y() + delta.y());
     savedPosition = event->globalPos();
   }
@@ -444,12 +444,10 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
   if (isMiniMode && isShadeMode) {
     savedPosition = event->globalPos();
   } else {
-    // auto slot {containingDiskSlot(event->pos())};  do not use
-    // Mingw 4.9.2 converts initialization braces to std::initializer_list, when auto is used
-    auto slot = containingDiskSlot(event->pos());   // should be OK with all compilers
+    const auto slot {containingDiskSlot(event->pos())};   // should be OK with all compilers
     if (slot >= 0) {
-      auto drag = new QDrag((QWidget *) this);
-      auto mimeData = new QMimeData;
+      auto drag {new QDrag((QWidget *) this)};
+      auto mimeData {new QMimeData};
 
       mimeData->setData("application/x-respeqt-disk-image", QByteArray(1, slot));
       drag->setMimeData(mimeData);
@@ -475,8 +473,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
-  /// not using initialization braces here (Mingw 4.9.2 treats them as std::initializer_list when auto is used)
-  auto i = containingDiskSlot(event->pos());
+  auto i {containingDiskSlot(event->pos())};
   if (i >= 0 && (event->mimeData()->hasUrls() ||
                  event->mimeData()->hasFormat("application/x-respeqt-disk-image")))
     event->setDropAction(event->proposedAction());
@@ -494,8 +491,7 @@ void MainWindow::dragLeaveEvent(QDragLeaveEvent *event) {
 }
 
 void MainWindow::dragMoveEvent(QDragMoveEvent *event) {
-  /// not using initialization braces here (Mingw 4.9.2 treats them as std::initializer_list when auto is used)
-  auto i = containingDiskSlot(event->pos());
+  auto i {containingDiskSlot(event->pos())};
   if (i >= 0 && (event->mimeData()->hasUrls() ||
                  event->mimeData()->hasFormat("application/x-respeqt-disk-image")))
     event->setDropAction(event->proposedAction());
@@ -513,8 +509,7 @@ void MainWindow::dropEvent(QDropEvent *event) {
   for (int j = 0; j < DISK_COUNT; j++) {
     diskWidgets[j]->setDropTarget(false);
   }
-  /// not using initialization braces here (Mingw 4.9.2 treats them as std::initializer_list when auto is used)
-  auto slot = containingDiskSlot(event->pos());
+  auto slot {containingDiskSlot(event->pos())};
   if (!(event->mimeData()->hasUrls() ||
         event->mimeData()->hasFormat("application/x-respeqt-disk-image")) ||
       slot < 0) {
@@ -523,11 +518,12 @@ void MainWindow::dropEvent(QDropEvent *event) {
 
   if (event->mimeData()->hasFormat("application/x-respeqt-disk-image")) {
     int source = event->mimeData()->data("application/x-respeqt-disk-image").at(0);
-    if (slot != source) {
+    if (slot != source)
+    {
       sio->swapDevices(slot + DISK_BASE_CDEVIC, source + DISK_BASE_CDEVIC);
       RespeqtSettings::instance()->swapImages(slot, source);
 
-      auto pclink = reinterpret_cast<PCLINK *>(sio->getDevice(PCLINK_CDEVIC));
+      auto pclink {reinterpret_cast<PCLINK *>(sio->getDevice(PCLINK_CDEVIC))};
       if (pclink->hasLink(slot + 1) || pclink->hasLink(source + 1)) {
         sio->uninstallDevice(PCLINK_CDEVIC);
         pclink->swapLinks(slot + 1, source + 1);
@@ -565,7 +561,7 @@ void MainWindow::dropEvent(QDropEvent *event) {
       qApp->processEvents();
     }
 
-    auto dlg = new CassetteDialog(this, files.at(0));
+    auto dlg {new CassetteDialog(this, files.at(0))};
     dlg->exec();
     delete dlg;
 
@@ -633,14 +629,14 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   int toBeSaved = 0;
 
   for (int i = 0; i < DISK_COUNT; i++) {//
-    auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i + DISK_BASE_CDEVIC));
+    auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i + DISK_BASE_CDEVIC))};
     if (img && img->isModified()) {
       toBeSaved++;
     }
   }
 
   for (char i = 0; i < DISK_COUNT; i++) {//
-    auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i + DISK_BASE_CDEVIC));
+    auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i + DISK_BASE_CDEVIC))};
     if (img && img->isModified()) {
       toBeSaved--;
       answer = saveImageWhenClosing(i, answer, toBeSaved);
@@ -659,7 +655,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 
   //close any disk edit dialogs we have open
   for (int i = 0; i < DISK_COUNT; i++) {
-    auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i + DISK_BASE_CDEVIC));
+    auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i + DISK_BASE_CDEVIC))};
     if (img && img->editDialog()) img->editDialog()->close();
   }
 
@@ -668,14 +664,14 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   docDisplayWindow = nullptr;
 
   for (int i = DISK_BASE_CDEVIC; i < (DISK_BASE_CDEVIC + DISK_COUNT); i++) {
-    auto s = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i));
+    auto s {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i))};
     if (s) {
       s->close();
     }
   }
 
   for (int i = 0; i < PRINTER_COUNT; i++) {
-    auto printerWidget = printerWidgets[i];
+    auto const printerWidget {printerWidgets[i]};
     if (printerWidget)
       printerWidget->disconnectPrinter();
   }
@@ -796,7 +792,7 @@ void MainWindow::toggleMiniModeTriggered() {
   isMiniMode = !isMiniMode;
 
   // set asside current geometry before doing anything
-  auto geometryBeforeToggle = geometry();
+  auto geometryBeforeToggle {geometry()};
 
   showHideDrives();
 
@@ -952,7 +948,7 @@ void MainWindow::sioStatusChanged(const QString &status) {
 
 void MainWindow::deviceStatusChanged(unsigned char deviceNo) {
   if (deviceNo >= DISK_BASE_CDEVIC && deviceNo < (DISK_BASE_CDEVIC + DISK_COUNT)) {// 0x31 - 0x3E
-    auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(deviceNo));
+    auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(deviceNo))};
 
     DriveWidget *diskWidget = diskWidgets[deviceNo - DISK_BASE_CDEVIC];
 
@@ -1036,7 +1032,7 @@ void MainWindow::updateHighSpeed() {
   if (sio->port() != nullptr) {
     int nbChip = 0;
     for (int i = 0; i < DISK_COUNT; ++i) {
-      auto disk = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i + DISK_BASE_CDEVIC));
+      auto disk {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i + DISK_BASE_CDEVIC))};
       DiskImages::Board *board = disk != nullptr ? disk->getBoardInfo() : nullptr;
       if ((board != nullptr) && (board->isChipOpen())) {
         nbChip++;
@@ -1119,7 +1115,7 @@ void MainWindow::uiMessage(int t, QString message) {
 }
 
 void MainWindow::showOptionsTriggered() {
-  auto restart = ui->actionStartEmulation->isChecked();
+  auto restart {ui->actionStartEmulation->isChecked()};
   if (restart) {
     ui->actionStartEmulation->trigger();
     sio->waitOnPort();
@@ -1211,7 +1207,7 @@ void MainWindow::setSession() {
 
 void MainWindow::openRecent() {
   qDebug("open recent");
-  auto action = qobject_cast<QAction *>(sender());
+  auto action {qobject_cast<QAction *>(sender())};
   if (action) {
     mountFileWithDefaultProtection(firstEmptyDiskSlot(), action->text());
   }
@@ -1233,14 +1229,14 @@ void MainWindow::updateRecentFileActions() {
 
 
 bool MainWindow::ejectImage(char no, bool ask) {
-  auto pclink = reinterpret_cast<PCLINK *>(sio->getDevice(PCLINK_CDEVIC));
+  auto pclink {reinterpret_cast<PCLINK *>(sio->getDevice(PCLINK_CDEVIC))};
   if (pclink->hasLink(no + 1)) {
     sio->uninstallDevice(PCLINK_CDEVIC);
     pclink->resetLink(no + 1);
     sio->installDevice(PCLINK_CDEVIC, pclink);
   }
 
-  auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
+  auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC))};
 
   if (ask && img && img->isModified()) {
     QMessageBox::StandardButton answer;
@@ -1300,7 +1296,7 @@ char MainWindow::firstEmptyDiskSlot(char startFrom, bool createOne) {
 }
 
 void MainWindow::bootExe(const QString &fileName) {
-  auto old = sio->getDevice(DISK_BASE_CDEVIC);
+  auto old {sio->getDevice(DISK_BASE_CDEVIC)};
   AutoBoot loader(sio, old);
   AutoBootDialog dlg(this);
 
@@ -1346,7 +1342,7 @@ void MainWindow::bootExeTriggered(const QString &fileName) {
 }
 
 void MainWindow::selectBootExeTriggered() {
-  auto dir = RespeqtSettings::instance()->lastExeDir();
+  auto dir {RespeqtSettings::instance()->lastExeDir()};
   g_exefileName = QFileDialog::getOpenFileName(this, tr("Open executable"),
                                                dir,
                                                tr(
@@ -1369,7 +1365,7 @@ void MainWindow::mountFileWithDefaultProtection(char no, const QString &fileName
 
   if (atariFileName.left(1) == "*") {
     atariLongName = atariFileName.mid(1);
-    auto path = RespeqtSettings::instance()->lastRclDir();
+    auto path {RespeqtSettings::instance()->lastRclDir()};
     if (atariLongName == "") {
       sio->port()->writeDataNak();
       return;
@@ -1378,9 +1374,8 @@ void MainWindow::mountFileWithDefaultProtection(char no, const QString &fileName
     }
   }
 
-  /// not using initialization braces here (Mingw 4.9.2 treats them as std::initializer_list when auto is used)
-  const auto imgSetting = RespeqtSettings::instance()->getImageSettingsFromName(atariFileName);
-  auto prot = (!imgSetting.fileName.isEmpty()) && imgSetting.isWriteProtected;
+  const auto imgSetting {RespeqtSettings::instance()->getImageSettingsFromName(atariFileName)};
+  const auto prot {(!imgSetting.fileName.isEmpty()) && imgSetting.isWriteProtected};
   mountFile(no, atariFileName, prot);
 }
 
@@ -1407,7 +1402,7 @@ void MainWindow::mountFile(char no, const QString &fileName, bool /*prot*/) {
   }
 
   if (disk) {
-    auto oldDisk = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
+    auto oldDisk {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC))};
     DiskImages::Board *board = oldDisk != nullptr ? oldDisk->getBoardInfo() : nullptr;
     if (g_rclFileName.left(1) == "*")
       ask = false;
@@ -1427,7 +1422,7 @@ void MainWindow::mountFile(char no, const QString &fileName, bool /*prot*/) {
     sio->installDevice(DISK_BASE_CDEVIC + no, disk);
 
     try {
-      auto pclink = dynamic_cast<PCLINK *>(sio->getDevice(PCLINK_CDEVIC));
+      auto pclink {dynamic_cast<PCLINK *>(sio->getDevice(PCLINK_CDEVIC))};
       if (pclink != nullptr && (isDir || pclink->hasLink(no + 1))) {
         sio->uninstallDevice(PCLINK_CDEVIC);
         if (isDir) {
@@ -1465,7 +1460,7 @@ void MainWindow::mountFile(char no, const QString &fileName, bool /*prot*/) {
 }
 
 DiskImages::SimpleDiskImage *MainWindow::installDiskImage() {
-  auto disk = new DiskImages::SimpleDiskImage(sio);
+  auto disk {new DiskImages::SimpleDiskImage(sio)};
   disk->setDisplayTransmission(RespeqtSettings::instance()->displayTransmission());
   disk->setSpyMode(RespeqtSettings::instance()->isSpyMode());
   disk->setTrackLayout(RespeqtSettings::instance()->isTrackLayout());
@@ -1522,60 +1517,60 @@ void MainWindow::mountFolderImage(char no) {
 }
 
 void MainWindow::loadNextSide(char no) {
-  auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
+  auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC))};
   if (img != nullptr)
     mountFileWithDefaultProtection(no, img->getNextSideFilename());
 }
 
 void MainWindow::toggleHappy(char no, bool enabled) {
-  auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
+  auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC))};
   if (img != nullptr)
     img->setHappyMode(enabled);
 }
 
 void MainWindow::toggleChip(char no, bool open) {
-  auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
+  auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC))};
   if (img != nullptr)
     img->setChipMode(open);
   updateHighSpeed();
 }
 
 void MainWindow::toggleOSB(char no, bool open) {
-  auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
+  auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC))};
   if (img != nullptr)
     img->setOSBMode(open);
 }
 
 void MainWindow::toggleToolDisk(char no, bool enabled) {
-  auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
+  auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC))};
   if (img != nullptr)
     img->setToolDiskMode(enabled);
   updateHighSpeed();
 }
 
 void MainWindow::toggleWriteProtection(char no, bool protectionEnabled) {
-  auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
+  auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC))};
   if (img != nullptr)
     img->setReadOnly(protectionEnabled);
   RespeqtSettings::instance()->setMountedImageProtection(no, protectionEnabled);
 }
 
 void MainWindow::openEditor(char no) {
-  auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
+  auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC))};
   if (img == nullptr)
     return;
 
   if (img->editDialog()) {
     img->editDialog()->close();
   } else {
-    auto dlg = new DiskEditDialog();
+    auto dlg {new DiskEditDialog()};
     dlg->go(img);
     dlg->show();
   }
 }
 
 QMessageBox::StandardButton MainWindow::saveImageWhenClosing(char no, QMessageBox::StandardButton previousAnswer, int number) {
-  auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
+  auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC))};
 
   if (previousAnswer != QMessageBox::YesToAll) {
     QMessageBox::StandardButtons buttons;
@@ -1613,7 +1608,7 @@ void MainWindow::loadTranslators() {
 }
 
 void MainWindow::saveDisk(char no) {
-  auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
+  auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC))};
 
   if (img->isUnnamed()) {
     saveDiskAs(no);
@@ -1653,7 +1648,7 @@ void MainWindow::chip(char no, bool st) {
 }
 
 void MainWindow::autoSaveDisk(char no) {
-  auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
+  auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC))};
 
   DriveWidget *widget = diskWidgets[no];
 
@@ -1686,7 +1681,7 @@ void MainWindow::autoSaveDisk(char no) {
 
 //
 void MainWindow::saveDiskAs(char no) {
-  auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
+  auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC))};
   QString dir, fileName;
   bool saved = false;
 
@@ -1730,7 +1725,7 @@ void MainWindow::saveDiskAs(char no) {
 }
 
 void MainWindow::revertDisk(char no) {
-  auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC));
+  auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(no + DISK_BASE_CDEVIC))};
   if (QMessageBox::question(this, tr("Revert to last saved"),
                             tr("Do you really want to revert '%1' to its last saved state? You will lose the changes that has been made.")
                                     .arg(img->originalFileName()),
@@ -1764,7 +1759,7 @@ void MainWindow::ejectAllTriggered() {
   int toBeSaved = 0;
 
   for (int i = 0; i < DISK_COUNT; i++) {//
-    auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i + DISK_BASE_CDEVIC));
+    auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i + DISK_BASE_CDEVIC))};
     if (img && img->isModified()) {
       toBeSaved++;
     }
@@ -1783,7 +1778,7 @@ void MainWindow::ejectAllTriggered() {
   }
 
   for (char i = DISK_COUNT - 1; i >= 0; i--) {
-    auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i + DISK_BASE_CDEVIC));
+    auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i + DISK_BASE_CDEVIC))};
     if (img && img->isModified()) {
       toBeSaved--;
       answer = saveImageWhenClosing(i, answer, toBeSaved);
@@ -1812,9 +1807,9 @@ void MainWindow::newImageTriggered() {
     return;
   }
 
-  auto no = firstEmptyDiskSlot(0, true);
+  auto no {firstEmptyDiskSlot(0, true)};
 
-  auto disk = installDiskImage();
+  auto disk {installDiskImage()};
   // TODO Test
   connect(disk, &DiskImages::SimpleDiskImage::statusChanged, this, &MainWindow::deviceStatusChanged, Qt::QueuedConnection);
 
@@ -1851,12 +1846,14 @@ void MainWindow::newImageTriggered() {
 }
 
 void MainWindow::openSessionTriggered() {
-  auto dir = RespeqtSettings::instance()->lastSessionDir();
-  auto fileName = QFileDialog::getOpenFileName(this, tr("Open session"),
-                                               dir,
-                                               tr(
-                                                       "RespeQt sessions (*.respeqt);;"
-                                                       "All files (*)"));
+  auto dir {RespeqtSettings::instance()->lastSessionDir()};
+  auto fileName {
+    QFileDialog::getOpenFileName(this, tr("Open session"),
+                                  dir,
+                                  tr(
+                                          "RespeQt sessions (*.respeqt);;"
+                                          "All files (*)"))
+  };
   if (fileName.isEmpty()) {
     return;
   }
@@ -1887,12 +1884,14 @@ void MainWindow::openSessionTriggered() {
 }
 
 void MainWindow::saveSessionTriggered() {
-  auto dir = RespeqtSettings::instance()->lastSessionDir();
-  auto fileName = QFileDialog::getSaveFileName(this, tr("Save session as"),
-                                               dir,
-                                               tr(
-                                                       "RespeQt sessions (*.respeqt);;"
-                                                       "All files (*)"));
+  auto dir {RespeqtSettings::instance()->lastSessionDir()};
+  auto fileName {
+    QFileDialog::getSaveFileName(this, tr("Save session as"),
+                                  dir,
+                                  tr(
+                                          "RespeQt sessions (*.respeqt);;"
+                                          "All files (*)"))
+  };
   if (fileName.isEmpty()) {
     return;
   }
@@ -1925,10 +1924,12 @@ void MainWindow::saveSessionTriggered() {
 }*/
 
 void MainWindow::cassettePlaybackTriggered() {
-  auto fileName = QFileDialog::getOpenFileName(this,
-                                               tr("Open a cassette image"),
-                                               RespeqtSettings::instance()->lastCasDir(),
-                                               tr("CAS images (*.cas);;All files (*)"));
+  auto fileName {
+    QFileDialog::getOpenFileName(this,
+                                  tr("Open a cassette image"),
+                                  RespeqtSettings::instance()->lastCasDir(),
+                                  tr("CAS images (*.cas);;All files (*)"))
+  };
   if (fileName.isEmpty()) {
     return;
   }
@@ -1942,7 +1943,7 @@ void MainWindow::cassettePlaybackTriggered() {
     qApp->processEvents();
   }
 
-  auto dlg = new CassetteDialog(this, fileName);
+  auto dlg {new CassetteDialog(this, fileName)};
   dlg->exec();
   delete dlg;
 
@@ -2012,14 +2013,16 @@ void MainWindow::connectUISignal() {
 
 void MainWindow::toggleSnapshotCapture(bool toggle) {
   if (sio) {
-    auto recorder = SioRecorder::instance();
+    auto recorder {SioRecorder::instance()};
 
     if (!recorder->isSnapshotRunning()) {
       recorder->startSIOSnapshot();
     } else {
-      auto snapshot = recorder->stopSIOSnapshot();
-      auto fileName = QFileDialog::getSaveFileName(MainWindow::instance(),
-                                                   tr("Save test Json File"), QString(), tr("Json Files (*.json)"));
+      auto snapshot {recorder->stopSIOSnapshot()};
+      auto fileName {
+        QFileDialog::getSaveFileName(MainWindow::instance(),
+                                      tr("Save test Json File"), QString(), tr("Json Files (*.json)"))
+      };
       QFile file{fileName};
       file.open(QFile::WriteOnly | QFile::Truncate);
       file.write(snapshot);
@@ -2032,17 +2035,19 @@ void MainWindow::toggleSnapshotCapture(bool toggle) {
 void MainWindow::replaySnapshot() {
   if (sio->isRunning() && RespeqtSettings::instance()->backend() != SerialBackend::TEST) {
     // TODO Ask for permission to cut the serial connection, if open.
-    auto answer = QMessageBox::question(this, tr("Disconnect serial"), tr("If you proceed, the standard serial port will be disconnected. Would you like to proceed?"));
+    auto answer {QMessageBox::question(this, tr("Disconnect serial"), tr("If you proceed, the standard serial port will be disconnected. Would you like to proceed?"))};
     if (answer == QMessageBox::No)
       return;
   }
 
   // Open the snapshot and load it into SioRecorder
-  auto fileName = QFileDialog::getOpenFileName(MainWindow::instance(),
-                                               tr("Save test Json File"), QString(), tr("Json Files (*.json)"));
+  auto fileName {
+    QFileDialog::getOpenFileName(MainWindow::instance(),
+                                  tr("Save test Json File"), QString(), tr("Json Files (*.json)"))
+  };
   QFile file{fileName};
   file.open(QFile::ReadOnly);
-  auto recorder = SioRecorder::instance();
+  auto recorder {SioRecorder::instance()};
   recorder->prepareReplaySnapshot(&file, RespeqtSettings::instance()->backend());
   file.close();
   // If SIO is connected aka running, then first disconnect
@@ -2099,7 +2104,7 @@ bool MainWindow::checkChangeDbSource(DbDataSource dbSourceNew)
     if (dbSourceNew == dbSourceNow)
         return false;
 
-    auto &sDbSettings = RespeqtSettings::dbSettings();
+    auto &sDbSettings {RespeqtSettings::dbSettings()};
     if (!sDbSettings || sDbSettings->isEmpty())
         return true;
 

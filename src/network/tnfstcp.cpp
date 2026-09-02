@@ -46,7 +46,7 @@ namespace Network
         Datagram datagram{};
         datagram.resize(socket->bytesAvailable());
         socket->read(datagram.data(), socket->bytesAvailable());
-        Datagram /*auto*/ answer{handleDatagram(datagram)};
+        auto answer{handleDatagram(datagram)};
         if (answer.length() > 0) {
             socket->write(answer);
         }

@@ -164,7 +164,7 @@ namespace DiskImages {
       qWarning() << "!w" << tr("[%1] No Translator disk image defined. Please, check settings in menu Disk images>OS-B emulation.").arg(deviceName());
       return false;
     }
-    auto translatorFile = new QFile(m_translatorDiskImagePath);
+    auto translatorFile {new QFile(m_translatorDiskImagePath)};
     if (!translatorFile->open(QFile::ReadOnly)) {
       delete translatorFile;
       qWarning() << "!w" << tr("[%1] Translator '%2' not found. Please, check settings in menu Disk images>OS-B emulation.").arg(deviceName(), m_translatorDiskImagePath);
@@ -203,7 +203,7 @@ namespace DiskImages {
       qWarning() << "!w" << tr("[%1] No tool disk image defined. Please, check settings in menu Disk images>Favorite tool disk.").arg(deviceName());
       return false;
     }
-    auto toolDiskFile = new QFile(m_toolDiskImagePath);
+    auto toolDiskFile {new QFile(m_toolDiskImagePath)};
     if (!toolDiskFile->open(QFile::ReadOnly)) {
       delete toolDiskFile;
       qWarning() << "!w" << tr("[%1] Tool disk '%2' not found. Please, check settings in menu Disk images>Favorite tool disk.").arg(deviceName(), m_toolDiskImagePath);
@@ -2712,7 +2712,7 @@ namespace DiskImages {
     m_remainingBytes.clear();
     code.append(data);
     len = code.size();
-    auto codePtr = (unsigned char *) code.data();
+    auto codePtr {reinterpret_cast<unsigned char*>(code.data())};
     while (offset < len) {
       int lenOpCode = -1;
       if (drive1050) {

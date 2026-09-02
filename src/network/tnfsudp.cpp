@@ -46,7 +46,7 @@ namespace Network
 
             udpSocket->readDatagram(datagram.data(), datagram.size(),&sender, &senderPort);
 
-            Datagram /*auto*/ answer{handleDatagram(datagram)};
+            auto answer{handleDatagram(datagram)};
             if (answer.length() > 0) {
                 udpSocket->writeDatagram(answer, sender, senderPort);
             }

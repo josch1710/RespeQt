@@ -6,7 +6,7 @@
 namespace DiskImages {
 
     AtxSectorInfo *AtxTrackInfo::add(quint8 sectorNumber, quint8 sectorStatus, quint16 sectorPosition) {
-      auto sector = new AtxSectorInfo(sectorNumber, sectorStatus, sectorPosition);
+      auto sector {new AtxSectorInfo(sectorNumber, sectorStatus, sectorPosition)};
       m_sectors.append(sector);
       return sector;
     }
