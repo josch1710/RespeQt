@@ -1,9 +1,9 @@
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 ### RespeQt CMAKE version
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 set(CMAKE_OSX_ARCHITECTURES x86_64)
-project(RespeQt VERSION 5.4.2 LANGUAGES CXX)
+project(RespeQt VERSION 5.5.0 LANGUAGES CXX)
 set(RC_VERSION "_RC1") ## Begin RC version with underscore
 cmake_policy(SET CMP0071 NEW)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -118,7 +118,6 @@ set(HEADERS
     include/printers/outputwindow.h
     include/printers/rawoutput.h
     include/siorecorder.h
-    tools/make_unique.h
     include/printers/printers.h
     include/rcl.h
     include/sdxprotocol.h
@@ -232,7 +231,7 @@ if (WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE")
 endif()
 
-find_package(Qt5 REQUIRED
+find_package(Qt5 5.15 REQUIRED
     COMPONENTS Core Widgets Gui Network PrintSupport SerialPort Svg LinguistTools
 )
 if (MAKE_TEST)
@@ -255,23 +254,10 @@ qt5_add_translation(QM_FILES ${TS_FILES})
 qt5_wrap_ui(UI_HEADERS ${FORMS})
 qt5_add_resources(UI_RESOURCES ${RESOURCES})
 
-if (Qt5Widgets_VERSION VERSION_LESS 5.13.0)
-    set(CMAKE_CXX_STANDARD 11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-    if(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-    endif()
-else()
-    set(CMAKE_CXX_STANDARD 14)
-endif()
+set(CMAKE_CXX_STANDARD 14)
 
 if (APPLE)
-    if (Qt5Widgets_VERSION VERSION_LESS 5.14.0)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-enum-constexpr-conversion")
-        set(CMAKE_OSX_DEPLOYMENT_TARGET 10.8)
-    else()
-        set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
-    endif()
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
     set(MACOSX_BUNDLE_ICON_FILE RespeQt.icns)
     set(APP_ICON resources/RespeQt.icns)
     set_source_files_properties(${APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
@@ -319,7 +305,7 @@ if (WIN32)
     target_link_libraries(${TARGET} winmm z winspool)
 endif()
 
-# Process Documents using LaTex
+# Process Documents
 # add_subdirectory(docs) # commented out (experimental)
 
 # Deployment

@@ -520,7 +520,7 @@ int PCLINK::validate_dos_name(char *fname) {
 /*************************************************************************
  * checks if a file newpath/dp->d_name is a valid file
  *
- * returns 0 when eveything is OK, 1 otherwise
+ * returns 0 when everything is OK, 1 otherwise
  *************************************************************************/
 
 int PCLINK::check_dos_name(char *newpath, struct dirent *dp, struct stat *sb) {
