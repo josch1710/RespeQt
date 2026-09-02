@@ -78,7 +78,11 @@ void PrinterWidget::setup() {
 // and rgb(128, 128, 128). Both were chosen for a light window and drop to
 // about 3:1 on a dark one, so derive the dimming from the palette instead.
 void PrinterWidget::applyPaletteColors() {
+#ifdef Q_OS_MAC
   const auto color{QColor(UiColors::isDark(ui->atariPrinters) ? Qt::black : Qt::white)};
+#else
+  const auto color{QColor(UiColors::isDark(ui->atariPrinters) ? Qt::white : Qt::black)};
+#endif
   UiColors::setButtonColor(ui->atariPrinters, color);
 }
 
