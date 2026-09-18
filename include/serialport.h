@@ -13,7 +13,6 @@
 
 #include <QByteArray>
 #include <QObject>
-#include <memory>
 
 enum eHandshake {
   HANDSHAKE_RI = 0,
@@ -45,11 +44,11 @@ class AbstractSerialPortBackend : public QObject {
   //    Q_ENUMS(MessageType::UiMessageType)
   //    Q_ENUMS(SerialLine)
 public:
-  AbstractSerialPortBackend(QObject *parent = nullptr);
-  virtual ~AbstractSerialPortBackend() override;
+  explicit AbstractSerialPortBackend(QObject *parent = nullptr);
+  ~AbstractSerialPortBackend() override;
 
-  static inline int baudToDivisor(int baud) { return (int) (1781610.0 / baud / 2 - 7); }
-  static inline int divisorToBaud(int divisor) {
+  static int baudToDivisor(const unsigned int baud) { return static_cast<int>(1781610.0 / baud / 2 - 7); }
+  constexpr static unsigned int divisorToBaud(const int divisor) {
     switch (divisor) {
       case 0:
         return 125000;
@@ -61,7 +60,7 @@ public:
         return 98797;
 
       default:
-        return (int) (1781610.0 / (2 * (divisor + 7)));
+        return static_cast<unsigned int>(1781610.0 / (2 * (divisor + 7)));
     }
   }
 
@@ -79,11 +78,11 @@ public:
   virtual bool writeDataNak() = 0;
   virtual bool writeComplete() = 0;
   virtual bool writeError() = 0;
-  virtual bool setSpeed(int speed) = 0;
+  virtual unsigned long speed() = 0;
+  virtual bool setSpeed(unsigned long speed) = 0;
   virtual bool writeRawFrame(const QByteArray &data) = 0;
   virtual void setActiveSioDevices(const QByteArray &data) = 0;
-  virtual int speed() = 0;
-  virtual void forceHighSpeed(int speed) = 0;
+  virtual void forceHighSpeed(unsigned int speed) = 0;
 
 signals:
   void statusChanged(QString status);
@@ -94,10 +93,12 @@ using AbstractSerialPortBackendPtr = QSharedPointer<AbstractSerialPortBackend>;
 
 #ifdef Q_OS_WIN
 #define SERIAL_PORT_LOCATION "\\\\.\\"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "serialport-win32.h"
 #endif
 #ifdef Q_OS_UNIX
 #define SERIAL_PORT_LOCATION "/dev/"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "serialport-unix.h"
 #endif
 

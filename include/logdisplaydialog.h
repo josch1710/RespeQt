@@ -12,7 +12,6 @@
 #include <QAbstractButton>
 #include <QDebug>
 #include <QDialog>
-#include <QTextEdit>
 
 constexpr int maxLogSize = 1 * 1024 * 1024; // 1 MB max size.
 
@@ -24,19 +23,19 @@ class LogDisplayDialog : public QDialog {
   Q_OBJECT
 
 public:
-  LogDisplayDialog(QWidget *parent = 0);
-  ~LogDisplayDialog();
+  explicit LogDisplayDialog(QWidget *parent = nullptr);
+  ~LogDisplayDialog() override;
 
 protected:
-  void changeEvent(QEvent *e);
+  void changeEvent(QEvent *e) override;
 
 private:
   Ui::LogDisplayDialog *l_ui;
   QString savedLog, filter;
 
 public slots:
-  void setLogText(QString logText);
-  void addLogTextChange(QString logChange);
+  void setLogText(const QString& logText);
+  void addLogTextChange(const QString& logChange);
 
 private slots:
   void diskFilter();

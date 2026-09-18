@@ -18,8 +18,8 @@ class SmartDevice : public SioDevice {
   Q_OBJECT
 
 public:
-  SmartDevice(SioWorkerPtr worker) : SioDevice(worker) {}
-  void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) override;
+  explicit SmartDevice(const SioWorkerPtr& worker) : SioDevice(worker) {}
+  void handleCommand(quint8 command, quint8 aux1, quint8 aux2) override;
 };
 
 #endif// SMARTDEVICE_H

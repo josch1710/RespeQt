@@ -17,16 +17,16 @@ namespace UiColors {
   // Everything below the middle of the lightness range counts as a dark
   // palette. Only the window background is looked at, since that is what the
   // text has to stand out against.
-  inline bool isDark(const QWidget *reference) {
-    return reference->palette().color(QPalette::Window).lightness() < 128;
+  inline bool isDark(const QWidget *reference, const QPalette::ColorRole role = QPalette::Window) {
+    return reference->palette().color(role).lightness() < 128;
   }
 
   // Mixes fg into bg, ignoring gamma -- close enough for muting text.
-  inline QColor blend(const QColor &fg, const QColor &bg, int percent) {
+  inline QColor blend(const QColor &fg, const QColor &bg, const int percent) {
     const int rest = 100 - percent;
-    return QColor((fg.red() * percent + bg.red() * rest) / 100,
+    return {(fg.red() * percent + bg.red() * rest) / 100,
                   (fg.green() * percent + bg.green() * rest) / 100,
-                  (fg.blue() * percent + bg.blue() * rest) / 100);
+                  (fg.blue() * percent + bg.blue() * rest) / 100};
   }
 
   // The colour for secondary text such as the drive number, the image details
@@ -35,7 +35,7 @@ namespace UiColors {
   // text colour over the window colour stays above the 4.5:1 that text needs
   // on every palette tried: 5.5:1 on a light window, 5.0:1 on a dark one.
   inline QColor mutedText(const QWidget *reference) {
-    const QPalette pal = reference->palette();
+    const QPalette &pal = reference->palette();
     return blend(pal.color(QPalette::WindowText), pal.color(QPalette::Window), 60);
   }
 
@@ -46,6 +46,16 @@ namespace UiColors {
   inline void setTextColor(QWidget *widget, const QColor &color) {
     QPalette pal = widget->palette();
     pal.setColor(QPalette::WindowText, color);
+    widget->setPalette(pal);
+  }
+
+  // QMacStyle, like the common style, takes the highlighted text colour of both labels and
+  // radio buttons from QPalette::WindowText; ButtonText and Text have no effect
+  // there. Going through the palette rather than a style sheet also leaves the
+  // native rendering of, say, a radio indicator untouched.
+  inline void setHighlightedTextColor(QWidget *widget, const QColor &color) {
+    QPalette pal = widget->palette();
+    pal.setColor(QPalette::HighlightedText, color);
     widget->setPalette(pal);
   }
 

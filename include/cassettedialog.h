@@ -21,23 +21,23 @@ class CassetteDialog : public QDialog {
   Q_OBJECT
 public:
   CassetteDialog(QWidget *parent, const QString &fileName);
-  ~CassetteDialog();
+  ~CassetteDialog() override;
 
 protected:
-  void changeEvent(QEvent *e);
+  void changeEvent(QEvent *e) override;
 
 private:
   Ui::CassetteDialog *ui;
   CassetteWorker *worker;
-  QTimer *mTimer;
+  QTimer *mTimer{};
   int mTotalDuration;
   int mRemainingTime;
   QString mFileName;
-  QMovie *mCassMovie;
+  QMovie *mCassMovie{};
 
 public slots:
-  int exec();
-  void accept();
+  int exec() override;
+  void accept() override;
   void tick();
 
 private slots:

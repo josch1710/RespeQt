@@ -15,21 +15,21 @@ using SioRecorderPtr = QSharedPointer<SioRecorder>;
 
 class SioRecorder final : public AbstractSerialPortBackend {
 public:
-  SioRecorder(QObject *parent = nullptr);
-  virtual ~SioRecorder();
+  explicit SioRecorder(QObject *parent = nullptr);
+  ~SioRecorder() override;
 
   static SioRecorderPtr instance() { return sInstance; }
 
   /* Snapshot API */
   void startSIOSnapshot();
   QByteArray stopSIOSnapshot();
-  bool isSnapshotRunning() const { return mSnapshotRunning; }
-  void writeSnapshotCommandFrame(const quint8 no, const quint8 command, const quint8 aux1, const quint8 aux2);
-  void writeSnapshotDataFrame(const QByteArray &data);
+  [[nodiscard]] bool isSnapshotRunning() const { return mSnapshotRunning; }
+  void writeSnapshotCommandFrame(quint8 no, quint8 command, quint8 aux1, quint8 aux2) const;
+  void writeSnapshotDataFrame(const QByteArray &data) const;
 
-  void prepareReplaySnapshot(QFile *file, SerialBackend prevSerialBackend);
+  void prepareReplaySnapshot(QFile *file, SerialBackend previousBackend);
 
-  void writePauseCommand(int msec);
+  void writePauseCommand(int msec) const;
 
   /* SerialPortBackend API */
   bool open() override;
@@ -46,11 +46,11 @@ public:
   bool writeDataNak() override;
   bool writeComplete() override;
   bool writeError() override;
-  bool setSpeed(int speed) override;
+  bool setSpeed(unsigned long speed) override;
+  unsigned long speed() override;
   bool writeRawFrame(const QByteArray &data) override;
   void setActiveSioDevices(const QByteArray &data) override;
-  int speed() override;
-  void forceHighSpeed(int speed) override;
+  void forceHighSpeed(unsigned int speed) override;
 
 protected:
   bool readPauseTag();
@@ -59,7 +59,7 @@ private:
   bool mSnapshotRunning{false};
   // QJsonArray is not a QObject, so we can't use QPointer
   std::unique_ptr<QJsonArray> mSnapshotData{nullptr};
-  std::vector<char> mTestData{};
+  std::vector<char> mTestData;
   int mReadIndex{0};
   SerialBackend mPreviousBackend{SerialBackend::NONE};
 

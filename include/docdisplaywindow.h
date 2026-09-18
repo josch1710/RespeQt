@@ -20,12 +20,12 @@ namespace Ui {
 class DocDisplayWindow : public QMainWindow {
   Q_OBJECT
 public:
-  DocDisplayWindow(QWidget *parent = 0);
-  ~DocDisplayWindow();
+  explicit DocDisplayWindow(QWidget *parent = nullptr);
+  ~DocDisplayWindow() override;
 
 protected:
-  void changeEvent(QEvent *e);
-  void closeEvent(QCloseEvent *e);
+  void changeEvent(QEvent *e) override;
+  void closeEvent(QCloseEvent *e) override;
 
 private:
   Ui::DocDisplayWindow *ui;

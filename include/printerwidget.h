@@ -20,16 +20,16 @@ public:
   explicit PrinterWidget(int printerNum, QWidget *parent = nullptr);
   ~PrinterWidget() override;
 
-  int getPrinterNumber() const { return printerNo_; }
+  [[nodiscard]] int getPrinterNumber() const { return printerNo_; }
 
-  Printers::BasePrinterPtr printer() const { return mPrinter; }
+  [[nodiscard]] Printers::BasePrinterPtr printer() const { return mPrinter; }
   void setPrinter(Printers::BasePrinterPtr printer) { mPrinter = std::move(printer); }
 
   void setSioWorker(SioWorkerPtr sio);
 
   Printers::OutputWindowPtr outputWindow() { return mOutputWindow; }
 
-  bool connected() const { return mConnected; }
+  [[nodiscard]] bool isConnected() const { return mConnected; }
 
 signals:
   void actionEject(int deviceId);
@@ -42,15 +42,16 @@ public slots:
 
 protected:
   void changeEvent(QEvent *e) override;
+  void showEvent(QShowEvent *e) override;
 
 private slots:
   void connectPrinter();
-  void printerSelectionChanged(const QString &printerName);
+  void printerSelectionChanged(const QString &printerName) const;
 
 private:
-  void setup();
+  void setup() const;
   bool selectPrinter();
-  void applyPaletteColors();
+  void applyPaletteColors() const;
 
 
   Ui::PrinterWidget *ui;

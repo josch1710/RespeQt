@@ -18,8 +18,8 @@ class StandardSerialPortBackend : public AbstractSerialPortBackend {
   Q_OBJECT
 
 public:
-  StandardSerialPortBackend(QObject *parent = 0);
-  ~StandardSerialPortBackend();
+  StandardSerialPortBackend(QObject *parent = nullptr);
+  ~StandardSerialPortBackend() override;
 
   static QString defaultPortName();
 
@@ -37,11 +37,11 @@ public:
   bool writeDataNak() override;
   bool writeComplete() override;
   bool writeError() override;
-  bool setSpeed(int speed) override;
+  bool setSpeed(unsigned long speed) override;
+  unsigned long speed() override;
   bool writeRawFrame(const QByteArray &data) override;
   void setActiveSioDevices(const QByteArray &data) override;
-  int speed() override;
-  void forceHighSpeed(int speed) override;
+  void forceHighSpeed(unsigned int speed) override;
 
 private:
   std::atomic_bool mCanceled;
@@ -57,20 +57,20 @@ private:
   bool setNormalSpeed();
   bool setHighSpeed();
   quint8 sioChecksum(const QByteArray &data, uint size);
-  QByteArray readRawFrame(uint size, bool verbose = true);
+  QByteArray readRawFrame(size_t size, bool verbose = true);
   QString lastErrorMessage();
 };
 
 /* Dummy AtariSIO backend */
-
+// TODO Define only for Linux
 class AtariSioBackend : public AbstractSerialPortBackend {
   Q_OBJECT
 
 public:
   static QString defaultPortName();
 
-  AtariSioBackend(QObject *parent = 0);
-  ~AtariSioBackend();
+  AtariSioBackend(QObject *parent = nullptr);
+  ~AtariSioBackend() override;
   bool open() override;
   bool isOpen() override;
   void close() override;
@@ -85,11 +85,11 @@ public:
   bool writeDataNak() override;
   bool writeComplete() override;
   bool writeError() override;
-  bool setSpeed(int speed) override;
+  bool setSpeed(unsigned long speed) override;
   bool writeRawFrame(const QByteArray &data) override;
   void setActiveSioDevices(const QByteArray &data) override;
-  int speed() override;
-  void forceHighSpeed(int speed) override;
+  unsigned long speed() override;
+  void forceHighSpeed(unsigned int speed) override;
 };
 
 #endif// SERIALPORTWIN32_H

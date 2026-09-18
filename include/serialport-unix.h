@@ -12,6 +12,7 @@
 #ifndef SERIALPORTUNIX_H
 #define SERIALPORTUNIX_H
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include "serialport.h"
 #include <atomic>
 
@@ -19,8 +20,8 @@ class StandardSerialPortBackend : public AbstractSerialPortBackend {
   Q_OBJECT
 
 public:
-  StandardSerialPortBackend(QObject *parent = 0);
-  ~StandardSerialPortBackend();
+  explicit StandardSerialPortBackend(QObject *parent = nullptr);
+  ~StandardSerialPortBackend() override;
 
   static QString defaultPortName();
 
@@ -38,27 +39,27 @@ public:
   bool writeDataNak() override;
   bool writeComplete() override;
   bool writeError() override;
-  bool setSpeed(int speed) override;
+  bool setSpeed(unsigned long speed) override;
+  unsigned long speed() override;
   bool writeRawFrame(const QByteArray &data) override;
   void setActiveSioDevices(const QByteArray &data) override;
-  int speed() override;
-  void forceHighSpeed(int speed) override;
+  void forceHighSpeed(unsigned int speed) override;
 
 private:
-  std::atomic_bool mCanceled;
+  std::atomic_bool mCanceled{false};
   bool mHighSpeed;
-  int mForceHighSpeed;
+  unsigned int mForceHighSpeed;
   int mHandle;
-  int mSpeed;
+  unsigned long mSpeed;
   int mMethod;
-  int mWriteDelay;
-  int mCompErrDelay;
+  unsigned long mWriteDelay;
+  unsigned int mCompErrDelay;
   QByteArray mSioDevices;
 
   bool setNormalSpeed();
   bool setHighSpeed();
   quint8 sioChecksum(const QByteArray &data, uint size);
-  QByteArray readRawFrame(uint size, bool verbose = true);
+  QByteArray readRawFrame(size_t size, bool verbose = true);
   QString lastErrorMessage();
 };
 
@@ -66,8 +67,8 @@ class AtariSioBackend : public AbstractSerialPortBackend {
   Q_OBJECT
 
 public:
-  AtariSioBackend(QObject *parent = 0);
-  ~AtariSioBackend();
+  explicit AtariSioBackend(QObject *parent = nullptr);
+  ~AtariSioBackend() override;
 
   static QString defaultPortName();
 
@@ -85,15 +86,15 @@ public:
   bool writeDataNak() override;
   bool writeComplete() override;
   bool writeError() override;
-  bool setSpeed(int speed) override;
+  bool setSpeed(unsigned long speed) override;
+  unsigned long speed() override;
   bool writeRawFrame(const QByteArray &data) override;
   void setActiveSioDevices(const QByteArray &data) override;
-  int speed() override;
-  void forceHighSpeed(int speed) override;
+  void forceHighSpeed(unsigned int speed) override;
 
 private:
   int mHandle, mCancelHandles[2];
-  int mSpeed;
+  unsigned long mSpeed;
   int mMethod;
   QString lastErrorMessage();
 };

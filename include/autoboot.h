@@ -9,44 +9,45 @@
 #ifndef AUTOBOOT_H
 #define AUTOBOOT_H
 
-#include <QFile>
-
 #include "sioworker.h"
 
 class AtariExeChunk {
 public:
-  int address;
+  int address{0};
   QByteArray data;
 };
 
 class AutoBoot : public SioDevice {
   Q_OBJECT
 
-private:
-  QByteArray bootSectors;
-  QList<AtariExeChunk> chunks;
-  int sectorCount;
-  SioDevice *oldDevice;
-  bool started, loaded;
-  bool readExecutable(const QString &fileName);
-
 public:
-  AutoBoot(SioWorkerPtr worker, SioDevice *aOldDevice) : SioDevice(worker) {
+  AutoBoot(const SioWorkerPtr &worker, SioDevice *aOldDevice) : SioDevice(worker) {
     oldDevice = aOldDevice;
     started = loaded = false;
   }
-  ~AutoBoot();
-  void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) override;
-  void passToOldHandler(const quint8 command, const quint8 aux1, const quint8 aux2);
+  ~AutoBoot() override;
+  void handleCommand(quint8 command, quint8 aux1, quint8 aux2) override;
+  void passToOldHandler(quint8 command, quint8 aux1, quint8 aux2);
   bool open(const QString &fileName, bool highSpeed);
   void close();
   void readSector(quint16 sector, QByteArray &data);
   QString deviceName() override;
+
 signals:
   void booterStarted();
   void booterLoaded();
   void blockRead(int current, int all);
   void loaderDone();
+
+private:
+  QByteArray bootSectors;
+  QList<AtariExeChunk> chunks;
+  qint64 sectorCount{};
+  SioDevice *oldDevice;
+  bool started, loaded;
+  bool readExecutable(const QString &fileName);
+
+
 };
 
 #endif// AUTOBOOT_H

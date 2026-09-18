@@ -16,6 +16,7 @@
 #include "mainwindow.h"
 #include "diskbrowser/picsourcetype.h"
 #include "diskbrowser/picpreview.h"
+#include "diskbrowser/dbsettings.h"
 
 #include <QPrinterInfo>
 #include <QSettings>
@@ -34,98 +35,98 @@ public:
 
   ~RespeqtSettings();
 
-  bool isFirstTime();
+  [[nodiscard]] bool isFirstTime() const;
 
-  bool saveMainWinGeometry(QMainWindow* window, bool miniMode);
-  bool restoreMainWinGeometry(QMainWindow* window, bool miniMode);
+  bool saveMainWinGeometry(const QMainWindow* window, bool isMiniMode) const;
+  bool restoreMainWinGeometry(QMainWindow* window, bool isMiniMode) const;
 
-  QString serialPortName();
-  void setSerialPortName(const QString &name);
+  [[nodiscard]] QString serialPortName() const;
+  void setSerialPortName(const QString &name) const;
 
-  int serialPortHandshakingMethod();
-  void setSerialPortHandshakingMethod(int method);
+  [[nodiscard]] int serialPortHandshakingMethod() const;
+  void setSerialPortHandshakingMethod(int method) const;
 
-  bool serialPortTriggerOnFallingEdge();
-  void setSerialPortTriggerOnFallingEdge(bool use);
+  [[nodiscard]] bool serialPortTriggerOnFallingEdge() const;
+  void setSerialPortTriggerOnFallingEdge(bool use) const;
 
-  bool serialPortDTRControlEnable();
-  void setSerialPortDTRControlEnable(bool use);
+  [[nodiscard]] bool serialPortDTRControlEnable() const;
+  void setSerialPortDTRControlEnable(bool use) const;
 
-  int serialPortMaximumSpeed();
-  void setSerialPortMaximumSpeed(int speed);
+  [[nodiscard]] int serialPortMaximumSpeed() const;
+  void setSerialPortMaximumSpeed(int speed) const;
 
-  bool serialPortUsePokeyDivisors();
-  void setSerialPortUsePokeyDivisors(bool use);
+  [[nodiscard]] bool serialPortUsePokeyDivisors() const;
+  void setSerialPortUsePokeyDivisors(bool use) const;
 
-  int serialPortPokeyDivisor();
-  void setSerialPortPokeyDivisor(int divisor);
+  [[nodiscard]] int serialPortPokeyDivisor() const;
+  void setSerialPortPokeyDivisor(int divisor) const;
 
-  int serialPortWriteDelay();
-  void setSerialPortWriteDelay(int delay);
+  [[nodiscard]] int serialPortWriteDelay() const;
+  void setSerialPortWriteDelay(int delay) const;
 
-  int serialPortCompErrDelay();
-  void setSerialPortCompErrDelay(int delay);
+  [[nodiscard]] unsigned int serialPortCompErrDelay() const;
+  void setSerialPortCompErrDelay(unsigned int delay) const;
 
-  QString atariSioDriverName();
-  void setAtariSioDriverName(const QString &name);
+  [[nodiscard]] QString atariSioDriverName() const;
+  void setAtariSioDriverName(const QString &name) const;
 
-  int atariSioHandshakingMethod();
-  void setAtariSioHandshakingMethod(int method);
+  [[nodiscard]] int atariSioHandshakingMethod() const;
+  void setAtariSioHandshakingMethod(int method) const;
 
-  SerialBackend backend();
-  void setBackend(SerialBackend backend);
+  [[nodiscard]] SerialBackend backend() const;
+  void setBackend(SerialBackend backend) const;
 
-  bool useHighSpeedExeLoader();
-  void setUseHighSpeedExeLoader(bool use);
+  [[nodiscard]] bool useHighSpeedExeLoader() const;
+  void setUseHighSpeedExeLoader(bool use) const;
 
-  bool printerEmulation();
-  void setPrinterEmulation(bool status);
+  [[nodiscard]] bool printerEmulation() const;
+  void setPrinterEmulation(bool status) const;
 
-  bool useCustomCasBaud();
-  void setUseCustomCasBaud(bool use);
+  [[nodiscard]] bool useCustomCasBaud() const;
+  void setUseCustomCasBaud(bool use) const;
 
-  int customCasBaud();
-  void setCustomCasBaud(int baud);
+  [[nodiscard]] int customCasBaud() const;
+  void setCustomCasBaud(int baud) const;
 
-  ImageSettings getImageSettingsFromName(const QString &fileName);
-  ImageSettings mountedImageSetting(int no);
-  ImageSettings recentImageSetting(int no);
+  [[nodiscard]] ImageSettings getImageSettingsFromName(const QString &fileName) const;
+  [[nodiscard]] ImageSettings mountedImageSetting(int no) const;
+  [[nodiscard]] ImageSettings recentImageSetting(int no) const;
 
-  void setMountedImageSetting(int no, const QString &fileName, bool prot);
-  void setMountedImageProtection(int no, bool prot);
+  void setMountedImageSetting(int no, const QString &fileName, bool prot) const;
+  void setMountedImageProtection(int no, bool prot) const;
 
-  void mountImage(int no, const QString &fileName, bool prot);
+  void mountImage(int no, const QString &fileName, bool isWriteProtected) const;
 
-  void unmountImage(int no);
+  void unmountImage(int no) const;
 
-  void swapImages(int no1, int no2);
+  void swapImages(int no1, int no2) const;
 
-  QString lastDiskImageDir();
-  void setLastDiskImageDir(const QString &dir);
+  [[nodiscard]] QString lastDiskImageDir() const;
+  void setLastDiskImageDir(const QString &dir) const;
 
-  QString lastFolderImageDir();
-  void setLastFolderImageDir(const QString &dir);
+  [[nodiscard]] QString lastFolderImageDir() const;
+  void setLastFolderImageDir(const QString &dir) const;
 
-  QString lastSessionDir();
-  void setLastSessionDir(const QString &dir);
+  [[nodiscard]] QString lastSessionDir() const;
+  void setLastSessionDir(const QString &dir) const;
 
-  QString lastExeDir();
-  void setLastExeDir(const QString &dir);
+  [[nodiscard]] QString lastExeDir() const;
+  void setLastExeDir(const QString &dir) const;
 
-  QString lastExtractDir();
-  void setLastExtractDir(const QString &dir);
+  [[nodiscard]] QString lastExtractDir() const;
+  void setLastExtractDir(const QString &dir) const;
 
-  QString lastPrinterTextDir();
-  void setLastPrinterTextDir(const QString &dir);
+  [[nodiscard]] QString lastPrinterTextDir() const;
+  void setLastPrinterTextDir(const QString &dir) const;
 
-  QString lastCasDir();
-  void setLastCasDir(const QString &dir);
+  [[nodiscard]] QString lastCasDir() const;
+  void setLastCasDir(const QString &dir) const;
 
-  QString lastRclDir();
-  void setRclDir(const QString &dir);
+  [[nodiscard]] QString lastRclDir() const;
+  void setRclDir(const QString &dir) const;
 
-  bool  showLogWindow();
-  void  setShowLogWindow(bool show = true);
+  [[nodiscard]] bool  showLogWindow() const;
+  void  setShowLogWindow(bool show = true) const;
 
   // Set and restore last mainwindow position and size //
   const QPoint DefaultFullModePos  = { 100, 100 };
@@ -137,25 +138,25 @@ public:
   const QSize  DefaultMiniModeSize = { 600, 100 };
   const QRect  DefaultMiniModeRect = { DefaultMiniModePos, DefaultMiniModeSize };
 
-  bool miniMode();
-  void setMiniMode(bool miniMode);
+  [[nodiscard]] bool miniMode() const;
+  void setMiniMode(bool miniMode) const;
 
-  QString i18nLanguage();
-  void setI18nLanguage(const QString &lang);
+  [[nodiscard]] QString i18nLanguage() const;
+  void setI18nLanguage(const QString &lang) const;
 
-  bool minimizeToTray();
-  void setMinimizeToTray(bool tray);
+  [[nodiscard]] bool minimizeToTray() const;
+  void setMinimizeToTray(bool tray) const;
 
-  void setOptionsDlgSplitPos(int pos);
-  int  optionsDialogSplitPos();
+  void setOptionsDlgSplitPos(int pos) const;
+  [[nodiscard]] int  optionsDialogSplitPos() const;
 
   // Save window positions and sizes option //
-  bool saveWindowsPos();
-  void setSaveWindowsPos(bool saveMwp);
+  [[nodiscard]] bool saveWindowsPos() const;
+  void setSaveWindowsPos(bool saveMwp) const;
 
   // Save drive visibility option //
-  bool saveDiskVis();
-  void setSaveDiskVis(bool saveDvis);
+  [[nodiscard]] bool saveDiskVis() const;
+  void setSaveDiskVis(bool saveDvis) const;
 
   // To pass session file name/path  //
   void setSessionFile(const QString &g_sessionFile, const QString &g_sessionFilePath);
@@ -169,160 +170,160 @@ public:
   void setMainWindowTitle(const QString &g_mainWindowTitle);
 
   // Hide/Show drives D9-DO   //
-  bool D9DOVisible();
-  void setD9DOVisible(bool dVis);
+  [[nodiscard]] bool D9DOVisible() const;
+  void setD9DOVisible(bool dVis) const;
 
   // Filter special characters from file names in Folder Images
-  bool filterUnderscore();
-  void setfilterUnderscore(bool filter);
+  [[nodiscard]] bool filterUnderscore() const;
+  void setfilterUnderscore(bool filter) const;
 
   // Limit number of entries in Folder Images to 64 or not.
-  bool limitFileEntries();
-  void setlimitFileEntries(bool limit);
+  [[nodiscard]] bool limitFileEntries() const;
+  void setlimitFileEntries(bool limit) const;
 
   // CAPITAL letters in file names for PCLINK
-  bool capitalLettersInPCLINK();
-  void setCapitalLettersInPCLINK(bool caps);
+  [[nodiscard]] bool capitalLettersInPCLINK() const;
+  void setCapitalLettersInPCLINK(bool caps) const;
 
   // URL Submit feature
-  bool isURLSubmitEnabled();
-  void setURLSubmit(bool enabled);
+  [[nodiscard]] bool isURLSubmitEnabled() const;
+  void setURLSubmit(bool enabled) const;
 
   // Spy Mode
-  bool isSpyMode();
-  void setSpyMode(bool enabled);
+  [[nodiscard]] bool isSpyMode() const;
+  void setSpyMode(bool enabled) const;
 
   // Command Name
-  bool isCommandName();
-  void setCommandName(bool enabled);
+  [[nodiscard]] bool isCommandName() const;
+  void setCommandName(bool enabled) const;
 
   // Track Layout
-  bool isTrackLayout();
-  void setTrackLayout(bool enabled);
+  [[nodiscard]] bool isTrackLayout() const;
+  void setTrackLayout(bool enabled) const;
 
   // Enable Shade Mode //
-  bool enableShade();
-  void setEnableShade(bool shade);
+  [[nodiscard]] bool enableShade() const;
+  void setEnableShade(bool shade) const;
 
   // Explorer Window On Top
-  bool explorerOnTop();
-  void setExplorerOnTop(bool expOnTop);
+  [[nodiscard]] bool explorerOnTop() const;
+  void setExplorerOnTop(bool expOnTop) const;
 
   // save/restore top-level widget geometry
-  bool saveWidgetGeometry(QWidget* widget, const QString& name = QString());
-  bool restoreWidgetGeometry(QWidget* widget, const QString& name = QString(), const QRect& defRect = QRect());
-  bool windowPosSaved(QWidget* widget, const QString& name = QString());
+  bool saveWidgetGeometry(const QWidget* widget, const QString& name = QString()) const;
+  bool restoreWidgetGeometry(QWidget* widget, const QString& name = QString(), const QRect& defRect = QRect()) const;
+  bool windowPosSaved(const QWidget* widget, const QString& name = QString()) const;
 
   // Printer Spy Mode
-  bool isPrinterSpyMode();
-  void setPrinterSpyMode(bool enabled);
+  [[nodiscard]] bool isPrinterSpyMode() const;
+  void setPrinterSpyMode(bool enabled) const;
 
   // 1020 Graphics Instructions
-  bool displayGraphicsInstructions();
-  void setDisplayGraphicsInstructions(bool enabled);
+  [[nodiscard]] bool displayGraphicsInstructions() const;
+  void setDisplayGraphicsInstructions(bool enabled) const;
 
   // Clear 1020 Graphics pane on STATUS command
-  bool clearOnStatus();
-  void setClearOnStatus(bool enabled);
+  [[nodiscard]] bool clearOnStatus() const;
+  void setClearOnStatus(bool enabled) const;
 
   // Methods for setting and getting the Printer emulation settings.
-  void setPrinterName(int no, const QString &printerInfo);
-  QString printerName(int no) const;
+  void setPrinterName(int no, const QString &printerName) const;
+  [[nodiscard]] QString printerName(int no) const;
 
-  QString atariFixedFontFamily();
-  void setAtariFixedFontFamily(QString fontFamily);
+  [[nodiscard]] QString atariFixedFontFamily() const;
+  void setAtariFixedFontFamily(const QString& fontFamily) const;
 
   // Drive emulation (SIO or firmware)
-  bool displayTransmission();
-  void setDisplayTransmission(bool displayTransmission);
-  bool displayDriveHead();
-  void setDisplayDriveHead(bool displayDriveHead);
-  bool displayFdcCommands();
-  void setDisplayFdcCommands(bool displayFdcCommands);
-  bool displayIndexPulse();
-  void setDisplayIndexPulse(bool displayIndexPulse);
-  bool displayMotorOnOff();
-  void setDisplayMotorOnOff(bool displayMotorOnOff);
-  bool displayIDAddressMarks();
-  void setDisplayIDAddressMarks(bool displayIDAddressMarks);
-  bool displayTrackInformation();
-  void setDisplayTrackInformation(bool displayTrackInformation);
-  bool disassembleUploadedCode();
-  void setDisassembleUploadedCode(bool disassembleUploadedCode);
-  bool translatorAutomaticDetection();
-  void setTranslatorAutomaticDetection(bool translatorAutomaticDetection);
-  QString translatorDiskImagePath();
-  void setTranslatorDiskImagePath(const QString &diskImage);
-  QString toolDiskImagePath();
-  void setToolDiskImagePath(const QString &diskImage);
-  bool sioAutoReconnect();
-  void setSioAutoReconnect(bool sioAutoReconnect);
-  bool hideChipMode();
-  void setHideChipMode(bool hidden);
-  bool hideHappyMode();
-  void setHideHappyMode(bool hidden);
-  bool hideNextImage();
-  void setHideNextImage(bool hidden);
-  bool hideOSBMode();
-  void setHideOSBMode(bool hidden);
-  bool hideToolDisk();
-  void setHideToolDisk(bool hidden);
-  bool activateChipModeWithTool();
-  void setActivateChipModeWithTool(bool activate);
-  bool activateHappyModeWithTool();
-  void setActivateHappyModeWithTool(bool activate);
-  bool displayCpuInstructions();
-  void setDisplayCpuInstructions(bool displayCpuInstructions);
-  QString traceFilename();
-  void setTraceFilename(const QString &filename);
+  [[nodiscard]] bool displayTransmission() const;
+  void setDisplayTransmission(bool displayTransmission) const;
+  [[nodiscard]] bool displayDriveHead() const;
+  void setDisplayDriveHead(bool displayDriveHead) const;
+  [[nodiscard]] bool displayFdcCommands() const;
+  void setDisplayFdcCommands(bool displayFdcCommands) const;
+  [[nodiscard]] bool displayIndexPulse() const;
+  void setDisplayIndexPulse(bool displayIndexPulse) const;
+  [[nodiscard]] bool displayMotorOnOff() const;
+  void setDisplayMotorOnOff(bool displayMotorOnOff) const;
+  [[nodiscard]] bool displayIDAddressMarks() const;
+  void setDisplayIDAddressMarks(bool displayIDAddressMarks) const;
+  [[nodiscard]] bool displayTrackInformation() const;
+  void setDisplayTrackInformation(bool displayTrackInformation) const;
+  [[nodiscard]] bool disassembleUploadedCode() const;
+  void setDisassembleUploadedCode(bool disassembleUploadedCode) const;
+  [[nodiscard]] bool translatorAutomaticDetection() const;
+  void setTranslatorAutomaticDetection(bool translatorAutomaticDetection) const;
+  [[nodiscard]] QString translatorDiskImagePath() const;
+  void setTranslatorDiskImagePath(const QString &diskImage) const;
+  [[nodiscard]] QString toolDiskImagePath() const;
+  void setToolDiskImagePath(const QString &diskImage) const;
+  [[nodiscard]] bool sioAutoReconnect() const;
+  void setSioAutoReconnect(bool sioAutoReconnect) const;
+  [[nodiscard]] bool hideChipMode() const;
+  void setHideChipMode(bool hidden) const;
+  [[nodiscard]] bool hideHappyMode() const;
+  void setHideHappyMode(bool hidden) const;
+  [[nodiscard]] bool hideNextImage() const;
+  void setHideNextImage(bool hidden) const;
+  [[nodiscard]] bool hideOSBMode() const;
+  void setHideOSBMode(bool hidden) const;
+  [[nodiscard]] bool hideToolDisk() const;
+  void setHideToolDisk(bool hidden) const;
+  [[nodiscard]] bool activateChipModeWithTool() const;
+  void setActivateChipModeWithTool(bool activate) const;
+  [[nodiscard]] bool activateHappyModeWithTool() const;
+  void setActivateHappyModeWithTool(bool activate) const;
+  [[nodiscard]] bool displayCpuInstructions() const;
+  void setDisplayCpuInstructions(bool displayCpuInstructions) const;
+  [[nodiscard]] QString traceFilename() const;
+  void setTraceFilename(const QString &filename) const;
 #ifdef Q_OS_MAC
-  void setNativeMenu(bool nativeMenu);
-  bool nativeMenu();
+  void setNativeMenu(bool nativeMenu) const;
+  [[nodiscard]] bool nativeMenu() const;
 #endif
-  void setRawPrinterName(const QString &name);
-  QString rawPrinterName() const;
+  void setRawPrinterName(const QString &name) const;
+  [[nodiscard]] QString rawPrinterName() const;
 
-  auto setTnfsEnabled(bool enable) -> void;
-  auto isTnfsEnabled() const -> bool;
+  auto setTnfsEnabled(bool enable) const -> void;
+  [[nodiscard]] auto isTnfsEnabled() const -> bool;
 
   // Disk Collection Browser
-  QString mostRecentBrowserFolder();
-  QStringList recentBrowserFolders();   // raw from QSettings map
+  [[nodiscard]] QString mostRecentBrowserFolder() const;
+  [[nodiscard]] QStringList recentBrowserFolders() const;   // raw from QSettings map
   QStringList buildBrowserFolders();    // remove selected disk names from paths and validates exists
-  void setMostRecentBrowserFolder(const QString& name);
-  void delMostRecentBrowserFolder(const QString& name);
+  void setMostRecentBrowserFolder(const QString& name) const;
+  void delMostRecentBrowserFolder(const QString& name) const;
   bool isDiskImage(const QString& name);
-  bool showDiskBrowser();
-  void setShowDiskBrowser(bool show = true);
-  int  diskBrowserHorzSplitPos();
-  int  diskBrowserVertSplitPos();
-  void setDiskBrowserHorzSplitPos(int pos);
-  void setDiskBrowserVertSplitPos(int pos);
-  void setDiskPic(const QString& pic);
-  QString diskPic();
+  [[nodiscard]] bool showDiskBrowser() const;
+  void setShowDiskBrowser(bool show = true) const;
+  [[nodiscard]] int  diskBrowserHorzSplitPos() const;
+  [[nodiscard]] int  diskBrowserVertSplitPos() const;
+  void setDiskBrowserHorzSplitPos(int pos) const;
+  void setDiskBrowserVertSplitPos(int pos) const;
+  void setDiskPic(const QString& pic) const;
+  [[nodiscard]] QString diskPic() const;
 
   // Disk Collection browser options page
-  DbDataSource dbDataSource();
+  [[nodiscard]] DbDataSource dbDataSource() const;
   void setDbDataSource(DbDataSource newDbSource);
-  void setDbFileNames(bool useFileNames, bool favorJson = false);
-  bool dbFavorJson();
-  bool dbUseFileNames();
-  bool dbCopyPics();
-  void setDbCopyPics(bool copy);
-  LabelFont dbTitleFont();
-  void setDbTitleFont(const LabelFont& font);
-  LabelFont dbIndexFont();
-  void setDbIndexFont(const LabelFont& font);
-  QString appDataFolder();
-  void setAppFolderDir(const QString& appDataDir);
+  void setDbFileNames(bool useFileNames, bool favorJson = false) const;
+  [[nodiscard]] bool dbFavorJson() const;
+  [[nodiscard]] bool dbUseFileNames() const;
+  [[nodiscard]] bool dbCopyPics() const;
+  void setDbCopyPics(bool copy) const;
+  [[nodiscard]] LabelFont dbTitleFont() const;
+  void setDbTitleFont(const LabelFont& font) const;
+  [[nodiscard]] LabelFont dbIndexFont() const;
+  void setDbIndexFont(const LabelFont& font) const;
+  [[nodiscard]] QString appDataFolder() const;
+  void setAppFolderDir(const QString& appDataDir) const;
 
   // Disk Collection Browser artwork settings -
   // These settings are kept seperately from above application global settings
   // when dbDataSource is JSON (DbData_subDirJson and DbData_appFolderJson).
   static const std::unique_ptr<DbSettings>& dbSettings();
 
-  bool debugMenuVisible() const;
-  void setDebugMenuVisible(bool menuVisible);
+  [[nodiscard]] bool debugMenuVisible() const;
+  void setDebugMenuVisible(bool menuVisible) const;
 
   static const std::unique_ptr<RespeqtSettings> &instance() {
     if (!sInstance) {
@@ -342,7 +343,7 @@ public:
 private:
   static std::unique_ptr<DbSettings> sDbSettings;
 
-  void writeRecentBrowserFolders(const QStringList& folders);
+  void writeRecentBrowserFolders(const QStringList& folders) const;
 //  const int maxRecentBrowserFolders = 10;
 
   bool mIsFirstTime;

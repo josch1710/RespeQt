@@ -19,13 +19,13 @@ class GzFile : public QFile {
   Q_OBJECT
 
 public:
-  GzFile(const QString &path);
+  explicit GzFile(const QString &path);
 
   bool open(OpenMode mode) override;
   void close() override;
   bool seek(qint64 pos) override;
-  bool isSequential() const override;
-  bool atEnd() const override;
+  [[nodiscard]] bool isSequential() const override;
+  [[nodiscard]] bool atEnd() const override;
 
 protected:
   gzFile mHandle;
@@ -66,7 +66,7 @@ public:
     XexGz
   };
   static FileType getFileType(const QString &fileName);
-  __attribute__((unused)) static QString getFileTypeName(FileType type);
+  [[maybe_unused]] static QString getFileTypeName(FileType type);
 
   static const QStringList& getDiskImageTypes()
   {

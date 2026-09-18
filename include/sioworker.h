@@ -21,7 +21,6 @@
 
 #include "serialport.h"
 #include <atomic>
-#include <memory>
 
 enum SIO_CDEVIC : quint8 {
   DISK_BASE_CDEVIC = 0x31,
@@ -32,8 +31,8 @@ enum SIO_CDEVIC : quint8 {
   PCLINK_CDEVIC = 0x6F
 };
 
-const quint8 DISK_COUNT = 15;
-const quint8 PRINTER_COUNT = 4;
+constexpr quint8 DISK_COUNT = 15;
+constexpr quint8 PRINTER_COUNT = 4;
 
 class SioWorker;
 using SioWorkerPtr = QSharedPointer<SioWorker>;
@@ -47,37 +46,25 @@ protected:
   SioWorkerPtr sio;
 
 public:
-  explicit SioDevice(SioWorkerPtr worker);
+  explicit SioDevice(const SioWorkerPtr& worker);
   ~SioDevice() override;
-  virtual void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) = 0;
+  virtual void handleCommand(quint8 command, quint8 aux1, quint8 aux2) = 0;
   virtual QString deviceName();
-  inline void lock() { mLock.lock(); }
-  inline bool tryLock() { return mLock.tryLock(); }
-  inline void unlock() { mLock.unlock(); }
-  inline void setDeviceNo(int no) {
+  void lock() { mLock.lock(); }
+  bool tryLock() { return mLock.tryLock(); }
+  void unlock() { mLock.unlock(); }
+  void setDeviceNo(const int no) {
     emit statusChanged(m_deviceNo);
     m_deviceNo = no;
     emit statusChanged(no);
   }
-  inline int deviceNo() const { return m_deviceNo; }
+  int deviceNo() const { return m_deviceNo; }
 signals:
   void statusChanged(int deviceNo);
 };
 
 class SioWorker : public QThread {
   Q_OBJECT
-
-private:
-#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
-  QMutex *deviceMutex;
-#else
-  QRecursiveMutex *deviceMutex;
-#endif
-  SioDevice *devices[256];
-  AbstractSerialPortBackendPtr mPort;
-  std::atomic_bool mustTerminate;
-  bool displayCommandName;
-  bool mAutoReconnect;
 
 public:
   AbstractSerialPortBackendPtr port() { return mPort; }
@@ -91,28 +78,38 @@ public:
       devices[i] = nullptr;
   }
 #endif
-  virtual ~SioWorker();
+  ~SioWorker() override;
 
   bool waitOnPort(unsigned long time = ULONG_MAX);
-
-  void run();
 
   void setAutoReconnect(bool autoReconnect);
   void installDevice(quint8 no, SioDevice *device);
   virtual void uninstallDevice(quint8 no);
   void swapDevices(quint8 d1, quint8 d2);
-  SioDevice *getDevice(quint8 no);
+  SioDevice *getDevice(quint8 no) const;
 
-  QString guessDiskCommand(const quint8 command, const quint8 aux1, const quint8 aux2);
+  QString guessDiskCommand(quint8 command, quint8 aux1, quint8 aux2);
   QString deviceName(int device);
-  void setDisplayCommandName(bool display) { displayCommandName = display; }
-  static void usleep(unsigned long time) { QThread::usleep(time); }
+  void setDisplayCommandName(const bool display) { displayCommandName = display; }
+  static void usleep(const unsigned long time) { QThread::usleep(time); }
+
+  // QThread creation doesn't work in other way correctly
+  void startThread(Priority p);
 
 signals:
   void statusChanged(QString status);
 
-public slots:
-  void start(Priority p);
+protected:
+  void run() override;
+
+private:
+  QRecursiveMutex *deviceMutex;
+  SioDevice *devices[256] {};
+  AbstractSerialPortBackendPtr mPort;
+  std::atomic_bool mustTerminate{};
+  bool displayCommandName;
+  bool mAutoReconnect;
+
 };
 
 class CassetteRecord {
@@ -126,29 +123,31 @@ public:
 class CassetteWorker : public QThread {
   Q_OBJECT
 
-private:
-  QMutex mustTerminate;
-  AbstractSerialPortBackendPtr mPort;
-  QList<CassetteRecord> mRecords;
-
 public:
   AbstractSerialPortBackendPtr port() { return mPort; }
 
   CassetteWorker();
-  ~CassetteWorker();
+  ~CassetteWorker() override;
 
   bool loadCasImage(const QString &fileName);
 
-  bool wait(unsigned long time = ULONG_MAX);
-
-  void run();
+  // TODO Look why is does this and how implement in another way
+  bool waitForThread(unsigned long time = ULONG_MAX);
+  // QThread creation doesn't work in other way correctly
+  void startThread(Priority p);
 
   int mTotalDuration;
 signals:
   void statusChanged(int remainingTime);
 
-public slots:
-  void start(Priority p);
+protected:
+  void run() override;
+
+private:
+  QMutex mustTerminate;
+  AbstractSerialPortBackendPtr mPort;
+  QList<CassetteRecord> mRecords;
+
 };
 
 #endif// SIOWORKER_H

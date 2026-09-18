@@ -11,10 +11,8 @@
 #ifndef OPTIONSDIALOG_H
 #define OPTIONSDIALOG_H
 
-#include <QDialog>
 #include <QFileDialog>
 #include <QTreeWidget>
-#include <QtDebug>
 
 #include "serialport.h"
 
@@ -26,44 +24,61 @@ class OptionsDialog : public QDialog {
   Q_OBJECT
 
 public:
-  OptionsDialog(QWidget *parent = 0);
-  ~OptionsDialog() = default;
+  explicit OptionsDialog(QWidget *parent = nullptr);
+  ~OptionsDialog() override = default;
 
 protected:
-  void changeEvent(QEvent *e) override;
-  void showEvent(QShowEvent *e) override;
-  void closeEvent(QCloseEvent *e) override;
+  void changeEvent(QEvent *event) override;
+  void showEvent(QShowEvent *event) override;
+  void closeEvent(QCloseEvent *event) override;
 
 private:
   Ui::OptionsDialog *m_ui;
-  QTreeWidgetItem *itemPassthrough, *itemAtari1027, *itemPrinterProtocol, *item1020Options,
-          *itemStandard, *itemAtariSio, *itemNetSIO, *itemEmulation, *itemDiskBrowser, *itemDiskOptions, *itemDiskOSB, *itemDiskIcons, *itemDiskFavorite, *itemI18n,
-          *itemFirmware810Path, *itemFirmware1050Path, *itemFirmwareEmulation, *itemTraceOptions, *itemDiskImages;
+  QTreeWidgetItem
+    *itemPassthrough{nullptr},
+    *itemAtari1027{nullptr},
+    *itemPrinterProtocol{nullptr},
+    *item1020Options{nullptr},
+    *itemStandard{nullptr},
+    *itemAtariSio{nullptr},
+    *itemNetSIO{nullptr},
+    *itemEmulation{nullptr},
+    *itemDiskBrowser{nullptr},
+    *itemDiskOptions{nullptr},
+    *itemDiskOSB{nullptr},
+    *itemDiskIcons{nullptr},
+    *itemDiskFavorite{nullptr},
+    *itemI18n{nullptr},
+    *itemFirmware810Path{nullptr},
+    *itemFirmware1050Path{nullptr},
+    *itemFirmwareEmulation{nullptr},
+    *itemTraceOptions{nullptr},
+    *itemDiskImages{nullptr};
 
-  void selectFirmware(QLineEdit *edit, QString title, QString filters);
+  void selectFirmware(QLineEdit* edit, const QString& title, const QString& filters);
   void connectSignals();
-  void setupSettings();
-  void setHorzSplitPos(int pos);
+  void setupSettings() const;
+  void setHorzSplitPos(int pos) const;
 
 private slots:
-  void serialPortChanged(int index);
-  void handshakeChanged(int index);
-  void useDivisorToggled(bool checked);
-  void sectionClicked(QTreeWidgetItem *item, int column);
-  void currentSectionChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
-  void saveSettings();
-  void onClosed();
-  void useCustomBaudToggled(bool checked);
-  void appDataDirToggled();
-  void diskSubDirToggled();
-  void appSettingsToggled();
+  void serialPortChanged(int index) const;
+  void handshakeChanged(int index) const;
+  void useDivisorToggled(bool checked) const;
+  void sectionClicked(QTreeWidgetItem *item, int column) const;
+  void currentSectionChanged(const QTreeWidgetItem *current, QTreeWidgetItem *previous) const;
+  void saveSettings() const;
+  void onClosed() const;
+  void useCustomBaudToggled(bool checked) const;
+  void appDataDirToggled() const;
+  void diskSubDirToggled() const;
+  void appSettingsToggled() const;
   void browseForAppDir();
   void indexColorClicked();
   void titleColorClicked();
-  void indexBoldToggled();
-  void titleBoldToggled();
-  void indexItalicToggled();
-  void titleItalicToggled();
+  void indexBoldToggled() const;
+  void titleBoldToggled() const;
+  void indexItalicToggled() const;
+  void titleItalicToggled() const;
 
 #ifdef SHOWFIRMWARE
   void select810FirmwareTriggered();
@@ -80,7 +95,7 @@ private slots:
   void selectToolDiskTriggered();
   void fixedFontClicked();
   void rclFolderClicked();
-  void useNativeMenuToggled();
+  void useNativeMenuToggled() const;
 };
 
 #endif// OPTIONSDIALOG_H

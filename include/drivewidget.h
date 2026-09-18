@@ -22,28 +22,28 @@ class DriveWidget : public QWidget {
   Q_OBJECT
 
 public:
-  explicit DriveWidget(int driveNum, QWidget *parent = 0);
-  ~DriveWidget();
+  explicit DriveWidget(int driveNum, QWidget *parent = nullptr);
+  ~DriveWidget() override;
 
-  __attribute__((unused)) int getDriveNumber() { return driveNo_; }
-  void setup(bool happyShown, bool chipShown, bool nextSideShown, bool OSBShown, bool toolDiskShown);
+  [[nodiscard]] [[maybe_unused]] int getDriveNumber() const { return driveNo_; }
+  void setup(bool happyHidden, bool chipHidden, bool nextSideHidden, bool OSBHidden, bool toolDiskHidden);
 
 
   void showAsEmpty(bool happyHidden, bool chipHidden, bool nextSideHidden, bool OSBHidden, bool toolDiskHidden);
   void showAsFolderMounted(const QString &fileName, const QString &description, bool editEnabled);
   void showAsImageMounted(const QString &fileName, const QString &description, bool editEnabled, bool enableSave, bool leverOpen, bool happyEnabled, bool chipOpen,
-                          bool translatorActive, bool toolDiskActive, bool severalSides, bool happyShown, bool chipShown, bool nextSideShown, bool OSBShown, bool toolDiskShown);
+                          bool translatorActive, bool toolDiskActive, bool severalSides, bool happyHidden, bool chipHidden, bool nextSideHidden, bool OSBHidden, bool toolDiskHidden);
 
-  void updateFromImage(DiskImages::SimpleDiskImage *diskImage, bool happyShown, bool chipShown, bool nextSideShown, bool OSBShown, bool toolDiskShown);
-  bool isAutoSaveEnabled();
-  bool isHappyEnabled();
-  bool isChipEnabled();
-  void setLabelToolTips(const QString &one, const QString &two, const QString &three);
-  void setDropTarget(bool target);
+  void updateFromImage(DiskImages::SimpleDiskImage *diskImage, bool happyHidden, bool chipHidden, bool nextSideHidden, bool OSBHidden, bool toolDiskHidden);
+  [[nodiscard]] bool isAutoSaveEnabled() const;
+  [[nodiscard]] bool isHappyEnabled() const;
+  [[nodiscard]] bool isChipEnabled() const;
+  void setLabelToolTips(const QString &one, const QString &two, const QString &three) const;
+  void setDropTarget(bool target) const;
 
-  void triggerAutoSaveClickIfEnabled();
-  void triggerHappyClickIfEnabled();
-  void triggerChipClickIfEnabled();
+  void triggerAutoSaveClickIfEnabled() const;
+  void triggerHappyClickIfEnabled() const;
+  void triggerChipClickIfEnabled() const;
 
 signals:
   void actionMountDisk(int deviceId);
@@ -55,7 +55,7 @@ signals:
   void actionToggleOSB(int deviceId, bool open);
   void actionToolDisk(int deviceId, bool open);
   void actionWriteProtect(int deviceId, bool state);
-  __attribute__((unused)) void actionMountRecent(int deviceId, const QString &fileName);
+  [[maybe_unused]] void actionMountRecent(int deviceId, const QString &fileName);
   void actionEditDisk(int deviceId);
   void actionSave(int deviceId);
   void actionAutoSave(int deviceId, bool enabled);
@@ -64,14 +64,14 @@ signals:
   void actionBootOptions(int deviceId);
 
 public slots:
-  void setLabelFont(const QFont &font);
+  void setLabelFont(const QFont &font) const;
 
 private slots:
   void mountFolderTriggered();
   void mountDiskTriggered();
   void ejectTriggered();
   void nextSideTriggered();
-  void happyToggled(bool enabled);
+  void happyToggled(bool open);
   void chipToggled(bool open);
   void osbToggled(bool open);
   void toolDiskToggled(bool open);
@@ -80,7 +80,7 @@ private slots:
   void saveTriggered();
   void revertTriggered();
   void saveAsTriggered();
-  void autoSaveToggled(bool arg1);
+  void autoSaveToggled(bool state);
   void bootOptionTriggered();
 
 protected:

@@ -9,18 +9,19 @@
 // This class computes CRC16.
 class Crc16 {
 
-private:
-  unsigned short m_crc;
-
 public:
   // constructor and destructor
   Crc16();
-  virtual ~Crc16() {}
+  virtual ~Crc16() = default;
 
-  virtual unsigned short GetCrc(void) { return m_crc; }
+  virtual unsigned short GetCrc() { return m_crc; }
 
-  virtual void Reset(void);
+  virtual void Reset();
   virtual unsigned char Add(unsigned char data);
+
+private:
+  unsigned short m_crc;
+
 };
 
 #endif

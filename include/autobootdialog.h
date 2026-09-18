@@ -20,25 +20,25 @@ class AutoBootDialog : public QDialog {
   Q_OBJECT
 
 public:
-  AutoBootDialog(QWidget *parent = 0);
-  ~AutoBootDialog();
+  explicit AutoBootDialog(QWidget *parent = nullptr);
+  ~AutoBootDialog() override;
 
 
 protected:
-  void changeEvent(QEvent *e);
-  void closeEvent(QCloseEvent *);
+  void changeEvent(QEvent *e) override;
+  void closeEvent(QCloseEvent *) override;
 
 private:
   Ui::AutoBootDialog *ui;
 
 public slots:
-  void booterStarted();
-  void booterLoaded();
-  void blockRead(int current, int all);
+  void booterStarted() const;
+  void booterLoaded() const;
+  void blockRead(int current, int all) const;
   void loaderDone();
 
 private slots:
-  void onClick(QAbstractButton *button);
+  [[maybe_unused]] void onClick(const QAbstractButton *button);
   void reloadExe();
 };
 

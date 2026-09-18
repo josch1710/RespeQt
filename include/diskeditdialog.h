@@ -15,7 +15,6 @@ namespace Ui {
   class DiskEditDialog;
 }
 
-#include <QAbstractTableModel>
 #include <QComboBox>
 #include <QItemSelection>
 #include <QMimeData>
@@ -26,28 +25,28 @@ class FileModel : public QAbstractTableModel {
   Q_OBJECT
 
 public:
-  FileModel(QObject *parent);
-  ~FileModel();
+  explicit FileModel(QObject *parent);
+  ~FileModel() override;
   QList<Filesystems::AtariDirEntry> entries;
   Filesystems::AtariFileSystem *fileSystem;
-  Qt::ItemFlags flags(const QModelIndex &index) const;
-  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-  bool setData(const QModelIndex &index, const QVariant &value, int role);
-  void deleteFiles(QModelIndexList indexes);
-  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const;
-  int columnCount(const QModelIndex &parent = QModelIndex()) const;
-  void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
+  [[nodiscard]] Qt::ItemFlags flags(const QModelIndex &index) const override;
+  [[nodiscard]] QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+  bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+  void deleteFiles(const QModelIndexList& indexes);
+  [[nodiscard]] QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+  [[nodiscard]] int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  [[nodiscard]] int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
   void setDirectory(int row);
   void toParent();
   void setRoot();
   void setFileSystem(Filesystems::AtariFileSystem *aFileSystem);
-  QMimeData *mimeData(const QModelIndexList &indexes) const;
-  QStringList mimeTypes() const;
-  void insertFiles(QStringList names);
-  bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
-  inline bool isRoot() const { return dirs.count() == 1; }
-  inline QString currentPath() const { return m_currentPath; }
+  [[nodiscard]] QMimeData *mimeData(const QModelIndexList &indexes) const override;
+  [[nodiscard]] QStringList mimeTypes() const override;
+  void insertFiles(const QStringList& names);
+  bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override;
+  [[nodiscard]] bool isRoot() const { return dirs.count() == 1; }
+  [[nodiscard]] QString currentPath() const { return m_currentPath; }
 
 private:
   QString m_currentPath;
@@ -61,31 +60,31 @@ class DiskEditDialog : public QMainWindow {
   Q_OBJECT
 
 public:
-  DiskEditDialog(QWidget *parent = 0);
-  ~DiskEditDialog();
+  explicit DiskEditDialog(QWidget *parent = nullptr);
+  ~DiskEditDialog() override;
   void go(DiskImages::SimpleDiskImage *image, int fileSystem = -1);
 
 protected:
   FileModel *model;
-  void changeEvent(QEvent *e);
+  void changeEvent(QEvent *e) override;
 
 private:
   Ui::DiskEditDialog *m_ui;
-  DiskImages::SimpleDiskImage *m_disk;
+  DiskImages::SimpleDiskImage *m_disk{};
   QComboBox *m_fileSystemBox;
 
 private slots:
   void addFilesTriggered();
   void deleteSelectedFilesTriggered();
-  void textConversionTriggered();
+  void textConversionTriggered() const;
   void extractFilesTriggered();
   void toParentTriggered();
   void printTriggered();
-  void fileListDoubleClicked(QModelIndex index);
+  void fileListDoubleClicked(const QModelIndex& index);
   void stayOnTopChanged();
 
   void fileSystemChanged(int index);
-  void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+  void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) const;
 };
 
 #endif// DISKEDITDIALOG_H

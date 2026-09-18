@@ -19,25 +19,25 @@ class CreateImageDialog : public QDialog {
   Q_OBJECT
 
 public:
-  CreateImageDialog(QWidget *parent = 0);
-  ~CreateImageDialog();
-  int sectorCount();
-  int sectorSize();
+  explicit CreateImageDialog(QWidget *parent = nullptr);
+  ~CreateImageDialog() override;
+  [[nodiscard]] int sectorCount() const;
+  [[nodiscard]] int sectorSize() const;
 
 protected:
-  void changeEvent(QEvent *e);
+  void changeEvent(QEvent *e) override;
 
 private:
   Ui::CreateImageDialog *m_ui;
 
 private slots:
-  void recalculate();
-  void harddiskToggled(bool checked);
-  void customToggled(bool checked);
-  void doubleDoubleToggled(bool checked);
-  void standardDoubleToggled(bool checked);
-  void standardSingleToggled(bool checked);
-  void standardEnhancedToggled(bool checked);
+  void recalculate() const;
+  void harddiskToggled(bool checked) const;
+  void customToggled(bool checked) const;
+  void doubleDoubleToggled(bool checked) const;
+  void standardDoubleToggled(bool checked) const;
+  void standardSingleToggled(bool checked) const;
+  void standardEnhancedToggled(bool checked) const;
 };
 
 #endif// CREATEIMAGEDIALOG_H

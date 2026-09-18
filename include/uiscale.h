@@ -28,7 +28,7 @@ namespace UiScale {
   // sizeHint() can size the box. The forms used to pin minimumSize ==
   // maximumSize and never set an icon size at all, which left the box and the
   // icon inside it free to drift apart whenever the style changed.
-  inline void applyToolButtonIconSizes(QWidget *root) {
+  inline void applyToolButtonIconSizes(const QWidget *root) {
     const int extent = iconExtent(root);
     for (QToolButton *button : root->findChildren<QToolButton *>()) {
       button->setIconSize(QSize(extent, extent));

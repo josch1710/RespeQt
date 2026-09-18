@@ -19,10 +19,10 @@ class RCl : public SioDevice {
 
 public:
   QString g_fileFilter;
-  RCl(SioWorkerPtr worker) : SioDevice(worker), mutex() {}
-  void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) override;
-  QString toAtariFileName(QString dosFileName);
-  QString toDosFileName(QString atariFileName);
+  explicit RCl(const SioWorkerPtr& worker) : SioDevice(worker) {}
+  void handleCommand(quint8 command, quint8 aux1, quint8 aux2) override;
+  QString toAtariFileName(const QString& dosFileName);
+  QString toDosFileName(const QString& atariFileName);
 
 public slots:
   void gotNewSlot(int slot);     //
@@ -30,11 +30,11 @@ public slots:
 
 signals:
   void findNewSlot(int startFrom, bool createOne);
-  void mountFile(int no, const QString fileName);
+  void mountFile(int no, QString fileName);
   void toggleAutoCommit(int no, bool st);
   void toggleHappy(int no, bool st);
   void toggleChip(int no, bool st);
-  void bootExe(const QString fileName);
+  void bootExe(QString fileName);
 
 private:
   QString imageFileName;

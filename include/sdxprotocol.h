@@ -15,20 +15,20 @@
 #define ulong unsigned long
 #endif
 
-typedef struct
+using DIRENTRY = struct
 {
   uchar status;
   uchar map_l, map_h;
   uchar len_l, len_m, len_h;
   char fname[11];
   uchar stamp[6];
-} DIRENTRY;
+};
 
 class SDXProtocol : public SioDevice {
   Q_OBJECT
 
 public:
-  SDXProtocol(SioWorkerPtr worker);
+  explicit SDXProtocol(const SioWorkerPtr& worker);
 };
 
 #endif// SDXPROTOCOLS_H

@@ -7,7 +7,7 @@
 class Atascii {
 public:
   Atascii();
-  QChar operator()(const unsigned char atascii) const;
+  QChar operator()(unsigned char atascii) const;
   unsigned char operator()(const QChar &unicode) const;
 
 protected:

@@ -9,20 +9,15 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
+// ReSharper disable CppUnusedIncludeDirective
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QFileDialog>
-#include <QFrame>
 #include <QLabel>
-#include <QMainWindow>
 #include <QMessageBox>
-#include <QPushButton>
 #include <QSystemTrayIcon>
 #include <QTextEdit>
 #include <QTranslator>
-#include <QtDebug>
-#include <memory>
 
 #include "aboutdialog.h"
 #include "createimagedialog.h"
@@ -32,12 +27,9 @@
 #include "logdisplaydialog.h"
 #include "optionsdialog.h"
 #include "printers/outputwindow.h"
-#include "printers/textprinterwindow.h"
 #include "printerwidget.h"
-#include "serialport.h"
 #include "siorecorder.h"
 #include "sioworker.h"
-#include "diskbrowser/folderdisks.h"
 #include "diskbrowser/diskbrowserdlg.h"
 #include "network/tnfsudp.h"
 #include "network/tnfstcp.h"
@@ -61,6 +53,9 @@ public:
   bool checkChangeDbSource(DbDataSource dbSourceNew);
   static void logMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg);
   static MainWindow *instance() { return sInstance; }
+  void setupDebugItems() const;
+
+  bool eventFilter(QObject *obj, QEvent *event) override;
 
 private:
   static MainWindow *sInstance;
@@ -68,8 +63,8 @@ private:
   Ui::MainWindow *ui;
   SioWorkerPtr sio;
   bool shownFirstTime;
-  std::vector<PrinterWidget *> printerWidgets{PRINTER_COUNT};
-  std::vector<DriveWidget *> diskWidgets{DISK_COUNT};
+  std::vector<PrinterWidget *> printerWidgets;
+  std::vector<DriveWidget *> diskWidgets;
   // InfoWidget* infoWidget;
   //SioRecorder *mRecorder{nullptr};
   QString mTestfile;
@@ -82,10 +77,10 @@ private:
   Qt::WindowFlags oldWindowFlags;
   Qt::WindowStates oldWindowStates;
   QString lastMessage;
-  int lastMessageRepeat;
+  int lastMessageRepeat{0};
   DiskBrowserDlg* diskBrowserDlg;
 
-  bool isClosing;
+  bool isClosing{false};
 
   LogDisplayDialog *logWindow_;
 
@@ -98,40 +93,38 @@ private:
   bool isMiniMode    = false;   // mini mode disk 1 only
   bool isShadeMode   = false;   // mini shade mode main win
 
-  Network::TnfsUdp tnfsudp{};
-  Network::TnfsTcp tnfstcp{};
+  Network::TnfsUdp tnfsudp;
+  Network::TnfsTcp tnfstcp;
 
   void setSession();//
   void updateRecentFileActions();
-  char containingDiskSlot(const QPoint &point);
+  [[nodiscard]] char containingDiskSlot(const QPoint &point) const;
   void mountFile(char no, const QString &fileName, bool prot);
   void mountDiskImage(char no);
   void mountFolderImage(char no);
   bool ejectImage(char no, bool ask = true);
   void loadNextSide(char no);
-  void toggleHappy(char no, bool enabled);
-  void toggleChip(char no, bool open);
-  void toggleOSB(char no, bool open);
-  void toggleToolDisk(char no, bool open);
-  void toggleWriteProtection(char no, bool protectionEnabled);
-  void updateHighSpeed();
+  void toggleHappy(char no, bool open) const;
+  void toggleChip(char no, bool open) const;
+  void toggleOSB(char no, bool open) const;
+  void toggleToolDisk(char no, bool open) const;
+  void toggleWriteProtection(char no, bool protectionEnabled) const;
+  void updateHighSpeed() const;
 
-  void openEditor(char no);
+  void openEditor(char no) const;
   void saveDisk(char no);
   void saveDiskAs(char no);
   void revertDisk(char no);
   QMessageBox::StandardButton saveImageWhenClosing(char no, QMessageBox::StandardButton previousAnswer, int number);
   void loadTranslators();
   void autoSaveDisk(char no);//
-  void setUpPrinterEmulationWidgets(bool enabled);
+  void setUpPrinterEmulationWidgets(bool enabled) const;
 
   void createDeviceWidgets();
   //SimpleDiskImage *installDiskImage(char no);
   void changeFonts();
   void connectUISignal();
-  DiskImages::SimpleDiskImage *installDiskImage();
-
-  void setupDebugItems();
+  [[nodiscard]] DiskImages::SimpleDiskImage *installDiskImage() const;
 
   void restoreLayout();
 
@@ -151,14 +144,9 @@ protected:
   void enterEvent(QEnterEvent *) override;
 #endif
   void leaveEvent(QEvent *) override;
-  bool eventFilter(QObject *obj, QEvent *event) override;
 
 signals:
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "NotImplementedFunctions"
-#pragma ide diagnostic ignored "NotUsedFunctions"
-  void logMessage(int type, const QString &msg);
-#pragma clang diagnostic pop
+  [[maybe_unused]] void logMessage(int type, const QString &msg);
   void newSlot(char slot);
   void fileMounted(bool mounted);
   void sendLogText(QString logText);
@@ -171,11 +159,11 @@ signals:
 public slots:
   char firstEmptyDiskSlot(char startFrom = 0, bool createOne = true);   //
   void mountFileWithDefaultProtection(char no, const QString &fileName);//
-  void autoCommit(char no, bool st);                                    //
-  void happy(char no, bool st);                                         //
-  void chip(char no, bool st);                                          //
+  void autoCommit(char no, bool st) const;                                    //
+  void happy(char no, bool st) const;                                         //
+  void chip(char no, bool st) const;                                          //
   void bootExeTriggered(const QString &fileName);
-  void toggleSnapshotCapture(bool toggle);
+  void toggleSnapshotCapture(bool toggle) const;
   void replaySnapshot();
   void bootExe(const QString &fileName);
 
@@ -191,25 +179,25 @@ private slots:
   void newImageTriggered();         //
   void ejectAllTriggered();         //
   void showOptionsTriggered();      //
-  void startEmulationTriggered();   //
-  void printerEmulationTriggered(); //
+  void startEmulationTriggered() const;   //
+  void printerEmulationTriggered() const; //
   void hideShowTriggered();         //
   void quitApplicationTriggered();  //
   void showAboutTriggered();        //
-  void showDocumentationTriggered();//
-  void toggleLimitEntriesTriggered();
+  void showDocumentationTriggered() const;//
+  void toggleLimitEntriesTriggered() const;
 
   // Device widget events
   void mountDiskTriggered(char no);                        //
   void mountFolderTriggered(char no);                      //
   void ejectTriggered(char no);                            //
   void nextSideTriggered(char no);                         //
-  void happyToggled(char no, bool enabled);                //
-  void chipToggled(char no, bool open);                    //
-  void OSBToggled(char no, bool open);                     //
-  void toolDiskTriggered(char no, bool open);              //
-  void protectTriggered(char no, bool writeProtectEnabled);//
-  void editDiskTriggered(char no);                         //
+  void happyToggled(char no, bool open) const;                //
+  void chipToggled(char no, bool open) const;                    //
+  void OSBToggled(char no, bool open) const;                     //
+  void toolDiskTriggered(char no, bool open) const;              //
+  void protectTriggered(char no, bool writeProtectEnabled) const;//
+  void editDiskTriggered(char no) const;                         //
   void saveTriggered(char no);                             //
   void autoSaveTriggered(char no);                         //
   void saveAsTriggered(char no);                           // MIA
@@ -220,12 +208,12 @@ private slots:
   void toggleShadeTriggered();   //
   void showLogWindowTriggered(); //
   void diskBrowserTriggered();   // what are all these trailing comment markers for?
-  void showHideDrives();                       //
-  void sioFinished();                          //
-  void sioStarted();                           //
-  void sioStatusChanged(const QString &status);//
+  void showHideDrives() const;                       //
+  void sioFinished() const;                          //
+  void sioStarted() const;                           //
+  void sioStatusChanged(const QString &status) const;//
   //void textPrinterWindowClosed();
-  void docDisplayWindowClosed();                   //
+  void docDisplayWindowClosed() const;                   //
   void deviceStatusChanged(unsigned char deviceNo);//
   void uiMessage(int t, QString message);
   // TODO Check on Windows and Linux
@@ -234,8 +222,8 @@ private slots:
   void logChanged(QString text);
 
   // TNFS
-  void sessionConnected();
-  void allSessionsDisconnected();
+  void sessionConnected() const;
+  void allSessionsDisconnected() const;
 };
 
 #endif// MAINWINDOW_H
