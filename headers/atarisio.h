@@ -44,7 +44,7 @@
    Note: be sure that the data_buffer is allocated and can
    store data_length bytes!
 */
-typedef struct SIO_param_struct {
+typedef struct SIO_param_struct { // NOLINT(*-use-using)
 	unsigned char  device_id;
 	unsigned char  command;
 	unsigned char  direction; /* 0=receive, 1=send data block */
@@ -73,7 +73,7 @@ typedef struct SIO_param_struct {
    Note: be sure that the data_buffer is allocated and can
    store data_length bytes!
 */
-typedef struct Ext_SIO_param_struct {
+typedef struct Ext_SIO_param_struct { // NOLINT(*-use-using)
 	unsigned char  device;
 	unsigned char  unit;
 	unsigned char  command;
@@ -95,7 +95,7 @@ typedef struct Ext_SIO_param_struct {
    the last call to GET_COMMAND_FRAME and the returned command
    frame. Usually, this member should be 0.
 */
-typedef struct SIO_command_frame_struct {
+typedef struct SIO_command_frame_struct { // NOLINT(*-use-using)
 	unsigned char device_id;
 	unsigned char command;
 	unsigned char aux1;
@@ -109,7 +109,7 @@ typedef struct SIO_command_frame_struct {
    RECEIVE_DATA_FRAME. data_buffer must be allocated to
    (at least) data_length bytes.
 */
-typedef struct SIO_data_frame_struct {
+typedef struct SIO_data_frame_struct { // NOLINT(*-use-using)
 	unsigned char* data_buffer;
 	unsigned int   data_length;
 } SIO_data_frame;
@@ -276,7 +276,7 @@ typedef struct SIO_data_frame_struct {
 /*
    timestamp structure for measuring system latency.
 */
-typedef struct SIO_timestamp_struct {
+typedef struct SIO_timestamp_struct { // NOLINT(*-use-using)
 	unsigned long long system_entering; /* set inside the ioctl() */
 	unsigned long long transmission_start; /* only set on send operations */
 	unsigned long long transmission_send_irq; /* timestamp of first send-char interrupt */
