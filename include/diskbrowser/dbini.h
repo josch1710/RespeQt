@@ -1,10 +1,6 @@
 #ifndef DBINI_H
 #define DBINI_H
 
-#include <QSettings>
-#include <QDir>
-#include <QRect>
-#include <QColor>
 #include "folderdisks.h"
 #include "picsourcetype.h"
 #include "diskbrowser/dbsettings.h"
@@ -27,25 +23,25 @@ class DbIni : public DbSettings
 {
 public:
     explicit DbIni();
-    virtual ~DbIni();
+    ~DbIni() override;
 
-    void setDataDir(const QString& dir);    // not used (used only with JSON impl)
+    void setDataDir(const QString& dir) override;    // not used (used only with JSON impl)
 
-    void setPicture(const QString& pic, const QString& folder = QString(), const QString& disk = QString());
-    QString getPicture(const QDir& dir, const QString& disk, PicSourceType& picSource);
+    void setPicture(const QString& pic, const QString& folder = QString(), const QString& disk = QString()) override;
+    QString getPicture(const QDir& dir, const QString& disk, PicSourceType& picSource) override;
 
-    void setTitle(const QString& title, const QString& folder, const QString& disk);
-    void setIndex(const QString& index, const QString& folder, const QString& disk);
-    void setSideB(bool sideB, const QString& folder, const QString& disk);
-    DiskLabel getLabel(const QDir& dir, const QString& disk);
+    void setTitle(const QString& title, const QString& folder, const QString& disk) override;
+    void setIndex(const QString& index, const QString& folder, const QString& disk) override;
+    void setSideB(bool sideB, const QString& folder, const QString& disk) override;
+    DiskLabel getLabel(const QDir& dir, const QString& disk) override;
 
-    bool load();
-    bool save();
+    bool load() override;
+    bool save() override;
 //  void clear();
 
-    bool isJson() { return false; }
+    bool isJson() override { return false; }
 
 private:
     QSettings* _settings = nullptr;
 };
-#endif // DBSETTINGS_H
+#endif // DBINI_H

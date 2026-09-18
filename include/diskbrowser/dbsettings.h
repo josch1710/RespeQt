@@ -1,10 +1,7 @@
 #ifndef DBSETTINGS_H
 #define DBSETTINGS_H
 
-#include <QSettings>
-#include <QDir>
 #include <QRect>
-#include <QColor>
 #include "folderdisks.h"
 #include "picsourcetype.h"
 
@@ -22,14 +19,14 @@
 // <disk>\sideb=[true|false]
 //
 
-typedef QMap<QString,FloppyArt> ArtMap;
+using ArtMap = QMap<QString,FloppyArt>;
 
 struct DirInfo
 {
     QString pic;    // dir/folder default pic
     ArtMap  map;    // disk-name -> FloppyArt
 
-    bool isEmpty() const {return pic.isEmpty() && map.isEmpty();}
+    [[nodiscard]] bool isEmpty() const {return pic.isEmpty() && map.isEmpty();}
 };
 
 // FolderMap - map/collection structured for above scheme
@@ -38,7 +35,7 @@ struct DirInfo
 //    - default pic for whole dir
 //    - ArtMap[disk name] -> FloppyArt { pic, label text }
 //
-typedef QMap<QString, DirInfo> DirMap;
+using DirMap = QMap<QString, DirInfo>;
 
 
 struct LabelPos
@@ -46,7 +43,7 @@ struct LabelPos
     QRect title;
     QRect index;
 
-    bool isEmpty() { return title.isEmpty() && index.isEmpty(); }
+    [[nodiscard]] bool isEmpty() const { return title.isEmpty() && index.isEmpty(); }
 };
 
 
@@ -70,13 +67,13 @@ public:
     virtual bool save()  = 0;
 //  virtual void clear() = 0;
 
-    bool isEmpty();
-    void clone(DbSettings& other);
+    [[nodiscard]] bool isEmpty() const;
+    void clone(const DbSettings& other);
     void merge(DbSettings& other);
     virtual bool isJson() = 0;          // TBD omit (not used)
 
     DirMap& getDirMap() { return _dirMap; }
-    QStringList getDirs() { return _dirMap.keys(); }
+    [[nodiscard]] QStringList getDirs() const { return _dirMap.keys(); }
     QString getDirPic(const QString& dir) { return _dirMap[dir].pic; }
     QStringList getDisks(const QString& dir) { return _dirMap[dir].map.keys(); }
 

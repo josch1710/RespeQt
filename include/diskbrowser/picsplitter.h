@@ -12,7 +12,7 @@
 class PicSplitter : public QSplitter
 {
 public:
-    PicSplitter(QWidget* parent);
+    explicit PicSplitter(QWidget* parent);
 
     void setOther(QSplitter* other);
     void setRatio(double ratio, bool moveOther = false);

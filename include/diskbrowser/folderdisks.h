@@ -6,20 +6,18 @@
 #ifndef FOLDERDISKS_H
 #define FOLDERDISKS_H
 
-#include <QObject>
-#include <QString>
-#include <QStringList>
 #include <QDir>
 #include <QSettings>
+#include <utility>
 
 struct DiskLabel
 {
-    DiskLabel(const QString& _title = QString(), const QString& _index = QString(), bool _sideB = false)
-            : title(_title), index(_index), sideB(_sideB) { }
+    explicit DiskLabel(QString  _title = QString(), QString  _index = QString(), const bool _sideB = false)
+            : title(std::move(_title)), index(std::move(_index)), sideB(_sideB) { }
 
     void clear() { title.clear(); index.clear(); sideB = false; }
 
-    bool isEmpty() const { return title.isEmpty() && index.isEmpty() && !sideB; }
+    [[nodiscard]] bool isEmpty() const { return title.isEmpty() && index.isEmpty() && !sideB; }
 
     QString title;
     QString index;
@@ -28,10 +26,10 @@ struct DiskLabel
 
 struct FloppyArt
 {
-    FloppyArt() { }
+    FloppyArt() = default;
 
     void clear() { pic.clear(); label.clear(); }
-    bool isEmpty() const { return pic.isEmpty() && label.isEmpty(); }
+    [[nodiscard]] bool isEmpty() const { return pic.isEmpty() && label.isEmpty(); }
 
     QString pic;
     DiskLabel label;
@@ -46,9 +44,9 @@ public:
     FolderDisks();
 
     bool load(const QString& path);
-    int count() const { return diskList.count(); }
-    QStringList disks() const { return diskList; }
-    QStringList folders() const { return dirList; }
+    [[nodiscard]] int count() const { return diskList.count(); }
+    [[nodiscard]] QStringList disks() const { return diskList; }
+    [[nodiscard]] QStringList folders() const { return dirList; }
 
 private:
     QDir dir;

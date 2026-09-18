@@ -17,19 +17,19 @@ class LabelFont : public QFont
 {
 //  Q_OBJECT
 public:
-    LabelFont() {}
+    LabelFont() = default;
 
     // Copying the four attributes by hand used to lose the size: a font that
     // carries a point size has pixelSize() == -1, so setPixelSize(-1) was
     // rejected by Qt with a warning and the size fell back to the default. The
     // base class copy keeps the size in whichever unit the source uses.
-    LabelFont(const QFont& font) : QFont(font)
+    explicit LabelFont(const QFont& font) : QFont(font)
     {
-        _color = QRgb(0);
+        _color = QColor(Qt::black);
         _scale = 3.0;
     }
 
-    LabelFont(const QString& family, bool bold = false, bool italic = false, QColor color = QColor("black"), double scale = 3.0)
+    explicit LabelFont(const QString& family, const bool bold = false, const bool italic = false, QColor color = QColor("black"), const double scale = 3.0)
     {
         setFamily(family);
         setBold(bold);
@@ -38,17 +38,17 @@ public:
         // from the label rectangle, but until then the font has to have a valid
         // size, otherwise it reaches the settings as -1.
         setPointSize(UiScale::defaultPointSize());
-        _color = color;
+        _color = std::move(color);
         _scale = scale;
     }
-    virtual ~LabelFont() {}
+    ~LabelFont() = default;
 
-    QColor color() const { return _color; }
+    [[nodiscard]] QColor color() const { return _color; }
     void setColor(const QColor& color)  { _color = color; }
     void setColor(const QString& color) { _color = QColor(color); }
 
-    double scale() const { return _scale; }
-    void setScale(double scale) { _scale = scale; }
+    [[nodiscard]] double scale() const { return _scale; }
+    void setScale(const double scale) { _scale = scale; }
 
 //  QFont qfont() { return QFont {family(), pointSize(), weight(), italic()}; }  // TBD: override cast operator? omit?
 
@@ -61,10 +61,10 @@ class Label : public QTextEdit
 {
     Q_OBJECT
 public:
-    Label(QWidget* parent, bool isIndex = false);
-    void setText(const QString& text);
+    explicit Label(QWidget* parent, bool isIndex = false);
+    void setLabelText(const QString& text);
     void setLineHeight(int height);
-    bool isEmpty() { return toPlainText().isEmpty(); }
+    [[nodiscard]] bool isEmpty() const { return toPlainText().isEmpty(); }
     void setEditMode(bool edit = true);
     void setFont(const LabelFont& font);
 
@@ -80,10 +80,10 @@ signals:
     void sigEditDone(bool canceled);
 
 protected:
-    virtual void keyPressEvent(QKeyEvent* event) override;
-    virtual void resizeEvent(QResizeEvent* event) override;
-    virtual void focusOutEvent(QFocusEvent* event) override;
-    virtual void mousePressEvent(QMouseEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
+    void focusOutEvent(QFocusEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
 
 private:
     bool      _isIndex  = false;
@@ -105,18 +105,20 @@ class PicPreview : public QLabel
     Q_OBJECT
 
 public:
-    PicPreview(QWidget* parent);
-    virtual ~PicPreview();
+    explicit PicPreview(QWidget* parent);
+    ~PicPreview() override;
 
-    void setFileName(const QString& name);
+    void setFileName(const QString& picPath);
     void setLabel(const DiskLabel& label);
     void setLabel(const QString& title, const QString& index, bool bSide);
 
     void editTitle();
     void editIndex();
 
-    double ratio();
-    void clear();
+    [[nodiscard]] double ratio() const;
+    void clearAll();
+
+    [[nodiscard]] QSize sizeHint() const override;
 
 signals:
     void sigTitleChanged(QString title);
@@ -124,9 +126,8 @@ signals:
     void sigPopupMenuReq(const QPoint& pos);
 
 protected:
-    virtual QSize sizeHint() const override;
-    virtual void paintEvent(QPaintEvent* event) override;
-    virtual void resizeEvent(QResizeEvent* event) override;
+    void paintEvent(QPaintEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
 
 private slots:
     void slotEditDone(bool canceled);
@@ -142,9 +143,9 @@ private:
     void loadPixmap(const QString& picPath);
     void moveLabels();
     void scaleFonts();
-    void update();
-    QRect padRect();
-    QRect scaleRect(const QRectF& rect, const QRectF& rcChild);
+    void updateLabel();
+    [[nodiscard]] QRectF padRect() const;
+    [[nodiscard]] QRectF scaleRect(const QRectF& rect, const QRectF& rcChild) const;
     void popupMenuReq(const QPoint& pos);
 };
 
