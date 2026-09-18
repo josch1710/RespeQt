@@ -193,8 +193,8 @@
     <name>AutoBoot</name>
     <message>
         <location filename="../autoboot.cpp" line="28"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation>[%1] comando: $%2, aux: $%3 NAKed.</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation>[%1] $%2, aux: $%3 NAKed.</translation>
     </message>
     <message>
         <location filename="../autoboot.cpp" line="48"/>
@@ -223,8 +223,8 @@
     </message>
     <message>
         <location filename="../autoboot.cpp" line="118"/>
-        <source>[%1] Invalid chunk in get chunk: aux = %2</source>
-        <translation>[%1] Parte inválida en obtener: aux = %2</translation>
+        <source>[%1] Invalid chunk in get aux = %2</source>
+        <translation>[%1] Parte inválida en aux = %2</translation>
     </message>
     <message>
         <location filename="../autoboot.cpp" line="127"/>
@@ -233,8 +233,8 @@
     </message>
     <message>
         <location filename="../autoboot.cpp" line="139"/>
-        <source>[%1] Invalid chunk in get chunk info: aux = %2</source>
-        <translation>[%1] Información no válida en obtener información de la parte:  aux = %2</translation>
+        <source>[%1] Invalid chunk in get chunk aux = %2</source>
+        <translation>[%1] Información no válida en obtener información de la aux = %2</translation>
     </message>
     <message>
         <location filename="../autoboot.cpp" line="159"/>
@@ -272,13 +272,13 @@
         <location filename="../autoboot.cpp" line="264"/>
         <location filename="../autoboot.cpp" line="293"/>
         <location filename="../autoboot.cpp" line="311"/>
-        <source>The executable &apos;%1&apos; is broken: Unexpected end of file, needed %2 more.</source>
-        <translation>El ejecutable &apos;%1&apos; está roto: fin de archivo inesperado, necesitaba un %2 más.</translation>
+        <source>The executable &apos;%1&apos; is Unexpected end of file, needed %2 more.</source>
+        <translation>El ejecutable &apos;%1&apos; está fin de archivo inesperado, necesitaba un %2 más.</translation>
     </message>
     <message>
         <location filename="../autoboot.cpp" line="254"/>
-        <source>The executable &apos;%1&apos; is broken: The end address is less than the start address.</source>
-        <translation>El ejecutable &apos;%1&apos; está roto: La dirección final es menor que la dirección de inicio.</translation>
+        <source>The executable &apos;%1&apos; is The end address is less than the start address.</source>
+        <translation>El ejecutable &apos;%1&apos; está La dirección final es menor que la dirección de inicio.</translation>
     </message>
     <message>
         <location filename="../autoboot.cpp" line="340"/>
@@ -506,13 +506,13 @@ Tiempo restante estimado: %1:%2</translation>
     </message>
     <message>
         <location filename="../createimagedialog.ui" line="118"/>
-        <source>Number of sectors:</source>
-        <translation>Número de sectores:</translation>
+        <source>Number of </source>
+        <translation>Número de </translation>
     </message>
     <message>
         <location filename="../createimagedialog.ui" line="142"/>
-        <source>Sector density:</source>
-        <translation>Sector densidad:</translation>
+        <source>Sector </source>
+        <translation>Sector </translation>
     </message>
     <message>
         <location filename="../createimagedialog.ui" line="150"/>
@@ -536,8 +536,8 @@ Tiempo restante estimado: %1:%2</translation>
     </message>
     <message>
         <location filename="../createimagedialog.ui" line="181"/>
-        <source>Total image capacity: 92160 bytes (90 K)</source>
-        <translation>Capacidad de imagen Total: 92160 bytes (90 KB)</translation>
+        <source>Total image 92160 bytes (90 K)</source>
+        <translation>Capacidad de imagen 92160 bytes (90 KB)</translation>
     </message>
     <message>
         <location filename="../createimagedialog.cpp" line="87"/>
@@ -1295,8 +1295,8 @@ Tiempo restante estimado: %1:%2</translation>
     </message>
     <message>
         <location filename="../logdisplaydialog.ui" line="42"/>
-        <source>Filter log by:</source>
-        <translation>Filtrar el registro por:</translation>
+        <source>Filter log </source>
+        <translation>Filtrar el registro </translation>
     </message>
     <message>
         <location filename="../logdisplaydialog.ui" line="58"/>
@@ -1766,8 +1766,8 @@ Tiempo restante estimado: %1:%2</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="301"/>
-        <source>Connected to the network via: </source>
-        <translation>Conectado a la red a través de: </translation>
+        <source>Connected to the network </source>
+        <translation>Conectado a la red a través </translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="305"/>
@@ -1887,8 +1887,8 @@ Do you want to open the options dialog?</source>
     <message>
         <location filename="../mainwindow.cpp" line="1489"/>
         <location filename="../mainwindow.cpp" line="1706"/>
-        <source>All Atari disk images (*.atr *.xfd *.atx *.pro);;SIO2PC ATR images (*.atr);;XFormer XFD images (*.xfd);;ATX images (*.atx);;Pro images (*.pro);;All files (*)</source>
-        <translation>Todas las imágenes de disco de Atari (*.atr *.xfd *.pro);;Imágenes de SIO2PC ATR (*.atr);;Imágenes de XFormer XFD (*.xfd);;Imágenes PRO (*.pro);;Todos los archivos (*)</translation>
+        <source>All Atari disk images (*.atr *.xfd *.atx *.pro)SIO2PC ATR images (*.atr)XFormer XFD images (*.xfd)ATX images (*.atx)Pro images (*.pro)All files (*)</source>
+        <translation>Todas las imágenes de disco de Atari (*.atr *.xfd *.pro)Imágenes de SIO2PC ATR (*.atr)Imágenes de XFormer XFD (*.xfd)Imágenes PRO (*.pro)Todos los archivos (*)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1508"/>
@@ -1938,8 +1938,8 @@ Do you want to open the options dialog?</source>
     <message>
         <location filename="../mainwindow.cpp" line="1878"/>
         <location filename="../mainwindow.cpp" line="1914"/>
-        <source>RespeQt sessions (*.respeqt);;All files (*)</source>
-        <translation>Sesiones de RespeQt (*.respeqt);;Todos los archivos (*)</translation>
+        <source>RespeQt sessions (*.respeqt)All files (*)</source>
+        <translation>Sesiones de RespeQt (*.respeqt)Todos los archivos (*)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1912"/>
@@ -1953,8 +1953,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1937"/>
-        <source>Atari executables (*.xex *.com *.exe);;All files (*)</source>
-        <translation>Ejecutables Atari (*.xex *.com *.exe);;Todos los archivos (*)</translation>
+        <source>Atari executables (*.xex *.com *.exe)All files (*)</source>
+        <translation>Ejecutables Atari (*.xex *.com *.exe)Todos los archivos (*)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1955"/>
@@ -1963,8 +1963,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1957"/>
-        <source>CAS images (*.cas);;All files (*)</source>
-        <translation>Imágenes CAS (*.cas);;Todos los archivos (*)</translation>
+        <source>CAS images (*.cas)All files (*)</source>
+        <translation>Imágenes CAS (*.cas)Todos los archivos (*)</translation>
     </message>
 </context>
 <context>
@@ -2080,14 +2080,14 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="219"/>
-        <source>Port name:</source>
-        <translation>Nombre del puerto:</translation>
+        <source>Port </source>
+        <translation>Nombre del </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="235"/>
         <location filename="../optionsdialog.ui" line="520"/>
-        <source>Handshake method:</source>
-        <translation>Método Handshake:</translation>
+        <source>Handshake </source>
+        <translation>Método </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="243"/>
@@ -2169,8 +2169,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="352"/>
-        <source>High speed mode baud rate:</source>
-        <translation>Velocidad de transmisión en modo de alta velocidad:</translation>
+        <source>High speed mode baud </source>
+        <translation>Velocidad de transmisión en modo de alta </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="363"/>
@@ -2194,8 +2194,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="397"/>
-        <source>High speed mode POKEY divisor:</source>
-        <translation>Modo de alta velocidad divisor POKEY:</translation>
+        <source>High speed mode POKEY </source>
+        <translation>Modo de alta velocidad divisor </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="417"/>
@@ -2214,8 +2214,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="500"/>
-        <source>Device name:</source>
-        <translation>Nombre del dispositivo:</translation>
+        <source>Device </source>
+        <translation>Nombre del </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="507"/>
@@ -2259,8 +2259,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="783"/>
-        <source>Folder Images:</source>
-        <translation>Imágenes de carpeta:</translation>
+        <source>Folder </source>
+        <translation>Imágenes de </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="802"/>
@@ -2269,8 +2269,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="809"/>
-        <source>Smart Device:</source>
-        <translation>Dispositivo inteligente:</translation>
+        <source>Smart </source>
+        <translation>Dispositivo </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="832"/>
@@ -2386,17 +2386,17 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1313"/>
-        <source>Atari 810 Happy firmware path:</source>
-        <translation>Ruta del firmware Atari 810 Happy:</translation>
+        <source>Atari 810 Happy firmware </source>
+        <translation>Ruta del firmware Atari 810 </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1334"/>
-        <source>Atari 810 Chip firmware path:</source>
+        <source>Atari 810 Chip firmware </source>
         <translation>Ruta del firmware del chip Atari 810:</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1361"/>
-        <source>Atari 810 firmware path:</source>
+        <source>Atari 810 firmware </source>
         <translation>Ruta del firmware del Atari 810:</translation>
     </message>
     <message>
@@ -2406,33 +2406,33 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1448"/>
-        <source>Atari 1050 Turbo firmware path:</source>
-        <translation>Ruta del firmware de Atari 1050 Turbo:</translation>
+        <source>Atari 1050 Turbo firmware </source>
+        <translation>Ruta del firmware de Atari 1050 </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1455"/>
-        <source>Atari 1050 Duplicator firmware path:</source>
+        <source>Atari 1050 Duplicator firmware </source>
         <translation>Ruta del firmware de la duplicadora Atari 1050:</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1495"/>
-        <source>Atari 1050 firmware path:</source>
+        <source>Atari 1050 firmware </source>
         <translation>Ruta del firmware de Atari 1050:</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1509"/>
-        <source>Atari 1050 Archiver firmware path:</source>
+        <source>Atari 1050 Archiver firmware </source>
         <translation>Ruta del firmware del archivador Atari 1050:</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1523"/>
-        <source>Atari 1050 Happy firmware path:</source>
-        <translation>Ruta del firmware Atari 1050 Happy:</translation>
+        <source>Atari 1050 Happy firmware </source>
+        <translation>Ruta del firmware Atari 1050 </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1530"/>
-        <source>Atari 1050 Speedy firmware path:</source>
-        <translation>Ruta del firmware Atari 1050 Speedy:</translation>
+        <source>Atari 1050 Speedy firmware </source>
+        <translation>Ruta del firmware Atari 1050 </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1676"/>
@@ -2581,8 +2581,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="2064"/>
-        <source>Trace CPU execution in this file:</source>
-        <translation>Rastree la ejecución de la CPU en este archivo:</translation>
+        <source>Trace CPU execution in this </source>
+        <translation>Rastree la ejecución de la CPU en este </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="2071"/>
@@ -2636,8 +2636,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="2226"/>
-        <source>NOTE: this option applies only to slot D1:</source>
-        <translation>NOTA: esta opción se aplica solo a la ranura D1:</translation>
+        <source>NOTE: this option applies only to slot </source>
+        <translation>NOTA: esta opción se aplica solo a la ranura </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="2250"/>
@@ -2886,14 +2886,14 @@ Do you want to open the options dialog?</source>
         <location filename="../optionsdialog.cpp" line="466"/>
         <location filename="../optionsdialog.cpp" line="471"/>
         <location filename="../optionsdialog.cpp" line="476"/>
-        <source>Atari drive firmware (*.rom);;All files (*)</source>
-        <translation>Firmware de la unidad Atari (*.rom);;Todos los archivos (*)</translation>
+        <source>Atari drive firmware (*.rom)All files (*)</source>
+        <translation>Firmware de la unidad Atari (*.rom)Todos los archivos (*)</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="481"/>
         <location filename="../optionsdialog.cpp" line="486"/>
-        <source>Atari disk image (*.atr);;All files (*)</source>
-        <translation>Imagen de disco de Atari (*.atr);;Todos los archivos (*)</translation>
+        <source>Atari disk image (*.atr)All files (*)</source>
+        <translation>Imagen de disco de Atari (*.atr)Todos los archivos (*)</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="493"/>
@@ -2945,8 +2945,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../pclink.cpp" line="236"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation>[%1] comando: $%2, aux: $%3 NAKed.</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation>[%1] $%2, aux: $%3 NAKed.</translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="269"/>
@@ -2970,28 +2970,28 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../pclink.cpp" line="488"/>
-        <source>atr mismatch: not HIDDEN or ARCHIVED</source>
-        <translation>Desajuste ATR: no OCULTO o ARCHIVADO</translation>
+        <source>atr not HIDDEN or ARCHIVED</source>
+        <translation>Desajuste no OCULTO o ARCHIVADO</translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="496"/>
-        <source>atr mismatch: not PROTECTED</source>
-        <translation>No coincidencia ATR: no está PROTEGIDO</translation>
+        <source>atr not PROTECTED</source>
+        <translation>No coincidencia no está PROTEGIDO</translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="505"/>
-        <source>atr mismatch: not UNPROTECTED</source>
-        <translation>Desajuste ATR: no DESPROTECTADO</translation>
+        <source>atr not UNPROTECTED</source>
+        <translation>Desajuste no DESPROTECTADO</translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="514"/>
-        <source>atr mismatch: not SUBDIR</source>
-        <translation>No coincidencia ATR: no SUBDIR</translation>
+        <source>atr not SUBDIR</source>
+        <translation>No coincidencia no SUBDIR</translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="523"/>
-        <source>atr mismatch: not FILE</source>
-        <translation>No coincidencia ATR: no archivo</translation>
+        <source>atr not FILE</source>
+        <translation>No coincidencia no archivo</translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="528"/>
@@ -3025,8 +3025,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../pclink.cpp" line="713"/>
-        <source>Internal error: dir_cache should be nullptr!</source>
-        <translation>Error interno: dir_cache debe ser NULL!</translation>
+        <source>Internal dir_cache should be nullptr!</source>
+        <translation>Error dir_cache debe ser NULL!</translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="844"/>
@@ -3556,13 +3556,13 @@ Do you want to open the options dialog?</source>
     <name>Printers::Atari1020</name>
     <message>
         <location filename="../printers/atari1020.cpp" line="92"/>
-        <source>[%1] Get status: $%2</source>
-        <translation>[%1] Obtener el estado: $%2</translation>
+        <source>[%1] Get $%2</source>
+        <translation>[%1] Obtener el $%2</translation>
     </message>
     <message>
         <location filename="../printers/atari1020.cpp" line="127"/>
-        <source>[%1] Print: data frame failed</source>
-        <translation>[%1] Imprimir: el marco de datos falló</translation>
+        <source>[%1] data frame failed</source>
+        <translation>[%1] el marco de datos falló</translation>
     </message>
     <message>
         <location filename="../printers/atari1020.cpp" line="137"/>
@@ -3571,8 +3571,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../printers/atari1020.cpp" line="146"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation>[%1] commando: $%2, aux: $%3 NAKed.</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation>[%1] $%2, aux: $%3 NAKed.</translation>
     </message>
     <message>
         <location filename="../printers/atari1020.cpp" line="152"/>
@@ -3744,18 +3744,18 @@ Do you want to open the options dialog?</source>
     <name>Printers::BasePrinter</name>
     <message>
         <location filename="../printers/baseprinter.cpp" line="43"/>
-        <source>[%1] Get status: $%2</source>
-        <translation>[%1] Obtener estado: $%2</translation>
+        <source>[%1] Get $%2</source>
+        <translation>[%1] Obtener $%2</translation>
     </message>
     <message>
         <location filename="../printers/baseprinter.cpp" line="70"/>
-        <source>[%1] Command: $%2, aux: $%3 NAKed because aux2 is not supported</source>
-        <translation>[%1] Comando: $%2, aux: $%3 NAKed porque aux2 no es compatible</translation>
+        <source>[%1] $%2, aux: $%3 NAKed because aux2 is not supported</source>
+        <translation>[%1] $%2, aux: $%3 NAKed porque aux2 no es compatible</translation>
     </message>
     <message>
         <location filename="../printers/baseprinter.cpp" line="82"/>
-        <source>[%1] Print: data frame failed</source>
-        <translation>[%1] Impresión: error en el marco de datos</translation>
+        <source>[%1] data frame failed</source>
+        <translation>[%1] error en el marco de datos</translation>
     </message>
     <message>
         <location filename="../printers/baseprinter.cpp" line="92"/>
@@ -3764,8 +3764,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../printers/baseprinter.cpp" line="98"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation>[%1] comando: $%2, aux: $%3 NAKed.</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation>[%1] $%2, aux: $%3 NAKed.</translation>
     </message>
     <message>
         <location filename="../printers/baseprinter.cpp" line="104"/>
@@ -3805,8 +3805,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../printers/textprinterwindow.cpp" line="256"/>
-        <source>Text files (*.txt);;All files (*)</source>
-        <translation>Archivos de texto (* txt.);;Todos los archivos (*)</translation>
+        <source>Text files (*.txt)All files (*)</source>
+        <translation>Archivos de texto (* txt.)Todos los archivos (*)</translation>
     </message>
     <message>
         <location filename="../printers/textprinterwindow.cpp" line="284"/>
@@ -3859,8 +3859,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../rcl.cpp" line="63"/>
-        <source>[%1] List filter set: [%2]</source>
-        <translation>[%1] Conjunto de filtros de lista: [%2]</translation>
+        <source>[%1] List filter [%2]</source>
+        <translation>[%1] Conjunto de filtros de [%2]</translation>
     </message>
     <message>
         <location filename="../rcl.cpp" line="160"/>
@@ -3875,7 +3875,7 @@ Do you want to open the options dialog?</source>
     <message>
         <location filename="../rcl.cpp" line="193"/>
         <source>[%1] Invalid swap request for drives: (%2)-(%3).</source>
-        <translation>[%1] Solicitud de intercambio no válida para unidades: (%2)-(%3).</translation>
+        <translation>[%1] Solicitud de intercambio no válida para (%2)-(%3).</translation>
     </message>
     <message>
         <location filename="../rcl.cpp" line="228"/>
@@ -3938,8 +3938,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../rcl.cpp" line="635"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation>[%1] comando: $%2, aux: $%3 NAKed.</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation>[%1] $%2, aux: $%3 NAKed.</translation>
     </message>
     <message>
         <location filename="../rcl.cpp" line="657"/>
@@ -4122,78 +4122,78 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1136"/>
-        <source>[%1] Uploaded code is: Check if drive is a Super Archiver</source>
-        <translation>[%1] El código subido es: compruebe si la unidad es un superarchivador</translation>
+        <source>[%1] Uploaded code Check if drive is a Super Archiver</source>
+        <translation>[%1] El código subido compruebe si la unidad es un superarchivador</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1157"/>
-        <source>[%1] Uploaded code is: Speed check</source>
-        <translation>[%1] El código subido es: verificación de velocidad</translation>
+        <source>[%1] Uploaded code Speed check</source>
+        <translation>[%1] El código subido verificación de velocidad</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1161"/>
-        <source>[%1] Uploaded code is: Diagnostic</source>
-        <translation>[%1] El código subido es: diagnóstico</translation>
+        <source>[%1] Uploaded code Diagnostic</source>
+        <translation>[%1] El código subido diagnóstico</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1165"/>
-        <source>[%1] Uploaded code is: End of diagnostic</source>
-        <translation>[%1] El código subido es: fin del diagnóstico</translation>
+        <source>[%1] Uploaded code End of diagnostic</source>
+        <translation>[%1] El código subido fin del diagnóstico</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1169"/>
-        <source>[%1] Uploaded code is: Read address marks for track $%2</source>
-        <translation>[%1] El código subido es: leer las marcas de dirección de la pista $%2</translation>
+        <source>[%1] Uploaded code Read address marks for track $%2</source>
+        <translation>[%1] El código subido leer las marcas de dirección de la pista $%2</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1174"/>
-        <source>[%1] Uploaded code is: BitWriter clear memory</source>
-        <translation>[%1] El código cargado es: BitWriter borrar memoria</translation>
+        <source>[%1] Uploaded code BitWriter clear memory</source>
+        <translation>[%1] El código cargado BitWriter borrar memoria</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1178"/>
-        <source>[%1] Uploaded code is: BitWriter read track $%2</source>
-        <translation>[%1] El código cargado es: BitWriter leyó la pista $%2</translation>
+        <source>[%1] Uploaded code BitWriter read track $%2</source>
+        <translation>[%1] El código cargado BitWriter leyó la pista $%2</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1187"/>
-        <source>[%1] Uploaded code is: Prepare track data at offset $%2</source>
-        <translation>[%1] El código subido es: preparar los datos de la pista en el desplazamiento $%2</translation>
+        <source>[%1] Uploaded code Prepare track data at offset $%2</source>
+        <translation>[%1] El código subido preparar los datos de la pista en el desplazamiento $%2</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1192"/>
-        <source>[%1] Uploaded code is: Super Archiver open Chip</source>
-        <translation>[%1] El código subido es: chip abierto de Super Archiver</translation>
+        <source>[%1] Uploaded code Super Archiver open Chip</source>
+        <translation>[%1] El código subido chip abierto de Super Archiver</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1196"/>
-        <source>[%1] Uploaded code is: BitWriter open Chip</source>
-        <translation>[%1] El código cargado es: BitWriter open Chip</translation>
+        <source>[%1] Uploaded code BitWriter open Chip</source>
+        <translation>[%1] El código cargado BitWriter open Chip</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1200"/>
-        <source>[%1] Uploaded code is: Super Archiver clear memory</source>
-        <translation>[%1] El código subido es: Super Archiver borrar memoria</translation>
+        <source>[%1] Uploaded code Super Archiver clear memory</source>
+        <translation>[%1] El código subido Super Archiver borrar memoria</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1216"/>
-        <source>[%1] Uploaded code is: Skew alignment of track $%2 sector $%3 with track $%4 sector $%5</source>
-        <translation>[%1] El código cargado es: Alineación sesgada de la pista $%2 sector $%3 con la pista $%4 sector $%5</translation>
+        <source>[%1] Uploaded code Skew alignment of track $%2 sector $%3 with track $%4 sector $%5</source>
+        <translation>[%1] El código cargado Alineación sesgada de la pista $%2 sector $%3 con la pista $%4 sector $%5</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1224"/>
-        <source>[%1] Uploaded code is: Skew alignment of track $%2 (%3 sectors) with track $%4 (%5 sectors)</source>
-        <translation>[%1] El código cargado es: Alineación sesgada de la pista $%2 (%3 sectores) con la pista $%4 (%5 sectores)</translation>
+        <source>[%1] Uploaded code Skew alignment of track $%2 (%3 sectors) with track $%4 (%5 sectors)</source>
+        <translation>[%1] El código cargado Alineación sesgada de la pista $%2 (%3 sectores) con la pista $%4 (%5 sectores)</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1237"/>
-        <source>[%1] Uploaded code is: Format track $%2 with skew alignment $%3 with track $%4</source>
-        <translation>[%1] El código subido es: Formatee la pista $%2 con alineación sesgada $%3 con la pista $%4</translation>
+        <source>[%1] Uploaded code Format track $%2 with skew alignment $%3 with track $%4</source>
+        <translation>[%1] El código subido Formatee la pista $%2 con alineación sesgada $%3 con la pista $%4</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1244"/>
-        <source>[%1] Uploaded code is: Format track $%2 with skew alignment with track $%3</source>
-        <translation>[%1] El código subido es: Formatee la pista $%2 con alineación sesgada con la pista $%3</translation>
+        <source>[%1] Uploaded code Format track $%2 with skew alignment with track $%3</source>
+        <translation>[%1] El código subido Formatee la pista $%2 con alineación sesgada con la pista $%3</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1252"/>
@@ -4202,8 +4202,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1630"/>
-        <source>[%1] command: $%2, aux: $%3 ignored because the drive is not ready.</source>
-        <translation>[%1] comando: $%2, aux: $%3 ignorado porque la unidad no está lista.</translation>
+        <source>[%1] $%2, aux: $%3 ignored because the drive is not ready.</source>
+        <translation>[%1] $%2, aux: $%3 ignorado porque la unidad no está lista.</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1662"/>
@@ -4704,13 +4704,13 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="2919"/>
-        <source>[%1] RespeQt version inquiry: $%2</source>
-        <translation>[%1] Consulta sobre la versión de RespeQt: $%2</translation>
+        <source>[%1] RespeQt version $%2</source>
+        <translation>[%1] Consulta sobre la versión de $%2</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="2924"/>
-        <source>[%1] Get status: $%2</source>
-        <translation>[%1] Obtener estado: $%2</translation>
+        <source>[%1] Get $%2</source>
+        <translation>[%1] Obtener $%2</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="2943"/>
@@ -4914,8 +4914,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="3482"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation>[%1] commando: $%2, aux: $%3 NAKed.</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation>[%1] $%2, aux: $%3 NAKed.</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="3583"/>
@@ -5082,7 +5082,7 @@ Do you want to open the options dialog?</source>
     <message>
         <location filename="../diskimageatr.cpp" line="565"/>
         <source>Cannot create new image: Cannot create temporary file &apos;%2&apos;: %3.</source>
-        <translation>No se puede crear una nueva imagen: no se puede crear un archivo temporal &apos;%2&apos;: %3.</translation>
+        <translation>No se puede crear una nueva no se puede crear un archivo temporal &apos;%2&apos;: %3.</translation>
     </message>
     <message>
         <location filename="../diskimageatr.cpp" line="575"/>
@@ -5287,8 +5287,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../diskimageatx.cpp" line="723"/>
-        <source>[%1] Header has out of range values: Track=$%2 Sector=$%3. Ignored.</source>
-        <translation>[%1] El encabezado tiene valores fuera de rango: Track=$%2 Sector=$%3. Ignorado.</translation>
+        <source>[%1] Header has out of range Track=$%2 Sector=$%3. Ignored.</source>
+        <translation>[%1] El encabezado tiene valores fuera de Track=$%2 Sector=$%3. Ignorado.</translation>
     </message>
     <message>
         <location filename="../diskimageatx.cpp" line="779"/>
@@ -5532,18 +5532,18 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../sioworker.cpp" line="170"/>
-        <source>[%1] command: $%2, aux: $%3 ignored because the image explorer is open.</source>
-        <translation>[%1] comando: $%2, aux: $%3  ignorado porque el explorador de imagen está abierta.</translation>
+        <source>[%1] $%2, aux: $%3 ignored because the image explorer is open.</source>
+        <translation>[%1] $%2, aux: $%3  ignorado porque el explorador de imagen está abierta.</translation>
     </message>
     <message>
         <location filename="../sioworker.cpp" line="177"/>
-        <source>[%1] command: $%2, aux: $%3 ignored: %4</source>
-        <translation>[%1] comando: $%2, aux: $%3 ignorado: %4</translation>
+        <source>[%1] $%2, aux: $%3 ignored: %4</source>
+        <translation>[%1] $%2, aux: $%3 ignorado: %4</translation>
     </message>
     <message>
         <location filename="../sioworker.cpp" line="184"/>
-        <source>[%1] command: $%2, aux: $%3 ignored.</source>
-        <translation>[%1] comando: $%2, aux: $%3 ignorado.</translation>
+        <source>[%1] $%2, aux: $%3 ignored.</source>
+        <translation>[%1] $%2, aux: $%3 ignorado.</translation>
     </message>
     <message>
         <location filename="../sioworker.cpp" line="201"/>
@@ -6086,8 +6086,8 @@ Do you want to open the options dialog?</source>
     <message>
         <location filename="../smartdevice.cpp" line="89"/>
         <location filename="../smartdevice.cpp" line="101"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation>[%1] comando: $%2, aux: $%3 NAKed.</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation>[%1] $%2, aux: $%3 NAKed.</translation>
     </message>
 </context>
 <context>
@@ -6292,8 +6292,8 @@ Do you want to open the options dialog?</source>
     </message>
     <message>
         <location filename="../serialport-test.cpp" line="232"/>
-        <source>Read error: got %1 bytes, expected %2 bytes</source>
-        <translation>Error de lectura: obtuvo %1 bytes, se esperaba %2 bytes</translation>
+        <source>Read got %1 bytes, expected %2 bytes</source>
+        <translation>Error de obtuvo %1 bytes, se esperaba %2 bytes</translation>
     </message>
 </context>
 <context>

@@ -33,8 +33,8 @@
         <translation type="obsolete">[%1]Čitať dátum/čas(%2).</translation>
     </message>
     <message>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation type="obsolete">[%1] prikaz: $%2,aux: $%3 Otvorený.</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation type="obsolete">[%1] $%2,aux: $%3 Otvorený.</translation>
     </message>
 </context>
 <context>
@@ -80,8 +80,8 @@
         <translation type="vanished">[%1] Zlé číslo disku: %2 pre ďiaľkovo odpojený</translation>
     </message>
     <message>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation type="vanished">[%1] prikaz: $%2, aux: $%3 Otvorený.</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation type="vanished">[%1] $%2, aux: $%3 Otvorený.</translation>
     </message>
 </context>
 <context>
@@ -252,8 +252,8 @@
     <name>AutoBoot</name>
     <message>
         <location filename="../autoboot.cpp" line="28"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation>[%1] prikaz: $%2, aux: $%3 Otvorený.</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation>[%1] $%2, aux: $%3 Otvorený.</translation>
     </message>
     <message>
         <location filename="../autoboot.cpp" line="48"/>
@@ -282,7 +282,7 @@
     </message>
     <message>
         <location filename="../autoboot.cpp" line="118"/>
-        <source>[%1] Invalid chunk in get chunk: aux = %2</source>
+        <source>[%1] Invalid chunk in get aux = %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -292,7 +292,7 @@
     </message>
     <message>
         <location filename="../autoboot.cpp" line="139"/>
-        <source>[%1] Invalid chunk in get chunk info: aux = %2</source>
+        <source>[%1] Invalid chunk in get chunk aux = %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -331,12 +331,12 @@
         <location filename="../autoboot.cpp" line="264"/>
         <location filename="../autoboot.cpp" line="293"/>
         <location filename="../autoboot.cpp" line="311"/>
-        <source>The executable &apos;%1&apos; is broken: Unexpected end of file, needed %2 more.</source>
-        <translation>Spustitelný &apos;%1&apos; je poškodený: Neočákavaný koniec súbory, potreba %2 ešte.</translation>
+        <source>The executable &apos;%1&apos; is Unexpected end of file, needed %2 more.</source>
+        <translation>Spustitelný &apos;%1&apos; je Neočákavaný koniec súbory, potreba %2 ešte.</translation>
     </message>
     <message>
         <location filename="../autoboot.cpp" line="254"/>
-        <source>The executable &apos;%1&apos; is broken: The end address is less than the start address.</source>
+        <source>The executable &apos;%1&apos; is The end address is less than the start address.</source>
         <translation>Spustitelný &apos;%1&apos; je poškodený. Koncová adresa je menšia ako štartovacia adresa.</translation>
     </message>
     <message>
@@ -566,13 +566,13 @@ Zostávajúci čas: %1: %2</translation>
     </message>
     <message>
         <location filename="../createimagedialog.ui" line="118"/>
-        <source>Number of sectors:</source>
-        <translation>Počet sektorov:</translation>
+        <source>Number of </source>
+        <translation>Počet </translation>
     </message>
     <message>
         <location filename="../createimagedialog.ui" line="142"/>
-        <source>Sector density:</source>
-        <translation>Hustota sektorov:</translation>
+        <source>Sector </source>
+        <translation>Hustota </translation>
     </message>
     <message>
         <location filename="../createimagedialog.ui" line="150"/>
@@ -596,8 +596,8 @@ Zostávajúci čas: %1: %2</translation>
     </message>
     <message>
         <location filename="../createimagedialog.ui" line="181"/>
-        <source>Total image capacity: 92160 bytes (90 K)</source>
-        <translation>Celková kapacita obrazu: 92160 bytov (90 K)</translation>
+        <source>Total image 92160 bytes (90 K)</source>
+        <translation>Celková kapacita 92160 bytov (90 K)</translation>
     </message>
     <message>
         <location filename="../createimagedialog.cpp" line="79"/>
@@ -942,8 +942,8 @@ Zostávajúci čas: %1: %2</translation>
         <translation type="vanished">Duplicitný sektor: %1 dupnum: %2</translation>
     </message>
     <message>
-        <source>Error in .pro image: sector: %1 dupnum: %2</source>
-        <translation type="vanished">Chyba v pro obraze: sektor: %1 dupnum: %2</translation>
+        <source>Error in .pro sector: %1 dupnum: %2</source>
+        <translation type="vanished">Chyba v pro sektor: %1 dupnum: %2</translation>
     </message>
     <message>
         <source>Bad sector</source>
@@ -1883,7 +1883,7 @@ Zostávajúci čas: %1: %2</translation>
     </message>
     <message>
         <location filename="../FirmwareDiskImage.cpp" line="550"/>
-        <source>[%1] Set Drive buffer Mode: </source>
+        <source>[%1] Set Drive buffer </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1903,7 +1903,7 @@ Zostávajúci čas: %1: %2</translation>
     </message>
     <message>
         <location filename="../FirmwareDiskImage.cpp" line="552"/>
-        <source>[%1] Set Density Sensing: </source>
+        <source>[%1] Set Density </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2235,7 +2235,7 @@ Zostávajúci čas: %1: %2</translation>
     <message>
         <location filename="../FirmwareDiskImage.cpp" line="1660"/>
         <location filename="../FirmwareDiskImage.cpp" line="1951"/>
-        <source>[%1] Track $%2 information:</source>
+        <source>[%1] Track $%2 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2323,7 +2323,7 @@ Zostávajúci čas: %1: %2</translation>
     </message>
     <message>
         <location filename="../logdisplaydialog.ui" line="42"/>
-        <source>Filter log by:</source>
+        <source>Filter log </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3434,7 +3434,7 @@ Zostávajúci čas: %1: %2</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="302"/>
-        <source>Connected to the network via: </source>
+        <source>Connected to the network </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3480,7 +3480,7 @@ Prajete si otvoriť Nastavenia?</translation>
     <message>
         <location filename="../mainwindow.cpp" line="1509"/>
         <location filename="../mainwindow.cpp" line="1693"/>
-        <source>All Atari disk images (*.atr *.xfd *.atx *.pro *.scp);;SIO2PC ATR images (*.atr);;XFormer XFD images (*.xfd);;ATX images (*.atx);;Pro images (*.pro);;SuperCard Pro images (*.scp);;All files (*)</source>
+        <source>All Atari disk images (*.atr *.xfd *.atx *.pro *.scp)SIO2PC ATR images (*.atr)XFormer XFD images (*.xfd)ATX images (*.atx)Pro images (*.pro)SuperCard Pro images (*.scp)All files (*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3578,8 +3578,8 @@ Prajete si otvoriť Nastavenia?</translation>
         <translation>Otvoriť diskový obraz</translation>
     </message>
     <message>
-        <source>All Atari disk images (*.atr *.xfd *.atx *.pro);;SIO2PC ATR images (*.atr);;XFormer XFD images (*.xfd);;ATX images (*.atx);;Pro images (*.pro);;All files (*)</source>
-        <translation type="obsolete">Všetky diskové obrazy(*.atr *.xfd *.atx *.pro);;SIO2PC ATR obrazy (*.atr);;XFormer XFD obrazy (*.xfd);;ATX obrazy (*.atx);;Pro obrazy (*.pro);;Všetky súbory (*)</translation>
+        <source>All Atari disk images (*.atr *.xfd *.atx *.pro)SIO2PC ATR images (*.atr)XFormer XFD images (*.xfd)ATX images (*.atx)Pro images (*.pro)All files (*)</source>
+        <translation type="obsolete">Všetky diskové obrazy(*.atr *.xfd *.atx *.pro)SIO2PC ATR obrazy (*.atr)XFormer XFD obrazy (*.xfd)ATX obrazy (*.atx)Pro obrazy (*.pro)Všetky súbory (*)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="306"/>
@@ -3744,8 +3744,8 @@ Prajete si otvoriť Nastavenia?</translation>
     <message>
         <location filename="../mainwindow.cpp" line="1864"/>
         <location filename="../mainwindow.cpp" line="1900"/>
-        <source>RespeQt sessions (*.respeqt);;All files (*)</source>
-        <translation>RespeQt relácia (*.respeqt);;Všetky súbory(*)</translation>
+        <source>RespeQt sessions (*.respeqt)All files (*)</source>
+        <translation>RespeQt relácia (*.respeqt)Všetky súbory(*)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1898"/>
@@ -3759,8 +3759,8 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1923"/>
-        <source>Atari executables (*.xex *.com *.exe);;All files (*)</source>
-        <translation>Atari spustitelné (*.xex *.com *.exe);;Všetky súbory (*)</translation>
+        <source>Atari executables (*.xex *.com *.exe)All files (*)</source>
+        <translation>Atari spustitelné (*.xex *.com *.exe)Všetky súbory (*)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1941"/>
@@ -3769,8 +3769,8 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1943"/>
-        <source>CAS images (*.cas);;All files (*)</source>
-        <translation>CAS obrazy (*.cas);;Všetky súbory(*)</translation>
+        <source>CAS images (*.cas)All files (*)</source>
+        <translation>CAS obrazy (*.cas)Všetky súbory(*)</translation>
     </message>
 </context>
 <context>
@@ -3886,8 +3886,8 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="186"/>
-        <source>Port name:</source>
-        <translation>Názov portu:</translation>
+        <source>Port </source>
+        <translation>Názov </translation>
     </message>
     <message>
         <source>COM1</source>
@@ -3896,8 +3896,8 @@ Prajete si otvoriť Nastavenia?</translation>
     <message>
         <location filename="../optionsdialog.ui" line="202"/>
         <location filename="../optionsdialog.ui" line="487"/>
-        <source>Handshake method:</source>
-        <translation>Metóda handshake:</translation>
+        <source>Handshake </source>
+        <translation>Metóda </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="210"/>
@@ -3979,8 +3979,8 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="319"/>
-        <source>High speed mode baud rate:</source>
-        <translation>Vysokorýchlostná prenosová rýchlosť:</translation>
+        <source>High speed mode baud </source>
+        <translation>Vysokorýchlostná prenosová </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="330"/>
@@ -4004,8 +4004,8 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="364"/>
-        <source>High speed mode POKEY divisor:</source>
-        <translation>Vysokorýchlostný mod POKEY deliteľa:</translation>
+        <source>High speed mode POKEY </source>
+        <translation>Vysokorýchlostný mod POKEY </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="384"/>
@@ -4024,8 +4024,8 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="467"/>
-        <source>Device name:</source>
-        <translation>Názov zariadenia:</translation>
+        <source>Device </source>
+        <translation>Názov </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="474"/>
@@ -4054,7 +4054,7 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="665"/>
-        <source>Folder Images:</source>
+        <source>Folder </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4115,17 +4115,17 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1242"/>
-        <source>Atari 810 Happy firmware path:</source>
+        <source>Atari 810 Happy firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1263"/>
-        <source>Atari 810 Chip firmware path:</source>
+        <source>Atari 810 Chip firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1290"/>
-        <source>Atari 810 firmware path:</source>
+        <source>Atari 810 firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4135,32 +4135,32 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1377"/>
-        <source>Atari 1050 Turbo firmware path:</source>
+        <source>Atari 1050 Turbo firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1384"/>
-        <source>Atari 1050 Duplicator firmware path:</source>
+        <source>Atari 1050 Duplicator firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1424"/>
-        <source>Atari 1050 firmware path:</source>
+        <source>Atari 1050 firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1438"/>
-        <source>Atari 1050 Archiver firmware path:</source>
+        <source>Atari 1050 Archiver firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1452"/>
-        <source>Atari 1050 Happy firmware path:</source>
+        <source>Atari 1050 Happy firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1459"/>
-        <source>Atari 1050 Speedy firmware path:</source>
+        <source>Atari 1050 Speedy firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4310,7 +4310,7 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1993"/>
-        <source>Trace CPU execution in this file:</source>
+        <source>Trace CPU execution in this </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4472,7 +4472,7 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="815"/>
-        <source>Smart Device:</source>
+        <source>Smart </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4556,7 +4556,7 @@ Prajete si otvoriť Nastavenia?</translation>
         <location filename="../optionsdialog.cpp" line="418"/>
         <location filename="../optionsdialog.cpp" line="423"/>
         <location filename="../optionsdialog.cpp" line="428"/>
-        <source>Atari drive firmware (*.rom);;All files (*)</source>
+        <source>Atari drive firmware (*.rom)All files (*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4609,7 +4609,7 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="242"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4634,27 +4634,27 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="494"/>
-        <source>atr mismatch: not HIDDEN or ARCHIVED</source>
+        <source>atr not HIDDEN or ARCHIVED</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="502"/>
-        <source>atr mismatch: not PROTECTED</source>
+        <source>atr not PROTECTED</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="511"/>
-        <source>atr mismatch: not UNPROTECTED</source>
+        <source>atr not UNPROTECTED</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="520"/>
-        <source>atr mismatch: not SUBDIR</source>
+        <source>atr not SUBDIR</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="529"/>
-        <source>atr mismatch: not FILE</source>
+        <source>atr not FILE</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4689,7 +4689,7 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="719"/>
-        <source>Internal error: dir_cache should be NULL!</source>
+        <source>Internal dir_cache should be NULL!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5147,16 +5147,16 @@ Prajete si otvoriť Nastavenia?</translation>
         <translation type="vanished">[%1] Ziskať status.</translation>
     </message>
     <message>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation type="vanished">[%1] prikaz: $%2, aux: $%3 Otvorený.</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation type="vanished">[%1] $%2, aux: $%3 Otvorený.</translation>
     </message>
     <message>
         <source>[%1] Converting Inverse Video Characters for ASCII viewing</source>
         <translation type="vanished">[%1] Konvertovať Inverzné Video znaky pre ASCII prezeranie</translation>
     </message>
     <message>
-        <source>[%1] Print: data frame failed</source>
-        <translation type="vanished">[%1] Tlač: data frame zlyhalo</translation>
+        <source>[%1] data frame failed</source>
+        <translation type="vanished">[%1] data frame zlyhalo</translation>
     </message>
     <message>
         <source>[%1] Print (%2 chars)</source>
@@ -5277,13 +5277,13 @@ Prajete si otvoriť Nastavenia?</translation>
     <message>
         <location filename="../printers/baseprinter.cpp" line="68"/>
         <location filename="../printers/baseprinter.cpp" line="95"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../printers/baseprinter.cpp" line="78"/>
-        <source>[%1] Print: data frame failed</source>
-        <translation type="unfinished">[%1] Tlač: data frame zlyhalo</translation>
+        <source>[%1] data frame failed</source>
+        <translation type="unfinished">[%1] data frame zlyhalo</translation>
     </message>
     <message>
         <location filename="../printers/baseprinter.cpp" line="89"/>
@@ -5313,8 +5313,8 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../printers/textprinterwindow.cpp" line="236"/>
-        <source>Text files (*.txt);;All files (*)</source>
-        <translation type="unfinished">Textové súbory (*.txt);;Všetky súbory (*)</translation>
+        <source>Text files (*.txt)All files (*)</source>
+        <translation type="unfinished">Textové súbory (*.txt)Všetky súbory (*)</translation>
     </message>
     <message>
         <location filename="../printers/textprinterwindow.cpp" line="264"/>
@@ -5367,7 +5367,7 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../rcl.cpp" line="63"/>
-        <source>[%1] List filter set: [%2]</source>
+        <source>[%1] List filter [%2]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5446,7 +5446,7 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../rcl.cpp" line="565"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5979,12 +5979,12 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="2680"/>
-        <source>[%1] RespeQt version inquiry: $%2</source>
+        <source>[%1] RespeQt version $%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="2685"/>
-        <source>[%1] Get status: $%2</source>
+        <source>[%1] Get $%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6134,42 +6134,42 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="968"/>
-        <source>[%1] Uploaded code is: Check if drive is a Super Archiver</source>
+        <source>[%1] Uploaded code Check if drive is a Super Archiver</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="989"/>
-        <source>[%1] Uploaded code is: Speed check</source>
+        <source>[%1] Uploaded code Speed check</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="993"/>
-        <source>[%1] Uploaded code is: Diagnostic</source>
+        <source>[%1] Uploaded code Diagnostic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1001"/>
-        <source>[%1] Uploaded code is: Prepare track data at offset $%2</source>
+        <source>[%1] Uploaded code Prepare track data at offset $%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1018"/>
-        <source>[%1] Uploaded code is: Skew alignment of track $%2 sector $%3 with track $%4 sector $%5</source>
+        <source>[%1] Uploaded code Skew alignment of track $%2 sector $%3 with track $%4 sector $%5</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1026"/>
-        <source>[%1] Uploaded code is: Skew alignment of track $%2 (%3 sectors) with track $%4 (%5 sectors)</source>
+        <source>[%1] Uploaded code Skew alignment of track $%2 (%3 sectors) with track $%4 (%5 sectors)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1039"/>
-        <source>[%1] Uploaded code is: Format track $%2 with skew alignment $%3 with track $%4</source>
+        <source>[%1] Uploaded code Format track $%2 with skew alignment $%3 with track $%4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1046"/>
-        <source>[%1] Uploaded code is: Format track $%2 with skew alignment with track $%3</source>
+        <source>[%1] Uploaded code Format track $%2 with skew alignment with track $%3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6179,7 +6179,7 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1486"/>
-        <source>[%1] command: $%2, aux: $%3 ignored because the drive is not ready.</source>
+        <source>[%1] $%2, aux: $%3 ignored because the drive is not ready.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6648,8 +6648,8 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="3226"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation>[%1] prikaz: $%2, aux: $%3 Otvorený.</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation>[%1] $%2, aux: $%3 Otvorený.</translation>
     </message>
     <message>
         <location filename="../diskimageatr.cpp" line="792"/>
@@ -6814,7 +6814,7 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../diskimageatx.cpp" line="723"/>
-        <source>[%1] Header has out of range values: Track=$%2 Sector=$%3. Ignored.</source>
+        <source>[%1] Header has out of range Track=$%2 Sector=$%3. Ignored.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -7054,18 +7054,18 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../sioworker.cpp" line="154"/>
-        <source>[%1] command: $%2, aux: $%3 ignored because the image explorer is open.</source>
-        <translation>[%1] príkaz: $%2, aux: $%3 ignorovaný, pretože je otvorený prehliadač obrazov.</translation>
+        <source>[%1] $%2, aux: $%3 ignored because the image explorer is open.</source>
+        <translation>[%1] $%2, aux: $%3 ignorovaný, pretože je otvorený prehliadač obrazov.</translation>
     </message>
     <message>
         <location filename="../sioworker.cpp" line="161"/>
-        <source>[%1] command: $%2, aux: $%3 ignored: %4</source>
+        <source>[%1] $%2, aux: $%3 ignored: %4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../sioworker.cpp" line="168"/>
-        <source>[%1] command: $%2, aux: $%3 ignored.</source>
-        <translation>[%1] príkaz: $%2, aux: $%3 ignorovaný.</translation>
+        <source>[%1] $%2, aux: $%3 ignored.</source>
+        <translation>[%1] $%2, aux: $%3 ignorovaný.</translation>
     </message>
     <message>
         <location filename="../sioworker.cpp" line="185"/>
@@ -7612,7 +7612,7 @@ Prajete si otvoriť Nastavenia?</translation>
     <message>
         <location filename="../smartdevice.cpp" line="92"/>
         <location filename="../smartdevice.cpp" line="104"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -7822,7 +7822,7 @@ Prajete si otvoriť Nastavenia?</translation>
     </message>
     <message>
         <location filename="../serialport-test.cpp" line="228"/>
-        <source>Read error: got %1 bytes, expected %2 bytes</source>
+        <source>Read got %1 bytes, expected %2 bytes</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -8031,8 +8031,8 @@ Prajete si otvoriť Nastavenia?</translation>
         <translation type="vanished">Uložiť textový výstup tlačiarne</translation>
     </message>
     <message>
-        <source>Text files (*.txt);;All files (*)</source>
-        <translation type="vanished">Textové súbory (*.txt);;Všetky súbory (*)</translation>
+        <source>Text files (*.txt)All files (*)</source>
+        <translation type="vanished">Textové súbory (*.txt)Všetky súbory (*)</translation>
     </message>
     <message>
         <source>Stripping Line Numbers..</source>

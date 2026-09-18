@@ -18,7 +18,7 @@
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Arial&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Arial&apos; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:16pt; font-weight:600; color:#000000;&quot;&gt;RespeQt&lt;/span&gt;&lt;span style=&quot; font-size:16pt; font-weight:600; color:#55aa00;&quot;&gt;Qt	&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;img src=&quot;:/icons/main-icon/RespeQt.ico&quot; /&gt;&lt;/p&gt;
@@ -44,118 +44,118 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;* &lt;/span&gt;&lt;a href=&quot;https://sourceforge.net/projects/respeqt/&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;RespeQt&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;: Copyright 2009 by Fatih Aygün. You can freely copy, use, modify and distribute it under the GPL 2.0 license. Please see license.txt for details.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;* Qt libraries: Copyright 2009 &lt;/span&gt;&lt;a href=&quot;http://qt.nokia.com/&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;Nokia Corporation&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; and/or its subsidiary(-ies). Used in this package under LGPL 2.0 license.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;* Qt Copyright 2009 &lt;/span&gt;&lt;a href=&quot;http://qt.nokia.com/&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;Nokia Corporation&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; and/or its subsidiary(-ies). Used in this package under LGPL 2.0 license.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;* Silk Icons: Copyright by &lt;/span&gt;&lt;a href=&quot;http://famfamfam.com&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;Mark James&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;. Used in this package under Creative Commons Attribution 3.0 license.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;* Silk Copyright by &lt;/span&gt;&lt;a href=&quot;http://famfamfam.com&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;Mark James&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;. Used in this package under Creative Commons Attribution 3.0 license.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;* Additional Icons by &lt;/span&gt;&lt;a href=&quot;http://www.oxygen-icons.org/?page_id=16&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;Oxygen Team&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;. Used in this package under Creative Commons Attribution-ShareAlike 3.0 license.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;* Atascii Fonts by &lt;/span&gt;&lt;a href=&quot;http://members.bitstream.net/~marksim/atarimac&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;Mark Simonson&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;. Used in this package under Freeware License.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;* AtariSIO Linux kernel module and high speed code used in the EXE loader: Copyright &lt;/span&gt;&lt;a href=&quot;mailto:hias@horus.com&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;Matthias Reichl&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;. Used in this package under GPL 2.0 license.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;* AtariSIO Linux kernel module and high speed code used in the EXE Copyright &lt;/span&gt;&lt;a href=&quot;mailto:hias@horus.com&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;Matthias Reichl&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;. Used in this package under GPL 2.0 license.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:9pt; font-weight:600;&quot;&gt;Contact&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;mailto:cyco130@yahoo.com&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;Fatih Aygün&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;, please include the word &amp;quot;respeqt&amp;quot; in the subject field.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;cyco130@yahoo.com&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;Fatih Aygün&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;, please include the word &amp;quot;respeqt&amp;quot; in the subject field.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;mailto:ray@atari8warez.com&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;Ray Ataergin&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; for SIO2PC/10502PC information and hardware please visit &lt;/span&gt;&lt;a href=&quot;http://www.atari8warez.com&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;atari8warez&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;ray@atari8warez.com&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;Ray Ataergin&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt; for SIO2PC/10502PC information and hardware please visit &lt;/span&gt;&lt;a href=&quot;http://www.atari8warez.com&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;atari8warez&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:9pt;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="obsolete">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;Kredi&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt; text-decoration: underline;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Ray Ataergin (Atari8Warez): Türkçe tercüme, yazıcı desteği, kullanim kılavuzu, RCL uzakdan kumanda yazılımı, ATASCII desteği, birden fazla oturum açma desteği, kullanıcı arayüzü geliştirme ve .ATR yükleme mantığında geliştirmeler.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Krzysztof Pyrkosz:  Lehce tercüme, kullanıcı dil seçimi, .PRO dosya desteği ve ceşitli düzeltme ve eklentiler.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Matthias Reichl: AtariSIO paketi, hızlı SIO kodu ve Unix seri bağlanma arka ucu.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Sebastian Bartkowicz:  Candle&apos;O&apos;Sin I/O board&apos;unu ödünç vererek, FTDI işlemcisi bazında imal edilmiş USB adaptörlerinin desteklenmesini sağlamak.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;Lisans&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* RespeQt: Copyright 2009 Fatih Aygün. Serbestce kopyalayıp, kullanabilir, değiştirebilir ve GPL2.0 lisansı altında dağıtabilirsiniz. Detay için lutfen license.txt dosyasına bakınız.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Qt libraries: Copyright 2009 Nokia Corporation ve yan kuruluşları. Bu paket içerisinde LGPL 2.0 lisansı altında kullanılmıştır.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Silk Icons: Copyright Mark James (famfamfam.com). Bu pakette  Creative Commons Attribution 3.0 lisansı altında kullanılmıştır.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* EXE yükleyicisindeki AtariSIO Linux kernel modülü ve yüksek hız kodu: Copyright Matthias Reichl &amp;lt;hias@horus.com&amp;gt;. Bu pakette GPL 2.0 lisansı altında kullanılmıştır.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;İletişim&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;Kredi&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt; text-decoration: underline;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Ray Ataergin (Atari8Warez): Türkçe tercüme, yazıcı desteği, kullanim kılavuzu, RCL uzakdan kumanda yazılımı, ATASCII desteği, birden fazla oturum açma desteği, kullanıcı arayüzü geliştirme ve .ATR yükleme mantığında geliştirmeler.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Krzysztof Lehce tercüme, kullanıcı dil seçimi, .PRO dosya desteği ve ceşitli düzeltme ve eklentiler.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Matthias AtariSIO paketi, hızlı SIO kodu ve Unix seri bağlanma arka ucu.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Sebastian Candle&apos;O&apos;Sin I/O board&apos;unu ödünç vererek, FTDI işlemcisi bazında imal edilmiş USB adaptörlerinin desteklenmesini sağlamak.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;Lisans&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Copyright 2009 Fatih Aygün. Serbestce kopyalayıp, kullanabilir, değiştirebilir ve GPL2.0 lisansı altında dağıtabilirsiniz. Detay için lutfen license.txt dosyasına bakınız.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Qt Copyright 2009 Nokia Corporation ve yan kuruluşları. Bu paket içerisinde LGPL 2.0 lisansı altında kullanılmıştır.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Silk Copyright Mark James (famfamfam.com). Bu pakette  Creative Commons Attribution 3.0 lisansı altında kullanılmıştır.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* EXE yükleyicisindeki AtariSIO Linux kernel modülü ve yüksek hız Copyright Matthias Reichl &amp;lt;hias@horus.com&amp;gt;. Bu pakette GPL 2.0 lisansı altında kullanılmıştır.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;İletişim&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
 
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;RespeQt ile ilgili sorularınız için Fatih Aygün&apos;e cyco130@yahoo.com adresinden eposta ile, konu kısmına &amp;quot;respeqt&amp;quot; yazarak ulaşabilirsiniz.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;SIO2PC donanım gereksinmelerinizi www.atari8warez.com  adresinden sağlayabilir, donanım ile ilgili sorularınızı atarı8warez@gmail.com adresine gönderebilirsiniz&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;RespeQt ile ilgili sorularınız için Fatih Aygün&apos;e cyco130@yahoo.com adresinden eposta ile, konu kısmına &amp;quot;respeqt&amp;quot; yazarak ulaşabilirsiniz.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;SIO2PC donanım gereksinmelerinizi www.atari8warez.com  adresinden sağlayabilir, donanım ile ilgili sorularınızı atarı8warez@gmail.com adresine gönderebilirsiniz&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;Credits&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt; text-decoration: underline;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Ray Ataergin &lt;/span&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt; font-style:italic;&quot;&gt;(Atari8Warez)&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt; for adding turkish translation and printer support.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Krzysztof Pyrkosz for adding language selection, polish translation, .PRO file support and other fixes and improvements.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Matthias Reichl for creating AtariSIO package, letting me use his high speed SIO codes and even getting his hands dirty with the Unix serial port backend.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Sebastian Bartkowicz for kindly donating one of his Candle&apos;O&apos;Sin I/O boards, thus giving me the possibility to support it and other FTDI chip based USB adaptors.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;License&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* RespeQt: Copyright 2009 by Fatih Aygün. You can freely copy, use, modify and distribute it under the GPL 2.0 license. Please see license.txt for details.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Qt libraries: Copyright 2009 Nokia Corporation and/or its subsidiary(-ies). Used in this package under LGPL 2.0 license.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Silk Icons: Copyright by Mark James (famfamfam.com). Used in this package under Creative Commons Attribution 3.0 license.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* AtariSIO Linux kernel module and high speed code used in the EXE loader: Copyright Matthias Reichl &amp;lt;hias@horus.com&amp;gt;. Used in this package under GPL 2.0 license.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;Contact&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;To contact Fatih Aygün Just drop a line at cyco130@yahoo.com, please include the word &amp;quot;respeqt&amp;quot; in the subject field.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;To contact Ray Ataergin for SIO2PC/10502PC information send email to atari8warez@gmaail.com.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;For SIO2PC/10502PC hardware please visit www.atari8warez.for-the.biz&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;Credits&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt; text-decoration: underline;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Ray Ataergin &lt;/span&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt; font-style:italic;&quot;&gt;(Atari8Warez)&lt;/span&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt; for adding turkish translation and printer support.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Krzysztof Pyrkosz for adding language selection, polish translation, .PRO file support and other fixes and improvements.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Matthias Reichl for creating AtariSIO package, letting me use his high speed SIO codes and even getting his hands dirty with the Unix serial port backend.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Sebastian Bartkowicz for kindly donating one of his Candle&apos;O&apos;Sin I/O boards, thus giving me the possibility to support it and other FTDI chip based USB adaptors.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;License&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Copyright 2009 by Fatih Aygün. You can freely copy, use, modify and distribute it under the GPL 2.0 license. Please see license.txt for details.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Qt Copyright 2009 Nokia Corporation and/or its subsidiary(-ies). Used in this package under LGPL 2.0 license.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Silk Copyright by Mark James (famfamfam.com). Used in this package under Creative Commons Attribution 3.0 license.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* AtariSIO Linux kernel module and high speed code used in the EXE Copyright Matthias Reichl &amp;lt;hias@horus.com&amp;gt;. Used in this package under GPL 2.0 license.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;Contact&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;To contact Fatih Aygün Just drop a line at cyco130@yahoo.com, please include the word &amp;quot;respeqt&amp;quot; in the subject field.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;To contact Ray Ataergin for SIO2PC/10502PC information send email to atari8warez@gmaail.com.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;For SIO2PC/10502PC hardware please visit www.atari8warez.for-the.biz&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="obsolete">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;Kredi&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt; text-decoration: underline;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Ray Ataergin (Atari8Warez): Türkçe tercüme, yazıcı desteği, kullanim kliavuzu ve .ATR yükleme mantığında geliştirmeler.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Krzysztof Pyrkosz:  Lehce tercüme, kullanıcı dil seçimi, .PRO dosya desteği ve ceşitli düzeltme ve eklentiler.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Matthias Reichl: AtariSIO paketi, hızlı SIO kodu ve Unix seri bağlanma arka ucu.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Sebastian Bartkowicz:  Candle&apos;O&apos;Sin I/O board&apos;unu ödünç vererek, FTDI işlemcisi bazında imal edilmiş USB adaptörlerinin desteklenmesini sağlamak.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;Lisans&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* RespeQt: Copyright 2009 Fatih Aygün. Serbestce kopyalayıp, kullanabilir, değiştirebilir ve GPL2.0 lisansı altında dağıtabilirsiniz. Detay için lutfen license.txt dosyasına bakınız.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Qt libraries: Copyright 2009 Nokia Corporation ve yan kuruluşları. Bu paket içerisinde LGPL 2.0 lisansı altında kullanılmıştır.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* Silk Icons: Copyright Mark James (famfamfam.com). Bu pakette  Creative Commons Attribution 3.0 lisansı altında kullanılmıştır.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;* EXE yükleyicisindeki AtariSIO Linux kernel modülü ve yüksek hız kodu: Copyright Matthias Reichl &amp;lt;hias@horus.com&amp;gt;. Bu pakette GPL 2.0 lisansı altında kullanılmıştır.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;İletişim&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;Kredi&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt; text-decoration: underline;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Ray Ataergin (Atari8Warez): Türkçe tercüme, yazıcı desteği, kullanim kliavuzu ve .ATR yükleme mantığında geliştirmeler.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Krzysztof Lehce tercüme, kullanıcı dil seçimi, .PRO dosya desteği ve ceşitli düzeltme ve eklentiler.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Matthias AtariSIO paketi, hızlı SIO kodu ve Unix seri bağlanma arka ucu.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Sebastian Candle&apos;O&apos;Sin I/O board&apos;unu ödünç vererek, FTDI işlemcisi bazında imal edilmiş USB adaptörlerinin desteklenmesini sağlamak.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;Lisans&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Copyright 2009 Fatih Aygün. Serbestce kopyalayıp, kullanabilir, değiştirebilir ve GPL2.0 lisansı altında dağıtabilirsiniz. Detay için lutfen license.txt dosyasına bakınız.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Qt Copyright 2009 Nokia Corporation ve yan kuruluşları. Bu paket içerisinde LGPL 2.0 lisansı altında kullanılmıştır.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* Silk Copyright Mark James (famfamfam.com). Bu pakette  Creative Commons Attribution 3.0 lisansı altında kullanılmıştır.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;* EXE yükleyicisindeki AtariSIO Linux kernel modülü ve yüksek hız Copyright Matthias Reichl &amp;lt;hias@horus.com&amp;gt;. Bu pakette GPL 2.0 lisansı altında kullanılmıştır.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt; font-weight:600; text-decoration: underline;&quot;&gt;İletişim&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
 
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;RespeQt ile ilgili sorularınız için Fatih Aygün&apos;e cyco130@yahoo.com adresinden eposta ile, konu kısmına &amp;quot;respeqt&amp;quot; yazarak ulaşabilirsiniz.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;SIO2PC donanım gereksinmelerinizi www.atari8warez.for-the.biz  adresinden sağlayabilir, donanım ile ilgili sorularınızı atarı8warez@gmail.com adresine gönderebilirsiniz&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos;; font-size:10pt;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;RespeQt ile ilgili sorularınız için Fatih Aygün&apos;e cyco130@yahoo.com adresinden eposta ile, konu kısmına &amp;quot;respeqt&amp;quot; yazarak ulaşabilirsiniz.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;SIO2PC donanım gereksinmelerinizi www.atari8warez.for-the.biz  adresinden sağlayabilir, donanım ile ilgili sorularınızı atarı8warez@gmail.com adresine gönderebilirsiniz&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;Sans Serif&apos; font-size:10pt;&quot;&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../aboutdialog.ui" line="32"/>
@@ -175,8 +175,8 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">[%1] Tarih/Saat (%2).</translation>
     </message>
     <message>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation type="obsolete">[%1] komut: $%2, aux: $%3 tanınmadı (NAK).</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation type="obsolete">[%1] $%2, aux: $%3 tanınmadı (NAK).</translation>
     </message>
 </context>
 <context>
@@ -254,8 +254,8 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">[%1] Alıcıdan tanımlanmamış talep (%2).</translation>
     </message>
     <message>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation type="vanished">[%1] komut: $%2, aux: $%3 tanınmadı (NAK).</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation type="vanished">[%1] $%2, aux: $%3 tanınmadı (NAK).</translation>
     </message>
 </context>
 <context>
@@ -426,8 +426,8 @@ p, li { white-space: pre-wrap; }
     <name>AutoBoot</name>
     <message>
         <location filename="../autoboot.cpp" line="28"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation>[%1] komut: $%2, aux: $%3 tanınmadı (NAK).</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation>[%1] $%2, aux: $%3 tanınmadı (NAK).</translation>
     </message>
     <message>
         <location filename="../autoboot.cpp" line="48"/>
@@ -456,7 +456,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../autoboot.cpp" line="118"/>
-        <source>[%1] Invalid chunk in get chunk: aux = %2</source>
+        <source>[%1] Invalid chunk in get aux = %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -466,7 +466,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../autoboot.cpp" line="139"/>
-        <source>[%1] Invalid chunk in get chunk info: aux = %2</source>
+        <source>[%1] Invalid chunk in get chunk aux = %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -505,13 +505,13 @@ p, li { white-space: pre-wrap; }
         <location filename="../autoboot.cpp" line="264"/>
         <location filename="../autoboot.cpp" line="293"/>
         <location filename="../autoboot.cpp" line="311"/>
-        <source>The executable &apos;%1&apos; is broken: Unexpected end of file, needed %2 more.</source>
-        <translation>Çalıştırılabilir dosya &apos;%1&apos; bozuk: Beklenmeyen dosya sonu, %2 daha gerekiyor.</translation>
+        <source>The executable &apos;%1&apos; is Unexpected end of file, needed %2 more.</source>
+        <translation>Çalıştırılabilir dosya &apos;%1&apos; Beklenmeyen dosya sonu, %2 daha gerekiyor.</translation>
     </message>
     <message>
         <location filename="../autoboot.cpp" line="254"/>
-        <source>The executable &apos;%1&apos; is broken: The end address is less than the start address.</source>
-        <translation>Çalıştırılabilir dosya &apos;%1&apos; bozuk: Dosya sonu adresi başlangıç adresinden küçük.</translation>
+        <source>The executable &apos;%1&apos; is The end address is less than the start address.</source>
+        <translation>Çalıştırılabilir dosya &apos;%1&apos; Dosya sonu adresi başlangıç adresinden küçük.</translation>
     </message>
     <message>
         <location filename="../autoboot.cpp" line="340"/>
@@ -704,7 +704,7 @@ Kalan süre: %1:%2</translation>
     <message>
         <location filename="../sioworker.cpp" line="590"/>
         <source>Cannot open &apos;%1&apos;: Unknown chunk header %2.</source>
-        <translation>&apos;%1&apos; açılamıyor: Tanınmayan başlık parçası %2.</translation>
+        <translation>&apos;%1&apos; Tanınmayan başlık parçası %2.</translation>
     </message>
     <message>
         <location filename="../sioworker.cpp" line="639"/>
@@ -755,13 +755,13 @@ Kalan süre: %1:%2</translation>
     </message>
     <message>
         <location filename="../createimagedialog.ui" line="118"/>
-        <source>Number of sectors:</source>
-        <translation>Sektör adedi:</translation>
+        <source>Number of </source>
+        <translation>Sektör </translation>
     </message>
     <message>
         <location filename="../createimagedialog.ui" line="142"/>
-        <source>Sector density:</source>
-        <translation>Sektör yoğunluğu:</translation>
+        <source>Sector </source>
+        <translation>Sektör </translation>
     </message>
     <message>
         <location filename="../createimagedialog.ui" line="150"/>
@@ -785,8 +785,8 @@ Kalan süre: %1:%2</translation>
     </message>
     <message>
         <location filename="../createimagedialog.ui" line="181"/>
-        <source>Total image capacity: 92160 bytes (90 K)</source>
-        <translation>Toplam imaj kapasitesi: 92160 bayt (90 K)</translation>
+        <source>Total image 92160 bytes (90 K)</source>
+        <translation>Toplam imaj 92160 bayt (90 K)</translation>
     </message>
     <message>
         <location filename="../createimagedialog.cpp" line="79"/>
@@ -1159,8 +1159,8 @@ Kalan süre: %1:%2</translation>
         <translation type="vanished">Önceden varolan sektör: %1  Nosu: %2</translation>
     </message>
     <message>
-        <source>Error in .pro image: sector: %1 dupnum: %2</source>
-        <translation type="vanished">PRO imajında hata: sektör: %1 Nosu: %2</translation>
+        <source>Error in .pro sector: %1 dupnum: %2</source>
+        <translation type="vanished">PRO imajında sektör: %1 Nosu: %2</translation>
     </message>
     <message>
         <source>Bad sector</source>
@@ -2096,7 +2096,7 @@ Kalan süre: %1:%2</translation>
     </message>
     <message>
         <location filename="../FirmwareDiskImage.cpp" line="550"/>
-        <source>[%1] Set Drive buffer Mode: </source>
+        <source>[%1] Set Drive buffer </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2116,7 +2116,7 @@ Kalan süre: %1:%2</translation>
     </message>
     <message>
         <location filename="../FirmwareDiskImage.cpp" line="552"/>
-        <source>[%1] Set Density Sensing: </source>
+        <source>[%1] Set Density </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2448,7 +2448,7 @@ Kalan süre: %1:%2</translation>
     <message>
         <location filename="../FirmwareDiskImage.cpp" line="1660"/>
         <location filename="../FirmwareDiskImage.cpp" line="1951"/>
-        <source>[%1] Track $%2 information:</source>
+        <source>[%1] Track $%2 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2537,7 +2537,7 @@ Kalan süre: %1:%2</translation>
     </message>
     <message>
         <location filename="../logdisplaydialog.ui" line="42"/>
-        <source>Filter log by:</source>
+        <source>Filter log </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3544,7 +3544,7 @@ Kalan süre: %1:%2</translation>
     <message>
         <location filename="../mainwindow.cpp" line="594"/>
         <source>Cannot mount &apos;%1&apos;: No empty disk slots.</source>
-        <translation>&apos;%1&apos; yüklenemiyor: Boş disk yuvası yok.</translation>
+        <translation>&apos;%1&apos; Boş disk yuvası yok.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="690"/>
@@ -3625,7 +3625,7 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     <message>
         <location filename="../mainwindow.cpp" line="1509"/>
         <location filename="../mainwindow.cpp" line="1693"/>
-        <source>All Atari disk images (*.atr *.xfd *.atx *.pro *.scp);;SIO2PC ATR images (*.atr);;XFormer XFD images (*.xfd);;ATX images (*.atx);;Pro images (*.pro);;SuperCard Pro images (*.scp);;All files (*)</source>
+        <source>All Atari disk images (*.atr *.xfd *.atx *.pro *.scp)SIO2PC ATR images (*.atr)XFormer XFD images (*.xfd)ATX images (*.atx)Pro images (*.pro)SuperCard Pro images (*.scp)All files (*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3639,8 +3639,8 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>All Atari disk images (*.atr *.xfd *.pro);;SIO2PC ATR images (*.atr);;XFormer XFD images (*.xfd);;Pro images (*.pro);;All files (*)</source>
-        <translation type="obsolete">Tüm Atarı disk imajları (*.atr *.xfd *.pro);;SIO2PC ATR imajlarıXFormer XFD imajları (*.xfd);;Pro imajları (*.pro);;Tüm dosyalar (*)&quot;</translation>
+        <source>All Atari disk images (*.atr *.xfd *.pro)SIO2PC ATR images (*.atr)XFormer XFD images (*.xfd)Pro images (*.pro)All files (*)</source>
+        <translation type="obsolete">Tüm Atarı disk imajları (*.atr *.xfd *.pro)SIO2PC ATR imajlarıXFormer XFD imajları (*.xfd)Pro imajları (*.pro)Tüm dosyalar (*)&quot;</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1529"/>
@@ -3690,8 +3690,8 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="302"/>
-        <source>Connected to the network via: </source>
-        <translation>Ağ bağlantısı kuruldu: </translation>
+        <source>Connected to the network </source>
+        <translation>Ağ bağlantısı </translation>
     </message>
     <message>
         <source>Network connection cannot be opened</source>
@@ -3710,8 +3710,8 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
         <translation>&apos;%1&apos; kaydedilemiyor, imajı başka bir isimle kaydetmek istermisiniz?</translation>
     </message>
     <message>
-        <source>All Atari disk images (*.atr *.xfd *.atx *.pro);;SIO2PC ATR images (*.atr);;XFormer XFD images (*.xfd);;ATX images (*.atx);;Pro images (*.pro);;All files (*)</source>
-        <translation type="obsolete">Bütün Atari disk imajları (*.atr *.xfd *.atx *.pro);;SIO2PC ATR imajları (*.atr);;XFormer XFD ımajları (*.xfd);;ATX imajları (*.atx);;Pro imajları (*.pro);;Bütün dosyalar (*)</translation>
+        <source>All Atari disk images (*.atr *.xfd *.atx *.pro)SIO2PC ATR images (*.atr)XFormer XFD images (*.xfd)ATX images (*.atx)Pro images (*.pro)All files (*)</source>
+        <translation type="obsolete">Bütün Atari disk imajları (*.atr *.xfd *.atx *.pro)SIO2PC ATR imajları (*.atr)XFormer XFD ımajları (*.xfd)ATX imajları (*.atx)Pro imajları (*.pro)Bütün dosyalar (*)</translation>
     </message>
     <message>
         <source>Show drives D5-DO</source>
@@ -3878,8 +3878,8 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     <message>
         <location filename="../mainwindow.cpp" line="1864"/>
         <location filename="../mainwindow.cpp" line="1900"/>
-        <source>RespeQt sessions (*.respeqt);;All files (*)</source>
-        <translation>RespeQt oturumları (*.respeqt);;Tüm dosyalar (*)</translation>
+        <source>RespeQt sessions (*.respeqt)All files (*)</source>
+        <translation>RespeQt oturumları (*.respeqt)Tüm dosyalar (*)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1898"/>
@@ -3893,8 +3893,8 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1923"/>
-        <source>Atari executables (*.xex *.com *.exe);;All files (*)</source>
-        <translation>Atari dosyaları (*.xex *.com *.exe);;Tüm dosyalar (*)</translation>
+        <source>Atari executables (*.xex *.com *.exe)All files (*)</source>
+        <translation>Atari dosyaları (*.xex *.com *.exe)Tüm dosyalar (*)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1941"/>
@@ -3903,8 +3903,8 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1943"/>
-        <source>CAS images (*.cas);;All files (*)</source>
-        <translation>Kaset imajları (*.cas);;Tüm dosyalar (*)</translation>
+        <source>CAS images (*.cas)All files (*)</source>
+        <translation>Kaset imajları (*.cas)Tüm dosyalar (*)</translation>
     </message>
 </context>
 <context>
@@ -4020,14 +4020,14 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="186"/>
-        <source>Port name:</source>
-        <translation>Bağlantı Noktası:</translation>
+        <source>Port </source>
+        <translation>Bağlantı </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="202"/>
         <location filename="../optionsdialog.ui" line="487"/>
-        <source>Handshake method:</source>
-        <translation>Senkronizasyon Yöntemi:</translation>
+        <source>Handshake </source>
+        <translation>Senkronizasyon </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="210"/>
@@ -4109,7 +4109,7 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="319"/>
-        <source>High speed mode baud rate:</source>
+        <source>High speed mode baud </source>
         <translation>Bağlantı  hızı (bps):</translation>
     </message>
     <message>
@@ -4134,8 +4134,8 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="364"/>
-        <source>High speed mode POKEY divisor:</source>
-        <translation>POKEY böleni:</translation>
+        <source>High speed mode POKEY </source>
+        <translation>POKEY </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="384"/>
@@ -4154,8 +4154,8 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="467"/>
-        <source>Device name:</source>
-        <translation>Cihaz adı:</translation>
+        <source>Device </source>
+        <translation>Cihaz </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="474"/>
@@ -4184,7 +4184,7 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="665"/>
-        <source>Folder Images:</source>
+        <source>Folder </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4245,17 +4245,17 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1242"/>
-        <source>Atari 810 Happy firmware path:</source>
+        <source>Atari 810 Happy firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1263"/>
-        <source>Atari 810 Chip firmware path:</source>
+        <source>Atari 810 Chip firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1290"/>
-        <source>Atari 810 firmware path:</source>
+        <source>Atari 810 firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4265,32 +4265,32 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1377"/>
-        <source>Atari 1050 Turbo firmware path:</source>
+        <source>Atari 1050 Turbo firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1384"/>
-        <source>Atari 1050 Duplicator firmware path:</source>
+        <source>Atari 1050 Duplicator firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1424"/>
-        <source>Atari 1050 firmware path:</source>
+        <source>Atari 1050 firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1438"/>
-        <source>Atari 1050 Archiver firmware path:</source>
+        <source>Atari 1050 Archiver firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1452"/>
-        <source>Atari 1050 Happy firmware path:</source>
+        <source>Atari 1050 Happy firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1459"/>
-        <source>Atari 1050 Speedy firmware path:</source>
+        <source>Atari 1050 Speedy firmware </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4440,7 +4440,7 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="1993"/>
-        <source>Trace CPU execution in this file:</source>
+        <source>Trace CPU execution in this </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4586,8 +4586,8 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
         <translation>Kaset emülasyonu için özel hız kullan (bps) </translation>
     </message>
     <message>
-        <source> Folder Images:</source>
-        <translation type="vanished">Klasör İmajı:</translation>
+        <source> Folder </source>
+        <translation type="vanished">Klasör </translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="724"/>
@@ -4606,7 +4606,7 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../optionsdialog.ui" line="815"/>
-        <source>Smart Device:</source>
+        <source>Smart </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4690,7 +4690,7 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
         <location filename="../optionsdialog.cpp" line="418"/>
         <location filename="../optionsdialog.cpp" line="423"/>
         <location filename="../optionsdialog.cpp" line="428"/>
-        <source>Atari drive firmware (*.rom);;All files (*)</source>
+        <source>Atari drive firmware (*.rom)All files (*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4743,8 +4743,8 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="242"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation type="unfinished">[%1] komut: $%2, aux: $%3 tanınmadı (NAK).</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation type="unfinished">[%1] $%2, aux: $%3 tanınmadı (NAK).</translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="275"/>
@@ -4768,27 +4768,27 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="494"/>
-        <source>atr mismatch: not HIDDEN or ARCHIVED</source>
+        <source>atr not HIDDEN or ARCHIVED</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="502"/>
-        <source>atr mismatch: not PROTECTED</source>
+        <source>atr not PROTECTED</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="511"/>
-        <source>atr mismatch: not UNPROTECTED</source>
+        <source>atr not UNPROTECTED</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="520"/>
-        <source>atr mismatch: not SUBDIR</source>
+        <source>atr not SUBDIR</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="529"/>
-        <source>atr mismatch: not FILE</source>
+        <source>atr not FILE</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4823,7 +4823,7 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../pclink.cpp" line="719"/>
-        <source>Internal error: dir_cache should be NULL!</source>
+        <source>Internal dir_cache should be NULL!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5281,16 +5281,16 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
         <translation type="vanished">[%1] Konum göster.</translation>
     </message>
     <message>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation type="vanished">[%1] komut: $%2, aux: $%3 tanınmadı (NAK).</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation type="vanished">[%1] $%2, aux: $%3 tanınmadı (NAK).</translation>
     </message>
     <message>
         <source>[%1] Converting Inverse Video Characters for ASCII viewing</source>
         <translation type="vanished">[%1] ATASCII ters video karakterleri ASCII ye çevriliyor</translation>
     </message>
     <message>
-        <source>[%1] Print: data frame failed</source>
-        <translation type="vanished">[%1] Print: veri bedeni başarısız oldu</translation>
+        <source>[%1] data frame failed</source>
+        <translation type="vanished">[%1] veri bedeni başarısız oldu</translation>
     </message>
     <message>
         <source>[%1] Print (%2 chars)</source>
@@ -5411,13 +5411,13 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     <message>
         <location filename="../printers/baseprinter.cpp" line="68"/>
         <location filename="../printers/baseprinter.cpp" line="95"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation type="unfinished">[%1] komut: $%2, aux: $%3 tanınmadı (NAK).</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation type="unfinished">[%1] $%2, aux: $%3 tanınmadı (NAK).</translation>
     </message>
     <message>
         <location filename="../printers/baseprinter.cpp" line="78"/>
-        <source>[%1] Print: data frame failed</source>
-        <translation type="unfinished">[%1] Print: veri bedeni başarısız oldu</translation>
+        <source>[%1] data frame failed</source>
+        <translation type="unfinished">[%1] veri bedeni başarısız oldu</translation>
     </message>
     <message>
         <location filename="../printers/baseprinter.cpp" line="89"/>
@@ -5447,8 +5447,8 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../printers/textprinterwindow.cpp" line="236"/>
-        <source>Text files (*.txt);;All files (*)</source>
-        <translation type="unfinished">Metin dosyaları (*.txt);;Tüm dosyalar (*)</translation>
+        <source>Text files (*.txt)All files (*)</source>
+        <translation type="unfinished">Metin dosyaları (*.txt)Tüm dosyalar (*)</translation>
     </message>
     <message>
         <location filename="../printers/textprinterwindow.cpp" line="264"/>
@@ -5501,7 +5501,7 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../rcl.cpp" line="63"/>
-        <source>[%1] List filter set: [%2]</source>
+        <source>[%1] List filter [%2]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5580,8 +5580,8 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../rcl.cpp" line="565"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation type="unfinished">[%1] komut: $%2, aux: $%3 tanınmadı (NAK).</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation type="unfinished">[%1] $%2, aux: $%3 tanınmadı (NAK).</translation>
     </message>
     <message>
         <location filename="../rcl.cpp" line="585"/>
@@ -6113,12 +6113,12 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="2680"/>
-        <source>[%1] RespeQt version inquiry: $%2</source>
+        <source>[%1] RespeQt version $%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="2685"/>
-        <source>[%1] Get status: $%2</source>
+        <source>[%1] Get $%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6268,42 +6268,42 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="968"/>
-        <source>[%1] Uploaded code is: Check if drive is a Super Archiver</source>
+        <source>[%1] Uploaded code Check if drive is a Super Archiver</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="989"/>
-        <source>[%1] Uploaded code is: Speed check</source>
+        <source>[%1] Uploaded code Speed check</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="993"/>
-        <source>[%1] Uploaded code is: Diagnostic</source>
+        <source>[%1] Uploaded code Diagnostic</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1001"/>
-        <source>[%1] Uploaded code is: Prepare track data at offset $%2</source>
+        <source>[%1] Uploaded code Prepare track data at offset $%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1018"/>
-        <source>[%1] Uploaded code is: Skew alignment of track $%2 sector $%3 with track $%4 sector $%5</source>
+        <source>[%1] Uploaded code Skew alignment of track $%2 sector $%3 with track $%4 sector $%5</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1026"/>
-        <source>[%1] Uploaded code is: Skew alignment of track $%2 (%3 sectors) with track $%4 (%5 sectors)</source>
+        <source>[%1] Uploaded code Skew alignment of track $%2 (%3 sectors) with track $%4 (%5 sectors)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1039"/>
-        <source>[%1] Uploaded code is: Format track $%2 with skew alignment $%3 with track $%4</source>
+        <source>[%1] Uploaded code Format track $%2 with skew alignment $%3 with track $%4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1046"/>
-        <source>[%1] Uploaded code is: Format track $%2 with skew alignment with track $%3</source>
+        <source>[%1] Uploaded code Format track $%2 with skew alignment with track $%3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6313,7 +6313,7 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="1486"/>
-        <source>[%1] command: $%2, aux: $%3 ignored because the drive is not ready.</source>
+        <source>[%1] $%2, aux: $%3 ignored because the drive is not ready.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6782,8 +6782,8 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../diskimage.cpp" line="3226"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation>[%1] komut: $%2, aux: $%3 tanınmadı (NAK).</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation>[%1] $%2, aux: $%3 tanınmadı (NAK).</translation>
     </message>
     <message>
         <location filename="../diskimageatr.cpp" line="792"/>
@@ -6948,7 +6948,7 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../diskimageatx.cpp" line="723"/>
-        <source>[%1] Header has out of range values: Track=$%2 Sector=$%3. Ignored.</source>
+        <source>[%1] Header has out of range Track=$%2 Sector=$%3. Ignored.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -7188,18 +7188,18 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../sioworker.cpp" line="154"/>
-        <source>[%1] command: $%2, aux: $%3 ignored because the image explorer is open.</source>
-        <translation>[%1] Komut: $%2, aux: $%3 gözardı edildi çünkü imaj görüntü ekranı açık..</translation>
+        <source>[%1] $%2, aux: $%3 ignored because the image explorer is open.</source>
+        <translation>[%1] $%2, aux: $%3 gözardı edildi çünkü imaj görüntü ekranı açık..</translation>
     </message>
     <message>
         <location filename="../sioworker.cpp" line="161"/>
-        <source>[%1] command: $%2, aux: $%3 ignored: %4</source>
+        <source>[%1] $%2, aux: $%3 ignored: %4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../sioworker.cpp" line="168"/>
-        <source>[%1] command: $%2, aux: $%3 ignored.</source>
-        <translation>[%1] Komut: $%2, aux: $%3 gözardı edildi.</translation>
+        <source>[%1] $%2, aux: $%3 ignored.</source>
+        <translation>[%1] $%2, aux: $%3 gözardı edildi.</translation>
     </message>
     <message>
         <location filename="../sioworker.cpp" line="185"/>
@@ -7746,8 +7746,8 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     <message>
         <location filename="../smartdevice.cpp" line="92"/>
         <location filename="../smartdevice.cpp" line="104"/>
-        <source>[%1] command: $%2, aux: $%3 NAKed.</source>
-        <translation type="unfinished">[%1] komut: $%2, aux: $%3 tanınmadı (NAK).</translation>
+        <source>[%1] $%2, aux: $%3 NAKed.</source>
+        <translation type="unfinished">[%1] $%2, aux: $%3 tanınmadı (NAK).</translation>
     </message>
 </context>
 <context>
@@ -7956,7 +7956,7 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
     </message>
     <message>
         <location filename="../serialport-test.cpp" line="228"/>
-        <source>Read error: got %1 bytes, expected %2 bytes</source>
+        <source>Read got %1 bytes, expected %2 bytes</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -8169,8 +8169,8 @@ Seçenekler diyaloğunu açmak istermisiniz?</translation>
         <translation type="vanished">Çıktıyı dosyaya kaydet</translation>
     </message>
     <message>
-        <source>Text files (*.txt);;All files (*)</source>
-        <translation type="vanished">Metin dosyaları (*.txt);;Tüm dosyalar (*)</translation>
+        <source>Text files (*.txt)All files (*)</source>
+        <translation type="vanished">Metin dosyaları (*.txt)Tüm dosyalar (*)</translation>
     </message>
     <message>
         <source>Stripping Line Numbers..</source>
