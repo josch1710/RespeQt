@@ -23,7 +23,7 @@ namespace Tests {
         int width() override { return 0; }
         int height() override { return 0; }
         int dpiX() override { return 0; }
-        void setFont(QFontPtr) override {}
+        void setFont(const QFontPtr &) override {}
         void applyFont() override {}
         void calculateFixedFontSize(uint8_t) override {}
 

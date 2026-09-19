@@ -1,7 +1,6 @@
 #ifndef SIORECORDERTEST_H
 #define SIORECORDERTEST_H
 
-#include <QObject>
 #include <QFile>
 
 
@@ -12,7 +11,7 @@ namespace Tests
         Q_OBJECT
     public:
         SioRecorderTest() = default;
-        virtual ~SioRecorderTest() = default;
+        ~SioRecorderTest() override = default;
 
 
     private slots:

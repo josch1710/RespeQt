@@ -1,10 +1,7 @@
 #include "siorecordertest.h"
 #include "sioworker.h"
 #include "siorecorder.h"
-#include "printers/atari1027.h"
 #include "respeqtsettings.h"
-#include "nulloutput.h"
-#include "dummyworker.h"
 #include <QTemporaryFile>
 #include <QTest>
 #include <QSharedPointer>
@@ -14,13 +11,16 @@ using std::cout;
 using std::endl;
 
 namespace Tests {
+    // ReSharper disable once CppMemberFunctionMayBeStatic
     void SioRecorderTest::initTestCase()
     {}
 
+    // ReSharper disable once CppMemberFunctionMayBeStatic
     void SioRecorderTest::cleanupTestCase()
     {}
 
-    void SioRecorderTest::writeSioCapture()
+    // ReSharper disable once CppMemberFunctionMayBeStatic
+    void SioRecorderTest::writeSioCapture() // NOLINT(*-convert-member-functions-to-static)
     {
         // Some test data
         // Atari OS fills left pads the printer buffer with spaces, so pre-set the spaces.
@@ -30,7 +30,7 @@ namespace Tests {
         QTemporaryFile file("testWriteSioCapture");
         file.open();
         file.setAutoRemove(true);
-        auto recorder = SioRecorder::instance();
+        const auto recorder = SioRecorder::instance();
         recorder->startSIOSnapshot();
 
         // Pause
@@ -45,24 +45,24 @@ namespace Tests {
         recorder->writePauseCommand(500);
         // Some random test data.
         for(unsigned int i = 0; i < 10; i++)
-            data[i] = i * 3;
+            data[i] = static_cast<char>(i * 3);
         recorder->writeSnapshotDataFrame(data);
         // Pause
         recorder->writePauseCommand(500);
 
         // We close the test file
-        auto snapshot = recorder->stopSIOSnapshot();
+        const auto snapshot = recorder->stopSIOSnapshot();
         file.write(snapshot);
         file.close();
 
         // Now fetch the generated file and the base line file and compare them
         file.open();
-        auto data_test = file.readAll();
+        const auto data_test = file.readAll();
         file.close();
 
         QFile baseline("tests/units/testdata/writeSioCapture.json");
         baseline.open(QIODevice::ReadOnly);
-        auto data_baseline = baseline.readAll();
+        const auto data_baseline = baseline.readAll();
         QVERIFY2(data_baseline.size() > 0, tr("Baseline file couldn't be read.").toLatin1());
         baseline.close();
 
