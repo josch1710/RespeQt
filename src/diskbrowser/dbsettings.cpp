@@ -5,15 +5,11 @@
  */
 #include "diskbrowser/dbsettings.h"
 
-DbSettings::DbSettings()
-{
-}
+DbSettings::DbSettings() = default;
 
-DbSettings::~DbSettings()
-{
-}
+DbSettings::~DbSettings() = default;
 
-bool DbSettings::isEmpty()
+bool DbSettings::isEmpty() const
 {
     if (_dirty)
         return false;
@@ -23,7 +19,7 @@ bool DbSettings::isEmpty()
            _dirMap.isEmpty();
 }
 
-void DbSettings::clone(DbSettings& other)
+void DbSettings::clone(const DbSettings& other) // TODO Copy ctor / operator
 {
     _dirMap = other._dirMap;
     _diskPic = other._diskPic;   // TBD: more than this (?) ...hang on, is this used?

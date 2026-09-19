@@ -5,14 +5,9 @@
  */
 #include "include/diskbrowser/picpreview.h"
 #include "respeqtsettings.h"
-#include <math.h>
+#include <cmath>
 #include <QPaintEvent>
 #include <QPainter>
-#include <QRegularExpression>
-#include <QFileInfo>
-#include <QDebug>
-#include <QDir>
-#include <QFileInfo>
 #include <QGuiApplication>
 
 const QString Label::DEF_INDEX_FNT { "Courier New" };
@@ -48,7 +43,7 @@ void PicPreview::popupMenuReq(const QPoint& pos)
     emit sigPopupMenuReq(mapToGlobal(pos));
 }
 
-void PicPreview::slotEditDone(bool canceled)
+void PicPreview::slotEditDone(const bool canceled)
 {
     if (canceled)
     {
@@ -71,9 +66,9 @@ PicPreview::~PicPreview()
     }
 }
 
-void PicPreview::clear()
+void PicPreview::clearAll()
 {
-    QLabel::clear();
+    clear();
     _picPath.clear();
     _picTooltip.clear();
     _title.clear();
@@ -102,16 +97,16 @@ void PicPreview::setFileName(const QString& picPath)
         _title.clear();             // no title overlay
     }
 
-    update();
+    updateLabel();
 }
 
-void PicPreview::setLabel(const QString& title, const QString& index, bool bSide)
+void PicPreview::setLabel(const QString& title, const QString& index, const bool bSide)
 {
-    _title.setText(title);
+    _title.setLabelText(title);
     _sideB = bSide;
-    _index.setText(index);
+    _index.setLabelText(index);
 
-    update();
+    updateLabel();
 }
 
 void PicPreview::setLabel(const DiskLabel& label)
@@ -124,50 +119,47 @@ void PicPreview::loadPixmap(const QString& picPath)
     if (_picPath == picPath)
         return;
 
+    delete _pixmap;
+
     _picPath = picPath;
-
-    if (_pixmap)
-        delete _pixmap;
-
     _pixmap = new QPixmap(_picPath);
 
     Q_ASSERT(_pixmap && !_pixmap->isNull());
 }
 
-QRect PicPreview::scaleRect(const QRectF& rect, const QRectF& rcChild)
+QRectF PicPreview::scaleRect(const QRectF& rect, const QRectF& rcChild) const
 {
     const QSizeF szPic = _pixmap->size();
 
-    int X = (int)round(rect.x() * rcChild.width() / szPic.width());
-    int Y = (int)round(rect.y() * rcChild.height() / szPic.height());
-    int W = (int)round(rect.width() * rcChild.width() / szPic.width());
-    int H = (int)round(rect.height() * rcChild.height() / szPic.height());
+    qreal X = round(rect.x() * rcChild.width() / szPic.width());
+    qreal Y = round(rect.y() * rcChild.height() / szPic.height());
+    const qreal W = round(rect.width() * rcChild.width() / szPic.width());
+    const qreal H = round(rect.height() * rcChild.height() / szPic.height());
 
     X += rcChild.x();
     Y += rcChild.y();
 
-    return QRect {QPoint{X,Y}, QSize{W,H}};
+    return QRectF {QPointF{X, Y}, QSizeF{W, H}};
 }
 
 // returns the current widget rect padded either horizontally or vertically
 // to maintain the current aspect ratio (property defined by the content)
 //
-QRect PicPreview::padRect()
+QRectF PicPreview::padRect() const
 {
-    QRect lblRect(rect());
-    double ratioNow = static_cast<double>(width()) / height();
+    QRectF lblRect(rect());
 
-    if (ratio() < ratioNow)
+    if (const auto ratioNow = static_cast<qreal>(width()) / height(); ratio() < ratioNow)
     {
         // pillarbox (extra space on left/right)
-        int maxWidth = static_cast<int>(round(ratio() * height()));
-        lblRect.setX((width() - maxWidth) / 2);
+        const auto maxWidth = round(ratio() * height());
+        lblRect.setX((width() - maxWidth) / 2.0f);
         lblRect.setWidth(maxWidth);
     }
     else if (ratio() > ratioNow)
     {
         // letterbox (extra space on top/bottom)
-        int maxHeight = static_cast<int>(round(width() / ratio()));
+        const auto maxHeight = round(width() / ratio());
         lblRect.setY((height() - maxHeight) / 2);
         lblRect.setHeight(maxHeight);
     }
@@ -180,8 +172,8 @@ void PicPreview::moveLabels()
     if (!_pixmap || _pixmap->isNull())
         return;
 
-    const QRectF LABEL_RECT_A {QPointF{57,24}, QSizeF{142,49}};
-    const QRectF LABEL_RECT_B {QPointF{23,24}, QSizeF{142,49}};
+    constexpr QRectF LABEL_RECT_A {QPointF{57,24}, QSizeF{142,49}};
+    constexpr QRectF LABEL_RECT_B {QPointF{23,24}, QSizeF{142,49}};
 
     QRectF labelRect;
 
@@ -190,17 +182,17 @@ void PicPreview::moveLabels()
     else
         labelRect = LABEL_RECT_A;
 
-    QRect paddedRect = padRect();
-    QRect scaledRect = scaleRect(labelRect, paddedRect);
+    const auto paddedRect = padRect();
+    const auto scaledRect = scaleRect(labelRect, paddedRect);
 
-    _title.setGeometry(scaledRect);
+    _title.setGeometry(scaledRect.toRect());
 
     // move the index rect
-    const double indexX = (_sideB ? 170 : 20);
+    const double indexX = _sideB ? 170 : 20;
     const QRectF INDEX_RECT {QPointF{indexX,20}, QSizeF{30,30}};
-    const QRect  indexRect = scaleRect(INDEX_RECT, paddedRect);
+    const auto indexRect = scaleRect(INDEX_RECT, paddedRect);
 
-    _index.setGeometry(indexRect);
+    _index.setGeometry(indexRect.toRect());
 }
 
 void PicPreview::scaleFonts()
@@ -211,29 +203,29 @@ void PicPreview::scaleFonts()
     // setPixelSize(0) is rejected by Qt with a warning.
     LabelFont font = RespeqtSettings::instance()->dbTitleFont();
     double scl = font.scale();
-    double pix = round((double)_title.size().height() / scl);
+    double pix = round(static_cast<double>(_title.size().height()) / scl);
 
-    font.setPixelSize(qMax(1, (int)pix));
+    font.setPixelSize(qMax(1, static_cast<int>(pix)));
 
     _title.setFont(font);
 
     font = RespeqtSettings::instance()->dbIndexFont();
     scl = font.scale();
-    pix = round((double)_index.size().height() / scl);
+    pix = round(static_cast<double>(_index.size().height()) / scl);
 
-    font.setPixelSize(qMax(1, (int)pix));
+    font.setPixelSize(qMax(1, static_cast<int>(pix)));
 
     _index.setFont(font);
 }
 
-void PicPreview::update()
+void PicPreview::updateLabel()
 {
     moveLabels();
     scaleFonts();
-    QLabel::update();
+    update();
 }
 
-double PicPreview::ratio()
+double PicPreview::ratio() const
 {
     double aspectRatio = 0.0;
 
@@ -248,8 +240,10 @@ void PicPreview::paintEvent(QPaintEvent* event)
     if (_pixmap)
     {
         QPainter painter(this);
-        QRect lblRect = padRect();
-        painter.drawPixmap(lblRect, _pixmap->scaled(lblRect.size(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        const auto lblRect{padRect()};
+        const auto lblSize{lblRect.size().toSize()};
+        const auto scaledPixmap{_pixmap->scaled(lblSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)};
+        painter.drawPixmap(lblRect.toRect(), scaledPixmap);
     }
 
     QLabel::paintEvent(event);
@@ -258,15 +252,15 @@ void PicPreview::paintEvent(QPaintEvent* event)
 void PicPreview::resizeEvent(QResizeEvent *event)
 {
     QLabel::resizeEvent(event);
-    update();
+    updateLabel();
 }
 
 QSize PicPreview::sizeHint() const
 {
     if (_pixmap == nullptr)
-        return QSize(200,130);  // TBD: why isn't this 1:1 with pixel ruler? (on a 4k monitor)
+        return {200,130};  // TBD: why isn't this 1:1 with pixel ruler? (on a 4k monitor)
 
-    return QSize(_pixmap->width(), _pixmap->height());
+    return {_pixmap->width(), _pixmap->height()};
 }
 
 void PicPreview::editTitle()
@@ -284,7 +278,7 @@ void PicPreview::editIndex()
 // Derived from QTextEdit, this class encapsulates the floppy disk title rendered on the label (if no preview is defined).
 // I'm using a Rich Text widget Due to the buggy nature specifically on macOS with line spacing in a QLabel.
 
-Label::Label(QWidget* parent, bool isIndex) : QTextEdit(parent)
+Label::Label(QWidget* parent, const bool isIndex) : QTextEdit(parent)
 {
     setContextMenuPolicy(Qt::NoContextMenu);
 
@@ -294,8 +288,8 @@ Label::Label(QWidget* parent, bool isIndex) : QTextEdit(parent)
     {
         setFont(RespeqtSettings::instance()->dbIndexFont());
         setAlignment(Qt::AlignCenter);
-        setLineWrapMode(QTextEdit::NoWrap);
-        document()->setDocumentMargin(qreal(height())/2.0);
+        setLineWrapMode(NoWrap);
+        document()->setDocumentMargin(static_cast<qreal>(height())/2.0);
     }
     else
     {
@@ -304,7 +298,7 @@ Label::Label(QWidget* parent, bool isIndex) : QTextEdit(parent)
         setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
     }
 
-    setFrameStyle(QFrame::NoFrame);
+    setFrameStyle(NoFrame);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setReadOnly(true);
@@ -315,15 +309,15 @@ void Label::resizeEvent(QResizeEvent *event)
     QTextEdit::resizeEvent(event);
 
     if (_isIndex)
-        document()->setDocumentMargin(qreal(height())/4.0);
+        document()->setDocumentMargin(static_cast<qreal>(height())/4.0);
 }
 
-void Label::setLineHeight(int height)
+void Label::setLineHeight(const int height)
 {
     _lineHeight = height;
 }
 
-void Label::setText(const QString& text)
+void Label::setLabelText(const QString& text)
 {
     setPlainText(text);
 
@@ -339,7 +333,7 @@ void Label::setText(const QString& text)
     theCursor.mergeBlockFormat(blockFmt);
 }
 
-void Label::setEditMode(bool edit)
+void Label::setEditMode(const bool edit)
 {
     if (edit == _editMode)
         return;
@@ -353,27 +347,26 @@ void Label::setEditMode(bool edit)
         _lastTitle = toPlainText();
         setFocus();
         selectAll();
-        QFrame::setFrameStyle(QFrame::Box | QFrame::Plain);
-        QFrame::setLineWidth(1);
+        setFrameStyle(Box | Plain);
+        setLineWidth(1);
     }
     else
     {
-        QFrame::setFrameStyle(QFrame::NoFrame);
+        setFrameStyle(NoFrame);
     }
 }
 
-void Label::keyPressEvent(QKeyEvent* evt)
+void Label::keyPressEvent(QKeyEvent* event)
 {
     if (_editMode)
     {
-        switch (evt->key())
+        switch (event->key())
         {
             case Qt::Key_Return:
             case Qt::Key_Enter:
             {
                 // if the shift key is down, process the return/enter key
-                auto mods {QGuiApplication::queryKeyboardModifiers()};
-                if (mods & Qt::ShiftModifier)
+                if (const auto mods {QGuiApplication::queryKeyboardModifiers()}; mods & Qt::ShiftModifier)
                     break;
 
                 // return/enter completes edit mode
@@ -384,7 +377,7 @@ void Label::keyPressEvent(QKeyEvent* evt)
             case Qt::Key_Escape:
             {
                 setEditMode(false);
-                setText(_lastTitle);
+                setLabelText(_lastTitle);
                 emit sigEditDone(true); // canceled
                 return;
             }
@@ -393,15 +386,15 @@ void Label::keyPressEvent(QKeyEvent* evt)
         }
     }
 
-    QTextEdit::keyPressEvent(evt);
+    QTextEdit::keyPressEvent(event);
 }
 
-void Label::mousePressEvent(QMouseEvent* evt)
+void Label::mousePressEvent(QMouseEvent* event)
 {
-    if (!_editMode && (evt->button() == Qt::LeftButton))
+    if (!_editMode && event->button() == Qt::LeftButton)
         setEditMode();
     else
-        QTextEdit::mousePressEvent(evt);
+        QTextEdit::mousePressEvent(event);
 }
 
 void Label::setFont(const LabelFont& font)
@@ -409,7 +402,7 @@ void Label::setFont(const LabelFont& font)
     _font = font;
     QTextEdit::setFont(font);
 
-    QString fmt
+    const QString fmt
     {
         "color: %1;"
         "font-family: \"%2\";"

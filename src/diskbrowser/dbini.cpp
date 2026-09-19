@@ -22,18 +22,18 @@ DbIni::~DbIni()
         DbIni::save();
 }
 
-void DbIni::setDataDir(const QString &dir)
+void DbIni::setDataDir(const QString&)
 {
     qDebug() << "!e" << "Disk Collection Browser: ini file format not used with .respeqt_db subdirs";
     Q_ASSERT(0);
 }
 
-void DbIni::setPicture(const QString& pic, const QString& dir, const QString& disk)
+void DbIni::setPicture(const QString& pic, const QString& folder, const QString& disk)
 {
-    bool isGlobal = (dir.isEmpty() && disk.isEmpty());     // program global pic?
-    bool isDirPic = (!dir.isEmpty() && disk.isEmpty());
-    bool isDiskPic = (!dir.isEmpty() && !disk.isEmpty());
-    QString lnxDir = QDir::fromNativeSeparators(dir);
+    const bool isGlobal = folder.isEmpty() && disk.isEmpty();     // program global pic?
+    const bool isDirPic = !folder.isEmpty() && disk.isEmpty();
+    const bool isDiskPic = !folder.isEmpty() && !disk.isEmpty();
+    const QString lnxDir = QDir::fromNativeSeparators(folder);
 
     if (isGlobal)
         _diskPic = pic;
@@ -49,22 +49,22 @@ void DbIni::setPicture(const QString& pic, const QString& dir, const QString& di
 
 QString DbIni::getPicture(const QDir& dir, const QString& disk, PicSourceType& picSource)
 {
-    QString dirStr  {dir.absolutePath()};
-    QString lnxDir  {QDir::fromNativeSeparators(dirStr)};
-    auto    dirInfo {_dirMap[lnxDir]};
+    const QString dirStr  {dir.absolutePath()};
+    const QString lnxDir  {QDir::fromNativeSeparators(dirStr)};
+    auto    [picturePath, artMap] {_dirMap[lnxDir]};
 
     QString pic;
     picSource = PicSource_none;
 
-    if (!dirInfo.map[disk].pic.isEmpty())
+    if (!artMap[disk].pic.isEmpty())
     {
         picSource = PicFromJson_disk;
-        pic = dirInfo.map[disk].pic;
+        pic = artMap[disk].pic;
     }
-    else if (!dirInfo.pic.isEmpty())
+    else if (!picturePath.isEmpty())
     {
         picSource = PicFromJson_dir;
-        pic = dirInfo.pic;
+        pic = picturePath;
     }
     else if (!_diskPic.isEmpty())
     {
@@ -77,29 +77,29 @@ QString DbIni::getPicture(const QDir& dir, const QString& disk, PicSourceType& p
 
 void DbIni::setTitle(const QString& title, const QString& folder, const QString& disk)
 {
-    QString lnxDir = QDir::fromNativeSeparators(folder);
+    const QString lnxDir = QDir::fromNativeSeparators(folder);
     _dirMap[lnxDir].map[disk].label.title = title;
     _dirty = true;
 }
 
 void DbIni::setIndex(const QString& index, const QString& folder, const QString& disk)
 {
-    QString lnxDir = QDir::fromNativeSeparators(folder);
+    const QString lnxDir = QDir::fromNativeSeparators(folder);
     _dirMap[lnxDir].map[disk].label.index = index;
     _dirty = true;
 }
 
-void DbIni::setSideB(bool sideB, const QString& folder, const QString& disk)
+void DbIni::setSideB(const bool sideB, const QString& folder, const QString& disk)
 {
-    QString lnxDir = QDir::fromNativeSeparators(folder);
+    const QString lnxDir = QDir::fromNativeSeparators(folder);
     _dirMap[lnxDir].map[disk].label.sideB = sideB;
     _dirty = true;
 }
 
 DiskLabel DbIni::getLabel(const QDir& dir, const QString& disk)
 {
-    QString folder = dir.absolutePath();
-    QString lnxDir = QDir::fromNativeSeparators(folder);
+    const QString folder = dir.absolutePath();
+    const QString lnxDir = QDir::fromNativeSeparators(folder);
     return _dirMap[lnxDir].map[disk].label;
 }
 
@@ -166,19 +166,19 @@ bool DbIni::save()
 
     for (auto it {_dirMap.begin()}; it != _dirMap.end(); ++it)
     {
-        DirInfo& dirInfo = it.value();
+        auto& [picturePath, artMap] = it.value();
         QString  escDir  = it.key();
         escDir.replace('/','@');
 
         _settings->beginGroup(escDir);
 
-        if (!dirInfo.pic.isEmpty())
-            _settings->setValue("pic", dirInfo.pic.replace('/','@'));
+        if (!picturePath.isEmpty())
+            _settings->setValue("pic", picturePath.replace('/','@'));
 
-        for (auto it2 {dirInfo.map.begin()}; it2 != dirInfo.map.end(); ++it2)
+        for (auto it2 {artMap.begin()}; it2 != artMap.end(); ++it2)
         {
             FloppyArt art {it2.value()};
-            QString group {it2.key()};
+            const QString& group {it2.key()};
 
             if (art.isEmpty())
                 continue;

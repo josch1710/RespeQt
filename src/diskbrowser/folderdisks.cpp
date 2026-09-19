@@ -7,19 +7,15 @@
 #include "miscutils.h"
 #include <QDir>
 
-FolderDisks::FolderDisks() : QObject()
-{
-}
+FolderDisks::FolderDisks() = default;
 
 bool FolderDisks::load(const QString& path)
 {
-    QString targetPath = path.isEmpty() ? QDir::currentPath() : path;
-
-    if (dir.exists(targetPath))
+    if (const QString targetPath = path.isEmpty() ? QDir::currentPath() : path; dir.exists(targetPath))
     {
         dir.setPath(targetPath);
 
-        QStringList filter = FileTypes::getDiskImageTypes();
+        const QStringList& filter = FileTypes::getDiskImageTypes();
         diskList = dir.entryList(filter, QDir::Files);
         dirList = dir.entryList(QDir::AllDirs | QDir::NoDot);
     }

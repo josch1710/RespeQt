@@ -1,5 +1,4 @@
 #include "diskbrowser/dbjson.h"
-#include <QStandardPaths>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include "respeqtsettings.h"
@@ -7,7 +6,7 @@
 DbJson::DbJson()
 {    
     if (RespeqtSettings::instance()->dbDataSource() == DbData_appFolderJson)
-        setDataDir(RespeqtSettings::instance()->appDataFolder());
+        DbJson::setDataDir(RespeqtSettings::instance()->appDataFolder());
 }
 
 DbJson::~DbJson()
@@ -19,6 +18,7 @@ DbJson::~DbJson()
 void DbJson::setDataDir(const QString& dir)
 {
     _dataDir.setPath(dir + "/.respeqt_db");
+    // ReSharper disable once CppExpressionWithoutSideEffects
     _dataDir.mkpath(".");
 
     _fileName = _dataDir.absoluteFilePath("dbSettings.json");
@@ -26,15 +26,15 @@ void DbJson::setDataDir(const QString& dir)
     DbJson::load();
 }
 
-void DbJson::setPicture(const QString& pic, const QString& dir, const QString& disk)
+void DbJson::setPicture(const QString& pic, const QString& folder, const QString& disk)
 {
     if (pic.isEmpty())
         return;
 
-    bool isGlobal = (dir.isEmpty() && disk.isEmpty());     // program global pic?
-    bool isDirPic = (!dir.isEmpty() && disk.isEmpty());
-    bool isDiskPic = (!dir.isEmpty() && !disk.isEmpty());
-    QString lnxDir = QDir::fromNativeSeparators(dir);
+    const bool isGlobal = folder.isEmpty() && disk.isEmpty();     // program global pic?
+    const bool isDirPic = !folder.isEmpty() && disk.isEmpty();
+    const bool isDiskPic = !folder.isEmpty() && !disk.isEmpty();
+    const QString lnxDir = QDir::fromNativeSeparators(folder);
 
     if (isGlobal)
         _diskPic = pic;
@@ -48,31 +48,31 @@ void DbJson::setPicture(const QString& pic, const QString& dir, const QString& d
     _dirty = true;
 }
 
-void DbJson::setLabel(const DiskLabel& label, const QString& dir, const QString& disk)
+void DbJson::setLabel(const DiskLabel& label, const QString& folder, const QString& disk)
 {
-    QString lnxDir = QDir::fromNativeSeparators(dir);
+    const QString lnxDir = QDir::fromNativeSeparators(folder);
     _dirMap[lnxDir].map[disk].label = label;
     _dirty = true;
 }
 
 QString DbJson::getPicture(const QDir& dir, const QString& disk, PicSourceType& picSource)
 {
-    QString dirStr  = dir.absolutePath();
-    QString lnxDir  = QDir::fromNativeSeparators(dirStr);
-    DirInfo dirInfo = _dirMap[lnxDir];
+    const QString dirStr  = dir.absolutePath();
+    const QString lnxDir  = QDir::fromNativeSeparators(dirStr);
+    auto [picturePath, artMap] = _dirMap[lnxDir];
 
     QString pic;
     picSource = PicSource_none;
 
-    if (!dirInfo.map[disk].pic.isEmpty())
+    if (!artMap[disk].pic.isEmpty())
     {
         picSource = PicFromJson_disk;
-        pic = dirInfo.map[disk].pic;
+        pic = artMap[disk].pic;
     }
-    else if (!dirInfo.pic.isEmpty())
+    else if (!picturePath.isEmpty())
     {
         picSource = PicFromJson_dir;
-        pic = dirInfo.pic;
+        pic = picturePath;
     }
     else if (!_diskPic.isEmpty())
     {
@@ -85,29 +85,29 @@ QString DbJson::getPicture(const QDir& dir, const QString& disk, PicSourceType& 
 
 void DbJson::setTitle(const QString& title, const QString& folder, const QString& disk)
 {
-    QString lnxDir = QDir::fromNativeSeparators(folder);
+    const QString lnxDir = QDir::fromNativeSeparators(folder);
     _dirMap[lnxDir].map[disk].label.title = title;
     _dirty = true;
 }
 
 void DbJson::setIndex(const QString& index, const QString& folder, const QString& disk)
 {
-    QString lnxDir = QDir::fromNativeSeparators(folder);
+    const QString lnxDir = QDir::fromNativeSeparators(folder);
     _dirMap[lnxDir].map[disk].label.index = index;
     _dirty = true;
 }
 
-void DbJson::setSideB(bool sideB, const QString& folder, const QString& disk)
+void DbJson::setSideB(const bool sideB, const QString& folder, const QString& disk)
 {
-    QString lnxDir = QDir::fromNativeSeparators(folder);
+    const QString lnxDir = QDir::fromNativeSeparators(folder);
     _dirMap[lnxDir].map[disk].label.sideB = sideB;
     _dirty = true;
 }
 
 DiskLabel DbJson::getLabel(const QDir& dir, const QString& disk)
 {
-    QString folder = dir.absolutePath();
-    QString lnxDir = QDir::fromNativeSeparators(folder);
+    const QString folder = dir.absolutePath();
+    const QString lnxDir = QDir::fromNativeSeparators(folder);
     return _dirMap[lnxDir].map[disk].label;
 }
 
@@ -119,7 +119,7 @@ bool DbJson::load()
     QFile file {_fileName};
     file.open(QIODevice::ReadOnly);
 
-    auto data {file.readAll()};
+    const auto data {file.readAll()};
     file.close();
 
     _jsDoc = QJsonDocument::fromJson(data);
@@ -170,7 +170,7 @@ bool DbJson::load()
     return true;    // TBD: error check?
 }
 
-QString DbJson::checkCopyPic(const QString& name)
+QString DbJson::checkCopyPic(const QString& name) const
 {
     // remove the path name if it's not needed
     // (allows collection/folder to be moved/copied)
@@ -181,7 +181,7 @@ QString DbJson::checkCopyPic(const QString& name)
     return name;
 }
 
-QString DbJson::makeFullPath(const QString& name)
+QString DbJson::makeFullPath(const QString& name) const
 {
     if (name.isEmpty())
         return name;
@@ -209,7 +209,7 @@ bool DbJson::save()
 
     auto it {_dirMap.begin()};  // set iterator to the first disk collection folder
 
-    bool useSubDir {RespeqtSettings::instance()->dbDataSource() == DbData_subDirJson};
+    const bool useSubDir {RespeqtSettings::instance()->dbDataSource() == DbData_subDirJson};
     if (useSubDir)
     {
         QDir upDir(_dataDir);               // disk collection dir will be the parent
@@ -232,23 +232,23 @@ bool DbJson::save()
         if (!dirInfo.pic.isEmpty())
             jsDirObj["pic"] = checkCopyPic(dirInfo.pic);
 
-        for (auto it {dirInfo.map.begin()}; it != dirInfo.map.end(); ++it)
+        for (auto it2 {dirInfo.map.begin()}; it2 != dirInfo.map.end(); ++it2)
         {
-            const QString   disk {it.key()};
-            const FloppyArt& art {it.value()};
+            const QString&   disk {it2.key()};
+            const auto& [pic, label] {it2.value()};
 
             QJsonObject jsNode;
 
-            if (!art.pic.isEmpty())
-                jsNode["pic"] = checkCopyPic(art.pic);
+            if (!pic.isEmpty())
+                jsNode["pic"] = checkCopyPic(pic);
 
-            if (!art.label.title.isEmpty())
-                jsNode["title"] = art.label.title;
+            if (!label.title.isEmpty())
+                jsNode["title"] = label.title;
 
-            if (!art.label.index.isEmpty())
+            if (!label.index.isEmpty())
             {
-                jsNode["index"] = art.label.index;
-                jsNode["sideb"] = art.label.sideB;
+                jsNode["index"] = label.index;
+                jsNode["sideb"] = label.sideB;
             }
 
             if (!jsNode.isEmpty())
@@ -266,7 +266,7 @@ bool DbJson::save()
 
     _jsDoc = QJsonDocument(jsRoot);
 
-    auto jsData {_jsDoc.toJson(QJsonDocument::Indented)};
+    const auto jsData {_jsDoc.toJson(QJsonDocument::Indented)};
     file.write(jsData);
     file.close();
 
