@@ -8,7 +8,7 @@ namespace Network {
 
     auto SessionInfo::realPath(const QString &path) const -> QDirPtr {
         if (path == "/") {
-            return QDirPtr();
+            return {};
         }
         auto pathList{path.split('/')};
         if (pathList.first() == "")
@@ -16,48 +16,41 @@ namespace Network {
 
         // TODO Perhaps there is a way to detect case sensitivity for a filesystem
 #if defined Q_OS_UNIX && !defined Q_OS_OSX
-        Qt::CaseSensitivity cs = Qt::CaseSensitive;
+        constexpr Qt::CaseSensitivity cs {Qt::CaseSensitive};
 #else
-        Qt::CaseSensitivity cs = Qt::CaseInsensitive;
+        constexpr Qt::CaseSensitivity cs {Qt::CaseInsensitive};
 #endif
-        for(auto mountPoint: _parent->mountPoints()) {
+        for(const auto& mountPoint: _parent->mountPoints()) {
             if (mountPoint.isNull()) {
                 continue;
             }
             if (mountPoint->isRoot()) {
-                QStorageInfo info{mountPoint->absolutePath()};
-                if (pathList.first() == info.displayName())
+                if (QStorageInfo info{mountPoint->absolutePath()}; pathList.first() == info.displayName())
                     return QDirPtr::create(mountPoint->absolutePath());
             }
             auto temp{mountPoint->absolutePath()};
-            for(auto dir = pathList.rbegin(); dir != pathList.rend(); dir++) {
+            for(auto dir = pathList.rbegin(); dir != pathList.rend(); ++dir) {
                 if (temp.endsWith(*dir, cs)) {
-                    auto i = temp.lastIndexOf(*dir, -1, cs);
-                    auto length = dir->length();
-                    if (false && i > 0 && length > 0)
-                        i--, length++;
-
+                    const auto i = temp.lastIndexOf(*dir, -1, cs);
+                    const auto length = dir->length();
                     temp.remove(i, length);
                 }
             }
 
             auto infoPath{temp.append('/').append(path)};
-            QFileInfo info{infoPath};
-            if (info.exists()) {
+            if (QFileInfo info{infoPath}; info.exists()) {
                 return QDirPtr::create(QDir::cleanPath(info.absoluteFilePath()));
             }
         }
-        return QDirPtr();
+        return {};
     }
     auto SessionInfo::realFileName(const QString &fileName) const -> QString {
-        QFileInfo fileinfo(fileName);
-        auto dir{realPath(fileinfo.path())};
-        if (!dir.isNull()) {
-            QFileInfo file{dir->absoluteFilePath(fileinfo.fileName())};
-            if (file.exists())
+        const QFileInfo fileinfo(fileName);
+        if (const auto dir{realPath(fileinfo.path())}; !dir.isNull()) {
+            if (const QFileInfo file{dir->absoluteFilePath(fileinfo.fileName())}; file.exists())
                 return file.absoluteFilePath();
         }
-        return QString();
+        return {};
     }
 
 }  // Network

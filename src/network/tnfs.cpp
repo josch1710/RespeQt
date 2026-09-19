@@ -9,7 +9,7 @@
 #include <QStorageInfo>
 
 namespace Network {
-    Tnfs::Tnfs() : QObject() {
+    Tnfs::Tnfs() {
         commandTexts[0x00] = QString("Mount");
         commandTexts[0x01] = QString("Unmount");
         commandTexts[0x10] = QString("Open Dir");
@@ -32,30 +32,30 @@ namespace Network {
         commandTexts[0x29] = QString("Open File");
         commandTexts[0x30] = QString("Filesystem Size");
         commandTexts[0x31] = QString("Filesystem Free");
-    };
+    }
 
 // TODO Make static
-    auto Tnfs::removeMountPoint(QDir mountPoint) -> void {
+    auto Tnfs::removeMountPoint(const QDir& mountPoint) -> void {
         _mountPoints.removeOne(QDirPtr::create(mountPoint));
     }
 
-    auto Tnfs::addMountPoint(QDir mountPoint) -> void {
+    auto Tnfs::addMountPoint(const QDir& mountPoint) -> void {
         _mountPoints.append(QDirPtr::create(mountPoint));
     }
 
-    auto Tnfs::handleDatagram(const Network::Datagram &datagram) -> Datagram
+    auto Tnfs::handleDatagram(const Datagram &datagram) -> Datagram
     {
         Datagram answer{};
         QString commandname{};
 
-        if (commandTexts.contains(datagram.at(3)))
+        if (commandTexts.contains(static_cast<quint8>(datagram.at(3))))
         {
             commandname = " (";
-            commandname.append(commandTexts[datagram.at(3)]);
+            commandname.append(commandTexts[static_cast<quint8>(datagram.at(3))]);
             commandname.append(')');
         }
 
-        qDebug() << "!e" << "Incoming command 0x" << QString::number((unsigned char) datagram.at(3), 16) << commandname;
+        qDebug() << "!e" << "Incoming command 0x" << QString::number(static_cast<quint8>(datagram.at(3)), 16) << commandname;
         switch (datagram.at(3))
         {
             case TNFS_MOUNT:
@@ -147,7 +147,7 @@ namespace Network {
                 break;
 
             default: {
-                qDebug() << "!n" << "Unknown command 0x" << QString::number((unsigned char) datagram.at(3), 16);
+                qDebug() << "!n" << "Unknown command 0x" << QString::number(static_cast<unsigned char>(datagram.at(3)), 16);
                 //for(auto i=0;i<datagram.size();i++) qDebug()<<"!n" << i << " => "<<(unsigned)datagram.at(i);
 
                 answer    = datagram.createAnswer();
@@ -168,13 +168,12 @@ namespace Network {
     auto Tnfs::mount(const Datagram &datagram) -> Datagram {
         //auto retry{datagram.at(2)};
         //auto version{getU16At(datagram, 4)};
-        auto mountPoint{datagram.getStringAt(6)};
-        auto userID{datagram.getStringAt(7 + mountPoint.length())};
-        auto password{datagram.getStringAt(7 + mountPoint.length() + userID.length())};
+        const auto mountPoint{datagram.getStringAt(6)};
+        //auto userID{datagram.getStringAt(7 + mountPoint.length())};
+        //auto password{datagram.getStringAt(7 + mountPoint.length() + userID.length())};
         Datagram answer{};
 
-        const QDir root{QDir::homePath().append(mountPoint)};
-        if (!root.exists()) {
+        if (const QDir root{QDir::homePath().append(mountPoint)}; !root.exists()) {
             answer.setU16At(0, 0);
             answer.setU16At(ENOENT, 2);
             answer.setU16At(versionSupported, 4);
@@ -182,7 +181,7 @@ namespace Network {
             return answer;
         }
 
-        SessionInfoPtr session{SessionInfoPtr::create(_sessionID, this)};
+        const SessionInfoPtr session{SessionInfoPtr::create(_sessionID, this)};
         sessions[_sessionID] = session;
 
         answer.setU16At(session.data()->sessionID(), 0);
@@ -191,11 +190,11 @@ namespace Network {
         answer.append(static_cast<char>(0));
         answer.append(static_cast<char>(0));
         // Version number 1.2
-        answer.append(static_cast<char>(2));
-        answer.append(static_cast<char>(1));
+        answer.append(2);
+        answer.append(1);
         // 1000 (0x03E8) ms timeout
         answer.append(static_cast<char>(0xE8));
-        answer.append(static_cast<char>(0x03));
+        answer.append(0x03);
 
         emit sessionConnected(); // Inform the main window about session
 
@@ -212,9 +211,9 @@ namespace Network {
         }
         sessions.remove(datagram.getSessionID());
 
-        auto isSessionsEmpty {
+        const auto isSessionsEmpty {
             sessions.end() == std::find_if_not(sessions.begin(), sessions.end(),
-                [](SessionInfoPtr session) {
+                [](const SessionInfoPtr& session) {
                     return session.isNull();
                 })
         };
@@ -225,7 +224,7 @@ namespace Network {
     }
 
     auto Tnfs::opendir(const Datagram &datagram) -> Datagram {
-        auto sessionID{datagram.getSessionID()};
+        const auto sessionID{datagram.getSessionID()};
         auto dirName{datagram.getStringAt(4)};
         auto answer{datagram.createAnswer()};
 
@@ -234,27 +233,27 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions[sessionID]};
-        auto pathName{sessionInfo->realPath(dirName)};
+        const auto sessionInfo{sessions[sessionID]};
+        const auto pathName{sessionInfo->realPath(dirName)};
         if (dirName != "/" && !pathName.isNull() && !pathName->exists()) {
             answer[4] = ENOENT;
             return answer;
         }
 
         auto &openDirs{sessionInfo->openDirectories()};
-        qint16 handle{findFreeSlot(openDirs)};
+        const qint16 handle{findFreeSlot(openDirs)};
         if(handle < 0) {
             answer[4] = EMFILE;
             return answer;
         }
-        answer[5] = handle;
+        answer[5] = static_cast<char>(handle);
 
-        auto index{QDirIndexPtr::create()};
+        const auto index{QDirIndexPtr::create()};
         index->isVirtualRoot = dirName == "/";
         index->actualDir = pathName;
         index->virtualDir = QDirPtr::create(dirName);
         if (index->isVirtualRoot) {
-            for(auto mountPoint: mountPoints()){
+            for(const auto& mountPoint: mountPoints()){
                 if (mountPoint.isNull()){
                     continue;
                 }
@@ -276,8 +275,8 @@ namespace Network {
     }
 
     auto Tnfs::readdir(const Datagram &datagram) -> Datagram {
-        auto sessionID{datagram.getSessionID()};
-        quint8 handle = datagram[4];
+        const auto sessionID{datagram.getSessionID()};
+        const auto handle = static_cast<quint8>(datagram[4]);
         auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
@@ -285,30 +284,30 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions[sessionID]};
+        const auto sessionInfo{sessions[sessionID]};
         auto &openDirs{sessionInfo->openDirectories()};
         if (openDirs[handle].isNull()) {
             answer[4] = ENOENT;
             return answer;
         }
 
-        auto index{openDirs[handle]};
-        if (index->fileListIndex >= index->files.length()) {
+        const auto index{openDirs[handle]};
+        if (index->fileListIndex >= static_cast<quint32>(index->files.length())) {
             answer[4] = TNFS_EOF;
             return answer;
         }
 
-        answer.setStringAt(index->files[index->fileListIndex], 5);
+        answer.setStringAt(index->files[static_cast<int>(index->fileListIndex)], 5);
         index->fileListIndex++;
 
         return answer;
     }
 
     auto Tnfs::opendirx(const Datagram &datagram) -> Datagram {
-        auto sessionID{datagram.getSessionID()};
-        auto diropt{static_cast<quint8>(datagram.at(4))};
-        auto dirsort{static_cast<quint8>(datagram.at(5))};
-        auto maxcount{datagram.getU16At(6)};
+        const auto sessionID{datagram.getSessionID()};
+        const auto diropt{static_cast<quint8>(datagram.at(4))};
+        const auto dirsort{static_cast<quint8>(datagram.at(5))};
+        const auto maxcount{datagram.getU16At(6)};
         auto wildcard{datagram.getStringAt(8)};
         auto dirName{datagram.getStringAt(9 + wildcard.length())};
         auto answer{datagram.createAnswer()};
@@ -318,22 +317,22 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions[sessionID]};
-        auto pathName{sessionInfo->realPath(dirName)};
+        const auto sessionInfo{sessions[sessionID]};
+        const auto pathName{sessionInfo->realPath(dirName)};
         if (dirName != "/" && !pathName.isNull() && !pathName->exists()) {
             answer[4] = ENOENT;
             return answer;
         }
 
         auto &openDirs{sessionInfo->openDirectories()};
-        qint16 handle{findFreeSlot(openDirs)};
+        const qint16 handle{findFreeSlot(openDirs)};
         if (handle < 0) {
             answer[4] = EMFILE;
             return answer;
         }
 
-        answer[5] = handle;
-        auto index{QDirIndexPtr::create()};
+        answer[5] = static_cast<char>(handle);
+        const auto index{QDirIndexPtr::create()};
         index->isVirtualRoot = dirName == "/";
         index->actualDir = pathName;
         index->virtualDir = QDirPtr::create(dirName);
@@ -401,16 +400,16 @@ namespace Network {
                 index->files.removeLast();
             }
         }
-        answer.setU16At(index->files.count(), 6);
+        answer.setU16At(static_cast<quint16>(index->files.count()), 6);
 
         return answer;
     }
 
     auto Tnfs::readdirx(const Datagram &datagram) -> Datagram
     {
-        auto sessionID{datagram.getSessionID()};
-        quint8 handle   = datagram[4];
-        quint8 maxCount = datagram[5];
+        const auto sessionID{datagram.getSessionID()};
+        const auto handle = static_cast<quint8>(datagram[4]);
+        //const quint8 maxCount = datagram[5];
         auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr)
@@ -419,7 +418,7 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions[sessionID]};
+        const auto sessionInfo{sessions[sessionID]};
         auto &openDirs{sessionInfo->openDirectories()};
         if (openDirs[handle].isNull())
         {
@@ -427,8 +426,8 @@ namespace Network {
             return answer;
         }
 
-        auto index{openDirs[handle]};
-        if (index->fileListIndex >= index->files.length())
+        const auto index{openDirs[handle]};
+        if (index->fileListIndex >= static_cast<quint32>(index->files.length()))
         {
             answer[4] = TNFS_EOF;
             return answer;
@@ -437,39 +436,39 @@ namespace Network {
         QString fileName{};
         if (index->isVirtualRoot) {
             fileName = "/";
-            fileName.append(index->files.at(index->fileListIndex));
-            auto dir{sessionInfo->realPath(fileName)};
+            fileName.append(index->files.at(static_cast<int>(index->fileListIndex)));
+            const auto dir{sessionInfo->realPath(fileName)};
             fileName = QDir::toNativeSeparators(dir->absolutePath());
         }
         else {
-            fileName = index->actualDir->absoluteFilePath(index->files.at(index->fileListIndex));
+            fileName = index->actualDir->absoluteFilePath(index->files.at(static_cast<int>(index->fileListIndex)));
         }
 
-        QFileInfo fileInfo{fileName};
+        const QFileInfo fileInfo{fileName};
         answer[5] = 1;
         answer[6] = 0;
-        if (index->fileListIndex + 1 == index->files.count()) { // Last entry
+        if (index->fileListIndex + 1 == static_cast<quint32>(index->files.count())) { // Last entry
             answer[6] = TNFS_DIRSTATUS_EOF;
         }
-        answer.setU16At(index->fileListIndex, 7);
+        answer.setU16At(static_cast<quint16>(index->fileListIndex), 7);
         quint8 entry{0};
         if (fileInfo.isDir())
             entry |= TNFS_DIRENTRY_DIR;
         if (fileInfo.isHidden())
             entry |= TNFS_DIRENTRY_HIDDEN;
-        answer[9] = entry;
-        answer.setU32At(fileInfo.size(), 10);
+        answer[9] = static_cast<char>(entry);
+        answer.setU32At(static_cast<quint32>(fileInfo.size()), 10);
         answer.setU32At(fileInfo.lastModified().toTime_t(), 14);
         answer.setU32At(fileInfo.lastModified().toTime_t(), 18);
-        answer.setStringAt(index->files[index->fileListIndex], 22);
+        answer.setStringAt(index->files[static_cast<int>(index->fileListIndex)], 22);
         index->fileListIndex++;
 
         return answer;
     }
 
     auto Tnfs::telldir(const Datagram &datagram) -> Datagram {
-        auto sessionID{datagram.getSessionID()};
-        quint8 handle = datagram[4];
+        const auto sessionID{datagram.getSessionID()};
+        const auto handle {static_cast<quint8>(datagram[4])};
         auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
@@ -477,7 +476,7 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions[sessionID]};
+        const auto sessionInfo{sessions[sessionID]};
         auto &openDirs{sessionInfo->openDirectories()};
         if (openDirs[handle].isNull() || !openDirs[handle]->actualDir->exists()) {
             answer[4] = ENOENT;
@@ -490,17 +489,17 @@ namespace Network {
     }
 
     auto Tnfs::seekdir(const Datagram &datagram) -> Datagram {
-        auto sessionID{datagram.getSessionID()};
-        quint8 handle = datagram[4];
-        auto seekIndex{datagram.getU32At(5)};
+        const auto sessionID{datagram.getSessionID()};
+        const auto handle {static_cast<quint8>(datagram[4])};
+        const auto seekIndex{datagram.getU32At(5)};
         auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
             answer[4] = EINVAL;
             return answer;
         }
-// TODO remove openDirs
-        auto sessionInfo{sessions[sessionID]};
+
+        const auto sessionInfo{sessions[sessionID]};
         auto &openDirs{sessionInfo->openDirectories()};
         if (openDirs[handle].isNull() ||
             (!openDirs[handle]->isVirtualRoot && !openDirs[handle]->actualDir->exists())
@@ -509,7 +508,7 @@ namespace Network {
             return answer;
         }
 
-        if (seekIndex >= openDirs[handle]->files.count()) {
+        if (seekIndex >= static_cast<quint32>(openDirs[handle]->files.count())) {
             answer[4] = EINVAL;
             return answer;
         }
@@ -519,8 +518,8 @@ namespace Network {
     }
 
     auto Tnfs::closedir(const Datagram &datagram) -> Datagram {
-        auto sessionID{datagram.getSessionID()};
-        quint8 handle = datagram[4];
+        const auto sessionID{datagram.getSessionID()};
+        const auto handle {static_cast<quint8>(datagram[4])};
         auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
@@ -528,7 +527,7 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions[sessionID]};
+        const auto sessionInfo{sessions[sessionID]};
         auto &openDirs{sessionInfo->openDirectories()};
         if (openDirs[handle].isNull()) {
             answer[4] = ENOENT;
@@ -540,7 +539,7 @@ namespace Network {
     }
 
     auto Tnfs::mkdir(const Datagram &datagram) const -> Datagram {
-        auto sessionID{datagram.getSessionID()};
+        const auto sessionID{datagram.getSessionID()};
         auto dirName{datagram.getStringAt(4)};
         auto answer{datagram.createAnswer()};
 
@@ -549,10 +548,10 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions.at(sessionID)};
+        const auto sessionInfo{sessions.at(sessionID)};
         if (dirName.startsWith('/'))
             dirName.remove(0, 1);
-        auto realPath{sessionInfo->realPath(dirName)};
+        const auto realPath{sessionInfo->realPath(dirName)};
         if (realPath->exists()) {
             answer[4] = EEXIST;
             return answer;
@@ -567,7 +566,7 @@ namespace Network {
     }
 
     auto Tnfs::rmdir(const Datagram &datagram) const -> Datagram {
-        auto sessionID{datagram.getSessionID()};
+        const auto sessionID{datagram.getSessionID()};
         auto dirName{datagram.getStringAt(4)};
         auto answer{datagram.createAnswer()};
 
@@ -576,10 +575,10 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions.at(sessionID)};
+        const auto sessionInfo{sessions.at(sessionID)};
         if (dirName.startsWith('/'))
             dirName.remove(0, 1);
-        auto realPath{sessionInfo->realPath(dirName)};
+        const auto realPath{sessionInfo->realPath(dirName)};
         if (!realPath->exists()) {
             answer[4] = ENOENT;
             return answer;
@@ -594,10 +593,10 @@ namespace Network {
     }
 
     auto Tnfs::openfile(const Datagram &datagram) -> Datagram {
-        auto sessionID{datagram.getSessionID()};
-        auto flags{datagram.getU16At(4)};
-        auto mode{datagram.getU16At(6)};
-        auto fileName{datagram.getStringAt(8)};
+        const auto sessionID{datagram.getSessionID()};
+        const auto flags{datagram.getU16At(4)};
+        const auto mode{datagram.getU16At(6)};
+        const auto fileName{datagram.getStringAt(8)};
         auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
@@ -605,16 +604,16 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions.at(sessionID)};
+        const auto sessionInfo{sessions.at(sessionID)};
         auto &openFiles{sessionInfo->openFiles()};
-        qint16 handle{findFreeSlot(openFiles)};
-        answer[5] = handle;
+        const qint16 handle{findFreeSlot(openFiles)};
+        answer[5] = static_cast<char>(handle);
         if(handle < 0) {
             answer[4] = EMFILE;
             return answer;
         }
 
-        auto file = new QFile(sessionInfo->realFileName(fileName));
+        const auto file = new QFile(sessionInfo->realFileName(fileName));
         QIODevice::OpenMode qflags{QIODevice::NotOpen};
         if (flags & 0x0001)
             qflags |= QIODevice::ReadOnly;
@@ -627,13 +626,13 @@ namespace Network {
         if (flags & O_TRUNC)
             qflags |= QIODevice::Truncate;
         // We must simulate ~O_CREAT and O_EXCL
-        if (((flags & 0x0002) | (flags & 0x0003)) && (flags & O_CREAT) == 0 && !file->exists()) {
+        if ((flags & 0x0002) | (flags & 0x0003) && (flags & O_CREAT) == 0 && !file->exists()) {
             // Qt always creates a file, when in write mode.
             // So we simulate not to automatically create the file, when O_CREAT is not set.
             answer[4] = ENOENT;
             return answer;
         }
-        if (((flags & 0x0002) | (flags & 0x0003)) && (flags & (O_CREAT | O_EXCL)) && file->exists()) {
+        if ((flags & 0x0002) | (flags & 0x0003) && flags & (O_CREAT | O_EXCL) && file->exists()) {
             // O_EXCL with O_CREAT means that, that a file is only created, if it does not exist.
             answer[4] = EEXIST;
             return answer;
@@ -650,8 +649,8 @@ namespace Network {
     }
 
     auto Tnfs::closefile(const Datagram &datagram) const -> Datagram {
-        auto sessionID{datagram.getSessionID()};
-        quint8 handle{static_cast<quint8>(datagram.at(4))};
+        const auto sessionID{datagram.getSessionID()};
+        const quint8 handle{static_cast<quint8>(datagram.at(4))};
         auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
@@ -659,7 +658,7 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions.at(sessionID)};
+        const auto sessionInfo{sessions.at(sessionID)};
         auto& openFiles{sessionInfo->openDirectories()};
         if (!openFiles[handle].isNull()) {
             answer[4] = ENOENT;
@@ -672,8 +671,8 @@ namespace Network {
 
     auto Tnfs::readfile(const Datagram &datagram) const -> Datagram
     {
-        auto sessionID{datagram.getSessionID()};
-        auto handle{static_cast<quint8>(datagram.at(4))};
+        const auto sessionID{datagram.getSessionID()};
+        const auto handle{static_cast<quint8>(datagram.at(4))};
         auto max{datagram.getU16At(5)};
         auto answer{datagram.createAnswer()};
 
@@ -682,7 +681,7 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions.at(sessionID)};
+        const auto sessionInfo{sessions.at(sessionID)};
         auto& openFiles{sessionInfo->openFiles()};
         if (openFiles[handle].isNull() || !openFiles[handle]->exists()) {
             answer[4] = ENOENT;
@@ -700,8 +699,8 @@ namespace Network {
         }
 
         max = std::min(max, MAX_PACKET_SIZE); // Clamp the datagram size
-        auto buffer {openFiles[handle]->read(max)};
-        answer.setU16At(buffer.length(), 5);
+        const auto buffer {openFiles[handle]->read(max)};
+        answer.setU16At(static_cast<quint16>(buffer.length()), 5);
         answer.setRawBytes(buffer, 7);
 
         return answer;
@@ -709,10 +708,10 @@ namespace Network {
 
     auto Tnfs::writefile(const Datagram &datagram) const -> Datagram
     {
-        auto sessionID{datagram.getSessionID()};
-        auto handle{static_cast<quint8>(datagram.at(4))};
-        auto length{datagram.getU16At(5)};
-        auto data{datagram.getRawBytes(length, 7)};
+        const auto sessionID{datagram.getSessionID()};
+        const auto handle{static_cast<quint8>(datagram.at(4))};
+        const auto length{datagram.getU16At(5)};
+        const auto data{datagram.getRawBytes(length, 7)};
         auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
@@ -720,7 +719,7 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions.at(sessionID)};
+        const auto sessionInfo{sessions.at(sessionID)};
         auto& openFiles{sessionInfo->openFiles()};
         if (openFiles[handle].isNull() || !openFiles[handle]->exists()) {
             answer[4] = ENOENT;
@@ -732,22 +731,22 @@ namespace Network {
             return answer;
         }
 
-        auto written = openFiles[handle]->write(data);
-        answer.setU16At(written, 5);
+        const auto written = openFiles[handle]->write(data);
+        answer.setU16At(static_cast<quint16>(written), 5);
 
         return answer;
     }
 
     auto Tnfs::seekfile(const Datagram &datagram) const -> Datagram
     {
-        auto sessionID{datagram.getSessionID()};
-        auto handle{static_cast<quint8>(datagram.at(4))};
-        auto type{static_cast<quint8>(datagram.at(5))};
-        unsigned char a = datagram.at(6);
-        unsigned char b = datagram.at(7);
-        unsigned char c = datagram.at(8);
-        unsigned char d = datagram.at(9);
-        qint32 position = a | b << 8 | c << 16 | d << 24;
+        const auto sessionID{datagram.getSessionID()};
+        const auto handle{static_cast<quint8>(datagram.at(4))};
+        const auto type{static_cast<quint8>(datagram.at(5))};
+        const auto a {static_cast<quint8>(datagram.at(6))};
+        const auto b {static_cast<quint8>(datagram.at(7))};
+        const auto c {static_cast<quint8>(datagram.at(8))};
+        const auto d {static_cast<quint8>(datagram.at(9))};
+        const qint32 position = a | b << 8 | c << 16 | d << 24;
         auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
@@ -755,7 +754,7 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions.at(sessionID)};
+        const auto sessionInfo{sessions.at(sessionID)};
         auto& openFiles{sessionInfo->openFiles()};
         if (openFiles[handle].isNull() || !openFiles[handle]->exists()) {
             answer[4] = ENOENT;
@@ -767,7 +766,7 @@ namespace Network {
             return answer;
         }*/
 
-        auto file{openFiles[handle]};
+        const auto file{openFiles[handle]};
         bool success{};
         if (type == SEEK_SET)
             success = file->seek(position);
@@ -781,14 +780,14 @@ namespace Network {
             return answer;
         }
 
-        answer.setU32At(file->pos(), 5);
+        answer.setU32At(static_cast<quint32>(file->pos()), 5);
         return answer;
     }
 
     auto Tnfs::statfile(const Datagram &datagram) const -> Datagram
     {
-        quint16 sessionID{datagram.getSessionID()};
-        auto fileName{datagram.getStringAt(4)};
+        const quint16 sessionID{datagram.getSessionID()};
+        const auto fileName{datagram.getStringAt(4)};
         auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
@@ -796,19 +795,18 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions.at(sessionID)};
-        QFileInfo fileInfo{sessionInfo->realFileName(fileName)};
-        answer.setU16At(fileInfo.permissions(), 5);
+        const auto sessionInfo{sessions.at(sessionID)};
+        const QFileInfo fileInfo{sessionInfo->realFileName(fileName)};
+        // ReSharper disable once CppRedundantCastExpression
+        answer.setU16At(static_cast<quint16>(fileInfo.permissions()), 5);
         // On Windows and other system ownerID and groupID will return -2. TNFS needs 0.
         quint16 id{static_cast<quint16>(fileInfo.ownerId())};
-        if (id < 0)
-            id = 0;
+        id = std::max<quint16>(id, 0);
         answer.setU16At(id, 7);
-        id = fileInfo.groupId();
-        if (id < 0)
-            id = 0;
+        id = static_cast<quint16>(fileInfo.groupId());
+        id = std::max<quint16>(id, 0);
         answer.setU16At(id, 9);
-        answer.setU32At(fileInfo.size(), 11);
+        answer.setU32At(static_cast<quint32>(fileInfo.size()), 11);
         answer.setU32At(fileInfo.lastRead().toTime_t(), 15);
         answer.setU32At(fileInfo.lastModified().toTime_t(), 19);
         answer.setU32At(fileInfo.birthTime().toTime_t(), 23);
@@ -820,8 +818,8 @@ namespace Network {
 
     auto Tnfs::unlinkfile(const Datagram &datagram) const -> Datagram
     {
-        auto sessionID{datagram.getSessionID()};
-        auto fileName{datagram.getStringAt(4)};
+        const auto sessionID{datagram.getSessionID()};
+        const auto fileName{datagram.getStringAt(4)};
         auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
@@ -829,9 +827,8 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions.at(sessionID)};
-        QFile file{sessionInfo->realFileName(fileName)};
-        if (file.exists() && !file.remove()) {
+        const auto sessionInfo{sessions.at(sessionID)};
+        if (QFile file{sessionInfo->realFileName(fileName)}; file.exists() && !file.remove()) {
             answer[4] = EACCES;
             return answer;
         }
@@ -841,9 +838,9 @@ namespace Network {
 
     auto Tnfs::chmodfile(const Datagram &datagram) const -> Datagram
     {
-        auto sessionID{datagram.getSessionID()};
-        auto permissions{datagram.getU16At(4)};
-        auto fileName{datagram.getStringAt(6)};
+        const auto sessionID{datagram.getSessionID()};
+        const auto permissions{datagram.getU16At(4)};
+        const auto fileName{datagram.getStringAt(6)};
         auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
@@ -851,7 +848,7 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions.at(sessionID)};
+        const auto sessionInfo{sessions.at(sessionID)};
         QFile file{sessionInfo->realFileName(fileName)};
         if (!file.exists()) {
             answer[4] = ENOENT;
@@ -868,9 +865,9 @@ namespace Network {
 
     auto Tnfs::renamefile(const Datagram &datagram) const -> Datagram
     {
-        auto sessionID{datagram.getSessionID()};
-        auto fileName{datagram.getStringAt(4)};
-        auto newName{datagram.getStringAt(5 + fileName.length())};
+        const auto sessionID{datagram.getSessionID()};
+        const auto fileName{datagram.getStringAt(4)};
+        const auto newName{datagram.getStringAt(5 + fileName.length())};
         auto answer{datagram.createAnswer()};
 
         if (sessions.at(sessionID).data() == nullptr) {
@@ -878,7 +875,7 @@ namespace Network {
             return answer;
         }
 
-        auto sessionInfo{sessions.at(sessionID)};
+        const auto sessionInfo{sessions.at(sessionID)};
         QFile file{sessionInfo->realFileName(fileName)};
         if (!file.exists()) {
             answer[4] = ENOENT;
@@ -896,11 +893,11 @@ namespace Network {
     auto Tnfs::fsSize(const Datagram &datagram) -> Datagram
     {
         //auto sessionID{datagram.getSessionID()};
-        auto fileName{datagram.getStringAt(4)};
+        //auto fileName{datagram.getStringAt(4)};
         auto answer{datagram.createAnswer()};
 
         answer[4] = 0;
-        QStorageInfo disk{*(_mountPoints.first())};
+        const QStorageInfo disk{*_mountPoints.first()};
         answer.setU32At(static_cast<quint32>(disk.bytesTotal() / 1024), 5);
         return answer;
     }
@@ -908,11 +905,11 @@ namespace Network {
     auto Tnfs::fsFree(const Datagram &datagram) -> Datagram
     {
         //auto sessionID{datagram.getSessionID()};
-        auto fileName{datagram.getStringAt(4)};
+        //auto fileName{datagram.getStringAt(4)};
         auto answer{datagram.createAnswer()};
 
         answer[4] = 0;
-        QStorageInfo disk{*(_mountPoints.first())};
+        const QStorageInfo disk{*_mountPoints.first()};
         answer.setU32At(static_cast<quint32>(disk.bytesAvailable() / 1024), 5);
         return answer;
     }

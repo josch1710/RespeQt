@@ -2,8 +2,7 @@
 
 namespace Network
 {
-    TnfsUdp::TnfsUdp()
-    {}
+    TnfsUdp::TnfsUdp() = default;
 
     TnfsUdp::~TnfsUdp()
     {
@@ -40,14 +39,13 @@ namespace Network
 
         while (udpSocket->hasPendingDatagrams()) {
             Datagram datagram;
-            datagram.resize(udpSocket->pendingDatagramSize());
+            datagram.resize(static_cast<int>(udpSocket->pendingDatagramSize()));
             QHostAddress sender;
             quint16 senderPort;
 
             udpSocket->readDatagram(datagram.data(), datagram.size(),&sender, &senderPort);
 
-            auto answer{handleDatagram(datagram)};
-            if (answer.length() > 0) {
+            if (auto answer{handleDatagram(datagram)}; answer.length() > 0) {
                 udpSocket->writeDatagram(answer, sender, senderPort);
             }
         }

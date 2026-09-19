@@ -2,8 +2,7 @@
 
 namespace Network
 {
-    TnfsTcp::TnfsTcp()
-    {}
+    TnfsTcp::TnfsTcp() = default;
 
     TnfsTcp::~TnfsTcp()
     {
@@ -44,10 +43,9 @@ namespace Network
 
     void TnfsTcp::readPendingData(QTcpSocket *const socket) {
         Datagram datagram{};
-        datagram.resize(socket->bytesAvailable());
+        datagram.resize(static_cast<int>(socket->bytesAvailable()));
         socket->read(datagram.data(), socket->bytesAvailable());
-        auto answer{handleDatagram(datagram)};
-        if (answer.length() > 0) {
+        if (const auto answer{handleDatagram(datagram)}; answer.length() > 0) {
             socket->write(answer);
         }
     }

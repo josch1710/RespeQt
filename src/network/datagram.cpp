@@ -5,11 +5,11 @@
 
 namespace Network {
     auto Datagram::getU16At(const int index) const -> quint16 {
-        return (at(index + 1) << 8) | at(index);
+        return static_cast<quint16>((at(index + 1) << 8) | at(index));
     }
     
-    auto Datagram::setU16At(quint16 value, const int index) -> void {
-        char bytesValue[2] {
+    auto Datagram::setU16At(const quint16 value, const int index) -> void {
+        const char bytesValue[2] {
             static_cast<char>(value & 0xFF),
             static_cast<char>((value >> 8) & 0xFF)
         };
@@ -17,12 +17,12 @@ namespace Network {
     }
 
     auto Datagram::getU32At(const int index) const -> quint32 {
-        return (at(index + 3) << 24) | (at(index + 2) << 16)
-            | (at(index + 1) << 8) | at(index);
+        return static_cast<quint32>((at(index + 3) << 24) | (at(index + 2) << 16)
+            | (at(index + 1) << 8) | at(index));
     }
     
-    auto Datagram::setU32At(quint32 value, const int index) -> void {
-        char bytesValue[4] {
+    auto Datagram::setU32At(const quint32 value, const int index) -> void {
+        const char bytesValue[4] {
             static_cast<char>(value & 0xFF),
             static_cast<char>((value >> 8) & 0xFF),
             static_cast<char>((value >> 16) & 0xFF),
@@ -41,7 +41,7 @@ namespace Network {
         return string;
     }
     
-    auto Datagram::setStringAt(const QString &value, int index) -> void {
+    auto Datagram::setStringAt(const QString &value, const int index) -> void {
         insert(index, value);
         (*this)[index + value.length()] = 0;
     }
@@ -53,12 +53,12 @@ namespace Network {
         return data;
     }
 
-    auto Datagram::setRawBytes(const QByteArray &data, int index) -> void
+    auto Datagram::setRawBytes(const QByteArray &data, const int index) -> void
     {
         insert(index, data);
     }
 
-    auto Datagram::copyBytes(QByteArray &dst, int from, int to, int length) const -> void {
+    auto Datagram::copyBytes(QByteArray &dst, const int from, const int to, const int length) const -> void {
         auto i = 0;
     
         while(i < length && from + i < this->length()) {
@@ -74,7 +74,4 @@ namespace Network {
         answer[4] = 0;
         return answer;
     }
-
-
-
 }
