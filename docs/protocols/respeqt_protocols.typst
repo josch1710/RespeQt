@@ -1,0 +1,673 @@
+#set page(numbering: "1")
+#set heading(numbering: "1.")
+#set math.equation(numbering: "(1)")
+#let numless(it) = {set heading(numbering: none); it }
+
+= Introduction
+<introduction>
+This document describes the communication protocols implemented in RespeQt for interfacing with Atari 8-bit computers and RespeQt.
+
+= RespeQt Client (RCl)
+<respeqt-client-rcl>
+== Introduction
+<introduction-1>
+RCl uses the SIO device ID `0x46` (`P7:`) to communicate between the Atari client and the RespeQt server.
+
+== Command overview
+<command-overview>
+#figure(
+  align(center)[#table(
+    columns: 4,
+    align: (left,left,left,left,),
+    table.header([Cmd], [Name], [Parameters], [Return value],),
+    table.hline(),
+    [0x93], [Send datetime], [None], [6 bytes date and time],
+    [0x94], [Swap disks], [AUX1 = slot 1, AUX2 = slot 2], [Success (ACK) or failure (NAK)],
+    [0x95], [Unmount disk], [AUX1 = slot \# (or 0xF9 for all)], [Success (ACK) or failure (NAK)],
+    [0x96], [Mount disk], [AUX1 = query flag, data frame (filename)], [Slot index or ACK/NAK],
+    [0x97], [Create and mount image], [AUX1 = query flag, data frame (filename + type)], [Slot index or ACK/NAK],
+    [0x98], [Toggle auto commit], [AUX1 = slot \# (or 0xF9 for all)], [Success (ACK) or failure (NAK)],
+  )]
+  , kind: table
+  )
+
+== Details
+<details>
+This section details all the commands supported by the RespeQt Client protocol.
+
+=== 0x93 - Send date and time
+<x93---send-date-and-time>
+This command requests the current date and time from the server. The client uses this information to set the real-time clock on the Atari.
+
++ *Parameters*
+  None.
+
++ *Return value*
+  The server returns a 6-byte data frame containing the current date and time as follows:
+#figure(
+  align(center)[#table(
+    columns: 3,
+    align: (left,left,left,),
+    table.header([Index], [Type], [Meaning],),
+    table.hline(),
+    [0], [byte], [Day of month (1--31)],
+    [1], [byte], [Month (1--12)],
+    [2], [byte], [Year without century (0--99)],
+    [3], [byte], [Hours (0--23)],
+    [4], [byte], [Minutes (0--59)],
+    [5], [byte], [Seconds (0--59)],
+  )]
+  , kind: table
+  )
+
+=== 0x94 - Swap disk images
+<x94---swap-disk-images>
+This command swaps the disk images mounted in two specified drive slots.
+
++ *Parameters*
+  - `AUX1`: First slot number (1--9 for `D1:`--`D9:`, or 26--31 for `D26:`--`D31:`).
+  - `AUX2`: Second slot number (1--9 for `D1:`--`D9:`, or 26--31 for `D26:`--`D31:`).
+
++ *Return value*
+  If either slot index is out of range, the server returns a `NAK`. On success, the server returns an `ACK`.
+
+=== 0x95 - Unmount disk images
+<x95---umount-disk-images>
+This command unmounts a disk image in a specific slot or unmounts all mounted images.
+
++ *Parameters*
+  - `AUX1`: Target slot number (1--9, 26--31, or `0xF9` / 249 / `-6` to unmount all slots).
+
++ *Return value*
+  If the slot index is out of range, the server returns a `NAK`. If any affected disk image has unsaved changes and requires saving, the unmount is aborted and the server returns a `NAK`. On success, the server returns an `ACK`.
+
+=== 0x96 - Mount disk image
+<x96---mount-disk-image>
+This command mounts a disk image into the next available drive slot, or queries the slot index of the most recently mounted image.
+
++ *Parameters*
+  - `AUX1`: Mode selector.
+    - If `0`: The client sends a data frame containing the filename to mount into the next free slot.
+    - If non-zero: Queries the slot index of the last successful mount.
+
++ *Return value*
+  - If `AUX1` is `0`: The server returns an `ACK` on successful mount, or a `NAK` if mounting failed (e.g. invalid filename or no free slot).
+  - If `AUX1` is non-zero: The server returns an `ACK` followed by a 1-byte data frame containing the slot index of the last mount.
+
+=== 0x97 - Create and mount disk image
+<x97---create-and-mount-disk-image>
+This command creates a new blank disk image of the requested geometry format and mounts it into the next free slot.
+
++ *Parameters*
+  - `AUX1`: Mode selector.
+    - If `0`: The client sends a data frame containing the 8.3 filename with the format type appended via `.` (e.g. `IMAGE.ATR.1`).
+    - If non-zero: Queries the slot index of the last mount.
+
+#figure(
+  align(center)[#table(
+    columns: 2,
+    align: (left,left,),
+    table.header([Type number], [Disk format],),
+    table.hline(),
+    [1], [Single Density, Single Sided (SSSD)],
+    [2], [Enhanced / Medium Density, Single Sided (SSES)],
+    [3], [Double Density, Single Sided (SSDD)],
+    [4], [Double Density, Double Sided (DSDD)],
+    [5], [Double Density, High Density (DDHD)],
+    [6], [Quad Density, High Density (QDHD)],
+  )]
+  , kind: table
+  )
+
++ *Return value*
+  - If `AUX1` is `0`: The server returns an `ACK` on success, or a `NAK` if image creation/mounting failed.
+  - If `AUX1` is non-zero: The server returns an `ACK` followed by a 1-byte data frame containing the slot index.
+
+=== 0x98 - Toggle auto commit
+<x98---toggle-auto-commit>
+This command toggles the auto-commit mode (automatic saving of disk changes) for a specific slot or across all slots.
+
++ *Parameters*
+  - `AUX1`: Target slot number (1--9, 26--31, or `0xF9` / 249 / `-6` for all slots).
+
++ *Return value*
+  If the slot index is out of range, the server returns a `NAK`. On success, the server returns an `ACK`.
+
+== Proposals
+<proposals>
+This section details proposals for future extensions to the RCl protocol.
+
+= PCLINK
+<pclink>
+== Introduction
+<introduction-2>
+PCLINK uses the device ID `0x6F` (`P:`) to communicate with SpartaDOS X. The protocol is based on DOS2DOS.
+
+== Command overview
+<command-overview-1>
+#figure(
+  align(center)[#table(
+    columns: 4,
+    align: (left,left,left,left,),
+    table.header([Cmd], [Name], [Parameters], [Return value],),
+    table.hline(),
+    [0x00], [FREAD], [handle, f1..f2 (block size)], [Data frame with read data],
+    [0x01], [FWRITE], [handle, f1..f2 (block size), payload data frame], [Success or failure in status],
+    [0x02], [FSEEK], [handle, f1..f3 (file position)], [Success or failure in status],
+    [0x03], [FTELL], [handle], [3 bytes file position],
+    [0x04], [FLEN], [handle], [3 bytes file length],
+    [0x06], [FNEXT], [handle], [24 bytes directory entry (PCLDBF)],
+    [0x07], [FCLOSE], [handle], [Success or failure in status],
+    [0x08], [INIT], [None], [Success or failure in status],
+    [0x09], [FOPEN], [fmode, fatr1, fatr2, name, path, f1..f6 (timestamp)], [24 bytes handle and file info (PCLDBF)],
+    [0x0A], [FFIRST], [fatr1, name, path], [24 bytes handle and first directory entry (PCLDBF)],
+    [0x0B], [RENAME], [fatr1, name, names, path], [Success or failure in status],
+    [0x0C], [REMOVE], [name, path], [Success or failure in status],
+    [0x0D], [CHMOD], [fatr1, fatr2, name, path], [Success or failure in status],
+    [0x0E], [MKDIR], [name, path, f1..f6 (timestamp)], [Success or failure in status],
+    [0x0F], [RMDIR], [name, path], [Success or failure in status],
+    [0x10], [CHDIR], [path], [Success or failure in status],
+    [0x11], [GETCWD], [None], [64 bytes current working directory],
+    [0x13], [DFREE], [None], [64 bytes disk information structure],
+    [0x14], [CHVOL], [name (volume label)], [Success or failure in status],
+  )]
+  , kind: table
+  )
+
+== Protocol sequence
+<protocol-sequence>
+On the SIO protocol layer, PCLINK subcommands are framed using standard SIO operations:
+
+#figure(
+  align(center)[#table(
+    columns: 4,
+    align: (left,left,left,left,),
+    table.header([Cmd], [Name], [Parameters], [Return value],),
+    table.hline(),
+    [`?` (0x3F)], [Get Hi-Speed], [None], [1 byte Hi-Speed index],
+    [`P` (0x50)], [Begin subcommand], [AUX1 = Buffer size, AUX2 = Protocol version & unit \#], [Command ACK / NAK],
+    [`R` (0x52)], [End subcommand / Transfer payload], [AUX1 = Buffer size, AUX2 = Protocol version & unit \#], [Payload data frame or command ACK],
+    [`S` (0x53)], [Get Status], [None], [4 bytes status block],
+  )]
+  , kind: table
+  )
+
+\
+#numless[=== Begin subcommand (`P` 0x50)]
+Every PCLINK transaction begins with an SIO `P` command. `AUX1` specifies the size of the parameter buffer transmitted in the subsequent data frame, while the lower 4 bits of `AUX2` identify the target unit number (0--15).
+Upon receiving command `ACK`, the client sends the parameter buffer containing the subcommand code (`fno`) and associated parameters (see @PCLINK:PARBUF). The size of this payload matches `AUX1`. If an error occurs during processing, the server records the error code in the status block.
+
+#numless[=== Status and payload phase (`S` 0x53 and `R` 0x52)]
+The client typically queries the status via the SIO `S` command to retrieve execution status and error codes (see @PCLINK:STATUS). The status block also indicates the payload transfer size or buffer correction.
+
+Depending on the subcommand, data transfer (reading or writing data) takes place during the `R` execution phase. The subcommand transaction is concluded by sending the `R` command to the addressed unit.
+
+If a new `P` command is sent to a device before the preceding transaction was concluded with `R`, the server rejects the command with a command `NAK`.
+
+== Data structures
+<data-structures>
+=== Parameter buffer
+<PCLINK:PARBUF>
+All subcommands use the following structure to submit parameters. The client specifies the number of bytes required for the specific operation in `AUX1`. The server may return a corrected buffer size in the SIO status response if needed.
+
+#figure(
+  align(center)[#table(
+    columns: 3,
+    align: (left,left,left,),
+    table.header([Name], [Type], [Function],),
+    table.hline(),
+    [fno], [byte], [Subcommand number (0x00--0x14)],
+    [handle], [byte], [Handle to opened file or directory (0--15)],
+    [f1, f2, f3, f4, f5, f6], [byte], [General-purpose parameters / timestamp],
+    [fmode], [byte], [File open mode (see @PCLINK:FMODE)],
+    [fatr1], [byte], [Search attribute mask (see @PCLINK:FATR1)],
+    [fatr2], [byte], [Target file attributes (see @PCLINK:FATR2)],
+    [name], [string (12 bytes)], [Primary file or directory name / search pattern],
+    [names], [string (12 bytes)], [Target file or directory name (for rename)],
+    [path], [string (65 bytes)], [Path to file or directory],
+  )]
+  , kind: table
+  )
+
+=== fatr1
+<PCLINK:FATR1>
+This bit mask filters attributes when searching files. A value of `0x00` matches all files.
+
+#figure(
+  align(center)[#table(
+    columns: 3,
+    align: (left,left,left,),
+    table.header([Value], [Name], [Meaning],),
+    table.hline(),
+    [0x01], [RA\_PROTECT], [Protected files],
+    [0x02], [RA\_HIDDEN], [Hidden files],
+    [0x04], [RA\_ARCHIVED], [Files with Archive attribute set],
+    [0x08], [RA\_SUBDIR], [Subdirectories],
+    [0x10], [RA\_NO\_PROTECT], [Non-protected files],
+    [0x20], [RA\_NO\_HIDDEN], [Non-hidden files],
+    [0x40], [RA\_NO\_ARCHIVED], [Files without Archive attribute set],
+    [0x80], [RA\_NO\_SUBDIR], [Non-subdirectory entries],
+  )]
+  , kind: table
+  )
+
+=== fatr2
+<PCLINK:FATR2>
+This bit mask represents the target file attributes to be applied.
+
+#figure(
+  align(center)[#table(
+    columns: 3,
+    align: (left,left,left,),
+    table.header([Value], [Name], [Meaning],),
+    table.hline(),
+    [0x01], [SA\_PROTECT], [Protect file],
+    [0x02], [SA\_HIDE], [Hide file],
+    [0x04], [SA\_ARCHIVE], [Set Archive attribute],
+    [0x10], [SA\_UNPROTECT], [Unprotect file],
+    [0x20], [SA\_UNHIDE], [Unhide file],
+    [0x40], [RA\_UNARCHIVE], [Clear Archive attribute],
+  )]
+  , kind: table
+  )
+
+=== fmode
+<PCLINK:FMODE>
+#figure(
+  align(center)[#table(
+    columns: 2,
+    align: (left,left,),
+    table.header([Value], [Meaning],),
+    table.hline(),
+    [0x04], [Read],
+    [0x08], [Write],
+    [0x09], [Append],
+    [0x0C], [Read and Write],
+  )]
+  , kind: table
+  ) #footnote[Bit 0 is used as the append modifier flag. Value 0x0D represents Read and Write with appending.]
+
+=== Directory entry (DIRENTRY / PCLDBF)
+<PCLINK:DIRENTRY>
+When opening a file (`FOPEN`), opening a directory (`FFIRST`), or reading the next directory entry (`FNEXT`), the server returns a 24-byte data structure containing a status/handle byte and a 23-byte SpartaDOS directory entry structure (`DIRENTRY`).
+
+#figure(
+  align(center)[#table(
+    columns: 4,
+    align: (left,left,left,left,),
+    table.header([Offset], [Name], [Type], [Function],),
+    table.hline(),
+    [0x00], [handle], [byte], [Assigned handle (0--15) or error status code],
+    [0x01], [status], [byte], [Entry flags: 0x01 = protected, 0x08 = file in use, 0x20 = directory, 0x28 = root dir],
+    [0x02--0x03], [map_l, map_h], [ushort], [Cluster/node map (low 11 bits: entry index, high 5 bits: directory node)],
+    [0x04--0x06], [len_l, len_m, len_h], [3 bytes], [24-bit file size in bytes (little-endian, max 16,777,215)],
+    [0x07--0x11], [fname], [11 bytes], [8+3 file/directory name (space-padded)],
+    [0x12--0x17], [stamp], [6 bytes], [Modification timestamp (day, month, year without century, hour, minute, second)],
+  )]
+  , kind: table
+  )
+
+=== Disk information buffer (DFREE)
+<PCLINK:DFREE_STRUCT>
+The `DFREE` subcommand returns a 64-byte data frame containing disk geometry and filesystem information matching the SpartaDOS filesystem header.
+
+#figure(
+  align(center)[#table(
+    columns: 4,
+    align: (left,left,left,left,),
+    table.header([Offset], [Name], [Size], [Meaning],),
+    table.hline(),
+    [0x00], [version], [byte], [Filesystem data format version (0x21)],
+    [0x01--0x02], [maindir], [ushort], [Main directory pointer (0x0000)],
+    [0x03--0x04], [totsec], [ushort], [Total sectors (0xFFFF)],
+    [0x05--0x06], [freesec], [ushort], [Free sectors (0xFFFF)],
+    [0x07], [bitlen], [byte], [Bitmap length (0x00)],
+    [0x08--0x09], [bitbegin], [ushort], [Bitmap begin sector (0x0000)],
+    [0x0A--0x0B], [filef], [ushort], [First free file map sector (0x0000)],
+    [0x0C--0x0D], [dirf], [ushort], [First free dir map sector (0x0000)],
+    [0x0E--0x15], [volname], [8 bytes], [Volume label (from `.PCLINK.VOLUME.LABEL` or `"PCLink  "` + unit letter)],
+    [0x16], [tracks], [byte], [Number of tracks (0x00)],
+    [0x17], [bps_enc], [byte], [Encoded bytes per sector (0x01 = 512 bytes)],
+    [0x18], [fs_ver], [byte], [Filesystem version number (0x80)],
+    [0x19--0x1A], [real_bps], [ushort], [Real bytes per sector (0x0200 = 512)],
+    [0x1B--0x1C], [fmapen], [ushort], [File map enable (0x0000)],
+    [0x1D], [spc], [byte], [Sectors per cluster (0x01)],
+    [0x1E--0x1F], [alloc], [ushort], [Allocation flags (0x0000)],
+    [0x20--0x21], [bootp], [ushort], [Boot sector pointer (0x0000)],
+    [0x22], [lock], [byte], [Lock flag (0x00)],
+    [0x23--0x3F], [reserved], [29 bytes], [Reserved / zeroes],
+  )]
+  , kind: table
+  )
+
+=== SIO Status block
+<PCLINK:STATUS>
+When the client sends an SIO `S` (0x53) status request, the server responds with a 4-byte status block.
+
+#figure(
+  align(center)[#table(
+    columns: 3,
+    align: (left,left,left,),
+    table.header([Byte], [Field], [Description],),
+    table.hline(),
+    [0], [stat], [Status flags (bit 1: wrong data frame length, bit 2: parameter buffer retry)],
+    [1], [err], [Error code (1 = Success, 3 = exact EOF, 134 = bad handle, 136 = EOF, 143 = CRC/length error, 146 = unsupported mode/function, 150 = invalid path, 151 = read-only/file exists, 156 = invalid volume name, 161 = too many open channels, 165 = bad filename, 166 = seek error, 167 = dir not empty, 170 = not found/access denied, 176 = bad exec/0 length, 255 = generic I/O error)],
+    [2], [tmot], [Low byte of transfer size or correction size],
+    [3], [none], [High byte of transfer size or correction size (or device ID `0x6F` on INIT)],
+  )]
+  , kind: table
+  )
+
+== Details
+<details-1>
+=== 0x00 - FREAD Read from file or directory
+<x00---fread-read-from-file-or-directory>
+This sub command reads data from an opened file or directory on the requested unit.
+If the handle is invalid or not open, the server sets status error 134.
+When reading from a directory handle, directory entries (`DIRENTRY`) are read sequentially from the directory cache.
+
++ *Parameters*
+  - `handle`: Open file or directory handle (0--15).
+  - `f1, f2`: Requested block size in bytes (`f1` = LSB, `f2` = MSB).
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  In the R execution phase, the server returns a data frame containing the read payload (up to the requested block size). The actual number of bytes read is stored in the status size field. If the end of the file or directory is reached, status error 136 (EOF) or 3 (exact EOF) is reported.
+
+=== 0x01 - FWRITE Write to file
+<x01---fwrite-write-to-file>
+This sub command writes data to an opened file on the requested unit.
+If the handle is invalid or not open, the server sets status error 134.
+If the handle refers to a directory, directory writes are ignored.
+
++ *Parameters*
+  - `handle`: Open file handle (0--15).
+  - `f1, f2`: Block size to write in bytes (`f1` = LSB, `f2` = MSB).
+  - In the R execution phase, the client sends a data frame containing the data to write (`blk_size` bytes).
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  None in data frame. Success (`err` = 1) or error status is returned in the SIO status block.
+
+=== 0x02 - FSEEK Seek to position in file
+<x02---fseek-seek-to-position-in-file>
+This sub command sets the current position pointer of an opened file or directory.
+If the handle is invalid or not open, the server sets status error 134.
+For files opened for read-only, seeking past the end of the file results in error 166.
+
++ *Parameters*
+  - `handle`: Open file or directory handle (0--15).
+  - `f1, f2, f3`: 24-bit target file position in bytes (little-endian: `f1` = LSB, `f2` = middle byte, `f3` = MSB).
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  None in data frame. Success (`err` = 1) or error status is returned in the SIO status block.
+
+=== 0x03 - FTELL Return the position in file
+<x03---ftell-return-the-position-in-file>
+This sub command returns the current 24-bit position pointer of an opened file or directory handle.
+If the handle is invalid or not open, the server sets status error 134.
+
++ *Parameters*
+  - `handle`: Open file or directory handle (0--15).
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  In the R execution phase, the server returns a 3-byte data frame containing the 24-bit file position (little-endian: lowest byte first).
+
+=== 0x04 - FLEN Return file length
+<x04---flen-return-file-length>
+This sub command returns the current length (in bytes) of an opened file or directory.
+For directories, the length represents the total size of cached directory entries (clamped to a maximum of 16,777,215 bytes).
+
++ *Parameters*
+  - `handle`: Open file or directory handle (0--15).
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  In the R execution phase, the server returns a 3-byte data frame containing the 24-bit file size (little-endian: lowest byte first).
+
+=== 0x06 - FNEXT Read next directory entry
+<x06---fnext-read-next-directory-entry>
+This sub command returns the next directory entry matching the search mask (`name`) and attribute filter (`fatr1`) from an opened directory.
+If the handle is invalid or not open, status error 134 is returned.
+
++ *Parameters*
+  - `handle`: Directory handle (0--15) opened previously with `FFIRST` or `FOPEN`.
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  In the R execution phase, the server returns a 24-byte data frame (`PCLDBF`, cf. @PCLINK:DIRENTRY) containing:
+  - Byte 0: `handle` or status code (e.g. 136 when reaching the end of the directory, 3 on exact EOF).
+  - Bytes 1--23: `dirbuf` containing the SpartaDOS directory entry structure (`DIRENTRY`).
+
+=== 0x07 - FCLOSE Close the file handle
+<x07---fclose-close-the-file-handle>
+This sub command closes an opened file or directory handle, releasing internal descriptors and directory caches.
+If the file was opened with write permissions and has a modification timestamp set, the host file modification time is updated.
+
++ *Parameters*
+  - `handle`: Open file or directory handle (0--15) to close.
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  None in data frame. Success (`err` = 1) or error status is returned in the SIO status block.
+
+=== 0x08 - INIT Initialize unit data structures
+<x08---init-initialize-unit-data-structures>
+This sub command initializes the PCLink data structures and closes all open file and directory handles across all units.
+
++ *Parameters*
+  None (parameter buffer with `fno` = 0x08). See @PCLINK:PARBUF.
+
++ *Return value*
+  None in data frame. The server sets `parbuf.handle` to `0xFF`, device status `none` field to `0x6F`, and status error to 1 (OK).
+
+=== 0x09 - FOPEN Open file handle
+<x09---fopen-open-file-handle>
+This sub command opens a file on the specified unit using the given path, filename, open mode, and attribute filters.
+If the file does not exist and write mode (0x08/0x09/0x0C) is requested, the server creates the file on the host filesystem and validates the 8.3 filename.
+If no free handle is available (out of 16 handles), status error 161 (too many channels open) is returned.
+
++ *Parameters*
+  - `fmode`: File open mode (0x04 = Read, 0x08 = Write, 0x09 = Append, 0x0C = Read/Write; cf. @PCLINK:FMODE).
+  - `fatr1`: Search attribute mask (cf. @PCLINK:FATR1).
+  - `fatr2`: Target attribute mask (cf. @PCLINK:FATR2).
+  - `name`: 8.3 filename (12 bytes).
+  - `path`: Path relative to the mounted unit root directory (65 bytes).
+  - `f1..f6`: Optional timestamp (day, month, year without century, hour, minute, second) for file creation/modification.
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  In the R execution phase, the server returns a 24-byte data frame (`PCLDBF`, cf. @PCLINK:DIRENTRY) containing:
+  - Byte 0: Allocated file handle (0--15) on success, or error status code on failure (e.g. 150 = invalid path, 151 = read-only/file exists, 165 = bad filename, 170 = file not found).
+  - Bytes 1--23: Directory entry information (`DIRENTRY`) for the opened file.
+
+=== 0x0A - FFIRST Read first directory entry
+<x0a---ffirst-read-first-directory-entry>
+This sub command opens a directory for reading and returns the first matching directory entry based on `fatr1` and the search pattern in `name` (e.g. `*.*`).
+The server automatically enables directory mode (`fmode |= 0x10`) and populates the directory cache.
+
++ *Parameters*
+  - `fatr1`: Search attribute mask (cf. @PCLINK:FATR1).
+  - `name`: File/directory search pattern or name (12 bytes).
+  - `path`: Path to directory relative to unit root (65 bytes).
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  In the R execution phase, the server returns a 24-byte data frame (`PCLDBF`, cf. @PCLINK:DIRENTRY) containing:
+  - Byte 0: Allocated directory handle (0--15) on success, or error code on failure.
+  - Bytes 1--23: `dirbuf` containing the first matching directory entry (`DIRENTRY`).
+
+=== 0x0B - RENAME Rename file or directory
+<x0b---rename-rename-file-or-directory>
+This sub command renames one or more files or directories in `path` matching `name` and attribute filter `fatr1` to the target name pattern in `names`.
+Wildcard characters (`?`) in `names` are replaced by characters from the matched filename.
+
++ *Parameters*
+  - `fatr1`: Search attribute filter mask (cf. @PCLINK:FATR1; `RA_NO_PROTECT` is enforced).
+  - `name`: Source file name or wildcard pattern (12 bytes).
+  - `names`: Destination file name or pattern (12 bytes).
+  - `path`: Directory path (65 bytes).
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  None in data frame. Success (`err` = 1) or error status (e.g. 151 if target exists, 170 if no matching file found) is returned in the SIO status block.
+
+=== 0x0C - REMOVE Remove file
+<x0c---remove-remove-file>
+This sub command deletes regular files in `path` matching `name`.
+Subdirectories, write-protected files, and hidden files are ignored.
+
++ *Parameters*
+  - `name`: Filename or wildcard pattern to remove (12 bytes).
+  - `path`: Directory path (65 bytes).
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  None in data frame. Success (`err` = 1) or error status (170 if no files were deleted) is returned in the SIO status block.
+
+=== 0x0D - CHMOD Change file permissions
+<x0d---chmod-change-file-permissions>
+This sub command modifies file permissions on matching files in `path`.
+The flag `SA_PROTECT` (0x01) marks files as protected (removes host write permission), while `SA_UNPROTECT` (0x10) unprotects files (adds host write permission).
+Subdirectory modification flags (`SA_SUBDIR`, `SA_UNSUBDIR`) are rejected with error 146.
+
++ *Parameters*
+  - `fatr1`: Search attribute filter mask (cf. @PCLINK:FATR1).
+  - `fatr2`: Attribute change mask (`SA_PROTECT`, `SA_UNPROTECT`; cf. @PCLINK:FATR2).
+  - `name`: Filename or wildcard pattern (12 bytes).
+  - `path`: Directory path (65 bytes).
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  None in data frame. Success (`err` = 1) or error status (170 if no matching files found) is returned in the SIO status block.
+
+=== 0x0E - MKDIR Create a directory
+<x0e---mkdir-create-a-directory>
+This sub command creates a new subdirectory named `name` under `path`.
+The directory name must conform to valid 8.3 format. If timestamp bytes are supplied in `f1..f6`, the creation/modification timestamp of the directory is set accordingly.
+
++ *Parameters*
+  - `name`: Directory name in 8.3 format (12 bytes).
+  - `path`: Parent directory path (65 bytes).
+  - `f1..f6`: Optional timestamp bytes (day, month, year without century, hour, minute, second).
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  None in data frame. Success (`err` = 1) or error status (151 if directory already exists, 165 if bad name, 150 if invalid path) is returned in the SIO status block.
+
+=== 0x0F - RMDIR Remove directory
+<x0f---rmdir-remove-directory>
+This sub command removes an empty subdirectory named `name` under `path`.
+
++ *Parameters*
+  - `name`: Directory name to remove (12 bytes).
+  - `path`: Parent directory path (65 bytes).
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  None in data frame. Success (`err` = 1) or error status (167 if directory is not empty, 170 if directory not found or write-protected, 165 if invalid name) is returned in the SIO status block.
+
+=== 0x10 - CHDIR Change the current working directory
+<x10---chdir-change-the-current-working-directory>
+This sub command changes the current working directory (`cwd`) for the unit to `path`.
+The requested path must reside inside the unit's mounted root directory tree.
+
++ *Parameters*
+  - `path`: Relative or absolute path (using SpartaDOS separators `>` or `\`, or `<` for parent directory).
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  None in data frame. Success (`err` = 1) or error status (150 if path is invalid or outside the mounted tree) is returned in the SIO status block.
+
+=== 0x11 - GETCWD Return the current working directory
+<x11---getcwd-return-the-current-working-directory>
+This sub command returns the current working directory of the specified unit relative to its mounted root.
+
++ *Parameters*
+  None (unit number specified in AUX2). See @PCLINK:PARBUF.
+
++ *Return value*
+  In the R execution phase, the server returns a 64-byte null-terminated string containing the current working directory path formatted with SpartaDOS separators (`>`).
+
+=== 0x13 - DFREE Return information about unit
+<x13---dfree-return-information-about-unit>
+This sub command returns filesystem and free space information for the unit formatted as a 64-byte SpartaDOS filesystem parameter block.
+
++ *Parameters*
+  None. See @PCLINK:PARBUF.
+
++ *Return value*
+  In the R execution phase, the server returns a 64-byte data frame containing disk geometry, filesystem version, and volume label (cf. @PCLINK:DFREE_STRUCT).
+
+=== 0x14 - CHVOL Change the current volume / drive
+<x14---chvol-change-the-current-volume-drive>
+This sub command sets or updates the volume label of the unit's mounted root directory.
+The label (up to 8 uppercase characters) is written to the `.PCLINK.VOLUME.LABEL` file in the unit's root directory.
+
++ *Parameters*
+  - `name`: New volume label (up to 8 characters).
+  See @PCLINK:PARBUF.
+
++ *Return value*
+  None in data frame. Success (`err` = 1) or error status (156 if name is empty) is returned in the SIO status block.
+
+= Smartdevice
+<smartdevice>
+== Introduction
+<introduction-3>
+Smartdevice uses the SIO device ID `0x45` (`P6:`) to communicate between the Atari and host application handlers.
+
+== Command overview
+<command-overview-2>
+#figure(
+  align(center)[#table(
+    columns: 4,
+    align: (left,left,left,left,),
+    table.header([Cmd], [Name], [Parameters], [Return value],),
+    table.hline(),
+    [0x55], [Submit URL], [AUX1..AUX2 = URL length, data frame (URL string)], [Success (ACK) or failure (NAK)],
+    [0x93], [Send datetime], [None], [6 bytes date and time],
+  )]
+  , kind: table
+  )
+
+== Details
+<details-2>
+=== 0x55 - Submit URL
+<x55---submit-url>
+This command submits a URL from the Atari to be opened by the host operating system's default handler application for the URL scheme.
+
++ *Parameters*
+  - `AUX1`: Low byte of URL string length (LSB).
+  - `AUX2`: High byte of URL string length (MSB).
+  - In the data frame phase, the client transmits the URL string (length specified by `AUX1` and `AUX2`).
+
++ *Return value*
+  If the URL length exceeds 2000 bytes, the server rejects the request with a command `NAK`. Otherwise, the server sends a command `ACK` and requests the host desktop services to open the URL.
+
+=== 0x93 - Send date and time
+<x93---send-date-and-time-1>
+This command requests the current host date and time to synchronize the Atari clock.
+
++ *Parameters*
+  None.
+
++ *Return value*
+  The server returns a 6-byte data frame containing the current date and time as follows:
+#figure(
+  align(center)[#table(
+    columns: 3,
+    align: (left,left,left,),
+    table.header([Index], [Type], [Meaning],),
+    table.hline(),
+    [0], [byte], [Day of month (1--31)],
+    [1], [byte], [Month (1--12)],
+    [2], [byte], [Year without century (0--99)],
+    [3], [byte], [Hours (0--23)],
+    [4], [byte], [Minutes (0--59)],
+    [5], [byte], [Seconds (0--59)],
+  )]
+  , kind: table
+  )
