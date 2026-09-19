@@ -11,12 +11,25 @@
 #include <cstring>
 
 // test if there is a page change
-#define CROSS_PAGE(a, r) (((a - r) ^ a) & 0xFF00)
+#define CROSS_PAGE(a, r) (((a) - (r) ^ (a)) & 0xFF00)
 
 // mask for Xas, Sya and other instructions
 #define UNDOC_MASK 0xDB// not sure
 
 namespace DiskImages {
+  /**
+   * @brief Represents a lookup table of opcodes for a particular addressing mode or processor functionality.
+   *
+   * This data structure contains 256 entries, each representing an opcode definition for specific instructions.
+   * Each opcode includes fields for its mnemonic name, legality status, and addressing mode.
+   *
+   * - `szName`: The mnemonic name of the instruction (e.g., "BRK", "ORA").
+   * - `bIllegal`: Boolean flag indicating whether the opcode is considered illegal (true) or valid (false).
+   * - `wMode`: The addressing mode used for the given opcode (e.g., MODE_IMPLIED, MODE_INDEXED_INDIRECT).
+   *
+   * The table is primarily used for emulation, validation, or interpretation of instructions in systems
+   * adhering to specific 8-bit processor designs, such as the 6502 microprocessor.
+   */
   static constexpr OPCODE tabOpcode02[256] =
           {
                   /* 00 */ {"BRK", false, MODE_IMPLIED},
@@ -535,19 +548,19 @@ namespace DiskImages {
                   /* FE */ {"INC", false, MODE_ABSOLUTE_X},
                   /* FF */ {"NOP", true, MODE_IMPLIED}};
 
-  Cpu6502::Cpu6502(CPU_ENUM cpuType) {
+  Cpu6502::Cpu6502(const CPU_ENUM cpuType) {
     m_cpuType = cpuType;
     m_PC = 0;
     m_SR = CPU6502_FLAG_U;
     m_SP = 0xFF;
     m_A = m_X = m_Y = 0;
-    m_traceOn = 0;
+    m_traceOn = false;
     m_instructionsSkipped = 0;
 
     // Compute the BCD lookup table
     for (unsigned int t = 0; t < 256; t++) {
-      m_BCDTable[0][t] = ((t >> 4) * 10) + (t & 0x0F);
-      m_BCDTable[1][t] = (((t % 100) / 10) << 4) | (t % 10);
+      m_BCDTable[0][t] = static_cast<unsigned char>((t >> 4) * 10 + (t & 0x0F));
+      m_BCDTable[1][t] = static_cast<unsigned char>(((t % 100 / 10) << 4) | t % 10);
       m_BCDTable[2][t] = 0;
       if ((t & 0x0F) >= 0x0A) {
         m_BCDTable[2][t] = 1;
@@ -558,31 +571,30 @@ namespace DiskImages {
     }
   }
 
-  int Cpu6502::Branch(unsigned char val) {
-    unsigned short OldPC = m_PC;
-    m_PC += (char) val;
+  int Cpu6502::Branch(const unsigned char val) {
+    const unsigned short OldPC = m_PC;
+    m_PC += static_cast<char>(val);
     if ((OldPC ^ m_PC) & 0xFF00) {
       return 4;// Different page
-    } else {
-      return 3;// Same page
     }
+    return 3;// Same page
   }
 
-  void Cpu6502::Aac(unsigned char val) {
+  void Cpu6502::Aac(const unsigned char val) {
     And(val);
     SetFlagC(m_SR & CPU6502_FLAG_N);
   }
 
-  void Cpu6502::Aax(unsigned short addr) {
+  void Cpu6502::Aax(const unsigned short addr) {
     WriteByte(addr, m_A & m_X);
   }
 
-  void Cpu6502::Adc(unsigned char val) {
-    unsigned char oldA = m_A;
-    unsigned short sum = (static_cast<unsigned short>(val) + static_cast<unsigned short>(m_A)) + (m_SR & CPU6502_FLAG_C);
-    auto lowSum {static_cast<unsigned char>(sum)};
+  void Cpu6502::Adc(const unsigned char val) {
+    const unsigned char oldA = m_A;
+    const unsigned short sum = static_cast<unsigned short>(val) + static_cast<unsigned short>(m_A) + (m_SR & CPU6502_FLAG_C);
+    const auto lowSum {static_cast<unsigned char>(sum)};
     SetFlagN(lowSum);
-    SetFlagV(((lowSum ^ oldA) & 0x80) && ((lowSum ^ val) & 0x80));
+    SetFlagV((lowSum ^ oldA) & 0x80 && (lowSum ^ val) & 0x80);
 
     if (m_SR & CPU6502_FLAG_D) {
 
@@ -590,11 +602,10 @@ namespace DiskImages {
       if (m_BCDTable[2][m_A] || m_BCDTable[2][val]) {
 
         // bad BCD values
-        unsigned short sumBCD, sumLow, sumHigh, lowCarry;
         unsigned char lowA = m_A & 0x0F;
         unsigned char lowVal = val & 0x0F;
-        unsigned short highA = (unsigned short) m_A & 0xF0;
-        unsigned short highVal = (unsigned short) val & 0xF0;
+        unsigned short highA = static_cast<unsigned short>(m_A) & 0xF0;
+        unsigned short highVal = static_cast<unsigned short>(val) & 0xF0;
 
         // fix low part of register A and val
         if (lowA >= 0x0A) {
@@ -608,15 +619,15 @@ namespace DiskImages {
         }
 
         // make the sum of low part
-        sumLow = (lowA + lowVal) + (m_SR & CPU6502_FLAG_C);
+        unsigned short sumLow = lowA + lowVal + (m_SR & CPU6502_FLAG_C);
 
         // fix BCD value if both parts are valid BCD values
-        if ((sumLow >= 0x0A) && (lowA < 0x0A) && (lowVal < 0x0A)) {
+        if (sumLow >= 0x0A && lowA < 0x0A && lowVal < 0x0A) {
           sumLow += 0x06;
         }
 
         // set carry for low part
-        lowCarry = ((sumLow & 0xF0) ? 0x10 : 0);
+        const unsigned short lowCarry = sumLow & 0xF0 ? 0x10 : 0;
         sumLow &= 0x0F;
 
         // fix high part of register A and val
@@ -631,24 +642,24 @@ namespace DiskImages {
         }
 
         // make the sum of high part
-        sumHigh = highA + highVal + lowCarry;
+        unsigned short sumHigh = highA + highVal + lowCarry;
 
         // fix BCD value if both parts are valid BCD values
-        if ((sumHigh >= 0xA0) && (highA < 0xA0) && (highVal < 0xA0)) {
+        if (sumHigh >= 0xA0 && highA < 0xA0 && highVal < 0xA0) {
           sumHigh += 0x60;
         }
 
         // make the sum and set carry flag.
-        sumBCD = sumHigh + sumLow;
+        const unsigned short sumBCD = sumHigh + sumLow;
         SetFlagC(sumBCD >> 8);
 
         // fix A for overflow setting.
-        m_A = (unsigned char) sumBCD;
+        m_A = static_cast<unsigned char>(sumBCD);
 
       } else {
 
         // good BCD values
-        short sumBCD = m_BCDTable[0][m_A] + m_BCDTable[0][val] + (m_SR & CPU6502_FLAG_C);
+        const auto sumBCD = m_BCDTable[0][m_A] + m_BCDTable[0][val] + (m_SR & CPU6502_FLAG_C);
         SetFlagC(sumBCD > 99);
         m_A = m_BCDTable[1][sumBCD & 0xFF];
       }
@@ -656,41 +667,39 @@ namespace DiskImages {
 
       // binary mode
       SetFlagC(sum >> 8);
-      m_A = (unsigned char) sum;
+      m_A = static_cast<unsigned char>(sum);
     }
     SetFlagZ(m_A);
   }
 
-  void Cpu6502::And(unsigned char val) {
+  void Cpu6502::And(const unsigned char val) {
     m_A &= val;
     SetFlagN(m_A);
     SetFlagZ(m_A);
   }
 
-  void Cpu6502::Ane(unsigned char val) {
+  void Cpu6502::Ane(const unsigned char val) {
     // m_A = (((m_A & val) | 0xEE) & (m_A | val)) & m_X;
     m_A &= m_X & val;
     SetFlagN(m_A);
     SetFlagZ(m_A);
   }
 
-  void Cpu6502::Arr(unsigned char val) {
-    unsigned char tmpA = m_A & val;
-    unsigned char highA = (tmpA >> 4) & 0x0F;
+  void Cpu6502::Arr(const unsigned char val) {
+    const unsigned char tmpA = m_A & val;
+    const unsigned char highA = (tmpA >> 4) & 0x0F;
 
     m_A = Ror(tmpA);
 
     // Set overflow and carry flag
     SetFlagV((tmpA ^ m_A) & CPU6502_FLAG_V);
-    SetFlagC((highA + (highA & 1) > 5));
+    SetFlagC(highA + (highA & 1) > 5);
 
     // BCD fixup if we are in decimal mode
     if (m_SR & CPU6502_FLAG_D) {
-      unsigned char lowA = tmpA & 0x0F;
-
       // BCD fixup for low part.
-      if (lowA + (lowA & 1) > 5) {
-        m_A = (m_A & 0xF0) | ((m_A + 0x06) & 0xF);
+      if (const unsigned char lowA = tmpA & 0x0F; lowA + (lowA & 1) > 5) {
+        m_A = (m_A & 0xF0) | (m_A + 0x06 & 0xF);
       }
 
       // BCD fixup for high part.
@@ -708,105 +717,97 @@ namespace DiskImages {
     return val;
   }
 
-  void Cpu6502::Asr(unsigned char val) {
+  void Cpu6502::Asr(const unsigned char val) {
     And(val);
     m_A = Lsr(m_A);
   }
 
-  void Cpu6502::Atx(unsigned char val) {
-    m_A = m_X = (m_A & val);// not sure
+  void Cpu6502::Atx(const unsigned char val) {
+    m_A = m_X = m_A & val;// not sure
     SetFlagN(m_A);
     SetFlagZ(m_A);
   }
 
-  void Cpu6502::Axa(unsigned short addr) {
+  void Cpu6502::Axa(const unsigned short addr) {
     WriteByte(addr, m_A & m_X & UNDOC_MASK);// not sure
   }
 
-  void Cpu6502::Axs(unsigned char val) {
-    unsigned short reg = (unsigned short) (m_A & m_X) - val;
+  void Cpu6502::Axs(const unsigned char val) {
+    const unsigned short reg = static_cast<unsigned short>(m_A & m_X) - val;
 
-    m_X = (unsigned char) reg;
+    m_X = static_cast<unsigned char>(reg);
     SetFlagC(reg < 0x100);
     SetFlagN(m_X);
     SetFlagZ(m_X);
   }
 
-  int Cpu6502::Bcc(unsigned char val) {
+  int Cpu6502::Bcc(const unsigned char val) {
     if ((m_SR & CPU6502_FLAG_C) == 0) {
       return Branch(val);
-    } else {
-      return 2;
     }
+    return 2;
   }
 
-  int Cpu6502::Bcs(unsigned char val) {
+  int Cpu6502::Bcs(const unsigned char val) {
     if (m_SR & CPU6502_FLAG_C) {
       return Branch(val);
-    } else {
-      return 2;
     }
+    return 2;
   }
 
-  int Cpu6502::Beq(unsigned char val) {
+  int Cpu6502::Beq(const unsigned char val) {
     if (m_SR & CPU6502_FLAG_Z) {
       return Branch(val);
-    } else {
-      return 2;
     }
+    return 2;
   }
 
-  void Cpu6502::Bit(unsigned char val) {
+  void Cpu6502::Bit(const unsigned char val) {
     SetFlagN(val);
     SetFlagV(val & CPU6502_FLAG_V);
     SetFlagZ(val & m_A);
   }
 
-  void Cpu6502::BitImm(unsigned char val) {
+  void Cpu6502::BitImm(const unsigned char val) {
     SetFlagZ(val & m_A);
   }
 
-  int Cpu6502::Bmi(unsigned char val) {
+  int Cpu6502::Bmi(const unsigned char val) {
     if (m_SR & CPU6502_FLAG_N) {
       return Branch(val);
-    } else {
-      return 2;
     }
+    return 2;
   }
 
-  int Cpu6502::Bne(unsigned char val) {
+  int Cpu6502::Bne(const unsigned char val) {
     if ((m_SR & CPU6502_FLAG_Z) == 0) {
       return Branch(val);
-    } else {
-      return 2;
     }
+    return 2;
   }
 
-  int Cpu6502::Bpl(unsigned char val) {
+  int Cpu6502::Bpl(const unsigned char val) {
     if ((m_SR & CPU6502_FLAG_N) == 0) {
       return Branch(val);
-    } else {
-      return 2;
     }
+    return 2;
   }
 
-  int Cpu6502::Bvc(unsigned char val) {
+  int Cpu6502::Bvc(const unsigned char val) {
     if ((m_SR & CPU6502_FLAG_V) == 0) {
       return Branch(val);
-    } else {
-      return 2;
     }
+    return 2;
   }
 
-  int Cpu6502::Bvs(unsigned char val) {
+  int Cpu6502::Bvs(const unsigned char val) {
     if (m_SR & CPU6502_FLAG_V) {
       return Branch(val);
-    } else {
-      return 2;
     }
+    return 2;
   }
 
-  void Cpu6502::Brk(void) {
+  void Cpu6502::Brk() {
     SetFlagB(1);
     PushWord(m_PC);
     PushByte(m_SR);
@@ -814,54 +815,54 @@ namespace DiskImages {
     m_PC = ReadWord(CPU6502_VEC_IRQ);
   }
 
-  void Cpu6502::Clc(void) {
+  void Cpu6502::Clc() {
     SetFlagC(0);
   }
 
-  void Cpu6502::Cld(void) {
+  void Cpu6502::Cld() {
     SetFlagD(0);
   }
 
-  void Cpu6502::Cli(void) {
+  void Cpu6502::Cli() {
     SetFlagI(0);
   }
 
-  void Cpu6502::Clv(void) {
+  void Cpu6502::Clv() {
     SetFlagV(0);
   }
 
-  void Cpu6502::Cmp(unsigned char val) {
-    unsigned short cmp = (unsigned short) m_A - val;
+  void Cpu6502::Cmp(const unsigned char val) {
+    const unsigned short cmp = static_cast<unsigned short>(m_A) - val;
 
     SetFlagC(cmp < 0x100);
-    SetFlagN((unsigned char) cmp);
+    SetFlagN(static_cast<unsigned char>(cmp));
     SetFlagZ(cmp & 0xFF);
   }
 
-  void Cpu6502::Cpx(unsigned char val) {
-    unsigned short cmp = (unsigned short) m_X - val;
+  void Cpu6502::Cpx(const unsigned char val) {
+    const unsigned short cmp = static_cast<unsigned short>(m_X) - val;
 
     SetFlagC(cmp < 0x100);
-    SetFlagN((unsigned char) cmp);
+    SetFlagN(static_cast<unsigned char>(cmp));
     SetFlagZ(cmp & 0xFF);
   }
 
-  void Cpu6502::Cpy(unsigned char val) {
-    unsigned short cmp = (unsigned short) m_Y - val;
+  void Cpu6502::Cpy(const unsigned char val) {
+    const unsigned short cmp = static_cast<unsigned short>(m_Y) - val;
 
     SetFlagC(cmp < 0x100);
-    SetFlagN((unsigned char) cmp);
+    SetFlagN(static_cast<unsigned char>(cmp));
     SetFlagZ(cmp & 0xFF);
   }
 
-  void Cpu6502::Dcp(unsigned short addr, unsigned char val) {
-    unsigned char reg = Dec(val);
+  void Cpu6502::Dcp(const unsigned short addr, const unsigned char val) {
+    const unsigned char reg = Dec(val);
 
     WriteByte(addr, reg);
     Cmp(reg);
   }
 
-  void Cpu6502::Dea(void) {
+  void Cpu6502::Dea() {
     m_A--;
     SetFlagN(m_A);
     SetFlagZ(m_A);
@@ -874,19 +875,19 @@ namespace DiskImages {
     return val;
   }
 
-  void Cpu6502::Dex(void) {
+  void Cpu6502::Dex() {
     m_X--;
     SetFlagN(m_X);
     SetFlagZ(m_X);
   }
 
-  void Cpu6502::Dey(void) {
+  void Cpu6502::Dey() {
     m_Y--;
     SetFlagN(m_Y);
     SetFlagZ(m_Y);
   }
 
-  void Cpu6502::Eor(unsigned char val) {
+  void Cpu6502::Eor(const unsigned char val) {
     m_A ^= val;
     SetFlagN(m_A);
     SetFlagZ(m_A);
@@ -899,65 +900,65 @@ namespace DiskImages {
     return val;
   }
 
-  void Cpu6502::Ina(void) {
+  void Cpu6502::Ina() {
     m_A++;
     SetFlagN(m_A);
     SetFlagZ(m_A);
   }
 
-  void Cpu6502::Inx(void) {
+  void Cpu6502::Inx() {
     m_X++;
     SetFlagN(m_X);
     SetFlagZ(m_X);
   }
 
-  void Cpu6502::Iny(void) {
+  void Cpu6502::Iny() {
     m_Y++;
     SetFlagN(m_Y);
     SetFlagZ(m_Y);
   }
 
-  void Cpu6502::Isc(unsigned short addr, unsigned char val) {
-    unsigned char reg = Inc(val);
+  void Cpu6502::Isc(const unsigned short addr, const unsigned char val) {
+    const unsigned char reg = Inc(val);
 
     WriteByte(addr, reg);
     Sbc(reg);
   }
 
-  void Cpu6502::Jmp(unsigned short addr) {
+  void Cpu6502::Jmp(const unsigned short addr) {
     m_PC = addr;
   }
 
-  void Cpu6502::Jsr(unsigned short addr) {
+  void Cpu6502::Jsr(const unsigned short addr) {
     m_PC--;// This really is a 6502 bug
     PushWord(m_PC);
     m_PC = addr;
   }
 
-  void Cpu6502::Lar(unsigned char val) {
-    m_A = m_X = m_SP = (m_SP & val);
+  void Cpu6502::Lar(const unsigned char val) {
+    m_A = m_X = m_SP = m_SP & val;
     SetFlagN(m_A);
   }
 
-  void Cpu6502::Lax(unsigned char val) {
+  void Cpu6502::Lax(const unsigned char val) {
     m_A = m_X = val;
     SetFlagN(m_A);
     SetFlagZ(m_A);
   }
 
-  void Cpu6502::Lda(unsigned char val) {
+  void Cpu6502::Lda(const unsigned char val) {
     m_A = val;
     SetFlagN(m_A);
     SetFlagZ(m_A);
   }
 
-  void Cpu6502::Ldx(unsigned char val) {
+  void Cpu6502::Ldx(const unsigned char val) {
     m_X = val;
     SetFlagN(m_X);
     SetFlagZ(m_X);
   }
 
-  void Cpu6502::Ldy(unsigned char val) {
+  void Cpu6502::Ldy(const unsigned char val) {
     m_Y = val;
     SetFlagN(m_Y);
     SetFlagZ(m_Y);
@@ -971,53 +972,53 @@ namespace DiskImages {
     return val;
   }
 
-  void Cpu6502::Ora(unsigned char val) {
+  void Cpu6502::Ora(const unsigned char val) {
     m_A |= val;
     SetFlagN(m_A);
     SetFlagZ(m_A);
   }
 
-  void Cpu6502::Pha(void) {
+  void Cpu6502::Pha() {
     PushByte(m_A);
   }
 
-  void Cpu6502::Php(void) {
+  void Cpu6502::Php() {
     PushByte(m_SR | CPU6502_FLAG_B);// This really is another 6502 bug
   }
 
-  void Cpu6502::Phx(void) {
+  void Cpu6502::Phx() {
     PushByte(m_X);
   }
 
-  void Cpu6502::Phy(void) {
+  void Cpu6502::Phy() {
     PushByte(m_Y);
   }
 
-  void Cpu6502::Pla(void) {
+  void Cpu6502::Pla() {
     m_A = PopByte();
     SetFlagN(m_A);
     SetFlagZ(m_A);
   }
 
-  void Cpu6502::Plp(void) {
+  void Cpu6502::Plp() {
     m_SR = PopByte();
     SetFlagB(0);
   }
 
-  void Cpu6502::Plx(void) {
+  void Cpu6502::Plx() {
     m_X = PopByte();
     SetFlagN(m_X);
     SetFlagZ(m_X);
   }
 
-  void Cpu6502::Ply(void) {
+  void Cpu6502::Ply() {
     m_Y = PopByte();
     SetFlagN(m_Y);
     SetFlagZ(m_Y);
   }
 
-  void Cpu6502::Rla(unsigned short addr, unsigned char val) {
-    unsigned char reg = Rol(val);
+  void Cpu6502::Rla(const unsigned short addr, const unsigned char val) {
+    const unsigned char reg = Rol(val);
 
     WriteByte(addr, reg);
     And(reg);
@@ -1056,32 +1057,30 @@ namespace DiskImages {
     return val;
   }
 
-  void Cpu6502::Rra(unsigned short addr, unsigned char val) {
-    unsigned char reg = Ror(val);
+  void Cpu6502::Rra(const unsigned short addr, const unsigned char val) {
+    const unsigned char reg = Ror(val);
 
     WriteByte(addr, reg);
     Adc(reg);
   }
 
-  void Cpu6502::Rti(void) {
+  void Cpu6502::Rti() {
     m_SR = PopByte();
     m_PC = PopWord();
   }
 
-  void Cpu6502::Rts(void) {
+  void Cpu6502::Rts() {
     m_PC = PopWord();
     m_PC++;
   }
 
-  void Cpu6502::Sbc(unsigned char val) {
-    unsigned short dif;
-    unsigned char lowDif;
-    unsigned char oldA = m_A;
+  void Cpu6502::Sbc(const unsigned char val) {
+    const unsigned char oldA = m_A;
 
-    dif = ((unsigned short) m_A - (unsigned short) val) - ((m_SR & CPU6502_FLAG_C) ? 0 : 1);
-    lowDif = (unsigned char) dif;
+    const unsigned short dif = static_cast<unsigned short>(m_A) - static_cast<unsigned short>(val) - (m_SR & CPU6502_FLAG_C ? 0 : 1);
+    const auto lowDif = static_cast<unsigned char>(dif);
     SetFlagN(lowDif);
-    SetFlagV(((lowDif ^ oldA) & 0x80) && ((oldA ^ val) & 0x80));
+    SetFlagV((lowDif ^ oldA) & 0x80 && (oldA ^ val) & 0x80);
 
     if (m_SR & CPU6502_FLAG_D) {
 
@@ -1089,14 +1088,13 @@ namespace DiskImages {
       if (m_BCDTable[2][m_A] || m_BCDTable[2][val]) {
 
         // bad BCD values
-        unsigned short difBCD, difLow, difHigh, lowCarry;
-        unsigned char lowA = m_A & 0x0F;
-        unsigned char lowVal = val & 0x0F;
-        unsigned short highA = (unsigned short) m_A & 0xF0;
-        unsigned short highVal = (unsigned short) val & 0xF0;
+        const unsigned char lowA = m_A & 0x0F;
+        const unsigned char lowVal = val & 0x0F;
+        const unsigned short highA = static_cast<unsigned short>(m_A) & 0xF0;
+        const unsigned short highVal = static_cast<unsigned short>(val) & 0xF0;
 
         // make the dif of low part
-        difLow = (lowA - lowVal) - ((m_SR & CPU6502_FLAG_C) ? 0 : 1);
+        unsigned short difLow = lowA - lowVal - (m_SR & CPU6502_FLAG_C ? 0 : 1);
 
         // fix BCD value
         if (difLow & 0x10) {
@@ -1104,11 +1102,11 @@ namespace DiskImages {
         }
 
         // set carry for low part
-        lowCarry = ((difLow & 0xF0) ? 0x10 : 0);
+        const unsigned short lowCarry = difLow & 0xF0 ? 0x10 : 0;
         difLow &= 0x0F;
 
         // make the dif of high part
-        difHigh = highA - highVal - lowCarry;
+        unsigned short difHigh = highA - highVal - lowCarry;
 
         // fix BCD value if both parts are valid BCD values
         if (difHigh & 0x100) {
@@ -1116,131 +1114,131 @@ namespace DiskImages {
         }
 
         // make the dif and set carry flag.
-        difBCD = difHigh | difLow;
-        SetFlagC((difBCD >> 8) == 0);
+        const unsigned short difBCD = difHigh | difLow;
+        SetFlagC(difBCD >> 8 == 0);
 
         // fix A for overflow setting.
-        m_A = (unsigned char) difBCD;
+        m_A = static_cast<unsigned char>(difBCD);
         SetFlagZ(difBCD != 0);
       } else {
 
         // good BCD values
-        short difBCD = m_BCDTable[0][m_A] - m_BCDTable[0][val] - ((m_SR & CPU6502_FLAG_C) ? 0 : 1);
+        auto difBCD = m_BCDTable[0][m_A] - m_BCDTable[0][val] - (m_SR & CPU6502_FLAG_C ? 0 : 1);
         if (difBCD < 0)
           difBCD += 100;
-        SetFlagC(m_A >= (val + ((m_SR & CPU6502_FLAG_C) ? 0 : 1)));
+        SetFlagC(m_A >= val + (m_SR & CPU6502_FLAG_C ? 0 : 1));
         m_A = m_BCDTable[1][difBCD & 0xFF];
         SetFlagZ(m_A);
       }
     } else {
 
       // binary mode
-      SetFlagC((dif >> 8) == 0);
-      m_A = (unsigned char) dif;
+      SetFlagC(dif >> 8 == 0);
+      m_A = static_cast<unsigned char>(dif);
       SetFlagZ(m_A);
     }
   }
 
-  void Cpu6502::Sec(void) {
+  void Cpu6502::Sec() {
     SetFlagC(1);
   }
 
-  void Cpu6502::Sed(void) {
+  void Cpu6502::Sed() {
     SetFlagD(1);
   }
 
-  void Cpu6502::Sei(void) {
+  void Cpu6502::Sei() {
     SetFlagI(1);
   }
 
-  void Cpu6502::Slo(unsigned short addr, unsigned char val) {
-    unsigned char reg = Asl(val);
+  void Cpu6502::Slo(const unsigned short addr, const unsigned char val) {
+    const unsigned char reg = Asl(val);
 
     WriteByte(addr, reg);
     Ora(reg);
   }
 
-  void Cpu6502::Sre(unsigned short addr, unsigned char val) {
-    unsigned char reg = Lsr(val);
+  void Cpu6502::Sre(const unsigned short addr, const unsigned char val) {
+    const unsigned char reg = Lsr(val);
 
     WriteByte(addr, reg);
     Eor(reg);
   }
 
-  void Cpu6502::Sta(unsigned short addr) {
+  void Cpu6502::Sta(const unsigned short addr) {
     WriteByte(addr, m_A);
   }
 
-  void Cpu6502::Stx(unsigned short addr) {
+  void Cpu6502::Stx(const unsigned short addr) {
     WriteByte(addr, m_X);
   }
 
-  void Cpu6502::Sty(unsigned short addr) {
+  void Cpu6502::Sty(const unsigned short addr) {
     WriteByte(addr, m_Y);
   }
 
-  void Cpu6502::Stz(unsigned short addr) {
+  void Cpu6502::Stz(const unsigned short addr) {
     WriteByte(addr, 0x00);
   }
 
-  void Cpu6502::Sxa(unsigned short addr) {
+  void Cpu6502::Sxa(const unsigned short addr) {
     WriteByte(addr, m_X & UNDOC_MASK);// not sure
   }
 
-  void Cpu6502::Sya(unsigned short addr) {
+  void Cpu6502::Sya(const unsigned short addr) {
     WriteByte(addr, m_Y & UNDOC_MASK);// not sure
   }
 
-  void Cpu6502::Tax(void) {
+  void Cpu6502::Tax() {
     m_X = m_A;
     SetFlagN(m_A);
     SetFlagZ(m_A);
   }
 
-  void Cpu6502::Tay(void) {
+  void Cpu6502::Tay() {
     m_Y = m_A;
     SetFlagN(m_A);
     SetFlagZ(m_A);
   }
 
-  unsigned char Cpu6502::Trb(unsigned char val) {
+  unsigned char Cpu6502::Trb(const unsigned char val) {
     SetFlagZ(val & m_A);
     return (m_A ^ 0xFF) & val;
   }
 
-  unsigned char Cpu6502::Tsb(unsigned char val) {
+  unsigned char Cpu6502::Tsb(const unsigned char val) {
     SetFlagZ(val & m_A);
     return m_A | val;
   }
 
-  void Cpu6502::Tsx(void) {
+  void Cpu6502::Tsx() {
     m_X = m_SP;
     SetFlagN(m_X);
     SetFlagZ(m_X);
   }
 
-  void Cpu6502::Txa(void) {
+  void Cpu6502::Txa() {
     m_A = m_X;
     SetFlagN(m_A);
     SetFlagZ(m_A);
   }
 
-  void Cpu6502::Txs(void) {
+  void Cpu6502::Txs() {
     m_SP = m_X;
   }
 
-  void Cpu6502::Tya(void) {
+  void Cpu6502::Tya() {
     m_A = m_Y;
     SetFlagN(m_A);
     SetFlagZ(m_A);
   }
 
-  void Cpu6502::Xas(unsigned short addr) {
-    m_SP = (m_A & m_X);
-    WriteByte(addr, (m_SP & UNDOC_MASK));// not sure
+  void Cpu6502::Xas(const unsigned short addr) {
+    m_SP = m_A & m_X;
+    WriteByte(addr, m_SP & UNDOC_MASK);// not sure
   }
 
-  __attribute__((unused)) int Cpu6502::Step(void) {
+  int Cpu6502::Step() {
     int nClockCount;
     unsigned char val;
     unsigned short addr;
@@ -1251,7 +1249,10 @@ namespace DiskImages {
       Trace(0, true, "%s", buf);
     }
 
+    nClockCount = 0;
     switch (ReadByte(m_PC++)) {
+      default:
+        break;
 
       case 0x00:// BRK
         m_PC++;
@@ -1409,7 +1410,7 @@ namespace DiskImages {
         addr = FetchIndirectY(m_PC);
         val = ReadByte(addr);
         m_PC++;
-        nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 6 : 5);
+        nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
         Ora(val);
         break;
 
@@ -1486,7 +1487,7 @@ namespace DiskImages {
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         Ora(val);
         break;
 
@@ -1530,7 +1531,7 @@ namespace DiskImages {
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_X)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         Ora(val);
         break;
 
@@ -1541,7 +1542,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           nClockCount = 7;
         } else {
-          nClockCount = ((CROSS_PAGE(addr, m_X)) ? 7 : 6);
+          nClockCount = CROSS_PAGE(addr, m_X) ? 7 : 6;
         }
         WriteByte(addr, Asl(val));
         break;
@@ -1699,7 +1700,7 @@ namespace DiskImages {
         addr = FetchIndirectY(m_PC);
         val = ReadByte(addr);
         m_PC++;
-        nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 6 : 5);
+        nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
         And(val);
         break;
 
@@ -1775,7 +1776,7 @@ namespace DiskImages {
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         And(val);
         break;
 
@@ -1805,12 +1806,12 @@ namespace DiskImages {
           addr = FetchAbsoluteX(m_PC);
           val = ReadByte(addr);
           m_PC += 2;
-          nClockCount = ((CROSS_PAGE(addr, m_X)) ? 5 : 4);
+          nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         } else {
           addr = FetchAbsoluteX(m_PC);
           val = ReadByte(addr);
           m_PC += 2;
-          nClockCount = ((CROSS_PAGE(addr, m_X)) ? 5 : 4);
+          nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
           Bit(val);
         }
         break;
@@ -1819,7 +1820,7 @@ namespace DiskImages {
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_X)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         And(val);
         break;
 
@@ -1830,7 +1831,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           nClockCount = 7;
         } else {
-          nClockCount = ((CROSS_PAGE(addr, m_X)) ? 7 : 6);
+          nClockCount = CROSS_PAGE(addr, m_X) ? 7 : 6;
         }
         WriteByte(addr, Rol(val));
         break;
@@ -1990,7 +1991,7 @@ namespace DiskImages {
         addr = FetchIndirectY(m_PC);
         val = ReadByte(addr);
         m_PC++;
-        nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 6 : 5);
+        nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
         Eor(val);
         break;
 
@@ -2064,7 +2065,7 @@ namespace DiskImages {
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         Eor(val);
         break;
 
@@ -2105,7 +2106,7 @@ namespace DiskImages {
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_X)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         Eor(val);
         break;
 
@@ -2116,7 +2117,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           nClockCount = 7;
         } else {
-          nClockCount = ((CROSS_PAGE(addr, m_X)) ? 7 : 6);
+          nClockCount = CROSS_PAGE(addr, m_X) ? 7 : 6;
         }
         WriteByte(addr, Lsr(val));
         break;
@@ -2284,7 +2285,7 @@ namespace DiskImages {
         addr = FetchIndirectY(m_PC);
         val = ReadByte(addr);
         m_PC++;
-        nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 6 : 5);
+        nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
         Adc(val);
         break;
 
@@ -2294,7 +2295,7 @@ namespace DiskImages {
         } else {
           val = ReadZPageIndirect(m_PC);
           m_PC++;
-          nClockCount = (m_SR & CPU6502_FLAG_D) ? 6 : 5;
+          nClockCount = m_SR & CPU6502_FLAG_D ? 6 : 5;
           Adc(val);
         }
         break;
@@ -2360,7 +2361,7 @@ namespace DiskImages {
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         Adc(val);
         break;
 
@@ -2403,7 +2404,7 @@ namespace DiskImages {
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_X)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         Adc(val);
         break;
 
@@ -2414,7 +2415,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           nClockCount = 7;
         } else {
-          nClockCount = ((CROSS_PAGE(addr, m_X)) ? 7 : 6);
+          nClockCount = CROSS_PAGE(addr, m_X) ? 7 : 6;
         }
         WriteByte(addr, Ror(val));
         break;
@@ -2838,7 +2839,7 @@ namespace DiskImages {
         addr = FetchIndirectY(m_PC);
         val = ReadByte(addr);
         m_PC++;
-        nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 6 : 5);
+        nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
         Lda(val);
         break;
 
@@ -2858,7 +2859,7 @@ namespace DiskImages {
           addr = FetchIndirectY(m_PC);
           val = ReadByte(addr);
           m_PC++;
-          nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 6 : 5);
+          nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
           Lax(val);
         } else {
           nClockCount = 1;
@@ -2906,7 +2907,7 @@ namespace DiskImages {
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         Lda(val);
         break;
 
@@ -2920,7 +2921,7 @@ namespace DiskImages {
           addr = FetchAbsoluteY(m_PC);
           val = ReadByte(addr);
           m_PC += 2;
-          nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 5 : 4);
+          nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
           Lar(val);
         } else {
           nClockCount = 1;
@@ -2931,7 +2932,7 @@ namespace DiskImages {
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_X)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         Ldy(val);
         break;
 
@@ -2939,7 +2940,7 @@ namespace DiskImages {
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_X)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         Lda(val);
         break;
 
@@ -2947,7 +2948,7 @@ namespace DiskImages {
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         Ldx(val);
         break;
 
@@ -2956,7 +2957,7 @@ namespace DiskImages {
           addr = FetchAbsoluteY(m_PC);
           val = ReadByte(addr);
           m_PC += 2;
-          nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 5 : 4);
+          nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
           Lax(val);
         } else {
           nClockCount = 1;
@@ -3100,7 +3101,7 @@ namespace DiskImages {
         addr = FetchIndirectY(m_PC);
         val = ReadByte(addr);
         m_PC++;
-        nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 6 : 5);
+        nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
         Cmp(val);
         break;
 
@@ -3174,7 +3175,7 @@ namespace DiskImages {
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         Cmp(val);
         break;
 
@@ -3208,7 +3209,7 @@ namespace DiskImages {
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_X)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         Cmp(val);
         break;
 
@@ -3368,7 +3369,7 @@ namespace DiskImages {
         addr = FetchIndirectY(m_PC);
         val = ReadByte(addr);
         m_PC++;
-        nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 6 : 5);
+        nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
         Sbc(val);
         break;
 
@@ -3378,7 +3379,7 @@ namespace DiskImages {
         } else {
           val = ReadZPageIndirect(m_PC);
           m_PC++;
-          nClockCount = (m_SR & CPU6502_FLAG_D) ? 6 : 5;
+          nClockCount = m_SR & CPU6502_FLAG_D ? 6 : 5;
           Sbc(val);
         }
         break;
@@ -3442,7 +3443,7 @@ namespace DiskImages {
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_Y)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         Sbc(val);
         break;
 
@@ -3476,7 +3477,7 @@ namespace DiskImages {
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
         m_PC += 2;
-        nClockCount = ((CROSS_PAGE(addr, m_X)) ? 5 : 4);
+        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         Sbc(val);
         break;
 
@@ -3503,9 +3504,9 @@ namespace DiskImages {
     return nClockCount;
   }
 
-  int Cpu6502::GetOpCodeLength(unsigned char opCode) {
-    MODE_ENUM wMode = m_cpuType == CPU_6502 ? tabOpcode02[opCode].wMode : tabOpcodeC02[opCode].wMode;
-    switch (wMode) {
+  int Cpu6502::GetOpCodeLength(const unsigned char opCode) const
+  {
+    switch (m_cpuType == CPU_6502 ? tabOpcode02[opCode].wMode : tabOpcodeC02[opCode].wMode) {
       case MODE_IMMEDIATE:
       case MODE_ZERO_PAGE:
       case MODE_INDEXED_INDIRECT:
@@ -3524,33 +3525,29 @@ namespace DiskImages {
     }
   }
 
-  char *Cpu6502::GetAddressLabel(unsigned short addr) {
+  const char *Cpu6502::GetAddressLabel(const unsigned short addr) const {
     static char buffer[6];
-    snprintf(buffer, 6, "$%04X", ((int) addr) & 0xFFFF);
+    snprintf(buffer, 6, "$%04X", static_cast<int>(addr) & 0xFFFF);
     return buffer;
   }
 
-  char *Cpu6502::GetAddressOrLabel(unsigned short addr) {
-    char *label = GetAddressLabel(addr);
-    if (label != nullptr) {
+  const char *Cpu6502::GetAddressOrLabel(const unsigned short addr) const {
+    if (const char *label = GetAddressLabel(addr); label != nullptr) {
       return label;
-    } else {
-      return Cpu6502::GetAddressLabel(addr);
     }
+    return Cpu6502::GetAddressLabel(addr);
   }
 
-  char *Cpu6502::GetAddressLabelAllBanks(unsigned short addr) {
+  const char *Cpu6502::GetAddressLabelAllBanks(const unsigned short addr) const {
     // default implementation when no bank system is available
     return GetAddressOrLabel(addr);
   }
 
-  char *Cpu6502::GetAddressOrLabelAllBanks(unsigned short addr) {
-    char *label = GetAddressLabelAllBanks(addr);
-    if (label != nullptr) {
+  const char *Cpu6502::GetAddressOrLabelAllBanks(const unsigned short addr) const {
+    if (const char *label = GetAddressLabelAllBanks(addr); label != nullptr) {
       return label;
-    } else {
-      return Cpu6502::GetAddressLabelAllBanks(addr);
     }
+    return Cpu6502::GetAddressLabelAllBanks(addr);
   }
 
   unsigned short Cpu6502::BuildTrace(char *buffer) {
@@ -3564,24 +3561,24 @@ namespace DiskImages {
       m_instructionsSkipped++;
       return 0xFFFF;
     }
-    unsigned char opCode = ReadByte(m_PC);
-    int lenOpCode = GetOpCodeLength(opCode);
-    snprintf(p, 28, "A=%02X X=%02X Y=%02X P=%02X SP=%02X  ", ((int) m_A) & 0xFF, ((int) m_X) & 0xFF, ((int) m_Y) & 0xFF, ((int) m_SR) & 0xFF, ((int) m_SP) & 0xFF);
+    const unsigned char opCode = ReadByte(m_PC);
+    const int lenOpCode = GetOpCodeLength(opCode);
+    snprintf(p, 28, "A=%02X X=%02X Y=%02X P=%02X SP=%02X  ", static_cast<int>(m_A) & 0xFF, static_cast<int>(m_X) & 0xFF, static_cast<int>(m_Y) & 0xFF, static_cast<int>(m_SR) & 0xFF, static_cast<int>(m_SP) & 0xFF);
     p += strlen(p);
-    snprintf(p, 6, "%04X:", ((int) m_PC) & 0xFFFF);
+    snprintf(p, 6, "%04X:", static_cast<int>(m_PC) & 0xFFFF);
     p += strlen(p);
     unsigned char opCodes[3];
     for (int i = 0; i < lenOpCode; i++) {
-      opCodes[i] = ReadByte(m_PC + i);
-      snprintf(p, 5, "%02X ", ((int) opCodes[i]) & 0xFF);
+      opCodes[i] = ReadByte(static_cast<unsigned short>(m_PC + i));
+      snprintf(p, 5, "%02X ", static_cast<int>(opCodes[i]) & 0xFF);
       p += 3;
     }
     for (int i = lenOpCode; i < 3; i++) {
       strcpy(p, "-- ");
       p += 3;
     }
-    char *label = GetAddressLabel(m_PC);
-    int lenLabel = 0;
+    const char *label = GetAddressLabel(m_PC);
+    size_t lenLabel = 0;
     if (label != nullptr) {
       strcpy(p, label);
       lenLabel = strlen(label);
@@ -3589,7 +3586,7 @@ namespace DiskImages {
       *p++ = ':';
       lenLabel++;
     }
-    for (int i = lenLabel; i < 17; i++) {
+    for (auto i = lenLabel; i < 17; i++) {
       *p++ = ' ';
     }
     const char *opCodeName = m_cpuType == CPU_6502 ? tabOpcode02[opCode].szName : tabOpcodeC02[opCode].szName;
@@ -3597,16 +3594,15 @@ namespace DiskImages {
     p += 3;
     *p++ = ' ';
     unsigned short addr = 0xFFFF;
-    char *secondLabel = nullptr;
-    char *thirdLabel = nullptr;
-    MODE_ENUM wMode = m_cpuType == CPU_6502 ? tabOpcode02[opCode].wMode : tabOpcodeC02[opCode].wMode;
-    switch (wMode) {
+    const char *secondLabel = nullptr;
+    const char *thirdLabel = nullptr;
+    switch (m_cpuType == CPU_6502 ? tabOpcode02[opCode].wMode : tabOpcodeC02[opCode].wMode) {
       case MODE_IMMEDIATE:
-        snprintf(p, 7, "#$%02X ", ((int) opCodes[1]) & 0xFF);
+        snprintf(p, 7, "#$%02X ", static_cast<int>(opCodes[1]) & 0xFF);
         p += strlen(p);
         break;
       case MODE_ZERO_PAGE:
-        addr = ((unsigned short) opCodes[1]) & 0x00FF;
+        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
         secondLabel = GetAddressOrLabel(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
@@ -3621,7 +3617,7 @@ namespace DiskImages {
         addr = ReadWord(addr + m_X);
         break;
       case MODE_INDIRECT_INDEXED:
-        addr = ((unsigned short) opCodes[1]) & 0x00FF;
+        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
         secondLabel = GetAddressOrLabel(addr);
         *p++ = '(';
         strcpy(p, secondLabel);
@@ -3631,7 +3627,7 @@ namespace DiskImages {
         addr = ReadWord(addr) + m_Y;
         break;
       case MODE_ZERO_PAGE_X:
-        addr = ((unsigned short) opCodes[1]) & 0x00FF;
+        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
         secondLabel = GetAddressOrLabel(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
@@ -3640,7 +3636,7 @@ namespace DiskImages {
         addr += m_X;
         break;
       case MODE_ZERO_PAGE_Y:
-        addr = ((unsigned short) opCodes[1]) & 0x00FF;
+        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
         secondLabel = GetAddressOrLabel(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
@@ -3649,18 +3645,18 @@ namespace DiskImages {
         addr += m_Y;
         break;
       case MODE_RELATIVE:
-        secondLabel = GetAddressOrLabel(m_PC + 2 + (char) opCodes[1]);
+        secondLabel = GetAddressOrLabel(static_cast<unsigned short>(m_PC + 2 + opCodes[1]));
         strcpy(p, secondLabel);
         p += strlen(p);
         break;
       case MODE_ABSOLUTE:
-        addr = (((unsigned short) opCodes[1]) & 0x00FF) | ((((unsigned short) opCodes[2]) << 8) & 0xFF00);
+        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
         secondLabel = GetAddressOrLabel(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
         break;
       case MODE_ABSOLUTE_X:
-        addr = (((unsigned short) opCodes[1]) & 0x00FF) | ((((unsigned short) opCodes[2]) << 8) & 0xFF00);
+        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
         secondLabel = GetAddressOrLabel(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
@@ -3669,7 +3665,7 @@ namespace DiskImages {
         addr += m_X;
         break;
       case MODE_ABSOLUTE_Y:
-        addr = (((unsigned short) opCodes[1]) & 0x00FF) | ((((unsigned short) opCodes[2]) << 8) & 0xFF00);
+        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
         secondLabel = GetAddressOrLabel(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
@@ -3678,19 +3674,19 @@ namespace DiskImages {
         addr += m_Y;
         break;
       case MODE_INDIRECT:
-        addr = (((unsigned short) opCodes[1]) & 0x00FF) | ((((unsigned short) opCodes[2]) << 8) & 0xFF00);
+        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
         *p++ = '(';
         secondLabel = GetAddressOrLabel(addr);
         if (secondLabel != nullptr) {
           strcpy(p, secondLabel);
         } else {
-          snprintf(p, 7, "$%04X", ((int) addr) & 0xFFFF);
+          snprintf(p, 7, "$%04X", static_cast<int>(addr) & 0xFFFF);
         }
         p += strlen(p);
         *p++ = ')';
         break;
       case MODE_ZERO_PAGE_INDIRECT:
-        addr = ((unsigned short) opCodes[1]) & 0x00FF;
+        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
         secondLabel = GetAddressOrLabel(addr);
         *p++ = '(';
         strcpy(p, secondLabel);
@@ -3700,18 +3696,18 @@ namespace DiskImages {
         addr = ReadWord(addr);
         break;
       case MODE_ZERO_PAGE_RELATIVE:
-        addr = ((unsigned short) opCodes[1]) & 0x00FF;
+        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
         secondLabel = GetAddressOrLabel(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
         strcpy(p, ",");
         p += strlen(p);
-        thirdLabel = GetAddressOrLabel(m_PC + 2 + (char) opCodes[2]);
+        thirdLabel = GetAddressOrLabel(static_cast<unsigned short>(m_PC + 2 + opCodes[2]));
         strcpy(p, thirdLabel);
         p += strlen(p);
         break;
       case MODE_IMMEDIATE_WORD:
-        snprintf(p, 8, "#$%04X ", (((unsigned short) opCodes[1]) & 0x00FF) | ((((unsigned short) opCodes[2]) << 8) & 0xFF00));
+        snprintf(p, 8, "#$%04X ", (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00));
         p += strlen(p);
         break;
       default:
@@ -3733,31 +3729,31 @@ namespace DiskImages {
     return addr;
   }
 
-  int Cpu6502::BuildInstruction(char *buffer, unsigned char *data, int lenData, unsigned short address) {
+  int Cpu6502::BuildInstruction(char *buffer, unsigned char *data, const int lenData, const unsigned short address) {
     char *p = buffer;
     *p = 0;
     if (lenData < 1) {
       return -1;
     }
-    unsigned char opCode = data[0];
-    int lenOpCode = GetOpCodeLength(opCode);
+    const unsigned char opCode = data[0];
+    const int lenOpCode = GetOpCodeLength(opCode);
     if (lenData < lenOpCode) {
       return -1;
     }
-    snprintf(p, 8, "$%04X: ", ((int) address) & 0xFFFF);
+    snprintf(p, 8, "$%04X: ", static_cast<int>(address) & 0xFFFF);
     p += strlen(p);
     unsigned char opCodes[3];
     for (int i = 0; i < lenOpCode; i++) {
       opCodes[i] = data[i];
-      snprintf(p, 4, "%02X ", ((int) opCodes[i]) & 0xFF);
+      snprintf(p, 4, "%02X ", static_cast<int>(opCodes[i]) & 0xFF);
       p += 3;
     }
     for (int i = lenOpCode; i < 3; i++) {
       strcpy(p, "-- ");
       p += 3;
     }
-    char *label = GetAddressLabel(address);
-    int lenLabel = 0;
+    const char *label = GetAddressLabel(address);
+    size_t lenLabel = 0;
     if (label != nullptr) {
       strcpy(p, label);
       lenLabel = strlen(label);
@@ -3765,7 +3761,7 @@ namespace DiskImages {
       *p++ = ':';
       lenLabel++;
     }
-    for (int i = lenLabel; i < 17; i++) {
+    for (auto i = lenLabel; i < 17; i++) {
       *p++ = ' ';
     }
     const char *opCodeName = m_cpuType == CPU_6502 ? tabOpcode02[opCode].szName : tabOpcodeC02[opCode].szName;
@@ -3773,16 +3769,15 @@ namespace DiskImages {
     p += 3;
     *p++ = ' ';
     unsigned short addr = 0xFFFF;
-    char *secondLabel = nullptr;
-    char *thirdLabel = nullptr;
-    MODE_ENUM wMode = m_cpuType == CPU_6502 ? tabOpcode02[opCode].wMode : tabOpcodeC02[opCode].wMode;
-    switch (wMode) {
+    const char *secondLabel = nullptr;
+    const char *thirdLabel = nullptr;
+    switch (m_cpuType == CPU_6502 ? tabOpcode02[opCode].wMode : tabOpcodeC02[opCode].wMode) {
       case MODE_IMMEDIATE:
-        snprintf(p, 10, "#$%02X ", ((int) opCodes[1]) & 0xFF);
+        snprintf(p, 10, "#$%02X ", static_cast<int>(opCodes[1]) & 0xFF);
         p += strlen(p);
         break;
       case MODE_ZERO_PAGE:
-        addr = ((unsigned short) opCodes[1]) & 0x00FF;
+        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
         secondLabel = GetAddressOrLabelAllBanks(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
@@ -3796,7 +3791,7 @@ namespace DiskImages {
         p += strlen(p);
         break;
       case MODE_INDIRECT_INDEXED:
-        addr = ((unsigned short) opCodes[1]) & 0x00FF;
+        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
         secondLabel = GetAddressOrLabelAllBanks(addr);
         *p++ = '(';
         strcpy(p, secondLabel);
@@ -3805,7 +3800,7 @@ namespace DiskImages {
         p += strlen(p);
         break;
       case MODE_ZERO_PAGE_X:
-        addr = ((unsigned short) opCodes[1]) & 0x00FF;
+        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
         secondLabel = GetAddressOrLabelAllBanks(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
@@ -3813,7 +3808,7 @@ namespace DiskImages {
         p += strlen(p);
         break;
       case MODE_ZERO_PAGE_Y:
-        addr = ((unsigned short) opCodes[1]) & 0x00FF;
+        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
         secondLabel = GetAddressOrLabelAllBanks(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
@@ -3821,18 +3816,18 @@ namespace DiskImages {
         p += strlen(p);
         break;
       case MODE_RELATIVE:
-        secondLabel = GetAddressOrLabelAllBanks(address + 2 + (char) opCodes[1]);
+        secondLabel = GetAddressOrLabelAllBanks(static_cast<unsigned short>(address + 2 + opCodes[1]));
         strcpy(p, secondLabel);
         p += strlen(p);
         break;
       case MODE_ABSOLUTE:
-        addr = (((unsigned short) opCodes[1]) & 0x00FF) | ((((unsigned short) opCodes[2]) << 8) & 0xFF00);
+        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
         secondLabel = GetAddressOrLabelAllBanks(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
         break;
       case MODE_ABSOLUTE_X:
-        addr = (((unsigned short) opCodes[1]) & 0x00FF) | ((((unsigned short) opCodes[2]) << 8) & 0xFF00);
+        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
         secondLabel = GetAddressOrLabelAllBanks(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
@@ -3840,7 +3835,7 @@ namespace DiskImages {
         p += strlen(p);
         break;
       case MODE_ABSOLUTE_Y:
-        addr = (((unsigned short) opCodes[1]) & 0x00FF) | ((((unsigned short) opCodes[2]) << 8) & 0xFF00);
+        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
         secondLabel = GetAddressOrLabelAllBanks(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
@@ -3848,19 +3843,19 @@ namespace DiskImages {
         p += strlen(p);
         break;
       case MODE_INDIRECT:
-        addr = (((unsigned short) opCodes[1]) & 0x00FF) | ((((unsigned short) opCodes[2]) << 8) & 0xFF00);
+        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
         *p++ = '(';
         secondLabel = GetAddressOrLabelAllBanks(addr);
         if (secondLabel != nullptr) {
           strcpy(p, secondLabel);
         } else {
-          snprintf(p, 10, "$%04X", ((int) addr) & 0xFFFF);
+          snprintf(p, 10, "$%04X", static_cast<int>(addr) & 0xFFFF);
         }
         p += strlen(p);
         *p++ = ')';
         break;
       case MODE_ZERO_PAGE_INDIRECT:
-        addr = ((unsigned short) opCodes[1]) & 0x00FF;
+        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
         secondLabel = GetAddressOrLabelAllBanks(addr);
         *p++ = '(';
         strcpy(p, secondLabel);
@@ -3869,18 +3864,18 @@ namespace DiskImages {
         p += strlen(p);
         break;
       case MODE_ZERO_PAGE_RELATIVE:
-        addr = ((unsigned short) opCodes[1]) & 0x00FF;
+        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
         secondLabel = GetAddressOrLabelAllBanks(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
         strcpy(p, ",");
         p += strlen(p);
-        thirdLabel = GetAddressOrLabelAllBanks(address + 2 + (char) opCodes[2]);
+        thirdLabel = GetAddressOrLabelAllBanks(static_cast<unsigned short>(address + 2 + opCodes[2]));
         strcpy(p, thirdLabel);
         p += strlen(p);
         break;
       case MODE_IMMEDIATE_WORD:
-        snprintf(p, 10, "#$%04X ", (((unsigned short) opCodes[1]) & 0x00FF) | ((((unsigned short) opCodes[2]) << 8) & 0xFF00));
+        snprintf(p, 10, "#$%04X ", (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00));
         p += strlen(p);
         break;
       default:
@@ -3890,7 +3885,7 @@ namespace DiskImages {
     return lenOpCode;
   }
 
-  int Cpu6502::Reset(void) {
+  int Cpu6502::Reset() {
     SetFlagB(0);
     SetFlagI(1);
     SetFlagD(0);
@@ -3898,7 +3893,7 @@ namespace DiskImages {
     return 7;
   }
 
-  int Cpu6502::Nmi(void) {
+  int Cpu6502::Nmi() {
     PushWord(m_PC);
     PushByte(m_SR);
     SetFlagI(1);
@@ -3906,7 +3901,7 @@ namespace DiskImages {
     return 7;
   }
 
-  int Cpu6502::Irq(void) {
+  int Cpu6502::Irq() {
     int nClockCount;
 
     if (m_SR & CPU6502_FLAG_I) {

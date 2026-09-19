@@ -3,45 +3,47 @@
 // (c) 2018 Eric BACHER
 //
 
+// ReSharper disable CppCStyleCast
 #include "include/diskimages/disassembly810.h"
 
 namespace DiskImages {
-  struct labels {
-    unsigned short address;
-    char *label;
-  };
+  namespace
+  {
+    struct labels {
+      unsigned short address;
+      const char *label;
+    };
+  }
 
-  typedef labels LABELS;
-
-  static LABELS labels810[] = {
-          {(unsigned short) 0x0000, (char *) "FCOMMAND"},
-          {(unsigned short) 0x0001, (char *) "FTRACK"},
-          {(unsigned short) 0x0002, (char *) "FSECTOR"},
-          {(unsigned short) 0x0003, (char *) "FDATA"},
-          {(unsigned short) 0x0380, (char *) "DRA"},
-          {(unsigned short) 0x0381, (char *) "DDRA"},
-          {(unsigned short) 0x0382, (char *) "DRB"},
-          {(unsigned short) 0x0383, (char *) "DDRB"},
-          {(unsigned short) 0x0384, (char *) "EDGECTRL"},
-          {(unsigned short) 0x0394, (char *) "RTIMNOIT"},
-          {(unsigned short) 0x0395, (char *) "RINTFLAG"},
-          {(unsigned short) 0x0396, (char *) "WR64NO"},
-          {(unsigned short) 0x0397, (char *) "WR1024NO"},
-          {(unsigned short) 0x039C, (char *) "RTIMIT"},
-          {(unsigned short) 0x039E, (char *) "WR64IT"},
-          {(unsigned short) 0x039F, (char *) "WR1024IT"},
+  static constexpr labels labels810[] = {
+          {0x0000, "FCOMMAND"},
+          {0x0001, "FTRACK"},
+          {0x0002, "FSECTOR"},
+          {0x0003, "FDATA"},
+          {0x0380, "DRA"},
+          {0x0381, "DDRA"},
+          {0x0382, "DRB"},
+          {0x0383, "DDRB"},
+          {0x0384, "EDGECTRL"},
+          {0x0394, "RTIMNOIT"},
+          {0x0395, "RINTFLAG"},
+          {0x0396, "WR64NO"},
+          {0x0397, "WR1024NO"},
+          {0x039C, "RTIMIT"},
+          {0x039E, "WR64IT"},
+          {0x039F, "WR1024IT"},
   };
 
   disassembly810::disassembly810()
       : Cpu6502(CPU_6502) {}
 
-  char *disassembly810::GetAddressLabel(unsigned short addr) {
-    for (unsigned int i = 0; i < sizeof(labels810) / sizeof(LABELS); i++) {
-      if (labels810[i].address == addr) {
-        return labels810[i].label;
+  const char *disassembly810::GetAddressLabel(const unsigned short addr) const {
+    for (auto & [address, label] : labels810) {
+      if (address == addr) {
+        return label;
       }
     }
-    return (char *) 0;
+    return nullptr;
   }
 
 }
