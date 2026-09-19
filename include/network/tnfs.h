@@ -12,16 +12,15 @@ namespace Network {
         Q_OBJECT
     public:
         Tnfs();
-        virtual ~Tnfs() = default;
+        ~Tnfs() override = default;
 
-        auto mountPoints() const -> const QDirVector& { return _mountPoints; }
-        auto addMountPoint(QDir mountPoint) -> void;
-        auto removeMountPoint(QDir mountPoint) -> void;
+        [[nodiscard]] auto mountPoints() const -> const QDirVector& { return _mountPoints; }
+        auto addMountPoint(const QDir& mountPoint) -> void;
+        auto removeMountPoint(const QDir& mountPoint) -> void;
 
     signals:
-        // No auto -> type notation, because moc.
-        void sessionConnected();
-        void allSessionsDisconnected();
+        auto sessionConnected() -> void;
+        auto allSessionsDisconnected() -> void;
 
     protected:
         auto reset() -> void;
@@ -35,18 +34,18 @@ namespace Network {
         auto telldir(const Datagram &datagram) -> Datagram;
         auto seekdir(const Datagram &datagram) -> Datagram;
         auto closedir(const Datagram &datagram) -> Datagram;
-        auto mkdir(const Datagram &datagram) const -> Datagram;
-        auto rmdir(const Datagram &datagram) const -> Datagram;
+        [[nodiscard]] auto mkdir(const Datagram &datagram) const -> Datagram;
+        [[nodiscard]] auto rmdir(const Datagram &datagram) const -> Datagram;
 
         auto openfile(const Datagram &datagram) -> Datagram;
-        auto closefile(const Datagram &datagram) const -> Datagram;
-        auto readfile(const Datagram &datagram) const -> Datagram;
-        auto writefile(const Datagram &datagram) const -> Datagram;
-        auto statfile(const Datagram &datagram) const -> Datagram;
-        auto seekfile(const Datagram &datagram) const -> Datagram;
-        auto unlinkfile(const Datagram &datagram) const -> Datagram;
-        auto chmodfile(const Datagram &datagram) const -> Datagram;
-        auto renamefile(const Datagram &datagram) const -> Datagram;
+        [[nodiscard]] auto closefile(const Datagram &datagram) const -> Datagram;
+        [[nodiscard]] auto readfile(const Datagram &datagram) const -> Datagram;
+        [[nodiscard]] auto writefile(const Datagram &datagram) const -> Datagram;
+        [[nodiscard]] auto statfile(const Datagram &datagram) const -> Datagram;
+        [[nodiscard]] auto seekfile(const Datagram &datagram) const -> Datagram;
+        [[nodiscard]] auto unlinkfile(const Datagram &datagram) const -> Datagram;
+        [[nodiscard]] auto chmodfile(const Datagram &datagram) const -> Datagram;
+        [[nodiscard]] auto renamefile(const Datagram &datagram) const -> Datagram;
 
         auto fsFree(const Datagram &datagram) -> Datagram;
         auto fsSize(const Datagram &datagram) -> Datagram;
@@ -72,7 +71,7 @@ namespace Network {
         QVector<SessionInfoPtr> sessions{10};
         constexpr static quint8 TNFS_EOF = 0x21;
         const quint16 MAX_PACKET_SIZE = 512;
-        QDirVector _mountPoints{};
+        QDirVector _mountPoints;
 
         // Version number 1.2
         constexpr static quint16 versionSupported = 0x0102;

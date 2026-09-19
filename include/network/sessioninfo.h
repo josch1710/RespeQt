@@ -30,12 +30,12 @@ namespace Network {
     class SessionInfo
     {
     public:
-        SessionInfo(quint16 sessionID, Tnfs* parent)
+        SessionInfo(const quint16 sessionID, Tnfs* parent)
             : _sessionID(sessionID), _parent(parent) {}
 
-        auto realPath(const QString &path) const -> QDirPtr;
-        auto realFileName(const QString &fileName) const -> QString;
-        auto sessionID() const -> quint16 { return _sessionID; }
+        [[nodiscard]] auto realPath(const QString &path) const -> QDirPtr;
+        [[nodiscard]] auto realFileName(const QString &fileName) const -> QString;
+        [[nodiscard]] auto sessionID() const -> quint16 { return _sessionID; }
         auto openDirectories() -> QDirIndexVector& { return _openDirs; }
         auto openFiles() -> QFileVector& { return _openFiles; }
 
