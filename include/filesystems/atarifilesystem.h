@@ -11,7 +11,6 @@
 
 #include "filesystems/ataridirentry.h"
 #include "include/diskimages/diskimage.h"
-#include <QDateTime>
 #include <QList>
 #include <QString>
 
@@ -23,14 +22,14 @@ namespace Filesystems {
     DiskImages::SimpleDiskImage *m_image;
     bool m_textConversion;
     QByteArray bitmap;
-    quint16 m_freeSectors;
+    quint16 m_freeSectors{};
     quint16 findFreeSector(quint16 from = 0);
     void allocateSector(quint16 sector);
     void freeSector(quint16 sector);
-    bool sectorIsFree(quint16 sector);
+    [[nodiscard]] bool sectorIsFree(quint16 sector) const;
 
   public:
-    AtariFileSystem(DiskImages::SimpleDiskImage *image) {
+    explicit AtariFileSystem(DiskImages::SimpleDiskImage *image) {
       m_image = image;
       m_textConversion = false;
     }
@@ -46,8 +45,8 @@ namespace Filesystems {
     virtual AtariDirEntry insert(quint16 dir, const QString &name) = 0;
     virtual bool erase(const AtariDirEntry &entry) = 0;
     virtual bool rename(const AtariDirEntry &entry, const QByteArray &name) = 0;
-    inline DiskImages::SimpleDiskImage *image() { return m_image; }
-    inline void setTextConversion(bool conv) { m_textConversion = conv; }
+    [[nodiscard]] DiskImages::SimpleDiskImage *image() const { return m_image; }
+    void setTextConversion(const bool conv) { m_textConversion = conv; }
     virtual QString name() = 0;
     virtual bool removeDir(const AtariDirEntry &entry) = 0;
     virtual AtariDirEntry makeDir(quint16 dir, const QString &name) = 0;

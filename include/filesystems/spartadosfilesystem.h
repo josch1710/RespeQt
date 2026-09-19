@@ -5,7 +5,6 @@
 #include "filesystems/atarifilesystem.h"
 #include "include/diskimages/diskimage.h"
 #include <QByteArray>
-#include <QDateTime>
 #include <QList>
 #include <QString>
 #include <QtGlobal>
@@ -23,8 +22,8 @@ namespace Filesystems {
 
   public:
     SpartaDosFile(SpartaDosFileSystem *fileSystem, quint16 firstMap);
-    QByteArray read(uint bytes);
-    bool write(const QByteArray &data, uint bytes);
+    QByteArray read(int bytes);
+    static bool write(const QByteArray &data, int bytes);
   };
 
 
@@ -39,23 +38,23 @@ namespace Filesystems {
     QByteArray m_volumeName;
 
   public:
-    SpartaDosFileSystem(DiskImages::SimpleDiskImage *image);
-    QList<AtariDirEntry> getEntries(quint16 dir);
+    explicit SpartaDosFileSystem(DiskImages::SimpleDiskImage *image);
+    QList<AtariDirEntry> getEntries(quint16 dir) override;
 
-    uint totalCapacity();
-    uint freeSpace();
+    uint totalCapacity() override;
+    uint freeSpace() override;
 
-    int findFreeFileNo(quint16 dir);
+    int findFreeFileNo(quint16 dir) override;
 
-    bool extract(const AtariDirEntry &entry, const QString &target);
-    AtariDirEntry insert(quint16 dir, const QString &name);
-    AtariDirEntry makeDir(quint16 dir, const QString &name);
-    bool erase(const AtariDirEntry &entry);
-    bool rename(const AtariDirEntry &entry, const QByteArray &name);
+    bool extract(const AtariDirEntry &entry, const QString &target) override;
+    AtariDirEntry insert(quint16 dir, const QString &name) override;
+    AtariDirEntry makeDir(quint16 dir, const QString &name) override;
+    bool erase(const AtariDirEntry &entry) override;
+    bool rename(const AtariDirEntry &entry, const QByteArray &name) override;
 
-    QString name() { return "SpartaDos"; }
-    bool removeDir(const AtariDirEntry &entry);
-    quint16 rootDir() { return m_rootDirMap; }
+    QString name() override { return "SpartaDos"; }
+    bool removeDir(const AtariDirEntry &entry) override;
+    quint16 rootDir() override { return m_rootDirMap; }
   };
 }// namespace Filesystems
 

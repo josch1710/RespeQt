@@ -27,18 +27,18 @@ namespace Filesystems {
     int size;
     QDateTime dateTime;
 
-    QString name() const;
-    QString niceName() const;
-    QString baseName() const;
-    QString suffix() const;
-    QString attributeNames() const;
+    [[nodiscard]] QString name() const;
+    [[nodiscard]] QString niceName() const;
+    [[nodiscard]] QString baseName() const;
+    [[nodiscard]] QString suffix() const;
+    [[nodiscard]] QString attributeNames() const;
 
     QByteArray internalData;
 
-    void makeFromAtariDosEntry(const QByteArray &entry, int aNo, int aDir, bool dd = false);
+    void makeFromAtariDosEntry(const QByteArray &entry, quint16 aNo, quint16 aDir, bool dd = false);
     void makeFromSpartaDosEntry(const QByteArray &entry, int aNo, int aDir);
 
-    inline bool isValid() { return no != -1; }
+    [[nodiscard]] bool isValid() const { return no != -1; }
   };
 
   Q_DECLARE_OPERATORS_FOR_FLAGS(AtariDirEntry::Attributes)

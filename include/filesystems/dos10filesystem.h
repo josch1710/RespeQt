@@ -13,19 +13,19 @@ namespace Filesystems {
     virtual bool writeBitmap();
 
   public:
-    Dos10FileSystem(DiskImages::SimpleDiskImage *image);
-    QList<AtariDirEntry> getEntries(quint16 dir);
-    uint totalCapacity();
-    int findFreeFileNo(quint16 dir);
-    uint freeSpace() { return m_freeSectors * (m_image->geometry().bytesPerSector() - 3); }
-    bool extract(const AtariDirEntry &entry, const QString &target);
-    AtariDirEntry insert(quint16 dir, const QString &name);
-    AtariDirEntry makeDir(quint16 dir, const QString &name);
-    bool erase(const AtariDirEntry &entry);
-    bool rename(const AtariDirEntry &entry, const QByteArray &name);
-    QString name() { return "Atari Dos 1.0"; }
-    bool removeDir(const AtariDirEntry &entry);
-    quint16 rootDir() { return 361; }
+    explicit Dos10FileSystem(DiskImages::SimpleDiskImage *image);
+    QList<AtariDirEntry> getEntries(quint16 dir) override;
+    uint totalCapacity() override;
+    int findFreeFileNo(quint16 dir) override;
+    uint freeSpace() override { return m_freeSectors * (m_image->geometry().bytesPerSector() - 3); }
+    bool extract(const AtariDirEntry &entry, const QString &target) override;
+    AtariDirEntry insert(quint16 dir, const QString &name) override;
+    AtariDirEntry makeDir(quint16 dir, const QString &name) override;
+    bool erase(const AtariDirEntry &entry) override;
+    bool rename(const AtariDirEntry &entry, const QByteArray &name) override;
+    QString name() override { return "Atari Dos 1.0"; }
+    bool removeDir(const AtariDirEntry &entry) override;
+    quint16 rootDir() override { return 361; }
   };
 }// namespace Filesystems
 

@@ -10,14 +10,14 @@ namespace Filesystems {
 
   protected:
     QByteArray xvtoc;
-    bool writeBitmap();
+    bool writeBitmap() override;
 
   public:
-    MyDosFileSystem(DiskImages::SimpleDiskImage *image);
+    explicit MyDosFileSystem(DiskImages::SimpleDiskImage *image);
 
-    uint totalCapacity();
+    uint totalCapacity() override;
 
-    QString name() { return "MyDos"; }
+    QString name() override { return "MyDos"; }
   };
 }// namespace Filesystems
 #endif//MYDOSFILESYSTEM_H

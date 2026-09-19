@@ -9,11 +9,11 @@ namespace Filesystems {
     Q_OBJECT
 
   public:
-    Dos20FileSystem(DiskImages::SimpleDiskImage *image);
+    explicit Dos20FileSystem(DiskImages::SimpleDiskImage *image);
 
-    uint totalCapacity();
+    uint totalCapacity() override;
 
-    QString name() { return "Atari Dos 2.0"; }
+    QString name() override { return "Atari Dos 2.0"; }
   };
 }// namespace Filesystems
 #endif//DOS20FILESYSTEM_H

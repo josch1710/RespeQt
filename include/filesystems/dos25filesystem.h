@@ -10,14 +10,14 @@ namespace Filesystems {
 
   protected:
     QByteArray vtoc2;
-    bool writeBitmap();
+    bool writeBitmap() override;
 
   public:
-    Dos25FileSystem(DiskImages::SimpleDiskImage *image);
+    explicit Dos25FileSystem(DiskImages::SimpleDiskImage *image);
 
-    uint totalCapacity();
+    uint totalCapacity() override;
 
-    QString name() { return "Atari Dos 2.5"; }
+    QString name() override { return "Atari Dos 2.5"; }
   };
 }// namespace Filesystems
 #endif//DOS25FILESYSTEM_H
