@@ -2,11 +2,13 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 ### RespeQt CMAKE version
 cmake_minimum_required(VERSION 3.10)
-set(CMAKE_OSX_ARCHITECTURES x86_64)
+
 project(RespeQt VERSION 5.5.0 LANGUAGES CXX)
 set(RC_VERSION "_RC1") ## Begin RC version with underscore
+
 cmake_policy(SET CMP0071 NEW)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
@@ -15,6 +17,7 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_AUTOUIC_SEARCH_PATHS} ui ui/printers ui/f
 add_definitions(-DQT_DEPRECATED_WARNINGS -DQT_DISABLE_DEPRECATED_BEFORE=0x050000)
 add_definitions(-DVERSION=\"v${PROJECT_VERSION}${RC_VERSION}\")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
+set(CMAKE_OSX_ARCHITECTURES x86_64 arm64)
 
 option(MAKE_TEST "Build the test application" OFF)
 message(STATUS "Build tests ${MAKE_TEST}")
@@ -35,11 +38,6 @@ else()
 endif()
 
 include_directories(include headers tests tools)
-
-# set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -fno-omit-frame-pointer -stdlib=libc++")
-if (NOT WIN32)
-    set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address -fno-omit-frame-pointer")
-endif()
 
 set(SOURCES
     src/siorecorder.cpp
@@ -254,8 +252,6 @@ qt5_add_translation(QM_FILES ${TS_FILES})
 qt5_wrap_ui(UI_HEADERS ${FORMS})
 qt5_add_resources(UI_RESOURCES ${RESOURCES})
 
-set(CMAKE_CXX_STANDARD 14)
-
 if (APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
     set(MACOSX_BUNDLE_ICON_FILE RespeQt.icns)
@@ -265,6 +261,32 @@ if (APPLE)
     set_target_properties(${TARGET} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/deployment/Info.plist.app")
 else()
     add_executable(${TARGET} ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES})
+endif()
+
+option(RESPEQT_STRICT_WARNINGS "Enable the extended warning set" ON)
+option(RESPEQT_WARN_CONVERSIONS "Enable -Wconversion (very noisy)" OFF)
+option(RESPEQT_SANITIZE "Build with ASan+UBSan (Debug)" OFF)
+
+if (RESPEQT_STRICT_WARNINGS)
+    target_compile_options(${TARGET} PRIVATE
+            $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:
+            -Wall -Wextra -Wpedantic
+            -Wnon-virtual-dtor -Woverloaded-virtual
+            -Wformat=2 -Wcast-qual -Wextra-semi>
+            $<$<CXX_COMPILER_ID:GNU>:
+            -Wsuggest-override -Wduplicated-cond -Wduplicated-branches -Wlogical-op>
+            $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive->
+    )
+endif()
+
+if (RESPEQT_WARN_CONVERSIONS)
+    target_compile_options(${TARGET} PRIVATE
+            $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wconversion -Wsign-conversion>)
+endif()
+
+if (RESPEQT_SANITIZE AND NOT WIN32)
+    target_compile_options(${TARGET} PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer -g)
+    target_link_options(${TARGET} PRIVATE -fsanitize=address,undefined)
 endif()
 
 find_package(ZLIB REQUIRED)
@@ -306,7 +328,7 @@ if (WIN32)
 endif()
 
 # Process Documents
-# add_subdirectory(docs) # commented out (experimental)
+add_subdirectory(docs)
 
 # Deployment
 if (NOT MAKE_TEST AND CMAKE_BUILD_TYPE STREQUAL "Release")
