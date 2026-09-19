@@ -1,9 +1,10 @@
 #include "filesystems/spartadosfilesystem.h"
 #include "diskeditdialog.h"
 #include <QMessageBox>
+#include <algorithm>
 
 namespace Filesystems {
-  SpartaDosFile::SpartaDosFile(SpartaDosFileSystem *fileSystem, quint16 firstMap) {
+  SpartaDosFile::SpartaDosFile(SpartaDosFileSystem *fileSystem, const quint16 firstMap) {
     m_fileSystem = fileSystem;
 
     m_currentMapOffset = 4;
@@ -14,15 +15,14 @@ namespace Filesystems {
 
   }
 
-  QByteArray SpartaDosFile::read(uint bytes) {
+  QByteArray SpartaDosFile::read(int bytes) {
     QByteArray result;
     while (bytes) {
-      uint left = m_currentSector.count() - m_currentSectorOffset;
-      if (bytes > left) {
+      if (const auto left = m_currentSector.count() - m_currentSectorOffset; bytes > left) {
         result.append(m_currentSector.right(left));
         bytes -= left;
         if (m_currentMapOffset >= m_currentMap.count()) {
-          int nextMap = (quint8) m_currentMap.at(0) + (quint8) m_currentMap.at(1) * 256;
+          const quint16 nextMap = static_cast<quint8>(m_currentMap.at(0)) + static_cast<quint8>(m_currentMap.at(1)) * 256;
           if (nextMap == 0) {
             m_currentMap.clear();
             return result;
@@ -30,7 +30,7 @@ namespace Filesystems {
           m_fileSystem->m_image->readSector(nextMap, m_currentMap);
           m_currentMapOffset = 4;
         }
-        int sector = (quint8) m_currentMap.at(m_currentMapOffset) + (quint8) m_currentMap.at(m_currentMapOffset + 1) * 256;
+        const quint16 sector = static_cast<quint8>(m_currentMap.at(m_currentMapOffset)) + static_cast<quint8>(m_currentMap.at(m_currentMapOffset + 1)) * 256;
         m_currentMapOffset += 2;
         if (sector == 0) {
           m_currentMap.clear();
@@ -47,7 +47,7 @@ namespace Filesystems {
     return result;
   }
 
-  bool SpartaDosFile::write(const QByteArray &, uint /*bytes*/) {
+  bool SpartaDosFile::write(const QByteArray &, int /*bytes*/) {
     return false;
   }
 
@@ -55,20 +55,20 @@ namespace Filesystems {
       : AtariFileSystem(image) {
     QByteArray boot;
     m_image->readSector(1, boot);
-    m_rootDirMap = (quint8) boot.at(9) + (quint8) boot.at(10) * 256;
-    m_freeSectors = (quint8) boot.at(13) + (quint8) boot.at(14) * 256;
-    m_bitmapCount = (quint8) boot.at(15);
-    m_firstBitmapSector = (quint8) boot.at(16) + (quint8) boot.at(17) * 256;
+    m_rootDirMap = static_cast<quint8>(boot.at(9)) + static_cast<quint8>(boot.at(10)) * 256;
+    m_freeSectors = static_cast<quint8>(boot.at(13)) + static_cast<quint8>(boot.at(14)) * 256;
+    m_bitmapCount = static_cast<quint8>(boot.at(15));
+    m_firstBitmapSector = static_cast<quint8>(boot.at(16)) + static_cast<quint8>(boot.at(17)) * 256;
     m_volumeName = boot.mid(22, 8);
 
     QByteArray map;
-    for (int i = m_firstBitmapSector; i < m_firstBitmapSector + m_bitmapCount; i++) {
+    for (quint16 i = m_firstBitmapSector; i < m_firstBitmapSector + m_bitmapCount; i++) {
       m_image->readSector(i, map);
       bitmap.append(map);
     }
   }
 
-  QList<AtariDirEntry> SpartaDosFileSystem::getEntries(quint16 dir) {
+  QList<AtariDirEntry> SpartaDosFileSystem::getEntries(const quint16 dir) {
     QList<AtariDirEntry> list;
 
     SpartaDosFile sf(this, dir);
@@ -78,17 +78,17 @@ namespace Filesystems {
       list.clear();
       return list;
     }
-    int dirLen = (quint8) dosEntry.at(3) + (quint8) dosEntry.at(4) * 256 + (quint8) dosEntry.at(5) * 65536 - 23;
+    int dirLen = static_cast<quint8>(dosEntry.at(3)) + static_cast<quint8>(dosEntry.at(4)) * 256 + static_cast<quint8>(dosEntry.at(5)) * 65536 - 23;
     int no = 0;
 
     while (dirLen > 0) {
-      AtariDirEntry entry;
       dosEntry = sf.read(23);
-      int f = (quint8) dosEntry.at(0);
+      const int f = static_cast<quint8>(dosEntry.at(0));
       if (f == 0) {
         break;
       }
       if ((f & 144) == 0) {
+        AtariDirEntry entry;
         entry.makeFromSpartaDosEntry(dosEntry, no, dir);
         list.append(entry);
       }
@@ -128,13 +128,10 @@ namespace Filesystems {
 
     int rest = entry.size;
 
-    QByteArray buffer;
     while (rest) {
       int bufSize = 8388608;
-      if (bufSize > rest) {
-        bufSize = rest;
-      }
-      buffer = sdf.read(bufSize);
+      bufSize = std::min(bufSize, rest);
+      QByteArray buffer = sdf.read(bufSize);
       if (buffer.count() != bufSize) {
         bufSize = buffer.count();
         rest = bufSize;
@@ -159,11 +156,11 @@ namespace Filesystems {
   }
 
   AtariDirEntry SpartaDosFileSystem::insert(quint16 /*dir*/, const QString & /*name*/) {
-    return AtariDirEntry();
+    return {};
   }
 
   AtariDirEntry SpartaDosFileSystem::makeDir(quint16 /*dir*/, const QString & /*name*/) {
-    return AtariDirEntry();
+    return {};
   }
 
   bool SpartaDosFileSystem::erase(const AtariDirEntry & /*entry*/) {

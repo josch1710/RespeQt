@@ -4,13 +4,12 @@
 namespace Filesystems {
   /* AtariDirEntry */
   AtariDirEntry::AtariDirEntry()
-      : no(-1), firstSector(-1), dir(-1), size(0) {}
+      : firstSector(UINT16_MAX), no(UINT16_MAX), dir(UINT16_MAX), size(0) {}
 
 
   QString AtariDirEntry::name() const {
     QString s = baseName();
-    QString e = suffix();
-    if (!e.isEmpty()) {
+    if (const QString e = suffix(); !e.isEmpty()) {
       s.append(".");
       s.append(e);
     }
@@ -21,9 +20,8 @@ namespace Filesystems {
     QString n = name();
     if (n == n.toUpper()) {
       return n.toLower();
-    } else {
-      return n;
     }
+    return n;
   }
 
   QString AtariDirEntry::baseName() const {
@@ -78,13 +76,13 @@ namespace Filesystems {
     return result;
   }
 
-  void AtariDirEntry::makeFromAtariDosEntry(const QByteArray &entry, int aNo, int aDir, bool dd) {
+  void AtariDirEntry::makeFromAtariDosEntry(const QByteArray &entry, const quint16 aNo, const quint16 aDir, const bool dd) {
     // Translate the attributes
     attributes = Attributes();
 
     internalData = entry;
 
-    auto f = (quint8) entry.at(0);
+    const auto f {static_cast<quint8>(entry.at(0))};
 
     if (f & 0x10) {
       attributes |= Directory;
@@ -92,7 +90,7 @@ namespace Filesystems {
     if (f & 0x20) {
       attributes |= Locked;
     }
-    if ((f & 0x01) && !(f & 0x40)) {
+    if (f & 0x01 && !(f & 0x40)) {
       attributes |= Dos25;
     }
     if (f & 0x04) {
@@ -110,14 +108,14 @@ namespace Filesystems {
       size = -1;
     } else {
       if (dd) {
-        size = ((quint8) entry.at(1) + (quint8) entry.at(2) * 256) * 253;
+        size = (static_cast<quint8>(entry.at(1)) + static_cast<quint8>(entry.at(2)) * 256) * 253;
       } else {
-        size = ((quint8) entry.at(1) + (quint8) entry.at(2) * 256) * 125;
+        size = (static_cast<quint8>(entry.at(1)) + static_cast<quint8>(entry.at(2)) * 256) * 125;
       }
     }
 
     // Translate the first sector
-    firstSector = (quint8) entry.at(3) + (quint8) entry.at(4) * 256;
+    firstSector = static_cast<quint8>(entry.at(3)) + static_cast<quint8>(entry.at(4)) * 256;
 
     // Put an invalid date
     dateTime = QDateTime();
@@ -126,13 +124,13 @@ namespace Filesystems {
     no = aNo;
   }
 
-  void AtariDirEntry::makeFromSpartaDosEntry(const QByteArray &entry, int aNo, int aDir) {
+  void AtariDirEntry::makeFromSpartaDosEntry(const QByteArray &entry, const int aNo, const int aDir) {
     // Translate the attributes
     attributes = Attributes();
 
     internalData = entry;
 
-    auto f = (quint8) entry.at(0);
+    const auto f = static_cast<quint8>(entry.at(0));
 
     if (f & 0x01) {
       attributes |= Locked;
@@ -154,22 +152,22 @@ namespace Filesystems {
     if (attributes & Directory) {
       size = -1;
     } else {
-      size = (quint8) entry.at(3) + (quint8) entry.at(4) * 256 + (quint8) entry.at(5) * 65536;
+      size = static_cast<quint8>(entry.at(3)) + static_cast<quint8>(entry.at(4)) * 256 + static_cast<quint8>(entry.at(5)) * 65536;
     }
 
     // Translate the first sector
-    firstSector = (quint8) entry.at(1) + (quint8) entry.at(2) * 256;
+    firstSector = static_cast<quint8>(entry.at(1)) + static_cast<quint8>(entry.at(2)) * 256;
 
     // Translate the date/time
-    int year = (quint8) entry.at(19) + 1900;
+    int year = static_cast<quint8>(entry.at(19)) + 1900;
     if (year < 1980) {
       year += 100;
     }
-    QDate date(year, (quint8) entry.at(18), (quint8) entry.at(17));
-    QTime time((quint8) entry.at(20), (quint8) entry.at(21), (quint8) entry.at(22));
+    const QDate date(year, static_cast<quint8>(entry.at(18)), static_cast<quint8>(entry.at(17)));
+    const QTime time(static_cast<quint8>(entry.at(20)), static_cast<quint8>(entry.at(21)), static_cast<quint8>(entry.at(22)));
     dateTime = QDateTime(date, time);
 
-    dir = aDir;
+    dir = static_cast<quint16>(aDir);
     no = aNo;
   }
 

@@ -10,29 +10,29 @@ namespace Filesystems {
       : AtariFileSystem(image) {
     m_image->readSector(360, vtoc);
     bitmap = vtoc.mid(10, 90);
-    m_freeSectors = (quint8) vtoc.at(3) + (quint8) vtoc.at(4) * 256;
+    m_freeSectors = static_cast<quint8>(vtoc.at(3)) + static_cast<quint8>(vtoc.at(4)) * 256;
   }
 
-  QList<AtariDirEntry> Dos10FileSystem::getEntries(quint16 dir) {
+  QList<AtariDirEntry> Dos10FileSystem::getEntries(const quint16 dir) {
     QList<AtariDirEntry> list;
 
-    bool dd = m_image->geometry().bytesPerSector() == 256;
+    const bool dd = m_image->geometry().bytesPerSector() == 256;
 
     int no = 0;
     for (quint16 s = dir; s < dir + 8; s++) {
       QByteArray data;
       m_image->readSector(s, data);
-      for (uint e = 0; e < 8; e++, no++) {
+      for (auto e {0}; e < 8; e++, no++) {
         QByteArray dosEntry = data.mid(e * 16, 16);
-        auto f = (quint8) dosEntry.at(0);
+        const auto f {static_cast<quint8>(dosEntry.at(0))};
         if (f == 0) {
           goto bailout;
         }
-        if (((f & 65) == 65) || (f & 128)) {
+        if ((f & 65) == 65 || f & 128) {
           continue;
         }
         AtariDirEntry a;
-        a.makeFromAtariDosEntry(dosEntry, no, dir, dd);
+        a.makeFromAtariDosEntry(dosEntry, static_cast<quint16>(no), dir, dd);
         list.append(a);
       }
     }
@@ -47,33 +47,29 @@ namespace Filesystems {
 
   bool Dos10FileSystem::extract(const AtariDirEntry &entry, const QString &target) {
     QFile file(target + "/" + entry.niceName());
-    QFile::OpenMode mode;
 
-    mode = QFile::WriteOnly | QFile::Truncate;
-
-    if (!file.open(mode)) {
+    if (constexpr QFile::OpenMode mode {QFile::WriteOnly | QFile::Truncate}; !file.open(mode)) {
       QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot create file '%1'.").arg(entry.niceName()));
       return false;
     }
 
     quint16 sector = entry.firstSector;
-    for (uint n = entry.size / (m_image->geometry().bytesPerSector() - 3); n > 0 && sector != 0; n--) {
+    for (quint16 n = static_cast<quint16>(entry.size) / (m_image->geometry().bytesPerSector() - 3); n > 0 && sector != 0; n--) {
       QByteArray data;
       if (!m_image->readSector(sector, data)) {
         QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot read '%1': %2").arg(entry.niceName(), tr("Sector read failed.")));
         return false;
       }
       if (!(entry.attributes & AtariDirEntry::MyDos)) {
-        int fileNo = (quint8) data.at(data.count() - 3) >> 2;
-        if (fileNo != entry.no) {
+        if (const int fileNo {static_cast<quint8>(data.at(data.count() - 3)) >> 2}; fileNo != entry.no) {
           QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot read '%1': %2").arg(entry.niceName(), tr("File number mismatch.")));
           return false;
         }
-        sector = ((quint8) data.at(data.count() - 3) & 0x03) * 256 + (quint8) data.at(data.count() - 2);
+        sector = (static_cast<quint8>(data.at(data.count() - 3)) & 0x03) * 256 + static_cast<quint8>(data.at(data.count() - 2));
       } else {
-        sector = (quint8) data.at(data.count() - 3) * 256 + (quint8) data.at(data.count() - 2);
+        sector = static_cast<quint8>(data.at(data.count() - 3)) * 256 + static_cast<quint8>(data.at(data.count() - 2));
       }
-      uint size = (quint8) data.at(data.count() - 1);
+      const auto size = data.at(data.count() - 1);
       if (!(entry.attributes & AtariDirEntry::Dos10)) {
         data.resize(size);
       } else {
@@ -128,14 +124,14 @@ namespace Filesystems {
     return true;
   }
 
-  AtariDirEntry Dos10FileSystem::insert(quint16 dir, const QString &name) {
+  AtariDirEntry Dos10FileSystem::insert(const quint16 dir, const QString &name) {
     AtariDirEntry result;
     QByteArray dosEntry = findName(dir, name);
     if (dosEntry.isEmpty()) {
       QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot insert '%1': %2").arg(name, tr("Cannot find a suitable file name.")));
       return result;
     }
-    int no = findFreeFileNo(dir);
+    const int no {findFreeFileNo(dir)};
     if (no < 0) {
       QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot insert '%1': %2").arg(name, tr("Directory is full.")));
       return result;
@@ -163,15 +159,17 @@ namespace Filesystems {
       return result;
     }
 
-    int dataSize = m_image->geometry().bytesPerSector() - 3;
+    const int dataSize {m_image->geometry().bytesPerSector() - 3};
 
-    int sector, newSector;
+    quint16 newSector;
     bool hiUsed = false;
-    bool myDos = typeid(*this) == typeid(MyDosFileSystem)
-       && (vtoc.at(0) > 2);
+    const bool myDos {
+      typeid(*this) == typeid(MyDosFileSystem)
+      && vtoc.at(0) > 2
+    };
 
-    int firstSector = findFreeSector(0);
-    sector = firstSector;
+    const auto firstSector = findFreeSector(0);
+    auto sector {firstSector};
     if (sector == 0) {
       QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot insert '%1': %2").arg(name, tr("Disk is full.")));
       return result;
@@ -187,7 +185,7 @@ namespace Filesystems {
       }
       int size = dataSize;
       if (file.bytesAvailable() < size) {
-        size = file.bytesAvailable();
+        size = static_cast<int>(file.bytesAvailable());
       }
       QByteArray data = file.read(size);
 
@@ -218,15 +216,15 @@ namespace Filesystems {
       }
       data.resize(dataSize + 3);
       if (myDos) {
-        data[dataSize] = newSector / 256;
-        data[dataSize + 1] = newSector % 256;
-        data[dataSize + 2] = size;
+        data[dataSize] = static_cast<char>(newSector / 256);
+        data[dataSize + 1] = static_cast<char>(newSector % 256);
+        data[dataSize + 2] = static_cast<char>(size);
       } else {
-        data[dataSize] = (newSector / 256) | (no * 4);
-        data[dataSize + 1] = newSector % 256;
+        data[dataSize] = static_cast<char>(newSector / 256 | no * 4);
+        data[dataSize + 1] = static_cast<char>(newSector % 256);
         // TODO WHY?
         // Always true if (fileSystemCode() != 0) {
-          data[dataSize + 2] = size;
+          data[dataSize + 2] = static_cast<char>(size);
         /*} else {
           if (file.atEnd()) {
             data[dataSize + 2] = size | 128;
@@ -242,8 +240,8 @@ namespace Filesystems {
       sector = newSector;
     } while (!file.atEnd());
 
-    quint16 dirsec = dir + no / 8;
-    int start = (no % 8) * 16;
+    const quint16 dirsec = dir + static_cast<quint16>(no) / 8;
+    const int start = no % 8 * 16;
     QByteArray data;
     if (!image()->readSector(dirsec, data)) {
       QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot insert '%1': %2").arg(name, tr("Sector read failed.")));
@@ -260,11 +258,11 @@ namespace Filesystems {
       flag = 0x42;
     }
 
-    dosEntry[0] = flag;
-    dosEntry[1] = sectorCount % 256;
-    dosEntry[2] = sectorCount / 256;
-    dosEntry[3] = firstSector % 256;
-    dosEntry[4] = firstSector / 256;
+    dosEntry[0] = static_cast<char>(flag);
+    dosEntry[1] = static_cast<char>(sectorCount % 256);
+    dosEntry[2] = static_cast<char>(sectorCount / 256);
+    dosEntry[3] = static_cast<char>(firstSector % 256);
+    dosEntry[4] = static_cast<char>(firstSector / 256);
 
     data.replace(start, 16, dosEntry);
 
@@ -274,19 +272,19 @@ namespace Filesystems {
     }
 
     writeBitmap();
-    result.makeFromAtariDosEntry(dosEntry, no, dir, m_image->geometry().bytesPerSector() == 256);
+    result.makeFromAtariDosEntry(dosEntry, static_cast<quint16>(no), dir, m_image->geometry().bytesPerSector() == 256);
 
     return result;
   }
 
-  AtariDirEntry Dos10FileSystem::makeDir(quint16 dir, const QString &name) {
+  AtariDirEntry Dos10FileSystem::makeDir(const quint16 dir, const QString &name) {
     AtariDirEntry result;
     QByteArray dosEntry = findName(dir, name);
     if (dosEntry.isEmpty()) {
       QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot insert '%1': %2").arg(name, tr("Cannot find a suitable file name.")));
       return result;
     }
-    int no = findFreeFileNo(dir);
+    const int no = findFreeFileNo(dir);
     if (no < 0) {
       QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot insert '%1': %2").arg(name, tr("Directory is full.")));
       return result;
@@ -296,8 +294,8 @@ namespace Filesystems {
     dosEntry[0] = 0x10;
     dosEntry[1] = 8;
 
-    int first = findFreeSector(369);
-    int sector = first;
+    const auto first = findFreeSector(369);
+    auto sector = first;
     if (sector == 0) {
       QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot insert '%1': %2").arg(name, tr("Disk is full.")));
       return result;
@@ -322,9 +320,9 @@ namespace Filesystems {
       return result;
     }
 
-    QByteArray empty(m_image->geometry().bytesPerSector(), 0);
+    const QByteArray empty(m_image->geometry().bytesPerSector(), 0);
 
-    for (int i = sector; i < sector + 8; i++) {
+    for (auto i = sector; i < sector + 8; i++) {
       allocateSector(i);
       if (!m_image->writeSector(i, empty)) {
         QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot insert '%1': %2").arg(name, tr("Sector write failed.")));
@@ -332,11 +330,11 @@ namespace Filesystems {
       }
     }
 
-    dosEntry[3] = sector % 256;
-    dosEntry[4] = sector / 256;
+    dosEntry[3] = static_cast<char>(sector % 256);
+    dosEntry[4] = static_cast<char>(sector / 256);
 
-    quint16 dirsec = dir + no / 8;
-    int start = (no % 8) * 16;
+    const quint16 dirsec = dir + static_cast<quint16>(no) / 8;
+    const int start = no % 8 * 16;
     QByteArray data;
     if (!image()->readSector(dirsec, data)) {
       QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot insert '%1': %2").arg(name, tr("Sector read failed.")));
@@ -351,27 +349,27 @@ namespace Filesystems {
     }
 
     writeBitmap();
-    result.makeFromAtariDosEntry(dosEntry, no, dir, m_image->geometry().bytesPerSector() == 256);
+    result.makeFromAtariDosEntry(dosEntry, static_cast<quint16>(no), dir, m_image->geometry().bytesPerSector() == 256);
 
     return result;
   }
 
   bool Dos10FileSystem::erase(const AtariDirEntry &entry) {
-    quint16 dirsec = entry.dir + entry.no / 8;
-    int start = (entry.no % 8) * 16;
+    const quint16 dirsec = entry.dir + static_cast<quint16>(entry.no) / 8;
+    const int start = entry.no % 8 * 16;
     QByteArray data;
     if (!image()->readSector(dirsec, data)) {
       QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot delete '%1': %2").arg(entry.niceName(), tr("Sector read failed.")));
       return false;
     }
-    data[start] = 0x80;
+    data[start] = static_cast<char>(0x80);
     if (!image()->writeSector(dirsec, data)) {
       QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot delete '%1': %2").arg(entry.niceName(), tr("Sector write failed.")));
       return false;
     }
 
     quint16 sector = entry.firstSector;
-    for (uint n = entry.size / (m_image->geometry().bytesPerSector() - 3); n > 0 && sector != 0; n--) {
+    for (quint16 n = static_cast<quint16>(entry.size) / (m_image->geometry().bytesPerSector() - 3); n > 0 && sector != 0; n--) {
       freeSector(sector);
       //QByteArray data;
       data.clear();
@@ -380,14 +378,13 @@ namespace Filesystems {
         return false;
       }
       if (!(entry.attributes & AtariDirEntry::MyDos)) {
-        int fileNo = (quint8) data.at(data.count() - 3) >> 2;
-        if (fileNo != entry.no) {
+        if (const int fileNo = static_cast<quint8>(data.at(data.count() - 3)) >> 2; fileNo != entry.no) {
           QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot delete '%1': %2").arg(entry.niceName(), tr("File number mismatch.")));
           return false;
         }
-        sector = ((quint8) data.at(data.count() - 3) & 0x03) * 256 + (quint8) data.at(data.count() - 2);
+        sector = (static_cast<quint8>(data.at(data.count() - 3)) & 0x03) * 256 + static_cast<quint8>(data.at(data.count() - 2));
       } else {
-        sector = (quint8) data.at(data.count() - 3) * 256 + (quint8) data.at(data.count() - 2);
+        sector = static_cast<quint8>(data.at(data.count() - 3)) * 256 + static_cast<quint8>(data.at(data.count() - 2));
       }
     }
 
@@ -399,29 +396,25 @@ namespace Filesystems {
   }
 
   bool Dos10FileSystem::rename(const AtariDirEntry &entry, const QByteArray &name) {
-    quint16 dirsec = entry.dir + entry.no / 8;
-    int start = (entry.no % 8) * 16;
+    const quint16 dirsec = entry.dir + static_cast<quint16>(entry.no) / 8;
+    const int start = entry.no % 8 * 16;
     QByteArray data;
     if (!image()->readSector(dirsec, data)) {
       return false;
     }
     data.replace(start + 5, 11, name);
-    if (!image()->writeSector(dirsec, data)) {
-      return false;
-    }
-    return true;
+    return image()->writeSector(dirsec, data);
   }
 
-  int Dos10FileSystem::findFreeFileNo(quint16 dir) {
+  int Dos10FileSystem::findFreeFileNo(const quint16 dir) {
     int no = 0;
-    for (int sector = dir; sector < dir + 8; sector++) {
+    for (auto sector = dir; sector < dir + 8; sector++) {
       QByteArray data;
       if (!m_image->readSector(sector, data)) {
         return -1;
       }
       for (int i = 0; i < 128; i += 16) {
-        int f = (quint8) data.at(i);
-        if (f == 0x80 || f == 0x00) {
+        if (const int f = static_cast<quint8>(data.at(i)); f == 0x80 || f == 0x00) {
           return no;
         }
         no++;
@@ -436,26 +429,26 @@ namespace Filesystems {
       return false;
     }
     data.replace(10, 90, bitmap);
-    data[3] = m_freeSectors % 256;
-    data[4] = m_freeSectors / 256;
+    data[3] = static_cast<char>(m_freeSectors % 256);
+    data[4] = static_cast<char>(m_freeSectors / 256);
     return m_image->writeSector(360, data);
   }
 
   bool Dos10FileSystem::removeDir(const AtariDirEntry &entry) {
-    quint16 dirsec = entry.dir + entry.no / 8;
-    int start = (entry.no % 8) * 16;
+    const quint16 dirsec = entry.dir + static_cast<quint16>(entry.no) / 8;
+    const int start = entry.no % 8 * 16;
     QByteArray data;
     if (!image()->readSector(dirsec, data)) {
       QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot delete '%1': %2").arg(entry.niceName(), tr("Sector read failed.")));
       return false;
     }
-    data[start] = 0x80;
+    data[start] = static_cast<char>(0x80);
     if (!image()->writeSector(dirsec, data)) {
       QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot delete '%1': %2").arg(entry.niceName(), tr("Sector write failed.")));
       return false;
     }
 
-    for (int s = entry.firstSector; s < entry.firstSector + 8; s++) {
+    for (auto s = entry.firstSector; s < entry.firstSector + 8; s++) {
       freeSector(s);
     }
 

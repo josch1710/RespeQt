@@ -1,5 +1,7 @@
 #include "filesystems/mydosfilesystem.h"
 
+#include <algorithm>
+
 namespace Filesystems {
 
 
@@ -7,13 +9,11 @@ namespace Filesystems {
       : Dos20FileSystem(image) {
     int xvtocCount;
     if (m_image->geometry().bytesPerSector() == 256) {
-      xvtocCount = (quint8) vtoc.at(0) - 2;
+      xvtocCount = static_cast<quint8>(vtoc.at(0)) - 2;
     } else {
-      xvtocCount = ((quint8) vtoc.at(0) * 2) - 4;
+      xvtocCount = static_cast<quint8>(vtoc.at(0)) * 2 - 4;
     }
-    if (xvtocCount < 0) {
-      xvtocCount = 0;
-    }
+    xvtocCount = std::max(xvtocCount, 0);
     xvtoc = QByteArray();
     for (quint16 s = 359; xvtocCount > 0; xvtocCount--, s--) {
       QByteArray data;
@@ -22,7 +22,7 @@ namespace Filesystems {
     }
     bitmap.append(vtoc.right(m_image->geometry().bytesPerSector() - 100));
     bitmap.append(xvtoc);
-    bitmap.resize((image->geometry().sectorCount() + 8) / 8);
+    bitmap.resize((static_cast<int>(image->geometry().sectorCount()) + 8) / 8);
   }
 
   bool MyDosFileSystem::writeBitmap() {
@@ -31,17 +31,15 @@ namespace Filesystems {
       return false;
     }
 
-    int bps = m_image->geometry().bytesPerSector();
+    const int bps = m_image->geometry().bytesPerSector();
 
     int total = bitmap.count();
-    if (total > bps - 10) {
-      total = bps - 10;
-    }
+    total = std::min(total, bps - 10);
 
     data.replace(10, total, bitmap.left(total));
 
-    data[3] = m_freeSectors % 256;
-    data[4] = m_freeSectors / 256;
+    data[3] = static_cast<char>(m_freeSectors % 256);
+    data[4] = static_cast<char>(m_freeSectors / 256);
     if (!m_image->writeSector(360, data)) {
       return false;
     }
@@ -54,9 +52,7 @@ namespace Filesystems {
 
     for (quint16 s = 359; xvtocCount > 0; xvtocCount--, s--, total += bps) {
       int n = bitmap.count() - total;
-      if (n > bps) {
-        n = bps;
-      }
+      n = std::min(n, bps);
       data = bitmap.mid(total, n);
       data.append(QByteArray(bps - n, 0));
       if (!m_image->writeSector(s, data)) {
@@ -67,7 +63,7 @@ namespace Filesystems {
   }
 
   uint MyDosFileSystem::totalCapacity() {
-    return ((quint8) vtoc.at(1) + (quint8) vtoc.at(2) * 256) * (m_image->geometry().bytesPerSector() - 3);
+    return (static_cast<quint8>(vtoc.at(1)) + static_cast<quint8>(vtoc.at(2)) * 256) * (m_image->geometry().bytesPerSector() - 3);
   }
 
 

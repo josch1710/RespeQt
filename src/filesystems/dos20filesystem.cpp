@@ -7,7 +7,7 @@ namespace Filesystems {
   }
 
   uint Dos20FileSystem::totalCapacity() {
-    return ((quint8) vtoc.at(1) + (quint8) vtoc.at(2) * 256) * (m_image->geometry().bytesPerSector() - 3);
+    return (static_cast<quint8>(vtoc.at(1)) + static_cast<quint8>(vtoc.at(2)) * 256) * (m_image->geometry().bytesPerSector() - 3);
   }
 
 }// namespace Filesystems
