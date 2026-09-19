@@ -59,7 +59,6 @@ def main() -> None:
             continue
 
         relative_path = Path(file_node.text.strip())
-        icon_path = os.path.join(SCRIPT_DIR, file_node.text)
 
         if relative_path.suffix.lower() not in SUPPORTED_EXTENSIONS:
             skipped += 1
