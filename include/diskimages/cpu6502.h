@@ -30,7 +30,7 @@ namespace DiskImages {
   constexpr unsigned char CPU6502_FLAG_V = 0x40;
   constexpr unsigned char CPU6502_FLAG_N = 0x80;
 
-  typedef enum MODE_ENUM {
+  using MODE_ENUM = enum MODE_ENUM {
     // 6502
     MODE_IMMEDIATE,
     MODE_ABSOLUTE,
@@ -49,22 +49,140 @@ namespace DiskImages {
     MODE_ZERO_PAGE_INDIRECT,
     MODE_ZERO_PAGE_RELATIVE,
     MODE_IMMEDIATE_WORD// for 3-byte NOP
-  } MODE_ENUM;
+  };
 
-  typedef struct OPCODE {
+  using OPCODE = struct OPCODE {
     const char szName[4];
     bool bIllegal;
     MODE_ENUM wMode;
-  } OPCODE;
+  };
 
-  typedef enum CPU_ENUM {
+  using CPU_ENUM = enum CPU_ENUM {
     CPU_6502,
     CPU_65C02
-  } CPU_ENUM;
+  };
 
   // This class implements 6502 CPU emulation.
   // It must be derived because ReadByte and WriteByte are pure virtual functions.
   class Cpu6502 {
+
+  public:
+    // constructors and destructor
+    explicit Cpu6502(CPU_ENUM cpuType);
+    virtual ~Cpu6502() = default;
+
+    // return register value
+    [[nodiscard]] unsigned short GetPC() const { return m_PC; }
+    [[nodiscard]] unsigned char GetSR() const { return m_SR; }
+    [[nodiscard]] unsigned char GetSP() const { return m_SP; }
+    [[nodiscard]] unsigned char GetA() const { return m_A; }
+    [[nodiscard]] unsigned char GetX() const { return m_X; }
+    [[nodiscard]] unsigned char GetY() const { return m_Y; }
+
+    // set register value
+    void SetPC(const unsigned short PC) { m_PC = PC; }
+    void SetSR(const unsigned char SR) { m_SR = SR; }
+    void SetSP(const unsigned char SP) { m_SP = SP; }
+    void SetA(const unsigned char A) { m_A = A; }
+    void SetX(const unsigned char X) { m_X = X; }
+    void SetY(const unsigned char Y) { m_Y = Y; }
+
+    // modify a flag in status register
+    void SetFlagB(const unsigned char val) {
+      if (val) m_SR |= CPU6502_FLAG_B;
+      else
+        m_SR &= ~CPU6502_FLAG_B;
+    }
+
+    void SetFlagI(const unsigned char val) {
+      if (val) m_SR |= CPU6502_FLAG_I;
+      else
+        m_SR &= ~CPU6502_FLAG_I;
+    }
+
+    void SetFlagZ(const unsigned char val) {
+      if (val == 0) m_SR |= CPU6502_FLAG_Z;
+      else
+        m_SR &= ~CPU6502_FLAG_Z;
+    }
+
+    void SetFlagN(const unsigned char val) {
+      if (val & CPU6502_FLAG_N) m_SR |= CPU6502_FLAG_N;
+      else
+        m_SR &= ~CPU6502_FLAG_N;
+    }
+
+    void SetFlagC(const unsigned char val) {
+      if (val) m_SR |= CPU6502_FLAG_C;
+      else
+        m_SR &= ~CPU6502_FLAG_C;
+    }
+
+    void SetFlagV(const unsigned char val) {
+      if (val) m_SR |= CPU6502_FLAG_V;
+      else
+        m_SR &= ~CPU6502_FLAG_V;
+    }
+
+    void SetFlagD(const unsigned char val) {
+      if (val) m_SR |= CPU6502_FLAG_D;
+      else
+        m_SR &= ~CPU6502_FLAG_D;
+    }
+
+    // read/write a word in memory
+    unsigned short ReadWordBug(const unsigned short addr) { return MAKE_WORD(ReadByte(addr), ReadByte((addr & 0xFF00) | (addr + 1 & 0x00FF))); }
+    unsigned short ReadWord(const unsigned short addr) { return MAKE_WORD(ReadByte(addr), ReadByte(addr + 1)); }
+    void WriteWord(const unsigned short addr, const unsigned short val) {
+      WriteByte(addr, LO_BYTE(val));
+      WriteByte(addr + 1, HI_BYTE(val));
+    }
+
+    // push/pop a value on the stack.
+    void PushByte(const unsigned char val) {
+      WriteByte(0x100 + m_SP, val);
+      m_SP--;
+    }
+
+    void PushWord(const unsigned short val) {
+      PushByte(HI_BYTE(val));
+      PushByte(LO_BYTE(val));
+    }
+
+    unsigned char PopByte() {
+      m_SP++;
+      return ReadByte(0x100 + m_SP);
+    }
+
+    unsigned short PopWord() {
+      const unsigned char uLow = PopByte();
+      return static_cast<unsigned short>(uLow | uLow << 8);
+    }
+
+    // execute one instruction and returns the number of cycles.
+    [[maybe_unused]]  virtual int Step();
+
+    // build a trace of the next instruction. Buffer should be at least 128 bytes
+    virtual unsigned short BuildTrace(char *buffer);
+    virtual int BuildInstruction(char *buffer, unsigned char *data, int lenData, unsigned short address);
+    virtual const char *GetAddressLabel(unsigned short addr) const;
+    virtual const char *GetAddressLabelAllBanks(unsigned short addr) const;
+    virtual void Trace(int module, bool debug, const char *msg, ...) = 0;
+    [[maybe_unused]] virtual bool HasTrace() { return m_traceOn; }
+    [[maybe_unused]] virtual void SetTrace(const bool traceOn) {
+      m_traceOn = traceOn;
+      m_instructionsSkipped = 0;
+    }
+
+    // trigger an interrupt line and returns the number of cycles.
+    int Reset();
+    [[maybe_unused]] int Nmi();
+    [[maybe_unused]] int Irq();
+
+    // read/write a byte in memory
+    virtual unsigned char ReadByte(unsigned short addr) = 0;
+    virtual void WriteByte(unsigned short addr, unsigned char val) = 0;
+    virtual bool IsAddressSkipped(unsigned short addr) = 0;
 
   private:
     // cpu type
@@ -79,37 +197,37 @@ namespace DiskImages {
     unsigned char m_Y;
 
     // BCD loopkup table
-    unsigned char m_BCDTable[3][256];
+    unsigned char m_BCDTable[3][256]{};
 
     // disassemble instructions
     bool m_traceOn;
     int m_instructionsSkipped;
 
     // get address depending on addressing mode
-    inline unsigned short FetchZPage(unsigned short addr) { return (unsigned short) ReadByte(addr); }
-    inline unsigned short FetchAbsolute(unsigned short addr) { return ReadWord(addr); }
-    inline unsigned short FetchAbsoluteX(unsigned short addr) { return ReadWord(addr) + m_X; }
-    inline unsigned short FetchAbsoluteY(unsigned short addr) { return ReadWord(addr) + m_Y; }
-    inline unsigned short FetchZPageX(unsigned short addr) { return (unsigned short) (ReadByte(addr) + m_X); }
-    inline unsigned short FetchZPageY(unsigned short addr) { return (unsigned short) (ReadByte(addr) + m_Y); }
-    inline unsigned short FetchXIndirect(unsigned short addr) { return ReadWord((unsigned char) (ReadByte(addr) + m_X)); }
-    inline unsigned short FetchIndirectY(unsigned short addr) { return ReadWord((unsigned short) ReadByte(addr)) + m_Y; }
-    inline unsigned short FetchIndirectBug(unsigned short addr) { return ReadWordBug(ReadWord(addr)); }
-    inline unsigned short FetchIndirect(unsigned short addr) { return ReadWord(ReadWord(addr)); }
-    inline unsigned short FetchZPageIndirect(unsigned short addr) { return ReadWord((unsigned char) ReadByte(addr)); }
-    inline unsigned short FetchAbsoluteXIndirect(unsigned short addr) { return ReadWord((unsigned short) (ReadWord(addr) + m_X)); }
+    unsigned short FetchZPage(const unsigned short addr) { return ReadByte(addr); }
+    unsigned short FetchAbsolute(const unsigned short addr) { return ReadWord(addr); }
+    unsigned short FetchAbsoluteX(const unsigned short addr) { return ReadWord(addr) + m_X; }
+    unsigned short FetchAbsoluteY(const unsigned short addr) { return ReadWord(addr) + m_Y; }
+    unsigned short FetchZPageX(const unsigned short addr) { return static_cast<unsigned short>(ReadByte(addr) + m_X); }
+    unsigned short FetchZPageY(const unsigned short addr) { return static_cast<unsigned short>(ReadByte(addr) + m_Y); }
+    unsigned short FetchXIndirect(const unsigned short addr) { return ReadWord(static_cast<unsigned char>(ReadByte(addr) + m_X)); }
+    unsigned short FetchIndirectY(const unsigned short addr) { return ReadWord(ReadByte(addr)) + m_Y; }
+    unsigned short FetchIndirectBug(const unsigned short addr) { return ReadWordBug(ReadWord(addr)); }
+    unsigned short FetchIndirect(const unsigned short addr) { return ReadWord(ReadWord(addr)); }
+    unsigned short FetchZPageIndirect(const unsigned short addr) { return ReadWord( ReadByte(addr)); }
+    unsigned short FetchAbsoluteXIndirect(const unsigned short addr) { return ReadWord(ReadWord(addr) + m_X); }
 
     // get value depending on addressing mode
-    inline unsigned char ReadImm(unsigned short addr) { return ReadByte(addr); }
-    inline unsigned char ReadZPage(unsigned short addr) { return ReadByte(FetchZPage(addr)); }
-    inline unsigned char ReadAbsolute(unsigned short addr) { return ReadByte(FetchAbsolute(addr)); }
-    inline unsigned char ReadAbsoluteX(unsigned short addr) { return ReadByte(FetchAbsoluteX(addr)); }
-    inline unsigned char ReadAbsoluteY(unsigned short addr) { return ReadByte(FetchAbsoluteY(addr)); }
-    inline unsigned char ReadZPageX(unsigned short addr) { return ReadByte(FetchZPageX(addr)); }
-    inline unsigned char ReadZPageY(unsigned short addr) { return ReadByte(FetchZPageY(addr)); }
-    inline unsigned char ReadXIndirect(unsigned short addr) { return ReadByte(FetchXIndirect(addr)); }
-    inline unsigned char ReadIndirectY(unsigned short addr) { return ReadByte(FetchIndirectY(addr)); }
-    inline unsigned char ReadZPageIndirect(unsigned short addr) { return ReadByte(FetchZPageIndirect(addr)); }
+    unsigned char ReadImm(const unsigned short addr) { return ReadByte(addr); }
+    unsigned char ReadZPage(const unsigned short addr) { return ReadByte(FetchZPage(addr)); }
+    unsigned char ReadAbsolute(const unsigned short addr) { return ReadByte(FetchAbsolute(addr)); }
+    unsigned char ReadAbsoluteX(const unsigned short addr) { return ReadByte(FetchAbsoluteX(addr)); }
+    unsigned char ReadAbsoluteY(const unsigned short addr) { return ReadByte(FetchAbsoluteY(addr)); }
+    unsigned char ReadZPageX(const unsigned short addr) { return ReadByte(FetchZPageX(addr)); }
+    unsigned char ReadZPageY(const unsigned short addr) { return ReadByte(FetchZPageY(addr)); }
+    unsigned char ReadXIndirect(const unsigned short addr) { return ReadByte(FetchXIndirect(addr)); }
+    unsigned char ReadIndirectY(const unsigned short addr) { return ReadByte(FetchIndirectY(addr)); }
+    unsigned char ReadZPageIndirect(const unsigned short addr) { return ReadByte(FetchZPageIndirect(addr)); }
 
     // modify m_PC with relative branch
     inline int Branch(unsigned char val);
@@ -136,24 +254,24 @@ namespace DiskImages {
     inline int Bpl(unsigned char val);
     inline int Bvc(unsigned char val);
     inline int Bvs(unsigned char val);
-    inline void Brk(void);
-    inline void Clc(void);
-    inline void Cld(void);
-    inline void Cli(void);
-    inline void Clv(void);
+    inline void Brk();
+    inline void Clc();
+    inline void Cld();
+    inline void Cli();
+    inline void Clv();
     inline void Cmp(unsigned char val);
     inline void Cpx(unsigned char val);
     inline void Cpy(unsigned char val);
     inline void Dcp(unsigned short addr, unsigned char val);
     inline unsigned char Dec(unsigned char val);
-    inline void Dea(void);
-    inline void Dex(void);
-    inline void Dey(void);
+    inline void Dea();
+    inline void Dex();
+    inline void Dey();
     inline void Eor(unsigned char val);
     inline unsigned char Inc(unsigned char val);
-    inline void Ina(void);
-    inline void Inx(void);
-    inline void Iny(void);
+    inline void Ina();
+    inline void Inx();
+    inline void Iny();
     inline void Isc(unsigned short addr, unsigned char val);
     inline void Jmp(unsigned short addr);
     inline void Jsr(unsigned short addr);
@@ -164,24 +282,24 @@ namespace DiskImages {
     inline void Ldy(unsigned char val);
     inline unsigned char Lsr(unsigned char val);
     inline void Ora(unsigned char val);
-    inline void Pha(void);
-    inline void Php(void);
-    inline void Phx(void);
-    inline void Phy(void);
-    inline void Pla(void);
-    inline void Plp(void);
-    inline void Plx(void);
-    inline void Ply(void);
+    inline void Pha();
+    inline void Php();
+    inline void Phx();
+    inline void Phy();
+    inline void Pla();
+    inline void Plp();
+    inline void Plx();
+    inline void Ply();
     inline void Rla(unsigned short addr, unsigned char val);
     inline unsigned char Rol(unsigned char val);
     inline unsigned char Ror(unsigned char val);
     inline void Rra(unsigned short addr, unsigned char val);
-    inline void Rti(void);
-    inline void Rts(void);
+    inline void Rti();
+    inline void Rts();
     inline void Sbc(unsigned char val);
-    inline void Sec(void);
-    inline void Sed(void);
-    inline void Sei(void);
+    inline void Sec();
+    inline void Sed();
+    inline void Sei();
     inline void Slo(unsigned short addr, unsigned char val);
     inline void Sta(unsigned short addr);
     inline void Stx(unsigned short addr);
@@ -190,131 +308,22 @@ namespace DiskImages {
     inline void Sre(unsigned short addr, unsigned char val);
     inline void Sxa(unsigned short addr);
     inline void Sya(unsigned short addr);
-    inline void Tax(void);
-    inline void Tay(void);
+    inline void Tax();
+    inline void Tay();
     inline unsigned char Trb(unsigned char val);
     inline unsigned char Tsb(unsigned char val);
-    inline void Tsx(void);
-    inline void Txa(void);
-    inline void Txs(void);
-    inline void Tya(void);
+    inline void Tsx();
+    inline void Txa();
+    inline void Txs();
+    inline void Tya();
     inline void Xas(unsigned short addr);
 
     // find the length of an op-code
-    inline int GetOpCodeLength(unsigned char opCode);
+    [[nodiscard]] inline int GetOpCodeLength(unsigned char opCode) const;
 
     // get label for a given address
-    inline char *GetAddressOrLabel(unsigned short addr);
-    inline char *GetAddressOrLabelAllBanks(unsigned short addr);
-
-  public:
-    // constructors and destructor
-    Cpu6502(CPU_ENUM cpuType);
-    virtual ~Cpu6502() = default;
-
-    // return register value
-    inline unsigned short GetPC(void) { return m_PC; }
-    inline unsigned char GetSR(void) { return m_SR; }
-    inline unsigned char GetSP(void) { return m_SP; }
-    inline unsigned char GetA(void) { return m_A; }
-    inline unsigned char GetX(void) { return m_X; }
-    inline unsigned char GetY(void) { return m_Y; }
-
-    // set register value
-    inline void SetPC(unsigned short PC) { m_PC = PC; }
-    inline void SetSR(unsigned char SR) { m_SR = SR; }
-    inline void SetSP(unsigned char SP) { m_SP = SP; }
-    inline void SetA(unsigned char A) { m_A = A; }
-    inline void SetX(unsigned char X) { m_X = X; }
-    inline void SetY(unsigned char Y) { m_Y = Y; }
-
-    // modify a flag in status register
-    inline void SetFlagB(unsigned char val) {
-      if (val) m_SR |= CPU6502_FLAG_B;
-      else
-        m_SR &= ~CPU6502_FLAG_B;
-    }
-    inline void SetFlagI(unsigned char val) {
-      if (val) m_SR |= CPU6502_FLAG_I;
-      else
-        m_SR &= ~CPU6502_FLAG_I;
-    }
-    inline void SetFlagZ(unsigned char val) {
-      if (val == 0) m_SR |= CPU6502_FLAG_Z;
-      else
-        m_SR &= ~CPU6502_FLAG_Z;
-    }
-    inline void SetFlagN(unsigned char val) {
-      if (val & CPU6502_FLAG_N) m_SR |= CPU6502_FLAG_N;
-      else
-        m_SR &= ~CPU6502_FLAG_N;
-    }
-    inline void SetFlagC(unsigned char val) {
-      if (val) m_SR |= CPU6502_FLAG_C;
-      else
-        m_SR &= ~CPU6502_FLAG_C;
-    }
-    inline void SetFlagV(unsigned char val) {
-      if (val) m_SR |= CPU6502_FLAG_V;
-      else
-        m_SR &= ~CPU6502_FLAG_V;
-    }
-    inline void SetFlagD(unsigned char val) {
-      if (val) m_SR |= CPU6502_FLAG_D;
-      else
-        m_SR &= ~CPU6502_FLAG_D;
-    }
-
-    // read/write a word in memory
-    inline unsigned short ReadWordBug(unsigned short addr) { return MAKE_WORD(ReadByte(addr), ReadByte((addr & 0xFF00) | ((addr + 1) & 0x00FF))); }
-    inline unsigned short ReadWord(unsigned short addr) { return MAKE_WORD(ReadByte(addr), ReadByte(addr + 1)); }
-    inline void WriteWord(unsigned short addr, unsigned short val) {
-      WriteByte(addr, LO_BYTE(val));
-      WriteByte(addr + 1, HI_BYTE(val));
-    }
-
-    // push/pop a value on the stack.
-    inline void PushByte(unsigned char val) {
-      WriteByte(0x100 + m_SP, val);
-      m_SP--;
-    }
-    inline void PushWord(unsigned short val) {
-      PushByte(HI_BYTE(val));
-      PushByte(LO_BYTE(val));
-    }
-    inline unsigned char PopByte(void) {
-      m_SP++;
-      return ReadByte(0x100 + m_SP);
-    }
-    inline unsigned short PopWord(void) {
-      unsigned char uLow = PopByte();
-      return (((unsigned short) uLow) | (((unsigned short) PopByte()) << 8));
-    }
-
-    // execute one instruction and returns the number of cycles.
-    __attribute__((unused)) virtual int Step(void);
-
-    // build a trace of the next instruction. Buffer should be at least 128 bytes
-    virtual unsigned short BuildTrace(char *buffer);
-    virtual int BuildInstruction(char *buffer, unsigned char *data, int lenData, unsigned short address);
-    virtual char *GetAddressLabel(unsigned short addr);
-    virtual char *GetAddressLabelAllBanks(unsigned short addr);
-    virtual void Trace(int module, bool debug, const char *msg, ...) = 0;
-    __attribute__((unused)) virtual bool HasTrace(void) { return m_traceOn; }
-    __attribute__((unused)) virtual void SetTrace(bool traceOn) {
-      m_traceOn = traceOn;
-      m_instructionsSkipped = 0;
-    }
-
-    // trigger an interrupt line and returns the number of cycles.
-    int Reset(void);
-    __attribute__((unused)) int Nmi(void);
-    __attribute__((unused)) int Irq(void);
-
-    // read/write a byte in memory
-    virtual unsigned char ReadByte(unsigned short addr) = 0;
-    virtual void WriteByte(unsigned short addr, unsigned char val) = 0;
-    virtual bool IsAddressSkipped(unsigned short addr) = 0;
+    inline const char *GetAddressOrLabel(unsigned short addr) const;
+    inline const char *GetAddressOrLabelAllBanks(unsigned short addr) const;
   };
 }
 #endif

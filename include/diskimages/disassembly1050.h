@@ -13,18 +13,18 @@ namespace DiskImages {
   class disassembly1050 : public Cpu6502 {
   public:
     disassembly1050();
-    virtual ~disassembly1050() {}
+    ~disassembly1050() override = default;
 
     // read/write a byte in memory (unused)
-    virtual unsigned char ReadByte(unsigned short) { return 0; }
-    virtual void WriteByte(unsigned short, unsigned char) {}
+    unsigned char ReadByte(unsigned short) override { return 0; }
+    void WriteByte(unsigned short, unsigned char) override {}
 
     // enable/disable traces (unused)
-    virtual void Trace(int, bool, const char *, ...) {}
-    __attribute__((unused)) virtual void Dump(char *, int) {}
-    virtual bool IsAddressSkipped(unsigned short) { return false; }
+    void Trace(int, bool, const char *, ...) override {}
+    [[maybe_unused]] virtual void Dump(char *, int) {}
+    bool IsAddressSkipped(unsigned short) override { return false; }
 
-    virtual char *GetAddressLabel(unsigned short addr);
+    const char *GetAddressLabel(unsigned short addr) const override;
   };
 }
 #endif// DISASSEMBLY1050_H

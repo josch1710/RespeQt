@@ -16,10 +16,7 @@ namespace DiskImages {
     quint8 duplicateOffset[5];
     quint8 driveStatus;
     quint8 wd1771Status;
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
-    quint8 reservedByte;
-#pragma clang diagnostic pop
+    [[maybe_unused]]quint8 reservedByte;
     quint16 absoluteSector;
     bool notEmpty;
     quint8 fillByte;

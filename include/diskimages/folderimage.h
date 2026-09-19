@@ -24,10 +24,7 @@ namespace DiskImages {
     QString atariName;
     QString atariExt;
     QString longName;
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
-    int lastSector;
-#pragma clang diagnostic pop
+    [[maybe_unused]] int lastSector;
     quint64 pos;
     int sectPass;
   };
@@ -39,21 +36,21 @@ namespace DiskImages {
     QDir dir;
     void buildDirectory();
     QVector<AtariFile> atariFiles;
-    int atariFileNo;
+    int atariFileNo{0};
     int maxEntries{64};
 
   public:
-    FolderImage(SioWorkerPtr worker, int maxEntries = 64);
-    ~FolderImage();
+    explicit FolderImage(const SioWorkerPtr& worker, int maxEntries = 64);
+    ~FolderImage() override;
 
-    void close();
-    bool open(const QString &fileName, FileTypes::FileType /* type */);
-    bool readSector(quint16 sector, QByteArray &data);
-    bool writeSector(quint16 sector, const QByteArray &data);
-    bool format(const DiskImages::DiskGeometry &geo);
-    __attribute__((unused)) QString longName(QString &lastMountedFolder, QString &atariFileName);
+    void close() override;
+    bool open(const QString &fileName, FileTypes::FileType type) override;
+    bool readSector(quint16 sector, QByteArray &data) override;
+    bool writeSector(quint16 sector, const QByteArray &data) override;
+    bool format(const DiskGeometry &geo) override;
+    [[maybe_unused]] QString longName(const QString &lastMountedFolder, const QString &atariFileName);
 
-    virtual QString description() const { return tr("Folder image"); }
+    QString description() const override { return tr("Folder image"); }
   };
 }
 #endif// FOLDERIMAGE_H

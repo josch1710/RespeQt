@@ -9,14 +9,11 @@
 #ifndef DISKIMAGE_H
 #define DISKIMAGE_H
 
-#include <QElapsedTimer>
-#include <QFile>
-#include <QList>
 #include <QTemporaryFile>
 #include <QtDebug>
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include "crc16.h"
-#include "diskimages/atxsectorinfo.h"
 #include "diskimages/atxtrackinfo.h"
 #include "diskimages/board.h"
 #include "diskimages/diskgeometry.h"
@@ -40,41 +37,43 @@ namespace DiskImages {
     Q_OBJECT
 
   public:
-    SimpleDiskImage(SioWorkerPtr worker);
-    virtual ~SimpleDiskImage();
+    explicit SimpleDiskImage(const SioWorkerPtr &worker);
+    ~SimpleDiskImage() override;
 
     virtual bool open(const QString &fileName, FileTypes::FileType type);
     virtual bool create(int untitledName);
-    __attribute__((unused)) virtual void reopen();
+    [[maybe_unused]] virtual void reopen();
     virtual void close();
     virtual bool save();
-    __attribute__((unused)) virtual bool saveAs(const QString &fileName);
-    inline bool isOpen() const { return file.isOpen(); }
-    inline bool isReadOnly() const { return m_isReadOnly; }
-    inline void setReadOnly(bool readOnly) { m_isReadOnly = readOnly; }
-    inline bool isLeverOpen() const { return m_isLeverOpen; }
-    __attribute__((unused)) __attribute__((unused)) virtual void setLeverOpen(bool open);
-    inline bool isModified() const { return m_isModified; }
-    inline bool isUnmodifiable() const { return m_isUnmodifiable; }
-    __attribute__((unused)) inline bool isUnnamed() const { return m_isUnnamed; }
-    inline bool isReady() const { return m_isReady; }
-    inline bool isHappyEnabled() const { return m_board.isHappyEnabled(); }
-    inline bool isChipOpen() const { return m_board.isChipOpen(); }
-    inline bool isTranslatorActive() const { return m_board.isTranslatorActive(); }
-    inline bool isToolDiskActive() const { return m_board.isToolDiskActive(); }
-    inline bool hasSeveralSides() const { return m_numberOfSides > 1; }
-    inline bool hasPadding() const { return m_hasPadding; }
+    [[maybe_unused]] virtual bool saveAs(const QString &fileName);
+    bool isOpen() const { return file.isOpen(); }
+    bool isReadOnly() const { return m_isReadOnly; }
+    void setReadOnly(const bool readOnly) { m_isReadOnly = readOnly; }
+    bool isLeverOpen() const { return m_isLeverOpen; }
+    [[maybe_unused]] virtual void setLeverOpen(bool open);
+    bool isModified() const { return m_isModified; }
+    bool isUnmodifiable() const { return m_isUnmodifiable; }
+    [[maybe_unused]] bool isUnnamed() const { return m_isUnnamed; }
+    bool isReady() const { return m_isReady; }
+    bool isHappyEnabled() const { return m_board.isHappyEnabled(); }
+    bool isChipOpen() const { return m_board.isChipOpen(); }
+    bool isTranslatorActive() const { return m_board.isTranslatorActive(); }
+    bool isToolDiskActive() const { return m_board.isToolDiskActive(); }
+    bool hasSeveralSides() const { return m_numberOfSides > 1; }
+    bool hasPadding() const { return m_hasPadding; }
     virtual QString getNextSideLabel();
-    __attribute__((unused)) inline QString getNextSideFilename() { return m_nextSideFilename; }
-    inline void setEditDialog(DiskEditDialog *aDialog) {
+    [[maybe_unused]] QString getNextSideFilename() { return m_nextSideFilename; }
+
+    void setEditDialog(DiskEditDialog *aDialog) {
       m_editDialog = aDialog;
       emit statusChanged(m_deviceNo);
     }
-    inline DiskEditDialog *editDialog() { return m_editDialog; }
-    __attribute__((unused)) inline Board *getBoardInfo() { return m_board.getCopy(); }
-    inline void setBoardInfo(Board *info) { m_board.setFromCopy(info); }
 
-    void handleCommand(const quint8 command, quint8 aux8, quint8 aux2) override;
+    DiskEditDialog *editDialog() const { return m_editDialog; }
+    [[maybe_unused]] Board *getBoardInfo() const { return m_board.getCopy(); }
+    void setBoardInfo(const Board *info) { m_board.setFromCopy(info); }
+
+    void handleCommand(quint8 command, quint8 aux1, quint8 aux2) override;
     virtual bool format(const DiskGeometry &geo);
     virtual bool readHappySectorAtPosition(int trackNumber, int sectorNumber, int afterSectorNumber, int &index, QByteArray &data);
     virtual bool readHappySkewAlignment(bool happy1050);
@@ -83,20 +82,20 @@ namespace DiskImages {
     virtual bool readSectorUsingIndex(quint16 aux, QByteArray &data);
     virtual bool readSector(quint16 aux, QByteArray &data);
     virtual bool readSkewAlignment(quint16 aux, QByteArray &data, bool timingOnly);
-    __attribute__((unused)) virtual bool resetTrack(quint16 aux);
+    [[maybe_unused]] virtual bool resetTrack(quint16 aux);
     virtual bool writeTrack(quint16 aux, const QByteArray &data);
     virtual bool writeTrackWithSkew(quint16 aux, const QByteArray &data);
     virtual bool writeSectorUsingIndex(quint16 aux, const QByteArray &data, bool fuzzy);
     virtual bool writeFuzzySector(quint16 aux, const QByteArray &data);
     virtual bool writeSector(quint16 aux, const QByteArray &data);
-    __attribute__((unused)) __attribute__((unused)) __attribute__((unused)) __attribute__((unused)) virtual bool writeSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8 sideNumber, quint8 sectorNumber, quint8 sectorSize, const QByteArray &data, bool crcError, int weakOffset);
+    [[maybe_unused]] virtual bool writeSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8 sideNumber, quint8 sectorNumber, quint8 sectorSize, const QByteArray &data, bool crcError, int weakOffset);
     virtual void getStatus(QByteArray &status);
     virtual int sectorsInCurrentTrack();
     virtual void setReady(bool bReady);
     virtual void setChipMode(bool enable);
     virtual void setHappyMode(bool enable);
     virtual void setOSBMode(bool enable);
-    __attribute__((unused)) __attribute__((unused)) virtual void setToolDiskMode(bool enable);
+    [[maybe_unused]] virtual void setToolDiskMode(bool enable);
     virtual void setDisplayTransmission(bool active);
     virtual void setSpyMode(bool enable);
     virtual void setTrackLayout(bool enable);
@@ -107,7 +106,7 @@ namespace DiskImages {
     virtual void setActivateChipModeWithTool(bool activate);
     virtual void setActivateHappyModeWithTool(bool activate);
 
-    inline DiskGeometry geometry() const { return m_geometry; }
+    DiskGeometry geometry() const { return m_geometry; }
     virtual QString originalFileName() const;
     virtual QString description() const;
 
@@ -119,49 +118,46 @@ namespace DiskImages {
   protected:
     DiskGeometry m_geometry, m_newGeometry;
     QTemporaryFile file;
-    bool m_isReadOnly;
+    bool m_isReadOnly{};
     bool m_isLeverOpen;
-    bool m_isModified;
-    bool m_isUnmodifiable;
-    bool m_isUnnamed;
+    bool m_isModified{};
+    bool m_isUnmodifiable{};
+    bool m_isUnnamed{};
     bool m_isReady;
     QString m_originalFileName;
     QByteArray m_originalFileHeader;
     FileTypes::FileType m_originalImageType;
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
-    bool m_gzipped;
-#pragma clang diagnostic pop
+    [[maybe_unused]] bool m_gzipped{};
     DiskEditDialog *m_editDialog;
-    int m_currentSide;
-    int m_numberOfSides;
+    int m_currentSide{};
+    int m_numberOfSides{};
     QString m_nextSideFilename;
     bool m_displayTransmission;
     bool m_dumpDataFrame;
     bool m_displayTrackLayout;
-    bool m_disassembleUploadedCode;
+    bool m_disassembleUploadedCode{};
     bool m_translatorAutomaticDetection;
     QString m_translatorDiskImagePath;
     bool m_OSBMode;
     QString m_toolDiskImagePath;
     bool m_toolDiskMode;
-    quint16 m_trackNumber;
-    qint64 m_lastTime;
-    qint64 m_lastDistance;
-    quint16 m_lastSector;
-    quint8 m_driveStatus;
+    quint16 m_trackNumber{};
+    qint64 m_lastTime{};
+    qint64 m_lastDistance{};
+    quint16 m_lastSector{};
+    quint8 m_driveStatus{};
     quint8 m_wd1771Status;
-    int m_sectorsInTrack;
+    int m_sectorsInTrack{};
     QElapsedTimer m_timer;
     QByteArray m_diagData;
     bool m_conversionInProgress;
     disassembly810 m_disassembly810;
     disassembly1050 m_disassembly1050;
-    int m_remainingAddress;
+    int m_remainingAddress{};
     QByteArray m_remainingBytes;
     // Pro specific data
-    ProSectorInfo m_proSectorInfo[1040 + 256];// to support an enhanced density PRO file + 256 phantom sectors
-    quint16 m_trackContent[200];
+    ProSectorInfo m_proSectorInfo[1040 + 256] {};// to support an enhanced density PRO file + 256 phantom sectors
+    quint16 m_trackContent[200]{};
     // Atx specific data
     AtxTrackInfo m_atxTrackInfo[40];
     // data for Happy or Archiver
@@ -169,8 +165,8 @@ namespace DiskImages {
     // Tanslator and tool disk
     SimpleDiskImage *m_translatorDisk;
     SimpleDiskImage *m_toolDisk;
-    bool m_activateChipModeWithTool;
-    bool m_activateHappyModeWithTool;
+    bool m_activateChipModeWithTool{};
+    bool m_activateHappyModeWithTool{};
     Padding m_hasPadding{None};
 
     bool seekToSector(quint16 sector);
@@ -235,7 +231,7 @@ namespace DiskImages {
     bool readProSector(quint16 aux, QByteArray &data);
     bool readAtxSector(quint16 aux, QByteArray &data);
 
-    bool readAtrSkewAlignment(quint16 aux, QByteArray &data, bool timingOnly);
+    bool readAtrSkewAlignment(quint16 aux, const QByteArray &data, bool timingOnly);
     bool readProSkewAlignment(quint16 aux, QByteArray &data, bool timingOnly);
     bool readAtxSkewAlignment(quint16 aux, QByteArray &data, bool timingOnly);
 
@@ -267,15 +263,15 @@ namespace DiskImages {
     bool writeProSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8 sideNumber, quint8 sectorNumber, quint8 sectorSize, const QByteArray &data, bool crcError, int weakOffset);
     bool writeAtxSectorExtended(int bitNumber, quint8 dataType, quint8 trackNumber, quint8 sideNumber, quint8 sectorNumber, quint8 sectorSize, const QByteArray &data, bool crcError, int weakOffset);
 
-    int sectorsInCurrentAtrTrack();
-    int sectorsInCurrentProTrack();
-    int sectorsInCurrentAtxTrack();
+    int sectorsInCurrentAtrTrack() const;
+    int sectorsInCurrentProTrack() const;
+    int sectorsInCurrentAtxTrack() const;
 
     bool fillProSectorInfo(const QString &fileName, QFile *sourceFile, quint16 slot, quint16 absoluteSector);
     quint16 findPositionInProTrack(int track, int indexInProSector, bool withoutData);
     void guessWeakSectorInPro(int slot);
-    bool findMappingInProTrack(int nbSectors, QByteArray &mapping);
-    bool findMappingInAtxTrack(int nbSectors, QByteArray &mapping);
+    bool findMappingInProTrack(int nbSectors, QByteArray &mapping) const;
+    bool findMappingInAtxTrack(int nbSectors, QByteArray &mapping) const;
     quint8 writeProSectorHeader(quint8 dataSize, quint16 sectorSlot, quint8 postDataCrc, quint8 preIDField, quint8 postIDCrc, quint8 track, quint8 index, quint8 nextSector);
     quint8 writeAtxSectorHeader(quint8 dataSize, QByteArray &sectorData, quint8 postDataCrc, quint8 preIDField, quint8 postIDCrc, quint8 track, quint8 index, quint8 nextSector);
     bool writeCommandAck();
@@ -292,14 +288,14 @@ namespace DiskImages {
     quint32 getLittleEndianLong(QByteArray &array, int offset);
     void setLittleEndianWord(QByteArray &array, int offset, quint16 value);
     void setLittleEndianLong(QByteArray &array, int offset, quint32 value);
-    void fillBuffer(char *line, unsigned char *buf, int len, int ofs, bool dumpAscii);
-    void dumpBuffer(unsigned char *buf, int len);
+    void fillBuffer(char *line, const unsigned char *buf, int len, int ofs, bool dumpAscii);
+    void dumpBuffer(const unsigned char *buf, int len);
     bool executeArchiverCode(quint16 aux, QByteArray &data);
     void readHappyTrack(int trackNumber, bool happy1050);
     bool writeHappyTrack(int trackNumber, bool happy1050);
     QByteArray readHappySectors(int trackNumber, int afterSectorNumber, bool happy1050);
     bool writeHappySectors(int trackNumber, int afterSectorNumber, bool happy1050);
-    int findNearestSpeed(int speed);
+    constexpr unsigned int findNearestSpeed(unsigned int speed) const;
     void setTranslatorActive(bool resetTranslatorState);
     bool translatorDiskImageAvailable();
     void closeTranslator();

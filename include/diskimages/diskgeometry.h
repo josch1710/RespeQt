@@ -15,29 +15,29 @@ namespace DiskImages {
     void initialize(uint aTotalSize, quint16 aBytesPerSector);
     void initialize(uint aTotalSize);
     void initialize(const QByteArray &percom);
-    bool isEqual(const DiskGeometry &other);
-    bool isStandardSD() const;
-    bool isStandardED() const;
-    bool isStandardDD() const;
-    bool isStandardDSDD() const;
-    bool isStandardDSQD() const;
-    inline bool isDoubleSided() const { return mIsDoubleSided; }
-    inline quint8 tracksPerSide() const { return mTracksPerSide; }
-    inline quint16 sectorsPerTrack() const { return mSectorsPerTrack; }
-    inline quint16 bytesPerSector() const { return mBytesPerSector; }
-    quint16 bytesPerSector(quint16 sector);
-    inline uint sectorCount() const { return mSectorCount; }
-    inline uint totalSize() const { return mTotalSize; }
-    QByteArray toPercomBlock();
-    QString humanReadable() const;
+    [[nodiscard]] bool isEqual(const DiskGeometry &other) const;
+    [[nodiscard]] bool isStandardSD() const;
+    [[nodiscard]] bool isStandardED() const;
+    [[nodiscard]] bool isStandardDD() const;
+    [[nodiscard]] bool isStandardDSDD() const;
+    [[nodiscard]] bool isStandardDSQD() const;
+    [[nodiscard]] bool isDoubleSided() const { return mIsDoubleSided; }
+    [[nodiscard]] quint8 tracksPerSide() const { return mTracksPerSide; }
+    [[nodiscard]] quint16 sectorsPerTrack() const { return mSectorsPerTrack; }
+    [[nodiscard]] quint16 bytesPerSector() const { return mBytesPerSector; }
+    [[nodiscard]] quint16 bytesPerSector(quint16 sector) const;
+    [[nodiscard]] uint sectorCount() const { return mSectorCount; }
+    [[nodiscard]] uint totalSize() const { return mTotalSize; }
+    [[nodiscard]] QByteArray toPercomBlock() const;
+    [[nodiscard]] QString humanReadable() const;
 
   private:
-    bool mIsDoubleSided;
-    quint8 mTracksPerSide;
-    quint16 mSectorsPerTrack;
-    quint16 mBytesPerSector;
-    uint mSectorCount;
-    uint mTotalSize;
+    bool mIsDoubleSided{};
+    quint8 mTracksPerSide{};
+    quint16 mSectorsPerTrack{};
+    quint16 mBytesPerSector{};
+    uint mSectorCount{};
+    uint mTotalSize{};
   };
 
 }// namespace DiskImages

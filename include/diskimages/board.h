@@ -2,7 +2,6 @@
 #ifndef RESPEQT_BOARD_H
 #define RESPEQT_BOARD_H
 
-#include <QtGlobal>
 #include <QObject>
 
 namespace DiskImages {
@@ -142,7 +141,7 @@ namespace DiskImages {
           0xAD, 0xDD, 0x01, 0x4A, 0x4A, 0x4A, 0x90, 0x05, 0xA0, 0x2B, 0x20, 0x8B, 0x1C, 0xA9, 0xFF, 0x20,
           0x1B, 0x1C, 0x20, 0x18, 0x1F, 0x20, 0x63, 0x1F, 0xA9, 0x6C, 0x20, 0xE1, 0x18, 0x20, 0x64, 0x08};
 
-  static quint8 HAPPY_INITIAL_SECTOR_LIST[] = {
+  static constexpr quint8 HAPPY_INITIAL_SECTOR_LIST[] = {
           0x00, 0x18, 0x00, 0x00, 0x00, 0x80, 0x80, 0x80, 0x80, 0x80, 0x00, 0x80, 0x80, 0x43, 0xFF, 0x12,
           0x00, 0x01, 0x23, 0x03, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
           0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -219,7 +218,7 @@ namespace DiskImages {
     // For Chip 810 and Super Archiver 1050 emulation
     bool m_chipOpen;
     unsigned short m_lastArchiverUploadCrc16;
-    quint16 m_lastArchiverSpeed;
+    quint16 m_lastArchiverSpeed{};
     // For Happy 810/1050 emulation
     bool m_happyEnabled;
     bool m_happy1050;
@@ -233,37 +232,36 @@ namespace DiskImages {
 
   public:
     // For Chip 810 and Super Archiver 1050 emulation
-    unsigned char m_chipRam[32];
+    unsigned char m_chipRam[32]{};
     QByteArray m_trackData;
     // For Happy 810/1050 emulation
     QByteArray m_happyRam;
 
-  public:
     Board();
-    ~Board();
-    Board *getCopy();
-    void setFromCopy(Board *info);
+    ~Board() override;
+    [[nodiscard]] Board *getCopy() const;
+    void setFromCopy(const Board *other);
     bool hasHappySignature();
-    inline void setChipOpen(bool open) { m_chipOpen = open; }
-    inline bool isChipOpen() const { return m_chipOpen; }
-    inline void setTranslatorActive(bool active) { m_translatorActive = active; }
-    inline bool isTranslatorActive() const { return m_translatorActive && (m_translatorState != BOOT_STATE::SECOND_SECTOR_1); }
-    inline void setTranslatorState(enum BOOT_STATE state) { m_translatorState = state; }
-    inline BOOT_STATE getTranslatorState() const { return m_translatorState; }
-    inline void setToolDiskActive(bool active) { m_toolDiskActive = active; }
-    inline bool isToolDiskActive() const { return m_toolDiskActive; }
-    inline void setLastArchiverUploadCrc16(unsigned short crc16) { m_lastArchiverUploadCrc16 = crc16; }
-    inline unsigned short getLastArchiverUploadCrc16() const { return m_lastArchiverUploadCrc16; }
-    inline void setLastArchiverSpeed(quint16 speed) { m_lastArchiverSpeed = speed; }
-    inline quint16 getLastArchiverSpeed() const { return m_lastArchiverSpeed; }
-    inline void setHappyEnabled(bool enabled) { m_happyEnabled = enabled; }
-    inline bool isHappyEnabled() const { return m_happyEnabled; }
-    inline void setHappy1050(bool is1050) { m_happy1050 = is1050; }
-    inline bool isHappy1050() const { return m_happy1050; }
-    inline void setHappyPatchInProgress(bool progress) { m_happyPatchInProgress = progress; }
-    inline bool isHappyPatchInProgress() const { return m_happyPatchInProgress; }
-    inline void setLastHappyUploadCrc16(unsigned short crc16) { m_lastHappyUploadCrc16 = crc16; }
-    inline unsigned short getLastHappyUploadCrc16() const { return m_lastHappyUploadCrc16; }
+    void setChipOpen(const bool open) { m_chipOpen = open; }
+    [[nodiscard]] bool isChipOpen() const { return m_chipOpen; }
+    void setTranslatorActive(const bool active) { m_translatorActive = active; }
+    [[nodiscard]] bool isTranslatorActive() const { return m_translatorActive && m_translatorState != BOOT_STATE::SECOND_SECTOR_1; }
+    void setTranslatorState(const BOOT_STATE state) { m_translatorState = state; }
+    [[nodiscard]] BOOT_STATE getTranslatorState() const { return m_translatorState; }
+    void setToolDiskActive(const bool active) { m_toolDiskActive = active; }
+    [[nodiscard]] bool isToolDiskActive() const { return m_toolDiskActive; }
+    void setLastArchiverUploadCrc16(const unsigned short crc16) { m_lastArchiverUploadCrc16 = crc16; }
+    [[nodiscard]] unsigned short getLastArchiverUploadCrc16() const { return m_lastArchiverUploadCrc16; }
+    void setLastArchiverSpeed(const quint16 speed) { m_lastArchiverSpeed = speed; }
+    [[nodiscard]] quint16 getLastArchiverSpeed() const { return m_lastArchiverSpeed; }
+    void setHappyEnabled(const bool enabled) { m_happyEnabled = enabled; }
+    [[nodiscard]] bool isHappyEnabled() const { return m_happyEnabled; }
+    void setHappy1050(const bool is1050) { m_happy1050 = is1050; }
+    [[nodiscard]] bool isHappy1050() const { return m_happy1050; }
+    void setHappyPatchInProgress(const bool progress) { m_happyPatchInProgress = progress; }
+    [[nodiscard]] bool isHappyPatchInProgress() const { return m_happyPatchInProgress; }
+    void setLastHappyUploadCrc16(const unsigned short crc16) { m_lastHappyUploadCrc16 = crc16; }
+    [[nodiscard]] unsigned short getLastHappyUploadCrc16() const { return m_lastHappyUploadCrc16; }
   };
 }
 #endif//RESPEQT_BOARD_H
