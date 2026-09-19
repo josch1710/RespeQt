@@ -9,9 +9,6 @@
 #ifndef TEXTPRINTERWINDOW_H
 #define TEXTPRINTERWINDOW_H
 
-#include <QMainWindow>
-#include <QGraphicsScene>
-#include <QString>
 #include "nativeoutput.h"
 
 namespace Ui {
@@ -24,25 +21,24 @@ class TextPrinterWindow : public QMainWindow, public NativeOutput {
     Q_OBJECT
 public:
     explicit TextPrinterWindow(QWidget *parent = nullptr);
-    ~TextPrinterWindow();
+    ~TextPrinterWindow() override;
 
-    virtual void newLine(bool linefeed = false) override;
-    virtual void newPage(bool) override {}
-    virtual void updateBoundingBox() override {}
-    virtual bool beginOutput() override { return true; }
-    virtual bool endOutput() override { return close(); }
-    virtual void printChar(const QChar &c) override;
-    virtual void printString(const QString &s) override;
+    void newLine(bool linefeed = false) override;
+    void newPage(bool) override {}
+    bool beginOutput() override { return true; }
+    bool endOutput() override { return close(); }
+    void printChar(const QChar &c) override;
+    void printString(const QString &s) override;
     virtual void setWindow(const QRect &) {}
     virtual void setPen(const QColor &) {}
     virtual void setPen(Qt::PenStyle) {}
     virtual void setPen(const QPen &) {}
-    virtual int dpiX() override { return 1; }
-    virtual const QPen &pen() const { return mPen; }
+    int dpiX() override { return 1; }
+    [[nodiscard]] virtual const QPen &pen() const { return mPen; }
     virtual void translate(const QPointF &) {}
     virtual void drawLine(const QPointF &, const QPointF &) {}
-    virtual void calculateFixedFontSize(uint8_t) override {}
-    //virtual bool setupOutput() override;
+    void calculateFixedFontSize(uint8_t) override {}
+    //bool setupOutput() override;
 
     static QString typeName()
     {
@@ -52,6 +48,7 @@ public:
 protected:
     void changeEvent(QEvent *e) override;
     void closeEvent(QCloseEvent *e) override;
+    void updateBoundingBox() override {}
 
 private:
     Ui::TextPrinterWindow *ui;
@@ -65,8 +62,8 @@ private:
 
 protected slots:
     void saveTriggered();
-    void clearTriggered();
-    void wordwrapTriggered();
+    void clearTriggered() const;
+    void wordwrapTriggered() const;
     void printTriggered();
 
     // To manipulate fonts and ascii/atascii windows  // 
@@ -75,10 +72,11 @@ protected slots:
     void hideshowAsciiTriggered();
     void hideshowAtasciiTriggered();
     void stripLineNumbersTriggered();
-    void asciiFontChanged (const QFont &);
-    void print(const QString &text);
+    void asciiFontChanged (const QFont &) const;
+    void print(const QString &text) const;
 
 signals:
+    // ReSharper disable once CppRedundantQualifier
     void closed(const Printers::TextPrinterWindow* window);
     void textPrint(const QString &text);
 };

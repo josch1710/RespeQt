@@ -3,8 +3,6 @@
 
 #include "atariprinter.h"
 
-#include <QFont>
-#include <QFontMetrics>
 #include <QPrinter>
 #include <QRect>
 
@@ -12,10 +10,10 @@ namespace Printers {
   class Atari1025 : public AtariPrinter {
     Q_OBJECT
   public:
-    Atari1025(SioWorkerPtr worker);
+    explicit Atari1025(const SioWorkerPtr &worker);
 
-    virtual bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
-    virtual void setupFont() override;
+    bool handleBuffer(const QByteArray &buffer, unsigned int len) override;
+    void setupFont() override;
 
   protected:
     QRectF printerDimension() const override;
@@ -36,8 +34,8 @@ namespace Printers {
   private:
     bool mESC;
 
-    bool handleEscapedCodes(const unsigned char b);
-    bool handlePrintableCodes(const unsigned char b);
+    bool handleEscapedCodes(unsigned char b);
+    bool handlePrintableCodes(unsigned char b);
     float mCPI;
     unsigned char mLineChars;
     unsigned char mLPI;

@@ -6,12 +6,12 @@
 namespace Printers {
   class Passthrough : public BasePrinter {
   public:
-    Passthrough(SioWorkerPtr sio);
-    virtual ~Passthrough();
+    explicit Passthrough(const SioWorkerPtr& sio);
+    ~Passthrough() override;
 
-    virtual bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
-    virtual void setupFont() override;
-    //virtual void setupOutput() override;
+    bool handleBuffer(const QByteArray &buffer, unsigned int len) override;
+    void setupFont() override;
+    //void setupOutput() override;
 
     static QString typeName() {
       return tr("Passthrough");

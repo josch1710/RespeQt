@@ -9,12 +9,12 @@ namespace Printers {
   class AtariPrinter : public BasePrinter {
     Q_OBJECT
   public:
-    AtariPrinter(SioWorkerPtr worker);
+    explicit AtariPrinter(const SioWorkerPtr &worker);
 
     bool internationalMode() const { return mInternational; }
-    void setInternationalMode(bool internationalMode) { mInternational = internationalMode; }
+    void setInternationalMode(const bool internationalMode) { mInternational = internationalMode; }
 
-    virtual const QChar translateAtascii(const unsigned char b) const override;
+    QChar translateAtascii(unsigned char b) const override;
 
   protected:
     bool mInternational;

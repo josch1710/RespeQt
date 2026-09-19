@@ -21,16 +21,16 @@ struct GRAPHICS_COMMAND {
   unsigned char command;        // command character
   int parameters;               // number of parameters
   bool repeat;                  // allows a list of parameters to repeat the same command using the ';' character
-  enum AUTOMATA_STATES automata;// initial state of the automata for this command
+  AUTOMATA_STATES automata;// initial state of the automata for this command
 };
 
 namespace Printers {
   class Atari1020 : public AtariPrinter {
   public:
-    Atari1020(SioWorkerPtr sio);
+    explicit Atari1020(const SioWorkerPtr &sio);
 
-    void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) override;
-    bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
+    void handleCommand(quint8 command, quint8 aux1, quint8 aux2) override;
+    bool handleBuffer(const QByteArray &buffer, unsigned int len) override;
 
   protected:
     QRectF printerDimension() const override;
@@ -39,25 +39,25 @@ namespace Printers {
     // void setupFont() override;
     // void setupOutput() override;
 
-    const QRectF getSceneRect() const override;
+    QRectF getSceneRect() const override;
 
     static QString typeName() {
       return "Atari 1020";
     }
 
   protected:
-    bool mEsc;
-    bool mStartOfLogicalLine;
-    bool mGraphicsMode;
-    int mTextOrientation;
-    QByteArray mPrintText;
-    enum AUTOMATA_STATES mAutomataState;
-    unsigned char mCurrentCommand;
-    bool mRepeatAllowed;
-    int mParametersExpected;
-    bool mFirstNegative;
-    bool mSecondNegative;
-    bool mThirdNegative;
+    bool mEsc{false};
+    bool mStartOfLogicalLine{true};
+    bool mGraphicsMode{false};
+    int mTextOrientation{0};
+    QByteArray mPrintText{""};
+    AUTOMATA_STATES mAutomataState{AUTOMATA_START};
+    unsigned char mCurrentCommand{};
+    bool mRepeatAllowed{false};
+    int mParametersExpected{0};
+    bool mFirstNegative{false};
+    bool mSecondNegative{false};
+    bool mThirdNegative{false};
     QByteArray mFirstNumber;
     QByteArray mSecondNumber;
     QByteArray mThirdNumber;
@@ -65,14 +65,14 @@ namespace Printers {
     void executeGraphicsCommand();
     void resetGraphics();
     void executeAndRepeatCommand();
-    bool checkGraphicsCommand(const unsigned char b);
-    void handleGraphicsCodes(const unsigned char b);
-    bool handlePrintableCodes(const unsigned char b);
-    bool handleGraphicsMode(const QByteArray &buffer, const unsigned int len, unsigned int &i);
-    inline int getFirstNumber(const int defaultValue = 0) { return getNumber(mFirstNumber, mFirstNegative, defaultValue); }
-    inline int getSecondNumber(const int defaultValue = 0) { return getNumber(mSecondNumber, mSecondNegative, defaultValue); }
-    inline int getThirdNumber(const int defaultValue = 0) { return getNumber(mThirdNumber, mThirdNegative, defaultValue); }
-    int getNumber(const QString number, const bool negative, const int defaultValue = 0);
+    bool checkGraphicsCommand(unsigned char b);
+    void handleGraphicsCodes(unsigned char b);
+    bool handlePrintableCodes(unsigned char b);
+    //bool handleGraphicsMode(const QByteArray &buffer, unsigned int len, unsigned int &i);
+    int getFirstNumber(const int defaultValue = 0) { return getNumber(mFirstNumber, mFirstNegative, defaultValue); }
+    int getSecondNumber(const int defaultValue = 0) { return getNumber(mSecondNumber, mSecondNegative, defaultValue); }
+    int getThirdNumber(const int defaultValue = 0) { return getNumber(mThirdNumber, mThirdNegative, defaultValue); }
+    int getNumber(const QString& number, bool negative, int defaultValue = 0);
     bool drawAxis(bool xAxis, int size, int count);
     bool drawText();
   };

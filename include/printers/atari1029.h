@@ -17,9 +17,9 @@ namespace Printers {
   class Atari1029 : public AtariPrinter {
     Q_OBJECT
   public:
-    Atari1029(SioWorkerPtr worker);
+    explicit Atari1029(const SioWorkerPtr &worker);
 
-    bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
+    bool handleBuffer(const QByteArray &buffer, unsigned int len) override;
     void setupFont() override;
 
     static QString typeName() {
@@ -30,11 +30,11 @@ namespace Printers {
     QRectF printerDimension() const override;
 
   private:
-    bool handleEscapedCodes(const unsigned char b);
-    bool handlePrintableCodes(const unsigned char b);
+    bool handleEscapedCodes(unsigned char b);
+    bool handlePrintableCodes(unsigned char b);
     bool elongatedMode() const { return mElongatedMode; }
     void setElongatedMode(bool elongatedMode);
-    bool handleGraphicsMode(const unsigned char b);
+    bool handleGraphicsMode(unsigned char b);
 
     GraphicsMode mGraphicsMode{GraphicsMode::NOT_GRAPHICS};
   };

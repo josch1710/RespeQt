@@ -1,4 +1,5 @@
 // Contains all printer class headers
+#pragma once
 #include "printers/atari1020.h"
 #include "printers/atari1025.h"
 #include "printers/atari1027.h"

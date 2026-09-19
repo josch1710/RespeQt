@@ -1,13 +1,9 @@
 #ifndef BASEPRINTER_H
 #define BASEPRINTER_H
 
-#include <QByteArray>
-#include <QFont>
-#include <QFontMetrics>
 #include <QPainter>
 #include <QPrinter>
 #include <QRect>
-#include <QSharedData>
 
 // We need a forward class definition,
 //because we reference BasePrinter in NativeOutput
@@ -24,22 +20,22 @@ namespace Printers {
   class BasePrinter : public SioDevice {
     Q_OBJECT
   public:
-    BasePrinter(SioWorkerPtr worker);
-    virtual ~BasePrinter();
+    explicit BasePrinter(const SioWorkerPtr &worker);
+    ~BasePrinter() override;
 
-    void handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) override;
-    virtual bool handleBuffer(const QByteArray &buffer, const unsigned int len) = 0;
+    void handleCommand(quint8 command, quint8 aux1, quint8 aux2) override;
+    virtual bool handleBuffer(const QByteArray &buffer, unsigned int len) = 0;
 
-    virtual const QChar translateAtascii(const unsigned char b) const;
+    virtual QChar translateAtascii(unsigned char b) const;
 
     OutputWindowPtr outputWindow() const { return mOutputWindow; }
     void setOutputWindow(OutputWindowPtr outputWindow);
     void resetOutputWindow();
     virtual void setupFont() {}
-    virtual const QRectF getSceneRect() const;
+    virtual QRectF getSceneRect() const;
 
     static QString typeName() {
-      throw new std::invalid_argument("Not implemented");
+      throw std::invalid_argument("Not implemented");
     }
 
   signals:
@@ -53,8 +49,8 @@ namespace Printers {
 
     QByteArray readDataFrame(uint size, bool isCommandFrame, bool verbose = true);
     bool writeDataFrame(QByteArray data);
-    void dumpBuffer(unsigned char *buf, int len);
-    void fillBuffer(char *line, unsigned char *buf, int len, int ofs, bool dumpAscii);
+    void dumpBuffer(const unsigned char *buf, int len);
+    void fillBuffer(char* line, const unsigned char* buf, int len, int ofs, bool dumpAscii);
     virtual QRectF printerDimension() const = 0;
 
     QFont mFont{};
@@ -70,7 +66,7 @@ namespace Printers {
 
 
   private:
-    char m_lastOperation;
+    char m_lastOperation{};
   };
 }// namespace Printers
 #endif// BASEPRINTER_H

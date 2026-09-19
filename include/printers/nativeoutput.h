@@ -1,14 +1,11 @@
 #ifndef NATIVEOUTPUT_H
 #define NATIVEOUTPUT_H
 
-#include <QPaintDevice>
-#include <QPainter>
-#include <QRect>
+// ReSharper disable once CppUnusedIncludeDirective
 #include <QSharedPointer>
 #include <QWeakPointer>
 #include <cmath>
 #include <memory>
-#include <utility>
 
 
 // We need a forward class definition,
@@ -47,17 +44,17 @@ namespace Printers {
       return static_cast<int>(trunc(mBoundingBox.height()));
     }
     virtual int dpiX() { return mDevice->logicalDpiX(); }
-    virtual void setFont(QFontPtr font);
+    virtual void setFont(const QFontPtr &font);
     virtual void applyFont();
-    QFontPtr font() const { return mFont; }
-    QPaintDevicePtr device() const { return mDevice; }
-    QPainterPtr painter() const { return mPainter; }
-    virtual void calculateFixedFontSize(uint8_t line_char_count);
+    [[nodiscard]] QFontPtr font() const { return mFont; }
+    [[nodiscard]] QPaintDevicePtr device() const { return mDevice; }
+    [[nodiscard]] QPainterPtr painter() const { return mPainter; }
+    virtual void calculateFixedFontSize(uint8_t charsPerLine);
 
-    int x() const { return mX; }
-    int y() const { return mY; }
-    void setX(int x) { mX = x; }
-    void setY(int y) { mY = y; }
+    [[nodiscard]] int x() const { return mX; }
+    [[nodiscard]] int y() const { return mY; }
+    void setX(const int x) { mX = x; }
+    void setY(const int y) { mY = y; }
     /*void setPrinter(const BasePrinterWPtr& printer) {
             if (printer)
             {
@@ -72,7 +69,7 @@ namespace Printers {
     //BasePrinterWPtr printer() const { return mPrinter; }
 
     static QString typeName() {
-      throw new std::invalid_argument("Not implemented");
+      throw std::invalid_argument("Not implemented");
     }
 
   protected:

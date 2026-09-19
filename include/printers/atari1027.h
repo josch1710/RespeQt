@@ -3,8 +3,6 @@
 
 #include "atariprinter.h"
 
-#include <QFont>
-#include <QFontMetrics>
 #include <QPrinter>
 #include <QRect>
 
@@ -17,10 +15,10 @@ namespace Printers {
     Q_OBJECT
 
   public:
-    Atari1027(SioWorkerPtr worker);
+    explicit Atari1027(const SioWorkerPtr &worker);
 
-    virtual bool handleBuffer(const QByteArray &buffer, const unsigned int len) override;
-    virtual void setupFont() override;
+    bool handleBuffer(const QByteArray &buffer, unsigned int len) override;
+    void setupFont() override;
 
     static QString typeName() {
       return "Atari 1027";
@@ -29,8 +27,8 @@ namespace Printers {
   private:
     bool mESC;
 
-    bool handleEscapedCodes(const unsigned char b);
-    bool handlePrintableCodes(const unsigned char b);
+    bool handleEscapedCodes(unsigned char b);
+    bool handlePrintableCodes(unsigned char b);
   };
 }// namespace Printers
 #endif// ATARI1027_H

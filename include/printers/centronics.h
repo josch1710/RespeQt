@@ -6,9 +6,9 @@
 namespace Printers {
   class Centronics : public BasePrinter {
   public:
-    Centronics(SioWorkerPtr sio);
+    explicit Centronics(const SioWorkerPtr &sio);
 
-    virtual const QChar translateAtascii(const unsigned char b) const override;
+    QChar translateAtascii(unsigned char b) const override;
   };
 }// namespace Printers
 #endif// CENTRONICS_H

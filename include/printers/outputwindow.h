@@ -13,7 +13,6 @@
 #include <QMainWindow>
 #include <QString>
 #include <QGraphicsItem>
-#include <memory>
 
 namespace Ui {
   class OutputWindow;
@@ -26,7 +25,7 @@ namespace Printers {
 
   public:
     explicit OutputWindow(QWidget *parent = nullptr);
-    ~OutputWindow();
+    ~OutputWindow() override;
 
     virtual void setWindow(const QRect &) {}
     //virtual void translate(const QPointF &) {}
@@ -46,7 +45,7 @@ namespace Printers {
     void closeEvent(QCloseEvent *e) override;
     void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent *e) override;
-    qreal calculateScaleFactor() const;
+    [[nodiscard]] qreal calculateScaleFactor() const;
 
 
   private:
@@ -66,6 +65,7 @@ namespace Printers {
     void print(const QString &text);
 
   signals:
+    // ReSharper disable once CppRedundantQualifier
     void closed(const Printers::OutputWindow *window);
     void textPrint(const QString &text);
   };
