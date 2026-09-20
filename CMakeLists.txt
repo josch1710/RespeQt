@@ -18,6 +18,7 @@ add_definitions(-DQT_DEPRECATED_WARNINGS -DQT_DISABLE_DEPRECATED_BEFORE=0x050000
 add_definitions(-DVERSION=\"v${PROJECT_VERSION}${RC_VERSION}\")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 set(CMAKE_OSX_ARCHITECTURES x86_64 arm64)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 11.0)
 
 option(MAKE_TEST "Build the test application" OFF)
 message(STATUS "Build tests ${MAKE_TEST}")
@@ -253,7 +254,6 @@ qt5_wrap_ui(UI_HEADERS ${FORMS})
 qt5_add_resources(UI_RESOURCES ${RESOURCES})
 
 if (APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
     set(MACOSX_BUNDLE_ICON_FILE RespeQt.icns)
     set(APP_ICON resources/RespeQt.icns)
     set_source_files_properties(${APP_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
