@@ -4,10 +4,9 @@
 #include <cups/cups.h>
 
 namespace Printers {
-  RawOutput::RawOutput() {}
+  RawOutput::RawOutput() = default;
 
   RawOutput::~RawOutput() {
-    if (mDest != nullptr)
       delete mDest;
   }
 
@@ -18,15 +17,14 @@ namespace Printers {
   bool RawOutput::beginOutput() {
     if (cupsCreateDestJob(mHttp, mDest, mInfo, &mJobId, "RespeQt", 0, nullptr) == IPP_STATUS_OK) {
       // Job created, now start first and last document.
-      bool return_ = cupsStartDestDocument(mHttp, mDest, mInfo, mJobId, "RespeQt", CUPS_FORMAT_TEXT, 0, nullptr, 1) == HTTP_STATUS_CONTINUE;
+      const bool return_ = cupsStartDestDocument(mHttp, mDest, mInfo, mJobId, "RespeQt", CUPS_FORMAT_TEXT, 0, nullptr, 1) == HTTP_STATUS_CONTINUE;
       if (!return_)
         qDebug() << "!e" << cupsLastErrorString();
       return return_;
-    } else {
-      // Error
-      qDebug() << "!e" << cupsLastErrorString();
-      return false;
     }
+    // Error
+    qDebug() << "!e" << cupsLastErrorString();
+    return false;
   }
 
   bool RawOutput::endOutput() {
@@ -44,9 +42,10 @@ namespace Printers {
     return true;
   }
 
-  bool RawOutput::sendBuffer(const QByteArray &b, unsigned int len) {
+  bool RawOutput::sendBuffer(const QByteArray &b, const unsigned int len) const
+  {
     // CUPS direct print
-    bool return_ = cupsWriteRequestData(mHttp, b.data(), static_cast<size_t>(len)) != HTTP_STATUS_ERROR;
+    const bool return_ = cupsWriteRequestData(mHttp, b.data(), len) != HTTP_STATUS_ERROR;
     if (!return_)
       qDebug() << "!e" << cupsLastErrorString();
     return return_;
@@ -57,11 +56,11 @@ namespace Printers {
     cups_dest_t *dests;
   };
 
-  int my_dest_cb(my_user_data_t *user_data, unsigned int flags, cups_dest_t *dest) {
+  static int my_dest_cb(my_user_data_t *user_data, const unsigned int flags, cups_dest_t *dest) {
     if (flags & CUPS_DEST_FLAGS_REMOVED) {
-      user_data->num_dests = cupsRemoveDest(dest->name, dest->instance, user_data->num_dests, &(user_data->dests));
+      user_data->num_dests = cupsRemoveDest(dest->name, dest->instance, user_data->num_dests, &user_data->dests);
     } else {
-      user_data->num_dests = cupsCopyDest(dest, user_data->num_dests, &(user_data->dests));
+      user_data->num_dests = cupsCopyDest(dest, user_data->num_dests, &user_data->dests);
     }
     return 1;
   }
@@ -109,7 +108,8 @@ namespace Printers {
 
   void RawOutput::setupRawPrinters(QComboBox *list) {
     my_user_data_t user_data = {0, nullptr};
-    cups_ptype_t type = CUPS_PRINTER_LOCAL, mask = CUPS_PRINTER_LOCAL;
+    constexpr cups_ptype_t type = CUPS_PRINTER_LOCAL;
+    constexpr cups_ptype_t mask = CUPS_PRINTER_LOCAL;
 
     list->clear();
     list->addItem(QObject::tr("Select raw printer"), QVariant(-1));
@@ -122,7 +122,7 @@ namespace Printers {
     }
 
     for (int i = 0; i < user_data.num_dests; i++) {
-      auto *dest = reinterpret_cast<cups_dest_t *>(&user_data.dests[i]);
+      const auto *dest = &user_data.dests[i];
 
       list->addItem(QString::fromLocal8Bit(dest->name), i);
     }

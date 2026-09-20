@@ -1,9 +1,9 @@
 #include "printers/atari1025.h"
 #include "respeqtsettings.h"
-#include <utility>
+
 namespace Printers {
-  Atari1025::Atari1025(SioWorkerPtr worker)
-      : AtariPrinter(std::move(worker)),
+  Atari1025::Atari1025(const SioWorkerPtr& worker)
+      : AtariPrinter(worker),
         mESC(false),
         mCPI(10),
         mLineChars(80),
@@ -130,16 +130,16 @@ namespace Printers {
         mESC = false;
         return true;
 
-        // TODO Check
-        /*default: // Not known control codes are consumed
-                mESC = false;
-                return true;*/
+      // TODO Check
+      default: // Not known control codes are consumed
+        mESC = false;
+        return true;
     }
     return false;
   }
 
   bool Atari1025::handlePrintableCodes(const unsigned char b) {
-    QChar qb = translateAtascii(b & 127); // Masking inverse characters.
+    const QChar qb = translateAtascii(b & 127); // Masking inverse characters.
     buffer.push_back(qb);
     if (buffer.size() >= mLineChars || b == 192 /* EOL */) {
       // executeGraphicsPrimitive(
@@ -147,9 +147,9 @@ namespace Printers {
       // );
 
       // update head position
-      QFontMetrics metrics(mFont);
-      QSize size = metrics.size(Qt::TextSingleLine, buffer);
-      int nbPixel = size.width();
+      const QFontMetrics metrics(mFont);
+      const QSize size = metrics.size(Qt::TextSingleLine, buffer);
+      const int nbPixel = size.width();
       mPenPoint.setX(mPenPoint.x() + nbPixel);
       while (mPenPoint.x() > mOutputWindow->width()) {
         mPenPoint.setX(mOutputWindow->width() - mPenPoint.x());
@@ -160,17 +160,17 @@ namespace Printers {
     return true;
   }
 
-  void Atari1025::setCharsPI(float chars) {
+  void Atari1025::setCharsPI(const float chars) {
     mCPI = chars;
     setupFont();
   }
 
-  void Atari1025::setLineChars(unsigned char chars) {
+  void Atari1025::setLineChars(const unsigned char chars) {
     mLineChars = chars;
     setupFont();
   }
 
-  void Atari1025::setLinesPI(unsigned char lines) {
+  void Atari1025::setLinesPI(const unsigned char lines) {
     mLPI = lines;
   }
 

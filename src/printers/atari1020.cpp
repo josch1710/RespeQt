@@ -3,9 +3,8 @@
 
 #include <QFontDatabase>
 #include <QPoint>
-#include <utility>
 
-static struct GRAPHICS_COMMAND ALLOWED_GRAPHICS_COMMANDS[] = {
+static constexpr GRAPHICS_COMMAND ALLOWED_GRAPHICS_COMMANDS[] = {
     {'A', 0, false, AUTOMATA_END},
     {'C', 1, false, AUTOMATA_FIRST_NUM},
     {'D', 2, true, AUTOMATA_FIRST_NUM},
@@ -22,9 +21,8 @@ static struct GRAPHICS_COMMAND ALLOWED_GRAPHICS_COMMANDS[] = {
 
 namespace Printers
 {
-Atari1020::Atari1020(SioWorkerPtr sio)
-    : AtariPrinter(std::move(sio)), mEsc(false), mStartOfLogicalLine(true),
-      mGraphicsMode(false), mTextOrientation(0), mPrintText("")
+Atari1020::Atari1020(const SioWorkerPtr& sio)
+    : AtariPrinter(sio)
 {
     QFontDatabase::addApplicationFont(":/fonts/1020");
     mFont = QFont("ATARI 1020 VECTOR FONT APPROXIM");
@@ -32,9 +30,9 @@ Atari1020::Atari1020(SioWorkerPtr sio)
     mFont.setPixelSize(18);
 }
 
-const QRectF Atari1020::getSceneRect() const
+QRectF Atari1020::getSceneRect() const
 {
-    return QRectF(0, -499, 480, 1499);
+    return {0, -499, 480, 1499};
 }
 
 /*
@@ -80,7 +78,7 @@ void Atari1020::handleCommand(const quint8 command, const quint8 aux1,
                 QByteArray status(4, 0);
                 status[0] = 0;
                 status[1] = 0;
-                status[2] = 0xFF;
+                status[2] = static_cast<char>(0xFF);
                 status[3] = 0x40;
                 if (!sio->port()->writeComplete())
                 {
@@ -89,7 +87,7 @@ void Atari1020::handleCommand(const quint8 command, const quint8 aux1,
                 qDebug() << "!n"
                          << tr("[%1] Get status: $%2")
                                 .arg(deviceName())
-                                .arg((unsigned char) status[1], 2, 16, QChar('0'));
+                                .arg(status[1], 2, 16, QChar('0'));
                 writeDataFrame(status);
 
                 /*
@@ -121,8 +119,8 @@ void Atari1020::handleCommand(const quint8 command, const quint8 aux1,
        * The printer always expects 40 bytes whatever value is send in AUX.
        * There is no possibility to send different buffer size.
        */
-                unsigned int len = 40;  // 1020 only support 40 bytes
-                QByteArray data  = readDataFrame(len, false);
+                constexpr unsigned int len = 40;  // 1020 only support 40 bytes
+                const QByteArray data  = readDataFrame(len, false);
                 if (data.isEmpty())
                 {
                     qCritical() << "!e"
@@ -172,10 +170,10 @@ bool Atari1020::handleBuffer(const QByteArray &buffer, const unsigned int len)
    * ignored meaning that a logical line always starts at the begining of a new
    * buffer.
    */
-    auto lenmin = std::min(static_cast<unsigned int>(buffer.count()), len);
+    const auto lenmin = std::min(static_cast<unsigned int>(buffer.count()), len);
     for (unsigned int i = 0; i < lenmin; i++)
     {
-        auto b = static_cast<unsigned char>(buffer.at(static_cast<int>(i)));
+        const auto b = static_cast<unsigned char>(buffer.at(static_cast<int>(i)));
 
         /*
      * EOL prevents printer from looking at the rest of the buffer.
@@ -432,7 +430,7 @@ void Atari1020::executeAndRepeatCommand()
    * The ';' character is used to repeat the same command but with another set
    * of parameters
    */
-    auto currentCommand = mCurrentCommand;
+    const auto currentCommand = mCurrentCommand;
     executeGraphicsCommand();
     resetGraphics();
     mCurrentCommand = currentCommand;
@@ -441,8 +439,7 @@ void Atari1020::executeAndRepeatCommand()
 
 bool Atari1020::checkGraphicsCommand(const unsigned char b)
 {
-    for (int i = 0; i < (int) (sizeof(ALLOWED_GRAPHICS_COMMANDS) / sizeof(struct GRAPHICS_COMMAND));
-         i++)
+    for (size_t i {0}; i < sizeof(ALLOWED_GRAPHICS_COMMANDS) / sizeof(GRAPHICS_COMMAND); i++)
     {
         if (ALLOWED_GRAPHICS_COMMANDS[i].command == b)
         {
@@ -467,7 +464,7 @@ void Atari1020::handleGraphicsCodes(const unsigned char b)
    * P (for Print text) then the asterisk is not a marker but a simple char to
    * print.
    */
-    if ((mAutomataState != AUTOMATA_TEXT) && (b == '*'))
+    if (mAutomataState != AUTOMATA_TEXT && b == '*')
     {  // end of Graphics instruction
         executeGraphicsCommand();
         resetGraphics();
@@ -511,11 +508,11 @@ void Atari1020::handleGraphicsCodes(const unsigned char b)
                     mAutomataState = AUTOMATA_END;  // wait for the next '*' or EOL
                 }
             }
-            else if ((b >= '0') && (b <= '9'))
+            else if (b >= '0' && b <= '9')
             {
                 if (mFirstNumber.length() < 3)
                 {
-                    mFirstNumber.append(b);
+                    mFirstNumber.append(static_cast<char>(b));
                 }
                 else
                 {
@@ -584,11 +581,11 @@ void Atari1020::handleGraphicsCodes(const unsigned char b)
                     mAutomataState = AUTOMATA_END;  // wait for the next '*' or EOL
                 }
             }
-            else if ((b >= '0') && (b <= '9'))
+            else if (b >= '0' && b <= '9')
             {
                 if (mSecondNumber.length() < 3)
                 {
-                    mSecondNumber.append(b);
+                    mSecondNumber.append(static_cast<char>(b));
                 }
                 else
                 {
@@ -639,11 +636,11 @@ void Atari1020::handleGraphicsCodes(const unsigned char b)
             // FALL THRU if '-' is not found
 
         case AUTOMATA_THIRD_INT:
-            if ((b >= '0') && (b <= '9'))
+            if (b >= '0' && b <= '9')
             {
                 if (mThirdNumber.length() < 3)
                 {
-                    mThirdNumber.append(b);
+                    mThirdNumber.append(static_cast<char>(b));
                 }
                 else
                 {
@@ -657,7 +654,7 @@ void Atari1020::handleGraphicsCodes(const unsigned char b)
             break;
 
         case AUTOMATA_TEXT:
-            mPrintText.append(b);
+            mPrintText.append(static_cast<char>(b));
             break;
 
         case AUTOMATA_END:
@@ -689,8 +686,7 @@ void Atari1020::executeGraphicsCommand()
 
             case 'S':  // Scale characters
             {
-                auto scale = getFirstNumber();
-                if (scale >= 0 && scale <= 63)
+                if (auto scale = getFirstNumber(); scale >= 0 && scale <= 63)
                 {
                     int size = 6 * (scale + 2);
                     if (scale == 0)
@@ -720,10 +716,9 @@ void Atari1020::executeGraphicsCommand()
 
             case 'C':  // Set Color
             {
-                auto next = getFirstNumber();
-                if (next >= 0 && next <= 3)
+                if (auto next = getFirstNumber(); next >= 0 && next <= 3)
                 {
-                    const char *colorName = "black";
+                    auto colorName = "black";
                     QColor temp(colorName);
                     switch (next)
                     {
@@ -767,8 +762,7 @@ void Atari1020::executeGraphicsCommand()
 
             case 'L':  // Line mode 0 = solid, anything else dashed
             {
-                auto line = getFirstNumber();
-                if (line >= 0 && line <= 15)
+                if (auto line = getFirstNumber(); line >= 0 && line <= 15)
                 {
                     if (RespeqtSettings::instance()->displayGraphicsInstructions())
                     {
@@ -825,7 +819,7 @@ void Atari1020::executeGraphicsCommand()
             {
                 auto x = getFirstNumber();
                 auto y = getSecondNumber();
-                if ((x >= 0) && (x <= 480))
+                if (x >= 0 && x <= 480)
                 {
                     QPointF point(x, y);
 
@@ -889,6 +883,9 @@ void Atari1020::executeGraphicsCommand()
                             }
                             mPenPoint += point;
                             break;
+
+                        default:
+                            break;
                     }
                 }
             }
@@ -899,7 +896,7 @@ void Atari1020::executeGraphicsCommand()
                 auto mode  = getFirstNumber();
                 auto size  = getSecondNumber();
                 auto count = getThirdNumber();
-                auto xAxe  = (mode != 0);
+                auto xAxe  = mode != 0;
                 if (xAxe)
                 {
                     if (RespeqtSettings::instance()->displayGraphicsInstructions())
@@ -929,8 +926,7 @@ void Atari1020::executeGraphicsCommand()
 
             case 'Q':  // Set text orientation
             {
-                auto orientation = getFirstNumber();
-                if (orientation >= 0 && orientation <= 3)
+                if (auto orientation = getFirstNumber(); orientation >= 0 && orientation <= 3)
                 {
                     mTextOrientation = orientation * 90;
                     if (RespeqtSettings::instance()->displayGraphicsInstructions())
@@ -965,12 +961,16 @@ void Atari1020::executeGraphicsCommand()
                 drawText();
             }
             break;
+
+            default:
+            break;
         }
     }
     mCurrentCommand = 0;  // to prevent execution of this command a second time !
 }
 
-int Atari1020::getNumber(const QString number, const bool negative,
+ // ReSharper disable once CppMemberFunctionMayBeStatic
+int Atari1020::getNumber(const QString& number, const bool negative, // NOLINT(*-convert-member-functions-to-static)
                          const int defaultValue)
 {
     if (number.length() == 0)
@@ -978,7 +978,7 @@ int Atari1020::getNumber(const QString number, const bool negative,
         return defaultValue;
     }
     bool ok;
-    int num = number.toInt(&ok, 10);
+    const int num = number.toInt(&ok, 10);
     if (!ok)
     {
         return defaultValue;
@@ -990,22 +990,22 @@ int Atari1020::getNumber(const QString number, const bool negative,
     return num;
 }
 
-bool Atari1020::drawAxis(bool xAxis, int size, int count)
+bool Atari1020::drawAxis(const bool xAxis, const int size, const int count)
 {
     auto end{QPointF(mPenPoint)};
 
     if (xAxis)
     {
-        end.setX(end.x() + (size * count));
+        end.setX(end.x() + size * count);
     }
     else
     {
-        end.setY(end.y() + (size * count));
+        end.setY(end.y() + size * count);
     }
     QPen pen(mPen);
     pen.setStyle(Qt::SolidLine);
-    
-    auto lineItem = new QGraphicsLineItem(mPenPoint.x(), mPenPoint.y(), end.x(), end.y());
+
+    const auto lineItem = new QGraphicsLineItem(mPenPoint.x(), mPenPoint.y(), end.x(), end.y());
     lineItem->setPen(pen);
     emit addItem(lineItem);
 
@@ -1013,17 +1013,17 @@ bool Atari1020::drawAxis(bool xAxis, int size, int count)
     {
         if (xAxis)
         {
-            auto xc = mPenPoint.x() + c * size;
-            auto lineItem = new QGraphicsLineItem(xc, mPenPoint.y() - 2, xc, mPenPoint.y() + 2);
-            lineItem->setPen(pen);
-            emit addItem(lineItem);
+            const auto xc = mPenPoint.x() + c * size;
+            const auto lineItem2 = new QGraphicsLineItem(xc, mPenPoint.y() - 2, xc, mPenPoint.y() + 2);
+            lineItem2->setPen(pen);
+            emit addItem(lineItem2);
         }
         else
         {
-            auto yc = mPenPoint.y() + c * size;
-            auto lineItem = new QGraphicsLineItem(mPenPoint.x() - 2, yc, mPenPoint.x() + 2, yc);
-            lineItem->setPen(pen);
-            emit addItem(lineItem);
+            const auto yc = mPenPoint.y() + c * size;
+            const auto lineItem2 = new QGraphicsLineItem(mPenPoint.x() - 2, yc, mPenPoint.x() + 2, yc);
+            lineItem2->setPen(pen);
+            emit addItem(lineItem2);
         }
     }
 
@@ -1032,19 +1032,19 @@ bool Atari1020::drawAxis(bool xAxis, int size, int count)
 
 bool Atari1020::drawText()
 {
-    auto textItem = new QGraphicsTextItem(QString(mPrintText));
+    const auto textItem = new QGraphicsTextItem(QString(mPrintText));
     textItem->setPos(mPenPoint);
     textItem->setFont(mFont);
     // TODO orientation textItem->setTransformations();
     emit addItem(textItem);
 
     // update head position
-    QFontMetrics metrics(mFont);
-    QSize size  = metrics.size(Qt::TextSingleLine, mPrintText);
-    int nbPixel = size.width();
+    const QFontMetrics metrics(mFont);
+    const QSize size  = metrics.size(Qt::TextSingleLine, mPrintText);
+    const int nbPixel = size.width();
     switch (mTextOrientation)
     {
-
+        default:
         case 0:  // text towards right
             mPenPoint.setX(mPenPoint.x() + nbPixel);
             if (mPenPoint.x() > 480)
@@ -1068,12 +1068,14 @@ bool Atari1020::drawText()
         case 270:  // text towards top
             mPenPoint.setY(mPenPoint.y() + nbPixel);
             break;
+
     }
 
     return true;
 }
 
-bool Atari1020::handlePrintableCodes(const unsigned char /*b*/)
+// ReSharper disable once CppMemberFunctionMayBeStatic
+bool Atari1020::handlePrintableCodes(const unsigned char /*b*/) // NOLINT(*-convert-member-functions-to-static)
 {
     // QChar qb = translateAtascii(b & 127); // Masking inverse characters.
     // mOutput->printChar(qb);

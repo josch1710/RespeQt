@@ -7,11 +7,10 @@
 #include <QString>
 #include <QFont>
 #include <QGraphicsTextItem>
-#include <QGraphicsLineItem>
 
 namespace Printers {
-  Atari1029::Atari1029(SioWorkerPtr worker)
-      : AtariPrinter(std::move(worker))
+  Atari1029::Atari1029(const SioWorkerPtr &worker)
+      : AtariPrinter(worker)
   {
     mLineHeight = 10.5;
   }
@@ -20,40 +19,38 @@ namespace Printers {
     if (!mIsFontInitialized)
     {
       // Load the font from the resources
-      auto fontId{QFontDatabase::addApplicationFont(":/fonts/1029")};
 
-      if (fontId != -1) {
+      if (const auto fontId{QFontDatabase::addApplicationFont(":/fonts/1029")}; fontId != -1) {
         // Retrieve the name of the loaded font
-        auto family{QFontDatabase::applicationFontFamilies(fontId).at(0)};
+        const auto family{QFontDatabase::applicationFontFamilies(fontId).at(0)};
 
         // Set the font for the whole application
         QFont font{family};
         // Goal: 80 characters in 480 pixels
-        int max_width = 480;
-        int max_chars = 80;
-        QString testString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; // Test string
+        const QString testString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; // Test string
 
         // Start with a default size and shrink it if necessary
         font.setPointSize(14);
 
         // Simple loop for adjusting the size (or use a binary search for performance)
         while (font.pointSize() > 1) {
-          QGraphicsTextItem* tempItem = new QGraphicsTextItem(testString);
+          constexpr int max_chars = 80;
+          const auto tempItem {new QGraphicsTextItem(testString)};
           tempItem->setFont(font);
 
           // Calculate the width for 80 characters based on the test string
           // (assumption: the test string represents the average width)
-          double averageCharWidth = tempItem->boundingRect().width() / testString.length();
+          const double averageCharWidth = tempItem->boundingRect().width() / testString.length();
           delete tempItem;
 
-          if (averageCharWidth * max_chars > max_width) {
+          if (constexpr int max_width = 480; averageCharWidth * max_chars > max_width) {
             font.setPointSize(font.pointSize() - 1);
           } else {
             break; // Size fits!
           }
         }
 
-        mFont = font;
+        mFont = std::move(font);
         mIsFontInitialized = true;
 
       } else {
@@ -64,6 +61,7 @@ namespace Printers {
 
   QRectF Atari1029::printerDimension() const
   {
+    // TODO Belongs in Scenerect, or all into printerdimension
     return {0, 0, 480, 0};
   }
 
@@ -205,8 +203,8 @@ namespace Printers {
   }
 
   bool Atari1029::handlePrintableCodes(const unsigned char b) {
-    auto qb{translateAtascii(b & 127)}; // Masking inverse characters.
-    auto item{new QGraphicsTextItem(qb)};
+    const auto qb{translateAtascii(b & 127)}; // Masking inverse characters.
+    const auto item{new QGraphicsTextItem(qb)};
     item->setPos(mPenPoint);
     item->setFont(mFont);
     item->setVisible(true);
@@ -222,12 +220,12 @@ namespace Printers {
     return true;
   }
 
-  void Atari1029::setElongatedMode(bool elongatedMode) {
+  void Atari1029::setElongatedMode(const bool elongatedMode) {
     mElongatedMode = elongatedMode;
-    if (mElongatedMode) {
-      //mOutput->calculateFixedFontSize(40);
+    if (mElongatedMode) { // NOLINT(*-branch-clone)
+      //calculateFixedFontSize(40);
     } else {
-      //mOutput->calculateFixedFontSize(80);
+      //calculateFixedFontSize(80);
     }
   }
 
@@ -252,7 +250,7 @@ namespace Printers {
         for(int i = 0; i < 7; i++)
         {
             // Mask the point we want to draw.
-            auto line{new QGraphicsLineItem(point.x(), point.y(), point.x(), point.y())};
+            const auto line{new QGraphicsLineItem(point.x(), point.y(), point.x(), point.y())};
             line->setPen(QPen(b & (1 << i) ? Qt::black : Qt::white, 1));
             emit addItem(line);
             point.setY(point.y() - 1);

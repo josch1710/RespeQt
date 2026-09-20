@@ -1,6 +1,5 @@
 #include "printers/atari1027.h"
 #include "respeqtsettings.h"
-#include <utility>
 
 namespace Printers {
   QRectF Atari1027::printerDimension() const
@@ -8,8 +7,8 @@ namespace Printers {
     return {0, 0, 0, 0};
   }
 
-  Atari1027::Atari1027(SioWorkerPtr worker)
-      : AtariPrinter(std::move(worker)),
+  Atari1027::Atari1027(const SioWorkerPtr &worker)
+      : AtariPrinter(worker),
         mESC(false) {}
 
   void Atari1027::setupFont() {
@@ -142,15 +141,16 @@ namespace Printers {
         mESC = false;
         return true;
 
-        // TODO Check
-        /*default: // Not known control codes are consumed
-                mESC = false;
-                return true;*/
+      // TODO Check
+      default: // Not known control codes are consumed
+        mESC = false;
+        return true;
     }
     return false;
   }
 
-  bool Atari1027::handlePrintableCodes(const unsigned char /*b*/) {
+  // ReSharper disable once CppMemberFunctionMayBeStatic
+  bool Atari1027::handlePrintableCodes(const unsigned char /*b*/) { // NOLINT(*-convert-member-functions-to-static)
     //QChar qb = translateAtascii(b & 127); // Masking inverse characters.
     //mOutput->printChar(qb);
     return true;

@@ -70,8 +70,8 @@ namespace Printers {
       if (e->type() == QEvent::Show && RespeqtSettings::instance()->saveWindowsPos())
       {
           // Restore last widget geometry
-          auto parent = qobject_cast<PrinterWidget*>(parentWidget());
-          QString name = QString("Printer%1").arg(parent->getPrinterNumber()+1);
+          const auto parent = qobject_cast<PrinterWidget*>(parentWidget());
+          const QString name = QString("Printer%1").arg(parent->getPrinterNumber()+1);
           RespeqtSettings::instance()->restoreWidgetGeometry(this, name);
       }
       playScene();
@@ -82,9 +82,11 @@ namespace Printers {
     // Save Current Window Position and size //
     if (RespeqtSettings::instance()->saveWindowsPos())
     {
-      auto parent = qobject_cast<PrinterWidget*>(parentWidget());
-      QString name = QString("Printer%1").arg(parent->getPrinterNumber()+1);
-      RespeqtSettings::instance()->saveWidgetGeometry(this, name);
+      const auto parent = qobject_cast<PrinterWidget*>(parentWidget());
+      if (const QString name = QString("Printer%1").arg(parent->getPrinterNumber()+1); !RespeqtSettings::instance()->saveWidgetGeometry(this, name))
+      {
+        qDebug() << "!n" << "Widget geometry couldn't be saved!";
+      }
     }
     emit closed(this);
     e->accept();
@@ -95,12 +97,14 @@ namespace Printers {
     playScene();
   }
 
-  void OutputWindow::print(const QString &) {
+  // ReSharper disable once CppMemberFunctionMayBeStatic
+  void OutputWindow::print(const QString &) { // NOLINT(*-convert-member-functions-to-static)
     // TODO Print
   }
 
 
-  void OutputWindow::clearTriggered() {
+  // ReSharper disable once CppMemberFunctionMayBeStatic
+  void OutputWindow::clearTriggered() { // NOLINT(*-convert-member-functions-to-static)
     // auto primitive {new GraphicsClearPane};
     // primitive->execute(ui->printerGraphics->scene());
     // delete primitive;
@@ -109,16 +113,15 @@ namespace Printers {
   // Send to Printer Action   //
   void OutputWindow::printTriggered() {
     QPrinter printer;
-    auto dialog = new QPrintDialog(&printer, this);
-    if (dialog->exec() != QDialog::Accepted)
+    if (const auto dialog = new QPrintDialog(&printer, this); dialog->exec() != QDialog::Accepted)
       return;
 
     QPainter painter;
     painter.begin(&printer);
     // Scale the contents of the window to the printer.
-    auto xscale = printer.pageRect(QPrinter::DevicePixel).width() / static_cast<double>(width());
-    auto yscale = printer.pageRect(QPrinter::DevicePixel).height() / static_cast<double>(height());
-    auto scale = qMin(xscale, yscale);
+    const auto xscale = printer.pageRect(QPrinter::DevicePixel).width() / static_cast<double>(width());
+    const auto yscale = printer.pageRect(QPrinter::DevicePixel).height() / static_cast<double>(height());
+    const auto scale = qMin(xscale, yscale);
     painter.translate(printer.paperRect(QPrinter::DevicePixel).x() + printer.pageRect(QPrinter::DevicePixel).width() / 2,
                       printer.paperRect(QPrinter::DevicePixel).y() + printer.pageRect(QPrinter::DevicePixel).height() / 2);
     painter.scale(scale, scale);
@@ -129,7 +132,7 @@ namespace Printers {
   }
 
   void OutputWindow::saveTriggered() {
-    QString fileName = QFileDialog::getSaveFileName(this,
+    const QString fileName = QFileDialog::getSaveFileName(this,
         tr("Save printer text output"),
         RespeqtSettings::instance()->lastPrinterTextDir(),
         tr("SVG files (*.svg);;All files (*)"), nullptr);
@@ -160,7 +163,7 @@ namespace Printers {
   
   void OutputWindow::playScene()
   {
-    auto scale{calculateScaleFactor()};
+    const auto scale{calculateScaleFactor()};
 
     setSceneRect(QRectF(0, 0, printerDimension.width(), ui->printerGraphics->height()));
     ui->printerGraphics->setTransform(QTransform().scale(scale, scale));

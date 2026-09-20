@@ -8,11 +8,11 @@ class TD;
 namespace Printers {
   NativeOutput::NativeOutput() {
     mCharMode = true;
-    calculateFixedFontSize(mCharsPerLine);
+    NativeOutput::calculateFixedFontSize(mCharsPerLine);
   }
 
   NativeOutput::~NativeOutput() {
-    endOutput();
+    NativeOutput::endOutput();
   }
 
   bool NativeOutput::beginOutput() {
@@ -43,20 +43,19 @@ namespace Printers {
     return true;
   }
 
-  void NativeOutput::calculateFixedFontSize(uint8_t charsPerLine) {
+  void NativeOutput::calculateFixedFontSize(const uint8_t charsPerLine) {
     if (!mFont) {
       return;
     }
-    qreal painterWidth = mBoundingBox.right() - mBoundingBox.left();
+    const qreal painterWidth = mBoundingBox.right() - mBoundingBox.left();
     qreal oldFontSize = mFont->pointSizeF();
-    int oldWidth;
 
     // Loop to approximate correct font size
     for (int i = 0; i < 3; i++) {
       QFontMetrics metrics{*mFont};
       auto bounds = metrics.boundingRect('M');
-      oldWidth = bounds.width();
-      qreal scale = painterWidth / (oldWidth * charsPerLine);
+      const int oldWidth = bounds.width();
+      const qreal scale = painterWidth / (oldWidth * charsPerLine);
       mFont->setPointSizeF(bounds.height() * scale);
       applyFont();
       oldFontSize = bounds.height() * scale;
@@ -68,7 +67,7 @@ namespace Printers {
     mCharsPerLine = charsPerLine;
   }
 
-  void NativeOutput::setFont(QFontPtr font) {
+  void NativeOutput::setFont(const QFontPtr &font) {
     if (font != mFont) {
       mFont = font;
     }
@@ -76,13 +75,13 @@ namespace Printers {
   }
 
   void NativeOutput::printChar(const QChar &c) {
-    QFontMetrics metrics(*mFont);
+    const QFontMetrics metrics(*mFont);
     if (metrics.boundingRect(c).width() + mX > mBoundingBox.right() || mCharCount + 1 > mCharsPerLine) {
       // Char has to go on next line
       newLine();
     }
     if (mPainter) {
-      QColor color(255, 0, 0);
+      constexpr QColor color(255, 0, 0);
       mPainter->setPen(color);
       mPainter->drawText(mX, mY + metrics.height(), c);
     }
@@ -96,8 +95,8 @@ namespace Printers {
     }
   }
 
-  void NativeOutput::newLine(bool linefeed) {
-    QFontMetrics metrics(*mFont);
+  void NativeOutput::newLine(const bool linefeed) {
+    const QFontMetrics metrics(*mFont);
 
     int lineSpacing = metrics.lineSpacing();
     if (mLPIMode > 0) {
@@ -115,7 +114,7 @@ namespace Printers {
     }
   }
 
-  void NativeOutput::plot(QPoint p, uint8_t dot) {
+  void NativeOutput::plot(const QPoint p, const uint8_t dot) {
     if (!mPainter)
       return;
 

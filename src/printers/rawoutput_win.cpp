@@ -26,7 +26,6 @@ namespace Printers {
     wchar_t *temp2 = new wchar_t[256];
     DOC_INFO_1 di1;
     DWORD needed;
-    QString type, docname;
 
     rawPrinterName.toWCharArray(temp);
     temp[rawPrinterName.length()] = 0;
@@ -40,8 +39,8 @@ namespace Printers {
     GetPrinterDriver(mJob, nullptr, 2, reinterpret_cast<LPBYTE>(&buffer[0]), needed, &needed);
     needed = reinterpret_cast<DRIVER_INFO_2 *>(&buffer[0])->cVersion;
 
-    type = needed >= 4 ? "XPS_PASS" : "RAW";
-    docname = "RespeQt";
+    QString type = needed >= 4 ? "XPS_PASS" : "RAW";
+    QString docname = "RespeQt";
     type.toWCharArray(temp);
     temp[type.length()] = 0;
     docname.toWCharArray(temp2);
@@ -74,7 +73,6 @@ namespace Printers {
   }
 
   void RawOutput::setupRawPrinters(QComboBox *list) {
-    PRINTER_INFO_1 *pinfo;
     DWORD needed, returned;
 
     list->clear();
@@ -89,7 +87,7 @@ namespace Printers {
                       reinterpret_cast<LPBYTE>(&buffer[0]), buffer.size(), &needed, &returned)) {
       return;
     }
-    pinfo = reinterpret_cast<PRINTER_INFO_1 *>(&buffer[0]);
+    PRINTER_INFO_1* pinfo = reinterpret_cast<PRINTER_INFO_1*>(&buffer[0]);
     for (DWORD i = 0; i < returned; i++) {
       list->addItem(QString::fromWCharArray(pinfo[i].pName), QVariant(static_cast<uint>(i)));
     }

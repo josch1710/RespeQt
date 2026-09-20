@@ -1,8 +1,8 @@
 #include "printers/escp.h"
-#include <utility>
+
 namespace Printers {
-  Escp::Escp(SioWorkerPtr sio)
-      : Centronics(std::move(sio)) {
+  Escp::Escp(const SioWorkerPtr& sio)
+      : Centronics(sio) {
     initPrinter();
   }
 
@@ -17,10 +17,12 @@ namespace Printers {
     return true;
   }
 
-  void Escp::handlePrintableCodes(unsigned char /*b*/) {
+  // ReSharper disable once CppMemberFunctionMayBeStatic
+  void Escp::handlePrintableCodes(unsigned char /*b*/) { // NOLINT(*-convert-member-functions-to-static)
   }
 
-  void Escp::handleEscapableCodes(unsigned char /*b*/) {
+  // ReSharper disable once CppMemberFunctionMayBeStatic
+  void Escp::handleEscapableCodes(unsigned char /*b*/) { // NOLINT(*-convert-member-functions-to-static)
   }
 
 }// namespace Printers
