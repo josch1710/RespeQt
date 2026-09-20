@@ -18,7 +18,7 @@ add_definitions(-DQT_DEPRECATED_WARNINGS -DQT_DISABLE_DEPRECATED_BEFORE=0x050000
 add_definitions(-DVERSION=\"v${PROJECT_VERSION}${RC_VERSION}\")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 set(CMAKE_OSX_ARCHITECTURES x86_64 arm64)
-set(CMAKE_OSX_DEPLOYMENT_TARGET 11.0)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 11.0) # Perhaps we can manage to build this 10.11 or whatever the min for qt5 is.
 
 option(MAKE_TEST "Build the test application" OFF)
 message(STATUS "Build tests ${MAKE_TEST}")
