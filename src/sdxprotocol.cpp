@@ -1,5 +1,5 @@
 #include "sdxprotocol.h"
 
-SDXProtocol::SDXProtocol(SioWorkerPtr worker)
+SDXProtocol::SDXProtocol(const SioWorkerPtr& worker)
     : SioDevice(worker) {
 }

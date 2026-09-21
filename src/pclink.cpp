@@ -60,15 +60,15 @@
 #define SDX_GO_UP_DIR_CHAR '<'
 
 /* Atari SIO status block */
-typedef struct
+using STATUS = struct
 {
   uchar stat;
   uchar err;
   uchar tmot;
   uchar none;
-} STATUS;
+};
 
-typedef struct /* PCLink parameter buffer */
+using PARBUF = struct /* PCLink parameter buffer */
 {
   uchar fno;            /* function number */
   uchar handle;         /* file handle */
@@ -80,18 +80,18 @@ typedef struct /* PCLink parameter buffer */
   uchar name[12];       /* name */
   uchar names[12];      /* names */
   uchar path[65];       /* path */
-} PARBUF;
+};
 
-typedef struct
+using DEVICE = struct
 {
   STATUS status;      /* the 4-byte status block */
   int on;             /* PCLink mount flag */
   char dirname[1024]; /* PCLink root directory path */
   uchar cwd[65];      /* PCLink current working dir, relative to the above */
   PARBUF parbuf;      /* PCLink parameter buffer */
-} DEVICE;
+};
 
-typedef struct
+using IODESC = struct
 {
   union {
     FILE *file;
@@ -109,60 +109,63 @@ typedef struct
   uchar d1, d2, d3;
   struct stat fpstat;
   char fpname[12];
-  long fppos;
-  long fpread;
+  size_t fppos; // TODO Perhaps off_t?
+  size_t fpread;
   int eof;
   char pathname[1024];
-} IODESC;
+};
 
-typedef struct
+using PCLDBF = struct
 {
   uchar handle;
   uchar dirbuf[23];
-} PCLDBF;
+};
 
-static const char *const invalid_file_names[] = {
-        "CON",
-        "PRN",
-        "AUX",
-        "NUL",
-        "COM1",
-        "COM2",
-        "COM3",
-        "COM4",
-        "COM5",
-        "COM6",
-        "COM7",
-        "COM8",
-        "COM9",
-        "LPT1",
-        "LPT2",
-        "LPT3",
-        "LPT4",
-        "LPT5",
-        "LPT6",
-        "LPT7",
-        "LPT8",
-        "LPT9",
-        0};
+static constexpr const char *const invalid_file_names[] =
+{
+    "CON",
+    "PRN",
+    "AUX",
+    "NUL",
+    "COM1",
+    "COM2",
+    "COM3",
+    "COM4",
+    "COM5",
+    "COM6",
+    "COM7",
+    "COM8",
+    "COM9",
+    "LPT1",
+    "LPT2",
+    "LPT3",
+    "LPT4",
+    "LPT5",
+    "LPT6",
+    "LPT7",
+    "LPT8",
+    "LPT9",
+    nullptr
+};
 
 static bool D = false;// extended debug
 static IODESC iodesc[16];
 static DEVICE device[16]; /* 1 PCLINK device with support for 15 units */
 static PCLDBF pcl_dbf;
 
-static const char *fun[] =
-        {
-                "FREAD", "FWRITE", "FSEEK", "FTELL", "FLEN", "(none)", "FNEXT", "FCLOSE",
-                "INIT", "FOPEN", "FFIRST", "RENAME", "REMOVE", "CHMOD", "MKDIR", "RMDIR",
-                "CHDIR", "GETCWD", "SETBOOT", "DFREE", "CHVOL"};
+static constexpr const char *fun[] =
+{
+    "FREAD", "FWRITE", "FSEEK", "FTELL", "FLEN", "(none)", "FNEXT", "FCLOSE",
+    "INIT", "FOPEN", "FFIRST", "RENAME", "REMOVE", "CHMOD", "MKDIR", "RMDIR",
+    "CHDIR", "GETCWD", "SETBOOT", "DFREE", "CHVOL"
+};
 
-char HOST_SEPARATOR_STR[] = {HOST_SEPARATOR_CHAR, 0};
-char RESERVED_NAME_PREFIX_STR[] = {RESERVED_NAME_PREFIX_CHAR, 0};
+static char HOST_SEPARATOR_STR[] = {HOST_SEPARATOR_CHAR, 0};
+static char RESERVED_NAME_PREFIX_STR[] = {RESERVED_NAME_PREFIX_CHAR, 0};
 
 /*************************************************************************/
 
-PCLINK::PCLINK(SioWorkerPtr worker)
+PCLINK::PCLINK(const SioWorkerPtr& worker)
     : SDXProtocol(worker) {
   do_pclink_init(1);
 }
@@ -170,12 +173,12 @@ PCLINK::PCLINK(SioWorkerPtr worker)
 /*************************************************************************/
 
 void PCLINK::handleCommand(const quint8 command, const quint8 aux1, const quint8 aux2) {
-  auto cunit = aux2 & 0x0F; /* PCLink ignores DUNIT */
+  const auto cunit = aux2 & 0x0F; /* PCLink ignores DUNIT */
 
   if (D) qDebug() << "!n" << tr("PCLINK Command=[$%1] aux1=$%2 aux2=$%3 cunit=$%4").arg(command, 0, 16).arg(aux1, 2, 16, QChar('0')).arg(aux2, 2, 16, QChar('0')).arg(cunit, 0, 16);
 
   /* cunit == 0 is init during warm reset */
-  if ((cunit == 0) || device[cunit].on) {
+  if (cunit == 0 || device[cunit].on) {
     switch (command) {
       case 'P': {
         qDebug() << "!n" << tr("[%1] P").arg(deviceName());
@@ -194,10 +197,10 @@ void PCLINK::handleCommand(const quint8 command, const quint8 aux1, const quint8
         sio->port()->writeCommandAck();
 
         QByteArray status(4, 0);
-        status[0] = device[cunit].status.stat;
-        status[1] = device[cunit].status.err;
-        status[2] = device[cunit].status.tmot;
-        status[3] = device[cunit].status.none;
+        status[0] = static_cast<char>(device[cunit].status.stat);
+        status[1] = static_cast<char>(device[cunit].status.err);
+        status[2] = static_cast<char>(device[cunit].status.tmot);
+        status[3] = static_cast<char>(device[cunit].status.none);
 
         sio->port()->writeComplete();
         sio->port()->writeDataFrame(status);
@@ -211,7 +214,7 @@ void PCLINK::handleCommand(const quint8 command, const quint8 aux1, const quint8
         sio->port()->writeCommandAck();
         sio->port()->writeComplete();
         QByteArray speed(1, 0);
-        speed[0] = sio->port()->speedByte();
+        speed[0] = static_cast<char>(sio->port()->speedByte());
         sio->port()->writeDataFrame(speed);
         qDebug() << "!n" << tr("[%1] Speed poll").arg(deviceName());
         break;
@@ -228,15 +231,16 @@ void PCLINK::handleCommand(const quint8 command, const quint8 aux1, const quint8
 
 /*************************************************************************/
 
-bool PCLINK::hasLink(int no) {
+// ReSharper disable once CppMemberFunctionMayBeStatic
+bool PCLINK::hasLink(const int no) { // NOLINT(*-convert-member-functions-to-static)
   if (no < 1 || no > 15) return false;
 
-  return (device[no].on == 1);
+  return device[no].on == 1;
 }
 
 /*************************************************************************/
 
-void PCLINK::setLink(int no, const char *fileName) {
+void PCLINK::setLink(const int no, const char *fileName) {
   if (no < 1 || no > 15) return;
 
   fps_close(no);
@@ -252,7 +256,7 @@ void PCLINK::setLink(int no, const char *fileName) {
 
 /*************************************************************************/
 
-void PCLINK::swapLinks(int from, int to) {
+void PCLINK::swapLinks(const int from, const int to) {
   if (from < 1 || from > 15 || to < 1 || to > 15) return;
 
   char tmp_dir_name[1024];
@@ -273,7 +277,7 @@ void PCLINK::swapLinks(int from, int to) {
 
 /*************************************************************************/
 
-void PCLINK::resetLink(int no) {
+void PCLINK::resetLink(const int no) {
   if (no < 1 || no > 15) return;
 
   fps_close(no);
@@ -288,46 +292,47 @@ void PCLINK::resetLink(int no) {
 
 /*************************************************************************/
 
-void PCLINK::unix_time_2_sdx(time_t *todp, uchar *ob) {
-  struct tm *t;
-  uchar yy;
+// ReSharper disable once CppMemberFunctionMayBeStatic
+void PCLINK::unix_time_2_sdx(const time_t *todp, uchar *ob) { // NOLINT(*-convert-member-functions-to-static)
 
   memset(ob, 0, 6);
 
-  if ((*todp == 0) || (*todp == -1))
+  if (*todp == 0 || *todp == -1)
     return;
 
-  t = localtime(todp);
+  const tm* t = localtime(todp);
 
-  yy = t->tm_year;
+  int yy = t->tm_year;
   while (yy >= 100)
     yy -= 100;
 
-  ob[0] = t->tm_mday;
-  ob[1] = t->tm_mon + 1;
-  ob[2] = yy;
-  ob[3] = t->tm_hour;
-  ob[4] = t->tm_min;
-  ob[5] = t->tm_sec;
+  ob[0] = static_cast<quint8>(t->tm_mday);
+  ob[1] = static_cast<quint8>(t->tm_mon + 1);
+  ob[2] = static_cast<quint8>(yy);
+  ob[3] = static_cast<quint8>(t->tm_hour);
+  ob[4] = static_cast<quint8>(t->tm_min);
+  ob[5] = static_cast<quint8>(t->tm_sec);
 }
 
 /*************************************************************************/
 
-bool PCLINK::isSDXLegalChar(uchar c) {
+// ReSharper disable once CppMemberFunctionMayBeStatic
+bool PCLINK::isSDXLegalChar(const uchar c) { // NOLINT(*-convert-member-functions-to-static)
 #if defined(Q_OS_LINUX) || defined(Q_OS_OSX)
   if (RespeqtSettings::instance()->capitalLettersInPCLINK())
-    return (isupper(c) || isdigit(c) || (c == '_') || (c == '@'));
+    return isupper(c) || isdigit(c) || c == '_' || c == '@';
 
-  return (islower(c) || isdigit(c) || (c == '_') || (c == '@'));
+  return islower(c) || isdigit(c) || c == '_' || c == '@';
 #else
-  return (isalpha(c) || isdigit(c) || (c == '_') || (c == '@'));
+  return isalpha(c) || isdigit(c) || (c == '_') || c == '@';
 #endif
 }
 
 /*************************************************************************/
 
-long PCLINK::dos_2_term(uchar c) {
-  return ((c == 0) || (c == 0x20));
+// ReSharper disable once CppMemberFunctionMayBeStatic
+long PCLINK::dos_2_term(const uchar c) { // NOLINT(*-convert-member-functions-to-static)
+  return c == 0 || c == 0x20;
 }
 
 /*************************************************************************
@@ -336,12 +341,10 @@ long PCLINK::dos_2_term(uchar c) {
  * returns 1 file name is OK, otherwise 0
  *************************************************************************/
 
-long PCLINK::validate_fn(uchar *name, int len) {
-  int x;
-
-  for (x = 0; x < len; x++) {
+long PCLINK::validate_fn(const uchar *name, const int len) {
+  for (int x = 0; x < len; x++) {
     if (dos_2_term(name[x]))
-      return (x != 0);
+      return x != 0;
     if (name[x] == '.')
       return 1;
     if (!isSDXLegalChar(name[x]))
@@ -357,25 +360,23 @@ long PCLINK::validate_fn(uchar *name, int len) {
  * output: out
  *************************************************************************/
 
+// ReSharper disable once CppParameterMayBeConstPtrOrRef
 void PCLINK::ugefina(char *src, char *out) {
-  char *dot;
   ushort i;
 
   memset(out, 0x20, 8 + 3);
 
-  dot = strchr(src, '.');
-
-  if (dot) {
+  if (const char* dot = strchr(src, '.')) {
     i = 1;
-    while (dot[i] && (i < 4)) {
-      out[i + 7] = toupper((uchar) dot[i]);
+    while (dot[i] && i < 4) {
+      out[i + 7] = static_cast<char>(toupper(dot[i]));
       i++;
     }
   }
 
   i = 0;
-  while ((src[i] != '.') && !dos_2_term(src[i]) && (i < 8)) {
-    out[i] = toupper((uchar) src[i]);
+  while (src[i] != '.' && !dos_2_term(static_cast<quint8>(src[i])) && i < 8) {
+    out[i] = static_cast<char>(toupper(src[i]));
     i++;
   }
 }
@@ -386,28 +387,25 @@ void PCLINK::ugefina(char *src, char *out) {
  * output: name83
  *************************************************************************/
 
-void PCLINK::uexpand(uchar *rawname, char *name83) {
-  ushort x, y;
-  uchar t;
+// ReSharper disable once CppMemberFunctionMayBeStatic
+void PCLINK::uexpand(const uchar *rawname, char *name83) { // NOLINT(*-convert-member-functions-to-static)
+  ushort x;
 
   name83[0] = 0;
 
   for (x = 0; x < 8; x++) {
-    t = rawname[x];
-    if (t && (t != 0x20))
-      name83[x] = RespeqtSettings::instance()->capitalLettersInPCLINK() ? toupper(t) : tolower(t);
+    if (const uchar t = rawname[x]; t && t != 0x20)
+      name83[x] = static_cast<char>(RespeqtSettings::instance()->capitalLettersInPCLINK() ? toupper(t) : tolower(t));
     else
       break;
   }
 
-  y = 8;
-
-  if (rawname[y] && (rawname[y] != 0x20)) {
+  if (ushort y = 8; rawname[y] && rawname[y] != 0x20) {
     name83[x] = '.';
     x++;
 
-    while ((y < 11) && rawname[y] && (rawname[y] != 0x20)) {
-      name83[x] = RespeqtSettings::instance()->capitalLettersInPCLINK() ? toupper(rawname[y]) : tolower(rawname[y]);
+    while (y < 11 && rawname[y] && rawname[y] != 0x20) {
+      name83[x] = static_cast<char>(RespeqtSettings::instance()->capitalLettersInPCLINK() ? toupper(rawname[y]) : tolower(rawname[y]));
       x++;
       y++;
     }
@@ -421,14 +419,13 @@ void PCLINK::uexpand(uchar *rawname, char *name83) {
  *
  *************************************************************************/
 
-int PCLINK::match_dos_names(char *name, char *mask, uchar fatr1, struct stat *sb) {
+// ReSharper disable once CppMemberFunctionMayBeStatic
+int PCLINK::match_dos_names(const char *name, const char *mask, uchar fatr1, const struct stat *sb) { // NOLINT(*-convert-member-functions-to-static)
   if (D) qDebug() << "!n" << tr("match: %1%2%3%4%5%6%7%8%9%10%11 with %12%13%14%15%16%17%18%19%20%21%22: ").arg(name[0]).arg(name[1]).arg(name[2]).arg(name[3]).arg(name[4]).arg(name[5]).arg(name[6]).arg(name[7]).arg(name[8]).arg(name[9]).arg(name[10]).arg(mask[0]).arg(mask[1]).arg(mask[2]).arg(mask[3]).arg(mask[4]).arg(mask[5]).arg(mask[6]).arg(mask[7]).arg(mask[8]).arg(mask[9]).arg(mask[10]);
 
-  ushort i;
-
-  for (i = 0; i < 11; i++) {
+  for (ushort i = 0; i < 11; i++) {
     if (mask[i] != '?')
-      if (toupper((uchar) name[i]) != toupper((uchar) mask[i])) {
+      if (toupper(static_cast<unsigned char>(name[i])) != toupper(static_cast<unsigned char>(mask[i]))) {
         if (D) qDebug() << "!n" << tr("no match");
         return 1;
       }
@@ -484,30 +481,30 @@ int PCLINK::match_dos_names(char *name, char *mask, uchar fatr1, struct stat *sb
 
 int PCLINK::validate_dos_name(char *fname) {
   char *dot = strchr(fname, '.');
-  long valid_fn, valid_xx;
+  long valid_xx;
 
-  if ((dot == nullptr) && (strlen(fname) > 8))
+  if (dot == nullptr && strlen(fname) > 8)
     return 1;
   if (dot) {
-    long dd = strlen(dot);
+    const size_t dd = strlen(dot);
 
     if (dd > 4)
       return 1;
-    if ((dot - fname) > 8)
+    if (dot - fname > 8)
       return 1;
-    if ((dot == fname) && (dd == 1))
+    if (dot == fname && dd == 1)
       return 1;
-    if ((dd == 2) && (dot[1] == '.'))
+    if (dd == 2 && dot[1] == '.')
       return 1;
-    if ((dd == 3) && ((dot[1] == '.') || (dot[2] == '.')))
+    if (dd == 3 && (dot[1] == '.' || dot[2] == '.'))
       return 1;
-    if ((dd == 4) && ((dot[1] == '.') || (dot[2] == '.') || (dot[3] == '.')))
+    if (dd == 4 && (dot[1] == '.' || dot[2] == '.' || dot[3] == '.'))
       return 1;
   }
 
-  valid_fn = validate_fn((uchar *) fname, 8);
+  const long valid_fn = validate_fn(reinterpret_cast<unsigned char*>(fname), 8);
   if (dot != nullptr)
-    valid_xx = validate_fn((uchar *) (dot + 1), 3);
+    valid_xx = validate_fn(reinterpret_cast<unsigned char*>(dot + 1), 3);
   else
     valid_xx = 1;
 
@@ -523,13 +520,13 @@ int PCLINK::validate_dos_name(char *fname) {
  * returns 0 when everything is OK, 1 otherwise
  *************************************************************************/
 
-int PCLINK::check_dos_name(char *newpath, struct dirent *dp, struct stat *sb) {
+int PCLINK::check_dos_name(char *newpath, dirent *dp, struct stat *sb) {
   char temp_fspec[1024], fname[256];
 
   strcpy(fname, dp->d_name);
 
   if (is_fname_encoded(dp->d_name)) {
-    memmove(dp->d_name, (dp->d_name) + 1, strlen(dp->d_name));
+    memmove(dp->d_name, dp->d_name + 1, strlen(dp->d_name));
   }
 
   if (D) qDebug() << "!n" << tr("%1: got fname '%2'").arg(__extension__ __FUNCTION__, dp->d_name);
@@ -563,7 +560,7 @@ int PCLINK::check_dos_name(char *newpath, struct dirent *dp, struct stat *sb) {
   if ((sb->st_mode & S_IRUSR) == 0) /* unreadable? */
     return 1;
 
-  if (S_ISDIR(sb->st_mode) && ((sb->st_mode & S_IXUSR) == 0))
+  if (S_ISDIR(sb->st_mode) && (sb->st_mode & S_IXUSR) == 0)
     return 1;
 
   return 0;
@@ -571,7 +568,8 @@ int PCLINK::check_dos_name(char *newpath, struct dirent *dp, struct stat *sb) {
 
 /*************************************************************************/
 
-void PCLINK::fps_close(int i) {
+// ReSharper disable once CppMemberFunctionMayBeStatic
+void PCLINK::fps_close(const int i) {// NOLINT(*-convert-member-functions-to-static)
   if (iodesc[i].fps.file != nullptr) {
     if (iodesc[i].fpmode & 0x10)
       closedir(iodesc[i].fps.dir);
@@ -607,13 +605,13 @@ void PCLINK::fps_close(int i) {
 
 /*************************************************************************/
 
-ulong PCLINK::get_file_len(uchar handle) {
-  ulong filelen;
-  struct dirent *dp;
-  struct stat sb;
+off_t PCLINK::get_file_len(const uchar handle) {
+  off_t filelen;
+  struct stat sb{};
 
   if (iodesc[handle].fpmode & 0x10) /* directory */
   {
+    dirent *dp;
     rewinddir(iodesc[handle].fps.dir);
     filelen = sizeof(DIRENTRY);
 
@@ -634,14 +632,14 @@ ulong PCLINK::get_file_len(uchar handle) {
 
 /*************************************************************************/
 
-DIRENTRY *PCLINK::cache_dir(uchar handle) {
-  char *bs, *cwd;
+DIRENTRY *PCLINK::cache_dir(const uchar handle) {
   uchar dirnode = 0x00;
   ushort node;
-  ulong dlen, flen, sl, dirlen = iodesc[handle].fpstat.st_size;
-  DIRENTRY *dbuf, *dir;
-  struct dirent *dp;
-  struct stat sb;
+  // ReSharper disable once CppRedundantCastExpression
+  const size_t dirlen = static_cast<size_t>(iodesc[handle].fpstat.st_size);
+  DIRENTRY *dbuf;
+  dirent *dp;
+  struct stat sb{};
 
   if (iodesc[handle].dir_cache != nullptr) {
     if (D) qDebug() << "!n" << tr("Internal error: dir_cache should be nullptr!");
@@ -649,7 +647,7 @@ DIRENTRY *PCLINK::cache_dir(uchar handle) {
     iodesc[handle].dir_cache = nullptr;
   }
 
-  dir = dbuf = (DIRENTRY *) malloc(dirlen + sizeof(DIRENTRY));
+  DIRENTRY* dir = dbuf = static_cast<DIRENTRY*>(malloc(dirlen + sizeof(DIRENTRY)));
   memset(dbuf, 0, dirlen + sizeof(DIRENTRY));
 
   dir->status = 0x28;
@@ -661,22 +659,22 @@ DIRENTRY *PCLINK::cache_dir(uchar handle) {
 
   memset(dir->fname, 0x20, 11);
 
-  sl = strlen(device[iodesc[handle].cunit].dirname);
+  const ulong sl = strlen(device[iodesc[handle].cunit].dirname);
 
-  cwd = iodesc[handle].pathname + sl;
+  const char* cwd = iodesc[handle].pathname + sl;
 
-  bs = strrchr(cwd, HOST_SEPARATOR_CHAR);
-
-  if (bs == nullptr)
-    (dir->fname, "MAIN", 4);
-  else {
-    char *cp = cwd;
+  // ReSharper disable once CppRedundantCastExpression
+  if (const auto bs = const_cast<char*>(strrchr(cwd, HOST_SEPARATOR_CHAR)); bs == nullptr)
+  {
+    //(dir->fname, "MAIN", 4);
+  } else {
+    const char *cp = cwd;
 
     /* convert 8+3 to NNNNNNNNXXX */
-    ugefina(bs + 1, (char *) dir->fname);
+    ugefina(bs + 1, dir->fname);
 
     if (is_fname_encoded(bs + 1)) {
-      memmove(dir->fname, (dir->fname) + 1, strlen(dir->fname));
+      memmove(dir->fname, dir->fname + 1, strlen(dir->fname));
     }
 
     node = 0;
@@ -687,44 +685,42 @@ DIRENTRY *PCLINK::cache_dir(uchar handle) {
       cp++;
     }
 
-    dir->map_h = (dirnode & 0x1f) << 3;
+    dir->map_h = static_cast<quint8>((dirnode & 0x1f) << 3);
   }
 
   unix_time_2_sdx(&iodesc[handle].fpstat.st_mtime, dir->stamp);
 
   dir++;
-  flen = sizeof(DIRENTRY);
+  ulong flen = sizeof(DIRENTRY);
 
   node = 1;
 
   while ((dp = readdir(iodesc[handle].fps.dir)) != nullptr) {
-    ushort map;
-
     if (check_dos_name(iodesc[handle].pathname, dp, &sb))
       continue;
 
-    dlen = sb.st_size;
+    off_t dlen = sb.st_size;
     if (dlen > SDX_MAXLEN)
       dlen = SDX_MAXLEN;
 
-    dir->status = (sb.st_mode & S_IWUSR) ? 0x08 : 0x09;
+    dir->status = sb.st_mode & S_IWUSR ? 0x08 : 0x09;
 
     if (S_ISDIR(sb.st_mode)) {
       dir->status |= 0x20; /* directory */
       dlen = sizeof(DIRENTRY);
     }
 
-    map = dirnode << 11;
-    map |= (node & 0x07ff);
+    ushort map = static_cast<ushort>(dirnode << 11);
+    map |= node & 0x07ff;
 
     dir->map_l = map & 0x00ff;
-    dir->map_h = ((map & 0xff00) >> 8);
+    dir->map_h = (map & 0xff00) >> 8;
     dir->len_l = dlen & 0x000000ffL;
     dir->len_m = (dlen & 0x0000ff00L) >> 8;
     dir->len_h = (dlen & 0x00ff0000L) >> 16;
 
     /* convert 8+3 to NNNNNNNNXXX */
-    ugefina(dp->d_name, (char *) dir->fname);
+    ugefina(dp->d_name, dir->fname);
 
     unix_time_2_sdx(&sb.st_mtime, dir->stamp);
 
@@ -741,15 +737,14 @@ DIRENTRY *PCLINK::cache_dir(uchar handle) {
 
 /*************************************************************************/
 
-ulong PCLINK::dir_read(uchar *mem, ulong blk_size, uchar handle, int *eof_sig) {
-  auto db = (uchar *) iodesc[handle].dir_cache;
-  ulong dirlen = iodesc[handle].fpstat.st_size, newblk;
+// ReSharper disable once CppMemberFunctionMayBeStatic
+size_t PCLINK::dir_read(uchar *mem, ulong blk_size, const uchar handle, int *eof_sig) { // NOLINT(*-convert-member-functions-to-static)
+  const auto db = reinterpret_cast<unsigned char*>(iodesc[handle].dir_cache);
+  const auto dirlen = iodesc[handle].fpstat.st_size;
 
   eof_sig[0] = 0;
 
-  newblk = dirlen - iodesc[handle].fppos;
-
-  if (newblk < blk_size) {
+  if (const auto newblk = static_cast<size_t>(dirlen) - iodesc[handle].fppos; newblk < blk_size) {
     blk_size = newblk;
     eof_sig[0] = 1;
   }
@@ -762,14 +757,12 @@ ulong PCLINK::dir_read(uchar *mem, ulong blk_size, uchar handle, int *eof_sig) {
 
 /*************************************************************************/
 
-void PCLINK::do_pclink_init(int force) {
-  uchar handle;
-
+void PCLINK::do_pclink_init(const int force) {
   if (force == 0) {
     if (D) qDebug() << "!n" << tr("closing all files");
   }
 
-  for (handle = 0; handle < 16; handle++) {
+  for (uchar handle = 0; handle < 16; handle++) {
     if (force)
       iodesc[handle].fps.file = nullptr;
     fps_close(handle);
@@ -779,8 +772,9 @@ void PCLINK::do_pclink_init(int force) {
 
 /*************************************************************************/
 
-void PCLINK::set_status_size(uchar cunit, ushort size) {
-  device[cunit].status.tmot = (size & 0x00ff);
+// ReSharper disable once CppMemberFunctionMayBeStatic
+void PCLINK::set_status_size(const uchar cunit, const ushort size) { // NOLINT(*-convert-member-functions-to-static)
+  device[cunit].status.tmot = size & 0x00ff;
   device[cunit].status.none = (size & 0xff00) >> 8;
 }
 
@@ -791,16 +785,17 @@ void PCLINK::set_status_size(uchar cunit, ushort size) {
  * returns 1 if everything is OK, otherwise 0
  *************************************************************************/
 
-int PCLINK::validate_user_path(char *defwd, char *newpath) {
-  char *d, oldwd[1024], newwd[1024];
+// ReSharper disable once CppMemberFunctionMayBeStatic
+int PCLINK::validate_user_path(const char *defwd, const char *newpath) { // NOLINT(*-convert-member-functions-to-static)
+  char oldwd[1024], newwd[1024];
 
-  (void) getcwd(oldwd, sizeof(oldwd));
+  getcwd(oldwd, sizeof(oldwd));
   if (chdir(newpath) < 0)
     return 0;
-  (void) getcwd(newwd, sizeof(newwd));
-  (void) chdir(oldwd);
+  getcwd(newwd, sizeof(newwd));
+  chdir(oldwd);
 
-  d = strstr(newwd, defwd);
+  const char* d = strstr(newwd, defwd);
 
   if (d == nullptr)
     return 0;
@@ -814,8 +809,9 @@ int PCLINK::validate_user_path(char *defwd, char *newpath) {
  * is it a Sparta Dos path separator?
  *************************************************************************/
 
-bool PCLINK::isSDXPathSeparator(uchar c) {
-  return ((c == '>') || (c == '\\'));
+// ReSharper disable once CppMemberFunctionMayBeStatic
+bool PCLINK::isSDXPathSeparator(const uchar c) { // NOLINT(*-convert-member-functions-to-static)
+  return c == '>' || c == '\\';
 }
 
 /*************************************************************************
@@ -828,9 +824,9 @@ void PCLINK::path_copy(uchar *dst, uchar *src) {
   bool in_file_name = false;
   bool in_file_suffix = false;
 
-  uchar *src_prev_ptr = src;
-  uchar *src_ptr = src;
-  uchar *dst_ptr = dst;
+  auto src_prev_ptr = src;
+  auto src_ptr = src;
+  const auto dst_ptr = dst;
 
   while (true) {
     if (in_file_name) {
@@ -838,11 +834,11 @@ void PCLINK::path_copy(uchar *dst, uchar *src) {
         if (*src_ptr && !isSDXPathSeparator(*src_ptr) && *src_ptr != SDX_GO_UP_DIR_CHAR && *src_ptr != '.') {
           src_ptr++;
         } else {
-          int length = src_ptr - src_prev_ptr;
-          if (length != 0 && is_fname_reserved((char *) src_prev_ptr, length)) *dst++ = RESERVED_NAME_PREFIX_CHAR;
+          const auto length = static_cast<size_t>(src_ptr - src_prev_ptr);
+          if (length != 0 && is_fname_reserved(reinterpret_cast<char*>(src_prev_ptr), length)) *dst++ = RESERVED_NAME_PREFIX_CHAR;
 
-          for (int i = 0; i < length; i++) {
-            *dst++ = RespeqtSettings::instance()->capitalLettersInPCLINK() ? toupper(*src_prev_ptr) : tolower(*src_prev_ptr);
+          for (size_t i = 0; i < length; i++) {
+            *dst++ = static_cast<quint8>(RespeqtSettings::instance()->capitalLettersInPCLINK() ? toupper(*src_prev_ptr) : tolower(*src_prev_ptr));
             src_prev_ptr++;
           }
 
@@ -857,7 +853,7 @@ void PCLINK::path_copy(uchar *dst, uchar *src) {
       } else// in a suffix
       {
         if (*src_ptr && !isSDXPathSeparator(*src_ptr) && *src_ptr != SDX_GO_UP_DIR_CHAR) {
-          *dst++ = RespeqtSettings::instance()->capitalLettersInPCLINK() ? toupper(*src_ptr) : tolower(*src_ptr);
+          *dst++ = static_cast<quint8>(RespeqtSettings::instance()->capitalLettersInPCLINK() ? toupper(*src_ptr) : tolower(*src_ptr));
           src_ptr++;
         } else {
           in_file_name = false;
@@ -904,8 +900,8 @@ void PCLINK::path_copy(uchar *dst, uchar *src) {
  * P CHDIR
  *************************************************************************/
 
-void PCLINK::create_user_path(uchar cunit, char *newpath) {
-  long sl, cwdo = 0;
+void PCLINK::create_user_path(const uchar cunit, char *newpath) {
+  size_t sl;
   uchar upath[128];
 
   strcpy(newpath, device[cunit].dirname);
@@ -913,34 +909,34 @@ void PCLINK::create_user_path(uchar cunit, char *newpath) {
   path_copy(upath, device[cunit].parbuf.path);
 
   if (upath[0] != HOST_SEPARATOR_CHAR) {
+    long cwdo = 0;
     sl = strlen(newpath);
-    if (sl && (newpath[sl - 1] != HOST_SEPARATOR_CHAR)) {
+    if (sl && newpath[sl - 1] != HOST_SEPARATOR_CHAR) {
       newpath[sl++] = HOST_SEPARATOR_CHAR;
       newpath[sl] = 0;
     }
     if (device[cunit].cwd[0] == HOST_SEPARATOR_CHAR)
       cwdo++;
 
-    path_copy((uchar *) newpath + sl, (uchar *) device[cunit].cwd + cwdo);
+    path_copy(reinterpret_cast<unsigned char*>(newpath) + sl, static_cast<unsigned char*>(device[cunit].cwd) + cwdo);
 
     sl = strlen(newpath);
-    if (sl && (newpath[sl - 1] != HOST_SEPARATOR_CHAR)) {
+    if (sl && newpath[sl - 1] != HOST_SEPARATOR_CHAR) {
       newpath[sl++] = HOST_SEPARATOR_CHAR;
       newpath[sl] = 0;
     }
   }
-  strcat(newpath, (char *) upath);
+  strcat(newpath, reinterpret_cast<char*>(upath));
   sl = strlen(newpath);
-  if (sl && (newpath[sl - 1] == HOST_SEPARATOR_CHAR))
+  if (sl && newpath[sl - 1] == HOST_SEPARATOR_CHAR)
     newpath[sl - 1] = 0;
 }
 
 /*************************************************************************/
 
-time_t PCLINK::timestamp2mtime(uchar *stamp) {
-  struct tm sdx_tm;
-
-  memset(&sdx_tm, 0, sizeof(struct tm));
+// ReSharper disable once CppMemberFunctionMayBeStatic
+time_t PCLINK::timestamp2mtime(const uchar *stamp) { // NOLINT(*-convert-member-functions-to-static)
+  tm sdx_tm = {};
 
   sdx_tm.tm_sec = stamp[5];
   sdx_tm.tm_min = stamp[4];
@@ -949,7 +945,7 @@ time_t PCLINK::timestamp2mtime(uchar *stamp) {
   sdx_tm.tm_mon = stamp[1];
   sdx_tm.tm_year = stamp[2];
 
-  if ((sdx_tm.tm_mday == 0) || (sdx_tm.tm_mon == 0))
+  if (sdx_tm.tm_mday == 0 || sdx_tm.tm_mon == 0)
     return 0;
 
   if (sdx_tm.tm_mon)
@@ -972,13 +968,13 @@ time_t PCLINK::timestamp2mtime(uchar *stamp) {
 
 void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
   uchar fno, ob[7], handle;
-  ushort cunit = caux2 & 0x0f, parsize;
+  quint8 cunit = caux2 & 0x0f, parsize;
   ulong faux;
-  struct stat sb;
-  struct dirent *dp;
+  struct stat sb{};
+  dirent *dp;
   static uchar old_ccom = 0;
 
-  parsize = caux1 ? caux1 : 256;
+  parsize = caux1 ? caux1 : static_cast<quint8>(256);
 
   if (caux2 & 0xf0) /* protocol version number must be 0 */
   {
@@ -1010,16 +1006,15 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
       if (D) qDebug() << "!n" << tr("'P' WRONG DATA FRAME, expected size %1 got %2").arg(parsize).arg(data.length());
       device[cunit].status.err = 143;
       goto complete;
-    } else {
-      memcpy(&pbuf, data.constData(), parsize);
     }
+    memcpy(&pbuf, data.constData(), parsize);
 
     device[cunit].status.stat &= ~0x04;
 
     if (memcmp(&pbuf, &device[cunit].parbuf, sizeof(PARBUF)) == 0) {
       /* this is a retry of P-block. Most commands don't like that */
-      if ((pbuf.fno != 0x00) && (pbuf.fno != 0x01) && (pbuf.fno != 0x03) && (pbuf.fno != 0x04) && (pbuf.fno != 0x06) &&
-          (pbuf.fno != 0x11) && (pbuf.fno != 0x13)) {
+      if (pbuf.fno != 0x00 && pbuf.fno != 0x01 && pbuf.fno != 0x03 && pbuf.fno != 0x04 && pbuf.fno != 0x06 &&
+          pbuf.fno != 0x11 && pbuf.fno != 0x13) {
         if (D) qDebug() << "!n" << tr("PARBLK retry, ignored");
         goto complete;
       }
@@ -1032,7 +1027,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
   faux = device[cunit].parbuf.f1 + device[cunit].parbuf.f2 * 256 +
          device[cunit].parbuf.f3 * 65536;
 
-  if (fno < (PCL_MAX_FNO + 1)) {
+  if (fno < PCL_MAX_FNO + 1) {
     if (D) qDebug() << "!n" << tr("%1 (fno $%02)").arg(fun[fno]).arg(fno, 0, 16);
   }
 
@@ -1041,10 +1036,10 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
   if (fno == 0x00) /* FREAD */
   {
     uchar *mem;
-    ulong blk_size = (faux & 0x0000FFFFL), buffer;
+    ulong blk_size = faux & 0x0000FFFFL, buffer;
 
     if (ccom == 'P') {
-      if ((handle > 15) || (iodesc[handle].fps.file == nullptr)) {
+      if (handle > 15 || iodesc[handle].fps.file == nullptr) {
         if (D) qDebug() << "!n" << tr("bad handle 1 %1").arg(handle);
         device[cunit].status.err = 134; /* bad file handle */
         goto complete;
@@ -1053,29 +1048,30 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
       if (blk_size == 0) {
         if (D) qDebug() << "!n" << tr("bad size $0000 (0)");
         device[cunit].status.err = 176;
-        set_status_size(cunit, 0);
+        // ReSharper disable once CppRedundantCastExpression
+        set_status_size(static_cast<quint8>(cunit), 0);
         goto complete;
       }
 
       device[cunit].status.err = 1;
       iodesc[handle].eof = 0;
 
-      buffer = iodesc[handle].fpstat.st_size - iodesc[handle].fppos;
+      buffer = static_cast<size_t>(iodesc[handle].fpstat.st_size) - iodesc[handle].fppos;
 
       if (buffer < blk_size) {
         blk_size = buffer;
-        device[cunit].parbuf.f1 = (buffer & 0x00ff);
+        device[cunit].parbuf.f1 = buffer & 0x00ff;
         device[cunit].parbuf.f2 = (buffer & 0xff00) >> 8;
         iodesc[handle].eof = 1;
         if (blk_size == 0)
           device[cunit].status.err = 136;
       }
       if (D) qDebug() << "!n" << tr("size $%1 (%2), buffer $%3 (%4)").arg(blk_size, 0, 16).arg(blk_size).arg(buffer, 0, 16).arg(buffer);
-      set_status_size(cunit, (ushort) blk_size);
+      set_status_size(cunit, static_cast<unsigned short>(blk_size));
       goto complete;
     }
 
-    if ((ccom == 'R') && (old_ccom == 'R')) {
+    if (ccom == 'R' && old_ccom == 'R') {
       sio->port()->writeCommandNak();
       if (D) qDebug() << "!n" << tr("serial communication error, abort");
       return;
@@ -1085,7 +1081,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
 
     if (D) qDebug() << "!n" << tr("handle %1").arg(handle);
 
-    mem = (uchar *) malloc(blk_size);
+    mem = static_cast<unsigned char*>(malloc(blk_size));
 
     if (device[cunit].status.err == 1) {
       iodesc[handle].fpread = blk_size;
@@ -1107,13 +1103,11 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
           }
         }
       } else {
-        if (fseek(iodesc[handle].fps.file, iodesc[handle].fppos, SEEK_SET)) {
+        if (fseek(iodesc[handle].fps.file, static_cast<long>(iodesc[handle].fppos), SEEK_SET)) {
           if (D) qDebug() << "!n" << tr("FREAD: cannot seek to $%1 (%2)").arg(iodesc[handle].fppos, 0, 16).arg(iodesc[handle].fppos);
           device[cunit].status.err = 166;
         } else {
-          long fdata = fread(mem, sizeof(char), blk_size, iodesc[handle].fps.file);
-
-          if ((ulong) fdata != blk_size) {
+          if (size_t fdata = fread(mem, sizeof(char), blk_size, iodesc[handle].fps.file); fdata != blk_size) {
             if (D) qDebug() << "!n" << tr("FREAD: cannot read %1 bytes from file").arg(blk_size);
             if (feof(iodesc[handle].fps.file)) {
               iodesc[handle].fpread = fdata;
@@ -1132,15 +1126,15 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
     if (device[cunit].status.err == 1) {
       if (iodesc[handle].eof)
         device[cunit].status.err = 136;
-      else if (iodesc[handle].fppos == iodesc[handle].fpstat.st_size)
+      else if (iodesc[handle].fppos == static_cast<size_t>(iodesc[handle].fpstat.st_size))
         device[cunit].status.err = 3;
     }
 
-    set_status_size(cunit, iodesc[handle].fpread);
+    set_status_size(cunit, static_cast<unsigned short>(iodesc[handle].fpread));
 
     if (D) qDebug() << "!n" << tr("FREAD: send $%1 (%2), status $%3").arg(blk_size, 0, 16).arg(blk_size).arg(device[cunit].status.err);
 
-    QByteArray data((const char *) mem, (int) blk_size);
+    QByteArray data(reinterpret_cast<const char*>(mem), static_cast<int>(blk_size));
     sio->port()->writeComplete();
     sio->port()->writeDataFrame(data);
 
@@ -1152,10 +1146,10 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
   if (fno == 0x01) /* FWRITE */
   {
     uchar *mem;
-    ulong blk_size = (faux & 0x0000FFFFL);
+    ulong blk_size = faux & 0x0000FFFFL;
 
     if (ccom == 'P') {
-      if ((handle > 15) || (iodesc[handle].fps.file == nullptr)) {
+      if (handle > 15 || iodesc[handle].fps.file == nullptr) {
         if (D) qDebug() << "!n" << tr("bad handle 2 %1").arg(handle);
         device[cunit].status.err = 134; /* bad file handle */
         goto complete;
@@ -1171,11 +1165,11 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
       device[cunit].status.err = 1;
 
       if (D) qDebug() << "!n" << tr("size $%1 (%2)").arg(blk_size, 0, 16).arg(blk_size);
-      set_status_size(cunit, (ushort) blk_size);
+      set_status_size(cunit, static_cast<unsigned short>(blk_size));
       goto complete;
     }
 
-    if ((ccom == 'R') && (old_ccom == 'R')) {
+    if (ccom == 'R' && old_ccom == 'R') {
       sio->port()->writeCommandNak();
       if (D) qDebug() << "!n" << tr("serial communication error, abort");
       return;
@@ -1186,38 +1180,33 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
     if (D) qDebug() << "!n" << tr("handle %1").arg(handle);
 
     if ((iodesc[handle].fpmode & 0x10) == 0) {
-      if (fseek(iodesc[handle].fps.file, iodesc[handle].fppos, SEEK_SET)) {
-        if (D) qDebug() << "!n" << tr("FWRITE: cannot seek to $%1 (%2)").arg(0, 16, iodesc[handle].fppos).arg(iodesc[handle].fppos);
+      if (fseek(iodesc[handle].fps.file, static_cast<long>(iodesc[handle].fppos), SEEK_SET)) {
+        if (D) qDebug() << "!n" << tr("FWRITE: cannot seek to $%1 (%2)").arg(iodesc[handle].fppos, 0, 16).arg(iodesc[handle].fppos);
         device[cunit].status.err = 166;
       }
     }
 
-    mem = (uchar *) malloc(blk_size);
+    mem = static_cast<unsigned char*>(malloc(blk_size));
 
-    QByteArray data = sio->port()->readDataFrame(blk_size, false);
+    QByteArray data = sio->port()->readDataFrame(static_cast<uint>(blk_size), false);
 
     sio->port()->writeDataAck(); /* ack the block of data */
 
-    if ((ulong) data.length() != blk_size) {
+    if (static_cast<unsigned long>(data.length()) != blk_size) {
       if (D) qDebug() << "!n" << tr("FWRITE: block CRC mismatch");
       device[cunit].status.err = 143;
       free(mem);
       goto complete;
-    } else {
-      memcpy(mem, data.constData(), blk_size);
     }
+    memcpy(mem, data.constData(), blk_size);
 
     if (device[cunit].status.err == 1) {
-      long rdata;
-
       iodesc[handle].fpread = blk_size;
 
       if (iodesc[handle].fpmode & 0x10) {
         /* ignore raw dir writes */
       } else {
-        rdata = fwrite(mem, sizeof(char), blk_size, iodesc[handle].fps.file);
-
-        if ((ulong) rdata != blk_size) {
+        if (const size_t rdata = fwrite(mem, sizeof(char), blk_size, iodesc[handle].fps.file); static_cast<unsigned long>(rdata) != blk_size) {
           if (D) qDebug() << "!n" << tr("FWRITE: cannot write %1 bytes to file").arg(blk_size);
           iodesc[handle].fpread = rdata;
           device[cunit].status.err = 255;
@@ -1227,7 +1216,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
 
     iodesc[handle].fppos += iodesc[handle].fpread;
 
-    set_status_size(cunit, iodesc[handle].fpread);
+    set_status_size(cunit, static_cast<unsigned short>(iodesc[handle].fpread));
 
     if (D) qDebug() << "!n" << tr("FWRITE: received $%1 (%2), status $%3").arg(blk_size, 0, 16).arg(blk_size).arg(device[cunit].status.err, 0, 16);
 
@@ -1239,7 +1228,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
   {
     ulong newpos = faux;
 
-    if ((handle > 15) || (iodesc[handle].fps.file == nullptr)) {
+    if (handle > 15 || iodesc[handle].fps.file == nullptr) {
       if (D) qDebug() << "!n" << tr("bad handle 3 %1").arg(handle);
       device[cunit].status.err = 134; /* bad file handle */
       goto complete;
@@ -1259,7 +1248,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
     if (iodesc[handle].fpmode & 0x08)
       iodesc[handle].fppos = newpos;
     else {
-      if (newpos <= (ulong) iodesc[handle].fpstat.st_size)
+      if (newpos <= static_cast<unsigned long>(iodesc[handle].fpstat.st_size))
         iodesc[handle].fppos = newpos;
       else
         device[cunit].status.err = 166;
@@ -1268,13 +1257,13 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
     goto complete;
   }
 
-  if ((fno == 0x03) || (fno == 0x04)) /* FTELL/FLEN */
+  if (fno == 0x03 || fno == 0x04) /* FTELL/FLEN */
   {
     ulong outval = 0;
     uchar out[3];
 
     if (ccom == 'P') {
-      if ((handle > 15) || (iodesc[handle].fps.file == nullptr)) {
+      if (handle > 15 || iodesc[handle].fps.file == nullptr) {
         if (D) qDebug() << "!n" << tr("bad handle 4 %1").arg(handle);
         device[cunit].status.err = 134; /* bad file handle */
         goto complete;
@@ -1291,15 +1280,15 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
     if (fno == 0x03)
       outval = iodesc[handle].fppos;
     else
-      outval = iodesc[handle].fpstat.st_size;
+      outval = static_cast<unsigned long>(iodesc[handle].fpstat.st_size);
 
     if (D) qDebug() << "!n" << tr("handle %1, send $%2 (%3)").arg(handle).arg(outval, 0, 16).arg(outval);
 
-    out[0] = (uchar) (outval & 0x000000ffL);
-    out[1] = (uchar) ((outval & 0x0000ff00L) >> 8);
-    out[2] = (uchar) ((outval & 0x00ff0000L) >> 16);
+    out[0] = static_cast<unsigned char>(outval & 0x000000ffL);
+    out[1] = static_cast<unsigned char>((outval & 0x0000ff00L) >> 8);
+    out[2] = static_cast<unsigned char>((outval & 0x00ff0000L) >> 16);
 
-    QByteArray data((const char *) out, sizeof(out));
+    QByteArray data(reinterpret_cast<const char*>(out), sizeof(out));
     sio->port()->writeComplete();
     sio->port()->writeDataFrame(data);
 
@@ -1315,7 +1304,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
       goto complete;
     }
 
-    if ((ccom == 'R') && (old_ccom == 'R')) {
+    if (ccom == 'R' && old_ccom == 'R') {
       sio->port()->writeCommandNak();
       if (D) qDebug() << "!n" << tr("serial communication error, abort");
       return;
@@ -1325,7 +1314,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
 
     memset(pcl_dbf.dirbuf, 0, sizeof(pcl_dbf.dirbuf));
 
-    if ((handle > 15) || (iodesc[handle].fps.file == nullptr)) {
+    if (handle > 15 || iodesc[handle].fps.file == nullptr) {
       if (D) qDebug() << "!n" << tr("bad handle 5 %1").arg(handle);
       device[cunit].status.err = 134; /* bad file handle */
     } else {
@@ -1334,7 +1323,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
       if (D) qDebug() << "!n" << tr("handle %1").arg(handle);
 
       do {
-        struct stat ts;
+        struct stat ts{};
 
         memset(&ts, 0, sizeof(ts));
         memset(pcl_dbf.dirbuf, 0, sizeof(pcl_dbf.dirbuf));
@@ -1351,7 +1340,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
           else
             ts.st_mode |= S_IFREG;
 
-          match = !match_dos_names((char *) pcl_dbf.dirbuf + 6, iodesc[handle].fpname, iodesc[handle].fatr1, &ts);
+          match = !match_dos_names(reinterpret_cast<char*>(pcl_dbf.dirbuf) + 6, iodesc[handle].fpname, iodesc[handle].fatr1, &ts);
         }
 
       } while (!eof_flg && !match);
@@ -1359,7 +1348,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
       if (eof_flg) {
         if (D) qDebug() << "!n" << tr("FNEXT: EOF");
         device[cunit].status.err = 136;
-      } else if (iodesc[handle].fppos == iodesc[handle].fpstat.st_size)
+      } else if (iodesc[handle].fppos == static_cast<size_t>(iodesc[handle].fpstat.st_size))
         device[cunit].status.err = 3;
     }
 
@@ -1368,7 +1357,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
 
     if (D) qDebug() << "!n" << tr("FNEXT: status %1, send $%2 $%3%4 $%5%6%7 %8%9%10%11%12%13%14%15%16%17%18 %19-%20-%21 %22:%23:%24").arg(pcl_dbf.handle).arg(pcl_dbf.dirbuf[0], 0, 16).arg(pcl_dbf.dirbuf[2], 0, 16).arg(pcl_dbf.dirbuf[1], 0, 16).arg(pcl_dbf.dirbuf[5]).arg(pcl_dbf.dirbuf[4]).arg(pcl_dbf.dirbuf[3]).arg(pcl_dbf.dirbuf[6]).arg(pcl_dbf.dirbuf[7]).arg(pcl_dbf.dirbuf[8]).arg(pcl_dbf.dirbuf[9]).arg(pcl_dbf.dirbuf[10]).arg(pcl_dbf.dirbuf[11]).arg(pcl_dbf.dirbuf[12]).arg(pcl_dbf.dirbuf[13]).arg(pcl_dbf.dirbuf[14]).arg(pcl_dbf.dirbuf[15]).arg(pcl_dbf.dirbuf[16]).arg(pcl_dbf.dirbuf[17]).arg(pcl_dbf.dirbuf[18]).arg(pcl_dbf.dirbuf[19]).arg(pcl_dbf.dirbuf[20]).arg(pcl_dbf.dirbuf[21]).arg(pcl_dbf.dirbuf[22]);
 
-    QByteArray data((const char *) &pcl_dbf, sizeof(pcl_dbf));
+    QByteArray data(reinterpret_cast<const char*>(&pcl_dbf), sizeof(pcl_dbf));
     sio->port()->writeComplete();
     sio->port()->writeDataFrame(data);
 
@@ -1388,7 +1377,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
       goto complete;
     }
 
-    if ((handle > 15) || (iodesc[handle].fps.file == nullptr)) {
+    if (handle > 15 || iodesc[handle].fps.file == nullptr) {
       if (D) qDebug() << "!n" << tr("bad handle 6 %1").arg(handle);
       device[cunit].status.err = 134; /* bad file handle */
       goto complete;
@@ -1405,8 +1394,8 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
 
     fps_close(handle); /* this clears out iodesc[handle] */
 
-    if (mtime && (fpmode & 0x08)) {
-      utimbuf ub;
+    if (mtime && fpmode & 0x08) {
+      utimbuf ub{};
       ub.actime = mtime;
       ub.modtime = mtime;
       utime(pathname, &ub);
@@ -1431,271 +1420,270 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
     goto complete;
   }
 
-  if ((fno == 0x09) || (fno == 0x0a)) /* FOPEN/FFIRST */
+  if (fno == 0x09 || fno == 0x0a) /* FOPEN/FFIRST */
   {
     if (ccom == 'P') {
-      if (D) qDebug() << "!n" << tr("mode: $%1, atr1: $%2, atr2: $%3, path: '%4', name: '%5'").arg(device[cunit].parbuf.fmode, 0, 16).arg(device[cunit].parbuf.fatr1, 0, 16).arg(device[cunit].parbuf.fatr2, 0, 16).arg(QString((const char *) device[cunit].parbuf.path), QString((const char *) device[cunit].parbuf.name));
+      if (D) qDebug() << "!n" << tr("mode: $%1, atr1: $%2, atr2: $%3, path: '%4', name: '%5'").arg(device[cunit].parbuf.fmode, 0, 16).arg(device[cunit].parbuf.fatr1, 0, 16).arg(device[cunit].parbuf.fatr2, 0, 16).arg(QString(reinterpret_cast<const char*>(device[cunit].parbuf.path)), QString(reinterpret_cast<const char*>(device[cunit].parbuf.name)));
 
       device[cunit].status.err = 1;
 
       if (fno == 0x0a)
         device[cunit].parbuf.fmode |= 0x10;
       goto complete;
-    } else /* ccom not 'P', execution stage */
-    {
-      DIR *dh;
-      uchar i;
-      long sl;
-      struct stat tempstat;
-      char newpath[1024], raw_name[12];
+    }
+    /* ccom not 'P', execution stage */
+    DIR *dh;
+    uchar i;
+    size_t sl;
+    struct stat tempstat{};
+    char newpath[1024], raw_name[12];
 
-      if ((ccom == 'R') && (old_ccom == 'R')) {
-        sio->port()->writeCommandNak();
-        if (D) qDebug() << "!n" << tr("serial communication error, abort");
-        return;
-      }
+    if (ccom == 'R' && old_ccom == 'R') {
+      sio->port()->writeCommandNak();
+      if (D) qDebug() << "!n" << tr("serial communication error, abort");
+      return;
+    }
 
-      sio->port()->writeCommandAck(); /* ack the command */
+    sio->port()->writeCommandAck(); /* ack the command */
 
-      memset(raw_name, 0, sizeof(raw_name));
-      memcpy(raw_name, device[cunit].parbuf.name, 8 + 3);
+    memset(raw_name, 0, sizeof(raw_name));
+    memcpy(raw_name, device[cunit].parbuf.name, 8 + 3);
 
-      if (((device[cunit].parbuf.fmode & 0x0c) == 0) ||
-          ((device[cunit].parbuf.fmode & 0x18) == 0x18)) {
-        if (D) qDebug() << "!n" << tr("unsupported fmode ($%1)").arg(device[cunit].parbuf.fmode);
-        device[cunit].status.err = 146;
-        goto complete_fopen;
-      }
+    if ((device[cunit].parbuf.fmode & 0x0c) == 0 ||
+      (device[cunit].parbuf.fmode & 0x18) == 0x18) {
+      if (D) qDebug() << "!n" << tr("unsupported fmode ($%1)").arg(device[cunit].parbuf.fmode);
+      device[cunit].status.err = 146;
+      goto complete_fopen;
+    }
 
-      create_user_path(cunit, newpath);
+    create_user_path(cunit, newpath);
 
-      if (!validate_user_path(device[cunit].dirname, newpath)) {
-        if (D) qDebug() << "!n" << tr("invalid path 1 '%1'").arg(newpath);
-        device[cunit].status.err = 150;
-        goto complete_fopen;
-      }
+    if (!validate_user_path(device[cunit].dirname, newpath)) {
+      if (D) qDebug() << "!n" << tr("invalid path 1 '%1'").arg(newpath);
+      device[cunit].status.err = 150;
+      goto complete_fopen;
+    }
 
-      if (D) qDebug() << "!n" << tr("local path '%1'").arg(newpath);
+    if (D) qDebug() << "!n" << tr("local path '%1'").arg(newpath);
 
-      for (i = 0; i < 16; i++) {
-        if (iodesc[i].fps.file == nullptr)
+    for (i = 0; i < 16; i++) {
+      if (iodesc[i].fps.file == nullptr)
+        break;
+    }
+    if (i > 15) {
+      if (D) qDebug() << "!n" << tr("FOPEN: too many channels open");
+      device[cunit].status.err = 161;
+      goto complete_fopen;
+    }
+
+    if (stat(newpath, &tempstat) < 0) {
+      if (D) qDebug() << "!n" << tr("FOPEN: cannot stat '%1'").arg(newpath);
+      device[cunit].status.err = 150;
+      goto complete_fopen;
+    }
+
+    dh = opendir(newpath);
+
+    if (device[cunit].parbuf.fmode & 0x10) {
+      iodesc[i].fps.dir = dh;
+      memcpy(&sb, &tempstat, sizeof(sb));
+    } else {
+      if (D) qDebug() << "!n" << tr(" ! fmode & 0x10");
+      while ((dp = readdir(dh)) != nullptr) {
+        if (check_dos_name(newpath, dp, &sb))
+          continue;
+
+        /* convert 8+3 to NNNNNNNNXXX */
+        ugefina(dp->d_name, raw_name);
+
+        /* match */
+        if (match_dos_names(raw_name,
+                            reinterpret_cast<char*>(device[cunit].parbuf.name),
+                            device[cunit].parbuf.fatr1, &sb) == 0)
           break;
       }
-      if (i > 15) {
-        if (D) qDebug() << "!n" << tr("FOPEN: too many channels open");
-        device[cunit].status.err = 161;
-        goto complete_fopen;
+
+      sl = strlen(newpath);
+      if (sl && newpath[sl - 1] != HOST_SEPARATOR_CHAR) {
+        newpath[sl] = HOST_SEPARATOR_CHAR;
+        newpath[sl + 1] = 0;
       }
+
+      if (dp) {
+        if (is_fname_reserved(dp->d_name)) {
+          strcat(newpath, RESERVED_NAME_PREFIX_STR);
+        }
+        strcat(newpath, dp->d_name);
+        /* convert 8+3 to NNNNNNNNXXX */
+        ugefina(dp->d_name, raw_name);
+        if ((device[cunit].parbuf.fmode & 0x0c) == 0x08)
+          sb.st_mtime = timestamp2mtime(&device[cunit].parbuf.f1);
+      } else {
+        if ((device[cunit].parbuf.fmode & 0x0c) == 0x04) {
+          if (D) qDebug() << "!n" << tr("FOPEN: file not found");
+          device[cunit].status.err = 170;
+          closedir(dh);
+          dp = nullptr;
+          goto complete_fopen;
+        }
+        char name83[12];
+
+        if (D) qDebug() << "!n" << tr("FOPEN: creating file");
+
+        /* convert NNNNNNNNXXX to 8+3 */
+        uexpand(device[cunit].parbuf.name, name83);
+
+        if (validate_dos_name(name83)) {
+          if (D) qDebug() << "!n" << tr("FOPEN: bad filename '%1'").arg(name83);
+          device[cunit].status.err = 165; /* bad filename */
+          goto complete_fopen;
+        }
+
+        if (is_fname_reserved(name83)) {
+          strcat(newpath, RESERVED_NAME_PREFIX_STR);
+        }
+        strcat(newpath, name83);
+        /* convert 8+3 to NNNNNNNNXXX */
+        ugefina(name83, raw_name);
+
+        memset(&sb, 0, sizeof(struct stat));
+        sb.st_mode = S_IFREG | S_IRUSR | S_IWUSR;
+
+        sb.st_mtime = timestamp2mtime(&device[cunit].parbuf.f1);
+      }
+
+      if (D) qDebug() << "!n" << tr("FOPEN: full local path '%1'").arg(newpath);
 
       if (stat(newpath, &tempstat) < 0) {
-        if (D) qDebug() << "!n" << tr("FOPEN: cannot stat '%1'").arg(newpath);
-        device[cunit].status.err = 150;
-        goto complete_fopen;
-      }
-
-      dh = opendir(newpath);
-
-      if (device[cunit].parbuf.fmode & 0x10) {
-        iodesc[i].fps.dir = dh;
-        memcpy(&sb, &tempstat, sizeof(sb));
-      } else {
-        if (D) qDebug() << "!n" << tr(" ! fmode & 0x10");
-        while ((dp = readdir(dh)) != nullptr) {
-          if (check_dos_name(newpath, dp, &sb))
-            continue;
-
-          /* convert 8+3 to NNNNNNNNXXX */
-          ugefina(dp->d_name, raw_name);
-
-          /* match */
-          if (match_dos_names(raw_name,
-                              (char *) device[cunit].parbuf.name,
-                              device[cunit].parbuf.fatr1, &sb) == 0)
-            break;
-        }
-
-        sl = strlen(newpath);
-        if (sl && (newpath[sl - 1] != HOST_SEPARATOR_CHAR)) {
-          newpath[sl] = HOST_SEPARATOR_CHAR;
-          newpath[sl + 1] = 0;
-        }
-
-        if (dp) {
-          if (is_fname_reserved(dp->d_name)) {
-            strcat(newpath, RESERVED_NAME_PREFIX_STR);
-          }
-          strcat(newpath, dp->d_name);
-          /* convert 8+3 to NNNNNNNNXXX */
-          ugefina(dp->d_name, raw_name);
-          if ((device[cunit].parbuf.fmode & 0x0c) == 0x08)
-            sb.st_mtime = timestamp2mtime(&device[cunit].parbuf.f1);
-        } else {
-          if ((device[cunit].parbuf.fmode & 0x0c) == 0x04) {
-            if (D) qDebug() << "!n" << tr("FOPEN: file not found");
-            device[cunit].status.err = 170;
-            closedir(dh);
-            dp = nullptr;
-            goto complete_fopen;
-          } else {
-            char name83[12];
-
-            if (D) qDebug() << "!n" << tr("FOPEN: creating file");
-
-            /* convert NNNNNNNNXXX to 8+3 */
-            uexpand(device[cunit].parbuf.name, name83);
-
-            if (validate_dos_name(name83)) {
-              if (D) qDebug() << "!n" << tr("FOPEN: bad filename '%1'").arg(name83);
-              device[cunit].status.err = 165; /* bad filename */
-              goto complete_fopen;
-            }
-
-            if (is_fname_reserved(name83)) {
-              strcat(newpath, RESERVED_NAME_PREFIX_STR);
-            }
-            strcat(newpath, name83);
-            /* convert 8+3 to NNNNNNNNXXX */
-            ugefina(name83, raw_name);
-
-            memset(&sb, 0, sizeof(struct stat));
-            sb.st_mode = S_IFREG | S_IRUSR | S_IWUSR;
-
-            sb.st_mtime = timestamp2mtime(&device[cunit].parbuf.f1);
-          }
-        }
-
-        if (D) qDebug() << "!n" << tr("FOPEN: full local path '%1'").arg(newpath);
-
-        if (stat(newpath, &tempstat) < 0) {
-          if ((device[cunit].parbuf.fmode & 0x0c) == 0x04) {
-            if (D) qDebug() << "!n" << tr("FOPEN: cannot stat '%1'").arg(newpath);
-            device[cunit].status.err = 170;
-            goto complete_fopen;
-          }
-        } else {
-          if (device[cunit].parbuf.fmode & 0x08) {
-            if ((tempstat.st_mode & S_IWUSR) == 0) {
-              if (D) qDebug() << "!n" << tr("FOPEN: '%1' is read-only").arg(newpath);
-              device[cunit].status.err = 151;
-              goto complete_fopen;
-            }
-          }
-        }
-
-        if ((device[cunit].parbuf.fmode & 0x0d) == 0x04)
-          iodesc[i].fps.file = fopen(newpath, "rb");
-        else if ((device[cunit].parbuf.fmode & 0x0d) == 0x08) {
-          iodesc[i].fps.file = fopen(newpath, "wb");
-          if (iodesc[i].fps.file)
-            sb.st_size = 0;
-        } else if ((device[cunit].parbuf.fmode & 0x0d) == 0x09) {
-          iodesc[i].fps.file = fopen(newpath, "rb+");
-          if (iodesc[i].fps.file)
-            fseek(iodesc[i].fps.file, sb.st_size, SEEK_SET);
-        } else if ((device[cunit].parbuf.fmode & 0x0d) == 0x0c)
-          iodesc[i].fps.file = fopen(newpath, "rb+");
-
-        closedir(dh);
-        dp = nullptr;
-      }
-
-      if (iodesc[i].fps.file == nullptr) {
-        if (D) qDebug() << "!n" << tr("FOPEN: cannot open '%1', %2 (%3)").arg(newpath, strerror(errno), QString::number(errno));
-        if (device[cunit].parbuf.fmode & 0x04)
+        if ((device[cunit].parbuf.fmode & 0x0c) == 0x04) {
+          if (D) qDebug() << "!n" << tr("FOPEN: cannot stat '%1'").arg(newpath);
           device[cunit].status.err = 170;
-        else
-          device[cunit].status.err = 151;
-        goto complete_fopen;
+          goto complete_fopen;
+        }
+      } else {
+        if (device[cunit].parbuf.fmode & 0x08) {
+          if ((tempstat.st_mode & S_IWUSR) == 0) {
+            if (D) qDebug() << "!n" << tr("FOPEN: '%1' is read-only").arg(newpath);
+            device[cunit].status.err = 151;
+            goto complete_fopen;
+          }
+        }
       }
 
-      handle = device[cunit].parbuf.handle = i;
+      if ((device[cunit].parbuf.fmode & 0x0d) == 0x04)
+        iodesc[i].fps.file = fopen(newpath, "rb");
+      else if ((device[cunit].parbuf.fmode & 0x0d) == 0x08) {
+        iodesc[i].fps.file = fopen(newpath, "wb");
+        if (iodesc[i].fps.file)
+          sb.st_size = 0;
+      } else if ((device[cunit].parbuf.fmode & 0x0d) == 0x09) {
+        iodesc[i].fps.file = fopen(newpath, "rb+");
+        if (iodesc[i].fps.file)
+          fseek(iodesc[i].fps.file, sb.st_size, SEEK_SET);
+      } else if ((device[cunit].parbuf.fmode & 0x0d) == 0x0c)
+        iodesc[i].fps.file = fopen(newpath, "rb+");
 
-      iodesc[handle].devno = devno;
-      iodesc[handle].cunit = cunit;
-      iodesc[handle].fpmode = device[cunit].parbuf.fmode;
-      iodesc[handle].fatr1 = device[cunit].parbuf.fatr1;
-      iodesc[handle].fatr2 = device[cunit].parbuf.fatr2;
-      iodesc[handle].t1 = device[cunit].parbuf.f1;
-      iodesc[handle].t2 = device[cunit].parbuf.f2;
-      iodesc[handle].t3 = device[cunit].parbuf.f3;
-      iodesc[handle].d1 = device[cunit].parbuf.f4;
-      iodesc[handle].d2 = device[cunit].parbuf.f5;
-      iodesc[handle].d3 = device[cunit].parbuf.f6;
-      iodesc[handle].fppos = 0L;
-      strcpy(iodesc[handle].pathname, newpath);
-      memcpy((void *) &iodesc[handle].fpstat, (void *) &sb, sizeof(struct stat));
+      closedir(dh);
+      dp = nullptr;
+    }
 
-      if (iodesc[handle].fpmode & 0x10)
-        memcpy(iodesc[handle].fpname, device[cunit].parbuf.name, sizeof(iodesc[i].fpname));
+    if (iodesc[i].fps.file == nullptr) {
+      if (D) qDebug() << "!n" << tr("FOPEN: cannot open '%1', %2 (%3)").arg(newpath, strerror(errno), QString::number(errno));
+      if (device[cunit].parbuf.fmode & 0x04)
+        device[cunit].status.err = 170;
       else
-        memcpy(iodesc[handle].fpname, raw_name, sizeof(iodesc[handle].fpname));
+        device[cunit].status.err = 151;
+      goto complete_fopen;
+    }
 
-      iodesc[handle].fpstat.st_size = get_file_len(handle);
+    handle = device[cunit].parbuf.handle = i;
 
-      if ((iodesc[handle].fpmode & 0x1d) == 0x09)
-        iodesc[handle].fppos = iodesc[handle].fpstat.st_size;
+    iodesc[handle].devno = devno;
+    iodesc[handle].cunit = cunit;
+    iodesc[handle].fpmode = device[cunit].parbuf.fmode;
+    iodesc[handle].fatr1 = device[cunit].parbuf.fatr1;
+    iodesc[handle].fatr2 = device[cunit].parbuf.fatr2;
+    iodesc[handle].t1 = device[cunit].parbuf.f1;
+    iodesc[handle].t2 = device[cunit].parbuf.f2;
+    iodesc[handle].t3 = device[cunit].parbuf.f3;
+    iodesc[handle].d1 = device[cunit].parbuf.f4;
+    iodesc[handle].d2 = device[cunit].parbuf.f5;
+    iodesc[handle].d3 = device[cunit].parbuf.f6;
+    iodesc[handle].fppos = 0L;
+    strcpy(iodesc[handle].pathname, newpath);
+    memcpy(&iodesc[handle].fpstat, &sb, sizeof(struct stat));
+
+    if (iodesc[handle].fpmode & 0x10)
+      memcpy(iodesc[handle].fpname, device[cunit].parbuf.name, sizeof(iodesc[i].fpname));
+    else
+      memcpy(iodesc[handle].fpname, raw_name, sizeof(iodesc[handle].fpname));
+
+    // ReSharper disable once CppRedundantCastExpression
+    iodesc[handle].fpstat.st_size = static_cast<off_t>(get_file_len(handle));
+
+    if ((iodesc[handle].fpmode & 0x1d) == 0x09)
+      iodesc[handle].fppos = static_cast<size_t>(iodesc[handle].fpstat.st_size);
+
+    memset(pcl_dbf.dirbuf, 0, sizeof(pcl_dbf.dirbuf));
+
+    if (handle > 15 || iodesc[handle].fps.file == nullptr) {
+      if (D) qDebug() << "!n" << tr("FOPEN: bad handle 7 %1").arg(handle);
+      device[cunit].status.err = 134; /* bad file handle */
+      pcl_dbf.handle = 134;
+    } else {
+      pcl_dbf.handle = handle;
+
+      unix_time_2_sdx(&iodesc[handle].fpstat.st_mtime, ob);
+
+      if (D) qDebug() << "!n" << tr("FOPEN: %1 handle %2").arg(iodesc[handle].fpmode & 0x08 ? "write" : "read").arg(handle);
 
       memset(pcl_dbf.dirbuf, 0, sizeof(pcl_dbf.dirbuf));
 
-      if ((handle > 15) || (iodesc[handle].fps.file == nullptr)) {
-        if (D) qDebug() << "!n" << tr("FOPEN: bad handle 7 %1").arg(handle);
-        device[cunit].status.err = 134; /* bad file handle */
-        pcl_dbf.handle = 134;
+      if (iodesc[handle].fpmode & 0x10) {
+        int eof_sig;
+
+        iodesc[handle].dir_cache = cache_dir(handle);
+        iodesc[handle].fppos += dir_read(pcl_dbf.dirbuf, sizeof(pcl_dbf.dirbuf), handle, &eof_sig);
+
+        if (eof_sig) {
+          if (D) qDebug() << "!n" << tr("FOPEN: dir EOF?");
+          device[cunit].status.err = 136;
+        } else if (iodesc[handle].fppos == static_cast<size_t>(iodesc[handle].fpstat.st_size))
+          device[cunit].status.err = 3;
       } else {
-        pcl_dbf.handle = handle;
+        int x;
+        auto dlen = iodesc[handle].fpstat.st_size;
 
-        unix_time_2_sdx(&iodesc[handle].fpstat.st_mtime, ob);
+        memset(pcl_dbf.dirbuf + 6, 0x20, 11);
+        pcl_dbf.dirbuf[3] = static_cast<unsigned char>(dlen & 0x000000ffL);
+        pcl_dbf.dirbuf[4] = static_cast<unsigned char>((dlen & 0x0000ff00L) >> 8);
+        pcl_dbf.dirbuf[5] = static_cast<unsigned char>((dlen & 0x00ff0000L) >> 16);
+        memcpy(pcl_dbf.dirbuf + 17, ob, 6);
 
-        if (D) qDebug() << "!n" << tr("FOPEN: %1 handle %2").arg((iodesc[handle].fpmode & 0x08) ? "write" : "read").arg(handle);
+        pcl_dbf.dirbuf[0] = 0x08;
 
-        memset(pcl_dbf.dirbuf, 0, sizeof(pcl_dbf.dirbuf));
+        if ((iodesc[handle].fpstat.st_mode & S_IWUSR) == 0)
+          pcl_dbf.dirbuf[0] |= 0x01; /* protected */
+        if (S_ISDIR(iodesc[handle].fpstat.st_mode))
+          pcl_dbf.dirbuf[0] |= 0x20; /* directory */
 
-        if (iodesc[handle].fpmode & 0x10) {
-          int eof_sig;
-
-          iodesc[handle].dir_cache = cache_dir(handle);
-          iodesc[handle].fppos += dir_read(pcl_dbf.dirbuf, sizeof(pcl_dbf.dirbuf), handle, &eof_sig);
-
-          if (eof_sig) {
-            if (D) qDebug() << "!n" << tr("FOPEN: dir EOF?");
-            device[cunit].status.err = 136;
-          } else if (iodesc[handle].fppos == iodesc[handle].fpstat.st_size)
-            device[cunit].status.err = 3;
-        } else {
-          int x;
-          ulong dlen = iodesc[handle].fpstat.st_size;
-
-          memset(pcl_dbf.dirbuf + 6, 0x20, 11);
-          pcl_dbf.dirbuf[3] = (uchar) (dlen & 0x000000ffL);
-          pcl_dbf.dirbuf[4] = (uchar) ((dlen & 0x0000ff00L) >> 8);
-          pcl_dbf.dirbuf[5] = (uchar) ((dlen & 0x00ff0000L) >> 16);
-          memcpy(pcl_dbf.dirbuf + 17, ob, 6);
-
-          pcl_dbf.dirbuf[0] = 0x08;
-
-          if ((iodesc[handle].fpstat.st_mode & S_IWUSR) == 0)
-            pcl_dbf.dirbuf[0] |= 0x01; /* protected */
-          if (S_ISDIR(iodesc[handle].fpstat.st_mode))
-            pcl_dbf.dirbuf[0] |= 0x20; /* directory */
-
-          x = 0;
-          while (iodesc[handle].fpname[x] && (x < 11)) {
-            pcl_dbf.dirbuf[6 + x] = iodesc[handle].fpname[x];
-            x++;
-          }
+        x = 0;
+        while (iodesc[handle].fpname[x] && x < 11) {
+          pcl_dbf.dirbuf[6 + x] = static_cast<quint8>(iodesc[handle].fpname[x]);
+          x++;
         }
-
-        if (D) qDebug() << "!n" << tr("FOPEN: send %1, send $%2 $%3%4 $%5%6%7 %8%9%10%11%12%13%14%15%16%17%18 %19-%20-%21 %22:%23:%24").arg(pcl_dbf.handle).arg(pcl_dbf.dirbuf[0], 0, 16).arg(pcl_dbf.dirbuf[2], 0, 16).arg(pcl_dbf.dirbuf[1], 0, 16).arg(pcl_dbf.dirbuf[5]).arg(pcl_dbf.dirbuf[4]).arg(pcl_dbf.dirbuf[3]).arg(pcl_dbf.dirbuf[6]).arg(pcl_dbf.dirbuf[7]).arg(pcl_dbf.dirbuf[8]).arg(pcl_dbf.dirbuf[9]).arg(pcl_dbf.dirbuf[10]).arg(pcl_dbf.dirbuf[11]).arg(pcl_dbf.dirbuf[12]).arg(pcl_dbf.dirbuf[13]).arg(pcl_dbf.dirbuf[14]).arg(pcl_dbf.dirbuf[15]).arg(pcl_dbf.dirbuf[16]).arg(pcl_dbf.dirbuf[17]).arg(pcl_dbf.dirbuf[18]).arg(pcl_dbf.dirbuf[19]).arg(pcl_dbf.dirbuf[20]).arg(pcl_dbf.dirbuf[21]).arg(pcl_dbf.dirbuf[22]);
       }
 
-    complete_fopen:
-
-      QByteArray data((const char *) &pcl_dbf, sizeof(pcl_dbf));
-      sio->port()->writeComplete();
-      sio->port()->writeDataFrame(data);
-
-      goto exit;
+      if (D) qDebug() << "!n" << tr("FOPEN: send %1, send $%2 $%3%4 $%5%6%7 %8%9%10%11%12%13%14%15%16%17%18 %19-%20-%21 %22:%23:%24").arg(pcl_dbf.handle).arg(pcl_dbf.dirbuf[0], 0, 16).arg(pcl_dbf.dirbuf[2], 0, 16).arg(pcl_dbf.dirbuf[1], 0, 16).arg(pcl_dbf.dirbuf[5]).arg(pcl_dbf.dirbuf[4]).arg(pcl_dbf.dirbuf[3]).arg(pcl_dbf.dirbuf[6]).arg(pcl_dbf.dirbuf[7]).arg(pcl_dbf.dirbuf[8]).arg(pcl_dbf.dirbuf[9]).arg(pcl_dbf.dirbuf[10]).arg(pcl_dbf.dirbuf[11]).arg(pcl_dbf.dirbuf[12]).arg(pcl_dbf.dirbuf[13]).arg(pcl_dbf.dirbuf[14]).arg(pcl_dbf.dirbuf[15]).arg(pcl_dbf.dirbuf[16]).arg(pcl_dbf.dirbuf[17]).arg(pcl_dbf.dirbuf[18]).arg(pcl_dbf.dirbuf[19]).arg(pcl_dbf.dirbuf[20]).arg(pcl_dbf.dirbuf[21]).arg(pcl_dbf.dirbuf[22]);
     }
+
+  complete_fopen:
+
+    QByteArray data(reinterpret_cast<const char*>(&pcl_dbf), sizeof(pcl_dbf));
+    sio->port()->writeComplete();
+    sio->port()->writeDataFrame(data);
+
+    goto exit;
   }
 
   if (fno == 0x0b) /* RENAME/RENDIR */
@@ -1741,11 +1729,11 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
       ugefina(dp->d_name, raw_name);
 
       /* match */
-      if (match_dos_names(raw_name, (char *) device[cunit].parbuf.name,
+      if (match_dos_names(raw_name, reinterpret_cast<char*>(device[cunit].parbuf.name),
                           device[cunit].parbuf.fatr1 | RA_NO_PROTECT, &sb) == 0) {
         char xpath[1024], xpath2[1024], newname[16];
         uchar names[12];
-        struct stat dummy;
+        struct stat dummy{};
         ushort x;
 
         fcnt++;
@@ -1761,7 +1749,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
 
         for (x = 0; x < 12; x++) {
           if (names[x] == '?')
-            names[x] = raw_name[x];
+            names[x] = static_cast<quint8>(raw_name[x]);
         }
 
         /* convert NNNNNNNNXXX to 8+3 */
@@ -1791,7 +1779,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
 
     closedir(renamedir);
 
-    if ((fcnt == 0) && (device[cunit].status.err == 1))
+    if (fcnt == 0 && device[cunit].status.err == 1)
       device[cunit].status.err = 170;
     goto complete;
   }
@@ -1839,7 +1827,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
       ugefina(dp->d_name, raw_name);
 
       /* match */
-      if (match_dos_names(raw_name, (char *) device[cunit].parbuf.name,
+      if (match_dos_names(raw_name, reinterpret_cast<char*>(device[cunit].parbuf.name),
                           RA_NO_PROTECT | RA_NO_SUBDIR | RA_NO_HIDDEN, &sb) == 0) {
         char xpath[1024];
 
@@ -1917,7 +1905,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
       ugefina(dp->d_name, raw_name);
 
       /* match */
-      if (match_dos_names(raw_name, (char *) device[cunit].parbuf.name,
+      if (match_dos_names(raw_name, reinterpret_cast<char*>(device[cunit].parbuf.name),
                           device[cunit].parbuf.fatr1, &sb) == 0) {
         char xpath[1024];
         mode_t newmode = sb.st_mode;
@@ -1952,7 +1940,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
   {
     char newpath[1024], fname[12];
     uchar dt[6];
-    struct stat dummy;
+    struct stat dummy{};
 
     if (ccom == 'R') {
       sio->port()->writeCommandAck(); /* ack the command */
@@ -2006,7 +1994,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
       time_t mtime = timestamp2mtime(dt);
       device[cunit].status.err = 1;
       if (mtime) {
-        utimbuf ub;
+        utimbuf ub{};
         ub.actime = mtime;
         ub.modtime = mtime;
         utime(newpath, &ub);
@@ -2128,7 +2116,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
     // and remove RESERVED_NAME_PREFIX_CHAR (i.e. replace "!com1" with "com1")
     // to report proper names to SDX
     char *src_ptr = newwd + i;
-    char *dst_ptr = (char *) device[cunit].cwd;
+    auto dst_ptr = reinterpret_cast<char*>(device[cunit].cwd);
     while (*src_ptr) {
       if (*src_ptr != RESERVED_NAME_PREFIX_CHAR) {
         *dst_ptr++ = *src_ptr;
@@ -2137,7 +2125,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
     }
     *dst_ptr = 0;
 
-    if (D) qDebug() << "!n" << tr("new current dir '%1'").arg((char *) device[cunit].cwd);
+    if (D) qDebug() << "!n" << tr("new current dir '%1'").arg(reinterpret_cast<char*>(device[cunit].cwd));
 
     device[cunit].status.err = 1;
 
@@ -2162,10 +2150,10 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
 
     tempcwd[0] = 0;
 
-    for (i = 0; device[cunit].cwd[i] && (i < 64); i++) {
+    for (i = 0; device[cunit].cwd[i] && i < 64; i++) {
       uchar a;
 
-      a = toupper(device[cunit].cwd[i]);
+      a = static_cast<quint8>(toupper(device[cunit].cwd[i]));
       if (a == HOST_SEPARATOR_CHAR)
         a = '>';
       tempcwd[i] = a;
@@ -2173,9 +2161,9 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
 
     tempcwd[i] = 0;
 
-    if (D) qDebug() << "!n" << tr("send '%1'").arg((const char *) tempcwd);
+    if (D) qDebug() << "!n" << tr("send '%1'").arg(reinterpret_cast<const char*>(tempcwd));
 
-    QByteArray data((const char *) tempcwd, sizeof(tempcwd) - 1);
+    QByteArray data(reinterpret_cast<const char*>(tempcwd), sizeof(tempcwd) - 1);
     sio->port()->writeComplete();
     sio->port()->writeDataFrame(data);
 
@@ -2227,7 +2215,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
 
     memset(dfree + 0x0e, 0x020, 8);
 
-    strcpy(lpath, (char *) device[cunit].dirname);
+    strcpy(lpath, device[cunit].dirname);
 
     strcat(lpath, HOST_SEPARATOR_STR);
 
@@ -2238,18 +2226,15 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
     vf = fopen(lpath, "rb");
 
     if (vf) {
-      int r;
-      uchar a;
-
-      r = fread(volname, sizeof(uchar), 8, vf);
+      size_t r = fread(volname, sizeof(uchar), 8, vf);
 
       fclose(vf);
 
-      for (x = 0; x < r; x++) {
-        a = volname[x];
+      for (size_t y = 0; y < r; y++) {
+        uchar a = volname[y];
         if (a == 0x9b)
           break;
-        dfree[14 + x] = a;
+        dfree[14 + y] = a;
       }
     }
 
@@ -2260,13 +2245,13 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
     }
 
     if (c == 0x20) {
-      memcpy(dfree + 14, "PCLink  ", 8);
+      memcpy(dfree + 14, "PCLink  ", 8); // NOLINT(*-not-null-terminated-result)
       dfree[21] = cunit + 0x40;
     }
 
-    if (D) qDebug() << "!n" << tr("DFREE: send info (%1 bytes)").arg((int) sizeof(dfree) - 1);
+    if (D) qDebug() << "!n" << tr("DFREE: send info (%1 bytes)").arg(static_cast<int>(sizeof(dfree)) - 1);
 
-    QByteArray data((const char *) dfree, sizeof(dfree) - 1);
+    QByteArray data(reinterpret_cast<const char*>(dfree), sizeof(dfree) - 1);
     sio->port()->writeComplete();
     sio->port()->writeDataFrame(data);
 
@@ -2288,7 +2273,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
       goto complete;
     }
 
-    nl = strlen((char *) device[cunit].parbuf.name);
+    nl = strlen(reinterpret_cast<char*>(device[cunit].parbuf.name));
 
     if (nl == 0) {
       if (D) qDebug() << "!n" << tr("invalid name");
@@ -2310,7 +2295,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
 
       for (x = 0; x < 8; x++) {
         a = device[cunit].parbuf.name[x];
-        if (!a || (a == 0x9b))
+        if (!a || a == 0x9b)
           a = 0x20;
         (void) fwrite(&a, sizeof(uchar), 1, vf);
       }
@@ -2331,7 +2316,6 @@ complete:
 exit:
   old_ccom = ccom;
 
-  return;
 }
 
 /*************************************************************************
@@ -2340,18 +2324,18 @@ exit:
  * length = 4
  *************************************************************************/
 
-bool PCLINK::is_fname_reserved(const char *fname, int length) const {
+// ReSharper disable once CppMemberFunctionMayBeStatic
+bool PCLINK::is_fname_reserved(const char *fname, size_t length) const { // NOLINT(*-convert-member-functions-to-static)
   bool fname_reserved = false;
   const char *const *p = invalid_file_names;
 
-  if (length == -1) {
+  if (length == ULONG_MAX) {
     const char *dot_ptr = strchr(fname, '.');
-    length = (dot_ptr == nullptr) ? strlen(fname) : (dot_ptr - fname);
+    length = dot_ptr == nullptr ? strlen(fname) : static_cast<size_t>(dot_ptr - fname);
   }
 
   while (const char *s = *p++) {
-    int reserved_str_len = strlen(s);
-    if (length == reserved_str_len && strncasecmp(s, fname, reserved_str_len) == 0) {
+    if (const size_t reserved_str_len = strlen(s); length == reserved_str_len && strncasecmp(s, fname, reserved_str_len) == 0) {
       fname_reserved = true;
       break;
     }
@@ -2364,16 +2348,16 @@ bool PCLINK::is_fname_reserved(const char *fname, int length) const {
  * fname = "!com1.txt"
  *************************************************************************/
 
-bool PCLINK::is_fname_encoded(const char *fname) const {
+// ReSharper disable once CppMemberFunctionMayBeStatic
+bool PCLINK::is_fname_encoded(const char *fname) const { // NOLINT(*-convert-member-functions-to-static)
   bool fname_encoded = false;
   const char *const *p = invalid_file_names;
 
   const char *dot_ptr = strchr(fname, '.');
-  int length = (dot_ptr == nullptr) ? strlen(fname) : (dot_ptr - fname);
+  const size_t length = dot_ptr == nullptr ? strlen(fname) : static_cast<size_t>(dot_ptr - fname);
 
   while (const char *s = *p++) {
-    int reserved_str_len = strlen(s);
-    if (length == reserved_str_len + 1 &&
+    if (const size_t reserved_str_len = strlen(s); length == reserved_str_len + 1 &&
         RESERVED_NAME_PREFIX_CHAR == fname[0] &&
         strncasecmp(s, fname + 1, reserved_str_len) == 0) {
       fname_encoded = true;

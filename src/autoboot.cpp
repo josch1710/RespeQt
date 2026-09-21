@@ -37,7 +37,7 @@ void AutoBoot::handleCommand(const quint8 command, const quint8 aux1, const quin
       }
       sio->port()->writeComplete();
       QByteArray speed(1, 0);
-      speed[0] = sio->port()->speedByte();
+      speed[0] = static_cast<char>(sio->port()->speedByte());
       sio->port()->writeDataFrame(speed);
       qDebug() << "!n" << tr("[%1] Speed poll.").arg(deviceName());
       break;
@@ -47,8 +47,7 @@ void AutoBoot::handleCommand(const quint8 command, const quint8 aux1, const quin
         passToOldHandler(command, aux1, aux2);
         return;
       }
-      quint16 aux = aux1 + aux2 * 256;
-      if (aux >= 1 && aux <= sectorCount) {
+      if (const quint16 aux = aux1 + aux2 * 256; aux >= 1 && aux <= sectorCount) {
         if (!sio->port()->writeCommandAck()) {
           return;
         }
@@ -93,7 +92,7 @@ void AutoBoot::handleCommand(const quint8 command, const quint8 aux1, const quin
       break;
     }
     case 0xFE: { /* Get chunk */
-      quint16 aux = aux1 + aux2 * 256;
+      const quint16 aux = aux1 + aux2 * 256;
       if (aux >= chunks.count()) {
         qDebug() << "!e" << tr("[%1] Invalid chunk in get chunk: aux = %2").arg(deviceName()).arg(aux);
         return;
@@ -109,7 +108,7 @@ void AutoBoot::handleCommand(const quint8 command, const quint8 aux1, const quin
       break;
     }
     case 0xFF: { /* Get chunk info */
-      quint16 aux = aux1 + aux2 * 256;
+      const quint16 aux = aux1 + aux2 * 256;
       if (aux >= chunks.count()) {
         qDebug() << "!e" << tr("[%1] Invalid chunk in get chunk info: aux = %2").arg(deviceName()).arg(aux);
         return;
@@ -123,12 +122,12 @@ void AutoBoot::handleCommand(const quint8 command, const quint8 aux1, const quin
         emit booterLoaded();
       }
       QByteArray data;
-      data[0] = chunks.at(aux).address % 256;
-      data[1] = chunks.at(aux).address / 256;
+      data[0] = static_cast<char>(chunks.at(aux).address % 256);
+      data[1] = static_cast<char>(chunks.at(aux).address / 256);
       data[2] = 1;
       data[3] = chunks.size() != aux + 1;
-      data[4] = chunks.at(aux).data.size() % 256;
-      data[5] = chunks.at(aux).data.size() / 256;
+      data[4] = static_cast<char>(chunks.at(aux).data.size() % 256);
+      data[5] = static_cast<char>(chunks.at(aux).data.size() / 256);
       qDebug() << "!d" << tr("[%1] Get chunk info %2 (%3 bytes at %4).").arg(deviceName()).arg(aux).arg(chunks.at(aux).data.size()).arg(chunks.at(aux).address);
       sio->port()->writeComplete();
       sio->port()->writeDataFrame(data);
@@ -136,7 +135,6 @@ void AutoBoot::handleCommand(const quint8 command, const quint8 aux1, const quin
     }
     default:
       passToOldHandler(command, aux1, aux2);
-      return;
   }
 }
 
@@ -148,12 +146,8 @@ bool AutoBoot::readExecutable(const QString &fileName) {
     return false;
   }
 
-  int start, end;
-
-  QByteArray data;
-
   /* Read the $FFFF header */
-  data = file.read(2);
+  QByteArray data = file.read(2);
   if (data.size() < 2) {
     QString error;
     if (file.atEnd()) {
@@ -164,7 +158,7 @@ bool AutoBoot::readExecutable(const QString &fileName) {
     qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName, error);
     return false;
   }
-  start = (quint8) data.at(0) + (quint8) data.at(1) * 256;
+  int start = static_cast<quint8>(data.at(0)) + static_cast<quint8>(data.at(1)) * 256;
   if (start != 0xffff) {
     QString error;
     qCritical() << "!e" << tr("Cannot load file '%1': The file doesn't seem to be an Atari DOS executable.").arg(fileName, error);
@@ -183,7 +177,7 @@ bool AutoBoot::readExecutable(const QString &fileName) {
     qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName, error);
     return false;
   }
-  start = (quint8) data.at(0) + (quint8) data.at(1) * 256;
+  start = static_cast<quint8>(data.at(0)) + static_cast<quint8>(data.at(1)) * 256;
 
   do {
     /* Read the end address */
@@ -195,15 +189,13 @@ bool AutoBoot::readExecutable(const QString &fileName) {
         qCritical() << "!e" << tr("The executable '%1' is broken: Unexpected end of file, needed %2 more.").arg(fileName).arg(2 - data.size());
         if (chunks.count() == 0) {
           return false;
-        } else {
-          break;
         }
-      } else {
-        qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName, file.errorString());
-        return false;
+        break;
       }
+      qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName, file.errorString());
+      return false;
     }
-    end = (quint8) data.at(0) + (quint8) data.at(1) * 256;
+    const int end = static_cast<quint8>(data.at(0)) + static_cast<quint8>(data.at(1)) * 256;
 
     qDebug() << "!d"
              << "Exe segment" << start << ".." << end;
@@ -215,7 +207,7 @@ bool AutoBoot::readExecutable(const QString &fileName) {
     }
 
     /* Read the chunk */
-    int size = end - start + 1;
+    const int size = end - start + 1;
     data = file.read(size);
     if (data.size() < size) {
       if (file.atEnd()) {
@@ -226,7 +218,7 @@ bool AutoBoot::readExecutable(const QString &fileName) {
       }
     }
 
-    int maxChunkSize = 1024;
+    constexpr int maxChunkSize = 1024;
     for (int i = 0; i < data.size(); i += maxChunkSize) {
       AtariExeChunk ch;
       ch.data = data.mid(i, maxChunkSize);
@@ -246,12 +238,11 @@ bool AutoBoot::readExecutable(const QString &fileName) {
       if (file.atEnd()) {
         qWarning() << "!w" << tr("The executable '%1' is broken: Unexpected end of file, needed %2 more.").arg(fileName).arg(2 - data.size());
         break;
-      } else {
-        qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName, file.errorString());
-        return false;
       }
+      qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName, file.errorString());
+      return false;
     }
-    start = (quint8) data.at(0) + (quint8) data.at(1) * 256;
+    start = static_cast<quint8>(data.at(0)) + static_cast<quint8>(data.at(1)) * 256;
 
     /* Skip if it's a $FFFF */
     if (start == 0xffff) {
@@ -260,18 +251,17 @@ bool AutoBoot::readExecutable(const QString &fileName) {
         if (file.atEnd()) {
           qWarning() << "!w" << tr("The executable '%1' is broken: Unexpected end of file, needed %2 more.").arg(fileName).arg(2 - data.size());
           break;
-        } else {
-          qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName, file.errorString());
-          return false;
         }
+        qCritical() << "!e" << tr("Cannot read from file '%1': %2.").arg(fileName, file.errorString());
+        return false;
       }
-      start = (quint8) data.at(0) + (quint8) data.at(1) * 256;
+      start = static_cast<quint8>(data.at(0)) + static_cast<quint8>(data.at(1)) * 256;
     }
   } while (true);
   return true;
 }
 
-bool AutoBoot::open(const QString &fileName, bool highSpeed) {
+bool AutoBoot::open(const QString &fileName, const bool highSpeed) {
   close();
   QFile boot;
 
@@ -294,10 +284,12 @@ bool AutoBoot::open(const QString &fileName, bool highSpeed) {
   return readExecutable(fileName);
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void AutoBoot::close() {
 }
 
-void AutoBoot::readSector(quint16 sector, QByteArray &data) {
+void AutoBoot::readSector(const quint16 sector, QByteArray &data) const
+{
   data = bootSectors.mid((sector - 1) * 128, 128);
   data.resize(128);
 }

@@ -12,17 +12,18 @@
 #include <QDir>
 #include <QFile>
 
-void deltree(const QString &name) {
-  QFileInfo info(name);
 
-  if (info.isDir()) {
+void deltree(const QString &name) { // NOLINT(*-no-recursion)
+
+  if (const QFileInfo info(name); info.isDir()) {
     QDir dir(name);
     QFileInfoList list = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files);
     foreach (QFileInfo file, list) {
       deltree(file.absoluteFilePath());
     }
-    QString n = dir.dirName();
+    const QString n = dir.dirName();
     dir.cdUp();
+    // ReSharper disable once CppExpressionWithoutSideEffects
     dir.rmdir(n);
   } else {
     QFile::remove(name);
@@ -43,8 +44,7 @@ FileTypes::FileType FileTypes::getFileType(const QString &fileName) {
 
   /* Read the file header */
   {
-    QFile file(fileName);
-    if (file.open(QFile::ReadOnly)) {
+    if (QFile file(fileName); file.open(QFile::ReadOnly)) {
       header = file.read(4);
     }
     while (header.count() < 4) {
@@ -56,11 +56,10 @@ FileTypes::FileType FileTypes::getFileType(const QString &fileName) {
 
   bool gz = false;
 
-  if ((quint8) header.at(0) == 0x1f && (quint8) header.at(1) == 0x8b) {
+  if (static_cast<quint8>(header.at(0)) == 0x1f && static_cast<quint8>(header.at(1)) == 0x8b) {
     /* The file is gzipped, read the real header */
     gz = true;
-    GzFile file(fileName);
-    if (file.open(QFile::ReadOnly)) {
+    if (GzFile file(fileName); file.open(QFile::ReadOnly)) {
       header = file.read(4);
     } else {
       header = QByteArray(4, 0);
@@ -70,10 +69,11 @@ FileTypes::FileType FileTypes::getFileType(const QString &fileName) {
     }
   }
 
-  quint8 b0 = header.at(0);
-  quint8 b1 = header.at(1);
-  quint8 b2 = header.at(2);
-  quint8 b3 = header.at(3);
+  const quint8 b0 = static_cast<quint8>(header.at(0));
+  const quint8 b1 = static_cast<quint8>(header.at(1));
+  const quint8 b2 = static_cast<quint8>(header.at(2));
+  // ReSharper disable once CppTooWideScopeInitStatement
+  const quint8 b3 = static_cast<quint8>(header.at(3));
 
   /* Determine the file type */
 
@@ -96,13 +96,13 @@ FileTypes::FileType FileTypes::getFileType(const QString &fileName) {
   }
 
   if (result != Unknown && gz) {
-    result = (FileType) (result + 1);
+    result = static_cast<FileType>(result + 1);
   }
 
   return result;
 }
 
-__attribute__((unused)) QString FileTypes::getFileTypeName(FileType type) {
+[[maybe_unused]] QString FileTypes::getFileTypeName(const FileType type) {
   switch (type) {
     case Atr:
       return tr("ATR disk image");
@@ -145,10 +145,10 @@ __attribute__((unused)) QString FileTypes::getFileTypeName(FileType type) {
 
 GzFile::GzFile(const QString &path)
     : QFile(path) {
-  mHandle = 0;
+  mHandle = nullptr;
 }
 
-bool GzFile::open(OpenMode mode) {
+bool GzFile::open(const OpenMode mode) {
   if (QFile::open(mode)) {
     if ((mode & ReadOnly) == ReadOnly) {
       mHandle = gzdopen(handle(), "rb");
@@ -180,28 +180,28 @@ bool GzFile::isSequential() const {
   return true;
 }
 
-bool GzFile::seek(qint64 pos) {
-  bool result = gzseek(mHandle, pos, SEEK_SET) != -1;
+bool GzFile::seek(const qint64 pos) {
+  const bool result = gzseek(mHandle, pos, SEEK_SET) != -1;
   if (!result) {
     setErrorString(tr("gzseek() failed."));
   }
   return result;
 }
 
-qint64 GzFile::readData(char *data, qint64 maxSize) {
+qint64 GzFile::readData(char *data, const qint64 maxSize) {
   if (mHandle == nullptr) {
     return 0;
   }
 
-  return gzread(mHandle, data, maxSize);
+  return gzread(mHandle, data, static_cast<unsigned int>(maxSize));
 }
 
-qint64 GzFile::writeData(const char *data, qint64 maxSize) {
+qint64 GzFile::writeData(const char *data, const qint64 maxSize) {
   if (mHandle == nullptr) {
     return 0;
   }
 
-  return gzwrite(mHandle, data, maxSize);
+  return gzwrite(mHandle, data, static_cast<unsigned int>(maxSize));
 }
 
 bool GzFile::atEnd() const {
@@ -226,10 +226,9 @@ QStringList toStringList(const QList<QByteArray>& list)
 QString getParentDir(const QString& fileFolder)
 {
     QString linuxName = QDir::fromNativeSeparators(fileFolder);
-    bool wasNonNative = linuxName != fileFolder;
+    const bool wasNonNative = linuxName != fileFolder;
 
-    int lastSlash = linuxName.lastIndexOf('/');
-    if (lastSlash >= 0)
+    if (const int lastSlash = linuxName.lastIndexOf('/'); lastSlash >= 0)
         linuxName.truncate(lastSlash);
 
     if (wasNonNative)

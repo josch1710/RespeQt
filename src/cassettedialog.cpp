@@ -12,13 +12,12 @@
 #include "ui_cassettedialog.h"
 
 #include <QTimer>
-#include <QtDebug>
-#include <QIcon>
+#include <algorithm>
 
 CassetteDialog::CassetteDialog(QWidget *parent, const QString &fileName)
     : QDialog(parent), ui(new Ui::CassetteDialog) {
   Qt::WindowFlags flags = windowFlags();
-  flags = flags & (~Qt::WindowContextHelpButtonHint);
+  flags = flags & ~Qt::WindowContextHelpButtonHint;
   setWindowFlags(flags);
 
   mFileName = fileName;
@@ -31,8 +30,8 @@ CassetteDialog::CassetteDialog(QWidget *parent, const QString &fileName)
   worker = new CassetteWorker;
   mTotalDuration = worker->mTotalDuration;
   mRemainingTime = mTotalDuration;
-  int minutes = mRemainingTime / 60000;
-  int seconds = (mRemainingTime - minutes * 60000) / 1000;
+  const int minutes = mRemainingTime / 60000;
+  const int seconds = (mRemainingTime - minutes * 60000) / 1000;
   ui->label->setText(tr("RespeQt is ready to playback the cassette image file '%1'.\n\n"
                         "The estimated playback duration is: %2:%3\n\n"
                         "Do whatever is necessary in your Atari to load this cassette "
@@ -52,7 +51,7 @@ CassetteDialog::~CassetteDialog() {
   disconnect(worker, &CassetteWorker::finished, this, &CassetteDialog::reject);
   if (worker->isRunning()) {
     worker->setPriority(QThread::NormalPriority);
-    worker->wait();
+    worker->waitForThread();
   }
   delete worker;
   delete ui;
@@ -84,24 +83,24 @@ void CassetteDialog::accept() {
   mCassMovie->start();
 
   ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
-  int minutes = mRemainingTime / 60000;
-  int seconds = (mRemainingTime - minutes * 60000) / 1000;
+  const int minutes = mRemainingTime / 60000;
+  const int seconds = (mRemainingTime - minutes * 60000) / 1000;
   ui->label->setText(tr("Playing back cassette image.\n\n"
                         "Estimated time left: %1:%2")
                              .arg(minutes)
                              .arg(seconds, 2, 10, QChar('0')));
   ui->progressBar->setVisible(true);
 
-  worker->start(QThread::TimeCriticalPriority);
+  worker->startThread(QThread::TimeCriticalPriority);
   mTimer = new QTimer(this);
   connect(mTimer, SIGNAL(timeout()), this, SLOT(tick()));
   mTimer->start(1000);
 }
 
-void CassetteDialog::progress(int remainingTime) {
+void CassetteDialog::progress(const int remainingTime) {
   mRemainingTime = remainingTime;
-  int minutes = mRemainingTime / 60000;
-  int seconds = (mRemainingTime - minutes * 60000) / 1000;
+  const int minutes = mRemainingTime / 60000;
+  const int seconds = (mRemainingTime - minutes * 60000) / 1000;
   ui->label->setText(tr("Playing back cassette image.\n\n"
                         "Estimated time left: %1:%2")
                              .arg(minutes)
@@ -111,8 +110,6 @@ void CassetteDialog::progress(int remainingTime) {
 }
 
 void CassetteDialog::tick() {
-  if (mRemainingTime < 1000) {
-    mRemainingTime = 1000;
-  }
+  mRemainingTime = std::max(mRemainingTime, 1000);
   emit progress(mRemainingTime - 1000);
 }

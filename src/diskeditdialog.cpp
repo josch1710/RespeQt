@@ -12,13 +12,8 @@
 #include "ui_diskeditdialog.h"
 
 #include <QDebug>
-#include <QFileDialog>
 #include <QIcon>
-#include <QMessageBox>
 #include <QPrintDialog>
-#include <QPrinter>
-#include <QTextEdit>
-#include <QUrl>
 
 #include <algorithm>
 
@@ -35,7 +30,7 @@
 
 FileModel::FileModel(QObject *parent)
     : QAbstractTableModel(parent) {
-  fileSystem = 0;
+  fileSystem = nullptr;
   tempDirs = new QStringList();
 }
 
@@ -45,9 +40,7 @@ FileModel::~FileModel() {
     tempDirs->removeLast();
   }
   delete tempDirs;
-  if (fileSystem) {
-    delete fileSystem;
-  }
+  delete fileSystem;
 }
 
 Qt::ItemFlags FileModel::flags(const QModelIndex &index) const {
@@ -65,27 +58,26 @@ Qt::ItemFlags FileModel::flags(const QModelIndex &index) const {
   return flags;
 }
 
-QVariant FileModel::data(const QModelIndex &index, int role) const {
+QVariant FileModel::data(const QModelIndex &index, const int role) const {
   if (index.row() >= rowCount()) {
-    return QVariant();
+    return {};
   }
   if (index.column() == 1 && role == Qt::DecorationRole) {
     if ((entries.at(index.row()).attributes & Filesystems::AtariDirEntry::Directory) != 0) {
       return QIcon::fromTheme("folder");
-    } else {
-      return QIcon::fromTheme("page_white");
     }
+    return QIcon::fromTheme("page_white");
   }
 
   if (role == Qt::TextAlignmentRole && (index.column() == 3 || index.column() == 0)) {
-    return (int) (Qt::AlignRight | Qt::AlignVCenter);
+    return {Qt::AlignRight | Qt::AlignVCenter};
   }
 
   QDateTime time = entries.at(index.row()).dateTime;
 
   if (index.column() == 4 && !time.isValid()) {
     if (role == Qt::TextAlignmentRole) {
-      return (int) (Qt::AlignCenter);
+      return Qt::AlignCenter;
     }
   }
 
@@ -95,6 +87,9 @@ QVariant FileModel::data(const QModelIndex &index, int role) const {
   }
 
   switch (index.column()) {
+    default:
+      return {};
+
     case 0:
       return entries.at(index.row()).no;
 
@@ -105,10 +100,11 @@ QVariant FileModel::data(const QModelIndex &index, int role) const {
       return entries.at(index.row()).suffix();
 
     case 3:
-      if (entries.at(index.row()).size >= 0) {
-        return entries.at(index.row()).size;
-      } else {
-        return QVariant();
+      {
+        if (entries.at(index.row()).size >= 0) {
+          return entries.at(index.row()).size;
+        }
+        return {};
       }
 
     case 4:
@@ -118,20 +114,23 @@ QVariant FileModel::data(const QModelIndex &index, int role) const {
       if (role == Qt::DisplayRole) {
         return QString("n/a");
       }
-      return QVariant();
+      return {};
 
     case 5:
       return entries.at(index.row()).attributeNames();
   }
 
-  return QVariant();
+  return {};
 }
 
-bool FileModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+bool FileModel::setData(const QModelIndex &index, const QVariant &value, const int role) {
   if (role != Qt::EditRole) {
     return false;
   }
   switch (index.column()) {
+    default:
+      return false;
+
     case 1: {
       QString s = value.toString();
       if (s.isEmpty()) {
@@ -142,7 +141,7 @@ bool FileModel::setData(const QModelIndex &index, const QVariant &value, int rol
         s.resize(8);
       }
       foreach (QChar c, s) {
-        if ((static_cast<uint8_t>(c.toLatin1()) > 0x7f) || (!c.isLetterOrNumber() && c != '_')) {
+        if (static_cast<uint8_t>(c.toLatin1()) > 0x7f || (!c.isLetterOrNumber() && c != '_')) {
           return false;
         }
       }
@@ -159,12 +158,11 @@ bool FileModel::setData(const QModelIndex &index, const QVariant &value, int rol
       if (fileSystem->rename(entries.at(index.row()), s.toLatin1())) {
         Filesystems::AtariDirEntry entry = entries.at(index.row());
         entry.atariName = s.toLatin1();
-        entries[index.row()] = entry;
+        entries[index.row()] = std::move(entry);
         emit dataChanged(index, index);
         return true;
-      } else {
-        return false;
       }
+      return false;
     }
 
     case 2: {
@@ -177,7 +175,7 @@ bool FileModel::setData(const QModelIndex &index, const QVariant &value, int rol
         s.resize(3);
       }
       foreach (QChar c, s) {
-        if ((static_cast<uint8_t>(c.toLatin1()) > 0x7f) || (!c.isLetterOrNumber() && c != '_')) {
+        if (static_cast<uint8_t>(c.toLatin1()) > 0x7f || (!c.isLetterOrNumber() && c != '_')) {
           return false;
         }
       }
@@ -195,12 +193,11 @@ bool FileModel::setData(const QModelIndex &index, const QVariant &value, int rol
       if (fileSystem->rename(entries.at(index.row()), s.toLatin1())) {
         Filesystems::AtariDirEntry entry = entries.at(index.row());
         entry.atariName = s.toLatin1();
-        entries[index.row()] = entry;
+        entries[index.row()] = std::move(entry);
         emit dataChanged(index, index);
         return true;
-      } else {
-        return false;
       }
+      return false;
     }
 
     case 4:
@@ -210,7 +207,7 @@ bool FileModel::setData(const QModelIndex &index, const QVariant &value, int rol
   return false;
 }
 
-void FileModel::deleteFiles(QModelIndexList indexes) {
+void FileModel::deleteFiles(const QModelIndexList& indexes) {
   QList<int> l;
 
   QList<Filesystems::AtariDirEntry> selectedEntries;
@@ -225,7 +222,7 @@ void FileModel::deleteFiles(QModelIndexList indexes) {
 
   emit layoutAboutToBeChanged();
   while (!l.isEmpty()) {
-    int i = l.last();
+    const int i = l.last();
     entries.removeAt(i);
     l.removeLast();
   }
@@ -233,11 +230,14 @@ void FileModel::deleteFiles(QModelIndexList indexes) {
   emit layoutChanged();
 }
 
-QVariant FileModel::headerData(int section, Qt::Orientation orientation, int role) const {
+QVariant FileModel::headerData(const int section, const Qt::Orientation orientation, const int role) const {
   if (role != Qt::DisplayRole || orientation != Qt::Horizontal) {
-    return QVariant();
+    return {};
   }
   switch (section) {
+    default:
+      return {};
+
     case 0:
       return tr("No");
 
@@ -257,7 +257,7 @@ QVariant FileModel::headerData(int section, Qt::Orientation orientation, int rol
       return tr("Notes");
   }
 
-  return QVariant();
+  return {};
 }
 
 int FileModel::rowCount(const QModelIndex & /*parent*/) const {
@@ -277,48 +277,54 @@ void FileModel::sort(int column, Qt::SortOrder order) {
   auto sorting {
     [column, order](const Filesystems::AtariDirEntry &e1, const Filesystems::AtariDirEntry &e2) {
       switch (column) {
+        default:
+          return false;
+
         case 0:
-          if (order == Qt::AscendingOrder) {
-            return e1.no < e2.no;
-          } else {
+          {
+            if (order == Qt::AscendingOrder) {
+              return e1.no < e2.no;
+            }
             return e1.no > e2.no;
           }
 
         case 1:
           if (order == Qt::AscendingOrder) {
             return e1.baseName() < e2.baseName();
-          } else {
-            return e1.baseName() > e2.baseName();
           }
+          return e1.baseName() > e2.baseName();
 
         case 2:
-          if (order == Qt::AscendingOrder) {
-            return e1.suffix() < e2.suffix();
-          } else {
+          {
+            if (order == Qt::AscendingOrder) {
+              return e1.suffix() < e2.suffix();
+            }
             return e1.suffix() > e2.suffix();
           }
 
         case 3:
-          if (order == Qt::AscendingOrder) {
-            return e1.size < e2.size;
-          } else {
+          {
+            if (order == Qt::AscendingOrder) {
+              return e1.size < e2.size;
+            }
             return e1.size > e2.size;
           }
 
         case 4:
-          if (order == Qt::AscendingOrder) {
-            return e1.dateTime < e2.dateTime;
-          } else {
+          {
+            if (order == Qt::AscendingOrder) {
+              return e1.dateTime < e2.dateTime;
+            }
             return e1.dateTime > e2.dateTime;
           }
 
         case 5:
-          if (order == Qt::AscendingOrder) {
-            return e1.attributeNames() < e2.attributeNames();
-          } else {
+          {
+            if (order == Qt::AscendingOrder) {
+              return e1.attributeNames() < e2.attributeNames();
+            }
             return e1.attributeNames() > e2.attributeNames();
           }
-
       }
 
       return false;
@@ -332,9 +338,9 @@ void FileModel::sort(int column, Qt::SortOrder order) {
 
 void FileModel::setFileSystem(Filesystems::AtariFileSystem *aFileSystem) {
   emit layoutAboutToBeChanged();
-  if (fileSystem) {
-    delete fileSystem;
-  }
+
+  delete fileSystem;
+
   fileSystem = aFileSystem;
   if (fileSystem) {
     setRoot();
@@ -344,7 +350,7 @@ void FileModel::setFileSystem(Filesystems::AtariFileSystem *aFileSystem) {
   emit layoutChanged();
 }
 
-void FileModel::setDirectory(int row) {
+void FileModel::setDirectory(const int row) {
   emit layoutAboutToBeChanged();
   paths.append(entries.at(row).name());
   dirs.append(entries.at(row).firstSector);
@@ -369,19 +375,19 @@ void FileModel::setRoot() {
   emit layoutAboutToBeChanged();
   paths.clear();
   dirs.clear();
-  int dir = fileSystem->rootDir();
+  const auto dir = fileSystem->rootDir();
   entries = fileSystem->getEntries(dir);
   dirs.append(dir);
   m_currentPath = QString("D%1:").arg(fileSystem->image()->deviceNo() - 0x30);
   emit layoutChanged();
 }
 
-void FileModel::insertFiles(QStringList names) {
+void FileModel::insertFiles(const QStringList& names) {
   if (names.isEmpty()) {
     return;
   }
 
-  int dir = dirs.last();
+  const auto dir = dirs.last();
 
   emit layoutAboutToBeChanged();
   entries.append(fileSystem->insertRecursive(dir, names));
@@ -389,19 +395,17 @@ void FileModel::insertFiles(QStringList names) {
 }
 
 bool FileModel::dropMimeData(const QMimeData *data, Qt::DropAction /*action*/, int /*row*/, int /*column*/, const QModelIndex & /*parent*/) {
-  QStringList names;
   if (data->hasUrls()) {
-    foreach (QUrl url, data->urls()) {
-      QString name = url.toLocalFile();
-      if (!name.isEmpty()) {
+    QStringList names;
+    foreach(QUrl url, data->urls()) {
+      if (QString name = url.toLocalFile(); !name.isEmpty()) {
         names.append(name);
       }
     }
     insertFiles(names);
     return true;
-  } else {
-    return false;
   }
+  return false;
 }
 
 QStringList FileModel::mimeTypes() const {
@@ -411,7 +415,7 @@ QStringList FileModel::mimeTypes() const {
 }
 
 QMimeData *FileModel::mimeData(const QModelIndexList &indexes) const {
-  auto data {new QMimeData()};
+  const auto data {new QMimeData()};
   QList<Filesystems::AtariDirEntry> selectedEntries;
   QList<QUrl> urls;
 
@@ -426,9 +430,8 @@ QMimeData *FileModel::mimeData(const QModelIndexList &indexes) const {
   temp.open();
   QString tempPath = temp.fileName() + "v";
   temp.close();
-  QFileInfo info(tempPath);
-  QDir dir = QDir::temp();
-  if (!dir.mkdir(info.fileName())) {
+  const QFileInfo info(tempPath);
+  if (const QDir dir = QDir::temp(); !dir.mkdir(info.fileName())) {
     return data;
   }
   tempDirs->append(info.fileName());
@@ -462,7 +465,7 @@ DiskEditDialog::DiskEditDialog(QWidget *parent) : QMainWindow(parent),
   m_ui->statusbar->addPermanentWidget(m_fileSystemBox);
 
   model = new FileModel(this);
-  model->setFileSystem(0);
+  model->setFileSystem(nullptr);
   m_ui->fileList->setModel(model);
 
   void (QComboBox::*fileSystemChanged)(int) = &QComboBox::currentIndexChanged;
@@ -515,9 +518,11 @@ void DiskEditDialog::go(DiskImages::SimpleDiskImage *image, int fileSystem) {
   }
 }
 
-void DiskEditDialog::fileSystemChanged(int index) {
+void DiskEditDialog::fileSystemChanged(const int index) {
   Filesystems::AtariFileSystem *a = nullptr;
   switch (index) {
+    default:
+      break;
     case 1:
       a = new Filesystems::Dos10FileSystem(m_disk);
       break;
@@ -558,13 +563,14 @@ void DiskEditDialog::fileSystemChanged(int index) {
   m_ui->actionToParent->setEnabled(false);
 }
 
-void DiskEditDialog::selectionChanged(const QItemSelection & /*selected*/, const QItemSelection & /*deselected*/) {
-  bool enabled = !m_ui->fileList->selectionModel()->selectedIndexes().isEmpty();
+void DiskEditDialog::selectionChanged(const QItemSelection & /*selected*/, const QItemSelection & /*deselected*/) const
+{
+  const bool enabled = !m_ui->fileList->selectionModel()->selectedIndexes().isEmpty();
   m_ui->actionExtractFiles->setEnabled(enabled);
   m_ui->actionDeleteSelectedFiles->setEnabled(enabled);
 }
 
-void DiskEditDialog::fileListDoubleClicked(QModelIndex index) {
+void DiskEditDialog::fileListDoubleClicked(const QModelIndex& index) {
   if (model->entries.at(index.row()).attributes & Filesystems::AtariDirEntry::Directory) {
     model->setDirectory(index.row());
     m_ui->fileList->resizeColumnToContents(0);
@@ -596,7 +602,7 @@ void DiskEditDialog::extractFilesTriggered() {
     return;
   }
 
-  QString target = QFileDialog::getExistingDirectory(this, tr("Extract files"), RespeqtSettings::instance()->lastExtractDir());
+  const QString target = QFileDialog::getExistingDirectory(this, tr("Extract files"), RespeqtSettings::instance()->lastExtractDir());
 
   if (target.isEmpty()) {
     return;
@@ -613,7 +619,8 @@ void DiskEditDialog::extractFilesTriggered() {
   model->fileSystem->extractRecursive(selectedEntries, target);
 }
 
-void DiskEditDialog::textConversionTriggered() {
+void DiskEditDialog::textConversionTriggered() const
+{
   if (m_ui->actionTextConversion->isChecked()) {
     m_ui->actionTextConversion->setToolTip(tr("Text conversion is on"));
     m_ui->actionTextConversion->setStatusTip(tr("Text conversion is on"));
@@ -629,13 +636,13 @@ void DiskEditDialog::deleteSelectedFilesTriggered() {
   if (QMessageBox::question(this, tr("Confirmation"), tr("Are you sure you want to delete selected files?"), QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes) {
     return;
   }
-  QModelIndexList indexes = m_ui->fileList->selectionModel()->selectedRows();
+  const QModelIndexList indexes = m_ui->fileList->selectionModel()->selectedRows();
   model->deleteFiles(indexes);
   m_ui->fileList->selectionModel()->clearSelection();
 }
 
 void DiskEditDialog::addFilesTriggered() {
-  QStringList files = QFileDialog::getOpenFileNames(this, tr("Add files"), RespeqtSettings::instance()->lastExtractDir());
+  const QStringList files = QFileDialog::getOpenFileNames(this, tr("Add files"), RespeqtSettings::instance()->lastExtractDir());
   if (files.empty()) {
     return;
   }
@@ -647,21 +654,18 @@ void DiskEditDialog::printTriggered() {
 
   QPrinter printer;
 
-  auto dialog {new QPrintDialog(&printer, this)};
-  if (dialog->exec() != QDialog::Accepted)
+  if (const auto dialog {new QPrintDialog(&printer, this)}; dialog->exec() != QDialog::Accepted)
     return;
 
   QTextEdit dirlist;
-  QString fname, ext;
-  int size;
   dirlist.clear();
   dirlist.append("Name\tExt\tSize");
   dirlist.append("========\t===\t====");
 
-  for (int row = 0; row < model->entries.size(); row++) {
-    fname = model->entries.at(row).atariName.left(8);
-    ext = model->entries.at(row).atariName.right(3);
-    size = model->entries.at(row).size;
+  for (const auto & entry : model->entries) {
+    QString fname = entry.atariName.left(8);
+    QString ext = entry.atariName.right(3);
+    const int size = entry.size;
     dirlist.append(fname + "\t" + ext + "\t" + QString("%1").arg(size));
   }
 

@@ -15,7 +15,6 @@
 #include <string.h>
 #include <windows.h>
 
-#include <QTime>
 #include <QtDebug>
 
 /*********/
@@ -28,14 +27,15 @@ AbstractSerialPortBackend::~AbstractSerialPortBackend() {
 }
 
 StandardSerialPortBackend::StandardSerialPortBackend(QObject *parent)
-    : AbstractSerialPortBackend(parent) {
+  : AbstractSerialPortBackend(parent), mHighSpeed(false), mSpeed(0), mMethod(0), mWriteDelay(0), mCompErrDelay(0)
+{
   mHandle = INVALID_HANDLE_VALUE;
   mForceHighSpeed = 0;
 }
 
 StandardSerialPortBackend::~StandardSerialPortBackend() {
-  if (isOpen()) {
-    close();
+  if (StandardSerialPortBackend::isOpen()) {
+    StandardSerialPortBackend::close();
   }
 }
 
@@ -54,7 +54,7 @@ bool StandardSerialPortBackend::open() {
   name.append(RespeqtSettings::instance()->serialPortName());
 
   mMethod = RespeqtSettings::instance()->serialPortHandshakingMethod();
-  mWriteDelay = SLEEP_FACTOR * RespeqtSettings::instance()->serialPortWriteDelay();
+  mWriteDelay = static_cast<unsigned long>(SLEEP_FACTOR * RespeqtSettings::instance()->serialPortWriteDelay());
   mCompErrDelay = RespeqtSettings::instance()->serialPortCompErrDelay();
 
   if (mMethod == HANDSHAKE_SOFTWARE) {
@@ -559,7 +559,7 @@ quint8 StandardSerialPortBackend::sioChecksum(const QByteArray &data, uint size)
   return sum;
 }
 
-QByteArray StandardSerialPortBackend::readRawFrame(uint size, bool verbose) {
+QByteArray StandardSerialPortBackend::readRawFrame(size_t size, bool verbose) {
   //    qDebug() << "!d" << tr("DBG -- Serial Port readRawFrame...");
 
   QByteArray data;
@@ -685,7 +685,10 @@ QString AtariSioBackend::defaultPortName() {
   return QString();
 }
 
-AtariSioBackend::AtariSioBackend(QObject *) {}
+AtariSioBackend::AtariSioBackend(QObject *) : mHandle(0), mCancelHandles{}, mSpeed(0), mMethod(0)
+{
+}
+
 AtariSioBackend::~AtariSioBackend() {}
 bool AtariSioBackend::isOpen() { return false; }
 void AtariSioBackend::close() {}
@@ -700,8 +703,8 @@ bool AtariSioBackend::writeDataAck() { return false; }
 bool AtariSioBackend::writeDataNak() { return false; }
 bool AtariSioBackend::writeComplete() { return false; }
 bool AtariSioBackend::writeError() { return false; }
-bool AtariSioBackend::setSpeed(int) { return false; }
+bool AtariSioBackend::setSpeed(unsigned long) { return false; }
 bool AtariSioBackend::writeRawFrame(const QByteArray &) { return false; }
 void AtariSioBackend::setActiveSioDevices(const QByteArray &) {}
-int AtariSioBackend::speed() { return 0; }
-void AtariSioBackend::forceHighSpeed(int) {}
+unsigned long AtariSioBackend::speed() { return 0; }
+void AtariSioBackend::forceHighSpeed(unsigned int) {}

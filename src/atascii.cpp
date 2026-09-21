@@ -144,10 +144,10 @@ QChar Atascii::operator()(const unsigned char atascii) const {
 }
 
 unsigned char Atascii::operator()(const QChar &unicode) const {
-  for (auto it: mapping) {
-    if (unicode == it.second) {
-      return it.first;
+  for (auto [atariChar, unicodeChar]: mapping) {
+    if (unicode == unicodeChar) {
+      return atariChar;
     }
   }
-  throw new std::invalid_argument("Unknown unicode mapping");
+  throw std::invalid_argument("Unknown unicode mapping");
 }

@@ -13,13 +13,11 @@
 #include "mainwindow.h"
 #include "ui_logdisplaydialog.h"
 
-#include <QMessageBox>
-#include <QTranslator>
 
 LogDisplayDialog::LogDisplayDialog(QWidget *parent) : QDialog(parent),
                                                       l_ui(new Ui::LogDisplayDialog)
 {
-    Qt::WindowFlags flags = windowFlags() & (~Qt::WindowContextHelpButtonHint);
+    const Qt::WindowFlags flags = windowFlags() & ~Qt::WindowContextHelpButtonHint;
     setWindowFlags(flags);
 
     l_ui->setupUi(this);
@@ -52,7 +50,7 @@ void LogDisplayDialog::changeEvent(QEvent *e)
     }
 }
 
-void LogDisplayDialog::setLogText(QString logText)
+void LogDisplayDialog::setLogText(const QString& logText)
 {
     savedLog.clear();
     filter = "ALL";
@@ -67,7 +65,7 @@ void LogDisplayDialog::setLogText(QString logText)
 }
 
 
-void LogDisplayDialog::addLogTextChange(QString logChange)
+void LogDisplayDialog::addLogTextChange(const QString& logChange)
 {
     if (filter == "ALL" || logChange.contains("[" + filter + "]"))
     {
@@ -80,17 +78,17 @@ void LogDisplayDialog::addLogTextChange(QString logChange)
 void LogDisplayDialog::diskFilter()
 {
     QTextEdit searchResults;
-    QTextDocument *search = l_ui->textEdit->document();
-    QTextCursor cursor;
+    const QTextDocument *search = l_ui->textEdit->document();
     filter = l_ui->listByDisk->currentText();
     searchResults.clear();
     if (filter != "ALL")
     {
+        QTextCursor cursor;
         cursor.setPosition(0);
         cursor = search->find(filter, cursor, QTextDocument::FindWholeWords);
         while (!cursor.isNull())
         {
-            int i = cursor.position();
+            const int i = cursor.position();
             cursor.setPosition(i - filter.length() - 1);
             cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
             searchResults.append(cursor.selectedText());

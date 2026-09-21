@@ -9,7 +9,6 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <QTextCodec>
-#include <memory>
 #include <QStyleFactory>
 
 #ifdef Q_OS_WIN
@@ -25,11 +24,11 @@ int main(int argc, char *argv[]) {
   QApplication::setStyle(QStyleFactory::create("Fusion"));
   QApplication a(argc, argv);
   QIcon::setThemeName("Classic");
-  a.setFont(a.font("QMenu"));
+  QApplication::setFont(QApplication::font("QMenu"));
   QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
-  auto w {new MainWindow};
+  const auto w {new MainWindow};
   w->show();
-  auto ret {a.exec()};
+  const auto ret {QApplication::exec()};
 #ifdef Q_OS_WIN
   timeEndPeriod(1);
 #endif

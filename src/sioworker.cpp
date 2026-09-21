@@ -14,17 +14,18 @@
 #include "siorecorder.h"
 #include <QDateTime>
 #include <QFile>
+#include <algorithm>
 
 /* SioDevice */
-SioDevice::SioDevice(SioWorkerPtr worker)
-    : QObject() {
+SioDevice::SioDevice(const SioWorkerPtr& worker)
+{
   sio = worker;
   m_deviceNo = -1;
 }
 
 SioDevice::~SioDevice() {
   if (m_deviceNo != -1) {
-    sio->uninstallDevice(m_deviceNo);
+    sio->uninstallDevice(static_cast<quint8>(m_deviceNo));
   }
 }
 
@@ -35,13 +36,11 @@ QString SioDevice::deviceName() {
 /* SioWorker */
 
 SioWorker::SioWorker()
-    : QThread() {
-#if (QT_VERSION < QT_VERSION_CHECK(5, 15, 0))
-  deviceMutex = new QMutex(QMutex::Recursive);
-#else
+  : displayCommandName(false), mAutoReconnect(false)
+{
   deviceMutex = new QRecursiveMutex();
-#endif
-  for (int i = 0; i <= 255; i++) {
+  for (int i = 0; i <= 255; i++)
+  {
     devices[i] = nullptr;
   }
   mPort.reset();
@@ -56,14 +55,14 @@ SioWorker::~SioWorker() {
   delete deviceMutex;
 }
 
-bool SioWorker::waitOnPort(unsigned long time) {
+bool SioWorker::waitOnPort(const unsigned long time) {
   mustTerminate = true;
 
   if (mPort) {
     mPort->cancel();
   }
 
-  bool result = QThread::wait(time);
+  const bool result = wait(time);
 
   if (mPort) {
     mPort.reset();
@@ -72,37 +71,37 @@ bool SioWorker::waitOnPort(unsigned long time) {
   return result;
 }
 
-void SioWorker::start(Priority p) {
+void SioWorker::startThread(const Priority p) {
   switch (RespeqtSettings::instance()->backend()) {
-    default:
-    case SerialBackend::STANDARD: {
-      const auto temp = QSharedPointer<StandardSerialPortBackend>(new StandardSerialPortBackend(this));
-      mPort = qSharedPointerDynamicCast<AbstractSerialPortBackend>(temp);
-      break;
-    }
-    case SerialBackend::SIO_DRIVER: {
-      const auto temp = QSharedPointer<AtariSioBackend>(new AtariSioBackend(this));
-      mPort = qSharedPointerDynamicCast<AbstractSerialPortBackend>(temp);
-      break;
-    }
-    case SerialBackend::TEST:
-      mPort = SioRecorder::instance();
-      break;
+  default:
+  case SerialBackend::STANDARD: {
+    const auto temp = QSharedPointer<StandardSerialPortBackend>(new StandardSerialPortBackend(this));
+    mPort = qSharedPointerDynamicCast<AbstractSerialPortBackend>(temp);
+    break;
+  }
+  case SerialBackend::SIO_DRIVER: {
+    const auto temp = QSharedPointer<AtariSioBackend>(new AtariSioBackend(this));
+    mPort = qSharedPointerDynamicCast<AbstractSerialPortBackend>(temp);
+    break;
+  }
+  case SerialBackend::TEST:
+    mPort = SioRecorder::instance();
+    break;
   }
 
   QByteArray data;
   for (int i = 0; i <= 255; i++) {
     if (devices[i]) {
-      data.append(i);
+      data.append(static_cast<char>(i));
     }
   }
   mPort->setActiveSioDevices(data);
 
   mustTerminate = false;
-  QThread::start(p);
+  start(p);
 }
 
-void SioWorker::setAutoReconnect(bool autoReconnect) {
+void SioWorker::setAutoReconnect(const bool autoReconnect) {
   mAutoReconnect = autoReconnect;
 }
 
@@ -128,8 +127,8 @@ void SioWorker::run() {
       if (mAutoReconnect) {
         qDebug() << "!u" << tr("Trying to reconnect SIO port...");
         mPort->close();
-        while (mAutoReconnect && (!mustTerminate) && (!mPort->isOpen())) {
-          QThread::sleep(1L);
+        while (mAutoReconnect && !mustTerminate && !mPort->isOpen()) {
+          sleep(1L);
           mPort->open();
         }
         if (!mustTerminate) {
@@ -139,10 +138,10 @@ void SioWorker::run() {
       break;
     }
     /* Decode the command */
-    auto no = static_cast<quint8>(cmd[0]);
-    auto command = static_cast<quint8>(cmd[1]);
-    auto aux1 = static_cast<quint8>(cmd[2]);
-    auto aux2 = static_cast<quint8>(cmd[3]);
+    const auto no = static_cast<quint8>(cmd[0]);
+    const auto command = static_cast<quint8>(cmd[1]);
+    const auto aux1 = static_cast<quint8>(cmd[2]);
+    const auto aux2 = static_cast<quint8>(cmd[3]);
 
     /* Redirect the command to the appropriate device */
     deviceMutex->lock();
@@ -154,7 +153,7 @@ void SioWorker::run() {
         qWarning() << "!w" << tr("[%1] command: $%2, aux: $%3 ignored because the image explorer is open.").arg(deviceName(no)).arg(command, 2, 16, QChar('0')).arg(aux1, 2, 16, QChar('0'));
       }
     } else {
-      if ((displayCommandName) && (no >= 0x31 && no <= 0x3F)) {
+      if (displayCommandName && no >= 0x31 && no <= 0x3F) {
         qDebug() << "!u" << tr("[%1] command: $%2, aux: $%3 ignored: %4").arg(deviceName(no)).arg(command, 2, 16, QChar('0')).arg(aux1, 2, 16, QChar('0')).arg(guessDiskCommand(command, aux1, aux2));
       } else {
         qDebug() << "!u" << tr("[%1] command: $%2, aux1: $%3, aux2: $%4 ignored.").arg(deviceName(no)).arg(command, 2, 16, QChar('0')).arg(aux1, 2, 16, QChar('0')).arg(aux2, 2, 16, QChar('0'));
@@ -166,6 +165,7 @@ void SioWorker::run() {
   mPort->close();
 }
 
+//NOLINTNEXTLINE(*-convert-member-functions-to-static)
 QString SioWorker::guessDiskCommand(const quint8 command, const quint8 aux1, const quint8 /*aux2*/) {
 #if ALL_COMMANDS
   // displays all known command meaning
@@ -318,14 +318,15 @@ QString SioWorker::guessDiskCommand(const quint8 command, const quint8 aux1, con
     case 0x47:
       return tr("Super Archiver Read Track (128 bytes) or Happy Write All Sectors");
     case 0x48:
-      if (aux1 == 0x01)
-        return tr("Happy Set Idle Timeout");
-      else if (aux1 == 0x02)
-        return tr("Happy Set Alternate Device ID");
-      else if (aux1 == 0x03)
-        return tr("Happy Reinitialize Drive");
-      else
+      {
+        if (aux1 == 0x01)
+          return tr("Happy Set Idle Timeout");
+        if (aux1 == 0x02)
+          return tr("Happy Set Alternate Device ID");
+        if (aux1 == 0x03)
+          return tr("Happy Reinitialize Drive");
         return tr("Happy Configure Drive");
+      }
     case 0x49:
       return tr("Happy Write Track with Skew Alignment");
     case 0x4A:
@@ -351,7 +352,6 @@ QString SioWorker::guessDiskCommand(const quint8 command, const quint8 aux1, con
     case 0x54:
       return tr("Super Archiver Get RAM Buffer");
     case 0x55:
-      return tr("Happy Execute code");
     case 0x56:
       return tr("Happy Execute code");
     case 0x57:
@@ -384,7 +384,7 @@ QString SioWorker::guessDiskCommand(const quint8 command, const quint8 aux1, con
 #endif
 }
 
-void SioWorker::installDevice(quint8 no, SioDevice *device) {
+void SioWorker::installDevice(const quint8 no, SioDevice *device) {
   deviceMutex->lock();
   if (devices[no]) {
     delete devices[no];
@@ -394,39 +394,37 @@ void SioWorker::installDevice(quint8 no, SioDevice *device) {
   deviceMutex->unlock();
   if (mPort) {
     QByteArray data;
-    for (int i = 0; i <= 255; i++) {
+    for (quint8 i = 0; i <= 255; i++) {
       if (devices[i]) {
-        data.append(i);
+        data.append(static_cast<char>(i));
       }
     }
     mPort->setActiveSioDevices(data);
   }
 }
 
-void SioWorker::uninstallDevice(quint8 no) {
+void SioWorker::uninstallDevice(const quint8 no) {
   deviceMutex->lock();
   if (devices[no]) {
     devices[no]->setDeviceNo(-1);
   }
-  devices[no] = 0;
+  devices[no] = nullptr;
   deviceMutex->unlock();
   if (mPort) {
     QByteArray data;
-    for (int i = 0; i <= 255; i++) {
+    for (quint8 i = 0; i <= 255; i++) {
       if (devices[i]) {
-        data.append(i);
+        data.append(static_cast<char>(i));
       }
     }
     mPort->setActiveSioDevices(data);
   }
 }
 
-void SioWorker::swapDevices(quint8 d1, quint8 d2) {
-  SioDevice *t1, *t2;
-
+void SioWorker::swapDevices(const quint8 d1, const quint8 d2) {
   deviceMutex->lock();
-  t1 = devices[d1];
-  t2 = devices[d2];
+  SioDevice* t1 = devices[d1];
+  SioDevice* t2 = devices[d2];
   uninstallDevice(d1);
   uninstallDevice(d2);
   if (t2) {
@@ -438,15 +436,16 @@ void SioWorker::swapDevices(quint8 d1, quint8 d2) {
   deviceMutex->unlock();
 }
 
-SioDevice *SioWorker::getDevice(quint8 no) {
-  SioDevice *result;
+SioDevice *SioWorker::getDevice(const quint8 no) const
+{
   deviceMutex->lock();
-  result = devices[no];
+  const auto result = devices[no];
   deviceMutex->unlock();
   return result;
 }
 
-QString SioWorker::deviceName(int device) {
+// ReSharper disable once CppMemberFunctionMayBeStatic
+QString SioWorker::deviceName(const int device) { // NOLINT(*-convert-member-functions-to-static)
   QString result;
   switch (device) {
     case -1:
@@ -505,13 +504,13 @@ QString SioWorker::deviceName(int device) {
 /* CassetteWorker */
 
 CassetteWorker::CassetteWorker()
-    : QThread() {
+  : mTotalDuration(0)
+{
   mPort.reset();
   mustTerminate.lock();
 }
 
-CassetteWorker::~CassetteWorker() {
-}
+CassetteWorker::~CassetteWorker() = default;
 
 bool CassetteWorker::loadCasImage(const QString &fileName) {
   mRecords.clear();
@@ -523,21 +522,17 @@ bool CassetteWorker::loadCasImage(const QString &fileName) {
     return false;
   }
 
-  QByteArray header, data;
-  uint magic;
-  int length, aux;
-
-  header = casFile.read(8);
+  QByteArray header = casFile.read(8);
 
   if (header.length() != 8) {
     qCritical() << "!e" << tr("Cannot read '%1': %2").arg(fileName, casFile.errorString());
     return false;
   }
 
-  magic = (quint8) header.at(0) + (quint8) header.at(1) * 256 + (quint8) header.at(2) * 65536 + (quint8) header.at(3) * 16777216;
-  length = (quint8) header.at(4) + (quint8) header.at(5) * 256;
+  uint magic = static_cast<quint8>(header.at(0)) + static_cast<quint8>(header.at(1)) * 256 + static_cast<quint8>(header.at(2)) * 65536 + static_cast<quint8>(header.at(3)) * 16777216;
+  int length = static_cast<quint8>(header.at(4)) + static_cast<quint8>(header.at(5)) * 256;
 
-  data = casFile.read(length);
+  QByteArray data = casFile.read(length);
   if (data.length() != length) {
     qCritical() << "!e" << tr("Cannot read '%1': %2").arg(fileName, casFile.errorString());
     return false;
@@ -565,9 +560,9 @@ bool CassetteWorker::loadCasImage(const QString &fileName) {
       return false;
     }
 
-    magic = (quint8) header.at(0) + (quint8) header.at(1) * 256 + (quint8) header.at(2) * 65536 + (quint8) header.at(3) * 16777216;
-    length = (quint8) header.at(4) + (quint8) header.at(5) * 256;
-    aux = (quint8) header.at(6) + (quint8) header.at(7) * 256;
+    magic = static_cast<quint8>(header.at(0)) + static_cast<quint8>(header.at(1)) * 256 + static_cast<quint8>(header.at(2)) * 65536 + static_cast<quint8>(header.at(3)) * 16777216;
+    length = static_cast<quint8>(header.at(4)) + static_cast<quint8>(header.at(5)) * 256;
+    const int aux = static_cast<quint8>(header.at(6)) + static_cast<quint8>(header.at(7)) * 256;
 
     data = casFile.read(length);
     if (data.length() != length) {
@@ -587,7 +582,7 @@ bool CassetteWorker::loadCasImage(const QString &fileName) {
       record.baudRate = lastBaud;
       record.data = data;
       record.gapDuration = aux;
-      record.totalDuration = aux + (length * 10000 + (lastBaud / 2)) / lastBaud;
+      record.totalDuration = aux + (length * 10000 + lastBaud / 2) / lastBaud;
       mTotalDuration += record.totalDuration;
       mRecords.append(record);
     } else {
@@ -600,14 +595,14 @@ bool CassetteWorker::loadCasImage(const QString &fileName) {
   return true;
 }
 
-bool CassetteWorker::wait(unsigned long time) {
+bool CassetteWorker::waitForThread(const unsigned long time) {
   if (mPort) {
     mPort->cancel();
   }
 
   mustTerminate.unlock();
 
-  bool result = QThread::wait(time);
+  const auto result = wait(time);
 
   if (mPort) {
     mPort->close();
@@ -632,7 +627,7 @@ void CassetteWorker::run() {
   foreach (CassetteRecord record, mRecords) {
     if (lastBaud != record.baudRate) {
       lastBaud = record.baudRate;
-      if (!mPort->setSpeed(lastBaud)) {
+      if (!mPort->setSpeed(static_cast<unsigned long>(lastBaud))) {
         return;
       }
     }
@@ -640,14 +635,12 @@ void CassetteWorker::run() {
     qDebug() << "!n" << tr("[Cassette] Playing record %1 of %2 (%3 ms of gap + %4 bytes of data)").arg(block).arg(mRecords.count()).arg(record.gapDuration).arg(record.data.length());
     tm = tm.addMSecs(record.gapDuration);
     int w = QTime::currentTime().msecsTo(tm);
-    if (w < 0) {
-      w = 0;
-    }
+    w = std::max(w, 0);
     if (mustTerminate.tryLock(w)) {
       return;
     }
     tm = QTime::currentTime();
-    tm = tm.addMSecs((record.data.length() * 10000 + (lastBaud / 2)) / lastBaud);
+    tm = tm.addMSecs((record.data.length() * 10000 + lastBaud / 2) / lastBaud);
     for (int i = 0; i < record.data.length(); i += 10) {
       mPort->writeRawFrame(record.data.mid(i, 10));
       if (mustTerminate.tryLock()) {
@@ -659,14 +652,13 @@ void CassetteWorker::run() {
   }
   // Wait until last written bytes are transferred and then some (FTDI bug)
   int w = QTime::currentTime().msecsTo(tm);
-  if (w < 0) {
-    w = 0;
-  }
-  msleep(w + 500);
+  w = std::max(w, 0);
+  w += 500;
+  msleep(static_cast<unsigned int>(w));
   mPort->close();
 }
 
-void CassetteWorker::start(Priority p) {
+void CassetteWorker::startThread(const Priority p) {
   switch (RespeqtSettings::instance()->backend()) {
     default:
     case SerialBackend::STANDARD: {
@@ -685,5 +677,5 @@ void CassetteWorker::start(Priority p) {
       mPort = SioRecorder::instance();
       break;
   }
-  QThread::start(p);
+  start(p);
 }

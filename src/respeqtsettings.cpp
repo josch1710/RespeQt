@@ -16,7 +16,6 @@
 #include "uiscale.h"
 #include <QFileInfo>
 #include <memory>
-#include <QApplication>
 #include <QStandardPaths>
 
 std::unique_ptr<RespeqtSettings> RespeqtSettings::sInstance;
@@ -43,7 +42,8 @@ void RespeqtSettings::setSessionFile(const QString &g_sessionFile, const QString
   mSessionFilePath = g_sessionFilePath;
 }
 
-void RespeqtSettings::copySettings(QSettings& setFrom, QSettings& setTo)
+// ReSharper disable once CppMemberFunctionMayBeStatic
+void RespeqtSettings::copySettings(QSettings& setFrom, QSettings& setTo) // NOLINT(*-no-recursion)
 {
     foreach(const QString& key, setFrom.childKeys())
     {
@@ -82,155 +82,173 @@ void RespeqtSettings::setMainWindowTitle(const QString &g_mainWindowTitle) {
   mMainWindowTitle = g_mainWindowTitle;
 }
 
-bool RespeqtSettings::isFirstTime() {
+bool RespeqtSettings::isFirstTime() const {
   return mIsFirstTime;
 }
 
-bool RespeqtSettings::showLogWindow() {
+bool RespeqtSettings::showLogWindow() const {
   return mSettings->value("ShowLogWindow", false).toBool();
 }
 
-void RespeqtSettings::setShowLogWindow(bool show) {
+void RespeqtSettings::setShowLogWindow(const bool show) const
+{
   mSettings->setValue("ShowLogWindow", show);
 }
 
-QString RespeqtSettings::serialPortName() {
+QString RespeqtSettings::serialPortName() const {
   return mSettings->value("SerialPortName").toString();
 }
 
-void RespeqtSettings::setSerialPortName(const QString &name) {
+void RespeqtSettings::setSerialPortName(const QString &name) const
+{
   mSettings->setValue("SerialPortName", name);
 }
 
-int RespeqtSettings::serialPortMaximumSpeed() {
+int RespeqtSettings::serialPortMaximumSpeed() const {
   return mSettings->value("MaximumSerialPortSpeed").toInt();
 }
 
-void RespeqtSettings::setSerialPortMaximumSpeed(int speed) {
+void RespeqtSettings::setSerialPortMaximumSpeed(const int speed) const
+{
   mSettings->setValue("MaximumSerialPortSpeed", speed);
 }
 
-bool RespeqtSettings::serialPortUsePokeyDivisors() {
+bool RespeqtSettings::serialPortUsePokeyDivisors() const {
   return mSettings->value("SerialPortUsePokeyDivisors").toBool();
 }
 
-void RespeqtSettings::setSerialPortUsePokeyDivisors(bool use) {
+void RespeqtSettings::setSerialPortUsePokeyDivisors(const bool use) const
+{
   mSettings->setValue("SerialPortUsePokeyDivisors", use);
 }
 
-int RespeqtSettings::serialPortPokeyDivisor() {
+int RespeqtSettings::serialPortPokeyDivisor() const {
   return mSettings->value("SerialPortPokeyDivisor").toInt();
 }
 
-void RespeqtSettings::setSerialPortPokeyDivisor(int divisor) {
+void RespeqtSettings::setSerialPortPokeyDivisor(const int divisor) const
+{
   mSettings->setValue("SerialPortPokeyDivisor", divisor);
 }
 
-int RespeqtSettings::serialPortHandshakingMethod() {
+int RespeqtSettings::serialPortHandshakingMethod() const {
   return mSettings->value("HandshakingMethod").toInt();
 }
 
-void RespeqtSettings::setSerialPortHandshakingMethod(int method) {
+void RespeqtSettings::setSerialPortHandshakingMethod(const int method) const
+{
   mSettings->setValue("HandshakingMethod", method);
 }
 
-bool RespeqtSettings::serialPortTriggerOnFallingEdge() {
+bool RespeqtSettings::serialPortTriggerOnFallingEdge() const {
   return mSettings->value("FallingEdge").toBool();
 }
 
-void RespeqtSettings::setSerialPortTriggerOnFallingEdge(bool use) {
+void RespeqtSettings::setSerialPortTriggerOnFallingEdge(const bool use) const
+{
   mSettings->setValue("FallingEdge", use);
 }
 
-bool RespeqtSettings::serialPortDTRControlEnable() {
+bool RespeqtSettings::serialPortDTRControlEnable() const {
   return mSettings->value("DTRControlEnable").toBool();
 }
 
-void RespeqtSettings::setSerialPortDTRControlEnable(bool use) {
+void RespeqtSettings::setSerialPortDTRControlEnable(const bool use) const
+{
   mSettings->setValue("DTRControlEnable", use);
 }
 
-int RespeqtSettings::serialPortWriteDelay() {
+int RespeqtSettings::serialPortWriteDelay() const {
   return mSettings->value("WriteDelay").toInt();
 }
 
-void RespeqtSettings::setSerialPortWriteDelay(int delay) {
+void RespeqtSettings::setSerialPortWriteDelay(const int delay) const
+{
   mSettings->setValue("WriteDelay", delay);
 }
 
-int RespeqtSettings::serialPortCompErrDelay() {
-  return mSettings->value("CompErrDelay").toInt();
+unsigned int RespeqtSettings::serialPortCompErrDelay() const {
+  return mSettings->value("CompErrDelay").toUInt();
 }
 
-void RespeqtSettings::setSerialPortCompErrDelay(int delay) {
+void RespeqtSettings::setSerialPortCompErrDelay(const unsigned int delay) const
+{
   mSettings->setValue("CompErrDelay", delay);
 }
 
-QString RespeqtSettings::atariSioDriverName() {
+QString RespeqtSettings::atariSioDriverName() const {
   return mSettings->value("AtariSioDriverName").toString();
 }
 
-void RespeqtSettings::setAtariSioDriverName(const QString &name) {
+void RespeqtSettings::setAtariSioDriverName(const QString &name) const
+{
   mSettings->setValue("AtariSioDriverName", name);
 }
 
-int RespeqtSettings::atariSioHandshakingMethod() {
+int RespeqtSettings::atariSioHandshakingMethod() const {
   return mSettings->value("AtariSioHandshakingMethod").toInt();
 }
 
-void RespeqtSettings::setAtariSioHandshakingMethod(int method) {
+void RespeqtSettings::setAtariSioHandshakingMethod(const int method) const
+{
   mSettings->setValue("AtariSioHandshakingMethod", method);
 }
 
-SerialBackend RespeqtSettings::backend() {
+SerialBackend RespeqtSettings::backend() const {
   return static_cast<SerialBackend>(mSettings->value("Backend").toInt());
 }
 
-void RespeqtSettings::setBackend(SerialBackend backend) {
+void RespeqtSettings::setBackend(SerialBackend backend) const
+{
   mSettings->setValue("Backend", static_cast<int>(backend));
 }
 
-QString RespeqtSettings::lastRclDir() {
+QString RespeqtSettings::lastRclDir() const {
   return mSettings->value("LastRclDir").toString();
 }
 
-void RespeqtSettings::setRclDir(const QString &dir) {
+void RespeqtSettings::setRclDir(const QString &dir) const
+{
   mSettings->setValue("LastRclDir", dir);
 }
 
-bool RespeqtSettings::useHighSpeedExeLoader() {
+bool RespeqtSettings::useHighSpeedExeLoader() const {
   return mSettings->value("UseHighSpeedExeLoader").toBool();
 }
 
-void RespeqtSettings::setUseHighSpeedExeLoader(bool use) {
+void RespeqtSettings::setUseHighSpeedExeLoader(const bool use) const
+{
   mSettings->setValue("UseHighSpeedExeLoader", use);
 }
 
-bool RespeqtSettings::printerEmulation() {
+bool RespeqtSettings::printerEmulation() const {
   return mSettings->value("PrinterEmulation").toBool();
 }
 
-void RespeqtSettings::setPrinterEmulation(bool status) {
+void RespeqtSettings::setPrinterEmulation(const bool status) const
+{
   mSettings->setValue("PrinterEmulation", status);
 }
 
-bool RespeqtSettings::useCustomCasBaud() {
+bool RespeqtSettings::useCustomCasBaud() const {
   return mSettings->value("UseCustomCasBaud").toBool();
 }
 
-void RespeqtSettings::setUseCustomCasBaud(bool use) {
+void RespeqtSettings::setUseCustomCasBaud(const bool use) const
+{
   mSettings->setValue("UseCustomCasBaud", use);
 }
 
-int RespeqtSettings::customCasBaud() {
+int RespeqtSettings::customCasBaud() const {
   return mSettings->value("CustomCasBaud").toInt();
 }
 
-void RespeqtSettings::setCustomCasBaud(int baud) {
+void RespeqtSettings::setCustomCasBaud(const int baud) const
+{
   mSettings->setValue("CustomCasBaud", baud);
 }
 
-RespeqtSettings::ImageSettings RespeqtSettings::getImageSettingsFromName(const QString &fileName) {
+RespeqtSettings::ImageSettings RespeqtSettings::getImageSettingsFromName(const QString &fileName) const {
   mSettings->beginReadArray("MountedImageSettings");
   for (int i = 0; i < DISK_COUNT; i++) {
     mSettings->setArrayIndex(i);
@@ -261,30 +279,35 @@ RespeqtSettings::ImageSettings RespeqtSettings::getImageSettingsFromName(const Q
   return ImageSettings{};
 }
 
-RespeqtSettings::ImageSettings RespeqtSettings::mountedImageSetting(int no) {
-  RespeqtSettings::ImageSettings is;
+RespeqtSettings::ImageSettings RespeqtSettings::mountedImageSetting(const int no) const
+{
+  ImageSettings is;
   is.fileName = mSettings->value(QString("MountedImageSettings/%1/FileName").arg(no)).toString();
   is.isWriteProtected = mSettings->value(QString("MountedImageSettings/%1/IsWriteProtected").arg(no)).toBool();
   return is;
 }
 
-RespeqtSettings::ImageSettings RespeqtSettings::recentImageSetting(int no) {
+RespeqtSettings::ImageSettings RespeqtSettings::recentImageSetting(const int no) const
+{
   ImageSettings is;
   is.fileName = mSettings->value(QString("RecentImageSettings/%1/FileName").arg(no)).toString();
   is.isWriteProtected = mSettings->value(QString("RecentImageSettings/%1/IsWriteProtected").arg(no)).toBool();
   return is;
 }
 
-void RespeqtSettings::setMountedImageProtection(int no, bool prot) {
+void RespeqtSettings::setMountedImageProtection(const int no, const bool prot) const
+{
   mSettings->setValue(QString("MountedImageSettings/%1/IsWriteProtected").arg(no), prot);
 }
 
-void RespeqtSettings::setMountedImageSetting(int no, const QString &fileName, bool prot) {
+void RespeqtSettings::setMountedImageSetting(const int no, const QString &fileName, const bool prot) const
+{
   mSettings->setValue(QString("MountedImageSettings/%1/FileName").arg(no), fileName);
   mSettings->setValue(QString("MountedImageSettings/%1/IsWriteProtected").arg(no), prot);
 }
 
-void RespeqtSettings::mountImage(int no, const QString &fileName, bool isWriteProtected) {
+void RespeqtSettings::mountImage(const int no, const QString &fileName, const bool isWriteProtected) const
+{
   if (fileName.isEmpty()) {
     return;
   }
@@ -305,9 +328,9 @@ void RespeqtSettings::mountImage(int no, const QString &fileName, bool isWritePr
     mSettings->beginWriteArray("RecentImageSettings");
     for (int j = i; j < NUM_RECENT_FILES - 1; j++) {
       mSettings->setArrayIndex(j);
-      auto image = mSettings->value(QString("RecentImageSettings/%1").arg(j + 1)).value<ImageSettings>();
-      mSettings->setValue("FileName", image.fileName);
-      mSettings->setValue("IsWriteProtected", image.isWriteProtected);
+      auto [_fileName, _isWriteProtected] = mSettings->value(QString("RecentImageSettings/%1").arg(j + 1)).value<ImageSettings>();
+      mSettings->setValue("FileName", _fileName);
+      mSettings->setValue("IsWriteProtected", _isWriteProtected);
     }
     mSettings->endArray();
     i = NUM_RECENT_FILES - 1;
@@ -330,431 +353,483 @@ void RespeqtSettings::mountImage(int no, const QString &fileName, bool isWritePr
   setMountedImageSetting(no, fileName, isWriteProtected);
 }
 
-void RespeqtSettings::unmountImage(int no) {
-  auto is = mSettings->value(QString("MountedImageSettings/%1").arg(no)).value<ImageSettings>();
+void RespeqtSettings::unmountImage(const int no) const
+{
+  auto [fileName, isWriteProtected] = mSettings->value(QString("MountedImageSettings/%1").arg(no)).value<ImageSettings>();
 
-  for (int i = (NUM_RECENT_FILES - 1); i > 0; i--) {
-    auto image = mSettings->value(QString("RecentImageSettings/%1").arg(no)).value<ImageSettings>();
-    mSettings->setValue(QString("RecentImageSettings/%1/FileName").arg(no), image.fileName);
-    mSettings->setValue(QString("RecentImageSettings/%1/IsWriteProtected").arg(no), image.isWriteProtected);
+  for (int i = NUM_RECENT_FILES - 1; i > 0; i--) {
+    auto [_fileName, _isWriteProtected] = mSettings->value(QString("RecentImageSettings/%1").arg(no)).value<ImageSettings>();
+    mSettings->setValue(QString("RecentImageSettings/%1/FileName").arg(no), _fileName);
+    mSettings->setValue(QString("RecentImageSettings/%1/IsWriteProtected").arg(no), _isWriteProtected);
   }
 
-  mSettings->setValue("RecentImageSettings/0/FileName", is.fileName);
-  mSettings->setValue("RecentImageSettings/0/IsWriteProtected", is.isWriteProtected);
+  mSettings->setValue("RecentImageSettings/0/FileName", fileName);
+  mSettings->setValue("RecentImageSettings/0/IsWriteProtected", isWriteProtected);
 
   setMountedImageSetting(no, "", false);
 }
 
-void RespeqtSettings::swapImages(int no1, int no2) {
-  ImageSettings is1 = mountedImageSetting(no1);
-  ImageSettings is2 = mountedImageSetting(no2);
-  setMountedImageSetting(no1, is2.fileName, is2.isWriteProtected);
-  setMountedImageSetting(no2, is1.fileName, is1.isWriteProtected);
+void RespeqtSettings::swapImages(const int no1, const int no2) const
+{
+  auto [fileName1, isWriteProtected1] = mountedImageSetting(no1);
+  auto [fileName2, isWriteProtected2] = mountedImageSetting(no2);
+  setMountedImageSetting(no1, fileName2, isWriteProtected2);
+  setMountedImageSetting(no2, fileName1, isWriteProtected1);
 }
 
 // Save drive visibility status //
-bool RespeqtSettings::saveDiskVis() {
+bool RespeqtSettings::saveDiskVis() const {
   return mSettings->value("SaveDiskVisibility", true).toBool();
 }
 
-void RespeqtSettings::setSaveDiskVis(bool saveDvis) {
+void RespeqtSettings::setSaveDiskVis(const bool saveDvis) const
+{
   mSettings->setValue("SaveDiskVisibility", saveDvis);
 }
 
 // Drive visibility status //
-bool RespeqtSettings::D9DOVisible() {
+bool RespeqtSettings::D9DOVisible() const {
   return mSettings->value("D9DOVisible", true).toBool();
 }
 
-void RespeqtSettings::setD9DOVisible(bool dVis) {
+void RespeqtSettings::setD9DOVisible(const bool dVis) const
+{
   if (saveDiskVis()) {
     mSettings->setValue("D9DOVisible", dVis);
   }
 }
 
 // Shade Mode Enable //
-bool RespeqtSettings::enableShade() {
+bool RespeqtSettings::enableShade() const {
   return mSettings->value("EnableShadeByDefault", false).toBool();
 }
 
-void RespeqtSettings::setEnableShade(bool shade) {
+void RespeqtSettings::setEnableShade(const bool shade) const
+{
   mSettings->setValue("EnableShadeByDefault", shade);
 }
 
 // Explorer Window always on top
-bool RespeqtSettings::explorerOnTop() {
+bool RespeqtSettings::explorerOnTop() const {
   return mSettings->value("ExplorerOnTop").toBool();
 }
 
-void RespeqtSettings::setExplorerOnTop(bool expOnTop) {
+void RespeqtSettings::setExplorerOnTop(const bool expOnTop) const
+{
   mSettings->setValue("ExplorerOnTop", expOnTop);
 }
 
 // Save/return last main window position/size option //
-bool RespeqtSettings::saveWindowsPos() {
+bool RespeqtSettings::saveWindowsPos() const {
   return mSettings->value("SaveWindowsPosSize", true).toBool();
 }
 
-void RespeqtSettings::setSaveWindowsPos(bool saveMwp) {
+void RespeqtSettings::setSaveWindowsPos(const bool saveMwp) const
+{
   mSettings->setValue("SaveWindowsPosSize", saveMwp);
 }
 
 // mini mode and it's specific window position and width
-bool RespeqtSettings::miniMode() {
+bool RespeqtSettings::miniMode() const {
   return mSettings->value("MiniMode", false).toBool();
 }
 
-void RespeqtSettings::setMiniMode(bool miniMode) {
+void RespeqtSettings::setMiniMode(const bool miniMode) const
+{
   mSettings->setValue("MiniMode", miniMode);
 }
 
-QString RespeqtSettings::lastDiskImageDir() {
+QString RespeqtSettings::lastDiskImageDir() const {
   return mSettings->value("LastDiskImageDir").toString();
 }
 
-void RespeqtSettings::setLastDiskImageDir(const QString &dir) {
+void RespeqtSettings::setLastDiskImageDir(const QString &dir) const
+{
   mSettings->setValue("LastDiskImageDir", dir);
 }
 
-QString RespeqtSettings::lastFolderImageDir() {
+QString RespeqtSettings::lastFolderImageDir() const {
   return mSettings->value("LastFolderImageDir").toString();
 }
 
-void RespeqtSettings::setLastFolderImageDir(const QString &dir) {
+void RespeqtSettings::setLastFolderImageDir(const QString &dir) const
+{
   mSettings->setValue("LastFolderImageDir", dir);
 }
 
-QString RespeqtSettings::lastSessionDir() {
+QString RespeqtSettings::lastSessionDir() const {
   return mSettings->value("LastSessionDir").toString();
 }
 
-void RespeqtSettings::setLastSessionDir(const QString &dir) {
+void RespeqtSettings::setLastSessionDir(const QString &dir) const
+{
   mSettings->setValue("LastSessionDir", dir);
 }
 
-QString RespeqtSettings::lastExeDir() {
+QString RespeqtSettings::lastExeDir() const {
   return mSettings->value("LastExeDir").toString();
 }
 
-void RespeqtSettings::setLastExeDir(const QString &dir) {
+void RespeqtSettings::setLastExeDir(const QString &dir) const
+{
   mSettings->setValue("LastExeDir", dir);
 }
 
-QString RespeqtSettings::lastExtractDir() {
+QString RespeqtSettings::lastExtractDir() const {
   return mSettings->value("LastExtractDir").toString();
 }
 
-void RespeqtSettings::setLastExtractDir(const QString &dir) {
+void RespeqtSettings::setLastExtractDir(const QString &dir) const
+{
   mSettings->setValue("LastExtractDir", dir);
 }
 
-QString RespeqtSettings::lastPrinterTextDir() {
+QString RespeqtSettings::lastPrinterTextDir() const {
   return mSettings->value("LastPrinterTextDir").toString();
 }
 
-void RespeqtSettings::setLastPrinterTextDir(const QString &dir) {
+void RespeqtSettings::setLastPrinterTextDir(const QString &dir) const
+{
   mSettings->setValue("LastPrinterTextDir", dir);
 }
 
-QString RespeqtSettings::lastCasDir() {
+QString RespeqtSettings::lastCasDir() const {
   return mSettings->value("LastCasDir").toString();
 }
 
-void RespeqtSettings::setLastCasDir(const QString &dir) {
+void RespeqtSettings::setLastCasDir(const QString &dir) const
+{
   mSettings->setValue("LastCasDir", dir);
 }
 
-QString RespeqtSettings::i18nLanguage() {
+QString RespeqtSettings::i18nLanguage() const {
   return mSettings->value("I18nLanguage").toString();
 }
 
-void RespeqtSettings::setI18nLanguage(const QString &lang) {
+void RespeqtSettings::setI18nLanguage(const QString &lang) const
+{
   mSettings->setValue("I18nLanguage", lang);
 }
 
-bool RespeqtSettings::minimizeToTray() {
+bool RespeqtSettings::minimizeToTray() const {
   return mSettings->value("MinimizeToTray").toBool();
 }
 
-void RespeqtSettings::setMinimizeToTray(bool tray) {
+void RespeqtSettings::setMinimizeToTray(const bool tray) const
+{
   mSettings->setValue("MinimizeToTray", tray);
 }
 
-bool RespeqtSettings::filterUnderscore() {
+bool RespeqtSettings::filterUnderscore() const {
   return mSettings->value("FilterUnderscore").toBool();
 }
 
-void RespeqtSettings::setfilterUnderscore(bool filter) {
+void RespeqtSettings::setfilterUnderscore(const bool filter) const
+{
   mSettings->setValue("FilterUnderscore", filter);
 }
 
-bool RespeqtSettings::limitFileEntries() {
+bool RespeqtSettings::limitFileEntries() const {
   return mSettings->value("LimitFileEntries").toBool();
 }
 
-void RespeqtSettings::setlimitFileEntries(bool limit) {
+void RespeqtSettings::setlimitFileEntries(const bool limit) const
+{
   mSettings->setValue("LimitFileEntries", limit);
 }
 
-bool RespeqtSettings::capitalLettersInPCLINK() {
+bool RespeqtSettings::capitalLettersInPCLINK() const {
   return mSettings->value("CapitalLettersInPCLINK").toBool();
 }
 
-void RespeqtSettings::setCapitalLettersInPCLINK(bool caps) {
+void RespeqtSettings::setCapitalLettersInPCLINK(const bool caps) const
+{
   mSettings->setValue("CapitalLettersInPCLINK", caps);
 }
 
-bool RespeqtSettings::isURLSubmitEnabled() {
+bool RespeqtSettings::isURLSubmitEnabled() const {
   return mSettings->value("URLSubmit").toBool();
 }
 
-void RespeqtSettings::setURLSubmit(bool enabled) {
+void RespeqtSettings::setURLSubmit(const bool enabled) const
+{
   mSettings->setValue("URLSubmit", enabled);
 }
 
-bool RespeqtSettings::isSpyMode() {
+bool RespeqtSettings::isSpyMode() const {
   return mSettings->value("SpyMode").toBool();
 }
 
-void RespeqtSettings::setSpyMode(bool enabled) {
+void RespeqtSettings::setSpyMode(const bool enabled) const
+{
   mSettings->setValue("SpyMode", enabled);
 }
 
-bool RespeqtSettings::isCommandName() {
+bool RespeqtSettings::isCommandName() const {
   return mSettings->value("CommandName").toBool();
 }
 
-void RespeqtSettings::setCommandName(bool enabled) {
+void RespeqtSettings::setCommandName(const bool enabled) const
+{
   mSettings->setValue("CommandName", enabled);
 }
 
-bool RespeqtSettings::isTrackLayout() {
+bool RespeqtSettings::isTrackLayout() const {
   return mSettings->value("TrackLayout").toBool();
 }
 
-void RespeqtSettings::setTrackLayout(bool enabled) {
+void RespeqtSettings::setTrackLayout(const bool enabled) const
+{
   mSettings->setValue("TrackLayout", enabled);
 }
 
-void RespeqtSettings::setPrinterName(int no, const QString &printerName) {
+void RespeqtSettings::setPrinterName(const int no, const QString &printerName) const
+{
   mSettings->setValue(QString("ConnectedPrinterSettings/%1/PrinterName").arg(no), printerName);
 }
 
-QString RespeqtSettings::printerName(int no) const {
+QString RespeqtSettings::printerName(const int no) const {
   return mSettings->value(QString("ConnectedPrinterSettings/%1/PrinterName").arg(no)).toString();
 }
 
-QString RespeqtSettings::atariFixedFontFamily() {
+QString RespeqtSettings::atariFixedFontFamily() const {
   return mSettings->value("AtariFixedFontFamily").toString();
 }
 
-void RespeqtSettings::setAtariFixedFontFamily(QString fontFamily) {
+void RespeqtSettings::setAtariFixedFontFamily(const QString& fontFamily) const
+{
   mSettings->setValue("AtariFixedFontFamily", fontFamily);
 }
 
-bool RespeqtSettings::isPrinterSpyMode() {
+bool RespeqtSettings::isPrinterSpyMode() const {
   return mSettings->value("PrinterSpyMode").toBool();
 }
 
-void RespeqtSettings::setPrinterSpyMode(bool enabled) {
+void RespeqtSettings::setPrinterSpyMode(const bool enabled) const
+{
   mSettings->setValue("PrinterSpyMode", enabled);
 }
 
-bool RespeqtSettings::displayGraphicsInstructions() {
+bool RespeqtSettings::displayGraphicsInstructions() const {
   return mSettings->value("DisplayGraphicsInstructions").toBool();
 }
 
-void RespeqtSettings::setDisplayGraphicsInstructions(bool enabled) {
+void RespeqtSettings::setDisplayGraphicsInstructions(const bool enabled) const
+{
   mSettings->setValue("DisplayGraphicsInstructions", enabled);
 }
 
-bool RespeqtSettings::clearOnStatus() {
+bool RespeqtSettings::clearOnStatus() const {
   return mSettings->value("ClearOnStatus").toBool();
 }
 
-void RespeqtSettings::setClearOnStatus(bool enabled) {
+void RespeqtSettings::setClearOnStatus(const bool enabled) const
+{
   mSettings->setValue("ClearOnStatus", enabled);
 }
 
-bool RespeqtSettings::displayTransmission() {
+bool RespeqtSettings::displayTransmission() const {
   return mSettings->value("DisplayTransmission").toBool();
 }
 
-void RespeqtSettings::setDisplayTransmission(bool displayTransmission) {
+void RespeqtSettings::setDisplayTransmission(const bool displayTransmission) const
+{
   mSettings->setValue("DisplayTransmission", displayTransmission);
 }
 
-bool RespeqtSettings::displayDriveHead() {
+bool RespeqtSettings::displayDriveHead() const {
   return mSettings->value("DisplayDriveHead").toBool();
 }
 
-void RespeqtSettings::setDisplayDriveHead(bool displayDriveHead) {
+void RespeqtSettings::setDisplayDriveHead(const bool displayDriveHead) const
+{
   mSettings->setValue("DisplayDriveHead", displayDriveHead);
 }
 
-bool RespeqtSettings::displayFdcCommands() {
+bool RespeqtSettings::displayFdcCommands() const {
   return mSettings->value("displayFdcCommands").toBool();
 }
 
-void RespeqtSettings::setDisplayFdcCommands(bool displayFdcCommands) {
+void RespeqtSettings::setDisplayFdcCommands(const bool displayFdcCommands) const
+{
   mSettings->setValue("DisplayFdcCommands", displayFdcCommands);
 }
 
-bool RespeqtSettings::displayIndexPulse() {
+bool RespeqtSettings::displayIndexPulse() const {
   return mSettings->value("DisplayIndexPulse").toBool();
 }
 
-void RespeqtSettings::setDisplayIndexPulse(bool displayIndexPulse) {
+void RespeqtSettings::setDisplayIndexPulse(const bool displayIndexPulse) const
+{
   mSettings->setValue("DisplayIndexPulse", displayIndexPulse);
 }
 
-bool RespeqtSettings::displayMotorOnOff() {
+bool RespeqtSettings::displayMotorOnOff() const {
   return mSettings->value("DisplayMotorOnOff").toBool();
 }
 
-void RespeqtSettings::setDisplayMotorOnOff(bool displayMotorOnOff) {
+void RespeqtSettings::setDisplayMotorOnOff(const bool displayMotorOnOff) const
+{
   mSettings->setValue("DisplayMotorOnOff", displayMotorOnOff);
 }
 
-bool RespeqtSettings::displayIDAddressMarks() {
+bool RespeqtSettings::displayIDAddressMarks() const {
   return mSettings->value("DisplayIDAddressMarks").toBool();
 }
 
-void RespeqtSettings::setDisplayIDAddressMarks(bool displayIDAddressMarks) {
+void RespeqtSettings::setDisplayIDAddressMarks(const bool displayIDAddressMarks) const
+{
   mSettings->setValue("DisplayIDAddressMarks", displayIDAddressMarks);
 }
 
-bool RespeqtSettings::displayTrackInformation() {
+bool RespeqtSettings::displayTrackInformation() const {
   return mSettings->value("DisplayTrackInformation").toBool();
 }
 
-void RespeqtSettings::setDisplayTrackInformation(bool displayTrackInformation) {
+void RespeqtSettings::setDisplayTrackInformation(const bool displayTrackInformation) const
+{
   mSettings->setValue("DisplayTrackInformation", displayTrackInformation);
 }
 
-bool RespeqtSettings::disassembleUploadedCode() {
+bool RespeqtSettings::disassembleUploadedCode() const {
   return mSettings->value("DisassembleUploadedCode").toBool();
 }
 
-void RespeqtSettings::setDisassembleUploadedCode(bool disassembleUploadedCode) {
+void RespeqtSettings::setDisassembleUploadedCode(const bool disassembleUploadedCode) const
+{
   mSettings->setValue("DisassembleUploadedCode", disassembleUploadedCode);
 }
 
-bool RespeqtSettings::translatorAutomaticDetection() {
+bool RespeqtSettings::translatorAutomaticDetection() const {
   return mSettings->value("TranslatorAutomaticDetection").toBool();
 }
 
-void RespeqtSettings::setTranslatorAutomaticDetection(bool translatorAutomaticDetection) {
+void RespeqtSettings::setTranslatorAutomaticDetection(const bool translatorAutomaticDetection) const
+{
   mSettings->setValue("TranslatorAutomaticDetection", translatorAutomaticDetection);
 }
 
-bool RespeqtSettings::sioAutoReconnect() {
+bool RespeqtSettings::sioAutoReconnect() const {
   return mSettings->value("SioAutoReconnect").toBool();
 }
 
-void RespeqtSettings::setSioAutoReconnect(bool sioAutoReconnect) {
+void RespeqtSettings::setSioAutoReconnect(const bool sioAutoReconnect) const
+{
   mSettings->setValue("SioAutoReconnect", sioAutoReconnect);
 }
 
-bool RespeqtSettings::hideChipMode() {
+bool RespeqtSettings::hideChipMode() const {
   return mSettings->value("HideChipMode").toBool();
 }
 
-void RespeqtSettings::setHideChipMode(bool hidden) {
+void RespeqtSettings::setHideChipMode(const bool hidden) const
+{
   mSettings->setValue("HideChipMode", hidden);
 }
 
-bool RespeqtSettings::hideHappyMode() {
+bool RespeqtSettings::hideHappyMode() const {
   return mSettings->value("HideHappyMode").toBool();
 }
 
-void RespeqtSettings::setHideHappyMode(bool hidden) {
+void RespeqtSettings::setHideHappyMode(const bool hidden) const
+{
   mSettings->setValue("HideHappyMode", hidden);
 }
 
-bool RespeqtSettings::hideNextImage() {
+bool RespeqtSettings::hideNextImage() const {
   return mSettings->value("HideNextImage").toBool();
 }
 
-void RespeqtSettings::setHideNextImage(bool hidden) {
+void RespeqtSettings::setHideNextImage(const bool hidden) const
+{
   mSettings->setValue("HideNextImage", hidden);
 }
 
-bool RespeqtSettings::hideOSBMode() {
+bool RespeqtSettings::hideOSBMode() const {
   return mSettings->value("HideOSBMode").toBool();
 }
 
-void RespeqtSettings::setHideOSBMode(bool hidden) {
+void RespeqtSettings::setHideOSBMode(const bool hidden) const
+{
   mSettings->setValue("HideOSBMode", hidden);
 }
 
-bool RespeqtSettings::hideToolDisk() {
+bool RespeqtSettings::hideToolDisk() const {
   return mSettings->value("HideToolDisk").toBool();
 }
 
-void RespeqtSettings::setHideToolDisk(bool hidden) {
+void RespeqtSettings::setHideToolDisk(const bool hidden) const
+{
   mSettings->setValue("HideToolDisk", hidden);
 }
 
-QString RespeqtSettings::translatorDiskImagePath() {
+QString RespeqtSettings::translatorDiskImagePath() const {
   return mSettings->value("TranslatorDiskImagePath").toString();
 }
 
-void RespeqtSettings::setTranslatorDiskImagePath(const QString &diskImage) {
+void RespeqtSettings::setTranslatorDiskImagePath(const QString &diskImage) const
+{
   mSettings->setValue("TranslatorDiskImagePath", diskImage);
 }
 
-QString RespeqtSettings::toolDiskImagePath() {
+QString RespeqtSettings::toolDiskImagePath() const {
   return mSettings->value("ToolDiskImagePath").toString();
 }
 
-void RespeqtSettings::setToolDiskImagePath(const QString &diskImage) {
+void RespeqtSettings::setToolDiskImagePath(const QString &diskImage) const
+{
   mSettings->setValue("ToolDiskImagePath", diskImage);
 }
 
-bool RespeqtSettings::activateChipModeWithTool() {
+bool RespeqtSettings::activateChipModeWithTool() const {
   return mSettings->value("ActivateChipModeWithTool").toBool();
 }
 
-void RespeqtSettings::setActivateChipModeWithTool(bool activate) {
+void RespeqtSettings::setActivateChipModeWithTool(const bool activate) const
+{
   mSettings->setValue("ActivateChipModeWithTool", activate);
 }
 
-bool RespeqtSettings::activateHappyModeWithTool() {
+bool RespeqtSettings::activateHappyModeWithTool() const {
   return mSettings->value("ActivateHappyModeWithTool").toBool();
 }
 
-void RespeqtSettings::setActivateHappyModeWithTool(bool activate) {
+void RespeqtSettings::setActivateHappyModeWithTool(const bool activate) const
+{
   mSettings->setValue("ActivateHappyModeWithTool", activate);
 }
 
-bool RespeqtSettings::displayCpuInstructions() {
+bool RespeqtSettings::displayCpuInstructions() const {
   return mSettings->value("DisplayCpuInstructions").toBool();
 }
 
-void RespeqtSettings::setDisplayCpuInstructions(bool displayCpuInstructions) {
+void RespeqtSettings::setDisplayCpuInstructions(const bool displayCpuInstructions) const
+{
   mSettings->setValue("DisplayCpuInstructions", displayCpuInstructions);
 }
 
-QString RespeqtSettings::traceFilename() {
+QString RespeqtSettings::traceFilename() const {
   return mSettings->value("TraceFilename").toString();
 }
 
-void RespeqtSettings::setTraceFilename(const QString &filename) {
+void RespeqtSettings::setTraceFilename(const QString &filename) const
+{
   mSettings->setValue("TraceFilename", filename);
 }
 
 #ifdef Q_OS_MAC
-void RespeqtSettings::setNativeMenu(bool nativeMenu) {
+void RespeqtSettings::setNativeMenu(const bool nativeMenu) const
+{
   mSettings->setValue("NativeMenu", nativeMenu);
 }
 
-bool RespeqtSettings::nativeMenu() {
+bool RespeqtSettings::nativeMenu() const {
   return mSettings->value("NativeMenu").toBool();
 }
 #endif
 
-void RespeqtSettings::setRawPrinterName(const QString &name) {
+void RespeqtSettings::setRawPrinterName(const QString &name) const
+{
   mSettings->setValue("RawPrinterName", name);
 }
 
@@ -767,7 +842,7 @@ bool RespeqtSettings::debugMenuVisible() const {
   return mSettings->value("DebugMenuVisible").toBool();
 }
 
-void RespeqtSettings::setDebugMenuVisible(bool menuVisible)
+void RespeqtSettings::setDebugMenuVisible(const bool menuVisible) const
 {
     mSettings->setValue("DebugMenuVisible", menuVisible);
 }
@@ -777,24 +852,24 @@ auto RespeqtSettings::isTnfsEnabled() const -> bool
     return mSettings->value("IsTnfsEnabled", false).toBool();
 }
 
-auto RespeqtSettings::setTnfsEnabled(bool enable) -> void
+auto RespeqtSettings::setTnfsEnabled(const bool enable) const -> void
 {
     mSettings->setValue("IsTnfsEnabled", enable);
 }
 
-QString RespeqtSettings::mostRecentBrowserFolder() {
-  QStringList folders = recentBrowserFolders();
-
-  if (!folders.isEmpty())
+QString RespeqtSettings::mostRecentBrowserFolder() const
+{
+  if (QStringList folders = recentBrowserFolders(); !folders.isEmpty())
     return folders.front();
 
-  return QString();
+  return {};
 }
 
-QStringList RespeqtSettings::recentBrowserFolders() {
+QStringList RespeqtSettings::recentBrowserFolders() const
+{
   QStringList folders;
 
-  int size = mSettings->beginReadArray("RecentBrowserFolders");
+  const int size = mSettings->beginReadArray("RecentBrowserFolders");
   for (int i = 0; i < size; i++) {
     mSettings->setArrayIndex(i);
     QString value = mSettings->value("FileFolder").toString();
@@ -805,12 +880,12 @@ QStringList RespeqtSettings::recentBrowserFolders() {
   return folders;
 }
 
-bool RespeqtSettings::isDiskImage(const QString &name)
+// ReSharper disable once CppMemberFunctionMayBeStatic
+bool RespeqtSettings::isDiskImage(const QString &name) // NOLINT(*-convert-member-functions-to-static)
 {
     foreach (const QString &fileType, FileTypes::getDiskImageTypes())
     {
-        QString ext = fileType.right(4);
-        if (name.endsWith(ext, osCaseSensitivity()))
+      if (QString ext = fileType.right(4); name.endsWith(ext, osCaseSensitivity()))
             return true;
     }
     return false;
@@ -818,58 +893,57 @@ bool RespeqtSettings::isDiskImage(const QString &name)
 
 QStringList RespeqtSettings::buildBrowserFolders()
 {
-    QStringList folders;
+  QStringList folders;
 
-    // build a list of MRU folders for the GUI dropdown list
+  // build a list of MRU folders for the GUI dropdown list
 
-    foreach (const QString& name, recentBrowserFolders())
+  foreach(const QString& name, recentBrowserFolders())
+  {
+    if (auto fileInfo = QFileInfo(name); fileInfo.exists())
     {
-        auto fileInf = QFileInfo(name);
-        if (fileInf.exists())
-        {
-            QString path = fileInf.isFile() ? fileInf.path() : name;    // don't want file names in dropdown
-            folders += path;
-        }
-        else if (isDiskImage(name)) // MRU missing. First check if a disk is selected
-        {
-            QString path = DbUtils::getParentDir(name);
-            if (QFileInfo::exists(path))
-            {
-                folders += path;    // Keep parent folder of bad disk
-            }
-            else
-            {
-                qDebug() << "!w" << QString("Disk Collection Browser most recent list updated. '%1' not found.").arg(name);
-                delMostRecentBrowserFolder(name);
-            }
-        }
-        else    // Simple case of missing folder
-        {
-            qDebug() << "!w" << QString("Disk Collection Browser most recent list updated. Folder '%1' not found.").arg(name);
-            delMostRecentBrowserFolder(name);
-        }
+      const QString path = fileInfo.isFile() ? fileInfo.path() : name; // don't want file names in dropdown
+      folders += path;
     }
-    return folders;
+    else if (isDiskImage(name)) // MRU missing. First check if a disk is selected
+    {
+      if (QString path = DbUtils::getParentDir(name); QFileInfo::exists(path))
+      {
+        folders += path; // Keep parent folder of bad disk
+      }
+      else
+      {
+        qDebug() << "!w" << QString("Disk Collection Browser most recent list updated. '%1' not found.").arg(name);
+        delMostRecentBrowserFolder(name);
+      }
+    }
+    else // Simple case of missing folder
+    {
+      qDebug() << "!w" << QString("Disk Collection Browser most recent list updated. Folder '%1' not found.").
+        arg(name);
+      delMostRecentBrowserFolder(name);
+    }
+  }
+  return folders;
 }
 
-void RespeqtSettings::setMostRecentBrowserFolder(const QString& name) {
+void RespeqtSettings::setMostRecentBrowserFolder(const QString& name) const
+{
   if (mostRecentBrowserFolder() == name)
     return;
 
-  auto fileInfo = QFileInfo(name);
+  const auto fileInfo = QFileInfo(name);
 
   if (!fileInfo.exists())
     return;
 
-  QString path = fileInfo.isFile() ? fileInfo.path() : name;
+  const QString path = fileInfo.isFile() ? fileInfo.path() : name;
 
   QStringList folders = recentBrowserFolders();
 
   for (int i = 0; i < folders.size(); ++i) {
     QString text = folders.at(i);
-    QFileInfo fi = QFileInfo(text);
-    QString test = fi.isFile() ? fi.path() : text;
-    if (test == path)
+    auto fi = QFileInfo(text);
+    if (QString test = fi.isFile() ? fi.path() : text; test == path)
       folders.removeAt(i);
   }
   folders.insert(0, name);
@@ -880,29 +954,29 @@ void RespeqtSettings::setMostRecentBrowserFolder(const QString& name) {
   writeRecentBrowserFolders(folders);
 }
 
-void RespeqtSettings::delMostRecentBrowserFolder(const QString& name) {
-  auto fileInfo = QFileInfo(name);
-  QString path = fileInfo.isFile() ? fileInfo.path() : name;
+void RespeqtSettings::delMostRecentBrowserFolder(const QString& name) const
+{
+  const auto fileInfo = QFileInfo(name);
+  const QString path = fileInfo.isFile() ? fileInfo.path() : name;
   QStringList folders = recentBrowserFolders();
 
   for (int i = 0; i < folders.size(); ++i) {
     QString text = folders.at(i);
-    QFileInfo fi = QFileInfo(text);
-    QString test = fi.isFile() ? fi.path() : text;
-    if (test == path)
+    auto fi = QFileInfo(text);
+    if (QString test = fi.isFile() ? fi.path() : text; test == path)
       folders.removeAt(i);
   }
 
   writeRecentBrowserFolders(folders);
 }
 
-void RespeqtSettings::writeRecentBrowserFolders(const QStringList& folders) {
+void RespeqtSettings::writeRecentBrowserFolders(const QStringList& folders) const
+{
   int index = 0;
 
   mSettings->beginWriteArray("RecentBrowserFolders");
   foreach (QString folder, folders) {
-    auto fileInfo = QFileInfo(folder);
-    if (!fileInfo.exists()) {
+    if (auto fileInfo = QFileInfo(folder); !fileInfo.exists()) {
       if (fileInfo.isFile())
         folder = fileInfo.path();
       else
@@ -917,61 +991,71 @@ void RespeqtSettings::writeRecentBrowserFolders(const QStringList& folders) {
   mSettings->endArray();
 }
 
-bool RespeqtSettings::showDiskBrowser() {
+bool RespeqtSettings::showDiskBrowser() const
+{
   return mSettings->value("/DiskBrowserDlg/show").toBool();
 }
 
-void RespeqtSettings::setShowDiskBrowser(bool show /*= true*/) {
+void RespeqtSettings::setShowDiskBrowser(const bool show /*= true*/) const
+{
   mSettings->setValue("/DiskBrowserDlg/show", show);
 }
 
-int RespeqtSettings::diskBrowserHorzSplitPos() {
+int RespeqtSettings::diskBrowserHorzSplitPos() const
+{
   return mSettings->value("/DiskBrowserDlg/HorzSplitPos", -1).toInt();
 }
 
-int RespeqtSettings::diskBrowserVertSplitPos() {
+int RespeqtSettings::diskBrowserVertSplitPos() const
+{
   return mSettings->value("/DiskBrowserDlg/VertSplitPos", -1).toInt();
 }
 
-void RespeqtSettings::setDiskBrowserHorzSplitPos(int pos) {
+void RespeqtSettings::setDiskBrowserHorzSplitPos(const int pos) const
+{
   mSettings->setValue("/DiskBrowserDlg/HorzSplitPos", pos);
 }
 
-void RespeqtSettings::setDiskBrowserVertSplitPos(int pos) {
+void RespeqtSettings::setDiskBrowserVertSplitPos(const int pos) const
+{
   mSettings->setValue("/DiskBrowserDlg/VertSplitPos", pos);
 }
 
-void RespeqtSettings::setOptionsDlgSplitPos(int pos) {
+void RespeqtSettings::setOptionsDlgSplitPos(const int pos) const
+{
   mSettings->setValue("/OptionsDialog/SplitterPos", pos);
 }
 
-int RespeqtSettings::optionsDialogSplitPos() {
+int RespeqtSettings::optionsDialogSplitPos() const {
   return mSettings->value("/OptionsDialog/SplitterPos",-1).toInt();
 }
 
-bool RespeqtSettings::saveMainWinGeometry(QMainWindow* window, bool isMiniMode) {
+bool RespeqtSettings::saveMainWinGeometry(const QMainWindow* window, const bool isMiniMode) const
+{
   if (!window || !saveWindowsPos())
     return false;
 
   setMiniMode(isMiniMode);
-  QString key = isMiniMode ? "MiniWindow" : "MainWindow";
+  const QString key = isMiniMode ? "MiniWindow" : "MainWindow";
   return saveWidgetGeometry(window, key);
 }
 
-bool RespeqtSettings::restoreMainWinGeometry(QMainWindow* window, bool isMiniMode) {
+bool RespeqtSettings::restoreMainWinGeometry(QMainWindow* window, const bool isMiniMode) const
+{
   if (!window || !saveWindowsPos())
     return false;
 
-  QString key = isMiniMode ? "MiniWindow" : "MainWindow";
-  QRect rcDef = isMiniMode ? DefaultMiniModeRect : DefaultFullModeRect;
+  const QString key = isMiniMode ? "MiniWindow" : "MainWindow";
+  const QRect rcDef = isMiniMode ? DefaultMiniModeRect : DefaultFullModeRect;
   return restoreWidgetGeometry(window, key, rcDef);
 }
 
-bool RespeqtSettings::saveWidgetGeometry(QWidget* widget, const QString& name) {
+bool RespeqtSettings::saveWidgetGeometry(const QWidget* widget, const QString& name) const
+{
   if (!widget || !saveWindowsPos())
     return false;
 
-  QString key = name.isEmpty() ? widget->objectName() : name;
+  const QString key = name.isEmpty() ? widget->objectName() : name;
   if (key.isEmpty())
     return false;
 
@@ -979,7 +1063,8 @@ bool RespeqtSettings::saveWidgetGeometry(QWidget* widget, const QString& name) {
   return true;
 }
 
-bool RespeqtSettings::restoreWidgetGeometry(QWidget* widget, const QString& name, const QRect& defRect) {
+bool RespeqtSettings::restoreWidgetGeometry(QWidget* widget, const QString& name, const QRect& defRect) const
+{
   if (widget == nullptr)
     return false;
 
@@ -989,7 +1074,7 @@ bool RespeqtSettings::restoreWidgetGeometry(QWidget* widget, const QString& name
 
   key += "/geometry";
   if (mSettings->contains(key)) {
-    auto geoBytes = mSettings->value(key).toByteArray();
+    const auto geoBytes = mSettings->value(key).toByteArray();
     widget->restoreGeometry(geoBytes);
   } else if (defRect.isValid()) {
     widget->setGeometry(defRect);
@@ -998,7 +1083,7 @@ bool RespeqtSettings::restoreWidgetGeometry(QWidget* widget, const QString& name
   return true;
 }
 
-bool RespeqtSettings::windowPosSaved(QWidget* widget, const QString& name)
+bool RespeqtSettings::windowPosSaved(const QWidget* widget, const QString& name) const
 {
     if (widget == nullptr)
         return false;
@@ -1012,18 +1097,18 @@ bool RespeqtSettings::windowPosSaved(QWidget* widget, const QString& name)
     return mSettings->contains(key);
 }
 
-void RespeqtSettings::setDbDataSource(DbDataSource newDbSource)
+void RespeqtSettings::setDbDataSource(const DbDataSource newDbSource)
 {
-    auto curDbSource = dbDataSource();
+    const auto curDbSource = dbDataSource();
     if (curDbSource == newDbSource)     // sanity check
         return;
 
     if (!sDbSettings)   // need current artwork data from the source?
     {
         if (curDbSource == DbData_appSettings)
-            sDbSettings.reset(new DbIni);
+            sDbSettings = std::make_unique<DbIni>();
         else
-            sDbSettings.reset(new DbJson);      // TBD untested (see above)
+            sDbSettings = std::make_unique<DbJson>();      // TBD untested (see above)
     }
 
     mSettings->setValue("/DiskBrowserDlg/source", newDbSource);
@@ -1035,8 +1120,8 @@ void RespeqtSettings::setDbDataSource(DbDataSource newDbSource)
         const DirMap& dirMap = sDbSettings->getDirMap();
         for (auto itDir = dirMap.begin(); itDir != dirMap.end(); ++itDir)
         {
-            const QString dir = itDir.key();
-            DbJson* pNew = new DbJson;
+            const QString& dir = itDir.key();
+            const auto pNew = new DbJson;
             const QString pic = DbUtils::removePrefix(dir, itDir.value().pic);
             pNew->setDataDir(dir);
             pNew->setPicture(pic, itDir.key());
@@ -1044,11 +1129,11 @@ void RespeqtSettings::setDbDataSource(DbDataSource newDbSource)
             const ArtMap& artMap = itDir.value().map;
             for (auto itArt = artMap.begin(); itArt != artMap.end(); ++itArt)
             {
-                QString disk = itArt.key();
-                const FloppyArt& art = itArt.value();
-                const QString artPic = DbUtils::removePrefix(dir, art.pic);
-                pNew->setPicture(art.pic, dir, disk);
-                pNew->setLabel(art.label, dir, disk);
+                const QString& disk = itArt.key();
+                const auto& [picturePath, label] = itArt.value();
+                //const QString artPic = DbUtils::removePrefix(dir, art.pic);
+                pNew->setPicture(picturePath, dir, disk);
+                pNew->setLabel(label, dir, disk);
             }
             //pNew->save(); delete does this next
             delete pNew;
@@ -1070,7 +1155,7 @@ void RespeqtSettings::setDbDataSource(DbDataSource newDbSource)
 
             foreach (const QString& dir, buildBrowserFolders())
             {
-                sDbSettings.reset(new DbJson);
+                sDbSettings = std::make_unique<DbJson>();
                 sDbSettings->setDataDir(dir);
                 pNew->merge(*sDbSettings);
             }
@@ -1102,56 +1187,57 @@ void RespeqtSettings::setDbDataSource(DbDataSource newDbSource)
     // to make sure there's one and only one node as it writes it out.
 }
 
-DbDataSource RespeqtSettings::dbDataSource()
+DbDataSource RespeqtSettings::dbDataSource() const
 {
     //assert(mSettings->group().isEmpty());
     return static_cast<DbDataSource>(mSettings->value("/DiskBrowserDlg/source", DbData_appSettings).toInt());
 }
 
-void RespeqtSettings::setDbFileNames(bool useFileNames, bool favorJson)
+void RespeqtSettings::setDbFileNames(const bool useFileNames, const bool favorJson) const
 {
     mSettings->setValue("/DiskBrowserDlg/use_filenames", useFileNames);
     mSettings->setValue("/DiskBrowserDlg/favor_json", favorJson);
 }
 
-bool RespeqtSettings::dbFavorJson()
+bool RespeqtSettings::dbFavorJson() const
 {
     return mSettings->value("/DiskBrowserDlg/json_1st", true).toBool();
 }
 
-bool RespeqtSettings::dbUseFileNames()
+bool RespeqtSettings::dbUseFileNames() const
 {
     return mSettings->value("/DiskBrowserDlg/use_filenames", true).toBool();
 }
 
-bool RespeqtSettings::dbCopyPics()
+bool RespeqtSettings::dbCopyPics() const
 {
     return mSettings->value("/DiskBrowserDlg/copy_pics", true).toBool();
 }
 
-void RespeqtSettings::setDbCopyPics(bool copy)
+void RespeqtSettings::setDbCopyPics(const bool copy) const
 {
     mSettings->setValue("/DiskBrowserDlg/copy_pics", copy);
 }
 
-QString RespeqtSettings::appDataFolder()
+QString RespeqtSettings::appDataFolder() const
 {
     QString folder = mSettings->value("/DiskBrowserDlg/appData_folder", QString()).toString();
     if (folder.isEmpty())
     {
-        auto    locType   = QStandardPaths::AppDataLocation;
-        QString appFolder = QStandardPaths::writableLocation(locType);
-        QDir appDataDir(appFolder);
+        constexpr auto    locType   = QStandardPaths::AppDataLocation;
+        const QString appFolder = QStandardPaths::writableLocation(locType);
+        const QDir appDataDir(appFolder);
 
         if (!appDataDir.exists())
-            appDataDir.mkpath(".");
+            if (!appDataDir.mkpath("."))
+              return {};
 
         folder = appDataDir.absolutePath();
     }
     return folder;
 }
 
-void RespeqtSettings::setAppFolderDir(const QString& appDataDir)
+void RespeqtSettings::setAppFolderDir(const QString& appDataDir) const
 {
     mSettings->setValue("/DiskBrowserDlg/appData_folder", appDataDir);
 }
@@ -1164,7 +1250,7 @@ void RespeqtSettings::setAppFolderDir(const QString& appDataDir)
 // that the number is a starting value only: PicPreview::scaleFonts() replaces
 // it with a size derived from the label rectangle and the user's scale factor
 // before anything is painted.
-static int labelFontPointSize(int points) {
+static int labelFontPointSize(const int points) {
     return points > 0 ? points : UiScale::defaultPointSize();
 }
 
@@ -1172,7 +1258,7 @@ static int labelFontPointSize(const QFont& font) {
     return labelFontPointSize(font.pointSize());
 }
 
-void RespeqtSettings::setDbTitleFont(const LabelFont& font)
+void RespeqtSettings::setDbTitleFont(const LabelFont& font) const
 {
     mSettings->beginGroup("/DiskBrowserDlg");
     mSettings->beginGroup("title_font");
@@ -1186,7 +1272,7 @@ void RespeqtSettings::setDbTitleFont(const LabelFont& font)
     mSettings->endGroup();
 }
 
-LabelFont RespeqtSettings::dbTitleFont()
+LabelFont RespeqtSettings::dbTitleFont() const
 {
     LabelFont font;
     mSettings->beginGroup("/DiskBrowserDlg");
@@ -1202,7 +1288,7 @@ LabelFont RespeqtSettings::dbTitleFont()
     return font;
 }
 
-void RespeqtSettings::setDbIndexFont(const LabelFont& font)
+void RespeqtSettings::setDbIndexFont(const LabelFont& font) const
 {
     mSettings->beginGroup("/DiskBrowserDlg");
     mSettings->beginGroup("index_font");
@@ -1216,7 +1302,7 @@ void RespeqtSettings::setDbIndexFont(const LabelFont& font)
     mSettings->endGroup();
 }
 
-LabelFont RespeqtSettings::dbIndexFont()
+LabelFont RespeqtSettings::dbIndexFont() const
 {
     LabelFont font;
     mSettings->beginGroup("/DiskBrowserDlg");
@@ -1232,12 +1318,12 @@ LabelFont RespeqtSettings::dbIndexFont()
     return font;
 }
 
-void RespeqtSettings::setDiskPic(const QString& pic)
+void RespeqtSettings::setDiskPic(const QString& pic) const
 {
     mSettings->setValue("/DiskBrowserDlg/disk_pic", pic);
 }
 
-QString RespeqtSettings::diskPic()
+QString RespeqtSettings::diskPic() const
 {
     return mSettings->value("/DiskBrowserDlg/disk_pic").toString();
 }
@@ -1247,9 +1333,9 @@ const std::unique_ptr<DbSettings>& RespeqtSettings::dbSettings()
     if (!sDbSettings)   // instantiate on demand
     {
         if (instance()->dbDataSource() == DbData_appSettings)
-            sDbSettings.reset(new DbIni);
+            sDbSettings = std::make_unique<DbIni>();
         else
-            sDbSettings.reset(new DbJson);
+            sDbSettings = std::make_unique<DbJson>();
     }
     return sDbSettings;
 }

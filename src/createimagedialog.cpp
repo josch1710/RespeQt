@@ -9,12 +9,10 @@
 #include "createimagedialog.h"
 #include "ui_createimagedialog.h"
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 CreateImageDialog::CreateImageDialog(QWidget *parent) : QDialog(parent),
                                                         m_ui(new Ui::CreateImageDialog) {
   Qt::WindowFlags flags = windowFlags();
-  flags = flags & (~Qt::WindowContextHelpButtonHint);
+  flags = flags & ~Qt::WindowContextHelpButtonHint;
   setWindowFlags(flags);
 
   m_ui->setupUi(this);
@@ -34,7 +32,6 @@ CreateImageDialog::CreateImageDialog(QWidget *parent) : QDialog(parent),
   connect(m_ui->stdSingleButton, &QRadioButton::toggled, this, &CreateImageDialog::standardSingleToggled);
   connect(m_ui->stdEnhancedButton, &QRadioButton::toggled, this, &CreateImageDialog::standardEnhancedToggled);
 }
-#pragma clang diagnostic pop
 
 CreateImageDialog::~CreateImageDialog() {
   delete m_ui;
@@ -51,11 +48,13 @@ void CreateImageDialog::changeEvent(QEvent *e) {
   }
 }
 
-int CreateImageDialog::sectorCount() {
+int CreateImageDialog::sectorCount() const
+{
   return m_ui->sectorsSpin->value();
 }
 
-int CreateImageDialog::sectorSize() {
+int CreateImageDialog::sectorSize() const
+{
   switch (m_ui->densityCombo->currentIndex()) {
     case 0:
       return 128;
@@ -70,8 +69,9 @@ int CreateImageDialog::sectorSize() {
   }
 }
 
-void CreateImageDialog::recalculate() {
-  int sectors = m_ui->sectorsSpin->value();
+void CreateImageDialog::recalculate() const
+{
+  const int sectors = m_ui->sectorsSpin->value();
   int size = sectors * sectorSize();
 
   if (m_ui->densityCombo->currentIndex() == 1) {
@@ -82,14 +82,15 @@ void CreateImageDialog::recalculate() {
     }
   }
 
-  int sizeK = (size + 512) / 1024;
+  const int sizeK = (size + 512) / 1024;
 
   m_ui->capacityLabel->setText(tr("Total image capacity: %1 bytes (%2 K)")
                                        .arg(size)
                                        .arg(sizeK));
 }
 
-void CreateImageDialog::standardEnhancedToggled(bool checked) {
+void CreateImageDialog::standardEnhancedToggled(const bool checked) const
+{
   if (checked) {
     m_ui->sectorsSpin->setValue(1040);
     m_ui->densityCombo->setCurrentIndex(0);
@@ -97,7 +98,8 @@ void CreateImageDialog::standardEnhancedToggled(bool checked) {
   }
 }
 
-void CreateImageDialog::standardSingleToggled(bool checked) {
+void CreateImageDialog::standardSingleToggled(const bool checked) const
+{
   if (checked) {
     m_ui->sectorsSpin->setValue(720);
     m_ui->densityCombo->setCurrentIndex(0);
@@ -105,7 +107,8 @@ void CreateImageDialog::standardSingleToggled(bool checked) {
   }
 }
 
-void CreateImageDialog::standardDoubleToggled(bool checked) {
+void CreateImageDialog::standardDoubleToggled(const bool checked) const
+{
   if (checked) {
     m_ui->sectorsSpin->setValue(720);
     m_ui->densityCombo->setCurrentIndex(1);
@@ -113,7 +116,8 @@ void CreateImageDialog::standardDoubleToggled(bool checked) {
   }
 }
 
-void CreateImageDialog::doubleDoubleToggled(bool checked) {
+void CreateImageDialog::doubleDoubleToggled(const bool checked) const
+{
   if (checked) {
     m_ui->sectorsSpin->setValue(1440);
     m_ui->densityCombo->setCurrentIndex(1);
@@ -121,13 +125,15 @@ void CreateImageDialog::doubleDoubleToggled(bool checked) {
   }
 }
 
-void CreateImageDialog::customToggled(bool checked) {
+void CreateImageDialog::customToggled(const bool checked) const
+{
   if (checked) {
     m_ui->geometryWidget->setEnabled(true);
   }
 }
 
-void CreateImageDialog::harddiskToggled(bool checked) {
+void CreateImageDialog::harddiskToggled(const bool checked) const
+{
   if (checked) {
     m_ui->sectorsSpin->setValue(65535);
     m_ui->densityCombo->setCurrentIndex(1);

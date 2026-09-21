@@ -30,7 +30,7 @@ public:
   void passToOldHandler(quint8 command, quint8 aux1, quint8 aux2);
   bool open(const QString &fileName, bool highSpeed);
   void close();
-  void readSector(quint16 sector, QByteArray &data);
+  void readSector(quint16 sector, QByteArray &data) const;
   QString deviceName() override;
 
 signals:

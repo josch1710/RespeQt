@@ -9,11 +9,10 @@
 #include <QMessageBox>
 #include <QString>
 #include <QVector>
-#include <QPalette>
 #include <memory>
 #include <utility>
 
-PrinterWidget::PrinterWidget(int printerNum, QWidget *parent)
+PrinterWidget::PrinterWidget(const int printerNum, QWidget *parent)
     : QFrame(parent), ui(new Ui::PrinterWidget), printerNo_(printerNum), mPrinter(nullptr)
       //, mDevice(nullptr)
       ,
@@ -32,8 +31,6 @@ PrinterWidget::PrinterWidget(int printerNum, QWidget *parent)
   // Connect widget actions to buttons
   ui->buttonDisconnectPrinter->setDefaultAction(ui->actionDisconnectPrinter);
   ui->buttonConnectPrinter->setDefaultAction(ui->actionConnectPrinter);
-
-  applyPaletteColors();
 }
 
 PrinterWidget::~PrinterWidget() {
@@ -41,8 +38,9 @@ PrinterWidget::~PrinterWidget() {
   delete ui;
 }
 
-void PrinterWidget::setup() {
-  QString printerTxt = QString("P%1").arg(printerNo_ + 1);
+void PrinterWidget::setup() const
+{
+  const QString printerTxt = QString("P%1").arg(printerNo_ + 1);
   ui->printerLabel->setText(printerTxt);
 
   // Keep the printer number column aligned without pinning the label to 26x26.
@@ -52,18 +50,16 @@ void PrinterWidget::setup() {
   ui->atariPrinters->clear();
   std::map<QString, int> list;
   ui->atariPrinters->addItem(tr("None"), -1);
-  auto factory = Printers::PrinterFactory::instance();
+  const auto factory = Printers::PrinterFactory::instance();
   const QVector<QString> pnames = factory->getPrinterNames();
-  QVector<QString>::const_iterator it;
-  for (it = pnames.begin(); it != pnames.end(); ++it) {
-    ui->atariPrinters->addItem(*it);
+  for (const auto & pname : pnames) {
+    ui->atariPrinters->addItem(pname);
   }
 
   // Set to default (none) and then look whether we have a settings
   ui->atariPrinters->setCurrentIndex(0);
   if (RespeqtSettings::instance()->printerName(printerNo_) != "") {
-    int index = ui->atariPrinters->findText(RespeqtSettings::instance()->printerName(printerNo_));
-    if (index != -1) {
+    if (const int index = ui->atariPrinters->findText(RespeqtSettings::instance()->printerName(printerNo_)); index != -1) {
       ui->atariPrinters->setCurrentIndex(index);
     }
   }
@@ -77,22 +73,30 @@ void PrinterWidget::setup() {
 // dimmed by the form through a literal palette override, rgb(104, 104, 104)
 // and rgb(128, 128, 128). Both were chosen for a light window and drop to
 // about 3:1 on a dark one, so derive the dimming from the palette instead.
-void PrinterWidget::applyPaletteColors() {
-#ifdef Q_OS_MAC
-  const auto color{QColor(UiColors::isDark(ui->atariPrinters) ? Qt::black : Qt::white)};
-#else
-  const auto color{QColor(UiColors::isDark(ui->atariPrinters) ? Qt::white : Qt::black)};
-#endif
+void PrinterWidget::applyPaletteColors() const
+{
+  const auto color{QColor(UiColors::isDark(ui->atariPrinters, QPalette::HighlightedText) ? Qt::white : Qt::black)};
   UiColors::setButtonColor(ui->atariPrinters, color);
+  UiColors::setHighlightedTextColor(ui->atariPrinters, color);
 }
 
 // The colours above are derived once, so they would go stale when the user
 // switches the system to dark mode while the window is open.
-void PrinterWidget::changeEvent(QEvent *e) {
+void PrinterWidget::changeEvent(QEvent *e)
+{
   QFrame::changeEvent(e);
   if (e->type() == QEvent::PaletteChange) {
     applyPaletteColors();
   }
+}
+
+void PrinterWidget::showEvent(QShowEvent *e)
+{
+  // On first start, the color has to be other way round.
+  const auto color{QColor(UiColors::isDark(ui->atariPrinters, QPalette::HighlightedText) ? Qt::black : Qt::white)};
+  UiColors::setButtonColor(ui->atariPrinters, color);
+  UiColors::setHighlightedTextColor(ui->atariPrinters, color);
+  QFrame::showEvent(e);
 }
 
 
@@ -115,7 +119,7 @@ bool PrinterWidget::selectPrinter() {
     mPrinter.reset();
   }
   if (mSio) {
-    auto newPrinter = Printers::PrinterFactory::instance()->createPrinter(ui->atariPrinters->currentText(), mSio);
+    const auto newPrinter = Printers::PrinterFactory::instance()->createPrinter(ui->atariPrinters->currentText(), mSio);
     if (newPrinter) {
       mSio->installDevice(static_cast<quint8>(PRINTER_BASE_CDEVIC + printerNo_), newPrinter.data());
       mPrinter = newPrinter;
@@ -164,6 +168,6 @@ void PrinterWidget::disconnectPrinter() {
   emit printerDeactivated(printerNo_, mPrinter);
 }
 
-void PrinterWidget::printerSelectionChanged(const QString &printerName) {
+void PrinterWidget::printerSelectionChanged(const QString &printerName) const {
   RespeqtSettings::instance()->setPrinterName(printerNo_, printerName);
 }

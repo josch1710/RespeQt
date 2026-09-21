@@ -17,18 +17,17 @@
 
 #include <QDir>
 #include <QRadioButton>
-#include <QTranslator>
 
 extern QString g_respeQtAppPath;
 extern bool g_disablePicoHiSpeed;
 
-QString selectedDOS;
+static QString selectedDOS;
 
 BootOptionsDialog::BootOptionsDialog(const QString &bootFolderPath, QWidget *parent) : QDialog(parent),
                                                                                        bootFolderPath_(bootFolderPath),
                                                                                        m_ui(new Ui::BootOptionsDialog) {
   Qt::WindowFlags flags = windowFlags();
-  flags = flags & (~Qt::WindowContextHelpButtonHint);
+  flags = flags & ~Qt::WindowContextHelpButtonHint;
   setWindowFlags(flags);
 
   m_ui->setupUi(this);
@@ -68,7 +67,6 @@ void BootOptionsDialog::accept() {
   QDir dir;
   QFile file;
   QStringList filters;
-  QStringList allFiles;
   QString fileName;
 
   if (m_ui->atariDOS->isChecked()) selectedDOS = "$bootata";
@@ -95,20 +93,21 @@ void BootOptionsDialog::accept() {
           << "x*.dos"
           << "startup.bat"
           << "$*.bin";
-  allFiles = dir.entryList(filters, QDir::Files);
+  QStringList allFiles = dir.entryList(filters, QDir::Files);
   foreach (fileName, allFiles) {
-    file.remove(bootFolderPath_ + "/" + fileName);
+    QFile::remove(bootFolderPath_ + "/" + fileName);
   }
   dir.setPath(g_respeQtAppPath + "/" + selectedDOS);
   allFiles = dir.entryList(QDir::NoDotAndDotDot | QDir::Files);
   foreach (fileName, allFiles) {
-    file.copy(dir.path() + "/" + fileName, bootFolderPath_ + "/" + fileName);
+    QFile::copy(dir.path() + "/" + fileName, bootFolderPath_ + "/" + fileName);
   }
 
   QDialog::accept();
 }
 
-void BootOptionsDialog::picoDOSToggled() {
-  bool enable = m_ui->myPicoDOS->isChecked();
+void BootOptionsDialog::picoDOSToggled() const
+{
+  const bool enable = m_ui->myPicoDOS->isChecked();
   m_ui->disablePicoHiSpeed->setEnabled(enable);
 }

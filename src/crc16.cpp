@@ -43,11 +43,11 @@ Crc16::Crc16() {
   m_crc = 0xFFFF;
 }
 
-void Crc16::Reset(void) {
+void Crc16::Reset() {
   m_crc = 0xFFFF;
 }
 
-unsigned char Crc16::Add(unsigned char data) {
+unsigned char Crc16::Add(const unsigned char data) {
   m_crc = ((m_crc << 8) ^ crcTable[((m_crc >> 8) ^ data) & 0xff]) & 0xffff;
   return data;
 }

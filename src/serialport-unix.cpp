@@ -20,10 +20,9 @@
 #include <QTime>
 #include <QtDebug>
 
+#include <algorithm>
 #include <cerrno>
-#include <cstring>
 #include <fcntl.h>
-#include <sys/types.h>
 #include <unistd.h>
 #ifdef Q_OS_UNIX
 #ifdef Q_OS_LINUX
@@ -40,21 +39,20 @@
 #endif
 
 AbstractSerialPortBackend::AbstractSerialPortBackend(QObject *parent)
-    : QObject(parent) {
-}
+    : QObject(parent) {}
 
-AbstractSerialPortBackend::~AbstractSerialPortBackend() {
-}
+AbstractSerialPortBackend::~AbstractSerialPortBackend() = default;
 
 StandardSerialPortBackend::StandardSerialPortBackend(QObject *parent)
-    : AbstractSerialPortBackend(parent) {
+  : AbstractSerialPortBackend(parent), mHighSpeed(false), mSpeed(0), mMethod(0), mWriteDelay(0), mCompErrDelay(0)
+{
   mHandle = -1;
   mForceHighSpeed = 0;
 }
 
 StandardSerialPortBackend::~StandardSerialPortBackend() {
-  if (isOpen()) {
-    close();
+  if (StandardSerialPortBackend::isOpen()) {
+    StandardSerialPortBackend::close();
   }
 }
 
@@ -66,7 +64,7 @@ QString StandardSerialPortBackend::defaultPortName() {
 
 #ifdef Q_OS_MAC
 QString StandardSerialPortBackend::defaultPortName() {
-  return QString("tty.usbserial");
+  return {"tty.usbserial"};
 }
 #endif
 
@@ -78,7 +76,7 @@ bool StandardSerialPortBackend::open() {
   QString name(SERIAL_PORT_LOCATION);
   name.append(RespeqtSettings::instance()->serialPortName());
   mMethod = RespeqtSettings::instance()->serialPortHandshakingMethod();
-  mWriteDelay = SLEEP_FACTOR * RespeqtSettings::instance()->serialPortWriteDelay();
+  mWriteDelay = static_cast<unsigned long>(SLEEP_FACTOR * RespeqtSettings::instance()->serialPortWriteDelay());
   mCompErrDelay = RespeqtSettings::instance()->serialPortCompErrDelay();
 
   mHandle = ::open(name.toLocal8Bit().constData(), O_RDWR | O_NOCTTY | O_NDELAY);
@@ -94,7 +92,7 @@ bool StandardSerialPortBackend::open() {
       qCritical() << "!e" << tr("Cannot get serial port status");
       return false;
     }
-    status |= (TIOCM_DTR | TIOCM_RTS);
+    status |= TIOCM_DTR | TIOCM_RTS;
     if (ioctl(mHandle, TIOCMSET, &status) < 0) {
       qCritical() << "!e" << tr("Cannot set RTS and CTS lines in serial port '%1': %2").arg(name, lastErrorMessage());
       return false;
@@ -128,7 +126,7 @@ bool StandardSerialPortBackend::open() {
       break;
   }
   /* Notify the user that emulation is started */
-  qWarning() << "!i" << tr("Emulation started through standard serial port backend on '%1' with %2 handshaking.").arg(RespeqtSettings::instance()->serialPortName()).arg(m);
+  qWarning() << "!i" << tr("Emulation started through standard serial port backend on '%1' with %2 handshaking.").arg(RespeqtSettings::instance()->serialPortName(), m);
   return true;
 }
 
@@ -151,28 +149,30 @@ void StandardSerialPortBackend::cancel() {
 int StandardSerialPortBackend::speedByte() {
   if (RespeqtSettings::instance()->serialPortHandshakingMethod() == HANDSHAKE_SOFTWARE) {
     return 0x28;// standard speed (19200)
-  } else if (mForceHighSpeed != 0) {
-    return baudToDivisor(mForceHighSpeed);// speed when SuperArchiver/BitWriter is active
-  } else if (RespeqtSettings::instance()->serialPortUsePokeyDivisors()) {
-    return RespeqtSettings::instance()->serialPortPokeyDivisor();
-  } else {
-    int speed = 0x08;
-    switch (RespeqtSettings::instance()->serialPortMaximumSpeed()) {
-      case 0:
-        speed = 0x28;
-        break;
-      case 1:
-        speed = 0x10;
-        break;
-      case 2:
-        speed = 0x08;
-        break;
-    }
-    return speed;
   }
+  if (mForceHighSpeed != 0) {
+    return baudToDivisor(mForceHighSpeed);// speed when SuperArchiver/BitWriter is active
+  }
+  if (RespeqtSettings::instance()->serialPortUsePokeyDivisors()) {
+    return RespeqtSettings::instance()->serialPortPokeyDivisor();
+  }
+  int speed = 0x08;
+  switch (RespeqtSettings::instance()->serialPortMaximumSpeed()) {
+  default:
+  case 0:
+    speed = 0x28;
+    break;
+  case 1:
+    speed = 0x10;
+    break;
+  case 2:
+    speed = 0x08;
+    break;
+  }
+  return speed;
 }
 
-void StandardSerialPortBackend::forceHighSpeed(int speed) {
+void StandardSerialPortBackend::forceHighSpeed(const unsigned int speed) {
   mForceHighSpeed = speed;
 }
 
@@ -185,23 +185,24 @@ bool StandardSerialPortBackend::setHighSpeed() {
   mHighSpeed = true;
   if (mForceHighSpeed != 0) {
     return setSpeed(mForceHighSpeed);// used to force 52400 when SuperArchiver/BitWriter is active
-  } else if (RespeqtSettings::instance()->serialPortUsePokeyDivisors()) {
-    return setSpeed(divisorToBaud(RespeqtSettings::instance()->serialPortPokeyDivisor()));
-  } else {
-    int speed = 57600;
-    switch (RespeqtSettings::instance()->serialPortMaximumSpeed()) {
-      case 0:
-        speed = 19200;
-        break;
-      case 1:
-        speed = 38400;
-        break;
-      case 2:
-        speed = 57600;
-        break;
-    }
-    return setSpeed(speed);
   }
+  if (RespeqtSettings::instance()->serialPortUsePokeyDivisors()) {
+    return setSpeed(divisorToBaud(RespeqtSettings::instance()->serialPortPokeyDivisor()));
+  }
+  auto speed {57600U};
+  switch (RespeqtSettings::instance()->serialPortMaximumSpeed()) {
+  default:
+  case 0:
+    speed = 19200;
+    break;
+  case 1:
+    speed = 38400;
+    break;
+  case 2:
+    speed = 57600;
+    break;
+  }
+  return setSpeed(speed);
 }
 
 #ifdef Q_OS_LINUX
@@ -267,11 +268,11 @@ bool StandardSerialPortBackend::setSpeed(int speed) {
 #endif
 
 #ifdef Q_OS_MAC
-bool StandardSerialPortBackend::setSpeed(int speed) {
-  termios tios;
+bool StandardSerialPortBackend::setSpeed(const unsigned long speed) {
+  termios tios{};
 
   tcgetattr(mHandle, &tios);
-  tios.c_cflag &= ~CSTOPB;
+  tios.c_cflag &= static_cast<tcflag_t>(~CSTOPB);
   cfmakeraw(&tios);
   tios.c_cflag |= CREAD | CLOCAL;// turn on READ
   tios.c_cflag |= CS8;
@@ -303,7 +304,7 @@ bool StandardSerialPortBackend::setSpeed(int speed) {
 }
 #endif
 
-int StandardSerialPortBackend::speed() {
+unsigned long StandardSerialPortBackend::speed() {
   return mSpeed;
 }
 
@@ -316,7 +317,7 @@ QByteArray StandardSerialPortBackend::readCommandFrame() {
       return data;
     }
 
-    const int size = 4;
+    constexpr int size = 4;
     quint8 expected = 0;
     quint8 got = 1;
     do {
@@ -329,7 +330,7 @@ QByteArray StandardSerialPortBackend::readCommandFrame() {
         if (data.size() == size + 1) {
           for (int i = 0; i < mSioDevices.size(); i++) {
             if (data.at(0) == mSioDevices[i]) {
-              expected = (quint8) data.at(size);
+              expected = static_cast<quint8>(data.at(size));
               got = sioChecksum(data, size);
               break;
             }
@@ -346,9 +347,9 @@ QByteArray StandardSerialPortBackend::readCommandFrame() {
     if (got == expected) {
       data.resize(size);
 
-      auto recorder = SioRecorder::instance();
-      if (recorder->isSnapshotRunning())
-        recorder->writeSnapshotCommandFrame(data[0], data[1], data[2], data[3]);
+      if (const auto recorder = SioRecorder::instance(); recorder->isSnapshotRunning())
+        // ReSharper disable once CppRedundantCastExpression
+        recorder->writeSnapshotCommandFrame(static_cast<quint8>(data[0]), static_cast<quint8>(data[1]), static_cast<quint8>(data[2]), static_cast<quint8>(data[3]));
 
       // After sending the last byte of the command frame
       // ATARI does not drop the command line immediately.
@@ -392,7 +393,7 @@ QByteArray StandardSerialPortBackend::readCommandFrame() {
 #ifdef Q_OS_MAC
           QThread::usleep(300);
 #endif
-        } while ((bytes == 0) && !mCanceled);
+        } while (bytes == 0 && !mCanceled);
       } else {
         // RI/DSR/CTS handshake
         /* First, wait until command line goes off */
@@ -410,7 +411,7 @@ QByteArray StandardSerialPortBackend::readCommandFrame() {
             QThread::usleep(500);
 #endif
           }
-        } while ((status & mask) && !mCanceled);
+        } while (status & mask && !mCanceled);
         /* Now wait for it to go on again */
         do {
           if (ioctl(mHandle, TIOCMGET, &status) < 0) {
@@ -448,7 +449,7 @@ QByteArray StandardSerialPortBackend::readCommandFrame() {
               qCritical() << "!e" << tr("Cannot retrieve serial port status: %1").arg(lastErrorMessage());
               return data;
             }
-          } while ((status & mask) && !mCanceled);
+          } while (status & mask && !mCanceled);
         } else {
           // After sending the last byte of the command frame
           // ATARI does not drop the command line immediately.
@@ -457,58 +458,57 @@ QByteArray StandardSerialPortBackend::readCommandFrame() {
           QThread::usleep(500);
         }
         break;
-      } else {
-        retries++;
-        totalRetries++;
-        if (retries == 2) {
-          retries = 0;
-          if (mHighSpeed) {
-            setNormalSpeed();
-          } else {
-            setHighSpeed();
-          }
+      }
+      retries++;
+      totalRetries++;
+      if (retries == 2) {
+        retries = 0;
+        if (mHighSpeed) {
+          setNormalSpeed();
+        } else {
+          setHighSpeed();
         }
       }
-      //    } while (totalRetries < 100);
-    } while (1);
+    } while (totalRetries < 100);
+    //} while (true);
   }
   return data;
 }
 
-QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool isCommandFrame, bool verbose) {
+QByteArray StandardSerialPortBackend::readDataFrame(const uint size, const bool isCommandFrame, const bool verbose) {
   QByteArray data = readRawFrame(size + 1, verbose);
   if (data.isEmpty()) {
     return data;
   }
 
-  auto expected = (quint8) data.at(size);
-  auto got = sioChecksum(data, size);
+  const auto expected = static_cast<quint8>(data.at(static_cast<int>(size)));
+  const auto got = sioChecksum(data, size);
   if (expected == got) {
-    data.resize(size);
+    data.resize(static_cast<int>(size));
 
-    auto recorder = SioRecorder::instance();
-    if (recorder->isSnapshotRunning()) {
+    if (const auto recorder = SioRecorder::instance(); recorder->isSnapshotRunning()) {
       if (isCommandFrame) {
-        recorder->writeSnapshotCommandFrame(data[0], data[1], data[2], data[3]);
+        // ReSharper disable CppRedundantCastExpression
+        recorder->writeSnapshotCommandFrame(static_cast<quint8>(data[0]), static_cast<quint8>(data[1]), static_cast<quint8>(data[2]), static_cast<quint8>(data[3]));
+        // ReSharper enable CppRedundantCastExpression
       } else {
         recorder->writeSnapshotDataFrame(data);
       }
     }
 
     return data;
-  } else {
-    if (verbose) {
-      qWarning() << "!w" << tr("Data frame checksum error, expected: %1, got: %2. (%3)").arg(expected).arg(got).arg(QString(data.toHex()));
-    }
-    data.clear();
-    return data;
   }
+  if (verbose) {
+    qWarning() << "!w" << tr("Data frame checksum error, expected: %1, got: %2. (%3)").arg(expected).arg(got).arg(QString(data.toHex()));
+  }
+  data.clear();
+  return data;
 }
 
 bool StandardSerialPortBackend::writeDataFrame(const QByteArray &data) {
   QByteArray copy(data);
   copy.resize(copy.size() + 1);
-  copy[copy.size() - 1] = sioChecksum(copy, copy.size() - 1);
+  copy[copy.size() - 1] = static_cast<char>(sioChecksum(copy, static_cast<uint>(copy.size() - 1)));
   if (mMethod == HANDSHAKE_SOFTWARE) SioWorker::usleep(mWriteDelay);
   SioWorker::usleep(50);
   return writeRawFrame(copy);
@@ -544,53 +544,48 @@ bool StandardSerialPortBackend::writeError() {
   return writeRawFrame(QByteArray(1, SIO_ERROR));
 }
 
-quint8 StandardSerialPortBackend::sioChecksum(const QByteArray &data, uint size) {
-  uint i;
+// ReSharper disable once CppMemberFunctionMayBeStatic
+quint8 StandardSerialPortBackend::sioChecksum(const QByteArray &data, const uint size) { // NOLINT(*-convert-member-functions-to-static)
   uint sum = 0;
 
-  for (i = 0; i < size; i++) {
-    sum += (quint8) data.at(i);
+  for (int i = 0; i < static_cast<int>(size); i++) {
+    sum += static_cast<quint8>(data.at(i));
     if (sum > 255) {
       sum -= 255;
     }
   }
 
-  return sum;
+  return static_cast<quint8>(sum);
 }
 
-QByteArray StandardSerialPortBackend::readRawFrame(uint size, bool /*verbose*/) {
+QByteArray StandardSerialPortBackend::readRawFrame(const size_t size, bool /*verbose*/) {
   QByteArray data;
-  int result;
-  uint total, rest;
+  data.resize(static_cast<int>(size));
 
-  data.resize(size);
+  uint total = 0;
+  ssize_t rest = static_cast<ssize_t>(size);
+  const QTime startTime = QTime::currentTime();
 
-  total = 0;
-  rest = size;
-  QTime startTime = QTime::currentTime();
-
-  int timeOut = data.count() * 12000 / mSpeed + 100;
+  auto timeOut = static_cast<unsigned long>(data.count()) * 12000 / mSpeed + 100;
   if (mMethod == HANDSHAKE_SOFTWARE) {
     timeOut += 100;
   }
 
-  int elapsed;
+  unsigned long elapsed;
   do {
-    result = ::read(mHandle, data.data() + total, rest);
+    auto result = ::read(mHandle, data.data() + total, static_cast<size_t>(rest));
     if (result < 0 && errno != EAGAIN) {
       qCritical() << "!e" << tr("Cannot read from serial port: %1").arg(lastErrorMessage());
       data.clear();
       return data;
     }
-    if (result < 0) {
-      result = 0;
-    }
+    result = std::max<ssize_t>(result, 0);
     total += result;
     rest -= result;
-    elapsed = startTime.msecsTo(QTime::currentTime());
+    elapsed = static_cast<unsigned long>(startTime.msecsTo(QTime::currentTime()));
   } while (total < size && elapsed < timeOut);
 
-  if ((uint) total != size) {
+  if (total != size) {
     qCritical() << "!e" << tr("Serial port read timeout. %1 of %2 read in %3 ms").arg(total).arg(data.count()).arg(elapsed);
     data.clear();
     return data;
@@ -599,34 +594,29 @@ QByteArray StandardSerialPortBackend::readRawFrame(uint size, bool /*verbose*/) 
 }
 
 bool StandardSerialPortBackend::writeRawFrame(const QByteArray &data) {
-  int result;
-  uint total, rest;
+  uint total = 0;
+  ssize_t rest = data.count();
+  const QTime startTime = QTime::currentTime();
 
-  total = 0;
-  rest = data.count();
-  QTime startTime = QTime::currentTime();
-
-  int timeOut = data.count() * 12000 / mSpeed + 100;
+  auto timeOut = static_cast<unsigned long>(data.count()) * 12000 / mSpeed + 100;
   if (mMethod == HANDSHAKE_SOFTWARE) {
     timeOut += 100;
   }
 
   int elapsed;
   do {
-    result = ::write(mHandle, data.constData() + total, rest);
+    auto result = ::write(mHandle, data.constData() + total, static_cast<size_t>(rest));
     if (result < 0 && errno != EAGAIN) {
       qCritical() << "!e" << tr("Cannot read from serial port: %1").arg(lastErrorMessage());
       return false;
     }
-    if (result < 0) {
-      result = 0;
-    }
+    result = std::max<ssize_t>(result, 0);
     total += result;
     rest -= result;
     elapsed = startTime.msecsTo(QTime::currentTime());
-  } while (total < (uint) data.count() && elapsed < timeOut);
+  } while (total < static_cast<uint>(data.count()) && elapsed < static_cast<int>(timeOut));
 
-  if (total != (uint) data.count()) {
+  if (total != static_cast<uint>(data.count())) {
     qCritical() << "!e" << tr("Serial port write timeout. %1 of %2 written in %3 ms").arg(total).arg(data.count()).arg(elapsed);
     return false;
   }
@@ -639,7 +629,8 @@ bool StandardSerialPortBackend::writeRawFrame(const QByteArray &data) {
   return true;
 }
 
-QString StandardSerialPortBackend::lastErrorMessage() {
+// ReSharper disable once CppMemberFunctionMayBeStatic
+QString StandardSerialPortBackend::lastErrorMessage() { // NOLINT(*-convert-member-functions-to-static)
   return QString::fromUtf8(strerror(errno)) + ".";
 }
 
@@ -648,18 +639,19 @@ void StandardSerialPortBackend::setActiveSioDevices(const QByteArray &data) {
 }
 
 AtariSioBackend::AtariSioBackend(QObject *parent)
-    : AbstractSerialPortBackend(parent) {
+  : AbstractSerialPortBackend(parent), mCancelHandles{}, mSpeed(0), mMethod(0)
+{
   mHandle = -1;
 }
 
 AtariSioBackend::~AtariSioBackend() {
-  if (isOpen()) {
-    close();
+  if (AtariSioBackend::isOpen()) {
+    AtariSioBackend::close();
   }
 }
 
 QString AtariSioBackend::defaultPortName() {
-  return QString("atarisio0");
+  return {"atarisio0"};
 }
 
 bool AtariSioBackend::open() {
@@ -677,18 +669,17 @@ bool AtariSioBackend::open() {
     return false;
   }
 
-  int version;
-  version = ioctl(mHandle, ATARISIO_IOC_GET_VERSION);
+  const int version = ioctl(mHandle, ATARISIO_IOC_GET_VERSION);
 
   if (version < 0) {
-    qCritical() << "!e" << tr("Cannot open AtariSio driver '%1': %2").arg(name).arg("Cannot determine AtariSio version.");
+    qCritical() << "!e" << tr("Cannot open AtariSio driver '%1': %2").arg(name, "Cannot determine AtariSio version.");
     close();
     return false;
   }
 
-  if ((version >> 8) != (ATARISIO_VERSION >> 8) ||
+  if (version >> 8 != ATARISIO_VERSION >> 8 ||
       (version & 0xff) < (ATARISIO_VERSION & 0xff)) {
-    qCritical() << "!e" << tr("Cannot open AtariSio driver '%1': %2").arg(name).arg("Incompatible AtariSio version.");
+    qCritical() << "!e" << tr("Cannot open AtariSio driver '%1': %2").arg(name, "Incompatible AtariSio version.");
     close();
     return false;
   }
@@ -741,7 +732,7 @@ bool AtariSioBackend::open() {
   }
 
   /* Notify the user that emulation is started */
-  qWarning() << "!i" << tr("Emulation started through AtariSIO backend on '%1' with %2 handshaking.").arg(RespeqtSettings::instance()->atariSioDriverName()).arg(m);
+  qWarning() << "!i" << tr("Emulation started through AtariSIO backend on '%1' with %2 handshaking.").arg(RespeqtSettings::instance()->atariSioDriverName(), m);
 
   return true;
 }
@@ -761,23 +752,22 @@ void AtariSioBackend::close() {
 }
 
 void AtariSioBackend::cancel() {
-  if (::write(mCancelHandles[1], "C", 1) < 1) {
+  if (write(mCancelHandles[1], "C", 1) < 1) {
     qCritical() << "!e" << tr("Cannot stop AtariSio backend.");
   }
 }
 
-void AtariSioBackend::forceHighSpeed(int) {
+void AtariSioBackend::forceHighSpeed(const unsigned int) {
 }
 
-bool AtariSioBackend::setSpeed(int speed) {
+bool AtariSioBackend::setSpeed(const unsigned long speed) {
   if (ioctl(mHandle, ATARISIO_IOC_SET_BAUDRATE, speed) < 0) {
     qCritical() << "!e" << tr("Cannot set AtariSio speed to %1: %2").arg(speed).arg(lastErrorMessage());
     return false;
-  } else {
-    emit statusChanged(tr("%1 bits/sec").arg(speed));
-    qWarning() << "!i" << tr("Serial port speed set to %1.").arg(speed);
-    return true;
   }
+  emit statusChanged(tr("%1 bits/sec").arg(speed));
+  qWarning() << "!i" << tr("Serial port speed set to %1.").arg(speed);
+  return true;
 }
 
 QByteArray AtariSioBackend::readCommandFrame() {
@@ -785,8 +775,6 @@ QByteArray AtariSioBackend::readCommandFrame() {
 
   fd_set read_set;
   fd_set except_set;
-
-  int ret;
 
   int maxfd = mHandle;
 
@@ -799,8 +787,7 @@ QByteArray AtariSioBackend::readCommandFrame() {
   FD_ZERO(&read_set);
   FD_SET(mCancelHandles[0], &read_set);
 
-  ret = select(maxfd + 1, &read_set, nullptr, &except_set, 0);
-  if (ret == -1 || ret == 0) {
+  if (const int ret = select(maxfd + 1, &read_set, nullptr, &except_set, nullptr); ret == -1 || ret == 0) {
     return data;
   }
   if (FD_ISSET(mCancelHandles[0], &read_set)) {
@@ -812,21 +799,19 @@ QByteArray AtariSioBackend::readCommandFrame() {
       return data;
     }
     data.resize(4);
-    data[0] = frame.device_id;
-    data[1] = frame.command;
-    data[2] = frame.aux1;
-    data[3] = frame.aux2;
+    data[0] = static_cast<char>(frame.device_id);
+    data[1] = static_cast<char>(frame.command);
+    data[2] = static_cast<char>(frame.aux1);
+    data[3] = static_cast<char>(frame.aux2);
 
-    auto recorder = SioRecorder::instance();
-    if (recorder->isSnapshotRunning())
-      recorder->writeSnapshotCommandFrame(data[0], data[1], data[2], data[3]);
+    if (const auto recorder = SioRecorder::instance(); recorder->isSnapshotRunning())
+      recorder->writeSnapshotCommandFrame(static_cast<quint8>(data[0]), static_cast<quint8>(data[1]), static_cast<quint8>(data[2]), static_cast<quint8>(data[3]));
 
 
-    int sp = ioctl(mHandle, ATARISIO_IOC_GET_BAUDRATE);
-    if (sp >= 0 && mSpeed != sp) {
+    if (const auto sp = ioctl(mHandle, ATARISIO_IOC_GET_BAUDRATE); sp >= 0 && mSpeed != static_cast<unsigned long>(sp)) {
       emit statusChanged(tr("%1 bits/sec").arg(sp));
       qWarning() << "!i" << tr("Serial port speed set to %1.").arg(sp);
-      mSpeed = sp;
+      mSpeed = static_cast<unsigned long>(sp);
     }
 
     return data;
@@ -839,26 +824,25 @@ int AtariSioBackend::speedByte() {
   return 0x08;
 }
 
-int AtariSioBackend::speed() {
+unsigned long AtariSioBackend::speed() {
   return mSpeed;
 }
 
-QByteArray AtariSioBackend::readDataFrame(uint size, bool isCommandFrame, bool verbose) {
+QByteArray AtariSioBackend::readDataFrame(const uint size, const bool isCommandFrame, const bool verbose) {
   QByteArray data;
   SIO_data_frame frame;
 
-  data.resize(size);
+  data.resize(static_cast<int>(size));
 
-  auto recorder = SioRecorder::instance();
-  if (recorder->isSnapshotRunning()) {
+  if (const auto recorder = SioRecorder::instance(); recorder->isSnapshotRunning()) {
     if (isCommandFrame) {
-      recorder->writeSnapshotCommandFrame(data[0], data[1], data[2], data[3]);
+      recorder->writeSnapshotCommandFrame(static_cast<quint8>(data[0]), static_cast<quint8>(data[1]), static_cast<quint8>(data[2]), static_cast<quint8>(data[3]));
     } else {
       recorder->writeSnapshotDataFrame(data);
     }
   }
 
-  frame.data_buffer = (unsigned char *) data.data();
+  frame.data_buffer = reinterpret_cast<unsigned char*>(data.data());
   frame.data_length = size;
 
   if (ioctl(mHandle, ATARISIO_IOC_RECEIVE_DATA_FRAME, &frame) < 0) {
@@ -874,8 +858,8 @@ QByteArray AtariSioBackend::readDataFrame(uint size, bool isCommandFrame, bool v
 bool AtariSioBackend::writeDataFrame(const QByteArray &data) {
   SIO_data_frame frame;
 
-  frame.data_buffer = (unsigned char *) data.constData();
-  frame.data_length = data.size();
+  frame.data_buffer = reinterpret_cast<unsigned char*>(const_cast<char*>(data.constData()));
+  frame.data_length = static_cast<unsigned int>(data.size());
 
   if (ioctl(mHandle, ATARISIO_IOC_SEND_DATA_FRAME, &frame) < 0) {
     qCritical() << "!e" << tr("Cannot write data frame: %1").arg(lastErrorMessage());
@@ -938,8 +922,8 @@ bool AtariSioBackend::writeError() {
 bool AtariSioBackend::writeRawFrame(const QByteArray &data) {
   SIO_data_frame frame;
 
-  frame.data_buffer = (unsigned char *) data.constData();
-  frame.data_length = data.size();
+  frame.data_buffer = reinterpret_cast<unsigned char*>(const_cast<char*>(data.constData()));
+  frame.data_length = static_cast<unsigned int>(data.size());
 
   if (ioctl(mHandle, ATARISIO_IOC_SEND_RAW_FRAME, &frame) < 0) {
     qCritical() << "!e" << tr("Cannot write raw frame: %1").arg(lastErrorMessage());
@@ -949,7 +933,8 @@ bool AtariSioBackend::writeRawFrame(const QByteArray &data) {
   return true;
 }
 
-QString AtariSioBackend::lastErrorMessage() {
+// ReSharper disable once CppMemberFunctionMayBeStatic
+QString AtariSioBackend::lastErrorMessage() { // NOLINT(*-convert-member-functions-to-static)
   switch (errno) {
     case EATARISIO_ERROR_BLOCK_TOO_LONG:
       return tr("Block too long.");

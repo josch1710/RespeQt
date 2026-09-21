@@ -28,7 +28,7 @@ void SioRecorder::startSIOSnapshot() {
 QByteArray SioRecorder::stopSIOSnapshot() {
   QByteArray result{};
   if (mSnapshotData) {
-    QJsonDocument document = QJsonDocument(*mSnapshotData);
+    const auto document = QJsonDocument(*mSnapshotData);
     result = document.toJson();
     mSnapshotRunning = false;
     mSnapshotData.reset();
@@ -36,7 +36,8 @@ QByteArray SioRecorder::stopSIOSnapshot() {
   return result;
 }
 
-void SioRecorder::writeSnapshotCommandFrame(const quint8 no, const quint8 command, const quint8 aux1, const quint8 aux2) {
+void SioRecorder::writeSnapshotCommandFrame(const quint8 no, const quint8 command, const quint8 aux1, const quint8 aux2) const
+{
   // Record the command frame, if the snapshot is running
   if (mSnapshotRunning && mSnapshotData) {
     QJsonObject commandframe{};
@@ -49,20 +50,22 @@ void SioRecorder::writeSnapshotCommandFrame(const quint8 no, const quint8 comman
   }
 }
 
-void SioRecorder::writeSnapshotDataFrame(const QByteArray &data) {
+void SioRecorder::writeSnapshotDataFrame(const QByteArray &data) const
+{
   // Record the command frame, if the snapshot is running
   if (mSnapshotRunning && mSnapshotData) {
     QJsonObject dataframe{};
     QString text{};
     text.reserve(data.size());
-    for (auto byte: data)
+    for (const auto byte: data)
       text.push_back(QChar{byte});
     dataframe["data"] = QJsonValue(text);
     mSnapshotData->push_back(dataframe);
   }
 }
 
-void SioRecorder::writePauseCommand(int msec) {
+void SioRecorder::writePauseCommand(const int msec) const
+{
   if (mSnapshotRunning && mSnapshotData) {
     QJsonObject pause{};
     pause["pause"] = QJsonValue(msec);
@@ -70,14 +73,15 @@ void SioRecorder::writePauseCommand(int msec) {
   }
 }
 
-void SioRecorder::prepareReplaySnapshot(QFile *file, SerialBackend previousBackend) {
+void SioRecorder::prepareReplaySnapshot(QFile *file, const SerialBackend previousBackend) {
   mPreviousBackend = previousBackend;
   if (file->isOpen() && file->isReadable()) {
     // Now we read the whole file to memory.
-    auto size = file->size();
+    // ReSharper disable once CppRedundantCastExpression
+    const auto size = static_cast<size_t>(file->size());
     mTestData.resize(size + 1);// Don't forget the 0 terminator
     QDataStream data(file);
-    data.readRawData(reinterpret_cast<char *>(mTestData.data()), size);
+    data.readRawData(mTestData.data(), static_cast<int>(size));
     mTestData[size] = 0;
   } else
     mTestData.clear();
@@ -88,10 +92,10 @@ bool SioRecorder::open() {
     close();
   }
   // Open Json and parse it
-  if (mTestData.size() == 0)
+  if (mTestData.empty())
     return false;
 
-  auto document = QJsonDocument::fromJson(QByteArray{mTestData.data()});
+  const auto document = QJsonDocument::fromJson(QByteArray{mTestData.data()});
 
   mSnapshotData.reset();
   if (document.isNull() || !document.isArray())
@@ -123,29 +127,27 @@ int SioRecorder::speedByte() {
   return 0x28;// standard speed (19200)
 }
 
-int SioRecorder::speed() {
+unsigned long SioRecorder::speed() {
   return 19200;
 }
 
-bool SioRecorder::setSpeed(int /*speed*/) {
+bool SioRecorder::setSpeed(unsigned long /*speed*/) {
   return true;
 }
 
-void SioRecorder::forceHighSpeed(int /*speed*/) {
+void SioRecorder::forceHighSpeed(unsigned int /*speed*/) {
 }
 
 bool SioRecorder::readPauseTag() {
   // How about more than one pause command?
-  auto data = mSnapshotData->at(mReadIndex);
+  const auto data = mSnapshotData->at(mReadIndex);
   if (data == QJsonValue::Undefined || !data.isObject())
     return false;
 
-  auto object = data.toObject();
-  if (object.contains("pause")) {
-    auto value = object.value("pause").toInt();
-    if (value > 0) {
+  if (const auto object = data.toObject(); object.contains("pause")) {
+    if (const auto value = object.value("pause").toInt(); value > 0) {
       qDebug() << "!d" << tr("Sleeping %1 milliseconds").arg(value);
-      QThread::currentThread()->msleep(value);
+      QThread::msleep(static_cast<unsigned long>(value));
     }
     mReadIndex++;
   }
@@ -157,7 +159,7 @@ QByteArray SioRecorder::readCommandFrame() {
   if (!readPauseTag())
     return {};
 
-  auto data = mSnapshotData->at(mReadIndex);
+  const auto data = mSnapshotData->at(mReadIndex);
   if (data == QJsonValue::Undefined || !data.isObject())
     return {};
 
@@ -169,34 +171,34 @@ QByteArray SioRecorder::readCommandFrame() {
   auto temp = object["device"].toInt(-1);
   if (temp == -1)
     return {};
-  result[0] = temp;
+  result[0] = static_cast<char>(temp);
 
   temp = object["command"].toInt(-1);
   if (temp == -1)
     return {};
-  result[1] = temp;
+  result[1] = static_cast<char>(temp);
 
   temp = object["aux1"].toInt(-1);
   if (temp == -1)
     return {};
-  result[2] = temp;
+  result[2] = static_cast<char>(temp);
 
   temp = object["aux2"].toInt(-1);
   if (temp == -1)
     return {};
-  result[3] = temp;
+  result[3] = static_cast<char>(temp);
 
   mReadIndex++;
   return result;
 }
 
 /// TODO Be more verbose about failures.
-QByteArray SioRecorder::readDataFrame(uint size, bool isCommandFrame, bool verbose) {
+QByteArray SioRecorder::readDataFrame(const uint size, bool, const bool verbose) {
   // We look whether there is a pause tag
   if (!readPauseTag())
     return {};
 
-  auto data = mSnapshotData->at(mReadIndex);
+  const auto data = mSnapshotData->at(mReadIndex);
   if (data == QJsonValue::Undefined || !data.isObject())
     return {};
 
@@ -204,7 +206,7 @@ QByteArray SioRecorder::readDataFrame(uint size, bool isCommandFrame, bool verbo
   if (!object.contains("data"))
     return {};
 
-  auto framedata = object["data"].toString("");
+  const auto framedata = object["data"].toString("");
   if (framedata.isEmpty() || static_cast<int>(size) != framedata.size())
     return {};
 

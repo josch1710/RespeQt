@@ -20,7 +20,6 @@
 
 #include <QDateTime>
 #include <QDesktopServices>
-#include <QUrl>
 #include <QtDebug>
 
 char RCl::rclSlotNo;
@@ -47,7 +46,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
       QDir dir(pth);
       QStringList filters;
       QString fileFilter = g_fileFilter.trimmed();
-      (fileFilter == "*" || fileFilter == "") ? filters << "*.atr"
+      fileFilter == "*" || fileFilter == "" ? filters << "*.atr"
                                                         << "*.xfd"
                                                         << "*.atx"
                                                         << "*.pro"
@@ -61,23 +60,22 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
 
       QByteArray fn = ("Path: " + pth).toUtf8();
       for (int n = 0; n < fn.length() && n < 37; n++)
-        ddata[index++] = fn[n] & 0xff;
+        ddata[index++] = static_cast<char>(fn[n] & 0xff);
 
       ddata[index++] = static_cast<char>(155);
 
       for (quint8 i = offset; i < filelist.size() && i < 250; ++i) {
-        QFileInfo fileInfo = filelist.at(i);
+        const QFileInfo& fileInfo = filelist.at(i);
         QString dosfilname = fileInfo.fileName();
         QString atarifilname = toAtariFileName(dosfilname);
-        QString atariFilenum = QString(QChar::fromLatin1(i - offset + 0x41));
-        QByteArray fnumber = (" " + atariFilenum + " " + atarifilname).toUtf8();
-        if (index + fnumber.length() < 252 && i - offset < 16) {
+        auto atariFilenum = QString(QChar::fromLatin1(static_cast<char>(i - offset + 0x41)));
+        if (QByteArray fnumber = (" " + atariFilenum + " " + atarifilname).toUtf8(); index + fnumber.length() < 252 && i - offset < 16) {
           for (int n = 0; n < fnumber.length(); n++)
-            ddata[index++] = fnumber[n] & 0xff;
+            ddata[index++] = static_cast<char>(fnumber[n] & 0xff);
           ddata[index++] = static_cast<char>(155);
           ddata[254] = 0x00;
         } else {
-          ddata[254] = i;
+          ddata[254] = static_cast<char>(i);
           break;
         }
       }
@@ -95,23 +93,22 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
         return;
       }
 
-      qint8 deviceNo;
-      deviceNo = aux1;
-      deviceNo = (deviceNo > 9) ? (deviceNo - 16) : deviceNo;
+      qint8 deviceNo = aux1 > 9 ? static_cast<qint8>(aux1 - 16) : static_cast<qint8>(aux1);
 
       if (deviceNo >= 0x0 && deviceNo <= 0xF) {
-        auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(deviceNo - 1 + DISK_BASE_CDEVIC));
+        auto img = qobject_cast<DiskImages::SimpleDiskImage *>(
+          sio->getDevice(static_cast<quint8>(deviceNo - 1 + DISK_BASE_CDEVIC))
+          );
         QString filename = "";
         if (img) {
-          auto i = img->originalFileName().lastIndexOf("/");
-          if ((i != -1) || (img->originalFileName().mid(0, 14) == "Untitled image"))
+          if (auto i = img->originalFileName().lastIndexOf("/"); i != -1 || img->originalFileName().mid(0, 14) == "Untitled image")
             filename = " " + img->originalFileName().right(img->originalFileName().size() - ++i);
         }
 
 
         QByteArray fn = filename.toUtf8();
         for (int i = 0; i < fdata.length(); i++)
-          fdata[i] = (fn.length() > i) ? (fn[i] & 0xff) : 0x00;
+          fdata[i] = fn.length() > i ? static_cast<char>(fn[i] & 0xff) : 0x00;
 
         sio->port()->writeComplete();
         sio->port()->writeDataFrame(fdata);
@@ -152,7 +149,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
       if (swapDisk2 > 25)
         swapDisk2 -= 16;
       if (swapDisk1 > 0 && swapDisk1 <= 15 && swapDisk2 > 0 && swapDisk2 <= 15 && swapDisk1 != swapDisk2) {
-        sio->swapDevices(swapDisk1 + DISK_BASE_CDEVIC - 1, swapDisk2 + DISK_BASE_CDEVIC - 1);
+        sio->swapDevices(static_cast<quint8>(swapDisk1 + DISK_BASE_CDEVIC - 1), static_cast<quint8>(swapDisk2 + DISK_BASE_CDEVIC - 1));
         RespeqtSettings::instance()->swapImages(swapDisk1 - 1, swapDisk2 - 1);
         qDebug() << "!n" << tr("[%1] Swapped disk %2 with disk %3.").arg(deviceName()).arg(swapDisk2).arg(swapDisk1);
         sio->port()->writeCommandAck();
@@ -175,8 +172,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
           // Eject All disks
           int toBeSaved = 0;
           for (int i = 0; i <= 14; i++) {//
-            auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(static_cast<quint8>(i + DISK_BASE_CDEVIC)));
-            if (img && img->isModified()) {
+            if (auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(static_cast<quint8>(i + DISK_BASE_CDEVIC))); img && img->isModified()) {
               toBeSaved++;
             }
           }
@@ -196,9 +192,8 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
           }
         } else {
           // Single Disk Eject
-          auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(static_cast<quint8>(unmountDisk - 1 + DISK_BASE_CDEVIC)));
 
-          if (img && img->isModified()) {
+          if (auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(static_cast<quint8>(unmountDisk - 1 + DISK_BASE_CDEVIC))); img && img->isModified()) {
             sio->port()->writeCommandNak();
             qDebug() << "!e" << tr("[%1] Can not remotely unmount disk %2 due to pending changes.").arg(deviceName()).arg(unmountDisk);
           } else {
@@ -281,7 +276,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
               fileData.resize(fileSize + 16);
               fileData.fill(0);
               fileData[2] = static_cast<char>(0x80);
-              fileData[3] = static_cast<char>(0x16);
+              fileData[3] = 0x16;
               fileData[4] = static_cast<char>(0x80);
             } break;
             case 2:// Enhanced Density
@@ -290,7 +285,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
               fileData.resize(fileSize + 16);
               fileData.fill(0);
               fileData[2] = static_cast<char>(0x80);
-              fileData[3] = static_cast<char>(0x20);
+              fileData[3] = 0x20;
               fileData[4] = static_cast<char>(0x80);
             } break;
             case 3:// Double Density
@@ -299,9 +294,9 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
               fileData.resize(fileSize + 16);
               fileData.fill(0);
               fileData[2] = static_cast<char>(0xE8);
-              fileData[3] = static_cast<char>(0x2C);
-              fileData[4] = static_cast<char>(0x00);
-              fileData[5] = static_cast<char>(0x01);
+              fileData[3] = 0x2C;
+              fileData[4] = 0x00;
+              fileData[5] = 0x01;
             } break;
             case 4:// Double Sided, Double Density
             {
@@ -309,9 +304,9 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
               fileData.resize(fileSize + 16);
               fileData.fill(0);
               fileData[2] = static_cast<char>(0xE8);
-              fileData[3] = static_cast<char>(0x59);
-              fileData[4] = static_cast<char>(0x00);
-              fileData[5] = static_cast<char>(0x01);
+              fileData[3] = 0x59;
+              fileData[4] = 0x00;
+              fileData[5] = 0x01;
             } break;
             case 5:// Double Density Hard Disk
             {
@@ -320,9 +315,9 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
               fileData.fill(0);
               fileData[2] = static_cast<char>(0xD8);
               fileData[3] = static_cast<char>(0xFF);
-              fileData[4] = static_cast<char>(0x00);
-              fileData[5] = static_cast<char>(0x01);
-              fileData[6] = static_cast<char>(0x0F);
+              fileData[4] = 0x00;
+              fileData[5] = 0x01;
+              fileData[6] = 0x0F;
             } break;
             case 6:// Quad Density Hard Disk
             {
@@ -331,13 +326,16 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
               fileData.fill(0);
               fileData[2] = static_cast<char>(0xE0);
               fileData[3] = static_cast<char>(0xFF);
-              fileData[4] = static_cast<char>(0x00);
-              fileData[5] = static_cast<char>(0x02);
-              fileData[6] = static_cast<char>(0x1F);
+              fileData[4] = 0x00;
+              fileData[5] = 0x02;
+              fileData[6] = 0x1F;
             } break;
+
+            default:
+              break;
           }
           fileData[0] = static_cast<char>(0x96);
-          fileData[1] = static_cast<char>(0x02);
+          fileData[1] = 0x02;
           file.write(fileData);
           fileData.clear();
           file.close();
@@ -376,8 +374,8 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
       }
       qint8 commitDisk;
       bool commitOnOff;
-      commitDisk = aux1 - 1;
-      commitOnOff = aux2 ? false : true;
+      commitDisk = static_cast<qint8>(aux1 - 1);
+      commitOnOff = aux2 == 0;
 
       if (commitDisk > 9) commitDisk -= 16;
       if (commitDisk != -7 && (commitDisk < 0 || commitDisk > 14)) {
@@ -403,18 +401,17 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
         return;
       }
 
-      int diskSaved = 0;
       auto deviceNo = static_cast<qint8>(aux2);
 
       if (deviceNo == -6) deviceNo = 0;// All drives
       if (deviceNo > 9) deviceNo -= 16;// Drive 10-15
       if (deviceNo >= 0 and deviceNo <= 15) {
+        int diskSaved = 0;
         if (deviceNo == 0) {
           // Eject All disks
 
           for (int i = 0; i <= 14; i++) {//
-            auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(i + DISK_BASE_CDEVIC));
-            if (img && img->isModified() && !img->isUnnamed()) {
+            if (auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(static_cast<quint8>(i + DISK_BASE_CDEVIC))); img && img->isModified() && !img->isUnnamed()) {
               img->save();
               qDebug() << "!n" << tr("[%1] Saved disk %2").arg(deviceName()).arg(i + 1);
               diskSaved++;
@@ -423,9 +420,8 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
 
         } else {
           // Single Disk save
-          auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(deviceNo - 1 + DISK_BASE_CDEVIC));
 
-          if (img && img->isModified() && !img->isUnnamed()) {
+          if (auto img = qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(static_cast<quint8>(deviceNo - 1 + DISK_BASE_CDEVIC))); img && img->isModified() && !img->isUnnamed()) {
             img->save();
             qDebug() << "!n" << tr("[%1] Saved disk %2").arg(deviceName()).arg(deviceNo);
             diskSaved++;
@@ -474,9 +470,8 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
 
       imageFileName = _data;
       imageFileName = imageFileName.trimmed();
-      auto isDiskImage = !(imageFileName.endsWith("XEX") || imageFileName.endsWith("EXE") || imageFileName.endsWith("COM"));
 
-      if (isDiskImage) {
+      if (!(imageFileName.endsWith("XEX") || imageFileName.endsWith("EXE") || imageFileName.endsWith("COM"))) {
         imageFileName = "*" + toDosFileName(imageFileName);
         emit mountFile(0, imageFileName);
       } else {
@@ -492,7 +487,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
         return;
       }
       auto happyDisk = static_cast<qint8>(aux1) - 1;
-      auto happyOnOff = static_cast<qint8>(aux2) ? false : true;
+      auto happyOnOff = static_cast<qint8>(aux2) == 0;
 
       if (happyDisk > 9) happyDisk -= 16;
       if (happyDisk != -7 && (happyDisk < 0 || happyDisk > 14)) {
@@ -519,7 +514,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
         return;
       }
       auto chipDisk = static_cast<qint8>(aux1) - 1;
-      auto chipOnOff = aux2 ? false : true;
+      auto chipOnOff = aux2 == 0;
 
       if (chipDisk > 9) chipDisk -= 16;
       if (chipDisk != -7 && (chipDisk < 0 || chipDisk > 14)) {
@@ -548,7 +543,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
 }
 
 // Get the next slot number available for mounting a disk image
-void RCl::gotNewSlot(int slot) {
+void RCl::gotNewSlot(const int slot) {
   mutex.lock();
   rclSlotNo = static_cast<char>(slot);
   mutex.unlock();
@@ -557,7 +552,7 @@ void RCl::gotNewSlot(int slot) {
   emit mountFile(slot, imageFileName);
 }
 
-void RCl::fileMounted(bool mounted) {
+void RCl::fileMounted(const bool mounted) {
   if (mounted) {
     sio->port()->writeComplete();
     qDebug() << "!n" << tr("[%1] Image %2 mounted").arg(deviceName(), imageFileName.mid(1, imageFileName.size() - 1));
@@ -567,24 +562,25 @@ void RCl::fileMounted(bool mounted) {
 }
 
 
-QString RCl::toAtariFileName(QString dosFileName) {
+// ReSharper disable once CppMemberFunctionMayBeStatic
+QString RCl::toAtariFileName(const QString& dosFileName) { // NOLINT(*-convert-member-functions-to-static)
+  static QRegularExpression regexp("[^A-Z0-9_]");
   QString name = "";
   QString ext = "";
-  QString filename = dosFileName.toUpper();
-  int t = filename.lastIndexOf(".");
-  if (t > 0) {
+  const QString filename = dosFileName.toUpper();
+  if (const int t = filename.lastIndexOf("."); t > 0) {
     name = filename.left(t);
     ext = filename.right(filename.length() - t - 1);
   }
-  name.remove(QRegularExpression("[^A-Z0-9_]"));
-  name = (name.length() > 8) ? name.left(5) + "$" + name.right(2) : name;
-  ext.remove(QRegularExpression("[^A-Z0-9_]"));
+  name.remove(regexp);
+  name = name.length() > 8 ? name.left(5) + "$" + name.right(2) : name;
+  ext.remove(regexp);
   return name + "." + ext;
 }
 
 
-QString RCl::toDosFileName(QString atariFileName) {
-  QString pth = RespeqtSettings::instance()->lastRclDir();
+QString RCl::toDosFileName(const QString& atariFileName) {
+  const QString pth = RespeqtSettings::instance()->lastRclDir();
   QDir dir(pth);
   QStringList filters;
   filters << "*.atr"
@@ -596,10 +592,8 @@ QString RCl::toDosFileName(QString atariFileName) {
           << "*.com";
   dir.setNameFilters(filters);
   QFileInfoList list = dir.entryInfoList();
-  for (int i = 0; i < list.size(); ++i) {
-    QFileInfo fileInfo = list.at(i);
-    QString dosFilename = fileInfo.fileName();
-    if (toAtariFileName(dosFilename) == atariFileName)
+  for (const auto & fileInfo : list) {
+    if (QString dosFilename = fileInfo.fileName(); toAtariFileName(dosFilename) == atariFileName)
       return dosFilename;
   }
   return "";

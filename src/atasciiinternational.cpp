@@ -2,7 +2,7 @@
 #include "logdisplaydialog.h"
 
 AtasciiInternational::AtasciiInternational()
-    : Atascii() {
+{
 
   mapping[0x00] = QChar(0x00E1);
   mapping[0x01] = QChar(0x00F9);

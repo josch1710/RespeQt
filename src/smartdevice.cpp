@@ -32,7 +32,7 @@ void SmartDevice::handleCommand(const quint8 command, const quint8 aux1, const q
       }
 
       QByteArray data(6, 0);
-      QDateTime dateTime = QDateTime::currentDateTime();
+      const QDateTime dateTime = QDateTime::currentDateTime();
 
       data[0] = static_cast<char>(dateTime.date().day());
       data[1] = static_cast<char>(dateTime.date().month());
@@ -50,8 +50,7 @@ void SmartDevice::handleCommand(const quint8 command, const quint8 aux1, const q
 
     // Submit URL
     case 0x55: {
-      quint16 aux = aux1 + aux2 * 256;
-      if (RespeqtSettings::instance()->isURLSubmitEnabled() && aux != 0 && aux <= 2000) {
+      if (const quint16 aux = aux1 + aux2 * 256; RespeqtSettings::instance()->isURLSubmitEnabled() && aux != 0 && aux <= 2000) {
         if (!sio->port()->writeCommandAck()) {
           return;
         }
@@ -67,14 +66,13 @@ void SmartDevice::handleCommand(const quint8 command, const quint8 aux1, const q
         sio->port()->writeDataAck();
         sio->port()->writeComplete();
 
-        QString urlstr(data);
+        const QString urlstr(data);
         QDesktopServices::openUrl(QUrl(urlstr));
 
         qDebug() << "!n" << tr("URL [%1] submitted").arg(urlstr);
       } else {
         sio->port()->writeCommandNak();
         qWarning() << "!w" << tr("[%1] command: $%2, aux: $%3 NAKed.").arg(deviceName()).arg(command, 2, 16, QChar('0')).arg(aux, 4, 16, QChar('0'));
-        return;
       }
       break;
     }

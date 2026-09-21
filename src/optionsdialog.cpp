@@ -54,7 +54,7 @@ static QFont serifButtonFont(const QFont &base) {
 OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent),
                                                 m_ui(new Ui::OptionsDialog) {
   auto flags = windowFlags();
-  flags = flags & (~Qt::WindowContextHelpButtonHint);
+  flags = flags & ~Qt::WindowContextHelpButtonHint;
   setWindowFlags(flags);
 
   m_ui->setupUi(this);
@@ -102,11 +102,12 @@ OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent),
   setupSettings();
 }
 
-void OptionsDialog::setupSettings() {
+void OptionsDialog::setupSettings() const
+{
   /* Retrieve application settings */
   m_ui->serialPortComboBox->clear();
   const QList<QSerialPortInfo> &infos = QSerialPortInfo::availablePorts();
-  for (QList<QSerialPortInfo>::const_iterator it = infos.begin(); it != infos.end(); it++) {
+  for (QList<QSerialPortInfo>::const_iterator it = infos.begin(); it != infos.end(); ++it) {
     m_ui->serialPortComboBox->addItem(it->portName(), it->systemLocation());
   }
   m_ui->serialPortComboBox->setCurrentText(RespeqtSettings::instance()->serialPortName());
@@ -125,7 +126,7 @@ void OptionsDialog::setupSettings() {
   m_ui->serialPortBaudCombo->setCurrentIndex(RespeqtSettings::instance()->serialPortMaximumSpeed());
   m_ui->serialPortUseDivisorsBox->setChecked(RespeqtSettings::instance()->serialPortUsePokeyDivisors());
   m_ui->serialPortDivisorEdit->setValue(RespeqtSettings::instance()->serialPortPokeyDivisor());
-  m_ui->serialPortCompErrDelayBox->setValue(RespeqtSettings::instance()->serialPortCompErrDelay());
+  m_ui->serialPortCompErrDelayBox->setValue(static_cast<int>(RespeqtSettings::instance()->serialPortCompErrDelay()));
   m_ui->atariSioDriverNameEdit->setText(RespeqtSettings::instance()->atariSioDriverName());
   m_ui->atariSioHandshakingMethodCombo->setCurrentIndex(RespeqtSettings::instance()->atariSioHandshakingMethod());
   m_ui->emulationHighSpeedExeLoaderBox->setChecked(RespeqtSettings::instance()->useHighSpeedExeLoader());
@@ -211,10 +212,9 @@ void OptionsDialog::setupSettings() {
 
 #ifdef Q_OS_MAC
   m_ui->useNativeMenu->setChecked(RespeqtSettings::instance()->nativeMenu());
-  const auto &actualNoMenu = QApplication::testAttribute(Qt::AA_DontUseNativeMenuBar);
   // The meaning of both flags are the opposite (i.e. boolean not) of each other.
   // So, we have to test for equality to get the difference (i.e. a != !b).
-  if (actualNoMenu == RespeqtSettings::instance()->nativeMenu())
+  if (const auto &actualNoMenu = QApplication::testAttribute(Qt::AA_DontUseNativeMenuBar); actualNoMenu == RespeqtSettings::instance()->nativeMenu())
     m_ui->warning_nativemenu->show();
   else
     m_ui->warning_nativemenu->hide();
@@ -261,7 +261,7 @@ void OptionsDialog::setupSettings() {
     }
   }
 
-  bool software_handshake = (RespeqtSettings::instance()->serialPortHandshakingMethod() == HANDSHAKE_SOFTWARE);
+  const bool software_handshake = RespeqtSettings::instance()->serialPortHandshakingMethod() == HANDSHAKE_SOFTWARE;
   m_ui->serialPortWriteDelayLabel->setVisible(software_handshake);
   m_ui->serialPortWriteDelayCombo->setVisible(software_handshake);
   m_ui->serialPortBaudLabel->setVisible(!software_handshake);
@@ -279,7 +279,7 @@ void OptionsDialog::setupSettings() {
   m_ui->serialPortFallingEdge->setVisible(false);
 #endif
 
-  if ((SerialBackend::STANDARD == RespeqtSettings::instance()->backend()) && software_handshake) {
+  if (SerialBackend::STANDARD == RespeqtSettings::instance()->backend() && software_handshake) {
     m_ui->emulationHighSpeedExeLoaderBox->setVisible(false);
   } else {
     m_ui->emulationHighSpeedExeLoaderBox->setVisible(true);
@@ -301,8 +301,7 @@ void OptionsDialog::setupSettings() {
 
   // Setup via platform dependent class
   Printers::RawOutput::setupRawPrinters(m_ui->rawPrinterName);
-  QString rawPrinterName = RespeqtSettings::instance()->rawPrinterName();
-  if (rawPrinterName.length() > 0)
+  if (const QString rawPrinterName = RespeqtSettings::instance()->rawPrinterName(); rawPrinterName.length() > 0)
     m_ui->rawPrinterName->setCurrentText(rawPrinterName);
 }
 
@@ -360,9 +359,9 @@ void OptionsDialog::connectSignals() {
   connect(m_ui->btn_italic_title, &QPushButton::toggled, this, &OptionsDialog::titleItalicToggled);
 }
 
-void OptionsDialog::changeEvent(QEvent *e) {
-  QDialog::changeEvent(e);
-  switch (e->type()) {
+void OptionsDialog::changeEvent(QEvent *event) {
+  QDialog::changeEvent(event);
+  switch (event->type()) {
     case QEvent::LanguageChange:
       m_ui->retranslateUi(this);
       break;
@@ -371,9 +370,12 @@ void OptionsDialog::changeEvent(QEvent *e) {
   }
 }
 
-void OptionsDialog::onClosed()
+void OptionsDialog::onClosed() const
 {
-    RespeqtSettings::instance()->saveWidgetGeometry(this);
+    if (!RespeqtSettings::instance()->saveWidgetGeometry(this))
+    {
+      qDebug() << "!n" << "Widget geometry couldn't be saved!";
+    }
     RespeqtSettings::instance()->setOptionsDlgSplitPos(m_ui->splitter->sizes().at(0));
 }
 
@@ -383,11 +385,11 @@ void OptionsDialog::closeEvent(QCloseEvent *event)
     event->accept();
 }
 
-void OptionsDialog::showEvent(QShowEvent *e)
+void OptionsDialog::showEvent(QShowEvent *event)
 {
-    QDialog::showEvent(e);
+    QDialog::showEvent(event);
 
-    if (e->type() != QEvent::Show)
+    if (event->type() != QEvent::Show)
         return;
 
     if (RespeqtSettings::instance()->windowPosSaved(this))
@@ -398,19 +400,21 @@ void OptionsDialog::showEvent(QShowEvent *e)
     }
     else
     {
-        auto size = QGuiApplication::primaryScreen()->size();
-        resize((size.width() / 3) + 150, size.height() / 3);   // Qt doesn't seem to have a better way to do this
-        setHorzSplitPos((width() / 3) - 20);
+        const auto size = QGuiApplication::primaryScreen()->size();
+        resize(size.width() / 3 + 150, size.height() / 3);   // Qt doesn't seem to have a better way to do this
+        setHorzSplitPos(width() / 3 - 20);
     }
 }
 
-void OptionsDialog::serialPortChanged(int index) {
-  bool isCustomPath = !m_ui->serialPortComboBox->itemData(index).isValid();
+void OptionsDialog::serialPortChanged(const int index) const
+{
+  const bool isCustomPath = !m_ui->serialPortComboBox->itemData(index).isValid();
   m_ui->serialPortComboBox->setEditable(isCustomPath);
 }
 
-void OptionsDialog::handshakeChanged(int index) {
-  auto software_handshake = (index == HANDSHAKE_SOFTWARE);
+void OptionsDialog::handshakeChanged(const int index) const
+{
+  const auto software_handshake = index == HANDSHAKE_SOFTWARE;
   m_ui->serialPortWriteDelayLabel->setVisible(software_handshake);
   m_ui->serialPortWriteDelayCombo->setVisible(software_handshake);
   m_ui->serialPortBaudLabel->setVisible(!software_handshake);
@@ -425,12 +429,13 @@ void OptionsDialog::handshakeChanged(int index) {
   m_ui->serialPortFallingEdge->setVisible(!no_handshake && !software_handshake);
   m_ui->serialPortDTRControlEnable->setVisible(no_handshake || software_handshake);
 #endif
-  if (itemStandard->checkState((0)) == Qt::Checked) {
+  if (itemStandard->checkState(0) == Qt::Checked) {
     m_ui->emulationHighSpeedExeLoaderBox->setVisible(!software_handshake);
   }
 }
 
-void OptionsDialog::useDivisorToggled(bool checked) {
+void OptionsDialog::useDivisorToggled(const bool checked) const
+{
   m_ui->serialPortBaudLabel->setEnabled(!checked);
   m_ui->serialPortBaudCombo->setEnabled(!checked);
   m_ui->serialPortDivisorLabel->setEnabled(checked);
@@ -438,7 +443,8 @@ void OptionsDialog::useDivisorToggled(bool checked) {
 }
 
 // TODO Bug with serial selection
-void OptionsDialog::sectionClicked(QTreeWidgetItem *item, int column) {
+void OptionsDialog::sectionClicked(QTreeWidgetItem *item, const int column) const
+{
   if (item->checkState(column) == Qt::Checked) {
     if (item == itemStandard) {
       m_ui->emulationHighSpeedExeLoaderBox->setVisible(HANDSHAKE_SOFTWARE != m_ui->serialPortHandshakeCombo->currentIndex());
@@ -450,15 +456,16 @@ void OptionsDialog::sectionClicked(QTreeWidgetItem *item, int column) {
     } else {
       itemAtariSio->setCheckState(column, Qt::Unchecked);
     }
-  } else if ((itemStandard->checkState(column) == Qt::Unchecked) &&
-             (itemAtariSio->checkState(column) == Qt::Unchecked)) {
+  } else if (itemStandard->checkState(column) == Qt::Unchecked &&
+             itemAtariSio->checkState(column) == Qt::Unchecked) {
     item->setCheckState(column, Qt::Checked);
   }
   m_ui->serialPortBox->setCheckState(itemStandard->checkState(column));
   m_ui->atariSioBox->setCheckState(itemAtariSio->checkState(column));
 }
 
-void OptionsDialog::currentSectionChanged(QTreeWidgetItem *current, QTreeWidgetItem * /*previous*/) {
+void OptionsDialog::currentSectionChanged(const QTreeWidgetItem *current, QTreeWidgetItem * /*previous*/) const
+{
   if (current == itemStandard) {
     m_ui->stackedWidget->setCurrentIndex(0);
   } else if (current == itemAtariSio) {
@@ -488,13 +495,14 @@ void OptionsDialog::currentSectionChanged(QTreeWidgetItem *current, QTreeWidgetI
   }
 }
 
-void OptionsDialog::saveSettings() {
+void OptionsDialog::saveSettings() const
+{
   RespeqtSettings::instance()->setSerialPortName(m_ui->serialPortComboBox->currentText());
   RespeqtSettings::instance()->setSerialPortHandshakingMethod(m_ui->serialPortHandshakeCombo->currentIndex());
   RespeqtSettings::instance()->setSerialPortTriggerOnFallingEdge(m_ui->serialPortFallingEdge->isChecked());
   RespeqtSettings::instance()->setSerialPortDTRControlEnable(m_ui->serialPortDTRControlEnable->isChecked());
   RespeqtSettings::instance()->setSerialPortWriteDelay(m_ui->serialPortWriteDelayCombo->currentIndex());
-  RespeqtSettings::instance()->setSerialPortCompErrDelay(m_ui->serialPortCompErrDelayBox->value());
+  RespeqtSettings::instance()->setSerialPortCompErrDelay(static_cast<unsigned int>(m_ui->serialPortCompErrDelayBox->value()));
   RespeqtSettings::instance()->setSerialPortMaximumSpeed(m_ui->serialPortBaudCombo->currentIndex());
   RespeqtSettings::instance()->setSerialPortUsePokeyDivisors(m_ui->serialPortUseDivisorsBox->isChecked());
   RespeqtSettings::instance()->setSerialPortPokeyDivisor(m_ui->serialPortDivisorEdit->value());
@@ -551,7 +559,7 @@ void OptionsDialog::saveSettings() {
     RespeqtSettings::instance()->setDbDataSource(dbSourceNew);
   }
 
-  LabelFont titleFont
+  const LabelFont titleFont
   {
       m_ui->cb_title_font->currentFont().family(),
       m_ui->btn_bold_title->isChecked(),
@@ -560,7 +568,7 @@ void OptionsDialog::saveSettings() {
       m_ui->spn_scale_title->value()
   };
   RespeqtSettings::instance()->setDbTitleFont(titleFont);
-  LabelFont indexFont
+  const LabelFont indexFont
   {
       m_ui->cb_index_font->currentFont().family(),
       m_ui->btn_bold_index->isChecked(),
@@ -570,12 +578,12 @@ void OptionsDialog::saveSettings() {
   };
   RespeqtSettings::instance()->setDbIndexFont(indexFont);
 
-  SerialBackend backend = SerialBackend::STANDARD;
+  auto backend = SerialBackend::STANDARD;
   if (itemAtariSio->checkState(0) == Qt::Checked) {
     backend = SerialBackend::SIO_DRIVER;
   }
 
-  RespeqtSettings::instance()->setBackend(static_cast<SerialBackend>(backend));
+  RespeqtSettings::instance()->setBackend(backend);
 
   RespeqtSettings::instance()->setI18nLanguage(m_ui->i18nLanguageCombo->itemData(m_ui->i18nLanguageCombo->currentIndex()).toString());
 #ifdef Q_OS_MAC
@@ -591,21 +599,21 @@ void OptionsDialog::saveSettings() {
   onClosed();   // persist the dialog geometry
 }
 
-void OptionsDialog::useCustomBaudToggled(bool checked) {
+void OptionsDialog::useCustomBaudToggled(const bool checked) const
+{
   m_ui->emulationCustomCasBaudSpin->setEnabled(checked);
 }
 
-void OptionsDialog::selectFirmware(QLineEdit *edit, QString title, QString filters) {
+void OptionsDialog::selectFirmware(QLineEdit *edit, const QString& title, const QString& filters) {
   auto dir = edit->text();
-  auto lastSlash = dir.lastIndexOf("/");
-  auto lastBackslash = dir.lastIndexOf("\\");
-  if ((lastSlash != -1) || (lastBackslash != -1)) {
-    auto lastIndex = lastSlash > lastBackslash ? lastSlash : lastBackslash;
+  const auto lastSlash = dir.lastIndexOf("/");
+  if (const auto lastBackslash = dir.lastIndexOf("\\"); lastSlash != -1 || lastBackslash != -1) {
+    const auto lastIndex = lastSlash > lastBackslash ? lastSlash : lastBackslash;
     dir = dir.left(lastIndex);
   } else {
     dir = "";
   }
-  auto fileName = QFileDialog::getOpenFileName(this, title, dir, filters);
+  const auto fileName = QFileDialog::getOpenFileName(this, title, dir, filters);
   if (fileName.isEmpty()) {
     return;
   }
@@ -662,7 +670,7 @@ void OptionsDialog::fixedFontClicked() {
   bool ok;
   QFont font;
   font.setFamily(m_ui->label_atarifixed->text());
-  QFontDialog::FontDialogOptions options = QFontDialog::MonospacedFonts;
+  constexpr QFontDialog::FontDialogOptions options = QFontDialog::MonospacedFonts;
   QFont newFont = QFontDialog::getFont(&ok, font, this, tr("Select Atari fixed width font"), options);
   if (ok) {
     newFont.setPointSize(12);
@@ -673,8 +681,7 @@ void OptionsDialog::fixedFontClicked() {
 }
 
 void OptionsDialog::rclFolderClicked() {
-  QString dir;
-  dir = RespeqtSettings::instance()->lastRclDir();
+  const QString dir = RespeqtSettings::instance()->lastRclDir();
   QString fileName = QFileDialog::getExistingDirectory(this, tr("Selec RCL image folder"), dir);
   fileName = QDir::fromNativeSeparators(fileName);//
   if (fileName.isEmpty()) {
@@ -684,7 +691,8 @@ void OptionsDialog::rclFolderClicked() {
   m_ui->RclNameEdit->setText(fileName);
 }
 
-void OptionsDialog::useNativeMenuToggled() {
+void OptionsDialog::useNativeMenuToggled() const
+{
   // The meaning of both flags are the opposite (i.e. boolean not) of each other.
   // So, we have to test for equality to get difference (i.e. a != !b).
   const auto &actualNoMenu = QApplication::testAttribute(Qt::AA_DontUseNativeMenuBar);
@@ -693,25 +701,25 @@ void OptionsDialog::useNativeMenuToggled() {
   m_ui->warning_nativemenu->setVisible(actualNoMenu != checkboxNoMenu);
 }
 
-void OptionsDialog::appDataDirToggled()
+void OptionsDialog::appDataDirToggled() const
 {
-    bool isChecked = m_ui->rb_dbset_app_data_dir->isChecked();
+    const bool isChecked = m_ui->rb_dbset_app_data_dir->isChecked();
     m_ui->edt_appdata_dir->setEnabled(isChecked);
     if (isChecked)
     {
-        QString appdatadir = RespeqtSettings::instance()->appDataFolder();
+        const QString appdatadir = RespeqtSettings::instance()->appDataFolder();
         m_ui->edt_appdata_dir->setText(appdatadir);
         m_ui->cb_copypics->setText(tr("Copy pics to AppData folder"));
     }
 }
 
-void OptionsDialog::diskSubDirToggled()
+void OptionsDialog::diskSubDirToggled() const
 {
     if (m_ui->rb_dbset_subdir->isChecked())
         m_ui->cb_copypics->setText(tr("Copy pics to .respeqt_db subdir"));
 }
 
-void OptionsDialog::appSettingsToggled()
+void OptionsDialog::appSettingsToggled() const
 {
     if (m_ui->rb_dbset_appset_ini->isChecked())
         m_ui->cb_copypics->setText(tr("Copy pics to disk folders"));
@@ -723,10 +731,9 @@ void OptionsDialog::browseForAppDir()
     dirName = QFileDialog::getExistingDirectory(this, tr("Choose directory for app data"), dirName);
     if (!dirName.isEmpty())
     {
-        QFileInfo fileInfo(dirName);
-        if (fileInfo.isWritable())
+      if (const QFileInfo fileInfo(dirName); fileInfo.isWritable())
             m_ui->edt_appdata_dir->setText(dirName);
-        else
+      else
             QMessageBox::warning(this, "Error directory not writable", "Check permissions and try again.");
     }
 }
@@ -753,41 +760,41 @@ void OptionsDialog::titleColorClicked()
     m_ui->btn_color_title->setStyleSheet(style);
 }
 
-void OptionsDialog::indexBoldToggled()
+void OptionsDialog::indexBoldToggled() const
 {
     QFont font = m_ui->btn_bold_index->font();
     font.setBold(m_ui->btn_bold_index->isChecked());
     m_ui->btn_bold_index->setFont(font);
 }
 
-void OptionsDialog::titleBoldToggled()
+void OptionsDialog::titleBoldToggled() const
 {
     QFont font = m_ui->btn_bold_title->font();
     font.setBold(m_ui->btn_bold_title->isChecked());
     m_ui->btn_bold_title->setFont(font);
 }
 
-void OptionsDialog::indexItalicToggled()
+void OptionsDialog::indexItalicToggled() const
 {
     QFont font = m_ui->btn_italic_index->font();
     font.setItalic(m_ui->btn_italic_index->isChecked());
     m_ui->btn_italic_index->setFont(font);
 }
 
-void OptionsDialog::titleItalicToggled()
+void OptionsDialog::titleItalicToggled() const
 {
     QFont font = m_ui->btn_italic_title->font();
     font.setItalic(m_ui->btn_italic_title->isChecked());
     m_ui->btn_italic_title->setFont(font);
 }
 
-void OptionsDialog::setHorzSplitPos(int pos)
+void OptionsDialog::setHorzSplitPos(const int pos) const
 {
     if (pos == -1)
         return;
 
     QList<int> sizes = m_ui->splitter->sizes();
-    int total = sizes.at(0) + sizes.at(1);
+    const int total = sizes.at(0) + sizes.at(1);
     sizes.clear();
     sizes << pos << (total - pos);
     m_ui->splitter->setSizes(sizes);

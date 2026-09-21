@@ -13,7 +13,7 @@ AboutDialog::AboutDialog(QWidget *parent, const QString &version)
     : QDialog(parent),
       m_ui(new Ui::AboutDialog) {
   Qt::WindowFlags flags = windowFlags();
-  flags = flags & (~Qt::WindowContextHelpButtonHint);
+  flags = flags & ~Qt::WindowContextHelpButtonHint;
   setWindowFlags(flags);
 
   m_ui->setupUi(this);
@@ -39,9 +39,7 @@ void AboutDialog::changeEvent(QEvent *e) {
   }
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "readability-convert-member-functions-to-static"
-void AboutDialog::showAboutQt() {
+// ReSharper disable once CppMemberFunctionMayBeStatic
+void AboutDialog::showAboutQt() { // NOLINT(*-convert-member-functions-to-static)
   QApplication::aboutQt();
 }
-#pragma clang diagnostic pop
