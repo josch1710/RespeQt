@@ -21,12 +21,14 @@ namespace Network
         ~TnfsTcp() override;
 
     public slots:
-        auto start() -> void;
-        auto stop() -> void;
+        // No auto -> type notation, because moc.
+        void start();
+        void stop();
 
     protected slots:
-        auto newConnection() -> void;
-        auto readPendingData(QTcpSocket * socket) -> void;
+        // No auto -> type notation, because moc.
+        void newConnection();
+        void readPendingData(QTcpSocket *const socket);
 
     private:
         QTcpServer *tcpServer{nullptr};

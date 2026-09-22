@@ -16,11 +16,12 @@ namespace Network
         ~TnfsUdp() override;
 
     public slots:
-        auto start() -> void;
-        auto stop() -> void;
+        // No auto -> type notation, because moc.
+        void start();
+        void stop();
 
     protected slots:
-        auto readPendingDatagrams() -> void;
+        void readPendingDatagrams(); // No auto -> type notation, because moc.
 
     private:
         QUdpSocket *udpSocket{nullptr};

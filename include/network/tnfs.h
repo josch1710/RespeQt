@@ -18,9 +18,10 @@ namespace Network {
         auto addMountPoint(const QDir& mountPoint) -> void;
         auto removeMountPoint(const QDir& mountPoint) -> void;
 
-    signals:
-        auto sessionConnected() -> void;
-        auto allSessionsDisconnected() -> void;
+        signals:
+        // No auto -> type notation, because moc.
+        void sessionConnected();
+        void allSessionsDisconnected();
 
     protected:
         auto reset() -> void;
