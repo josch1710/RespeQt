@@ -20,6 +20,8 @@ namespace Ui {
   class OptionsDialog;
 }
 
+namespace UI {
+
 class OptionsDialog : public QDialog {
   Q_OBJECT
 
@@ -33,7 +35,7 @@ protected:
   void closeEvent(QCloseEvent *event) override;
 
 private:
-  Ui::OptionsDialog *m_ui;
+  ::Ui::OptionsDialog *m_ui;
   QTreeWidgetItem
     *itemPassthrough{nullptr},
     *itemAtari1027{nullptr},
@@ -97,5 +99,7 @@ private slots:
   void rclFolderClicked();
   void useNativeMenuToggled() const;
 };
+
+} // namespace UI
 
 #endif// OPTIONSDIALOG_H

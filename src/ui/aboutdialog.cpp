@@ -6,12 +6,14 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include "aboutdialog.h"
+#include "ui/aboutdialog.h"
 #include "ui_aboutdialog.h"
+
+namespace UI {
 
 AboutDialog::AboutDialog(QWidget *parent, const QString &version)
     : QDialog(parent),
-      m_ui(new Ui::AboutDialog) {
+      m_ui(new ::Ui::AboutDialog) {
   Qt::WindowFlags flags = windowFlags();
   flags = flags & ~Qt::WindowContextHelpButtonHint;
   setWindowFlags(flags);
@@ -43,3 +45,5 @@ void AboutDialog::changeEvent(QEvent *e) {
 void AboutDialog::showAboutQt() { // NOLINT(*-convert-member-functions-to-static)
   QApplication::aboutQt();
 }
+
+} // namespace UI

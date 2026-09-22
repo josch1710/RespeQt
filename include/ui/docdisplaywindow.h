@@ -17,6 +17,8 @@ namespace Ui {
   class DocDisplayWindow;
 }
 
+namespace UI {
+
 class DocDisplayWindow : public QMainWindow {
   Q_OBJECT
 public:
@@ -28,7 +30,7 @@ protected:
   void closeEvent(QCloseEvent *e) override;
 
 private:
-  Ui::DocDisplayWindow *ui;
+  ::Ui::DocDisplayWindow *ui;
 
 private slots:
   void printTriggered();
@@ -36,5 +38,7 @@ private slots:
 signals:
   void closed();
 };
+
+} // namespace UI
 
 #endif// DOCDISPLAYWINDOW_H

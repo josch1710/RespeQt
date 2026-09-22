@@ -6,15 +6,17 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include "autobootdialog.h"
-#include "mainwindow.h"
+#include "ui/autobootdialog.h"
+#include "ui/mainwindow.h"
 #include "ui_autobootdialog.h"
 
 extern QString g_exefileName;
 static bool reload;
 
+namespace UI {
+
 [[maybe_unused]] AutoBootDialog::AutoBootDialog(QWidget *parent) : QDialog(parent),
-                                                  ui(new Ui::AutoBootDialog) {
+                                                  ui(new ::Ui::AutoBootDialog) {
   ui->setupUi(this);
   ui->progressBar->setVisible(false);
   connect(ui->reloadButton, &QPushButton::clicked, this, &AutoBootDialog::reject);
@@ -75,3 +77,5 @@ void AutoBootDialog::reloadExe() {
   reload = true;
   close();
 }
+
+} // namespace UI

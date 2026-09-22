@@ -1,5 +1,5 @@
 #include "printers/nativeoutput.h"
-#include "logdisplaydialog.h"
+#include "ui/logdisplaydialog.h"
 #include <cmath>
 
 template<typename T>

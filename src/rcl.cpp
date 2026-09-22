@@ -13,7 +13,7 @@
 #include "windows.h"
 #endif
 
-#include "mainwindow.h"
+#include "ui/mainwindow.h"
 #include "rcl.h"
 #include "respeqtsettings.h"
 #include "diskimages/diskimage.h"

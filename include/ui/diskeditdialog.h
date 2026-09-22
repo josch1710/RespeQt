@@ -21,6 +21,8 @@ namespace Ui {
 
 #include "filesystems/atarifilesystem.h"
 
+namespace UI {
+
 class FileModel : public QAbstractTableModel {
   Q_OBJECT
 
@@ -69,7 +71,7 @@ protected:
   void changeEvent(QEvent *e) override;
 
 private:
-  Ui::DiskEditDialog *m_ui;
+  ::Ui::DiskEditDialog *m_ui;
   DiskImages::SimpleDiskImage *m_disk{};
   QComboBox *m_fileSystemBox;
 
@@ -86,5 +88,7 @@ private slots:
   void fileSystemChanged(int index);
   void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) const;
 };
+
+} // namespace UI
 
 #endif// DISKEDITDIALOG_H

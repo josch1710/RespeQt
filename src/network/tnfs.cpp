@@ -1,7 +1,7 @@
 #include "network/tnfs.h"
 #include "network/sessioninfo.h"
 #include "network/datagram.h"
-#include "mainwindow.h"
+#include "ui/mainwindow.h"
 
 #include <fcntl.h>
 #include <algorithm>

@@ -1,5 +1,5 @@
 #include "filesystems/spartadosfilesystem.h"
-#include "diskeditdialog.h"
+#include "ui/diskeditdialog.h"
 #include <QMessageBox>
 #include <algorithm>
 

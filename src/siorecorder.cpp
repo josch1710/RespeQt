@@ -1,5 +1,5 @@
 #include "siorecorder.h"
-#include "mainwindow.h"
+#include "ui/mainwindow.h"
 #include "respeqtsettings.h"
 
 #include <QDataStream>

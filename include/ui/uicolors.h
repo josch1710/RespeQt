@@ -12,7 +12,7 @@
 #include <QPalette>
 #include <QWidget>
 
-namespace UiColors {
+namespace UI::Colors {
 
   // Everything below the middle of the lightness range counts as a dark
   // palette. Only the window background is looked at, since that is what the
@@ -71,6 +71,8 @@ namespace UiColors {
     widget->setPalette(pal);
   }
 
-}// namespace UiColors
+}// namespace UI::Colors
+
+namespace UiColors = UI::Colors;
 
 #endif// UICOLORS_H

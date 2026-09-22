@@ -1,10 +1,10 @@
-#include "printerwidget.h"
+#include "ui/printerwidget.h"
 #include "printers/printerfactory.h"
 #include "printers/printers.h"
 #include "respeqtsettings.h"
 #include "ui_printerwidget.h"
-#include "uiscale.h"
-#include "uicolors.h"
+#include "ui/uiscale.h"
+#include "ui/uicolors.h"
 
 #include <QMessageBox>
 #include <QString>
@@ -12,14 +12,16 @@
 #include <memory>
 #include <utility>
 
+namespace UI {
+
 PrinterWidget::PrinterWidget(const int printerNum, QWidget *parent)
-    : QFrame(parent), ui(new Ui::PrinterWidget), printerNo_(printerNum), mPrinter(nullptr)
+    : QFrame(parent), ui(new ::Ui::PrinterWidget), printerNo_(printerNum), mPrinter(nullptr)
       //, mDevice(nullptr)
       ,
       mSio(nullptr) {
   ui->setupUi(this);
   // See DriveWidget: the form pinned the buttons and set no icon size.
-  UiScale::applyToolButtonIconSizes(this);
+  Scale::applyToolButtonIconSizes(this);
   setup();
 
   // Connect the printer selection combobox
@@ -75,9 +77,9 @@ void PrinterWidget::setup() const
 // about 3:1 on a dark one, so derive the dimming from the palette instead.
 void PrinterWidget::applyPaletteColors() const
 {
-  const auto color{QColor(UiColors::isDark(ui->atariPrinters, QPalette::HighlightedText) ? Qt::white : Qt::black)};
-  UiColors::setButtonColor(ui->atariPrinters, color);
-  UiColors::setHighlightedTextColor(ui->atariPrinters, color);
+  const auto color{QColor(Colors::isDark(ui->atariPrinters, QPalette::HighlightedText) ? Qt::white : Qt::black)};
+  Colors::setButtonColor(ui->atariPrinters, color);
+  Colors::setHighlightedTextColor(ui->atariPrinters, color);
 }
 
 // The colours above are derived once, so they would go stale when the user
@@ -93,9 +95,9 @@ void PrinterWidget::changeEvent(QEvent *e)
 void PrinterWidget::showEvent(QShowEvent *e)
 {
   // On first start, the color has to be other way round.
-  const auto color{QColor(UiColors::isDark(ui->atariPrinters, QPalette::HighlightedText) ? Qt::black : Qt::white)};
-  UiColors::setButtonColor(ui->atariPrinters, color);
-  UiColors::setHighlightedTextColor(ui->atariPrinters, color);
+  const auto color{QColor(Colors::isDark(ui->atariPrinters, QPalette::HighlightedText) ? Qt::black : Qt::white)};
+  Colors::setButtonColor(ui->atariPrinters, color);
+  Colors::setHighlightedTextColor(ui->atariPrinters, color);
   QFrame::showEvent(e);
 }
 
@@ -171,3 +173,5 @@ void PrinterWidget::disconnectPrinter() {
 void PrinterWidget::printerSelectionChanged(const QString &printerName) const {
   RespeqtSettings::instance()->setPrinterName(printerNo_, printerName);
 }
+
+} // namespace UI

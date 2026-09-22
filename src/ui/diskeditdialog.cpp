@@ -8,7 +8,7 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include "diskeditdialog.h"
+#include "ui/diskeditdialog.h"
 #include "ui_diskeditdialog.h"
 
 #include <QDebug>
@@ -25,6 +25,8 @@
 #include "filesystems/dos25filesystem.h"
 #include "filesystems/mydosfilesystem.h"
 #include "filesystems/spartadosfilesystem.h"
+
+namespace UI {
 
 /* MyModel */
 
@@ -451,7 +453,7 @@ QMimeData *FileModel::mimeData(const QModelIndexList &indexes) const {
 /* DiskEditDialog */
 
 DiskEditDialog::DiskEditDialog(QWidget *parent) : QMainWindow(parent),
-                                                  m_ui(new Ui::DiskEditDialog) {
+                                                  m_ui(new ::Ui::DiskEditDialog) {
   m_ui->setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
 
@@ -681,3 +683,5 @@ void DiskEditDialog::stayOnTopChanged() {
   }
   show();
 }
+
+} // namespace UI

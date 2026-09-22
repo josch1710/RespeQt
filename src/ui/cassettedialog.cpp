@@ -8,14 +8,16 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include "cassettedialog.h"
+#include "ui/cassettedialog.h"
 #include "ui_cassettedialog.h"
 
 #include <QTimer>
 #include <algorithm>
 
+namespace UI {
+
 CassetteDialog::CassetteDialog(QWidget *parent, const QString &fileName)
-    : QDialog(parent), ui(new Ui::CassetteDialog) {
+    : QDialog(parent), ui(new ::Ui::CassetteDialog) {
   Qt::WindowFlags flags = windowFlags();
   flags = flags & ~Qt::WindowContextHelpButtonHint;
   setWindowFlags(flags);
@@ -113,3 +115,5 @@ void CassetteDialog::tick() {
   mRemainingTime = std::max(mRemainingTime, 1000);
   emit progress(mRemainingTime - 1000);
 }
+
+} // namespace UI

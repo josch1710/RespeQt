@@ -13,7 +13,7 @@
 #include "respeqtsettings.h"
 #include "serialport.h"
 #include "diskbrowser/diskbrowser.h"
-#include "uiscale.h"
+#include "ui/uiscale.h"
 #include <QFileInfo>
 #include <memory>
 #include <QStandardPaths>

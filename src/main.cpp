@@ -6,7 +6,7 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include "mainwindow.h"
+#include "ui/mainwindow.h"
 #include <QApplication>
 #include <QTextCodec>
 #include <QStyleFactory>
@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
   QIcon::setThemeName("Classic");
   QApplication::setFont(QApplication::font("QMenu"));
   QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
-  const auto w {new MainWindow};
+  const auto w {new UI::MainWindow};
   w->show();
   const auto ret {QApplication::exec()};
 #ifdef Q_OS_WIN

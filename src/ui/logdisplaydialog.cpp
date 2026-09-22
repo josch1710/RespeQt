@@ -9,13 +9,14 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include "logdisplaydialog.h"
-#include "mainwindow.h"
+#include "ui/logdisplaydialog.h"
+#include "ui/mainwindow.h"
 #include "ui_logdisplaydialog.h"
 
+namespace UI {
 
 LogDisplayDialog::LogDisplayDialog(QWidget *parent) : QDialog(parent),
-                                                      l_ui(new Ui::LogDisplayDialog)
+                                                      l_ui(new ::Ui::LogDisplayDialog)
 {
     const Qt::WindowFlags flags = windowFlags() & ~Qt::WindowContextHelpButtonHint;
     setWindowFlags(flags);
@@ -103,3 +104,5 @@ void LogDisplayDialog::diskFilter()
         l_ui->textEdit->setHtml(savedLog);
     }
 }
+
+} // namespace UI

@@ -1,7 +1,7 @@
 #include "filesystems/dos10filesystem.h"
 #include "filesystems/dos20filesystem.h"
 #include "filesystems/mydosfilesystem.h"
-#include "diskeditdialog.h"
+#include "ui/diskeditdialog.h"
 #include <QMessageBox>
 
 namespace Filesystems {

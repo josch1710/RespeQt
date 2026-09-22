@@ -19,15 +19,15 @@
 #include <QTextEdit>
 #include <QTranslator>
 
-#include "aboutdialog.h"
-#include "createimagedialog.h"
-#include "diskeditdialog.h"
-#include "docdisplaywindow.h"
-#include "drivewidget.h"
-#include "logdisplaydialog.h"
-#include "optionsdialog.h"
+#include "ui/aboutdialog.h"
+#include "ui/createimagedialog.h"
+#include "ui/diskeditdialog.h"
+#include "ui/docdisplaywindow.h"
+#include "ui/drivewidget.h"
+#include "ui/logdisplaydialog.h"
+#include "ui/optionsdialog.h"
 #include "printers/outputwindow.h"
-#include "printerwidget.h"
+#include "ui/printerwidget.h"
 #include "siorecorder.h"
 #include "sioworker.h"
 #include "diskbrowser/diskbrowserdlg.h"
@@ -39,6 +39,8 @@
 namespace Ui {
   class MainWindow;
 }
+
+namespace UI {
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -60,7 +62,7 @@ public:
 private:
   static MainWindow *sInstance;
   int untitledName;
-  Ui::MainWindow *ui;
+  ::Ui::MainWindow *ui;
   SioWorkerPtr sio;
   bool shownFirstTime;
   std::vector<PrinterWidget *> printerWidgets;
@@ -225,5 +227,7 @@ private slots:
   void sessionConnected() const;
   void allSessionsDisconnected() const;
 };
+
+} // namespace UI
 
 #endif// MAINWINDOW_H

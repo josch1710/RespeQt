@@ -15,21 +15,23 @@ namespace Ui {
   class AboutDialog;
 }
 
-class AboutDialog : public QDialog {
-  Q_OBJECT
+namespace UI {
+  class AboutDialog : public QDialog {
+    Q_OBJECT
 
-public:
-  AboutDialog(QWidget *parent, const QString &version);
-  ~AboutDialog() override;
+  public:
+    AboutDialog(QWidget *parent, const QString &version);
+    ~AboutDialog() override;
 
-protected:
-  void changeEvent(QEvent *e) override;
+  protected:
+    void changeEvent(QEvent *e) override;
 
-private:
-  Ui::AboutDialog *m_ui;
+  private:
+    ::Ui::AboutDialog *m_ui;
 
-private slots:
-  void showAboutQt();
-};
+  private slots:
+    void showAboutQt();
+  };
+} // namespace UI
 
 #endif// ABOUTDIALOG_H

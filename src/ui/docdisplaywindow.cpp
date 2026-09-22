@@ -8,7 +8,7 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include "docdisplaywindow.h"
+#include "ui/docdisplaywindow.h"
 #include "respeqtsettings.h"
 #include "ui_docdisplaywindow.h"
 
@@ -16,8 +16,10 @@
 #include <QPrintDialog>
 #include <QPrinter>
 
+namespace UI {
+
 DocDisplayWindow::DocDisplayWindow(QWidget *parent) : QMainWindow(parent),
-                                                      ui(new Ui::DocDisplayWindow) {
+                                                      ui(new ::Ui::DocDisplayWindow) {
   ui->setupUi(this);
   // "monospace" is a fontconfig generic that does not resolve on Windows or
   // macOS -- there Qt substituted a proportional font. Ask the platform for
@@ -55,3 +57,5 @@ void DocDisplayWindow::printTriggered() {
     return;
   ui->docDisplay->print(&printer);
 }
+
+} // namespace UI

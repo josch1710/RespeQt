@@ -5,21 +5,23 @@
  *
  */
 
-#include "drivewidget.h"
-#include "include/diskimages/diskimage.h"
+#include "ui/drivewidget.h"
+#include "diskimages/diskimage.h"
 #include "ui_drivewidget.h"
-#include "uicolors.h"
-#include "uiscale.h"
+#include "ui/uicolors.h"
+#include "ui/uiscale.h"
 
 #include <QEvent>
 
+namespace UI {
+
 DriveWidget::DriveWidget(const int driveNum, QWidget *parent)
-    : QWidget(parent), ui(new Ui::DriveWidget), driveNo_(driveNum) {
+    : QWidget(parent), ui(new ::Ui::DriveWidget), driveNo_(driveNum) {
   ui->setupUi(this);
   // The form pinned every button to 28x28 or 21x25 and set no icon size at
   // all. Now the style decides how large an icon is and the buttons size
   // themselves around it.
-  UiScale::applyToolButtonIconSizes(this);
+  Scale::applyToolButtonIconSizes(this);
 }
 
 DriveWidget::~DriveWidget() {
@@ -31,9 +33,9 @@ DriveWidget::~DriveWidget() {
 // and rgb(128, 128, 128). Both were chosen for a light window and drop to
 // about 3:1 on a dark one, so derive the dimming from the palette instead.
 void DriveWidget::applyPaletteColors() {
-  const QColor muted = UiColors::mutedText(this);
-  UiColors::setTextColor(ui->driveLabel, muted);
-  UiColors::setTextColor(ui->labelImageProperties, muted);
+  const QColor muted = Colors::mutedText(this);
+  Colors::setTextColor(ui->driveLabel, muted);
+  Colors::setTextColor(ui->labelImageProperties, muted);
   setFileNameHighlight(fileNameHighlighted_);
 }
 
@@ -64,7 +66,7 @@ void DriveWidget::setFileNameHighlight(const bool highlighted) {
     return;
   }
 
-  const QColor accent = UiColors::isDark(this) ? QColor(98, 217, 212)
+  const QColor accent = Colors::isDark(this) ? QColor(98, 217, 212)
                                               : QColor(13, 110, 106);
   ui->labelFileName->setStyleSheet(
       QStringLiteral("color: %1; font-weight: bold").arg(accent.name()));
@@ -380,3 +382,5 @@ void DriveWidget::revertTriggered() { emit actionRevert(driveNo_); }
 void DriveWidget::saveAsTriggered() { emit actionSaveAs(driveNo_); }
 void DriveWidget::autoSaveToggled(const bool state) { emit actionAutoSave(driveNo_, state); }
 void DriveWidget::bootOptionTriggered() { emit actionBootOptions(driveNo_); }
+
+} // namespace UI

@@ -16,19 +16,19 @@
  */
 
 
-#include "mainwindow.h"
+#include "ui/mainwindow.h"
 #include "ui_mainwindow.h"
 
 #include "autoboot.h"
-#include "autobootdialog.h"
-#include "bootoptionsdialog.h"
-#include "cassettedialog.h"
-#include "drivewidget.h"
-#include "include/diskimages/folderimage.h"
-#include "logdisplaydialog.h"
+#include "ui/autobootdialog.h"
+#include "ui/bootoptionsdialog.h"
+#include "ui/cassettedialog.h"
+#include "ui/drivewidget.h"
+#include "diskimages/folderimage.h"
+#include "ui/logdisplaydialog.h"
 #include "pclink.h"
 #include "printers/printerfactory.h"
-#include "printerwidget.h"
+#include "ui/printerwidget.h"
 #include "rcl.h"
 #include "smartdevice.h"
 //#include "printers/outputfactory.h"
@@ -72,6 +72,8 @@ QString g_respeQtAppPath;
 bool g_disablePicoHiSpeed;
 //SimpleDiskImage *g_translator = nullptr;
 //static int g_savedWidth;
+
+namespace UI {
 
 MainWindow *MainWindow::sInstance{nullptr};
 
@@ -144,7 +146,7 @@ void MainWindow::doLogMessage(const int type, const QString &msg) {
 }
 
 MainWindow::MainWindow()
-    : QMainWindow(nullptr), ui(new Ui::MainWindow)
+    : QMainWindow(nullptr), ui(new ::Ui::MainWindow)
 {
   // Make the main window delete when closed.
   setAttribute(Qt::WA_DeleteOnClose, true);
@@ -2141,3 +2143,5 @@ void MainWindow::sessionConnected() const
     netLabel->setToolTip(tr("TNFS connected"));
     netLabel->setStatusTip(netLabel->toolTip());
 }
+
+} // namespace UI

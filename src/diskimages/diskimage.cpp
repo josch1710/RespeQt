@@ -10,10 +10,10 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include "include/diskimages/diskimage.h"
+#include "diskimages/diskimage.h"
 #include "zlib.h"
 
-#include "diskeditdialog.h"
+#include "ui/diskeditdialog.h"
 #include "respeqtsettings.h"
 #include <QDir>
 #include <QFileInfo>

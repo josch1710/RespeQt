@@ -24,7 +24,9 @@
 #include "miscutils.h"
 #include "sioworker.h"
 
-class DiskEditDialog;
+namespace UI {
+  class DiskEditDialog;
+}
 
 namespace DiskImages {
   enum Padding: uint8_t {
@@ -64,12 +66,12 @@ namespace DiskImages {
     virtual QString getNextSideLabel();
     [[maybe_unused]] QString getNextSideFilename() { return m_nextSideFilename; }
 
-    void setEditDialog(DiskEditDialog *aDialog) {
+    void setEditDialog(UI::DiskEditDialog *aDialog) {
       m_editDialog = aDialog;
       emit statusChanged(m_deviceNo);
     }
 
-    DiskEditDialog *editDialog() const { return m_editDialog; }
+    UI::DiskEditDialog *editDialog() const { return m_editDialog; }
     [[maybe_unused]] Board *getBoardInfo() const { return m_board.getCopy(); }
     void setBoardInfo(const Board *info) { m_board.setFromCopy(info); }
 
@@ -128,7 +130,7 @@ namespace DiskImages {
     QByteArray m_originalFileHeader;
     FileTypes::FileType m_originalImageType;
     [[maybe_unused]] bool m_gzipped{};
-    DiskEditDialog *m_editDialog;
+    UI::DiskEditDialog *m_editDialog;
     int m_currentSide{};
     int m_numberOfSides{};
     QString m_nextSideFilename;

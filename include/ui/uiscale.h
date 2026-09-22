@@ -16,7 +16,7 @@
 #include <QToolButton>
 #include <QWidget>
 
-namespace UiScale {
+namespace UI::Scale {
 
   // The active style's own small icon size: 16 on the common desktop styles,
   // larger on styles built for touch or high density output.
@@ -55,6 +55,8 @@ namespace UiScale {
     return points > 0 ? points : 10;
   }
 
-}// namespace UiScale
+}// namespace UI::Scale
+
+namespace UiScale = UI::Scale;
 
 #endif// UISCALE_H

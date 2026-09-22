@@ -13,7 +13,7 @@
 #ifndef RESPEQTSETTINGS_H
 #define RESPEQTSETTINGS_H
 
-#include "mainwindow.h"
+#include "ui/mainwindow.h"
 #include "diskbrowser/picsourcetype.h"
 #include "diskbrowser/picpreview.h"
 #include "diskbrowser/dbsettings.h"

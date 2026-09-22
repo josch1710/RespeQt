@@ -6,11 +6,13 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include "createimagedialog.h"
+#include "ui/createimagedialog.h"
 #include "ui_createimagedialog.h"
 
+namespace UI {
+
 CreateImageDialog::CreateImageDialog(QWidget *parent) : QDialog(parent),
-                                                        m_ui(new Ui::CreateImageDialog) {
+                                                        m_ui(new ::Ui::CreateImageDialog) {
   Qt::WindowFlags flags = windowFlags();
   flags = flags & ~Qt::WindowContextHelpButtonHint;
   setWindowFlags(flags);
@@ -140,3 +142,5 @@ void CreateImageDialog::harddiskToggled(const bool checked) const
     m_ui->geometryWidget->setEnabled(false);
   }
 }
+
+} // namespace UI

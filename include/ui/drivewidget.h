@@ -18,6 +18,8 @@ namespace DiskImages {
   class SimpleDiskImage;
 }
 
+namespace UI {
+
 class DriveWidget : public QWidget {
   Q_OBJECT
 
@@ -90,9 +92,11 @@ private:
   void setFileNameHighlight(bool highlighted);
   void applyPaletteColors();
 
-  Ui::DriveWidget *ui;
+  ::Ui::DriveWidget *ui;
   int driveNo_;
   bool fileNameHighlighted_{false};
 };
+
+} // namespace UI
 
 #endif// DRIVEWIDGET_H

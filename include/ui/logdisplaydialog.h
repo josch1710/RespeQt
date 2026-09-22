@@ -13,11 +13,13 @@
 #include <QDebug>
 #include <QDialog>
 
-constexpr int maxLogSize = 1 * 1024 * 1024; // 1 MB max size.
-
 namespace Ui {
   class LogDisplayDialog;
 }
+
+namespace UI {
+
+constexpr int maxLogSize = 1 * 1024 * 1024; // 1 MB max size.
 
 class LogDisplayDialog : public QDialog {
   Q_OBJECT
@@ -30,7 +32,7 @@ protected:
   void changeEvent(QEvent *e) override;
 
 private:
-  Ui::LogDisplayDialog *l_ui;
+  ::Ui::LogDisplayDialog *l_ui;
   QString savedLog, filter;
 
 public slots:
@@ -41,4 +43,6 @@ private slots:
   void diskFilter();
   void onClick(QAbstractButton *button);
 };
+
+} // namespace UI
 #endif// LOGDISPLAYDIALOG_H

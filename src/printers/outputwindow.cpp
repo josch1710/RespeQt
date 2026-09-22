@@ -21,7 +21,8 @@
 #include <QString>
 #include <QSvgGenerator>
 
-#include "uicolors.h"
+#include "ui/uicolors.h"
+#include "ui/printerwidget.h"
 
 namespace Printers {
 
@@ -70,7 +71,7 @@ namespace Printers {
       if (e->type() == QEvent::Show && RespeqtSettings::instance()->saveWindowsPos())
       {
           // Restore last widget geometry
-          const auto parent = qobject_cast<PrinterWidget*>(parentWidget());
+          const auto parent = qobject_cast<UI::PrinterWidget*>(parentWidget());
           const QString name = QString("Printer%1").arg(parent->getPrinterNumber()+1);
           RespeqtSettings::instance()->restoreWidgetGeometry(this, name);
       }
@@ -82,7 +83,7 @@ namespace Printers {
     // Save Current Window Position and size //
     if (RespeqtSettings::instance()->saveWindowsPos())
     {
-      const auto parent = qobject_cast<PrinterWidget*>(parentWidget());
+      const auto parent = qobject_cast<UI::PrinterWidget*>(parentWidget());
       if (const QString name = QString("Printer%1").arg(parent->getPrinterNumber()+1); !RespeqtSettings::instance()->saveWidgetGeometry(this, name))
       {
         qDebug() << "!n" << "Widget geometry couldn't be saved!";

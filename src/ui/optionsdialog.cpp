@@ -9,11 +9,11 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include "optionsdialog.h"
+#include "ui/optionsdialog.h"
 #include "printers/rawoutput.h"
 #include "respeqtsettings.h"
 #include "ui_optionsdialog.h"
-#include "uiscale.h"
+#include "ui/uiscale.h"
 #include <QDir>
 #include <QFileDialog>
 #include <QFontDatabase>
@@ -22,6 +22,8 @@
 #include <QtSerialPort>
 #include <QColorDialog>
 #include <QScreen>
+
+namespace UI {
 
 // A sans serif capital "I" is hard to tell apart from a lowercase L or a pipe,
 // which is why the italic buttons asked for a serif family. The form named
@@ -52,7 +54,7 @@ static QFont serifButtonFont(const QFont &base) {
 }
 
 OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent),
-                                                m_ui(new Ui::OptionsDialog) {
+                                                m_ui(new ::Ui::OptionsDialog) {
   auto flags = windowFlags();
   flags = flags & ~Qt::WindowContextHelpButtonHint;
   setWindowFlags(flags);
@@ -61,18 +63,18 @@ OptionsDialog::OptionsDialog(QWidget *parent) : QDialog(parent),
 
   // The twelve browse buttons were pinned to 24x24 (28x28 for the RCL folder)
   // without ever getting an icon size. Let the style decide instead.
-  UiScale::applyToolButtonIconSizes(this);
+  Scale::applyToolButtonIconSizes(this);
 
   // Same for the seven single glyph buttons of the disk browser section, which
   // the form pinned to 22 or 35 pixels. The icon button also never got an icon
   // size of its own.
   m_ui->btn_appdata_browse->setIconSize(
-          QSize(UiScale::iconExtent(this), UiScale::iconExtent(this)));
+          QSize(Scale::iconExtent(this), Scale::iconExtent(this)));
   for (QPushButton *button : {m_ui->btn_bold_title, m_ui->btn_italic_title,
                               m_ui->btn_color_title, m_ui->btn_bold_index,
                               m_ui->btn_italic_index, m_ui->btn_color_index,
                               m_ui->btn_appdata_browse}) {
-    UiScale::applySquareSize(button);
+    Scale::applySquareSize(button);
   }
 
   m_ui->optionSections->expandAll();
@@ -799,3 +801,5 @@ void OptionsDialog::setHorzSplitPos(const int pos) const
     sizes << pos << (total - pos);
     m_ui->splitter->setSizes(sizes);
 }
+
+} // namespace UI

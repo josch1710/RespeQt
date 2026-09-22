@@ -11,7 +11,7 @@
 #include <QPixmap>
 #include <QTextEdit>
 #include "folderdisks.h"
-#include "uiscale.h"
+#include "ui/uiscale.h"
 
 class LabelFont : public QFont
 {

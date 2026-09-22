@@ -8,7 +8,7 @@
 
 #include "filesystems/atarifilesystem.h"
 
-#include "diskeditdialog.h"
+#include "ui/diskeditdialog.h"
 #include <QDir>
 #include <QMessageBox>
 #include <QtGlobal>

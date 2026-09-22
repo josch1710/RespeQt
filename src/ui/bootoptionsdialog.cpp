@@ -9,11 +9,11 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include "bootoptionsdialog.h"
-#include "mainwindow.h"
+#include "ui/bootoptionsdialog.h"
+#include "ui/mainwindow.h"
 #include "ui_bootoptionsdialog.h"
 
-#include "uicolors.h"
+#include "ui/uicolors.h"
 
 #include <QDir>
 #include <QRadioButton>
@@ -23,9 +23,11 @@ extern bool g_disablePicoHiSpeed;
 
 static QString selectedDOS;
 
+namespace UI {
+
 BootOptionsDialog::BootOptionsDialog(const QString &bootFolderPath, QWidget *parent) : QDialog(parent),
                                                                                        bootFolderPath_(bootFolderPath),
-                                                                                       m_ui(new Ui::BootOptionsDialog) {
+                                                                                       m_ui(new ::Ui::BootOptionsDialog) {
   Qt::WindowFlags flags = windowFlags();
   flags = flags & ~Qt::WindowContextHelpButtonHint;
   setWindowFlags(flags);
@@ -38,12 +40,12 @@ BootOptionsDialog::BootOptionsDialog(const QString &bootFolderPath, QWidget *par
   // reaches 3.2:1 and the grey rgb(111, 111, 111) 3.3:1, short of the 4.5:1
   // that text needs. So keep the intended mauve accent but tune it to the
   // palette at hand, and let the palette supply the muted hint colour.
-  const QColor accent = UiColors::isDark(this) ? QColor(186, 154, 168)
+  const QColor accent = Colors::isDark(this) ? QColor(186, 154, 168)
                                               : QColor(119, 81, 97);
   for (QRadioButton *button : findChildren<QRadioButton *>()) {
-    UiColors::setTextColor(button, accent);
+    Colors::setTextColor(button, accent);
   }
-  UiColors::setTextColor(m_ui->label, UiColors::mutedText(this));
+  Colors::setTextColor(m_ui->label, Colors::mutedText(this));
 
   connect(m_ui->myPicoDOS, SIGNAL(toggled(bool)), this, SLOT(picoDOSToggled()));
 }
@@ -111,3 +113,5 @@ void BootOptionsDialog::picoDOSToggled() const
   const bool enable = m_ui->myPicoDOS->isChecked();
   m_ui->disablePicoHiSpeed->setEnabled(enable);
 }
+
+} // namespace UI

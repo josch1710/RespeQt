@@ -42,14 +42,14 @@ include_directories(include headers tests tools)
 
 set(SOURCES
     src/siorecorder.cpp
-    src/mainwindow.cpp
+    src/ui/mainwindow.cpp
     src/rcl.cpp
     src/sdxprotocol.cpp
     src/sioworker.cpp
     src/diskimages/diskimagepro.cpp
     src/diskimages/diskimageatx.cpp
-    src/optionsdialog.cpp
-    src/aboutdialog.cpp
+    src/ui/optionsdialog.cpp
+    src/ui/aboutdialog.cpp
     src/diskimages/diskimage.cpp
     src/diskimages/folderimage.cpp
     src/diskbrowser/folderdisks.cpp
@@ -59,24 +59,24 @@ set(SOURCES
     src/diskbrowser/dbini.cpp
     src/diskbrowser/picsplitter.cpp
     src/diskbrowser/picpreview.cpp
-    src/createimagedialog.cpp
-    src/diskeditdialog.cpp
+    src/ui/createimagedialog.cpp
+    src/ui/diskeditdialog.cpp
     src/autoboot.cpp
-    src/autobootdialog.cpp
+    src/ui/autobootdialog.cpp
     src/miscutils.cpp
     src/printers/textprinterwindow.cpp
-    src/cassettedialog.cpp
-    src/docdisplaywindow.cpp
-    src/bootoptionsdialog.cpp
-    src/logdisplaydialog.cpp
+    src/ui/cassettedialog.cpp
+    src/ui/docdisplaywindow.cpp
+    src/ui/bootoptionsdialog.cpp
+    src/ui/logdisplaydialog.cpp
     src/respeqtsettings.cpp
     src/pclink.cpp
     src/printers/baseprinter.cpp
     src/printers/atari1027.cpp
     src/atascii.cpp
-    src/drivewidget.cpp
+    src/ui/drivewidget.cpp
     src/atasciiinternational.cpp
-    src/printerwidget.cpp
+    src/ui/printerwidget.cpp
     src/printers/atariprinter.cpp
     src/printers/atari1020.cpp
     src/smartdevice.cpp
@@ -113,7 +113,7 @@ set(SOURCES
 )
 
 set(HEADERS
-    include/mainwindow.h
+    include/ui/mainwindow.h
     include/printers/outputwindow.h
     include/printers/rawoutput.h
     include/siorecorder.h
@@ -122,8 +122,8 @@ set(HEADERS
     include/sdxprotocol.h
     include/serialport.h
     include/sioworker.h
-    include/optionsdialog.h
-    include/aboutdialog.h
+    include/ui/optionsdialog.h
+    include/ui/aboutdialog.h
     include/diskimages/diskimage.h
     include/diskimages/folderimage.h
     include/diskbrowser/folderdisks.h
@@ -135,25 +135,25 @@ set(HEADERS
     include/diskbrowser/picpreview.h
     include/diskbrowser/picsourcetype.h
     include/diskbrowser/diskbrowser.h
-    include/createimagedialog.h
-    include/diskeditdialog.h
+    include/ui/createimagedialog.h
+    include/ui/diskeditdialog.h
     include/autoboot.h
-    include/autobootdialog.h
+    include/ui/autobootdialog.h
     include/miscutils.h
     include/printers/textprinterwindow.h
-    include/cassettedialog.h
-    include/docdisplaywindow.h
-    include/bootoptionsdialog.h
-    include/logdisplaydialog.h
+    include/ui/cassettedialog.h
+    include/ui/docdisplaywindow.h
+    include/ui/bootoptionsdialog.h
+    include/ui/logdisplaydialog.h
     include/respeqtsettings.h
     include/pclink.h
     include/printers/baseprinter.h
     include/printers/atari1027.h
     include/atascii.h
-    include/drivewidget.h
-    include/uicolors.h
-    include/uiscale.h
-    include/printerwidget.h
+    include/ui/drivewidget.h
+    include/ui/uicolors.h
+    include/ui/uiscale.h
+    include/ui/printerwidget.h
     include/atasciiinternational.h
     include/printers/atariprinter.h
     include/printers/atari1020.h

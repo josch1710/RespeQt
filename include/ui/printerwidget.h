@@ -13,6 +13,8 @@ namespace Ui {
   class PrinterWidget;
 }
 
+namespace UI {
+
 class PrinterWidget : public QFrame {
   Q_OBJECT
 
@@ -54,7 +56,7 @@ private:
   void applyPaletteColors() const;
 
 
-  Ui::PrinterWidget *ui;
+  ::Ui::PrinterWidget *ui;
   int printerNo_;
   Printers::BasePrinterPtr mPrinter;
   Printers::OutputWindowPtr mOutputWindow;
@@ -63,5 +65,7 @@ private:
   bool mInitialized{false};
   bool mConnected{false};
 };
+
+} // namespace UI
 
 #endif// PRINTERWIDGET_H

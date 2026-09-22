@@ -16,7 +16,7 @@
 #include "diskbrowser/folderdisks.h"
 #include "diskbrowser/dbini.h"
 #include "diskbrowser/dbjson.h"
-#include "mainwindow.h"
+#include "ui/mainwindow.h"
 #include "miscutils.h"
 #include "respeqtsettings.h"
 #include "ui_diskbrowserdlg.h"
@@ -243,7 +243,7 @@ void DiskBrowserDlg::updateDiskBrowser()
     _diskTitle  = fiDisk.completeBaseName();
 
     RespeqtSettings::instance()->setMostRecentBrowserFolder(fullName);
-    MainWindow::instance()->mountFileWithDefaultProtection(0, fullName);
+    UI::MainWindow::instance()->mountFileWithDefaultProtection(0, fullName);
 
     QString fileList;   // get a list of files to show in the file list pane
 

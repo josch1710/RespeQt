@@ -1,5 +1,5 @@
 #include "atasciiinternational.h"
-#include "logdisplaydialog.h"
+#include "ui/logdisplaydialog.h"
 
 AtasciiInternational::AtasciiInternational()
 {
