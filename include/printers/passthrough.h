@@ -6,7 +6,7 @@
 namespace Printers {
   class Passthrough : public BasePrinter {
   public:
-    explicit Passthrough(const SioWorkerPtr& sio);
+    explicit Passthrough(const SIO::SioWorkerPtr& sio);
     ~Passthrough() override;
 
     bool handleBuffer(const QByteArray &buffer, unsigned int len) override;

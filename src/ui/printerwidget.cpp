@@ -102,7 +102,7 @@ void PrinterWidget::showEvent(QShowEvent *e)
 }
 
 
-void PrinterWidget::setSioWorker(SioWorkerPtr sio) {
+void PrinterWidget::setSioWorker(SIO::SioWorkerPtr sio) {
   mSio = std::move(sio);
   if (!mInitialized) {
     mInitialized = true;
@@ -117,13 +117,13 @@ bool PrinterWidget::selectPrinter() {
   if (mPrinter) {
     // TBD Stop the printer.
     if (mSio)
-      mSio->uninstallDevice(static_cast<quint8>(PRINTER_BASE_CDEVIC + printerNo_));
+      mSio->uninstallDevice(static_cast<quint8>(SIO::PRINTER_BASE_CDEVIC + printerNo_));
     mPrinter.reset();
   }
   if (mSio) {
     const auto newPrinter = Printers::PrinterFactory::instance()->createPrinter(ui->atariPrinters->currentText(), mSio);
     if (newPrinter) {
-      mSio->installDevice(static_cast<quint8>(PRINTER_BASE_CDEVIC + printerNo_), newPrinter.data());
+      mSio->installDevice(static_cast<quint8>(SIO::PRINTER_BASE_CDEVIC + printerNo_), newPrinter.data());
       mPrinter = newPrinter;
       RespeqtSettings::instance()->setPrinterName(printerNo_, ui->atariPrinters->currentText());
       return true;

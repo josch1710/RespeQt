@@ -11,7 +11,8 @@
  */
 
 #include "respeqtsettings.h"
-#include "serialport.h"
+#include "sio/serialport.h"
+#include "sio/sioworker.h"
 #include "diskbrowser/diskbrowser.h"
 #include "ui/uiscale.h"
 #include <QFileInfo>
@@ -194,11 +195,11 @@ void RespeqtSettings::setAtariSioHandshakingMethod(const int method) const
   mSettings->setValue("AtariSioHandshakingMethod", method);
 }
 
-SerialBackend RespeqtSettings::backend() const {
-  return static_cast<SerialBackend>(mSettings->value("Backend").toInt());
+SIO::SerialBackend RespeqtSettings::backend() const {
+  return static_cast<SIO::SerialBackend>(mSettings->value("Backend").toInt());
 }
 
-void RespeqtSettings::setBackend(SerialBackend backend) const
+void RespeqtSettings::setBackend(SIO::SerialBackend backend) const
 {
   mSettings->setValue("Backend", static_cast<int>(backend));
 }
@@ -250,7 +251,7 @@ void RespeqtSettings::setCustomCasBaud(const int baud) const
 
 RespeqtSettings::ImageSettings RespeqtSettings::getImageSettingsFromName(const QString &fileName) const {
   mSettings->beginReadArray("MountedImageSettings");
-  for (int i = 0; i < DISK_COUNT; i++) {
+  for (int i = 0; i < SIO::DISK_COUNT; i++) {
     mSettings->setArrayIndex(i);
     if (mSettings->value("fileName").toString() == fileName) {
       ImageSettings image;

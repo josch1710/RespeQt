@@ -10,7 +10,9 @@
 #ifndef PCLINK_H
 #define PCLINK_H
 
-#include "sdxprotocol.h"
+#include "sio/sdxprotocol.h"
+
+namespace SIO {
 
 class PCLINK : public SDXProtocol {
   Q_OBJECT
@@ -51,5 +53,7 @@ private:
   bool is_fname_reserved(const char *fname, size_t length = ULONG_MAX) const;
   bool is_fname_encoded(const char *fname) const;
 };
+
+} // namespace SIO
 
 #endif// PCLINK_H

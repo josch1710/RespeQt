@@ -14,6 +14,8 @@
 #define RESPEQTSETTINGS_H
 
 #include "ui/mainwindow.h"
+#include "sio/serialport.h"
+#include "sio/sioworker.h"
 #include "diskbrowser/picsourcetype.h"
 #include "diskbrowser/picpreview.h"
 #include "diskbrowser/dbsettings.h"
@@ -73,8 +75,8 @@ public:
   [[nodiscard]] int atariSioHandshakingMethod() const;
   void setAtariSioHandshakingMethod(int method) const;
 
-  [[nodiscard]] SerialBackend backend() const;
-  void setBackend(SerialBackend backend) const;
+  [[nodiscard]] SIO::SerialBackend backend() const;
+  void setBackend(SIO::SerialBackend backend) const;
 
   [[nodiscard]] bool useHighSpeedExeLoader() const;
   void setUseHighSpeedExeLoader(bool use) const;

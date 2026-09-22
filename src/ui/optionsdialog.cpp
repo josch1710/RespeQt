@@ -226,13 +226,13 @@ void OptionsDialog::setupSettings() const
 
   switch (RespeqtSettings::instance()->backend()) {
     default:
-    case SerialBackend::STANDARD:
+    case SIO::SerialBackend::STANDARD:
       itemStandard->setCheckState(0, Qt::Checked);
       itemAtariSio->setCheckState(0, Qt::Unchecked);
       itemNetSIO->setCheckState(0, Qt::Unchecked);
       m_ui->optionSections->setCurrentItem(itemStandard);
       break;
-    case SerialBackend::SIO_DRIVER:
+    case SIO::SerialBackend::SIO_DRIVER:
       itemStandard->setCheckState(0, Qt::Unchecked);
       itemAtariSio->setCheckState(0, Qt::Checked);
       itemNetSIO->setCheckState(0, Qt::Unchecked);
@@ -263,7 +263,7 @@ void OptionsDialog::setupSettings() const
     }
   }
 
-  const bool software_handshake = RespeqtSettings::instance()->serialPortHandshakingMethod() == HANDSHAKE_SOFTWARE;
+  const bool software_handshake = RespeqtSettings::instance()->serialPortHandshakingMethod() == SIO::HANDSHAKE_SOFTWARE;
   m_ui->serialPortWriteDelayLabel->setVisible(software_handshake);
   m_ui->serialPortWriteDelayCombo->setVisible(software_handshake);
   m_ui->serialPortBaudLabel->setVisible(!software_handshake);
@@ -274,14 +274,14 @@ void OptionsDialog::setupSettings() const
   m_ui->serialPortCompErrDelayLabel->setVisible(!software_handshake);
   m_ui->serialPortCompErrDelayBox->setVisible(!software_handshake);
 #ifdef Q_OS_WIN
-  bool no_handshake = (RespeqtSettings::instance()->serialPortHandshakingMethod() == HANDSHAKE_NO_HANDSHAKE);
+  bool no_handshake = (RespeqtSettings::instance()->serialPortHandshakingMethod() == SIO::HANDSHAKE_NO_HANDSHAKE);
   m_ui->serialPortFallingEdge->setVisible(!no_handshake && !software_handshake);
   m_ui->serialPortDTRControlEnable->setVisible(no_handshake || software_handshake);
 #else
   m_ui->serialPortFallingEdge->setVisible(false);
 #endif
 
-  if (SerialBackend::STANDARD == RespeqtSettings::instance()->backend() && software_handshake) {
+  if (SIO::SerialBackend::STANDARD == RespeqtSettings::instance()->backend() && software_handshake) {
     m_ui->emulationHighSpeedExeLoaderBox->setVisible(false);
   } else {
     m_ui->emulationHighSpeedExeLoaderBox->setVisible(true);
@@ -416,7 +416,7 @@ void OptionsDialog::serialPortChanged(const int index) const
 
 void OptionsDialog::handshakeChanged(const int index) const
 {
-  const auto software_handshake = index == HANDSHAKE_SOFTWARE;
+  const auto software_handshake = index == SIO::HANDSHAKE_SOFTWARE;
   m_ui->serialPortWriteDelayLabel->setVisible(software_handshake);
   m_ui->serialPortWriteDelayCombo->setVisible(software_handshake);
   m_ui->serialPortBaudLabel->setVisible(!software_handshake);
@@ -427,7 +427,7 @@ void OptionsDialog::handshakeChanged(const int index) const
   m_ui->serialPortCompErrDelayLabel->setVisible(!software_handshake);
   m_ui->serialPortCompErrDelayBox->setVisible(!software_handshake);
 #ifdef Q_OS_WIN
-  bool no_handshake = (index == HANDSHAKE_NO_HANDSHAKE);
+  bool no_handshake = (index == SIO::HANDSHAKE_NO_HANDSHAKE);
   m_ui->serialPortFallingEdge->setVisible(!no_handshake && !software_handshake);
   m_ui->serialPortDTRControlEnable->setVisible(no_handshake || software_handshake);
 #endif
@@ -449,7 +449,7 @@ void OptionsDialog::sectionClicked(QTreeWidgetItem *item, const int column) cons
 {
   if (item->checkState(column) == Qt::Checked) {
     if (item == itemStandard) {
-      m_ui->emulationHighSpeedExeLoaderBox->setVisible(HANDSHAKE_SOFTWARE != m_ui->serialPortHandshakeCombo->currentIndex());
+      m_ui->emulationHighSpeedExeLoaderBox->setVisible(SIO::HANDSHAKE_SOFTWARE != m_ui->serialPortHandshakeCombo->currentIndex());
     } else {
       itemStandard->setCheckState(column, Qt::Unchecked);
     }
@@ -580,9 +580,9 @@ void OptionsDialog::saveSettings() const
   };
   RespeqtSettings::instance()->setDbIndexFont(indexFont);
 
-  auto backend = SerialBackend::STANDARD;
+  auto backend = SIO::SerialBackend::STANDARD;
   if (itemAtariSio->checkState(0) == Qt::Checked) {
-    backend = SerialBackend::SIO_DRIVER;
+    backend = SIO::SerialBackend::SIO_DRIVER;
   }
 
   RespeqtSettings::instance()->setBackend(backend);

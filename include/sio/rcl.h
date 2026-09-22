@@ -11,7 +11,9 @@
 #ifndef RCL_H
 #define RCL_H
 
-#include "sioworker.h"
+#include "sio/sioworker.h"
+
+namespace SIO {
 
 // RespeQt Time Server //
 class RCl : public SioDevice {
@@ -41,5 +43,7 @@ private:
   static char rclSlotNo;
   QMutex mutex;
 };
+
+} // namespace SIO
 
 #endif// RCL_H

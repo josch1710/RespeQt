@@ -9,7 +9,9 @@
 #ifndef AUTOBOOT_H
 #define AUTOBOOT_H
 
-#include "sioworker.h"
+#include "sio/sioworker.h"
+
+namespace SIO {
 
 class AtariExeChunk {
 public:
@@ -49,5 +51,7 @@ private:
 
 
 };
+
+} // namespace SIO
 
 #endif// AUTOBOOT_H

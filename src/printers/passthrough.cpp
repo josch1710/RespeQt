@@ -4,7 +4,7 @@
 
 namespace Printers {
 
-  Passthrough::Passthrough(const SioWorkerPtr& sio)
+  Passthrough::Passthrough(const SIO::SioWorkerPtr& sio)
       : BasePrinter(sio) {}
 
   Passthrough::~Passthrough() = default;

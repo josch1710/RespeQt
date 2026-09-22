@@ -1,7 +1,7 @@
 #include "printers/escp.h"
 
 namespace Printers {
-  Escp::Escp(const SioWorkerPtr& sio)
+  Escp::Escp(const SIO::SioWorkerPtr& sio)
       : Centronics(sio) {
     initPrinter();
   }

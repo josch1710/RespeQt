@@ -1,7 +1,7 @@
 #ifndef SDXPROTOCOLS_H
 #define SDXPROTOCOLS_H
 
-#include "sioworker.h"
+#include "sio/sioworker.h"
 
 #ifndef uchar
 #define uchar unsigned char
@@ -14,6 +14,8 @@
 #ifndef ulong
 #define ulong unsigned long
 #endif
+
+namespace SIO {
 
 using DIRENTRY = struct
 {
@@ -30,5 +32,7 @@ class SDXProtocol : public SioDevice {
 public:
   explicit SDXProtocol(const SioWorkerPtr& worker);
 };
+
+} // namespace SIO
 
 #endif// SDXPROTOCOLS_H

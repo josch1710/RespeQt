@@ -11,8 +11,10 @@
 #ifndef SERIALPORTWIN32_H
 #define SERIALPORTWIN32_H
 
-#include "serialport.h"
+#include "sio/serialport.h"
 #include <atomic>
+
+namespace SIO {
 
 class StandardSerialPortBackend : public AbstractSerialPortBackend {
   Q_OBJECT
@@ -91,5 +93,7 @@ public:
   unsigned long speed() override;
   void forceHighSpeed(unsigned int speed) override;
 };
+
+} // namespace SIO
 
 #endif// SERIALPORTWIN32_H

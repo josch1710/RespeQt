@@ -2,7 +2,7 @@
 #define PRINTERFACTORY_H
 
 #include "baseprinter.h"
-#include "sioworker.h"
+#include "sio/sioworker.h"
 #include <QString>
 #include <QVector>
 #include <memory>
@@ -21,7 +21,7 @@ namespace Printers {
       creatorFunctions.push_back(CreatorPair(label, &creator<TDerived>));
     }
 
-    [[nodiscard]] BasePrinterPtr createPrinter(const QString& label, const SioWorkerPtr& worker) const {
+    [[nodiscard]] BasePrinterPtr createPrinter(const QString& label, const SIO::SioWorkerPtr& worker) const {
       for (const auto & [printerName, printerFactory]: creatorFunctions) {
         if (printerName == label) {
           // This is a call to the function pointed to by it.second.
@@ -41,12 +41,12 @@ namespace Printers {
 
   private:
     template<class TDerived>
-    static BasePrinterPtr creator(const SioWorkerPtr &worker) {
+    static BasePrinterPtr creator(const SIO::SioWorkerPtr &worker) {
       return QSharedPointer<TDerived>::create(worker);
     }
 
     // Instanciation maps
-    using Creator = BasePrinterPtr(const SioWorkerPtr &worker);
+    using Creator = BasePrinterPtr(const SIO::SioWorkerPtr &worker);
     using CreatorPair = std::pair<QString, Creator *>;
     using CreatorVector = std::vector<CreatorPair>;
     CreatorVector creatorFunctions;

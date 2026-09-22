@@ -14,7 +14,7 @@
 #include <QFileDialog>
 #include <QTreeWidget>
 
-#include "serialport.h"
+#include "sio/serialport.h"
 
 namespace Ui {
   class OptionsDialog;

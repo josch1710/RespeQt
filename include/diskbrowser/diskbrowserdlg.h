@@ -10,7 +10,7 @@
 #include <QTreeWidgetItem>
 #include <QShowEvent>
 #include "folderdisks.h"
-#include "sioworker.h"
+#include "sio/sioworker.h"
 #include "picsourcetype.h"
 
 
@@ -37,7 +37,7 @@ class DiskBrowserDlg : public QDialog
     Q_OBJECT
 
 public:
-    explicit DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent = nullptr);
+    explicit DiskBrowserDlg(SIO::SioWorkerPtr pSio, QWidget *parent = nullptr);
     ~DiskBrowserDlg() override;
 
     [[nodiscard]] int getHorzSplitPos() const;
@@ -71,7 +71,7 @@ private:
     Ui::DiskBrowserDlg *ui;
     FolderDisks _folderDisks;
     FloppyArt _picInfo;
-    SioWorkerPtr sio;
+    SIO::SioWorkerPtr sio;
     QString _currentDir;
     QString _diskTitle;
     QString _diskFileName;

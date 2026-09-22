@@ -19,8 +19,10 @@
 #include <QFile>
 #endif
 
-#include "serialport.h"
+#include "sio/serialport.h"
 #include <atomic>
+
+namespace SIO {
 
 enum SIO_CDEVIC : quint8 {
   DISK_BASE_CDEVIC = 0x31,
@@ -149,5 +151,7 @@ private:
   QList<CassetteRecord> mRecords;
 
 };
+
+} // namespace SIO
 
 #endif// SIOWORKER_H

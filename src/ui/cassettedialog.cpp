@@ -29,7 +29,7 @@ CassetteDialog::CassetteDialog(QWidget *parent, const QString &fileName)
   ui->progressBar->setVisible(false);
   ui->imgCass->setVisible(false);
 
-  worker = new CassetteWorker;
+  worker = new SIO::CassetteWorker;
   mTotalDuration = worker->mTotalDuration;
   mRemainingTime = mTotalDuration;
   const int minutes = mRemainingTime / 60000;
@@ -45,12 +45,12 @@ CassetteDialog::CassetteDialog(QWidget *parent, const QString &fileName)
                              .arg(minutes)
                              .arg(seconds, 2, 10, QChar('0')));
 
-  connect(worker, &CassetteWorker::statusChanged, this, &CassetteDialog::progress, Qt::QueuedConnection);
-  connect(worker, &CassetteWorker::finished, this, &CassetteDialog::reject);
+  connect(worker, &SIO::CassetteWorker::statusChanged, this, &CassetteDialog::progress, Qt::QueuedConnection);
+  connect(worker, &SIO::CassetteWorker::finished, this, &CassetteDialog::reject);
 }
 
 CassetteDialog::~CassetteDialog() {
-  disconnect(worker, &CassetteWorker::finished, this, &CassetteDialog::reject);
+  disconnect(worker, &SIO::CassetteWorker::finished, this, &CassetteDialog::reject);
   if (worker->isRunning()) {
     worker->setPriority(QThread::NormalPriority);
     worker->waitForThread();

@@ -28,8 +28,8 @@
 #include "ui/optionsdialog.h"
 #include "printers/outputwindow.h"
 #include "ui/printerwidget.h"
-#include "siorecorder.h"
-#include "sioworker.h"
+#include "sio/siorecorder.h"
+#include "sio/sioworker.h"
 #include "diskbrowser/diskbrowserdlg.h"
 #include "network/tnfsudp.h"
 #include "network/tnfstcp.h"
@@ -63,7 +63,7 @@ private:
   static MainWindow *sInstance;
   int untitledName;
   ::Ui::MainWindow *ui;
-  SioWorkerPtr sio;
+  SIO::SioWorkerPtr sio;
   bool shownFirstTime;
   std::vector<PrinterWidget *> printerWidgets;
   std::vector<DriveWidget *> diskWidgets;

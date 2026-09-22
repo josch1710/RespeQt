@@ -13,7 +13,7 @@
 #include <QtDebug>
 
 // ReSharper disable once CppUnusedIncludeDirective
-#include "crc16.h"
+#include "diskimages/crc16.h"
 #include "diskimages/atxtrackinfo.h"
 #include "diskimages/board.h"
 #include "diskimages/diskgeometry.h"
@@ -22,7 +22,7 @@
 #include "include/diskimages/disassembly810.h"
 
 #include "miscutils.h"
-#include "sioworker.h"
+#include "sio/sioworker.h"
 
 namespace UI {
   class DiskEditDialog;
@@ -35,11 +35,11 @@ namespace DiskImages {
       SameSectorSize = 2
   };
 
-  class SimpleDiskImage : public SioDevice {
+  class SimpleDiskImage : public SIO::SioDevice {
     Q_OBJECT
 
   public:
-    explicit SimpleDiskImage(const SioWorkerPtr &worker);
+    explicit SimpleDiskImage(const SIO::SioWorkerPtr &worker);
     ~SimpleDiskImage() override;
 
     virtual bool open(const QString &fileName, FileTypes::FileType type);

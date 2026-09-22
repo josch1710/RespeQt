@@ -6,6 +6,7 @@
 // ReSharper disable CppMemberFunctionMayBeStatic
 #include "diskbrowser/diskbrowserdlg.h"
 #include "diskimages/diskimage.h"
+#include "sio/sioworker.h"
 #include "filesystems/ataridirentry.h"
 #include "filesystems/atarifilesystem.h"
 #include "filesystems/dos10filesystem.h"
@@ -28,7 +29,7 @@
 #include <QStandardPaths>
 #include <QInputDialog>
 
-DiskBrowserDlg::DiskBrowserDlg(SioWorkerPtr pSio, QWidget *parent)
+DiskBrowserDlg::DiskBrowserDlg(SIO::SioWorkerPtr pSio, QWidget *parent)
     : QDialog(parent), ui(new Ui::DiskBrowserDlg)
 {
     sio = std::move(pSio);
@@ -250,7 +251,7 @@ void DiskBrowserDlg::updateDiskBrowser()
     if (sio)
     {
         constexpr int deviceNo {0};
-        const auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(deviceNo + DISK_BASE_CDEVIC))};
+        const auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(deviceNo + SIO::DISK_BASE_CDEVIC))};
         const int fs = img->defaultFileSystem();
         Filesystems::AtariFileSystem *atariFs = nullptr;
 

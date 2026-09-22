@@ -13,14 +13,14 @@ namespace Printers {
 }// namespace Printers
 
 #include "atascii.h"
-#include "sioworker.h"
+#include "sio/sioworker.h"
 #include "outputwindow.h"
 
 namespace Printers {
-  class BasePrinter : public SioDevice {
+  class BasePrinter : public SIO::SioDevice {
     Q_OBJECT
   public:
-    explicit BasePrinter(const SioWorkerPtr &worker);
+    explicit BasePrinter(const SIO::SioWorkerPtr &worker);
     ~BasePrinter() override;
 
     void handleCommand(quint8 command, quint8 aux1, quint8 aux2) override;

@@ -28,7 +28,7 @@ namespace DiskImages {
 
   static bool g_disablePicoHiSpeed;
 
-  FolderImage::FolderImage(const SioWorkerPtr& worker, const int maxEntries) : SimpleDiskImage(worker),
+  FolderImage::FolderImage(const SIO::SioWorkerPtr& worker, const int maxEntries) : SimpleDiskImage(worker),
                                                                                maxEntries(maxEntries)
   {
   }

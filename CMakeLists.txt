@@ -41,11 +41,11 @@ endif()
 include_directories(include headers tests tools)
 
 set(SOURCES
-    src/siorecorder.cpp
+    src/sio/siorecorder.cpp
     src/ui/mainwindow.cpp
-    src/rcl.cpp
-    src/sdxprotocol.cpp
-    src/sioworker.cpp
+    src/sio/rcl.cpp
+    src/sio/sdxprotocol.cpp
+    src/sio/sioworker.cpp
     src/diskimages/diskimagepro.cpp
     src/diskimages/diskimageatx.cpp
     src/ui/optionsdialog.cpp
@@ -61,7 +61,7 @@ set(SOURCES
     src/diskbrowser/picpreview.cpp
     src/ui/createimagedialog.cpp
     src/ui/diskeditdialog.cpp
-    src/autoboot.cpp
+    src/sio/autoboot.cpp
     src/ui/autobootdialog.cpp
     src/miscutils.cpp
     src/printers/textprinterwindow.cpp
@@ -70,7 +70,7 @@ set(SOURCES
     src/ui/bootoptionsdialog.cpp
     src/ui/logdisplaydialog.cpp
     src/respeqtsettings.cpp
-    src/pclink.cpp
+    src/sio/pclink.cpp
     src/printers/baseprinter.cpp
     src/printers/atari1027.cpp
     src/atascii.cpp
@@ -79,7 +79,7 @@ set(SOURCES
     src/ui/printerwidget.cpp
     src/printers/atariprinter.cpp
     src/printers/atari1020.cpp
-    src/smartdevice.cpp
+    src/sio/smartdevice.cpp
     src/printers/nativeoutput.cpp
     src/printers/outputwindow.cpp
     src/printers/centronics.cpp
@@ -91,7 +91,7 @@ set(SOURCES
     src/printers/printerfactory.cpp
     src/printers/atari1025.cpp
     src/printers/passthrough.cpp
-    src/crc16.cpp
+    src/diskimages/crc16.cpp
     src/diskimages/cpu6502.cpp
     src/filesystems/ataridirentry.cpp
     src/filesystems/atarifilesystem.cpp
@@ -116,12 +116,12 @@ set(HEADERS
     include/ui/mainwindow.h
     include/printers/outputwindow.h
     include/printers/rawoutput.h
-    include/siorecorder.h
+    include/sio/siorecorder.h
     include/printers/printers.h
-    include/rcl.h
-    include/sdxprotocol.h
-    include/serialport.h
-    include/sioworker.h
+    include/sio/rcl.h
+    include/sio/sdxprotocol.h
+    include/sio/serialport.h
+    include/sio/sioworker.h
     include/ui/optionsdialog.h
     include/ui/aboutdialog.h
     include/diskimages/diskimage.h
@@ -137,7 +137,7 @@ set(HEADERS
     include/diskbrowser/diskbrowser.h
     include/ui/createimagedialog.h
     include/ui/diskeditdialog.h
-    include/autoboot.h
+    include/sio/autoboot.h
     include/ui/autobootdialog.h
     include/miscutils.h
     include/printers/textprinterwindow.h
@@ -146,7 +146,7 @@ set(HEADERS
     include/ui/bootoptionsdialog.h
     include/ui/logdisplaydialog.h
     include/respeqtsettings.h
-    include/pclink.h
+    include/sio/pclink.h
     include/printers/baseprinter.h
     include/printers/atari1027.h
     include/atascii.h
@@ -166,8 +166,8 @@ set(HEADERS
     include/printers/printerfactory.h
     include/printers/atari1025.h
     include/printers/passthrough.h
-    include/smartdevice.h
-    include/crc16.h
+    include/sio/smartdevice.h
+    include/diskimages/crc16.h
     include/diskimages/cpu6502.h
     headers/atarisio.h
     include/filesystems/ataridirentry.h
@@ -216,17 +216,17 @@ set(RESOURCES
 )
 
 if (UNIX)
-    set(SOURCES ${SOURCES} src/serialport-unix.cpp src/printers/rawoutput_cups.cpp)
-    set(HEADERS ${HEADERS} include/serialport-unix.h)
+    set(SOURCES ${SOURCES} src/sio/serialport-unix.cpp src/printers/rawoutput_cups.cpp)
+    set(HEADERS ${HEADERS} include/sio/serialport-unix.h)
 endif()
 if (WIN32)
     set(CMAKE_RC_COMPILER_INIT windres)
     ENABLE_LANGUAGE(RC)
     SET(CMAKE_RC_COMPILE_OBJECT
             "<CMAKE_RC_COMPILER> <FLAGS> -O coff <DEFINES> -i <SOURCE> -o <OBJECT>")
-    set(SOURCES ${SOURCES} src/serialport-win32.cpp src/printers/rawoutput_win.cpp
+    set(SOURCES ${SOURCES} src/sio/serialport-win32.cpp src/printers/rawoutput_win.cpp
             resources/RespeQt.rc)
-    set(HEADERS ${HEADERS} include/serialport-win32.h)
+    set(HEADERS ${HEADERS} include/sio/serialport-win32.h)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE")
 endif()
 

@@ -19,8 +19,10 @@
 // The order matters
 // clang-format off
 #include "respeqtsettings.h"
-#include "pclink.h"
+#include "sio/pclink.h"
 // clang-format on
+
+namespace SIO {
 
 #define SDX_MAXLEN 16777215L
 
@@ -2368,3 +2370,5 @@ bool PCLINK::is_fname_encoded(const char *fname) const { // NOLINT(*-convert-mem
 }
 
 /*************************************************************************/
+
+} // namespace SIO

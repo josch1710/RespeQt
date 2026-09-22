@@ -21,7 +21,7 @@ static constexpr GRAPHICS_COMMAND ALLOWED_GRAPHICS_COMMANDS[] = {
 
 namespace Printers
 {
-Atari1020::Atari1020(const SioWorkerPtr& sio)
+Atari1020::Atari1020(const SIO::SioWorkerPtr& sio)
     : AtariPrinter(sio)
 {
     QFontDatabase::addApplicationFont(":/fonts/1020");

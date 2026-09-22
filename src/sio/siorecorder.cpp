@@ -1,4 +1,4 @@
-#include "siorecorder.h"
+#include "sio/siorecorder.h"
 #include "ui/mainwindow.h"
 #include "respeqtsettings.h"
 
@@ -6,6 +6,8 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+
+namespace SIO {
 
 SioRecorderPtr SioRecorder::sInstance = SioRecorderPtr(new SioRecorder());
 
@@ -251,3 +253,5 @@ bool SioRecorder::writeRawFrame(const QByteArray & /*data*/) {
 }
 
 void SioRecorder::setActiveSioDevices(const QByteArray & /*data*/) {}
+
+} // namespace SIO

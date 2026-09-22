@@ -14,12 +14,14 @@
 #endif
 
 #include "respeqtsettings.h"
-#include "smartdevice.h"
+#include "sio/smartdevice.h"
 
 
 #include <QDateTime>
 #include <QDesktopServices>
 #include <QUrl>
+
+namespace SIO {
 
 //SmartDevice (ApeTime + URL submit)
 
@@ -84,3 +86,5 @@ void SmartDevice::handleCommand(const quint8 command, const quint8 aux1, const q
     }
   }
 }
+
+} // namespace SIO

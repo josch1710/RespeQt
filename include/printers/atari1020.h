@@ -27,7 +27,7 @@ struct GRAPHICS_COMMAND {
 namespace Printers {
   class Atari1020 : public AtariPrinter {
   public:
-    explicit Atari1020(const SioWorkerPtr &sio);
+    explicit Atari1020(const SIO::SioWorkerPtr &sio);
 
     void handleCommand(quint8 command, quint8 aux1, quint8 aux2) override;
     bool handleBuffer(const QByteArray &buffer, unsigned int len) override;

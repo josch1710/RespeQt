@@ -1,7 +1,7 @@
 #ifndef SIORECORDER_H
 #define SIORECORDER_H
 
-#include "serialport.h"
+#include "sio/serialport.h"
 
 #include <QFile>
 #include <QJsonArray>
@@ -9,6 +9,8 @@
 #include <QSharedPointer>
 #include <memory>
 #include <vector>
+
+namespace SIO {
 
 class SioRecorder;
 using SioRecorderPtr = QSharedPointer<SioRecorder>;
@@ -65,4 +67,7 @@ private:
 
   static SioRecorderPtr sInstance;
 };
+
+} // namespace SIO
+
 #endif// SIORECORDER_H

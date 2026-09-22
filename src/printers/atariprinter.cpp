@@ -1,7 +1,7 @@
 #include "printers/atariprinter.h"
 
 namespace Printers {
-  AtariPrinter::AtariPrinter(const SioWorkerPtr &worker)
+  AtariPrinter::AtariPrinter(const SIO::SioWorkerPtr &worker)
       : BasePrinter(worker),
         mInternational(false) {}
 

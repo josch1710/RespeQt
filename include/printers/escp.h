@@ -6,7 +6,7 @@
 namespace Printers {
   class Escp : public Centronics {
   public:
-    explicit Escp(const SioWorkerPtr &sio);
+    explicit Escp(const SIO::SioWorkerPtr &sio);
 
     bool handleBuffer(const QByteArray &buffer, unsigned int len) override;
 

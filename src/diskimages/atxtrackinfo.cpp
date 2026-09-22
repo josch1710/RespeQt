@@ -1,7 +1,7 @@
 
 #include "diskimages/atxsectorinfo.h"
 #include "diskimages/atxtrackinfo.h"
-#include "crc16.h"
+#include "diskimages/crc16.h"
 
 namespace DiskImages {
 

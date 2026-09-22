@@ -2,7 +2,7 @@
 #include "respeqtsettings.h"
 
 namespace Printers {
-  Atari1025::Atari1025(const SioWorkerPtr& worker)
+  Atari1025::Atari1025(const SIO::SioWorkerPtr& worker)
       : AtariPrinter(worker),
         mESC(false),
         mCPI(10),

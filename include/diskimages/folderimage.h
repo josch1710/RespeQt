@@ -40,7 +40,7 @@ namespace DiskImages {
     int maxEntries{64};
 
   public:
-    explicit FolderImage(const SioWorkerPtr& worker, int maxEntries = 64);
+    explicit FolderImage(const SIO::SioWorkerPtr& worker, int maxEntries = 64);
     ~FolderImage() override;
 
     void close() override;

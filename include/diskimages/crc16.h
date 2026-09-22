@@ -6,6 +6,8 @@
 #ifndef CRC16_HPP
 #define CRC16_HPP 1
 
+namespace DiskImages {
+
 // This class computes CRC16.
 class Crc16 {
 
@@ -23,5 +25,7 @@ private:
   unsigned short m_crc;
 
 };
+
+} // namespace DiskImages
 
 #endif

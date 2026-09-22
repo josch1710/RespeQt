@@ -14,13 +14,15 @@
 #endif
 
 #include "ui/mainwindow.h"
-#include "rcl.h"
+#include "sio/rcl.h"
 #include "respeqtsettings.h"
 #include "diskimages/diskimage.h"
 
 #include <QDateTime>
 #include <QDesktopServices>
 #include <QtDebug>
+
+namespace SIO {
 
 char RCl::rclSlotNo;
 
@@ -598,3 +600,5 @@ QString RCl::toDosFileName(const QString& atariFileName) {
   }
   return "";
 }
+
+} // namespace SIO

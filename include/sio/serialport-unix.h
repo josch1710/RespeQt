@@ -13,8 +13,10 @@
 #define SERIALPORTUNIX_H
 
 // ReSharper disable once CppUnusedIncludeDirective
-#include "serialport.h"
+#include "sio/serialport.h"
 #include <atomic>
+
+namespace SIO {
 
 class StandardSerialPortBackend : public AbstractSerialPortBackend {
   Q_OBJECT
@@ -98,5 +100,7 @@ private:
   int mMethod;
   QString lastErrorMessage();
 };
+
+} // namespace SIO
 
 #endif// SERIALPORTUNIX_H

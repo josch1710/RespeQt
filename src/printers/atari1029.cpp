@@ -9,7 +9,7 @@
 #include <QGraphicsTextItem>
 
 namespace Printers {
-  Atari1029::Atari1029(const SioWorkerPtr &worker)
+  Atari1029::Atari1029(const SIO::SioWorkerPtr &worker)
       : AtariPrinter(worker)
   {
     mLineHeight = 10.5;

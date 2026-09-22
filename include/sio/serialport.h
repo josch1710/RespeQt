@@ -13,6 +13,9 @@
 
 #include <QByteArray>
 #include <QObject>
+#include <QSharedPointer>
+
+namespace SIO {
 
 enum eHandshake {
   HANDSHAKE_RI = 0,
@@ -90,16 +93,17 @@ signals:
 
 using AbstractSerialPortBackendPtr = QSharedPointer<AbstractSerialPortBackend>;
 
+} // namespace SIO
 
 #ifdef Q_OS_WIN
 #define SERIAL_PORT_LOCATION "\\\\.\\"
 // ReSharper disable once CppUnusedIncludeDirective
-#include "serialport-win32.h"
+#include "sio/serialport-win32.h"
 #endif
 #ifdef Q_OS_UNIX
 #define SERIAL_PORT_LOCATION "/dev/"
 // ReSharper disable once CppUnusedIncludeDirective
-#include "serialport-unix.h"
+#include "sio/serialport-unix.h"
 #endif
 
 #endif// SERIALPORT_H

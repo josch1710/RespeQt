@@ -10,12 +10,14 @@
  */
 
 #include "respeqtsettings.h"
-#include "serialport.h"
-#include "sioworker.h"
+#include "sio/serialport.h"
+#include "sio/sioworker.h"
 #include <string.h>
 #include <windows.h>
 
 #include <QtDebug>
+
+namespace SIO {
 
 /*********/
 
@@ -708,3 +710,5 @@ bool AtariSioBackend::writeRawFrame(const QByteArray &) { return false; }
 void AtariSioBackend::setActiveSioDevices(const QByteArray &) {}
 unsigned long AtariSioBackend::speed() { return 0; }
 void AtariSioBackend::forceHighSpeed(unsigned int) {}
+
+} // namespace SIO

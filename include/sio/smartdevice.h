@@ -11,7 +11,9 @@
 #ifndef SMARTDEVICE_H
 #define SMARTDEVICE_H
 
-#include "sioworker.h"
+#include "sio/sioworker.h"
+
+namespace SIO {
 
 // SmartDevice (ApeTime + URL submit)
 class SmartDevice : public SioDevice {
@@ -21,5 +23,7 @@ public:
   explicit SmartDevice(const SioWorkerPtr& worker) : SioDevice(worker) {}
   void handleCommand(quint8 command, quint8 aux1, quint8 aux2) override;
 };
+
+} // namespace SIO
 
 #endif// SMARTDEVICE_H

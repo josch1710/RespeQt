@@ -9,7 +9,7 @@
 #ifndef CASSETTEDIALOG_H
 #define CASSETTEDIALOG_H
 
-#include "sioworker.h"
+#include "sio/sioworker.h"
 #include <QDialog>
 #include <QMovie>
 
@@ -29,7 +29,7 @@ namespace UI {
 
   private:
     ::Ui::CassetteDialog *ui;
-    CassetteWorker *worker;
+    SIO::CassetteWorker *worker;
     QTimer *mTimer{};
     int mTotalDuration;
     int mRemainingTime;

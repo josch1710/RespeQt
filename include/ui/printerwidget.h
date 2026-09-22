@@ -2,7 +2,7 @@
 #define PRINTERWIDGET_H
 
 #include "printers/baseprinter.h"
-#include "sioworker.h"
+#include "sio/sioworker.h"
 //#include "printers/nativeoutput.h"
 #include "printers/outputwindow.h"
 
@@ -27,7 +27,7 @@ public:
   [[nodiscard]] Printers::BasePrinterPtr printer() const { return mPrinter; }
   void setPrinter(Printers::BasePrinterPtr printer) { mPrinter = std::move(printer); }
 
-  void setSioWorker(SioWorkerPtr sio);
+  void setSioWorker(SIO::SioWorkerPtr sio);
 
   Printers::OutputWindowPtr outputWindow() { return mOutputWindow; }
 
@@ -61,7 +61,7 @@ private:
   Printers::BasePrinterPtr mPrinter;
   Printers::OutputWindowPtr mOutputWindow;
 
-  SioWorkerPtr mSio;
+  SIO::SioWorkerPtr mSio;
   bool mInitialized{false};
   bool mConnected{false};
 };

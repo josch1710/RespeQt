@@ -15,7 +15,7 @@ namespace Printers {
     Q_OBJECT
 
   public:
-    explicit Atari1027(const SioWorkerPtr &worker);
+    explicit Atari1027(const SIO::SioWorkerPtr &worker);
 
     bool handleBuffer(const QByteArray &buffer, unsigned int len) override;
     void setupFont() override;

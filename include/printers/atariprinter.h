@@ -3,13 +3,13 @@
 
 #include "atasciiinternational.h"
 #include "baseprinter.h"
-#include "sioworker.h"
+#include "sio/sioworker.h"
 
 namespace Printers {
   class AtariPrinter : public BasePrinter {
     Q_OBJECT
   public:
-    explicit AtariPrinter(const SioWorkerPtr &worker);
+    explicit AtariPrinter(const SIO::SioWorkerPtr &worker);
 
     bool internationalMode() const { return mInternational; }
     void setInternationalMode(const bool internationalMode) { mInternational = internationalMode; }

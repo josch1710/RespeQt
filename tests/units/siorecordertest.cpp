@@ -1,6 +1,6 @@
 #include "siorecordertest.h"
-#include "sioworker.h"
-#include "siorecorder.h"
+#include "sio/sioworker.h"
+#include "sio/siorecorder.h"
 #include "respeqtsettings.h"
 #include <QTemporaryFile>
 #include <QTest>
@@ -30,17 +30,17 @@ namespace Tests {
         QTemporaryFile file("testWriteSioCapture");
         file.open();
         file.setAutoRemove(true);
-        const auto recorder = SioRecorder::instance();
+        const auto recorder = SIO::SioRecorder::instance();
         recorder->startSIOSnapshot();
 
         // Pause
         recorder->writePauseCommand(500);
         // Get Status command
-        recorder->writeSnapshotCommandFrame(PRINTER_BASE_CDEVIC, 0x53, 0, 0);
+        recorder->writeSnapshotCommandFrame(SIO::PRINTER_BASE_CDEVIC, 0x53, 0, 0);
         // Pause
         recorder->writePauseCommand(500);
         // Write data command
-        recorder->writeSnapshotCommandFrame(PRINTER_BASE_CDEVIC, 0x57, 0x4e, 0);
+        recorder->writeSnapshotCommandFrame(SIO::PRINTER_BASE_CDEVIC, 0x57, 0x4e, 0);
         // Pause
         recorder->writePauseCommand(500);
         // Some random test data.
@@ -74,13 +74,13 @@ namespace Tests {
     //     auto file {new QFile("tests/units/testdata/writeSioCapture.json")};
     //     file->open(QIODevice::ReadOnly);
     //
-    //     auto recorder {SioRecorder::instance()};
-    //     recorder->prepareReplaySnapshot(file, SerialBackend::NONE);
+    //     auto recorder {SIO::SioRecorder::instance()};
+    //     recorder->prepareReplaySnapshot(file, SIO::SerialBackend::NONE);
     //
     //     // The test only involves a printer device, so we instanciate one.
-    //     SioWorkerPtr dummyworker{QSharedPointer<DummyWorker>::create(recorder.data())};
+    //     SIO::SioWorkerPtr dummyworker{QSharedPointer<DummyWorker>::create(recorder.data())};
     //     Printers::Atari1027 printer(dummyworker);
-    //     printer.setDeviceNo(PRINTER_BASE_CDEVIC);
+    //     printer.setDeviceNo(SIO::PRINTER_BASE_CDEVIC);
     //     Printers::NativeOutputPtr nulloutput(new NullOutput);
     //     RespeqtSettings::instance()->setPrinterEmulation(true);
     //

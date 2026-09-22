@@ -1,15 +1,15 @@
 #ifndef DUMMYWORKER_H
 #define DUMMYWORKER_H
-#include "serialport.h"
-#include "sioworker.h"
+#include "sio/serialport.h"
+#include "sio/sioworker.h"
 
 namespace Tests
 {
 
-    class DummyWorker final: public SioWorker
+    class DummyWorker final: public SIO::SioWorker
     {
     public:
-        DummyWorker(AbstractSerialPortBackend* port): SioWorker(port) {};
+        DummyWorker(SIO::AbstractSerialPortBackend* port): SIO::SioWorker(port) {};
 
         void uninstallDevice(quint8) override {};
     };

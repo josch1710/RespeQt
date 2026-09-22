@@ -21,7 +21,7 @@
 
 /* SimpleDiskImage */
 namespace DiskImages {
-  SimpleDiskImage::SimpleDiskImage(const SioWorkerPtr &worker)
+  SimpleDiskImage::SimpleDiskImage(const SIO::SioWorkerPtr &worker)
     : SioDevice(worker)
   {
     m_editDialog = nullptr;
@@ -975,7 +975,7 @@ namespace DiskImages {
     unsigned int lastSpeed = 300000;
     unsigned int bestSpeed = 19200;
     for (int divisor = 0; divisor <= 40; divisor++) {
-      const auto newSpeed = AbstractSerialPortBackend::divisorToBaud(divisor);
+      const auto newSpeed = SIO::AbstractSerialPortBackend::divisorToBaud(divisor);
       if (speed == newSpeed) {
         bestSpeed = newSpeed;
         break;

@@ -14,9 +14,9 @@
 
 #include "atarisio.h"
 #include "respeqtsettings.h"
-#include "serialport.h"
-#include "sioworker.h"
-#include "siorecorder.h"
+#include "sio/serialport.h"
+#include "sio/sioworker.h"
+#include "sio/siorecorder.h"
 #include <QTime>
 #include <QtDebug>
 
@@ -37,6 +37,8 @@
 #define IOSSIOSPEED _IOW('T', 2, speed_t)
 #endif
 #endif
+
+namespace SIO {
 
 AbstractSerialPortBackend::AbstractSerialPortBackend(QObject *parent)
     : QObject(parent) {}
@@ -963,3 +965,5 @@ QString AtariSioBackend::lastErrorMessage() { // NOLINT(*-convert-member-functio
 }
 
 void AtariSioBackend::setActiveSioDevices(const QByteArray &) {}
+
+} // namespace SIO

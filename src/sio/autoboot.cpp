@@ -9,10 +9,12 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include "autoboot.h"
+#include "sio/autoboot.h"
 #include "respeqtsettings.h"
 
 #include <QtDebug>
+
+namespace SIO {
 
 AutoBoot::~AutoBoot() {
   close();
@@ -297,3 +299,5 @@ void AutoBoot::readSector(const quint16 sector, QByteArray &data) const
 QString AutoBoot::deviceName() {
   return "AutoBoot";
 }
+
+} // namespace SIO

@@ -9,12 +9,14 @@
  * know the specific year(s) please let the current maintainer know.
  */
 
-#include "sioworker.h"
+#include "sio/sioworker.h"
 #include "respeqtsettings.h"
-#include "siorecorder.h"
+#include "sio/siorecorder.h"
 #include <QDateTime>
 #include <QFile>
 #include <algorithm>
+
+namespace SIO {
 
 /* SioDevice */
 SioDevice::SioDevice(const SioWorkerPtr& worker)
@@ -39,7 +41,7 @@ SioWorker::SioWorker()
   : displayCommandName(false), mAutoReconnect(false)
 {
   deviceMutex = new QRecursiveMutex();
-  for (int i = 0; i <= 255; i++)
+  for (int i = 0; i <= 255; ++i)
   {
     devices[i] = nullptr;
   }
@@ -47,7 +49,7 @@ SioWorker::SioWorker()
 }
 
 SioWorker::~SioWorker() {
-  for (int i = 0; i <= 255; i++) {
+  for (int i = 0; i <= 255; ++i) {
     if (devices[i]) {
       delete devices[i];
     }
@@ -90,7 +92,7 @@ void SioWorker::startThread(const Priority p) {
   }
 
   QByteArray data;
-  for (int i = 0; i <= 255; i++) {
+  for (int i = 0; i <= 255; ++i) {
     if (devices[i]) {
       data.append(static_cast<char>(i));
     }
@@ -394,7 +396,7 @@ void SioWorker::installDevice(const quint8 no, SioDevice *device) {
   deviceMutex->unlock();
   if (mPort) {
     QByteArray data;
-    for (quint8 i = 0; i <= 255; i++) {
+    for (quint16 i = 0; i <= 255; ++i) {
       if (devices[i]) {
         data.append(static_cast<char>(i));
       }
@@ -412,7 +414,7 @@ void SioWorker::uninstallDevice(const quint8 no) {
   deviceMutex->unlock();
   if (mPort) {
     QByteArray data;
-    for (quint8 i = 0; i <= 255; i++) {
+    for (quint16 i = 0; i <= 255; ++i) {
       if (devices[i]) {
         data.append(static_cast<char>(i));
       }
@@ -679,3 +681,5 @@ void CassetteWorker::startThread(const Priority p) {
   }
   start(p);
 }
+
+} // namespace SIO

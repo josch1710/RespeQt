@@ -7,7 +7,7 @@ namespace Printers {
     return {0, 0, 0, 0};
   }
 
-  Atari1027::Atari1027(const SioWorkerPtr &worker)
+  Atari1027::Atari1027(const SIO::SioWorkerPtr &worker)
       : AtariPrinter(worker),
         mESC(false) {}
 

@@ -5,7 +5,7 @@
 #include "respeqtsettings.h"
 
 namespace Printers {
-  BasePrinter::BasePrinter(const SioWorkerPtr &worker)
+  BasePrinter::BasePrinter(const SIO::SioWorkerPtr &worker)
       : SioDevice(worker),
           mESC(false),
           mElongatedMode(false)

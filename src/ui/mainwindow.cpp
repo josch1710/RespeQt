@@ -19,18 +19,18 @@
 #include "ui/mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "autoboot.h"
+#include "sio/autoboot.h"
 #include "ui/autobootdialog.h"
 #include "ui/bootoptionsdialog.h"
 #include "ui/cassettedialog.h"
 #include "ui/drivewidget.h"
 #include "diskimages/folderimage.h"
 #include "ui/logdisplaydialog.h"
-#include "pclink.h"
+#include "sio/pclink.h"
 #include "printers/printerfactory.h"
 #include "ui/printerwidget.h"
-#include "rcl.h"
-#include "smartdevice.h"
+#include "sio/rcl.h"
+#include "sio/smartdevice.h"
 //#include "printers/outputfactory.h"
 #include "printers/printers.h"
 //#include "printers/outputs.h"
@@ -57,7 +57,7 @@
 #include <utility>
 
 #if !defined(QT_NO_DEBUG)
-#include "siorecorder.h"
+#include "sio/siorecorder.h"
 #endif
 
 static QFile *logFile;
@@ -74,6 +74,8 @@ bool g_disablePicoHiSpeed;
 //static int g_savedWidth;
 
 namespace UI {
+
+using namespace SIO;
 
 MainWindow *MainWindow::sInstance{nullptr};
 
