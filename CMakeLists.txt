@@ -263,7 +263,7 @@ else()
     add_executable(${TARGET} ${SOURCES} ${HEADERS} ${QM_FILES} ${UI_HEADERS} ${UI_RESOURCES} ${TARGET_SOURCES})
 endif()
 
-option(RESPEQT_STRICT_WARNINGS "Enable the extended warning set" ON)
+option(RESPEQT_STRICT_WARNINGS "Enable the extended warning set" OFF)
 option(RESPEQT_WARN_CONVERSIONS "Enable -Wconversion (very noisy)" OFF)
 option(RESPEQT_SANITIZE "Build with Sanitizers (Debug only; can be ON/address, thread, memory, cfi)" OFF)
 
