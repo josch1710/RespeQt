@@ -208,7 +208,7 @@ bool StandardSerialPortBackend::setHighSpeed() {
 }
 
 #ifdef Q_OS_LINUX
-bool StandardSerialPortBackend::setSpeed(int speed) {
+bool StandardSerialPortBackend::setSpeed(const unsigned long speed) {
   termios tios;
   struct serial_struct ss;
 
