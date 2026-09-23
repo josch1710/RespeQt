@@ -7,6 +7,7 @@
 #include <QResizeEvent>
 #include <QtDebug>
 #include <QTimer>
+#include <math.h>
 
 PicSplitter::PicSplitter(QWidget* parent) : QSplitter(parent)
 {
