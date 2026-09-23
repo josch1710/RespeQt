@@ -37,22 +37,22 @@ jobs:
           target: "desktop"
           dir: '${{ github.workspace }}/Qt5/'
           install-deps: 'true'
-      - name: Install CQtDeployer
-        run: |
-          sudo snap install cqtdeployer
+#      - name: Install CQtDeployer
+#        run: |
+#          sudo snap install cqtdeployer
           
       - name: Build via Cmake and package
         run: |
           top=`pwd`
           mkdir -p $top/build
           cmake -S $top -B $top/build -DCMAKE_PREFIX_PATH='${{ github.workspace }}/Qt5/5.15.2/lib/cmake' -DCMAKE_BUILD_TYPE=Release
-          cmake --build $top/build --target deploy -j4
+#          cmake --build $top/build --target deploy -j4
           
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v7.0.0
-        with:
-          name: Relase packages
-          path: ${{ github.workspace }}/build/DistributionKit/
+#      - name: Upload artifacts
+#        uses: actions/upload-artifact@v7.0.0
+#        with:
+#          name: Relase packages
+#          path: ${{ github.workspace }}/build/DistributionKit/
 
 
   Linux_CI_build_test:

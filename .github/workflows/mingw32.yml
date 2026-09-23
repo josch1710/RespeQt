@@ -36,13 +36,13 @@ jobs:
           target: "desktop"
           dir: '${{ github.workspace }}/Qt5/'
           install-deps: 'true'
-      - name: Install CQtDeployer
-        run: |
-          top=`pwd`
-          cd $top
-          wget -q https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2365/CQtDeployer_1.6.2365.7cce7f3_Windows_AMD64.exe
-          ./CQtDeployer_1.6.2365.7cce7f3_Windows_AMD64.exe install -t $top/cqtdeployer -c
-          echo "$top/cqtdeployer/1.6" >> "$GITHUB_PATH"
+#      - name: Install CQtDeployer
+#        run: |
+#          top=`pwd`
+#          cd $top
+#          wget -q https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2365/CQtDeployer_1.6.2365.7cce7f3_Windows_AMD64.exe
+#          ./CQtDeployer_1.6.2365.7cce7f3_Windows_AMD64.exe install -t $top/cqtdeployer -c
+#          echo "$top/cqtdeployer/1.6" >> "$GITHUB_PATH"
 
       - name: Build via Cmake and package
         run: |
@@ -50,13 +50,13 @@ jobs:
           mkdir -p $top/build
           export PATH="$top/cqtdeployer/1.6:$PATH"
           /mingw32/bin/cmake -DCMAKE_BUILD_TYPE=Release -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' -DZLIB_LIBRARY='/mingw32/lib' -DZLIB_INCLUDE_DIR='/mingw32/include'
-          /mingw32/bin/cmake --build $top/build --target deploy -j4
+#          /mingw32/bin/cmake --build $top/build --target deploy -j4
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v7.0.0
-        with:
-          name: Relase packages
-          path: ${{ github.workspace }}/build/DistributionKit/
+#      - name: Upload artifacts
+#        uses: actions/upload-artifact@v7.0.0
+#        with:
+#          name: Relase packages
+#          path: ${{ github.workspace }}/build/DistributionKit/
 
 
   MinGW32_CI_build_test:

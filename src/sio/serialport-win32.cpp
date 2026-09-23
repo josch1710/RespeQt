@@ -215,10 +215,11 @@ bool StandardSerialPortBackend::setSpeed(const unsigned long speed) {
 
   DCB dcb;
   COMMTIMEOUTS to;
+  auto speed_{speed};
 
   /* Adjust parameters */
   dcb.DCBlength = sizeof dcb;
-  dcb.BaudRate = speed & ~1;
+  dcb.BaudRate = speed_ & ~1;
   dcb.fBinary = TRUE;
   dcb.fParity = FALSE;
 
@@ -244,8 +245,8 @@ bool StandardSerialPortBackend::setSpeed(const unsigned long speed) {
   dcb.XoffLim = 0;
   dcb.ByteSize = 8;
   dcb.Parity = NOPARITY;
-  if (speed & 1) {
-    speed &= ~1;
+  if (speed_ & 1) {
+    speed_ &= static_cast<unsigned long>(~1);
     dcb.StopBits = TWOSTOPBITS;
   } else {
     dcb.StopBits = ONESTOPBIT;
@@ -259,7 +260,7 @@ bool StandardSerialPortBackend::setSpeed(const unsigned long speed) {
 
   /* Set serial port state */
   if (!SetCommState(mHandle, &dcb)) {
-    qCritical() << "!e" << tr("Cannot set serial port speed to %1: %2").arg(speed).arg(lastErrorMessage());
+    qCritical() << "!e" << tr("Cannot set serial port speed to %1: %2").arg(speed_).arg(lastErrorMessage());
     return false;
   }
 
@@ -284,9 +285,9 @@ bool StandardSerialPortBackend::setSpeed(const unsigned long speed) {
     return false;
   }
 
-  emit statusChanged(tr("%1 bits/sec").arg(speed));
-  qWarning() << "!i" << tr("Serial port speed set to %1.").arg(speed);
-  mSpeed = speed;
+  emit statusChanged(tr("%1 bits/sec").arg(speed_));
+  qWarning() << "!i" << tr("Serial port speed set to %1.").arg(speed_);
+  mSpeed = speed_;
   return true;
 }
 
