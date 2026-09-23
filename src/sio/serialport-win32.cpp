@@ -175,7 +175,7 @@ int StandardSerialPortBackend::speedByte() {
   }
 }
 
-void StandardSerialPortBackend::forceHighSpeed(int speed) {
+void StandardSerialPortBackend::forceHighSpeed(const unsigned int speed) {
   mForceHighSpeed = speed;
 }
 
@@ -210,7 +210,7 @@ bool StandardSerialPortBackend::setHighSpeed() {
   }
 }
 
-bool StandardSerialPortBackend::setSpeed(int speed) {
+bool StandardSerialPortBackend::setSpeed(const unsigned long speed) {
   //    qDebug() << "!d" << tr("DBG -- Serial Port setSpeed...");
 
   DCB dcb;
@@ -290,7 +290,7 @@ bool StandardSerialPortBackend::setSpeed(int speed) {
   return true;
 }
 
-int StandardSerialPortBackend::speed() {
+unsigned long StandardSerialPortBackend::speed() {
   return mSpeed;
 }
 
@@ -687,7 +687,7 @@ QString AtariSioBackend::defaultPortName() {
   return QString();
 }
 
-AtariSioBackend::AtariSioBackend(QObject *) : mHandle(0), mCancelHandles{}, mSpeed(0), mMethod(0)
+AtariSioBackend::AtariSioBackend(QObject *)
 {
 }
 
