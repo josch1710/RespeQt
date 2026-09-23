@@ -66,7 +66,7 @@ namespace Printers {
     return true;
   }
 
-  bool RawOutput::sendBuffer(const QByteArray &b, const unsigned int len) {
+  bool RawOutput::sendBuffer(const QByteArray &b, const unsigned int len) const {
     DWORD dwWritten;
     WritePrinter(mJob, reinterpret_cast<LPVOID>(const_cast<char *>(b.data())), len, &dwWritten);
     return true;

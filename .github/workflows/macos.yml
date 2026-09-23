@@ -1,3 +1,4 @@
+# TODO Fetch newer Qt5
 name: macOS builds
 on:
   push:
@@ -12,7 +13,7 @@ jobs:
       actions: write  # for styfle/cancel-workflow-action to cancel/stop running workflows
       contents: write # for actions/checkout to fetch code and softprops/action-gh-release
     if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
-    runs-on: macos-26-intel
+    runs-on: macos-26
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.13.1
@@ -35,8 +36,9 @@ jobs:
         run: |
           top=`pwd`
           mkdir -p $top/build
-          cmake -S $top -B $top/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' 
-#          cmake --build $top/build --target deploy -j4
+          cmake -S $top -B $top/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH='${{ github.workspace }}/Qt5/Qt/5.15.2/mingw81_32/lib/cmake' 
+          cmake --build $top/build -j4
+#         --target deploy
           
 #      - name: Upload artifacts
 #        uses: actions/upload-artifact@v7.0.0
@@ -50,7 +52,7 @@ jobs:
       actions: write  # for styfle/cancel-workflow-action to cancel/stop running workflows
       contents: write # for actions/checkout to fetch code and softprops/action-gh-release
     if: github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
-    runs-on: macos-26-intel
+    runs-on: macos-26
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.13.1
@@ -73,7 +75,7 @@ jobs:
         run: |
           top=`pwd`
           mkdir -p $top/build
-          cmake -DMAKE_TEST=on -S $top -B $top/build -DCMAKE_PREFIX_PATH='Qt5/Qt/5.15.2/mingw81_32/lib/cmake' 
+          cmake -DMAKE_TEST=on -S $top -B $top/build -DCMAKE_PREFIX_PATH='${{ github.workspace }}/Qt5/Qt/5.15.2/mingw81_32/lib/cmake' 
           cmake --build $top/build
       - name: Run the test
         run: |
