@@ -22,11 +22,18 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET 11.0) # Perhaps we can manage to build this 10.1
 
 option(MAKE_TEST "Build the test application" OFF)
 message(STATUS "Build tests ${MAKE_TEST}")
+option(BUILD_ATARI_EXECUTABLES "Build Atari 8-bit executables (requires MADS assembler)" OFF)
+if (BUILD_ATARI)
+    set(BUILD_ATARI_EXECUTABLES ON)
+endif()
 if (MAKE_TEST)
     message(STATUS "Build test application")
     set(TARGET_SOURCES
         tests/units/siorecordertest.cpp
         tests/units/siorecordertest.h
+        tests/units/pclinktest.cpp
+        tests/units/pclinktest.h
+        tests/units/mockserialport.h
         tests/units/tests.cpp
     )
     set(TARGET RespeQtTest)
@@ -359,6 +366,11 @@ endif()
 
 # Process Documents
 add_subdirectory(docs)
+
+# Atari 8-Bit binaries
+if (BUILD_ATARI_EXECUTABLES)
+    add_subdirectory(atari)
+endif()
 
 # Deployment
 if (NOT MAKE_TEST AND CMAKE_BUILD_TYPE STREQUAL "Release")

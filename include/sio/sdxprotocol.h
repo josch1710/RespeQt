@@ -3,18 +3,6 @@
 
 #include "sio/sioworker.h"
 
-#ifndef uchar
-#define uchar unsigned char
-#endif
-
-#ifndef ushort
-#define ushort unsigned short
-#endif
-
-#ifndef ulong
-#define ulong unsigned long
-#endif
-
 namespace SIO {
 
 #pragma pack(push, 1)

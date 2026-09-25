@@ -74,6 +74,11 @@ public:
   SioWorker();
 #ifdef RESPEQT_TEST
   // This is totally ugly, we must get rid of this special ctor
+  explicit SioWorker(const AbstractSerialPortBackendPtr &port) : QThread(), mPort(port) {
+    deviceMutex = nullptr;
+    for (int i = 0; i <= 255; i++)
+      devices[i] = nullptr;
+  }
   explicit SioWorker(AbstractSerialPortBackend *port) : QThread(), mPort(port) {
     deviceMutex = nullptr;
     for (int i = 0; i <= 255; i++)

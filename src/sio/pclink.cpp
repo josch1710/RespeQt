@@ -221,7 +221,11 @@ bool PCLINK::hasLink(const int no) { // NOLINT(*-convert-member-functions-to-sta
 void PCLINK::setLink(const int no, const char *fileName) {
   if (no < 1 || no > 15) return;
 
-  fps_close(no);
+  for (int i = 0; i < 16; i++) {
+    if (iodesc[i].cunit == no) {
+      fps_close(i);
+    }
+  }
   memset(&device[no].parbuf, 0, sizeof(PARBUF));
 
   strncpy(device[no].dirname, fileName, 1023);
@@ -258,7 +262,11 @@ void PCLINK::swapLinks(const int from, const int to) {
 void PCLINK::resetLink(const int no) {
   if (no < 1 || no > 15) return;
 
-  fps_close(no);
+  for (int i = 0; i < 16; i++) {
+    if (iodesc[i].cunit == no) {
+      fps_close(i);
+    }
+  }
   memset(&device[no].parbuf, 0, sizeof(PARBUF));
 
   device[no].on = 0;
@@ -329,7 +337,7 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
     return;
   }
 
-  if (parsize > sizeof(PARBUF)) /* and not more than fits in parbuf */
+  if (ccom == 'P' && parsize > sizeof(PARBUF)) /* and not more than fits in parbuf */
   {
     sio->port()->writeCommandNak();
     return;
@@ -989,7 +997,7 @@ void PCLINK::handleFOpen(const quint8 cunit, const uchar ccom, const ulong faux,
 
   sio->port()->writeCommandAck(); /* ack the command */
 
-  char raw_name[12];
+  char raw_name[16];
   memset(raw_name, 0, sizeof(raw_name));
   memcpy(raw_name, device[cunit].parbuf.name, 8 + 3);
 
@@ -1072,7 +1080,7 @@ void PCLINK::handleFOpen(const quint8 cunit, const uchar ccom, const ulong faux,
         sio->port()->writeDataFrame(data);
         return;
       }
-      char name83[12];
+      char name83[16];
 
       if (D) qDebug() << "!n" << tr("FOPEN: creating file");
 
@@ -2392,9 +2400,11 @@ void PCLINK::do_pclink_init(const int force) {
   }
 
   for (uchar handle = 0; handle < 16; handle++) {
-    if (force)
-      iodesc[handle].fps.file = nullptr;
-    fps_close(handle);
+    if (force) {
+      memset(&iodesc[handle], 0, sizeof(IODESC));
+    } else {
+      fps_close(handle);
+    }
     memset(&device[handle].parbuf, 0, sizeof(PARBUF));
   }
 }
