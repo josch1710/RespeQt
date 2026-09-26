@@ -194,6 +194,7 @@ void OptionsDialog::setupSettings() const
   m_ui->btn_italic_title->setFont(btnFont);
   m_ui->btn_italic_title->update();
   m_ui->spn_scale_title->setValue(dbfnt.scale());
+  m_ui->btn_color_title->setProperty("color", dbfnt.color().name());
   QString style = QString("QPushButton {color: %1}").arg(dbfnt.color().name());
   m_ui->btn_color_title->setStyleSheet(style);
 
@@ -209,6 +210,7 @@ void OptionsDialog::setupSettings() const
   m_ui->btn_italic_index->setChecked(dbfnt.italic());
   m_ui->btn_italic_index->setFont(btnFont);
   m_ui->spn_scale_index->setValue(dbfnt.scale());
+  m_ui->btn_color_index->setProperty("color", dbfnt.color().name());
   style = QString("QPushButton {color: %1}").arg(dbfnt.color().name());
   m_ui->btn_color_index->setStyleSheet(style);
 
@@ -745,6 +747,8 @@ void OptionsDialog::indexColorClicked()
     auto font = RespeqtSettings::instance()->dbIndexFont();
     QColor init = font.color();
     QColor color = QColorDialog::getColor(init, this, "Select the font color for Index labels:");
+    if (!color.isValid())
+      return;
     QString style = QString("QPushButton {color: %1}").arg(color.name());
 
     m_ui->btn_color_index->setProperty("color", color.name());
@@ -756,6 +760,8 @@ void OptionsDialog::titleColorClicked()
     auto font = RespeqtSettings::instance()->dbTitleFont();
     QColor init = font.color();
     QColor color = QColorDialog::getColor(init, this, "Select the font color for Title labels:");
+    if (!color.isValid())
+      return;
     QString style = QString("QPushButton {color: %1}").arg(color.name());
 
     m_ui->btn_color_title->setProperty("color", color.name());

@@ -44,7 +44,6 @@ public slots:
 
 protected:
   void changeEvent(QEvent *e) override;
-  void showEvent(QShowEvent *e) override;
 
 private slots:
   void connectPrinter();

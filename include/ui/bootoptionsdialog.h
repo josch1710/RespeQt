@@ -30,6 +30,8 @@ namespace UI {
     void changeEvent(QEvent *e) override;
 
   private:
+    void applyPaletteColors();
+
     const QString &bootFolderPath_;
     ::Ui::BootOptionsDialog *m_ui;
 

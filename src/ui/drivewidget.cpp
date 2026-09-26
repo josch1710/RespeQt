@@ -22,6 +22,7 @@ DriveWidget::DriveWidget(const int driveNum, QWidget *parent)
   // all. Now the style decides how large an icon is and the buttons size
   // themselves around it.
   Scale::applyToolButtonIconSizes(this);
+  applyPaletteColors();
 }
 
 DriveWidget::~DriveWidget() {

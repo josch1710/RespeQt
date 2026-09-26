@@ -34,18 +34,7 @@ BootOptionsDialog::BootOptionsDialog(const QString &bootFolderPath, QWidget *par
 
   m_ui->setupUi(this);
 
-  // The form painted the six DOS radio buttons in a literal mauve and the hint
-  // above them in a literal grey. Both were picked for a light window and fail
-  // on a dark one: against a #1e1e1e window the mauve rgb(140, 96, 115) only
-  // reaches 3.2:1 and the grey rgb(111, 111, 111) 3.3:1, short of the 4.5:1
-  // that text needs. So keep the intended mauve accent but tune it to the
-  // palette at hand, and let the palette supply the muted hint colour.
-  const QColor accent = Colors::isDark(this) ? QColor(186, 154, 168)
-                                              : QColor(119, 81, 97);
-  for (QRadioButton *button : findChildren<QRadioButton *>()) {
-    Colors::setTextColor(button, accent);
-  }
-  Colors::setTextColor(m_ui->label, Colors::mutedText(this));
+  applyPaletteColors();
 
   connect(m_ui->myPicoDOS, SIGNAL(toggled(bool)), this, SLOT(picoDOSToggled()));
 }
@@ -54,11 +43,29 @@ BootOptionsDialog::~BootOptionsDialog() {
   delete m_ui;
 }
 
+// The form painted the six DOS radio buttons in a literal mauve and the hint
+// above them in a literal grey. Both were picked for a light window and fail
+// on a dark one: against a #1e1e1e window the mauve rgb(140, 96, 115) only
+// reaches 3.2:1 and the grey rgb(111, 111, 111) 3.3:1, short of the 4.5:1
+// that text needs. So keep the intended mauve accent but tune it to the
+// palette at hand, and let the palette supply the muted hint colour.
+void BootOptionsDialog::applyPaletteColors() {
+  const QColor accent = Colors::isDark(this) ? QColor(186, 154, 168)
+                                              : QColor(119, 81, 97);
+  for (QRadioButton *button : findChildren<QRadioButton *>()) {
+    Colors::setTextColor(button, accent);
+  }
+  Colors::setTextColor(m_ui->label, Colors::mutedText(this));
+}
+
 void BootOptionsDialog::changeEvent(QEvent *e) {
   QDialog::changeEvent(e);
   switch (e->type()) {
     case QEvent::LanguageChange:
       m_ui->retranslateUi(this);
+      break;
+    case QEvent::PaletteChange:
+      applyPaletteColors();
       break;
     default:
       break;

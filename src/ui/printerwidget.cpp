@@ -23,6 +23,7 @@ PrinterWidget::PrinterWidget(const int printerNum, QWidget *parent)
   // See DriveWidget: the form pinned the buttons and set no icon size.
   Scale::applyToolButtonIconSizes(this);
   setup();
+  applyPaletteColors();
 
   // Connect the printer selection combobox
   connect(ui->atariPrinters, &QComboBox::currentTextChanged, this, &PrinterWidget::printerSelectionChanged);
@@ -71,15 +72,13 @@ void PrinterWidget::setup() const
   ui->actionConnectPrinter->setEnabled(true);
 }
 
-// The drive number and the image details are secondary information and were
-// dimmed by the form through a literal palette override, rgb(104, 104, 104)
-// and rgb(128, 128, 128). Both were chosen for a light window and drop to
-// about 3:1 on a dark one, so derive the dimming from the palette instead.
+// The printer number is secondary information and was
+// dimmed by the form through a literal palette override.
+// Derive the dimming from the palette instead.
 void PrinterWidget::applyPaletteColors() const
 {
-  const auto color{QColor(Colors::isDark(ui->atariPrinters, QPalette::HighlightedText) ? Qt::white : Qt::black)};
-  Colors::setButtonColor(ui->atariPrinters, color);
-  Colors::setHighlightedTextColor(ui->atariPrinters, color);
+  const QColor muted = Colors::mutedText(this);
+  Colors::setTextColor(ui->printerLabel, muted);
 }
 
 // The colours above are derived once, so they would go stale when the user
@@ -90,15 +89,6 @@ void PrinterWidget::changeEvent(QEvent *e)
   if (e->type() == QEvent::PaletteChange) {
     applyPaletteColors();
   }
-}
-
-void PrinterWidget::showEvent(QShowEvent *e)
-{
-  // On first start, the color has to be other way round.
-  const auto color{QColor(Colors::isDark(ui->atariPrinters, QPalette::HighlightedText) ? Qt::black : Qt::white)};
-  Colors::setButtonColor(ui->atariPrinters, color);
-  Colors::setHighlightedTextColor(ui->atariPrinters, color);
-  QFrame::showEvent(e);
 }
 
 

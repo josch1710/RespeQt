@@ -9,6 +9,7 @@
 #define UICOLORS_H
 
 #include <QColor>
+#include <QGuiApplication>
 #include <QPalette>
 #include <QWidget>
 
@@ -17,8 +18,9 @@ namespace UI::Colors {
   // Everything below the middle of the lightness range counts as a dark
   // palette. Only the window background is looked at, since that is what the
   // text has to stand out against.
-  inline bool isDark(const QWidget *reference, const QPalette::ColorRole role = QPalette::Window) {
-    return reference->palette().color(role).lightness() < 128;
+  inline bool isDark(const QWidget *reference = nullptr, const QPalette::ColorRole role = QPalette::Window) {
+    const QPalette &pal = reference ? reference->palette() : QGuiApplication::palette();
+    return pal.color(role).lightness() < 128;
   }
 
   // Mixes fg into bg, ignoring gamma -- close enough for muting text.
@@ -34,8 +36,8 @@ namespace UI::Colors {
   // #808080 for those, which drop to about 3:1 on a dark window. 60% of the
   // text colour over the window colour stays above the 4.5:1 that text needs
   // on every palette tried: 5.5:1 on a light window, 5.0:1 on a dark one.
-  inline QColor mutedText(const QWidget *reference) {
-    const QPalette &pal = reference->palette();
+  inline QColor mutedText(const QWidget *reference = nullptr) {
+    const QPalette &pal = reference ? reference->palette() : QGuiApplication::palette();
     return blend(pal.color(QPalette::WindowText), pal.color(QPalette::Window), 60);
   }
 
@@ -44,6 +46,7 @@ namespace UI::Colors {
   // there. Going through the palette rather than a style sheet also leaves the
   // native rendering of, say, a radio indicator untouched.
   inline void setTextColor(QWidget *widget, const QColor &color) {
+    if (!widget) return;
     QPalette pal = widget->palette();
     pal.setColor(QPalette::WindowText, color);
     widget->setPalette(pal);
@@ -54,18 +57,21 @@ namespace UI::Colors {
   // there. Going through the palette rather than a style sheet also leaves the
   // native rendering of, say, a radio indicator untouched.
   inline void setHighlightedTextColor(QWidget *widget, const QColor &color) {
+    if (!widget) return;
     QPalette pal = widget->palette();
     pal.setColor(QPalette::HighlightedText, color);
     widget->setPalette(pal);
   }
 
   inline void setButtonColor(QWidget *widget, const QColor &color) {
+    if (!widget) return;
     QPalette pal = widget->palette();
     pal.setColor(QPalette::ButtonText, color);
     widget->setPalette(pal);
   }
 
   inline void setBaseColor(QWidget *widget, const QColor &color) {
+    if (!widget) return;
     QPalette pal = widget->palette();
     pal.setColor(QPalette::Base, color);
     widget->setPalette(pal);
