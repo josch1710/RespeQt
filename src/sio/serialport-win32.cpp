@@ -668,7 +668,7 @@ QString StandardSerialPortBackend::lastErrorMessage() {
           (LPTSTR) &lpMsgBuf,
           0, nullptr);
 
-  result.setUtf16((ushort *) lpMsgBuf, wcslen((wchar_t *) lpMsgBuf) - 2);
+  result.setUtf16(static_cast<ushort *>(lpMsgBuf), static_cast<int>(wcslen(static_cast<wchar_t *>(lpMsgBuf)) - 2));
   LocalFree(lpMsgBuf);
   return result;
 }

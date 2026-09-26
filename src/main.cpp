@@ -10,7 +10,11 @@
 #ifdef HAS_QT_DBUS
 #include "ui/portalthemelistener.h"
 #endif
+#ifdef Q_OS_WIN
+#include "ui/windowsthemelistener.h"
+#endif
 #include <QApplication>
+#include <QStyleFactory>
 #include <QTextCodec>
 
 #ifdef Q_OS_WIN
@@ -23,9 +27,13 @@ int main(int argc, char *argv[]) {
 #endif
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+  QApplication::setStyle(QStyleFactory::create("Fusion"));
   QApplication a(argc, argv);
 #ifdef HAS_QT_DBUS
   UI::PortalThemeListener::init(&a);
+#endif
+#ifdef Q_OS_WIN
+  UI::WindowsThemeListener::init(&a);
 #endif
   QIcon::setThemeName("Classic");
   QApplication::setFont(QApplication::font("QMenu"));

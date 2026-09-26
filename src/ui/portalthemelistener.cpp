@@ -6,6 +6,7 @@
  */
 
 #include "ui/portalthemelistener.h"
+#include "ui/uicolors.h"
 
 #include <QApplication>
 #include <QColor>
@@ -74,26 +75,7 @@ void PortalThemeListener::applyColorScheme(const uint scheme) {
   }
 
   if (scheme == 1) { // 1: Prefer Dark
-    QPalette darkPalette;
-    darkPalette.setColor(QPalette::Window, QColor(53, 53, 53));
-    darkPalette.setColor(QPalette::WindowText, Qt::white);
-    darkPalette.setColor(QPalette::Base, QColor(35, 35, 35));
-    darkPalette.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
-    darkPalette.setColor(QPalette::ToolTipBase, QColor(25, 25, 25));
-    darkPalette.setColor(QPalette::ToolTipText, Qt::white);
-    darkPalette.setColor(QPalette::Text, Qt::white);
-    darkPalette.setColor(QPalette::Button, QColor(53, 53, 53));
-    darkPalette.setColor(QPalette::ButtonText, Qt::white);
-    darkPalette.setColor(QPalette::BrightText, Qt::red);
-    darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
-    darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
-    darkPalette.setColor(QPalette::HighlightedText, Qt::white);
-    darkPalette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
-    darkPalette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
-    darkPalette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
-    darkPalette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
-    darkPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(127, 127, 127));
-    QApplication::setPalette(darkPalette);
+    QApplication::setPalette(Colors::darkPalette());
   } else { // 0: No preference, 2: Prefer Light
     QApplication::setPalette(m_defaultPalette);
   }

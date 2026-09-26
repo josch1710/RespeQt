@@ -232,8 +232,10 @@ if (WIN32)
     SET(CMAKE_RC_COMPILE_OBJECT
             "<CMAKE_RC_COMPILER> <FLAGS> -O coff <DEFINES> -i <SOURCE> -o <OBJECT>")
     set(SOURCES ${SOURCES} src/sio/serialport-win32.cpp src/printers/rawoutput_win.cpp
+            src/ui/windowsthemelistener.cpp
             resources/RespeQt.rc)
-    set(HEADERS ${HEADERS} include/sio/serialport-win32.h)
+    set(HEADERS ${HEADERS} include/sio/serialport-win32.h
+            include/ui/windowsthemelistener.h)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUNICODE")
 endif()
 

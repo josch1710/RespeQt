@@ -77,6 +77,29 @@ namespace UI::Colors {
     widget->setPalette(pal);
   }
 
+  inline QPalette darkPalette() {
+    QPalette darkPal;
+    darkPal.setColor(QPalette::Window, QColor(53, 53, 53));
+    darkPal.setColor(QPalette::WindowText, Qt::white);
+    darkPal.setColor(QPalette::Base, QColor(35, 35, 35));
+    darkPal.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
+    darkPal.setColor(QPalette::ToolTipBase, QColor(25, 25, 25));
+    darkPal.setColor(QPalette::ToolTipText, Qt::white);
+    darkPal.setColor(QPalette::Text, Qt::white);
+    darkPal.setColor(QPalette::Button, QColor(53, 53, 53));
+    darkPal.setColor(QPalette::ButtonText, Qt::white);
+    darkPal.setColor(QPalette::BrightText, Qt::red);
+    darkPal.setColor(QPalette::Link, QColor(42, 130, 218));
+    darkPal.setColor(QPalette::Highlight, QColor(42, 130, 218));
+    darkPal.setColor(QPalette::HighlightedText, Qt::white);
+    darkPal.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
+    darkPal.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
+    darkPal.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
+    darkPal.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
+    darkPal.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(127, 127, 127));
+    return darkPal;
+  }
+
 }// namespace UI::Colors
 
 namespace UiColors = UI::Colors;
