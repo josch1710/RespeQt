@@ -295,6 +295,9 @@ if (RESPEQT_STRICT_WARNINGS)
     )
 endif()
 
+# GCC ignores [[maybe_unused]] on non-static data members and warns about it; Clang accepts it.
+target_compile_options(${TARGET} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Wno-attributes>)
+
 if (RESPEQT_WARN_CONVERSIONS)
     target_compile_options(${TARGET} PRIVATE
             $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wconversion -Wsign-conversion>)

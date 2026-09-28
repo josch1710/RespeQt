@@ -39,7 +39,7 @@ namespace DiskImages {
     [[nodiscard]] quint16 sectorWeakOffset() const { return m_sectorWeakOffset; }
     void setSectorWeakOffset(quint16 sectorWeakOffet);
     static quint8 driveStatus() { return 0x10; }
-    [[nodiscard]] quint8 wd1771Status() const { return (~m_sectorStatus & 0x3E) | 0xC1; }
+    [[nodiscard]] quint8 wd1771Status() const { return static_cast<quint8>(~m_sectorStatus & 0x3E) | 0xC1; }
     void setWd1771Status(const quint8 status) { m_sectorStatus |= ~status & 0x3E; }
     [[maybe_unused]] int dataMarkOffset(int headerOffset, int shift);
 

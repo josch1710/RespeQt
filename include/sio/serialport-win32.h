@@ -48,12 +48,12 @@ public:
 private:
   std::atomic_bool mCanceled;
   bool mHighSpeed;
-  int mForceHighSpeed;
+  unsigned int mForceHighSpeed;
   void *mHandle, *mCancelHandle;
-  int mSpeed;
+  unsigned long mSpeed;
   int mMethod;
   int mWriteDelay;
-  int mCompErrDelay;
+  unsigned int mCompErrDelay;
   QByteArray mSioDevices;
 
   bool setNormalSpeed();

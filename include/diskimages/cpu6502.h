@@ -89,45 +89,52 @@ namespace DiskImages {
 
     // modify a flag in status register
     void SetFlagB(const unsigned char val) {
-      if (val) m_SR |= CPU6502_FLAG_B;
+      if (val) 
+        m_SR |= CPU6502_FLAG_B;
       else
-        m_SR &= ~CPU6502_FLAG_B;
+        m_SR &= static_cast<unsigned char>(~CPU6502_FLAG_B);
     }
 
     void SetFlagI(const unsigned char val) {
-      if (val) m_SR |= CPU6502_FLAG_I;
+      if (val) 
+        m_SR |= CPU6502_FLAG_I;
       else
-        m_SR &= ~CPU6502_FLAG_I;
+        m_SR &= static_cast<unsigned char>(~CPU6502_FLAG_I);
     }
 
     void SetFlagZ(const unsigned char val) {
-      if (val == 0) m_SR |= CPU6502_FLAG_Z;
+      if (val == 0) 
+        m_SR |= CPU6502_FLAG_Z;
       else
-        m_SR &= ~CPU6502_FLAG_Z;
+        m_SR &= static_cast<unsigned char>(~CPU6502_FLAG_Z);
     }
 
     void SetFlagN(const unsigned char val) {
-      if (val & CPU6502_FLAG_N) m_SR |= CPU6502_FLAG_N;
+      if (val & CPU6502_FLAG_N) 
+        m_SR |= CPU6502_FLAG_N;
       else
-        m_SR &= ~CPU6502_FLAG_N;
+        m_SR &= static_cast<unsigned char>(~CPU6502_FLAG_N);
     }
 
     void SetFlagC(const unsigned char val) {
-      if (val) m_SR |= CPU6502_FLAG_C;
+      if (val)
+        m_SR |= CPU6502_FLAG_C;
       else
-        m_SR &= ~CPU6502_FLAG_C;
+        m_SR &= static_cast<unsigned char>(~CPU6502_FLAG_C);
     }
 
     void SetFlagV(const unsigned char val) {
-      if (val) m_SR |= CPU6502_FLAG_V;
+      if (val)
+        m_SR |= CPU6502_FLAG_V;
       else
-        m_SR &= ~CPU6502_FLAG_V;
+        m_SR &= static_cast<unsigned char>(~CPU6502_FLAG_V);
     }
 
     void SetFlagD(const unsigned char val) {
-      if (val) m_SR |= CPU6502_FLAG_D;
+      if (val)
+        m_SR |= CPU6502_FLAG_D;
       else
-        m_SR &= ~CPU6502_FLAG_D;
+        m_SR &= static_cast<unsigned char>(~CPU6502_FLAG_D);
     }
 
     // read/write a word in memory
@@ -215,7 +222,7 @@ namespace DiskImages {
     unsigned short FetchIndirectBug(const unsigned short addr) { return ReadWordBug(ReadWord(addr)); }
     unsigned short FetchIndirect(const unsigned short addr) { return ReadWord(ReadWord(addr)); }
     unsigned short FetchZPageIndirect(const unsigned short addr) { return ReadWord( ReadByte(addr)); }
-    unsigned short FetchAbsoluteXIndirect(const unsigned short addr) { return ReadWord(ReadWord(addr) + m_X); }
+    unsigned short FetchAbsoluteXIndirect(const unsigned short addr) { return ReadWord(static_cast<unsigned short>(ReadWord(addr) + static_cast<unsigned short>(m_X))); }
 
     // get value depending on addressing mode
     unsigned char ReadImm(const unsigned short addr) { return ReadByte(addr); }

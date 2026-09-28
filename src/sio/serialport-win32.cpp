@@ -29,10 +29,10 @@ AbstractSerialPortBackend::~AbstractSerialPortBackend() {
 }
 
 StandardSerialPortBackend::StandardSerialPortBackend(QObject *parent)
-  : AbstractSerialPortBackend(parent), mHighSpeed(false), mSpeed(0), mMethod(0), mWriteDelay(0), mCompErrDelay(0)
+    : AbstractSerialPortBackend(parent), mHighSpeed(false), mCancelHandle(nullptr), mSpeed(0), mMethod(0), mWriteDelay(0), mCompErrDelay(0)
 {
-  mHandle = INVALID_HANDLE_VALUE;
-  mForceHighSpeed = 0;
+    mHandle         = INVALID_HANDLE_VALUE;
+    mForceHighSpeed = 0;
 }
 
 StandardSerialPortBackend::~StandardSerialPortBackend() {
@@ -56,31 +56,31 @@ bool StandardSerialPortBackend::open() {
   name.append(RespeqtSettings::instance()->serialPortName());
 
   mMethod = RespeqtSettings::instance()->serialPortHandshakingMethod();
-  mWriteDelay = static_cast<unsigned long>(SLEEP_FACTOR * RespeqtSettings::instance()->serialPortWriteDelay());
+  mWriteDelay = SLEEP_FACTOR * RespeqtSettings::instance()->serialPortWriteDelay();
   mCompErrDelay = RespeqtSettings::instance()->serialPortCompErrDelay();
 
   if (mMethod == HANDSHAKE_SOFTWARE) {
     mHandle = (CreateFile(
-            (WCHAR *) name.utf16(),
+            reinterpret_cast<WCHAR *>(const_cast<ushort *>(name.utf16())),
             GENERIC_READ | GENERIC_WRITE,
             0,
             nullptr,
             OPEN_EXISTING,
             0,
-            0));
+            nullptr));
     if (mHandle == INVALID_HANDLE_VALUE) {
       qCritical() << "!e" << tr("Cannot open serial port '%1': %2").arg(RespeqtSettings::instance()->serialPortName(), lastErrorMessage());
       return false;
     }
   } else {
     mHandle = (CreateFile(
-            (WCHAR *) name.utf16(),
+            reinterpret_cast<WCHAR *>(const_cast<ushort *>(name.utf16())),
             GENERIC_READ | GENERIC_WRITE,
             0,
             nullptr,
             OPEN_EXISTING,
             FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,
-            0));
+            nullptr));
     if (mHandle == INVALID_HANDLE_VALUE) {
       qCritical() << "!e" << tr("Cannot open serial port '%1': %2").arg(RespeqtSettings::instance()->serialPortName(), lastErrorMessage());
       return false;
@@ -97,7 +97,7 @@ bool StandardSerialPortBackend::open() {
 
   mCanceled = false;
 
-  mCancelHandle = CreateEvent(0, true, false, 0);
+  mCancelHandle = CreateEvent(nullptr, true, false, nullptr);
 
   if (!setNormalSpeed()) {
     close();
@@ -161,6 +161,7 @@ int StandardSerialPortBackend::speedByte() {
   } else {
     int speed = 0x08;
     switch (RespeqtSettings::instance()->serialPortMaximumSpeed()) {
+      default:
       case 0:
         speed = 0x28;
         break;
@@ -191,23 +192,24 @@ bool StandardSerialPortBackend::setHighSpeed() {
   }
   if (mForceHighSpeed != 0) {
     return setSpeed(mForceHighSpeed);// used to force 52400 when SuperArchiver/BitWriter is active
-  } else if (RespeqtSettings::instance()->serialPortUsePokeyDivisors()) {
-    return setSpeed(divisorToBaud(RespeqtSettings::instance()->serialPortPokeyDivisor()));
-  } else {
-    int speed = 57600;
-    switch (RespeqtSettings::instance()->serialPortMaximumSpeed()) {
-      case 0:
-        speed = 19200;
-        break;
-      case 1:
-        speed = 38400;
-        break;
-      case 2:
-        speed = 57600;
-        break;
-    }
-    return setSpeed(speed);
   }
+  if (RespeqtSettings::instance()->serialPortUsePokeyDivisors()) {
+      return setSpeed(divisorToBaud(RespeqtSettings::instance()->serialPortPokeyDivisor()));
+  }
+  unsigned int speed = 57600;
+  switch (RespeqtSettings::instance()->serialPortMaximumSpeed()) {
+      default:
+      case 0:
+          speed = 19200;
+          break;
+      case 1:
+          speed = 38400;
+          break;
+      case 2:
+          speed = 57600;
+          break;
+  }
+  return setSpeed(speed);
 }
 
 bool StandardSerialPortBackend::setSpeed(const unsigned long speed) {
@@ -219,7 +221,7 @@ bool StandardSerialPortBackend::setSpeed(const unsigned long speed) {
 
   /* Adjust parameters */
   dcb.DCBlength = sizeof dcb;
-  dcb.BaudRate = speed_ & ~1;
+  dcb.BaudRate = speed_ & static_cast<DWORD>(~1);
   dcb.fBinary = TRUE;
   dcb.fParity = FALSE;
 
@@ -306,7 +308,7 @@ QByteArray StandardSerialPortBackend::readCommandFrame() {
       return data;
     }
 
-    const int size = 4;
+    constexpr int size = 4;
     quint8 expected = 0;
     quint8 got = 1;
     do {
@@ -320,7 +322,7 @@ QByteArray StandardSerialPortBackend::readCommandFrame() {
         if (data.size() == size + 1) {
           for (int i = 0; i < mSioDevices.size(); i++) {
             if (data.at(0) == mSioDevices[i]) {
-              expected = (quint8) data.at(size);
+              expected = static_cast<quint8>(data.at(size));
               got = sioChecksum(data, size);
               break;
             }
@@ -369,13 +371,13 @@ QByteArray StandardSerialPortBackend::readCommandFrame() {
       return data;
     }
 
-    int retries = 0, totalRetries = 0;
+    int retries = 0; 
+    [[maybe_unused]] int totalRetries = 0;
     do {
       data.clear();
-      OVERLAPPED ov;
+      OVERLAPPED ov = {};
 
-      memset(&ov, 0, sizeof(ov));
-      ov.hEvent = CreateEvent(0, true, false, 0);
+      ov.hEvent = CreateEvent(nullptr, true, false, nullptr);
 
       HANDLE events[2];
       events[0] = ov.hEvent;
@@ -444,20 +446,21 @@ QByteArray StandardSerialPortBackend::readCommandFrame() {
           QThread::usleep(500);
         }
         break;
-      } else {
-        retries++;
-        totalRetries++;
-        if (retries == 2) {
+      }
+        
+      retries++;
+      totalRetries++;
+      if (retries == 2) {
           retries = 0;
           if (mHighSpeed) {
-            setNormalSpeed();
-          } else {
-            setHighSpeed();
+              setNormalSpeed();
           }
-        }
+          else {
+              setHighSpeed();
+          }
       }
       //    } while (totalRetries < 100);
-    } while (1);
+    } while (true);
   }
   return data;
 }
@@ -469,15 +472,13 @@ QByteArray StandardSerialPortBackend::readDataFrame(uint size, bool isCommandFra
   if (data.isEmpty()) {
     return data;
   }
-  quint8 expected = (quint8) data.at(size);
-  quint8 got = sioChecksum(data, size);
-  if (expected == got) {
-    data.resize(size);
+  const quint8 expected = static_cast<quint8>(data.at(static_cast<int>(size)));
+  if (quint8 got = sioChecksum(data, size); expected == got) {
+    data.resize(static_cast<int>(size));
 
-    auto recorder = SioRecorder::instance();
-    if (recorder->isSnapshotRunning()) {
+      if (auto recorder = SioRecorder::instance(); recorder->isSnapshotRunning()) {
       if (isCommandFrame) {
-        recorder->writeSnapshotCommandFrame(data[0], data[1], data[2], data[3]);
+        recorder->writeSnapshotCommandFrame(static_cast<quint8>(data[0]), static_cast<quint8>(data[1]), static_cast<quint8>(data[2]), static_cast<quint8>(data[3]));
       } else {
         recorder->writeSnapshotDataFrame(data);
       }
@@ -498,8 +499,8 @@ bool StandardSerialPortBackend::writeDataFrame(const QByteArray &data) {
 
   QByteArray copy(data);
   copy.resize(copy.size() + 1);
-  copy[copy.size() - 1] = sioChecksum(copy, copy.size() - 1);
-  if (mMethod == HANDSHAKE_SOFTWARE) SioWorker::usleep(mWriteDelay);
+  copy[copy.size() - 1] = static_cast<char>(sioChecksum(copy, static_cast<uint>(copy.size() - 1)));
+  if (mMethod == HANDSHAKE_SOFTWARE) SioWorker::usleep(static_cast<unsigned long>(mWriteDelay));
   SioWorker::usleep(50);
   return writeRawFrame(copy);
 }
@@ -531,7 +532,7 @@ bool StandardSerialPortBackend::writeDataNak() {
 bool StandardSerialPortBackend::writeComplete() {
   //    qDebug() << "!d" << tr("DBG -- Serial Port writeComplete...");
 
-  if (mMethod == HANDSHAKE_SOFTWARE) SioWorker::usleep(mWriteDelay);
+  if (mMethod == HANDSHAKE_SOFTWARE) SioWorker::usleep(static_cast<unsigned long>(mWriteDelay));
   else
     SioWorker::usleep(mCompErrDelay);
   return writeRawFrame(QByteArray(1, SIO_COMPLETE));
@@ -540,26 +541,26 @@ bool StandardSerialPortBackend::writeComplete() {
 bool StandardSerialPortBackend::writeError() {
   //    qDebug() << "!d" << tr("DBG -- Serial Port writeError...");
 
-  if (mMethod == HANDSHAKE_SOFTWARE) SioWorker::usleep(mWriteDelay);
+  if (mMethod == HANDSHAKE_SOFTWARE) SioWorker::usleep(static_cast<unsigned long>(mWriteDelay));
   else
     SioWorker::usleep(mCompErrDelay);
   return writeRawFrame(QByteArray(1, SIO_ERROR));
 }
 
-quint8 StandardSerialPortBackend::sioChecksum(const QByteArray &data, uint size) {
+// ReSharper disable once CppMemberFunctionMayBeStatic
+quint8 StandardSerialPortBackend::sioChecksum(const QByteArray &data, const uint size) {
   //    qDebug() << "!d" << tr("DBG -- Serial Port sioChecksum...");
 
-  uint i;
   uint sum = 0;
 
-  for (i = 0; i < size; i++) {
-    sum += (quint8) data.at(i);
+  for (uint i = 0; i < size; i++) {
+    sum += static_cast<quint8>(data.at(static_cast<int>(i)));
     if (sum > 255) {
       sum -= 255;
     }
   }
 
-  return sum;
+  return static_cast<quint8>(sum);
 }
 
 QByteArray StandardSerialPortBackend::readRawFrame(size_t size, bool verbose) {
@@ -569,22 +570,21 @@ QByteArray StandardSerialPortBackend::readRawFrame(size_t size, bool verbose) {
   DWORD result;
 
   if (mMethod == HANDSHAKE_SOFTWARE) {
-    data.resize(size);
-    if (!ReadFile(mHandle, data.data(), size, &result, nullptr) || (result != (DWORD) size)) {
+    data.resize(static_cast<int>(size));
+    if (!ReadFile(mHandle, data.data(), size, &result, nullptr) || (result != static_cast<DWORD>(size))) {
       data.clear();
     }
   } else {
-    OVERLAPPED ov;
+    OVERLAPPED ov = {};
 
-    memset(&ov, 0, sizeof(ov));
-    ov.hEvent = CreateEvent(0, true, false, 0);
+    ov.hEvent = CreateEvent(nullptr, true, false, nullptr);
 
     if (ov.hEvent == INVALID_HANDLE_VALUE) {
       qCritical() << "!e" << tr("Cannot create event: %1").arg(lastErrorMessage());
       return data;
     }
 
-    data.resize(size);
+    data.resize(static_cast<int>(size));
     if (!ReadFile(mHandle, data.data(), size, &result, &ov)) {
       if (GetLastError() == ERROR_IO_PENDING) {
         if (!GetOverlappedResult(mHandle, &ov, &result, true)) {
@@ -601,7 +601,7 @@ QByteArray StandardSerialPortBackend::readRawFrame(size_t size, bool verbose) {
       }
     }
     CloseHandle(ov.hEvent);
-    if (result != (DWORD) size) {
+    if (result != static_cast<DWORD>(size)) {
       if (verbose) {
         qCritical() << "!e" << tr("Serial port read timeout.");
       }
@@ -623,14 +623,13 @@ bool StandardSerialPortBackend::writeRawFrame(const QByteArray &data) {
   }
 
   if (mMethod == HANDSHAKE_SOFTWARE) {
-    return WriteFile(mHandle, data.constData(), data.size(), &result, nullptr);
+    return WriteFile(mHandle, data.constData(), static_cast<DWORD>(data.size()), &result, nullptr);
   } else {
-    OVERLAPPED ov;
+    OVERLAPPED ov = {};
 
-    memset(&ov, 0, sizeof(ov));
-    ov.hEvent = CreateEvent(0, true, false, 0);
+    ov.hEvent = CreateEvent(nullptr, true, false, nullptr);
 
-    if (!WriteFile(mHandle, data.constData(), data.size(), &result, &ov)) {
+    if (!WriteFile(mHandle, data.constData(), static_cast<DWORD>(data.size()), &result, &ov)) {
       if (GetLastError() == ERROR_IO_PENDING) {
         if (!GetOverlappedResult(mHandle, &ov, &result, true)) {
           qCritical() << "!e" << tr("Cannot write to serial port: %1").arg(lastErrorMessage());
@@ -645,13 +644,14 @@ bool StandardSerialPortBackend::writeRawFrame(const QByteArray &data) {
     CloseHandle(ov.hEvent);
   }
 
-  if (result != (DWORD) data.size()) {
+  if (result != static_cast<DWORD>(data.size())) {
     qCritical() << "!e" << tr("Serial port write timeout.");
     return false;
   }
   return true;
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 QString StandardSerialPortBackend::lastErrorMessage() {
   //    qDebug() << "!d" << tr("DBG -- Serial Port lastErrorMessage...");
 
@@ -665,7 +665,7 @@ QString StandardSerialPortBackend::lastErrorMessage() {
           nullptr,
           GetLastError(),
           MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-          (LPTSTR) &lpMsgBuf,
+          reinterpret_cast<LPTSTR>(&lpMsgBuf),
           0, nullptr);
 
   result.setUtf16(static_cast<ushort *>(lpMsgBuf), static_cast<int>(wcslen(static_cast<wchar_t *>(lpMsgBuf)) - 2));
