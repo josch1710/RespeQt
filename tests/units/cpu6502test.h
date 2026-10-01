@@ -20,6 +20,15 @@ private slots:
   void testJsrRts();
   void testCrossPageCalculations();
   void testDisassemblyRelativeJump();
+  void testOpcodeTableConsistency();
+  void testAluBinaryAndFlags();
+  void testAdcSbcDecimal();
+  void testRmwShiftsAndRotates();
+  void testLoadStoreAllModes();
+  void testBranchCyclesAndJmpIndirect();
+  void testUndocumentedOpcodes();
+  void test65C02Instructions();
+  void testDisassemblyAllModes();
 };
 
 } // namespace Tests

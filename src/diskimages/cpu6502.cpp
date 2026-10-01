@@ -10,546 +10,575 @@
 #include <cstdio>
 #include <cstring>
 
-// test if there is a page change
-static constexpr bool CROSS_PAGE(const unsigned short a, const unsigned short r) { return ((a - r) & 0xFF00) != (a & 0xFF00); }
-
 // mask for Xas, Sya and other instructions
 constexpr unsigned char UNDOC_MASK = 0xDB;// not sure
 
 namespace DiskImages {
   /**
-   * @brief Represents a lookup table of opcodes for a particular addressing mode or processor functionality.
+   * @brief Unified opcode table of the MOS 6502 (including all undocumented opcodes).
    *
-   * This data structure contains 256 entries, each representing an opcode definition for specific instructions.
-   * Each opcode includes fields for its mnemonic name, legality status, and addressing mode.
-   *
-   * - `szName`: The mnemonic name of the instruction (e.g., "BRK", "ORA").
-   * - `bIllegal`: Boolean flag indicating whether the opcode is considered illegal (true) or valid (false).
-   * - `wMode`: The addressing mode used for the given opcode (e.g., MODE_IMPLIED, MODE_INDEXED_INDIRECT).
-   *
-   * The table is primarily used for emulation, validation, or interpretation of instructions in systems
-   * adhering to specific 8-bit processor designs, such as the 6502 microprocessor.
+   * Every entry is created by one of the constexpr Op* builders declared in Cpu6502 (OpAlu, OpStore, OpRmw,
+   * OpBranch, OpImplied, OpNop*, OpCtrl, ...). The builder instantiates the execution template with the very
+   * same addressing mode and cycle count that are stored as disassembly metadata, so both can never drift apart.
    */
-  static constexpr OPCODE tabOpcode02[256] =
-          {
-                  /* 00 */ {"BRK", false, MODE_IMPLIED},
-                  /* 01 */ {"ORA", false, MODE_INDEXED_INDIRECT},
-                  /* 02 */ {"kil", true, MODE_IMPLIED},
-                  /* 03 */ {"slo", true, MODE_INDEXED_INDIRECT},
-                  /* 04 */ {"dop", true, MODE_ZERO_PAGE},
-                  /* 05 */ {"ORA", false, MODE_ZERO_PAGE},
-                  /* 06 */ {"ASL", false, MODE_ZERO_PAGE},
-                  /* 07 */ {"slo", true, MODE_ZERO_PAGE},
-                  /* 08 */ {"PHP", false, MODE_IMPLIED},
-                  /* 09 */ {"ORA", false, MODE_IMMEDIATE},
-                  /* 0A */ {"ASL", false, MODE_ACCUMULATOR},
-                  /* 0B */ {"aac", true, MODE_IMMEDIATE},
-                  /* 0C */ {"top", true, MODE_ABSOLUTE},
-                  /* 0D */ {"ORA", false, MODE_ABSOLUTE},
-                  /* 0E */ {"ASL", false, MODE_ABSOLUTE},
-                  /* 0F */ {"slo", true, MODE_ABSOLUTE},
-                  /* 10 */ {"BPL", false, MODE_RELATIVE},
-                  /* 11 */ {"ORA", false, MODE_INDIRECT_INDEXED},
-                  /* 12 */ {"kil", true, MODE_IMPLIED},
-                  /* 13 */ {"slo", true, MODE_INDIRECT_INDEXED},
-                  /* 14 */ {"dop", true, MODE_ZERO_PAGE_X},
-                  /* 15 */ {"ORA", false, MODE_ZERO_PAGE_X},
-                  /* 16 */ {"ASL", false, MODE_ZERO_PAGE_X},
-                  /* 17 */ {"slo", true, MODE_ZERO_PAGE_X},
-                  /* 18 */ {"CLC", false, MODE_IMPLIED},
-                  /* 19 */ {"ORA", false, MODE_ABSOLUTE_Y},
-                  /* 1A */ {"nop", true, MODE_IMPLIED},
-                  /* 1B */ {"slo", true, MODE_ABSOLUTE_Y},
-                  /* 1C */ {"top", true, MODE_ABSOLUTE_X},
-                  /* 1D */ {"ORA", false, MODE_ABSOLUTE_X},
-                  /* 1E */ {"ASL", false, MODE_ABSOLUTE_X},
-                  /* 1F */ {"slo", true, MODE_ABSOLUTE_X},
-                  /* 20 */ {"JSR", false, MODE_ABSOLUTE},
-                  /* 21 */ {"AND", false, MODE_INDEXED_INDIRECT},
-                  /* 22 */ {"kil", true, MODE_IMPLIED},
-                  /* 23 */ {"rla", true, MODE_INDEXED_INDIRECT},
-                  /* 24 */ {"BIT", false, MODE_ZERO_PAGE},
-                  /* 25 */ {"AND", false, MODE_ZERO_PAGE},
-                  /* 26 */ {"ROL", false, MODE_ZERO_PAGE},
-                  /* 27 */ {"rla", true, MODE_ZERO_PAGE},
-                  /* 28 */ {"PLP", false, MODE_IMPLIED},
-                  /* 29 */ {"AND", false, MODE_IMMEDIATE},
-                  /* 2A */ {"ROL", false, MODE_ACCUMULATOR},
-                  /* 2B */ {"aac", true, MODE_IMMEDIATE},
-                  /* 2C */ {"BIT", false, MODE_ABSOLUTE},
-                  /* 2D */ {"AND", false, MODE_ABSOLUTE},
-                  /* 2E */ {"ROL", false, MODE_ABSOLUTE},
-                  /* 2F */ {"rla", true, MODE_ABSOLUTE},
-                  /* 30 */ {"BMI", false, MODE_RELATIVE},
-                  /* 31 */ {"AND", false, MODE_INDIRECT_INDEXED},
-                  /* 32 */ {"kil", true, MODE_IMPLIED},
-                  /* 33 */ {"rla", true, MODE_INDIRECT_INDEXED},
-                  /* 34 */ {"dop", true, MODE_ZERO_PAGE_X},
-                  /* 35 */ {"AND", false, MODE_ZERO_PAGE_X},
-                  /* 36 */ {"ROL", false, MODE_ZERO_PAGE_X},
-                  /* 37 */ {"rla", true, MODE_ZERO_PAGE_X},
-                  /* 38 */ {"SEC", false, MODE_IMPLIED},
-                  /* 39 */ {"AND", false, MODE_ABSOLUTE_Y},
-                  /* 3A */ {"nop", true, MODE_IMPLIED},
-                  /* 3B */ {"rla", true, MODE_ABSOLUTE_Y},
-                  /* 3C */ {"top", true, MODE_ABSOLUTE_X},
-                  /* 3D */ {"AND", false, MODE_ABSOLUTE_X},
-                  /* 3E */ {"ROL", false, MODE_ABSOLUTE_X},
-                  /* 3F */ {"rla", true, MODE_ABSOLUTE_X},
-                  /* 40 */ {"RTI", false, MODE_IMPLIED},
-                  /* 41 */ {"EOR", false, MODE_INDEXED_INDIRECT},
-                  /* 42 */ {"kil", true, MODE_IMPLIED},
-                  /* 43 */ {"sre", true, MODE_INDEXED_INDIRECT},
-                  /* 44 */ {"dop", true, MODE_ZERO_PAGE},
-                  /* 45 */ {"EOR", false, MODE_ZERO_PAGE},
-                  /* 46 */ {"LSR", false, MODE_ZERO_PAGE},
-                  /* 47 */ {"sre", true, MODE_ZERO_PAGE},
-                  /* 48 */ {"PHA", false, MODE_IMPLIED},
-                  /* 49 */ {"EOR", false, MODE_IMMEDIATE},
-                  /* 4A */ {"LSR", false, MODE_ACCUMULATOR},
-                  /* 4B */ {"asr", true, MODE_IMMEDIATE},
-                  /* 4C */ {"JMP", false, MODE_ABSOLUTE},
-                  /* 4D */ {"EOR", false, MODE_ABSOLUTE},
-                  /* 4E */ {"LSR", false, MODE_ABSOLUTE},
-                  /* 4F */ {"sre", true, MODE_ABSOLUTE},
-                  /* 50 */ {"BVC", false, MODE_RELATIVE},
-                  /* 51 */ {"EOR", false, MODE_INDIRECT_INDEXED},
-                  /* 52 */ {"kil", true, MODE_IMPLIED},
-                  /* 53 */ {"sre", true, MODE_INDIRECT_INDEXED},
-                  /* 54 */ {"dop", true, MODE_ZERO_PAGE_X},
-                  /* 55 */ {"EOR", false, MODE_ZERO_PAGE_X},
-                  /* 56 */ {"LSR", false, MODE_ZERO_PAGE_X},
-                  /* 57 */ {"sre", true, MODE_ZERO_PAGE_X},
-                  /* 58 */ {"CLI", false, MODE_IMPLIED},
-                  /* 59 */ {"EOR", false, MODE_ABSOLUTE_Y},
-                  /* 5A */ {"nop", true, MODE_IMPLIED},
-                  /* 5B */ {"sre", true, MODE_ABSOLUTE_Y},
-                  /* 5C */ {"top", true, MODE_ABSOLUTE_X},
-                  /* 5D */ {"EOR", false, MODE_ABSOLUTE_X},
-                  /* 5E */ {"LSR", false, MODE_ABSOLUTE_X},
-                  /* 5F */ {"sre", true, MODE_ABSOLUTE_X},
-                  /* 60 */ {"RTS", false, MODE_IMPLIED},
-                  /* 61 */ {"ADC", false, MODE_INDEXED_INDIRECT},
-                  /* 62 */ {"kil", true, MODE_IMPLIED},
-                  /* 63 */ {"rra", true, MODE_INDEXED_INDIRECT},
-                  /* 64 */ {"dop", true, MODE_ZERO_PAGE},
-                  /* 65 */ {"ADC", false, MODE_ZERO_PAGE},
-                  /* 66 */ {"ROR", false, MODE_ZERO_PAGE},
-                  /* 67 */ {"rra", true, MODE_ZERO_PAGE},
-                  /* 68 */ {"PLA", false, MODE_IMPLIED},
-                  /* 69 */ {"ADC", false, MODE_IMMEDIATE},
-                  /* 6A */ {"ROR", false, MODE_ACCUMULATOR},
-                  /* 6B */ {"arr", true, MODE_IMMEDIATE},
-                  /* 6C */ {"JMP", false, MODE_INDIRECT},
-                  /* 6D */ {"ADC", false, MODE_ABSOLUTE},
-                  /* 6E */ {"ROR", false, MODE_ABSOLUTE},
-                  /* 6F */ {"rra", true, MODE_ABSOLUTE},
-                  /* 70 */ {"BVS", false, MODE_RELATIVE},
-                  /* 71 */ {"ADC", false, MODE_INDIRECT_INDEXED},
-                  /* 72 */ {"kil", true, MODE_IMPLIED},
-                  /* 73 */ {"rra", true, MODE_INDIRECT_INDEXED},
-                  /* 74 */ {"dop", true, MODE_ZERO_PAGE_X},
-                  /* 75 */ {"ADC", false, MODE_ZERO_PAGE_X},
-                  /* 76 */ {"ROR", false, MODE_ZERO_PAGE_X},
-                  /* 77 */ {"rra", true, MODE_ZERO_PAGE_X},
-                  /* 78 */ {"SEI", false, MODE_IMPLIED},
-                  /* 79 */ {"ADC", false, MODE_ABSOLUTE_Y},
-                  /* 7A */ {"nop", true, MODE_IMPLIED},
-                  /* 7B */ {"rra", true, MODE_ABSOLUTE_Y},
-                  /* 7C */ {"top", true, MODE_ABSOLUTE_X},
-                  /* 7D */ {"ADC", false, MODE_ABSOLUTE_X},
-                  /* 7E */ {"ROR", false, MODE_ABSOLUTE_X},
-                  /* 7F */ {"rra", true, MODE_ABSOLUTE_X},
-                  /* 80 */ {"dop", true, MODE_IMMEDIATE},
-                  /* 81 */ {"STA", false, MODE_INDEXED_INDIRECT},
-                  /* 82 */ {"dop", true, MODE_IMMEDIATE},
-                  /* 83 */ {"aax", true, MODE_INDEXED_INDIRECT},
-                  /* 84 */ {"STY", false, MODE_ZERO_PAGE},
-                  /* 85 */ {"STA", false, MODE_ZERO_PAGE},
-                  /* 86 */ {"STX", false, MODE_ZERO_PAGE},
-                  /* 87 */ {"aax", true, MODE_ZERO_PAGE},
-                  /* 88 */ {"DEY", false, MODE_IMPLIED},
-                  /* 89 */ {"dop", true, MODE_IMMEDIATE},
-                  /* 8A */ {"TXA", false, MODE_IMPLIED},
-                  /* 8B */ {"xaa", true, MODE_IMMEDIATE},
-                  /* 8C */ {"STY", false, MODE_ABSOLUTE},
-                  /* 8D */ {"STA", false, MODE_ABSOLUTE},
-                  /* 8E */ {"STX", false, MODE_ABSOLUTE},
-                  /* 8F */ {"aax", true, MODE_ABSOLUTE},
-                  /* 90 */ {"BCC", false, MODE_RELATIVE},
-                  /* 91 */ {"STA", false, MODE_INDIRECT_INDEXED},
-                  /* 92 */ {"kil", true, MODE_IMPLIED},
-                  /* 93 */ {"axa", true, MODE_INDIRECT_INDEXED},
-                  /* 94 */ {"STY", false, MODE_ZERO_PAGE_X},
-                  /* 95 */ {"STA", false, MODE_ZERO_PAGE_X},
-                  /* 96 */ {"STX", false, MODE_ZERO_PAGE_Y},
-                  /* 97 */ {"aax", true, MODE_ZERO_PAGE_Y},
-                  /* 98 */ {"TYA", false, MODE_IMPLIED},
-                  /* 99 */ {"STA", false, MODE_ABSOLUTE_Y},
-                  /* 9A */ {"TXS", false, MODE_IMPLIED},
-                  /* 9B */ {"xas", true, MODE_ABSOLUTE_Y},
-                  /* 9C */ {"sya", true, MODE_ABSOLUTE_X},
-                  /* 9D */ {"STA", false, MODE_ABSOLUTE_X},
-                  /* 9E */ {"sxa", true, MODE_ABSOLUTE_Y},
-                  /* 9F */ {"axa", true, MODE_ABSOLUTE_Y},
-                  /* A0 */ {"LDY", false, MODE_IMMEDIATE},
-                  /* A1 */ {"LDA", false, MODE_INDEXED_INDIRECT},
-                  /* A2 */ {"LDX", false, MODE_IMMEDIATE},
-                  /* A3 */ {"lax", true, MODE_INDEXED_INDIRECT},
-                  /* A4 */ {"LDY", false, MODE_ZERO_PAGE},
-                  /* A5 */ {"LDA", false, MODE_ZERO_PAGE},
-                  /* A6 */ {"LDX", false, MODE_ZERO_PAGE},
-                  /* A7 */ {"lax", true, MODE_ZERO_PAGE},
-                  /* A8 */ {"TAY", false, MODE_IMPLIED},
-                  /* A9 */ {"LDA", false, MODE_IMMEDIATE},
-                  /* AA */ {"TAX", false, MODE_IMPLIED},
-                  /* AB */ {"atx", true, MODE_IMPLIED},
-                  /* AC */ {"LDY", false, MODE_ABSOLUTE},
-                  /* AD */ {"LDA", false, MODE_ABSOLUTE},
-                  /* AE */ {"LDX", false, MODE_ABSOLUTE},
-                  /* AF */ {"lax", true, MODE_ABSOLUTE},
-                  /* B0 */ {"BCS", false, MODE_RELATIVE},
-                  /* B1 */ {"LDA", false, MODE_INDIRECT_INDEXED},
-                  /* B2 */ {"kil", true, MODE_IMPLIED},
-                  /* B3 */ {"lax", true, MODE_INDIRECT_INDEXED},
-                  /* B4 */ {"LDY", false, MODE_ZERO_PAGE_X},
-                  /* B5 */ {"LDA", false, MODE_ZERO_PAGE_X},
-                  /* B6 */ {"LDX", false, MODE_ZERO_PAGE_Y},
-                  /* B7 */ {"lax", true, MODE_ZERO_PAGE_Y},
-                  /* B8 */ {"CLV", false, MODE_IMPLIED},
-                  /* B9 */ {"LDA", false, MODE_ABSOLUTE_Y},
-                  /* BA */ {"TSX", false, MODE_IMPLIED},
-                  /* BB */ {"lar", true, MODE_ABSOLUTE_Y},
-                  /* BC */ {"LDY", false, MODE_ABSOLUTE_X},
-                  /* BD */ {"LDA", false, MODE_ABSOLUTE_X},
-                  /* BE */ {"LDX", false, MODE_ABSOLUTE_Y},
-                  /* BF */ {"lax", true, MODE_ABSOLUTE_Y},
-                  /* C0 */ {"CPY", false, MODE_IMMEDIATE},
-                  /* C1 */ {"CMP", false, MODE_INDEXED_INDIRECT},
-                  /* C2 */ {"dop", true, MODE_IMMEDIATE},
-                  /* C3 */ {"dcp", true, MODE_INDEXED_INDIRECT},
-                  /* C4 */ {"CPY", false, MODE_ZERO_PAGE},
-                  /* C5 */ {"CMP", false, MODE_ZERO_PAGE},
-                  /* C6 */ {"DEC", false, MODE_ZERO_PAGE},
-                  /* C7 */ {"dcp", true, MODE_ZERO_PAGE},
-                  /* C8 */ {"INY", false, MODE_IMPLIED},
-                  /* C9 */ {"CMP", false, MODE_IMMEDIATE},
-                  /* CA */ {"DEX", false, MODE_IMPLIED},
-                  /* CB */ {"axs", true, MODE_IMMEDIATE},
-                  /* CC */ {"CPY", false, MODE_ABSOLUTE},
-                  /* CD */ {"CMP", false, MODE_ABSOLUTE},
-                  /* CE */ {"DEC", false, MODE_ABSOLUTE},
-                  /* CF */ {"dcp", true, MODE_ABSOLUTE},
-                  /* D0 */ {"BNE", false, MODE_RELATIVE},
-                  /* D1 */ {"CMP", false, MODE_INDIRECT_INDEXED},
-                  /* D2 */ {"kil", true, MODE_IMPLIED},
-                  /* D3 */ {"dcp", true, MODE_INDIRECT_INDEXED},
-                  /* D4 */ {"dop", true, MODE_ZERO_PAGE_X},
-                  /* D5 */ {"CMP", false, MODE_ZERO_PAGE_X},
-                  /* D6 */ {"DEC", false, MODE_ZERO_PAGE_X},
-                  /* D7 */ {"dcp", true, MODE_ZERO_PAGE_X},
-                  /* D8 */ {"CLD", false, MODE_IMPLIED},
-                  /* D9 */ {"CMP", false, MODE_ABSOLUTE_Y},
-                  /* DA */ {"nop", true, MODE_IMPLIED},
-                  /* DB */ {"dcp", true, MODE_ABSOLUTE_Y},
-                  /* DC */ {"top", true, MODE_ABSOLUTE_X},
-                  /* DD */ {"CMP", false, MODE_ABSOLUTE_X},
-                  /* DE */ {"DEC", false, MODE_ABSOLUTE_X},
-                  /* DF */ {"dcp", true, MODE_ABSOLUTE_X},
-                  /* E0 */ {"CPX", false, MODE_IMMEDIATE},
-                  /* E1 */ {"SBC", false, MODE_INDEXED_INDIRECT},
-                  /* E2 */ {"dop", true, MODE_IMMEDIATE},
-                  /* E3 */ {"isc", true, MODE_INDEXED_INDIRECT},
-                  /* E4 */ {"CPX", false, MODE_ZERO_PAGE},
-                  /* E5 */ {"SBC", false, MODE_ZERO_PAGE},
-                  /* E6 */ {"INC", false, MODE_ZERO_PAGE},
-                  /* E7 */ {"isc", true, MODE_ZERO_PAGE},
-                  /* E8 */ {"INX", false, MODE_IMPLIED},
-                  /* E9 */ {"SBC", false, MODE_IMMEDIATE},
-                  /* EA */ {"NOP", false, MODE_IMPLIED},
-                  /* EB */ {"sbc", true, MODE_IMMEDIATE},
-                  /* EC */ {"CPX", false, MODE_ABSOLUTE},
-                  /* ED */ {"SBC", false, MODE_ABSOLUTE},
-                  /* EE */ {"INC", false, MODE_ABSOLUTE},
-                  /* EF */ {"isc", true, MODE_ABSOLUTE},
-                  /* F0 */ {"BEQ", false, MODE_RELATIVE},
-                  /* F1 */ {"SBC", false, MODE_INDIRECT_INDEXED},
-                  /* F2 */ {"kil", true, MODE_IMPLIED},
-                  /* F3 */ {"isc", true, MODE_INDIRECT_INDEXED},
-                  /* F4 */ {"dop", true, MODE_ZERO_PAGE_X},
-                  /* F5 */ {"SBC", false, MODE_ZERO_PAGE_X},
-                  /* F6 */ {"INC", false, MODE_ZERO_PAGE_X},
-                  /* F7 */ {"isc", true, MODE_ZERO_PAGE_X},
-                  /* F8 */ {"SED", false, MODE_IMPLIED},
-                  /* F9 */ {"SBC", false, MODE_ABSOLUTE_Y},
-                  /* FA */ {"nop", true, MODE_IMPLIED},
-                  /* FB */ {"isc", true, MODE_ABSOLUTE_Y},
-                  /* FC */ {"top", true, MODE_ABSOLUTE_X},
-                  /* FD */ {"SBC", false, MODE_ABSOLUTE_X},
-                  /* FE */ {"INC", false, MODE_ABSOLUTE_X},
-                  /* FF */ {"isc", true, MODE_ABSOLUTE_X}};
+  const std::array<OpcodeDesc, 256> Cpu6502::s_opTable6502 = {{
+    /* 00 */ OpCtrl<&Cpu6502::ExecBrk>("BRK", AddrMode::Implied),
+    /* 01 */ OpAlu<AddrMode::IndirectX, &Cpu6502::Ora, 6>("ORA"),
+    /* 02 */ OpKil(),
+    /* 03 */ OpRmwAlu<AddrMode::IndirectX, &Cpu6502::Slo, 8>("slo"),
+    /* 04 */ OpNopRead<AddrMode::ZeroPage, 3>("dop"),
+    /* 05 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Ora, 3>("ORA"),
+    /* 06 */ OpRmw<AddrMode::ZeroPage, &Cpu6502::Asl, 5>("ASL"),
+    /* 07 */ OpRmwAlu<AddrMode::ZeroPage, &Cpu6502::Slo, 5>("slo"),
+    /* 08 */ OpImplied<&Cpu6502::Php, 3>("PHP"),
+    /* 09 */ OpAlu<AddrMode::Immediate, &Cpu6502::Ora, 2>("ORA"),
+    /* 0A */ OpRmw<AddrMode::Accumulator, &Cpu6502::Asl, 2>("ASL"),
+    /* 0B */ OpAlu<AddrMode::Immediate, &Cpu6502::Aac, 2>("aac", true),
+    /* 0C */ OpNopRead<AddrMode::Absolute, 4>("top"),
+    /* 0D */ OpAlu<AddrMode::Absolute, &Cpu6502::Ora, 4>("ORA"),
+    /* 0E */ OpRmw<AddrMode::Absolute, &Cpu6502::Asl, 6>("ASL"),
+    /* 0F */ OpRmwAlu<AddrMode::Absolute, &Cpu6502::Slo, 6>("slo"),
 
-  static constexpr OPCODE tabOpcodeC02[256] =
-          {
-                  /* 00 */ {"BRK", false, MODE_IMPLIED},
-                  /* 01 */ {"ORA", false, MODE_INDEXED_INDIRECT},
-                  /* 02 */ {"NOP", true, MODE_IMMEDIATE},
-                  /* 03 */ {"NOP", true, MODE_IMPLIED},
-                  /* 04 */ {"TSB", true, MODE_ZERO_PAGE},
-                  /* 05 */ {"ORA", false, MODE_ZERO_PAGE},
-                  /* 06 */ {"ASL", false, MODE_ZERO_PAGE},
-                  /* 07 */ {"NOP", true, MODE_IMPLIED},
-                  /* 08 */ {"PHP", false, MODE_IMPLIED},
-                  /* 09 */ {"ORA", false, MODE_IMMEDIATE},
-                  /* 0A */ {"ASL", false, MODE_ACCUMULATOR},
-                  /* 0B */ {"NOP", true, MODE_IMPLIED},
-                  /* 0C */ {"TSB", true, MODE_ABSOLUTE},
-                  /* 0D */ {"ORA", false, MODE_ABSOLUTE},
-                  /* 0E */ {"ASL", false, MODE_ABSOLUTE},
-                  /* 0F */ {"NOP", true, MODE_IMPLIED},
-                  /* 10 */ {"BPL", false, MODE_RELATIVE},
-                  /* 11 */ {"ORA", false, MODE_INDIRECT_INDEXED},
-                  /* 12 */ {"ORA", true, MODE_ZERO_PAGE_INDIRECT},
-                  /* 13 */ {"NOP", true, MODE_IMPLIED},
-                  /* 14 */ {"TRB", true, MODE_ZERO_PAGE},
-                  /* 15 */ {"ORA", false, MODE_ZERO_PAGE_X},
-                  /* 16 */ {"ASL", false, MODE_ZERO_PAGE_X},
-                  /* 17 */ {"NOP", true, MODE_IMPLIED},
-                  /* 18 */ {"CLC", false, MODE_IMPLIED},
-                  /* 19 */ {"ORA", false, MODE_ABSOLUTE_Y},
-                  /* 1A */ {"INA", true, MODE_ACCUMULATOR},
-                  /* 1B */ {"NOP", true, MODE_IMPLIED},
-                  /* 1C */ {"TRB", true, MODE_ABSOLUTE},
-                  /* 1D */ {"ORA", false, MODE_ABSOLUTE_X},
-                  /* 1E */ {"ASL", false, MODE_ABSOLUTE_X},
-                  /* 1F */ {"NOP", true, MODE_IMPLIED},
-                  /* 20 */ {"JSR", false, MODE_ABSOLUTE},
-                  /* 21 */ {"AND", false, MODE_INDEXED_INDIRECT},
-                  /* 22 */ {"NOP", true, MODE_IMMEDIATE},
-                  /* 23 */ {"NOP", true, MODE_IMPLIED},
-                  /* 24 */ {"BIT", false, MODE_ZERO_PAGE},
-                  /* 25 */ {"AND", false, MODE_ZERO_PAGE},
-                  /* 26 */ {"ROL", false, MODE_ZERO_PAGE},
-                  /* 27 */ {"NOP", true, MODE_IMPLIED},
-                  /* 28 */ {"PLP", false, MODE_IMPLIED},
-                  /* 29 */ {"AND", false, MODE_IMMEDIATE},
-                  /* 2A */ {"ROL", false, MODE_ACCUMULATOR},
-                  /* 2B */ {"NOP", true, MODE_IMPLIED},
-                  /* 2C */ {"BIT", false, MODE_ABSOLUTE},
-                  /* 2D */ {"AND", false, MODE_ABSOLUTE},
-                  /* 2E */ {"ROL", false, MODE_ABSOLUTE},
-                  /* 2F */ {"NOP", true, MODE_IMPLIED},
-                  /* 30 */ {"BMI", false, MODE_RELATIVE},
-                  /* 31 */ {"AND", false, MODE_INDIRECT_INDEXED},
-                  /* 32 */ {"AND", true, MODE_ZERO_PAGE_INDIRECT},
-                  /* 33 */ {"NOP", true, MODE_IMPLIED},
-                  /* 34 */ {"BIT", true, MODE_ZERO_PAGE_X},
-                  /* 35 */ {"AND", false, MODE_ZERO_PAGE_X},
-                  /* 36 */ {"ROL", false, MODE_ZERO_PAGE_X},
-                  /* 37 */ {"NOP", true, MODE_IMPLIED},
-                  /* 38 */ {"SEC", false, MODE_IMPLIED},
-                  /* 39 */ {"AND", false, MODE_ABSOLUTE_Y},
-                  /* 3A */ {"DEA", true, MODE_ACCUMULATOR},
-                  /* 3B */ {"NOP", true, MODE_IMPLIED},
-                  /* 3C */ {"BIT", true, MODE_ABSOLUTE_X},
-                  /* 3D */ {"AND", false, MODE_ABSOLUTE_X},
-                  /* 3E */ {"ROL", false, MODE_ABSOLUTE_X},
-                  /* 3F */ {"NOP", true, MODE_IMPLIED},
-                  /* 40 */ {"RTI", false, MODE_IMPLIED},
-                  /* 41 */ {"EOR", false, MODE_INDEXED_INDIRECT},
-                  /* 42 */ {"NOP", true, MODE_IMMEDIATE},
-                  /* 43 */ {"NOP", true, MODE_IMPLIED},
-                  /* 44 */ {"NOP", true, MODE_IMMEDIATE},
-                  /* 45 */ {"EOR", false, MODE_ZERO_PAGE},
-                  /* 46 */ {"LSR", false, MODE_ZERO_PAGE},
-                  /* 47 */ {"NOP", true, MODE_IMPLIED},
-                  /* 48 */ {"PHA", false, MODE_IMPLIED},
-                  /* 49 */ {"EOR", false, MODE_IMMEDIATE},
-                  /* 4A */ {"LSR", false, MODE_ACCUMULATOR},
-                  /* 4B */ {"NOP", true, MODE_IMPLIED},
-                  /* 4C */ {"JMP", false, MODE_ABSOLUTE},
-                  /* 4D */ {"EOR", false, MODE_ABSOLUTE},
-                  /* 4E */ {"LSR", false, MODE_ABSOLUTE},
-                  /* 4F */ {"NOP", true, MODE_IMPLIED},
-                  /* 50 */ {"BVC", false, MODE_RELATIVE},
-                  /* 51 */ {"EOR", false, MODE_INDIRECT_INDEXED},
-                  /* 52 */ {"EOR", true, MODE_ZERO_PAGE_INDIRECT},
-                  /* 53 */ {"NOP", true, MODE_IMPLIED},
-                  /* 54 */ {"NOP", true, MODE_IMMEDIATE},
-                  /* 55 */ {"EOR", false, MODE_ZERO_PAGE_X},
-                  /* 56 */ {"LSR", false, MODE_ZERO_PAGE_X},
-                  /* 57 */ {"NOP", true, MODE_IMPLIED},
-                  /* 58 */ {"CLI", false, MODE_IMPLIED},
-                  /* 59 */ {"EOR", false, MODE_ABSOLUTE_Y},
-                  /* 5A */ {"PHY", true, MODE_IMPLIED},
-                  /* 5B */ {"NOP", true, MODE_IMPLIED},
-                  /* 5C */ {"NOP", true, MODE_IMMEDIATE_WORD},
-                  /* 5D */ {"EOR", false, MODE_ABSOLUTE_X},
-                  /* 5E */ {"LSR", false, MODE_ABSOLUTE_X},
-                  /* 5F */ {"NOP", true, MODE_IMPLIED},
-                  /* 60 */ {"RTS", false, MODE_IMPLIED},
-                  /* 61 */ {"ADC", false, MODE_INDEXED_INDIRECT},
-                  /* 62 */ {"NOP", true, MODE_IMMEDIATE},
-                  /* 63 */ {"NOP", true, MODE_IMPLIED},
-                  /* 64 */ {"STZ", true, MODE_ZERO_PAGE},
-                  /* 65 */ {"ADC", false, MODE_ZERO_PAGE},
-                  /* 66 */ {"ROR", false, MODE_ZERO_PAGE},
-                  /* 67 */ {"NOP", true, MODE_IMPLIED},
-                  /* 68 */ {"PLA", false, MODE_IMPLIED},
-                  /* 69 */ {"ADC", false, MODE_IMMEDIATE},
-                  /* 6A */ {"ROR", false, MODE_ACCUMULATOR},
-                  /* 6B */ {"NOP", true, MODE_IMPLIED},
-                  /* 6C */ {"JMP", false, MODE_INDIRECT},
-                  /* 6D */ {"ADC", false, MODE_ABSOLUTE},
-                  /* 6E */ {"ROR", false, MODE_ABSOLUTE},
-                  /* 6F */ {"NOP", true, MODE_IMPLIED},
-                  /* 70 */ {"BVS", false, MODE_RELATIVE},
-                  /* 71 */ {"ADC", false, MODE_INDIRECT_INDEXED},
-                  /* 72 */ {"ADC", true, MODE_ZERO_PAGE_INDIRECT},
-                  /* 73 */ {"NOP", true, MODE_IMPLIED},
-                  /* 74 */ {"STZ", true, MODE_ZERO_PAGE_X},
-                  /* 75 */ {"ADC", false, MODE_ZERO_PAGE_X},
-                  /* 76 */ {"ROR", false, MODE_ZERO_PAGE_X},
-                  /* 77 */ {"NOP", true, MODE_IMPLIED},
-                  /* 78 */ {"SEI", false, MODE_IMPLIED},
-                  /* 79 */ {"ADC", false, MODE_ABSOLUTE_Y},
-                  /* 7A */ {"PLY", true, MODE_IMPLIED},
-                  /* 7B */ {"NOP", true, MODE_IMPLIED},
-                  /* 7C */ {"JMP", true, MODE_ABSOLUTE_X},
-                  /* 7D */ {"ADC", false, MODE_ABSOLUTE_X},
-                  /* 7E */ {"ROR", false, MODE_ABSOLUTE_X},
-                  /* 7F */ {"NOP", true, MODE_IMPLIED},
-                  /* 80 */ {"BRA", true, MODE_RELATIVE},
-                  /* 81 */ {"STA", false, MODE_INDEXED_INDIRECT},
-                  /* 82 */ {"NOP", true, MODE_IMMEDIATE},
-                  /* 83 */ {"NOP", true, MODE_IMPLIED},
-                  /* 84 */ {"STY", false, MODE_ZERO_PAGE},
-                  /* 85 */ {"STA", false, MODE_ZERO_PAGE},
-                  /* 86 */ {"STX", false, MODE_ZERO_PAGE},
-                  /* 87 */ {"NOP", true, MODE_IMPLIED},
-                  /* 88 */ {"DEY", false, MODE_IMPLIED},
-                  /* 89 */ {"BIT", true, MODE_IMMEDIATE},
-                  /* 8A */ {"TXA", false, MODE_IMPLIED},
-                  /* 8B */ {"NOP", true, MODE_IMPLIED},
-                  /* 8C */ {"STY", false, MODE_ABSOLUTE},
-                  /* 8D */ {"STA", false, MODE_ABSOLUTE},
-                  /* 8E */ {"STX", false, MODE_ABSOLUTE},
-                  /* 8F */ {"NOP", true, MODE_IMPLIED},
-                  /* 90 */ {"BCC", false, MODE_RELATIVE},
-                  /* 91 */ {"STA", false, MODE_INDIRECT_INDEXED},
-                  /* 92 */ {"STA", true, MODE_ZERO_PAGE_INDIRECT},
-                  /* 93 */ {"NOP", true, MODE_IMPLIED},
-                  /* 94 */ {"STY", false, MODE_ZERO_PAGE_X},
-                  /* 95 */ {"STA", false, MODE_ZERO_PAGE_X},
-                  /* 96 */ {"STX", false, MODE_ZERO_PAGE_Y},
-                  /* 97 */ {"NOP", true, MODE_IMPLIED},
-                  /* 98 */ {"TYA", false, MODE_IMPLIED},
-                  /* 99 */ {"STA", false, MODE_ABSOLUTE_Y},
-                  /* 9A */ {"TXS", false, MODE_IMPLIED},
-                  /* 9B */ {"NOP", true, MODE_IMPLIED},
-                  /* 9C */ {"STZ", true, MODE_ABSOLUTE},
-                  /* 9D */ {"STA", false, MODE_ABSOLUTE_X},
-                  /* 9E */ {"STZ", true, MODE_ABSOLUTE_X},
-                  /* 9F */ {"NOP", true, MODE_IMPLIED},
-                  /* A0 */ {"LDY", false, MODE_IMMEDIATE},
-                  /* A1 */ {"LDA", false, MODE_INDEXED_INDIRECT},
-                  /* A2 */ {"LDX", false, MODE_IMMEDIATE},
-                  /* A3 */ {"NOP", true, MODE_IMPLIED},
-                  /* A4 */ {"LDY", false, MODE_ZERO_PAGE},
-                  /* A5 */ {"LDA", false, MODE_ZERO_PAGE},
-                  /* A6 */ {"LDX", false, MODE_ZERO_PAGE},
-                  /* A7 */ {"NOP", true, MODE_IMPLIED},
-                  /* A8 */ {"TAY", false, MODE_IMPLIED},
-                  /* A9 */ {"LDA", false, MODE_IMMEDIATE},
-                  /* AA */ {"TAX", false, MODE_IMPLIED},
-                  /* AB */ {"NOP", true, MODE_IMPLIED},
-                  /* AC */ {"LDY", false, MODE_ABSOLUTE},
-                  /* AD */ {"LDA", false, MODE_ABSOLUTE},
-                  /* AE */ {"LDX", false, MODE_ABSOLUTE},
-                  /* AF */ {"NOP", true, MODE_IMPLIED},
-                  /* B0 */ {"BCS", false, MODE_RELATIVE},
-                  /* B1 */ {"LDA", false, MODE_INDIRECT_INDEXED},
-                  /* B2 */ {"LDA", true, MODE_ZERO_PAGE_INDIRECT},
-                  /* B3 */ {"NOP", true, MODE_IMPLIED},
-                  /* B4 */ {"LDY", false, MODE_ZERO_PAGE_X},
-                  /* B5 */ {"LDA", false, MODE_ZERO_PAGE_X},
-                  /* B6 */ {"LDX", false, MODE_ZERO_PAGE_Y},
-                  /* B7 */ {"NOP", true, MODE_IMPLIED},
-                  /* B8 */ {"CLV", false, MODE_IMPLIED},
-                  /* B9 */ {"LDA", false, MODE_ABSOLUTE_Y},
-                  /* BA */ {"TSX", false, MODE_IMPLIED},
-                  /* BB */ {"NOP", true, MODE_IMPLIED},
-                  /* BC */ {"LDY", false, MODE_ABSOLUTE_X},
-                  /* BD */ {"LDA", false, MODE_ABSOLUTE_X},
-                  /* BE */ {"LDX", false, MODE_ABSOLUTE_Y},
-                  /* BF */ {"NOP", true, MODE_IMPLIED},
-                  /* C0 */ {"CPY", false, MODE_IMMEDIATE},
-                  /* C1 */ {"CMP", false, MODE_INDEXED_INDIRECT},
-                  /* C2 */ {"NOP", true, MODE_IMMEDIATE},
-                  /* C3 */ {"NOP", true, MODE_IMPLIED},
-                  /* C4 */ {"CPY", false, MODE_ZERO_PAGE},
-                  /* C5 */ {"CMP", false, MODE_ZERO_PAGE},
-                  /* C6 */ {"DEC", false, MODE_ZERO_PAGE},
-                  /* C7 */ {"NOP", true, MODE_IMPLIED},
-                  /* C8 */ {"INY", false, MODE_IMPLIED},
-                  /* C9 */ {"CMP", false, MODE_IMMEDIATE},
-                  /* CA */ {"DEX", false, MODE_IMPLIED},
-                  /* CB */ {"NOP", true, MODE_IMPLIED},
-                  /* CC */ {"CPY", false, MODE_ABSOLUTE},
-                  /* CD */ {"CMP", false, MODE_ABSOLUTE},
-                  /* CE */ {"DEC", false, MODE_ABSOLUTE},
-                  /* CF */ {"NOP", true, MODE_IMPLIED},
-                  /* D0 */ {"BNE", false, MODE_RELATIVE},
-                  /* D1 */ {"CMP", false, MODE_INDIRECT_INDEXED},
-                  /* D2 */ {"CMP", true, MODE_ZERO_PAGE_INDIRECT},
-                  /* D3 */ {"NOP", true, MODE_IMPLIED},
-                  /* D4 */ {"NOP", true, MODE_IMMEDIATE},
-                  /* D5 */ {"CMP", false, MODE_ZERO_PAGE_X},
-                  /* D6 */ {"DEC", false, MODE_ZERO_PAGE_X},
-                  /* D7 */ {"NOP", true, MODE_IMPLIED},
-                  /* D8 */ {"CLD", false, MODE_IMPLIED},
-                  /* D9 */ {"CMP", false, MODE_ABSOLUTE_Y},
-                  /* DA */ {"PHX", true, MODE_IMPLIED},
-                  /* DB */ {"NOP", true, MODE_IMPLIED},
-                  /* DC */ {"NOP", true, MODE_IMMEDIATE_WORD},
-                  /* DD */ {"CMP", false, MODE_ABSOLUTE_X},
-                  /* DE */ {"DEC", false, MODE_ABSOLUTE_X},
-                  /* DF */ {"NOP", true, MODE_IMPLIED},
-                  /* E0 */ {"CPX", false, MODE_IMMEDIATE},
-                  /* E1 */ {"SBC", false, MODE_INDEXED_INDIRECT},
-                  /* E2 */ {"NOP", true, MODE_IMMEDIATE},
-                  /* E3 */ {"NOP", true, MODE_IMPLIED},
-                  /* E4 */ {"CPX", false, MODE_ZERO_PAGE},
-                  /* E5 */ {"SBC", false, MODE_ZERO_PAGE},
-                  /* E6 */ {"INC", false, MODE_ZERO_PAGE},
-                  /* E7 */ {"NOP", true, MODE_IMPLIED},
-                  /* E8 */ {"INX", false, MODE_IMPLIED},
-                  /* E9 */ {"SBC", false, MODE_IMMEDIATE},
-                  /* EA */ {"NOP", false, MODE_IMPLIED},
-                  /* EB */ {"NOP", true, MODE_IMPLIED},
-                  /* EC */ {"CPX", false, MODE_ABSOLUTE},
-                  /* ED */ {"SBC", false, MODE_ABSOLUTE},
-                  /* EE */ {"INC", false, MODE_ABSOLUTE},
-                  /* EF */ {"NOP", true, MODE_IMPLIED},
-                  /* F0 */ {"BEQ", false, MODE_RELATIVE},
-                  /* F1 */ {"SBC", false, MODE_INDIRECT_INDEXED},
-                  /* F2 */ {"SBC", true, MODE_ZERO_PAGE_INDIRECT},
-                  /* F3 */ {"NOP", true, MODE_IMPLIED},
-                  /* F4 */ {"NOP", true, MODE_IMMEDIATE},
-                  /* F5 */ {"SBC", false, MODE_ZERO_PAGE_X},
-                  /* F6 */ {"INC", false, MODE_ZERO_PAGE_X},
-                  /* F7 */ {"NOP", true, MODE_IMPLIED},
-                  /* F8 */ {"SED", false, MODE_IMPLIED},
-                  /* F9 */ {"SBC", false, MODE_ABSOLUTE_Y},
-                  /* FA */ {"PLX", true, MODE_IMPLIED},
-                  /* FB */ {"NOP", true, MODE_IMPLIED},
-                  /* FC */ {"NOP", true, MODE_IMMEDIATE_WORD},
-                  /* FD */ {"SBC", false, MODE_ABSOLUTE_X},
-                  /* FE */ {"INC", false, MODE_ABSOLUTE_X},
-                  /* FF */ {"NOP", true, MODE_IMPLIED}};
+    /* 10 */ OpBranch<CPU6502_FLAG_N, false>("BPL"),
+    /* 11 */ OpAlu<AddrMode::IndirectY, &Cpu6502::Ora, 5, true>("ORA"),
+    /* 12 */ OpKil(),
+    /* 13 */ OpRmwAlu<AddrMode::IndirectY, &Cpu6502::Slo, 8>("slo"),
+    /* 14 */ OpNopRead<AddrMode::ZeroPageX, 4>("dop"),
+    /* 15 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::Ora, 4>("ORA"),
+    /* 16 */ OpRmw<AddrMode::ZeroPageX, &Cpu6502::Asl, 6>("ASL"),
+    /* 17 */ OpRmwAlu<AddrMode::ZeroPageX, &Cpu6502::Slo, 6>("slo"),
+    /* 18 */ OpImplied<&Cpu6502::Clc, 2>("CLC"),
+    /* 19 */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Ora, 4, true>("ORA"),
+    /* 1A */ OpNop<2>("nop", true),
+    /* 1B */ OpRmwAlu<AddrMode::AbsoluteY, &Cpu6502::Slo, 7>("slo"),
+    /* 1C */ OpNopRead<AddrMode::AbsoluteX, 4, true>("top"),
+    /* 1D */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::Ora, 4, true>("ORA"),
+    /* 1E */ OpRmw<AddrMode::AbsoluteX, &Cpu6502::Asl, 7>("ASL"),
+    /* 1F */ OpRmwAlu<AddrMode::AbsoluteX, &Cpu6502::Slo, 7>("slo"),
+
+    /* 20 */ OpCtrl<&Cpu6502::ExecJsr>("JSR", AddrMode::Absolute),
+    /* 21 */ OpAlu<AddrMode::IndirectX, &Cpu6502::And, 6>("AND"),
+    /* 22 */ OpKil(),
+    /* 23 */ OpRmwAlu<AddrMode::IndirectX, &Cpu6502::Rla, 8>("rla"),
+    /* 24 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Bit, 3>("BIT"),
+    /* 25 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::And, 3>("AND"),
+    /* 26 */ OpRmw<AddrMode::ZeroPage, &Cpu6502::Rol, 5>("ROL"),
+    /* 27 */ OpRmwAlu<AddrMode::ZeroPage, &Cpu6502::Rla, 5>("rla"),
+    /* 28 */ OpImplied<&Cpu6502::Plp, 4>("PLP"),
+    /* 29 */ OpAlu<AddrMode::Immediate, &Cpu6502::And, 2>("AND"),
+    /* 2A */ OpRmw<AddrMode::Accumulator, &Cpu6502::Rol, 2>("ROL"),
+    /* 2B */ OpAlu<AddrMode::Immediate, &Cpu6502::Aac, 2>("aac", true),
+    /* 2C */ OpAlu<AddrMode::Absolute, &Cpu6502::Bit, 4>("BIT"),
+    /* 2D */ OpAlu<AddrMode::Absolute, &Cpu6502::And, 4>("AND"),
+    /* 2E */ OpRmw<AddrMode::Absolute, &Cpu6502::Rol, 6>("ROL"),
+    /* 2F */ OpRmwAlu<AddrMode::Absolute, &Cpu6502::Rla, 6>("rla"),
+
+    /* 30 */ OpBranch<CPU6502_FLAG_N, true>("BMI"),
+    /* 31 */ OpAlu<AddrMode::IndirectY, &Cpu6502::And, 5, true>("AND"),
+    /* 32 */ OpKil(),
+    /* 33 */ OpRmwAlu<AddrMode::IndirectY, &Cpu6502::Rla, 8>("rla"),
+    /* 34 */ OpNopRead<AddrMode::ZeroPageX, 4>("dop"),
+    /* 35 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::And, 4>("AND"),
+    /* 36 */ OpRmw<AddrMode::ZeroPageX, &Cpu6502::Rol, 6>("ROL"),
+    /* 37 */ OpRmwAlu<AddrMode::ZeroPageX, &Cpu6502::Rla, 6>("rla"),
+    /* 38 */ OpImplied<&Cpu6502::Sec, 2>("SEC"),
+    /* 39 */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::And, 4, true>("AND"),
+    /* 3A */ OpNop<2>("nop", true),
+    /* 3B */ OpRmwAlu<AddrMode::AbsoluteY, &Cpu6502::Rla, 7>("rla"),
+    /* 3C */ OpNopRead<AddrMode::AbsoluteX, 4, true>("top"),
+    /* 3D */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::And, 4, true>("AND"),
+    /* 3E */ OpRmw<AddrMode::AbsoluteX, &Cpu6502::Rol, 7>("ROL"),
+    /* 3F */ OpRmwAlu<AddrMode::AbsoluteX, &Cpu6502::Rla, 7>("rla"),
+
+    /* 40 */ OpCtrl<&Cpu6502::ExecRti>("RTI", AddrMode::Implied),
+    /* 41 */ OpAlu<AddrMode::IndirectX, &Cpu6502::Eor, 6>("EOR"),
+    /* 42 */ OpKil(),
+    /* 43 */ OpRmwAlu<AddrMode::IndirectX, &Cpu6502::Sre, 8>("sre"),
+    /* 44 */ OpNopRead<AddrMode::ZeroPage, 3>("dop"),
+    /* 45 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Eor, 3>("EOR"),
+    /* 46 */ OpRmw<AddrMode::ZeroPage, &Cpu6502::Lsr, 5>("LSR"),
+    /* 47 */ OpRmwAlu<AddrMode::ZeroPage, &Cpu6502::Sre, 5>("sre"),
+    /* 48 */ OpImplied<&Cpu6502::Pha, 3>("PHA"),
+    /* 49 */ OpAlu<AddrMode::Immediate, &Cpu6502::Eor, 2>("EOR"),
+    /* 4A */ OpRmw<AddrMode::Accumulator, &Cpu6502::Lsr, 2>("LSR"),
+    /* 4B */ OpAlu<AddrMode::Immediate, &Cpu6502::Asr, 2>("asr", true),
+    /* 4C */ OpCtrl<&Cpu6502::ExecJmpAbs>("JMP", AddrMode::Absolute),
+    /* 4D */ OpAlu<AddrMode::Absolute, &Cpu6502::Eor, 4>("EOR"),
+    /* 4E */ OpRmw<AddrMode::Absolute, &Cpu6502::Lsr, 6>("LSR"),
+    /* 4F */ OpRmwAlu<AddrMode::Absolute, &Cpu6502::Sre, 6>("sre"),
+
+    /* 50 */ OpBranch<CPU6502_FLAG_V, false>("BVC"),
+    /* 51 */ OpAlu<AddrMode::IndirectY, &Cpu6502::Eor, 5, true>("EOR"),
+    /* 52 */ OpKil(),
+    /* 53 */ OpRmwAlu<AddrMode::IndirectY, &Cpu6502::Sre, 8>("sre"),
+    /* 54 */ OpNopRead<AddrMode::ZeroPageX, 4>("dop"),
+    /* 55 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::Eor, 4>("EOR"),
+    /* 56 */ OpRmw<AddrMode::ZeroPageX, &Cpu6502::Lsr, 6>("LSR"),
+    /* 57 */ OpRmwAlu<AddrMode::ZeroPageX, &Cpu6502::Sre, 6>("sre"),
+    /* 58 */ OpImplied<&Cpu6502::Cli, 2>("CLI"),
+    /* 59 */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Eor, 4, true>("EOR"),
+    /* 5A */ OpNop<2>("nop", true),
+    /* 5B */ OpRmwAlu<AddrMode::AbsoluteY, &Cpu6502::Sre, 7>("sre"),
+    /* 5C */ OpNopRead<AddrMode::AbsoluteX, 4, true>("top"),
+    /* 5D */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::Eor, 4, true>("EOR"),
+    /* 5E */ OpRmw<AddrMode::AbsoluteX, &Cpu6502::Lsr, 7>("LSR"),
+    /* 5F */ OpRmwAlu<AddrMode::AbsoluteX, &Cpu6502::Sre, 7>("sre"),
+
+    /* 60 */ OpCtrl<&Cpu6502::ExecRts>("RTS", AddrMode::Implied),
+    /* 61 */ OpAlu<AddrMode::IndirectX, &Cpu6502::Adc, 6>("ADC"),
+    /* 62 */ OpKil(),
+    /* 63 */ OpRmwAlu<AddrMode::IndirectX, &Cpu6502::Rra, 8>("rra"),
+    /* 64 */ OpNopRead<AddrMode::ZeroPage, 3>("dop"),
+    /* 65 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Adc, 3>("ADC"),
+    /* 66 */ OpRmw<AddrMode::ZeroPage, &Cpu6502::Ror, 5>("ROR"),
+    /* 67 */ OpRmwAlu<AddrMode::ZeroPage, &Cpu6502::Rra, 5>("rra"),
+    /* 68 */ OpImplied<&Cpu6502::Pla, 4>("PLA"),
+    /* 69 */ OpAlu<AddrMode::Immediate, &Cpu6502::Adc, 2>("ADC"),
+    /* 6A */ OpRmw<AddrMode::Accumulator, &Cpu6502::Ror, 2>("ROR"),
+    /* 6B */ OpAlu<AddrMode::Immediate, &Cpu6502::Arr, 2>("arr", true),
+    /* 6C */ OpCtrl<&Cpu6502::ExecJmpIndBug>("JMP", AddrMode::AbsoluteIndirect),
+    /* 6D */ OpAlu<AddrMode::Absolute, &Cpu6502::Adc, 4>("ADC"),
+    /* 6E */ OpRmw<AddrMode::Absolute, &Cpu6502::Ror, 6>("ROR"),
+    /* 6F */ OpRmwAlu<AddrMode::Absolute, &Cpu6502::Rra, 6>("rra"),
+
+    /* 70 */ OpBranch<CPU6502_FLAG_V, true>("BVS"),
+    /* 71 */ OpAlu<AddrMode::IndirectY, &Cpu6502::Adc, 5, true>("ADC"),
+    /* 72 */ OpKil(),
+    /* 73 */ OpRmwAlu<AddrMode::IndirectY, &Cpu6502::Rra, 8>("rra"),
+    /* 74 */ OpNopRead<AddrMode::ZeroPageX, 4>("dop"),
+    /* 75 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::Adc, 4>("ADC"),
+    /* 76 */ OpRmw<AddrMode::ZeroPageX, &Cpu6502::Ror, 6>("ROR"),
+    /* 77 */ OpRmwAlu<AddrMode::ZeroPageX, &Cpu6502::Rra, 6>("rra"),
+    /* 78 */ OpImplied<&Cpu6502::Sei, 2>("SEI"),
+    /* 79 */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Adc, 4, true>("ADC"),
+    /* 7A */ OpNop<2>("nop", true),
+    /* 7B */ OpRmwAlu<AddrMode::AbsoluteY, &Cpu6502::Rra, 7>("rra"),
+    /* 7C */ OpNopRead<AddrMode::AbsoluteX, 4, true>("top"),
+    /* 7D */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::Adc, 4, true>("ADC"),
+    /* 7E */ OpRmw<AddrMode::AbsoluteX, &Cpu6502::Ror, 7>("ROR"),
+    /* 7F */ OpRmwAlu<AddrMode::AbsoluteX, &Cpu6502::Rra, 7>("rra"),
+
+    /* 80 */ OpNopSkip<AddrMode::Immediate, 2>("dop"),
+    /* 81 */ OpStore<AddrMode::IndirectX, &Cpu6502::m_A, 6>("STA"),
+    /* 82 */ OpNopSkip<AddrMode::Immediate, 2>("dop"),
+    /* 83 */ OpStoreSpecial<AddrMode::IndirectX, &Cpu6502::Aax, 6>("aax"),
+    /* 84 */ OpStore<AddrMode::ZeroPage, &Cpu6502::m_Y, 3>("STY"),
+    /* 85 */ OpStore<AddrMode::ZeroPage, &Cpu6502::m_A, 3>("STA"),
+    /* 86 */ OpStore<AddrMode::ZeroPage, &Cpu6502::m_X, 3>("STX"),
+    /* 87 */ OpStoreSpecial<AddrMode::ZeroPage, &Cpu6502::Aax, 3>("aax"),
+    /* 88 */ OpImplied<&Cpu6502::Dey, 2>("DEY"),
+    /* 89 */ OpNopSkip<AddrMode::Immediate, 2>("dop"),
+    /* 8A */ OpImplied<&Cpu6502::Txa, 2>("TXA"),
+    /* 8B */ OpAlu<AddrMode::Immediate, &Cpu6502::Ane, 2>("xaa", true),
+    /* 8C */ OpStore<AddrMode::Absolute, &Cpu6502::m_Y, 4>("STY"),
+    /* 8D */ OpStore<AddrMode::Absolute, &Cpu6502::m_A, 4>("STA"),
+    /* 8E */ OpStore<AddrMode::Absolute, &Cpu6502::m_X, 4>("STX"),
+    /* 8F */ OpStoreSpecial<AddrMode::Absolute, &Cpu6502::Aax, 4>("aax"),
+
+    /* 90 */ OpBranch<CPU6502_FLAG_C, false>("BCC"),
+    /* 91 */ OpStore<AddrMode::IndirectY, &Cpu6502::m_A, 6>("STA"),
+    /* 92 */ OpKil(),
+    /* 93 */ OpStoreSpecial<AddrMode::IndirectY, &Cpu6502::Axa, 6>("axa"),
+    /* 94 */ OpStore<AddrMode::ZeroPageX, &Cpu6502::m_Y, 4>("STY"),
+    /* 95 */ OpStore<AddrMode::ZeroPageX, &Cpu6502::m_A, 4>("STA"),
+    /* 96 */ OpStore<AddrMode::ZeroPageY, &Cpu6502::m_X, 4>("STX"),
+    /* 97 */ OpStoreSpecial<AddrMode::ZeroPageY, &Cpu6502::Aax, 4>("aax"),
+    /* 98 */ OpImplied<&Cpu6502::Tya, 2>("TYA"),
+    /* 99 */ OpStore<AddrMode::AbsoluteY, &Cpu6502::m_A, 5>("STA"),
+    /* 9A */ OpImplied<&Cpu6502::Txs, 2>("TXS"),
+    /* 9B */ OpStoreSpecial<AddrMode::AbsoluteY, &Cpu6502::Xas, 5>("xas"),
+    /* 9C */ OpStoreSpecial<AddrMode::AbsoluteX, &Cpu6502::Sya, 5>("sya"),
+    /* 9D */ OpStore<AddrMode::AbsoluteX, &Cpu6502::m_A, 5>("STA"),
+    /* 9E */ OpStoreSpecial<AddrMode::AbsoluteY, &Cpu6502::Sxa, 5>("sxa"),
+    /* 9F */ OpStoreSpecial<AddrMode::AbsoluteY, &Cpu6502::Axa, 5>("axa"),
+
+    /* A0 */ OpAlu<AddrMode::Immediate, &Cpu6502::Ldy, 2>("LDY"),
+    /* A1 */ OpAlu<AddrMode::IndirectX, &Cpu6502::Lda, 6>("LDA"),
+    /* A2 */ OpAlu<AddrMode::Immediate, &Cpu6502::Ldx, 2>("LDX"),
+    /* A3 */ OpAlu<AddrMode::IndirectX, &Cpu6502::Lax, 6>("lax", true),
+    /* A4 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Ldy, 3>("LDY"),
+    /* A5 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Lda, 3>("LDA"),
+    /* A6 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Ldx, 3>("LDX"),
+    /* A7 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Lax, 3>("lax", true),
+    /* A8 */ OpImplied<&Cpu6502::Tay, 2>("TAY"),
+    /* A9 */ OpAlu<AddrMode::Immediate, &Cpu6502::Lda, 2>("LDA"),
+    /* AA */ OpImplied<&Cpu6502::Tax, 2>("TAX"),
+    /* AB */ OpAlu<AddrMode::Immediate, &Cpu6502::Atx, 2>("atx", true),
+    /* AC */ OpAlu<AddrMode::Absolute, &Cpu6502::Ldy, 4>("LDY"),
+    /* AD */ OpAlu<AddrMode::Absolute, &Cpu6502::Lda, 4>("LDA"),
+    /* AE */ OpAlu<AddrMode::Absolute, &Cpu6502::Ldx, 4>("LDX"),
+    /* AF */ OpAlu<AddrMode::Absolute, &Cpu6502::Lax, 4>("lax", true),
+
+    /* B0 */ OpBranch<CPU6502_FLAG_C, true>("BCS"),
+    /* B1 */ OpAlu<AddrMode::IndirectY, &Cpu6502::Lda, 5, true>("LDA"),
+    /* B2 */ OpKil(),
+    /* B3 */ OpAlu<AddrMode::IndirectY, &Cpu6502::Lax, 5, true>("lax", true),
+    /* B4 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::Ldy, 4>("LDY"),
+    /* B5 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::Lda, 4>("LDA"),
+    /* B6 */ OpAlu<AddrMode::ZeroPageY, &Cpu6502::Ldx, 4>("LDX"),
+    /* B7 */ OpAlu<AddrMode::ZeroPageY, &Cpu6502::Lax, 4>("lax", true),
+    /* B8 */ OpImplied<&Cpu6502::Clv, 2>("CLV"),
+    /* B9 */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Lda, 4, true>("LDA"),
+    /* BA */ OpImplied<&Cpu6502::Tsx, 2>("TSX"),
+    /* BB */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Lar, 4, true>("lar", true),
+    /* BC */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::Ldy, 4, true>("LDY"),
+    /* BD */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::Lda, 4, true>("LDA"),
+    /* BE */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Ldx, 4, true>("LDX"),
+    /* BF */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Lax, 4, true>("lax", true),
+
+    /* C0 */ OpAlu<AddrMode::Immediate, &Cpu6502::Cpy, 2>("CPY"),
+    /* C1 */ OpAlu<AddrMode::IndirectX, &Cpu6502::Cmp, 6>("CMP"),
+    /* C2 */ OpNopSkip<AddrMode::Immediate, 2>("dop"),
+    /* C3 */ OpRmwAlu<AddrMode::IndirectX, &Cpu6502::Dcp, 8>("dcp"),
+    /* C4 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Cpy, 3>("CPY"),
+    /* C5 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Cmp, 3>("CMP"),
+    /* C6 */ OpRmw<AddrMode::ZeroPage, &Cpu6502::Dec, 5>("DEC"),
+    /* C7 */ OpRmwAlu<AddrMode::ZeroPage, &Cpu6502::Dcp, 5>("dcp"),
+    /* C8 */ OpImplied<&Cpu6502::Iny, 2>("INY"),
+    /* C9 */ OpAlu<AddrMode::Immediate, &Cpu6502::Cmp, 2>("CMP"),
+    /* CA */ OpImplied<&Cpu6502::Dex, 2>("DEX"),
+    /* CB */ OpAlu<AddrMode::Immediate, &Cpu6502::Axs, 2>("axs", true),
+    /* CC */ OpAlu<AddrMode::Absolute, &Cpu6502::Cpy, 4>("CPY"),
+    /* CD */ OpAlu<AddrMode::Absolute, &Cpu6502::Cmp, 4>("CMP"),
+    /* CE */ OpRmw<AddrMode::Absolute, &Cpu6502::Dec, 6>("DEC"),
+    /* CF */ OpRmwAlu<AddrMode::Absolute, &Cpu6502::Dcp, 6>("dcp"),
+
+    /* D0 */ OpBranch<CPU6502_FLAG_Z, false>("BNE"),
+    /* D1 */ OpAlu<AddrMode::IndirectY, &Cpu6502::Cmp, 5, true>("CMP"),
+    /* D2 */ OpKil(),
+    /* D3 */ OpRmwAlu<AddrMode::IndirectY, &Cpu6502::Dcp, 8>("dcp"),
+    /* D4 */ OpNopRead<AddrMode::ZeroPageX, 4>("dop"),
+    /* D5 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::Cmp, 4>("CMP"),
+    /* D6 */ OpRmw<AddrMode::ZeroPageX, &Cpu6502::Dec, 6>("DEC"),
+    /* D7 */ OpRmwAlu<AddrMode::ZeroPageX, &Cpu6502::Dcp, 6>("dcp"),
+    /* D8 */ OpImplied<&Cpu6502::Cld, 2>("CLD"),
+    /* D9 */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Cmp, 4, true>("CMP"),
+    /* DA */ OpNop<2>("nop", true),
+    /* DB */ OpRmwAlu<AddrMode::AbsoluteY, &Cpu6502::Dcp, 7>("dcp"),
+    /* DC */ OpNopRead<AddrMode::AbsoluteX, 4, true>("top"),
+    /* DD */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::Cmp, 4, true>("CMP"),
+    /* DE */ OpRmw<AddrMode::AbsoluteX, &Cpu6502::Dec, 7>("DEC"),
+    /* DF */ OpRmwAlu<AddrMode::AbsoluteX, &Cpu6502::Dcp, 7>("dcp"),
+
+    /* E0 */ OpAlu<AddrMode::Immediate, &Cpu6502::Cpx, 2>("CPX"),
+    /* E1 */ OpAlu<AddrMode::IndirectX, &Cpu6502::Sbc, 6>("SBC"),
+    /* E2 */ OpNopSkip<AddrMode::Immediate, 2>("dop"),
+    /* E3 */ OpRmwAlu<AddrMode::IndirectX, &Cpu6502::Isc, 8>("isc"),
+    /* E4 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Cpx, 3>("CPX"),
+    /* E5 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Sbc, 3>("SBC"),
+    /* E6 */ OpRmw<AddrMode::ZeroPage, &Cpu6502::Inc, 5>("INC"),
+    /* E7 */ OpRmwAlu<AddrMode::ZeroPage, &Cpu6502::Isc, 5>("isc"),
+    /* E8 */ OpImplied<&Cpu6502::Inx, 2>("INX"),
+    /* E9 */ OpAlu<AddrMode::Immediate, &Cpu6502::Sbc, 2>("SBC"),
+    /* EA */ OpNop<2>("NOP"),
+    /* EB */ OpAlu<AddrMode::Immediate, &Cpu6502::Sbc, 2>("sbc", true),
+    /* EC */ OpAlu<AddrMode::Absolute, &Cpu6502::Cpx, 4>("CPX"),
+    /* ED */ OpAlu<AddrMode::Absolute, &Cpu6502::Sbc, 4>("SBC"),
+    /* EE */ OpRmw<AddrMode::Absolute, &Cpu6502::Inc, 6>("INC"),
+    /* EF */ OpRmwAlu<AddrMode::Absolute, &Cpu6502::Isc, 6>("isc"),
+
+    /* F0 */ OpBranch<CPU6502_FLAG_Z, true>("BEQ"),
+    /* F1 */ OpAlu<AddrMode::IndirectY, &Cpu6502::Sbc, 5, true>("SBC"),
+    /* F2 */ OpKil(),
+    /* F3 */ OpRmwAlu<AddrMode::IndirectY, &Cpu6502::Isc, 8>("isc"),
+    /* F4 */ OpNopRead<AddrMode::ZeroPageX, 4>("dop"),
+    /* F5 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::Sbc, 4>("SBC"),
+    /* F6 */ OpRmw<AddrMode::ZeroPageX, &Cpu6502::Inc, 6>("INC"),
+    /* F7 */ OpRmwAlu<AddrMode::ZeroPageX, &Cpu6502::Isc, 6>("isc"),
+    /* F8 */ OpImplied<&Cpu6502::Sed, 2>("SED"),
+    /* F9 */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Sbc, 4, true>("SBC"),
+    /* FA */ OpNop<2>("nop", true),
+    /* FB */ OpRmwAlu<AddrMode::AbsoluteY, &Cpu6502::Isc, 7>("isc"),
+    /* FC */ OpNopRead<AddrMode::AbsoluteX, 4, true>("top"),
+    /* FD */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::Sbc, 4, true>("SBC"),
+    /* FE */ OpRmw<AddrMode::AbsoluteX, &Cpu6502::Inc, 7>("INC"),
+    /* FF */ OpRmwAlu<AddrMode::AbsoluteX, &Cpu6502::Isc, 7>("isc")
+  }};
+
+  /**
+   * @brief Unified opcode table of the WDC 65C02.
+   *
+   * Undocumented NMOS opcodes are NOPs on the 65C02 (1 cycle for 1-byte NOPs). The 65C02 extensions
+   * (BRA, STZ, TRB, TSB, INA, DEA, PHX, PHY, PLX, PLY, BIT #Imm/Zpg,X/Abs,X, (Zpg) addressing, JMP (Abs,X))
+   * are flagged as "illegal" because they do not exist on the plain 6502.
+   */
+  const std::array<OpcodeDesc, 256> Cpu6502::s_opTable65C02 = {{
+    /* 00 */ OpCtrl<&Cpu6502::ExecBrk>("BRK", AddrMode::Implied),
+    /* 01 */ OpAlu<AddrMode::IndirectX, &Cpu6502::Ora, 6>("ORA"),
+    /* 02 */ OpNopSkip<AddrMode::Immediate, 2>("NOP"),
+    /* 03 */ OpNop1(),
+    /* 04 */ OpRmw<AddrMode::ZeroPage, &Cpu6502::Tsb, 5>("TSB", true),
+    /* 05 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Ora, 3>("ORA"),
+    /* 06 */ OpRmw<AddrMode::ZeroPage, &Cpu6502::Asl, 5>("ASL"),
+    /* 07 */ OpNop1(),
+    /* 08 */ OpImplied<&Cpu6502::Php, 3>("PHP"),
+    /* 09 */ OpAlu<AddrMode::Immediate, &Cpu6502::Ora, 2>("ORA"),
+    /* 0A */ OpRmw<AddrMode::Accumulator, &Cpu6502::Asl, 2>("ASL"),
+    /* 0B */ OpNop1(),
+    /* 0C */ OpRmw<AddrMode::Absolute, &Cpu6502::Tsb, 6>("TSB", true),
+    /* 0D */ OpAlu<AddrMode::Absolute, &Cpu6502::Ora, 4>("ORA"),
+    /* 0E */ OpRmw<AddrMode::Absolute, &Cpu6502::Asl, 6>("ASL"),
+    /* 0F */ OpNop1(),
+
+    /* 10 */ OpBranch<CPU6502_FLAG_N, false>("BPL"),
+    /* 11 */ OpAlu<AddrMode::IndirectY, &Cpu6502::Ora, 5, true>("ORA"),
+    /* 12 */ OpAlu<AddrMode::ZeroPageIndirect, &Cpu6502::Ora, 5>("ORA", true),
+    /* 13 */ OpNop1(),
+    /* 14 */ OpRmw<AddrMode::ZeroPage, &Cpu6502::Trb, 5>("TRB", true),
+    /* 15 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::Ora, 4>("ORA"),
+    /* 16 */ OpRmw<AddrMode::ZeroPageX, &Cpu6502::Asl, 6>("ASL"),
+    /* 17 */ OpNop1(),
+    /* 18 */ OpImplied<&Cpu6502::Clc, 2>("CLC"),
+    /* 19 */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Ora, 4, true>("ORA"),
+    /* 1A */ OpRmw<AddrMode::Accumulator, &Cpu6502::Inc, 2>("INA", true),
+    /* 1B */ OpNop1(),
+    /* 1C */ OpRmw<AddrMode::Absolute, &Cpu6502::Trb, 6>("TRB", true),
+    /* 1D */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::Ora, 4, true>("ORA"),
+    /* 1E */ OpRmw<AddrMode::AbsoluteX, &Cpu6502::Asl, 6, true>("ASL"),
+    /* 1F */ OpNop1(),
+
+    /* 20 */ OpCtrl<&Cpu6502::ExecJsr>("JSR", AddrMode::Absolute),
+    /* 21 */ OpAlu<AddrMode::IndirectX, &Cpu6502::And, 6>("AND"),
+    /* 22 */ OpNopSkip<AddrMode::Immediate, 2>("NOP"),
+    /* 23 */ OpNop1(),
+    /* 24 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Bit, 3>("BIT"),
+    /* 25 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::And, 3>("AND"),
+    /* 26 */ OpRmw<AddrMode::ZeroPage, &Cpu6502::Rol, 5>("ROL"),
+    /* 27 */ OpNop1(),
+    /* 28 */ OpImplied<&Cpu6502::Plp, 4>("PLP"),
+    /* 29 */ OpAlu<AddrMode::Immediate, &Cpu6502::And, 2>("AND"),
+    /* 2A */ OpRmw<AddrMode::Accumulator, &Cpu6502::Rol, 2>("ROL"),
+    /* 2B */ OpNop1(),
+    /* 2C */ OpAlu<AddrMode::Absolute, &Cpu6502::Bit, 4>("BIT"),
+    /* 2D */ OpAlu<AddrMode::Absolute, &Cpu6502::And, 4>("AND"),
+    /* 2E */ OpRmw<AddrMode::Absolute, &Cpu6502::Rol, 6>("ROL"),
+    /* 2F */ OpNop1(),
+
+    /* 30 */ OpBranch<CPU6502_FLAG_N, true>("BMI"),
+    /* 31 */ OpAlu<AddrMode::IndirectY, &Cpu6502::And, 5, true>("AND"),
+    /* 32 */ OpAlu<AddrMode::ZeroPageIndirect, &Cpu6502::And, 5>("AND", true),
+    /* 33 */ OpNop1(),
+    /* 34 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::Bit, 4>("BIT", true),
+    /* 35 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::And, 4>("AND"),
+    /* 36 */ OpRmw<AddrMode::ZeroPageX, &Cpu6502::Rol, 6>("ROL"),
+    /* 37 */ OpNop1(),
+    /* 38 */ OpImplied<&Cpu6502::Sec, 2>("SEC"),
+    /* 39 */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::And, 4, true>("AND"),
+    /* 3A */ OpRmw<AddrMode::Accumulator, &Cpu6502::Dec, 2>("DEA", true),
+    /* 3B */ OpNop1(),
+    /* 3C */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::Bit, 4, true>("BIT", true),
+    /* 3D */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::And, 4, true>("AND"),
+    /* 3E */ OpRmw<AddrMode::AbsoluteX, &Cpu6502::Rol, 6, true>("ROL"),
+    /* 3F */ OpNop1(),
+
+    /* 40 */ OpCtrl<&Cpu6502::ExecRti>("RTI", AddrMode::Implied),
+    /* 41 */ OpAlu<AddrMode::IndirectX, &Cpu6502::Eor, 6>("EOR"),
+    /* 42 */ OpNopSkip<AddrMode::Immediate, 2>("NOP"),
+    /* 43 */ OpNop1(),
+    /* 44 */ OpNopSkip<AddrMode::Immediate, 3>("NOP"),
+    /* 45 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Eor, 3>("EOR"),
+    /* 46 */ OpRmw<AddrMode::ZeroPage, &Cpu6502::Lsr, 5>("LSR"),
+    /* 47 */ OpNop1(),
+    /* 48 */ OpImplied<&Cpu6502::Pha, 3>("PHA"),
+    /* 49 */ OpAlu<AddrMode::Immediate, &Cpu6502::Eor, 2>("EOR"),
+    /* 4A */ OpRmw<AddrMode::Accumulator, &Cpu6502::Lsr, 2>("LSR"),
+    /* 4B */ OpNop1(),
+    /* 4C */ OpCtrl<&Cpu6502::ExecJmpAbs>("JMP", AddrMode::Absolute),
+    /* 4D */ OpAlu<AddrMode::Absolute, &Cpu6502::Eor, 4>("EOR"),
+    /* 4E */ OpRmw<AddrMode::Absolute, &Cpu6502::Lsr, 6>("LSR"),
+    /* 4F */ OpNop1(),
+
+    /* 50 */ OpBranch<CPU6502_FLAG_V, false>("BVC"),
+    /* 51 */ OpAlu<AddrMode::IndirectY, &Cpu6502::Eor, 5, true>("EOR"),
+    /* 52 */ OpAlu<AddrMode::ZeroPageIndirect, &Cpu6502::Eor, 5>("EOR", true),
+    /* 53 */ OpNop1(),
+    /* 54 */ OpNopSkip<AddrMode::Immediate, 4>("NOP"),
+    /* 55 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::Eor, 4>("EOR"),
+    /* 56 */ OpRmw<AddrMode::ZeroPageX, &Cpu6502::Lsr, 6>("LSR"),
+    /* 57 */ OpNop1(),
+    /* 58 */ OpImplied<&Cpu6502::Cli, 2>("CLI"),
+    /* 59 */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Eor, 4, true>("EOR"),
+    /* 5A */ OpImplied<&Cpu6502::Phy, 3>("PHY", true),
+    /* 5B */ OpNop1(),
+    /* 5C */ OpNopSkip<AddrMode::ImmediateWord, 8>("NOP"),
+    /* 5D */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::Eor, 4, true>("EOR"),
+    /* 5E */ OpRmw<AddrMode::AbsoluteX, &Cpu6502::Lsr, 6, true>("LSR"),
+    /* 5F */ OpNop1(),
+
+    /* 60 */ OpCtrl<&Cpu6502::ExecRts>("RTS", AddrMode::Implied),
+    /* 61 */ OpAlu<AddrMode::IndirectX, &Cpu6502::Adc, 6>("ADC"),
+    /* 62 */ OpNopSkip<AddrMode::Immediate, 2>("NOP"),
+    /* 63 */ OpNop1(),
+    /* 64 */ OpStz<AddrMode::ZeroPage, 3>(),
+    /* 65 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Adc, 3>("ADC"),
+    /* 66 */ OpRmw<AddrMode::ZeroPage, &Cpu6502::Ror, 5>("ROR"),
+    /* 67 */ OpNop1(),
+    /* 68 */ OpImplied<&Cpu6502::Pla, 4>("PLA"),
+    /* 69 */ OpAlu<AddrMode::Immediate, &Cpu6502::Adc, 2>("ADC"),
+    /* 6A */ OpRmw<AddrMode::Accumulator, &Cpu6502::Ror, 2>("ROR"),
+    /* 6B */ OpNop1(),
+    /* 6C */ OpCtrl<&Cpu6502::ExecJmpInd>("JMP", AddrMode::AbsoluteIndirect),
+    /* 6D */ OpAlu<AddrMode::Absolute, &Cpu6502::Adc, 4>("ADC"),
+    /* 6E */ OpRmw<AddrMode::Absolute, &Cpu6502::Ror, 6>("ROR"),
+    /* 6F */ OpNop1(),
+
+    /* 70 */ OpBranch<CPU6502_FLAG_V, true>("BVS"),
+    /* 71 */ OpAlu<AddrMode::IndirectY, &Cpu6502::Adc, 5, true>("ADC"),
+    /* 72 */ OpAlu<AddrMode::ZeroPageIndirect, &Cpu6502::Adc, 5, false, true>("ADC", true),
+    /* 73 */ OpNop1(),
+    /* 74 */ OpStz<AddrMode::ZeroPageX, 4>(),
+    /* 75 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::Adc, 4>("ADC"),
+    /* 76 */ OpRmw<AddrMode::ZeroPageX, &Cpu6502::Ror, 6>("ROR"),
+    /* 77 */ OpNop1(),
+    /* 78 */ OpImplied<&Cpu6502::Sei, 2>("SEI"),
+    /* 79 */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Adc, 4, true>("ADC"),
+    /* 7A */ OpImplied<&Cpu6502::Ply, 4>("PLY", true),
+    /* 7B */ OpNop1(),
+    /* 7C */ OpCtrl<&Cpu6502::ExecJmpAbsXInd>("JMP", AddrMode::AbsoluteXIndirect, true),
+    /* 7D */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::Adc, 4, true>("ADC"),
+    /* 7E */ OpRmw<AddrMode::AbsoluteX, &Cpu6502::Ror, 6, true>("ROR"),
+    /* 7F */ OpNop1(),
+
+    /* 80 */ OpCtrl<&Cpu6502::ExecBra>("BRA", AddrMode::Relative, true),
+    /* 81 */ OpStore<AddrMode::IndirectX, &Cpu6502::m_A, 6>("STA"),
+    /* 82 */ OpNopSkip<AddrMode::Immediate, 2>("NOP"),
+    /* 83 */ OpNop1(),
+    /* 84 */ OpStore<AddrMode::ZeroPage, &Cpu6502::m_Y, 3>("STY"),
+    /* 85 */ OpStore<AddrMode::ZeroPage, &Cpu6502::m_A, 3>("STA"),
+    /* 86 */ OpStore<AddrMode::ZeroPage, &Cpu6502::m_X, 3>("STX"),
+    /* 87 */ OpNop1(),
+    /* 88 */ OpImplied<&Cpu6502::Dey, 2>("DEY"),
+    /* 89 */ OpAlu<AddrMode::Immediate, &Cpu6502::BitImm, 2>("BIT", true),
+    /* 8A */ OpImplied<&Cpu6502::Txa, 2>("TXA"),
+    /* 8B */ OpNop1(),
+    /* 8C */ OpStore<AddrMode::Absolute, &Cpu6502::m_Y, 4>("STY"),
+    /* 8D */ OpStore<AddrMode::Absolute, &Cpu6502::m_A, 4>("STA"),
+    /* 8E */ OpStore<AddrMode::Absolute, &Cpu6502::m_X, 4>("STX"),
+    /* 8F */ OpNop1(),
+
+    /* 90 */ OpBranch<CPU6502_FLAG_C, false>("BCC"),
+    /* 91 */ OpStore<AddrMode::IndirectY, &Cpu6502::m_A, 6>("STA"),
+    /* 92 */ OpStore<AddrMode::ZeroPageIndirect, &Cpu6502::m_A, 5>("STA", true),
+    /* 93 */ OpNop1(),
+    /* 94 */ OpStore<AddrMode::ZeroPageX, &Cpu6502::m_Y, 4>("STY"),
+    /* 95 */ OpStore<AddrMode::ZeroPageX, &Cpu6502::m_A, 4>("STA"),
+    /* 96 */ OpStore<AddrMode::ZeroPageY, &Cpu6502::m_X, 4>("STX"),
+    /* 97 */ OpNop1(),
+    /* 98 */ OpImplied<&Cpu6502::Tya, 2>("TYA"),
+    /* 99 */ OpStore<AddrMode::AbsoluteY, &Cpu6502::m_A, 5>("STA"),
+    /* 9A */ OpImplied<&Cpu6502::Txs, 2>("TXS"),
+    /* 9B */ OpNop1(),
+    /* 9C */ OpStz<AddrMode::Absolute, 4>(),
+    /* 9D */ OpStore<AddrMode::AbsoluteX, &Cpu6502::m_A, 5>("STA"),
+    /* 9E */ OpStz<AddrMode::AbsoluteX, 5>(),
+    /* 9F */ OpNop1(),
+
+    /* A0 */ OpAlu<AddrMode::Immediate, &Cpu6502::Ldy, 2>("LDY"),
+    /* A1 */ OpAlu<AddrMode::IndirectX, &Cpu6502::Lda, 6>("LDA"),
+    /* A2 */ OpAlu<AddrMode::Immediate, &Cpu6502::Ldx, 2>("LDX"),
+    /* A3 */ OpNop1(),
+    /* A4 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Ldy, 3>("LDY"),
+    /* A5 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Lda, 3>("LDA"),
+    /* A6 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Ldx, 3>("LDX"),
+    /* A7 */ OpNop1(),
+    /* A8 */ OpImplied<&Cpu6502::Tay, 2>("TAY"),
+    /* A9 */ OpAlu<AddrMode::Immediate, &Cpu6502::Lda, 2>("LDA"),
+    /* AA */ OpImplied<&Cpu6502::Tax, 2>("TAX"),
+    /* AB */ OpNop1(),
+    /* AC */ OpAlu<AddrMode::Absolute, &Cpu6502::Ldy, 4>("LDY"),
+    /* AD */ OpAlu<AddrMode::Absolute, &Cpu6502::Lda, 4>("LDA"),
+    /* AE */ OpAlu<AddrMode::Absolute, &Cpu6502::Ldx, 4>("LDX"),
+    /* AF */ OpNop1(),
+
+    /* B0 */ OpBranch<CPU6502_FLAG_C, true>("BCS"),
+    /* B1 */ OpAlu<AddrMode::IndirectY, &Cpu6502::Lda, 5, true>("LDA"),
+    /* B2 */ OpAlu<AddrMode::ZeroPageIndirect, &Cpu6502::Lda, 5>("LDA", true),
+    /* B3 */ OpNop1(),
+    /* B4 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::Ldy, 4>("LDY"),
+    /* B5 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::Lda, 4>("LDA"),
+    /* B6 */ OpAlu<AddrMode::ZeroPageY, &Cpu6502::Ldx, 4>("LDX"),
+    /* B7 */ OpNop1(),
+    /* B8 */ OpImplied<&Cpu6502::Clv, 2>("CLV"),
+    /* B9 */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Lda, 4, true>("LDA"),
+    /* BA */ OpImplied<&Cpu6502::Tsx, 2>("TSX"),
+    /* BB */ OpNop1(),
+    /* BC */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::Ldy, 4, true>("LDY"),
+    /* BD */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::Lda, 4, true>("LDA"),
+    /* BE */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Ldx, 4, true>("LDX"),
+    /* BF */ OpNop1(),
+
+    /* C0 */ OpAlu<AddrMode::Immediate, &Cpu6502::Cpy, 2>("CPY"),
+    /* C1 */ OpAlu<AddrMode::IndirectX, &Cpu6502::Cmp, 6>("CMP"),
+    /* C2 */ OpNopSkip<AddrMode::Immediate, 2>("NOP"),
+    /* C3 */ OpNop1(),
+    /* C4 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Cpy, 3>("CPY"),
+    /* C5 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Cmp, 3>("CMP"),
+    /* C6 */ OpRmw<AddrMode::ZeroPage, &Cpu6502::Dec, 5>("DEC"),
+    /* C7 */ OpNop1(),
+    /* C8 */ OpImplied<&Cpu6502::Iny, 2>("INY"),
+    /* C9 */ OpAlu<AddrMode::Immediate, &Cpu6502::Cmp, 2>("CMP"),
+    /* CA */ OpImplied<&Cpu6502::Dex, 2>("DEX"),
+    /* CB */ OpNop1(),
+    /* CC */ OpAlu<AddrMode::Absolute, &Cpu6502::Cpy, 4>("CPY"),
+    /* CD */ OpAlu<AddrMode::Absolute, &Cpu6502::Cmp, 4>("CMP"),
+    /* CE */ OpRmw<AddrMode::Absolute, &Cpu6502::Dec, 6>("DEC"),
+    /* CF */ OpNop1(),
+
+    /* D0 */ OpBranch<CPU6502_FLAG_Z, false>("BNE"),
+    /* D1 */ OpAlu<AddrMode::IndirectY, &Cpu6502::Cmp, 5, true>("CMP"),
+    /* D2 */ OpAlu<AddrMode::ZeroPageIndirect, &Cpu6502::Cmp, 5>("CMP", true),
+    /* D3 */ OpNop1(),
+    /* D4 */ OpNopSkip<AddrMode::Immediate, 4>("NOP"),
+    /* D5 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::Cmp, 4>("CMP"),
+    /* D6 */ OpRmw<AddrMode::ZeroPageX, &Cpu6502::Dec, 6>("DEC"),
+    /* D7 */ OpNop1(),
+    /* D8 */ OpImplied<&Cpu6502::Cld, 2>("CLD"),
+    /* D9 */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Cmp, 4, true>("CMP"),
+    /* DA */ OpImplied<&Cpu6502::Phx, 3>("PHX", true),
+    /* DB */ OpNop1(),
+    /* DC */ OpNopSkip<AddrMode::ImmediateWord, 4>("NOP"),
+    /* DD */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::Cmp, 4, true>("CMP"),
+    /* DE */ OpRmw<AddrMode::AbsoluteX, &Cpu6502::Dec, 7>("DEC"),
+    /* DF */ OpNop1(),
+
+    /* E0 */ OpAlu<AddrMode::Immediate, &Cpu6502::Cpx, 2>("CPX"),
+    /* E1 */ OpAlu<AddrMode::IndirectX, &Cpu6502::Sbc, 6>("SBC"),
+    /* E2 */ OpNopSkip<AddrMode::Immediate, 2>("NOP"),
+    /* E3 */ OpNop1(),
+    /* E4 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Cpx, 3>("CPX"),
+    /* E5 */ OpAlu<AddrMode::ZeroPage, &Cpu6502::Sbc, 3>("SBC"),
+    /* E6 */ OpRmw<AddrMode::ZeroPage, &Cpu6502::Inc, 5>("INC"),
+    /* E7 */ OpNop1(),
+    /* E8 */ OpImplied<&Cpu6502::Inx, 2>("INX"),
+    /* E9 */ OpAlu<AddrMode::Immediate, &Cpu6502::Sbc, 2>("SBC"),
+    /* EA */ OpNop<2>("NOP"),
+    /* EB */ OpNop1(),
+    /* EC */ OpAlu<AddrMode::Absolute, &Cpu6502::Cpx, 4>("CPX"),
+    /* ED */ OpAlu<AddrMode::Absolute, &Cpu6502::Sbc, 4>("SBC"),
+    /* EE */ OpRmw<AddrMode::Absolute, &Cpu6502::Inc, 6>("INC"),
+    /* EF */ OpNop1(),
+
+    /* F0 */ OpBranch<CPU6502_FLAG_Z, true>("BEQ"),
+    /* F1 */ OpAlu<AddrMode::IndirectY, &Cpu6502::Sbc, 5, true>("SBC"),
+    /* F2 */ OpAlu<AddrMode::ZeroPageIndirect, &Cpu6502::Sbc, 5, false, true>("SBC", true),
+    /* F3 */ OpNop1(),
+    /* F4 */ OpNopSkip<AddrMode::Immediate, 4>("NOP"),
+    /* F5 */ OpAlu<AddrMode::ZeroPageX, &Cpu6502::Sbc, 4>("SBC"),
+    /* F6 */ OpRmw<AddrMode::ZeroPageX, &Cpu6502::Inc, 6>("INC"),
+    /* F7 */ OpNop1(),
+    /* F8 */ OpImplied<&Cpu6502::Sed, 2>("SED"),
+    /* F9 */ OpAlu<AddrMode::AbsoluteY, &Cpu6502::Sbc, 4, true>("SBC"),
+    /* FA */ OpImplied<&Cpu6502::Plx, 4>("PLX", true),
+    /* FB */ OpNop1(),
+    /* FC */ OpNopSkip<AddrMode::ImmediateWord, 4>("NOP"),
+    /* FD */ OpAlu<AddrMode::AbsoluteX, &Cpu6502::Sbc, 4, true>("SBC"),
+    /* FE */ OpRmw<AddrMode::AbsoluteX, &Cpu6502::Inc, 7>("INC"),
+    /* FF */ OpNop1()
+  }};
 
   Cpu6502::Cpu6502(const CPU_ENUM cpuType) {
     m_cpuType = cpuType;
+    m_activeOpTable = (cpuType == CPU_65C02) ? s_opTable65C02.data() : s_opTable6502.data();
     m_PC = 0;
     m_SR = CPU6502_FLAG_U;
     m_SP = 0xFF;
@@ -740,27 +769,6 @@ namespace DiskImages {
     SetFlagZ(m_X);
   }
 
-  int Cpu6502::Bcc(const unsigned char val) {
-    if ((m_SR & CPU6502_FLAG_C) == 0) {
-      return Branch(val);
-    }
-    return 2;
-  }
-
-  int Cpu6502::Bcs(const unsigned char val) {
-    if (m_SR & CPU6502_FLAG_C) {
-      return Branch(val);
-    }
-    return 2;
-  }
-
-  int Cpu6502::Beq(const unsigned char val) {
-    if (m_SR & CPU6502_FLAG_Z) {
-      return Branch(val);
-    }
-    return 2;
-  }
-
   void Cpu6502::Bit(const unsigned char val) {
     SetFlagN(val);
     SetFlagV(val & CPU6502_FLAG_V);
@@ -769,41 +777,6 @@ namespace DiskImages {
 
   void Cpu6502::BitImm(const unsigned char val) {
     SetFlagZ(val & m_A);
-  }
-
-  int Cpu6502::Bmi(const unsigned char val) {
-    if (m_SR & CPU6502_FLAG_N) {
-      return Branch(val);
-    }
-    return 2;
-  }
-
-  int Cpu6502::Bne(const unsigned char val) {
-    if ((m_SR & CPU6502_FLAG_Z) == 0) {
-      return Branch(val);
-    }
-    return 2;
-  }
-
-  int Cpu6502::Bpl(const unsigned char val) {
-    if ((m_SR & CPU6502_FLAG_N) == 0) {
-      return Branch(val);
-    }
-    return 2;
-  }
-
-  int Cpu6502::Bvc(const unsigned char val) {
-    if ((m_SR & CPU6502_FLAG_V) == 0) {
-      return Branch(val);
-    }
-    return 2;
-  }
-
-  int Cpu6502::Bvs(const unsigned char val) {
-    if (m_SR & CPU6502_FLAG_V) {
-      return Branch(val);
-    }
-    return 2;
   }
 
   void Cpu6502::Brk() {
@@ -861,12 +834,6 @@ namespace DiskImages {
     Cmp(reg);
   }
 
-  void Cpu6502::Dea() {
-    m_A--;
-    SetFlagN(m_A);
-    SetFlagZ(m_A);
-  }
-
   unsigned char Cpu6502::Dec(unsigned char val) {
     val--;
     SetFlagN(val);
@@ -899,12 +866,6 @@ namespace DiskImages {
     return val;
   }
 
-  void Cpu6502::Ina() {
-    m_A++;
-    SetFlagN(m_A);
-    SetFlagZ(m_A);
-  }
-
   void Cpu6502::Inx() {
     m_X++;
     SetFlagN(m_X);
@@ -922,10 +883,6 @@ namespace DiskImages {
 
     WriteByte(addr, reg);
     Sbc(reg);
-  }
-
-  void Cpu6502::Jmp(const unsigned short addr) {
-    m_PC = addr;
   }
 
   void Cpu6502::Jsr(const unsigned short addr) {
@@ -1164,22 +1121,6 @@ namespace DiskImages {
     Eor(reg);
   }
 
-  void Cpu6502::Sta(const unsigned short addr) {
-    WriteByte(addr, m_A);
-  }
-
-  void Cpu6502::Stx(const unsigned short addr) {
-    WriteByte(addr, m_X);
-  }
-
-  void Cpu6502::Sty(const unsigned short addr) {
-    WriteByte(addr, m_Y);
-  }
-
-  void Cpu6502::Stz(const unsigned short addr) {
-    WriteByte(addr, 0x00);
-  }
-
   void Cpu6502::Sxa(const unsigned short addr) {
     WriteByte(addr, m_X & UNDOC_MASK);// not sure
   }
@@ -1238,9 +1179,6 @@ namespace DiskImages {
   }
 
   int Cpu6502::Step() {
-    int nClockCount;
-    unsigned char val;
-    unsigned short addr;
     char buf[256];
 
     BuildTrace(buf);
@@ -1248,2280 +1186,16 @@ namespace DiskImages {
       Trace(0, true, "%s", buf);
     }
 
-    nClockCount = 0;
-    switch (ReadByte(m_PC++)) {
-      default:
-        break;
-
-      case 0x00:// BRK
-        m_PC++;
-        nClockCount = 7;
-        Brk();
-        break;
-
-      case 0x01:// ORA (Zpg,X)
-        val = ReadXIndirect(m_PC);
-        m_PC++;
-        nClockCount = 6;
-        Ora(val);
-        break;
-
-      case 0x02:// kil or NOP
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 0;
-        } else {
-          m_PC++;
-          nClockCount = 2;
-        }
-        break;
-
-      case 0x03:// slo (Zpg,X) or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchXIndirect(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 8;
-          Slo(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x04:// dop Zpg or TSB Zpg
-        if (m_cpuType == CPU_6502) {
-          addr = FetchZPage(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 3;
-        } else {
-          addr = FetchZPage(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 5;
-          WriteByte(addr, Tsb(val));
-        }
-        break;
-
-      case 0x05:// ORA Zpg
-        val = ReadZPage(m_PC);
-        m_PC++;
-        nClockCount = 3;
-        Ora(val);
-        break;
-
-      case 0x06:// ASL Zpg
-        addr = FetchZPage(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = 5;
-        WriteByte(addr, Asl(val));
-        break;
-
-      case 0x07:// slo Zpg or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchZPage(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 5;
-          Slo(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x08:// PHP
-        nClockCount = 3;
-        Php();
-        break;
-
-      case 0x09:// ORA #Imm
-        val = ReadImm(m_PC);
-        m_PC++;
-        nClockCount = 2;
-        Ora(val);
-        break;
-
-      case 0x0A:// ASL A
-        nClockCount = 2;
-        m_A = Asl(m_A);
-        break;
-
-      case 0x0B:// aac #Imm or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadImm(m_PC);
-          m_PC++;
-          nClockCount = 2;
-          Aac(val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x0C:// top Abs or TSB Abs
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsolute(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 4;
-        } else {
-          addr = FetchAbsolute(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 6;
-          WriteByte(addr, Tsb(val));
-        }
-        break;
-
-      case 0x0D:// ORA Abs
-        val = ReadAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        Ora(val);
-        break;
-
-      case 0x0E:// ASL Abs
-        addr = FetchAbsolute(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 6;
-        WriteByte(addr, Asl(val));
-        break;
-
-      case 0x0F:// slo Abs or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsolute(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 6;
-          Slo(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x10:// BPL Rel
-        val = ReadByte(m_PC);
-        m_PC++;
-        nClockCount = Bpl(val);
-        break;
-
-      case 0x11:// ORA (Zpg),Y
-        addr = FetchIndirectY(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
-        Ora(val);
-        break;
-
-      case 0x12:// kil or ORA (Zpg)
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 0;
-        } else {
-          val = ReadZPageIndirect(m_PC);
-          m_PC++;
-          nClockCount = 5;
-          Ora(val);
-        }
-        break;
-
-      case 0x13:// slo (Zpg),Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchIndirectY(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 8;
-          Slo(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x14:// dop Zpg,X or TRB Zpg
-        if (m_cpuType == CPU_6502) {
-          val = ReadZPageX(m_PC);
-          m_PC++;
-          nClockCount = 4;
-        } else {
-          addr = FetchZPage(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 5;
-          WriteByte(addr, Trb(val));
-        }
-        break;
-
-      case 0x15:// ORA Zpg,X
-        val = ReadZPageX(m_PC);
-        m_PC++;
-        nClockCount = 4;
-        Ora(val);
-        break;
-
-      case 0x16:// ASL Zpg,X
-        addr = FetchZPageX(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = 6;
-        WriteByte(addr, Asl(val));
-        break;
-
-      case 0x17:// slo Zpg,X or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchZPageX(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 6;
-          Slo(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x18:// CLC
-        nClockCount = 2;
-        Clc();
-        break;
-
-      case 0x19:// ORA Abs,Y
-        addr = FetchAbsoluteY(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
-        Ora(val);
-        break;
-
-      case 0x1A:// nop or INA
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 2;
-        } else {
-          nClockCount = 2;
-          Ina();
-        }
-        break;
-
-      case 0x1B:// slo Abs,Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteY(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 7;
-          Slo(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x1C:// top Abs,X or TRB Abs
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteX(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 4;
-        } else {
-          addr = FetchAbsolute(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 6;
-          WriteByte(addr, Trb(val));
-        }
-        break;
-
-      case 0x1D:// ORA Abs,X
-        addr = FetchAbsoluteX(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
-        Ora(val);
-        break;
-
-      case 0x1E:// ASL Abs,X
-        addr = FetchAbsoluteX(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 7;
-        } else {
-          nClockCount = CROSS_PAGE(addr, m_X) ? 7 : 6;
-        }
-        WriteByte(addr, Asl(val));
-        break;
-
-      case 0x1F:// slo Abs,X or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteX(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 7;
-          Slo(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x20:// JSR Abs
-        addr = FetchAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 6;
-        Jsr(addr);
-        break;
-
-      case 0x21:// AND (Zpg,X)
-        val = ReadXIndirect(m_PC);
-        m_PC++;
-        nClockCount = 6;
-        And(val);
-        break;
-
-      case 0x22:// kil or NOP
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 0;
-        } else {
-          m_PC++;
-          nClockCount = 2;
-        }
-        break;
-
-      case 0x23:// rla (Zpg,X) or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchXIndirect(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 8;
-          Rla(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x24:// BIT Zpg
-        val = ReadZPage(m_PC);
-        m_PC++;
-        nClockCount = 3;
-        Bit(val);
-        break;
-
-      case 0x25:// AND Zpg
-        val = ReadZPage(m_PC);
-        m_PC++;
-        nClockCount = 3;
-        And(val);
-        break;
-
-      case 0x26:// ROL Zpg
-        addr = FetchZPage(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = 5;
-        WriteByte(addr, Rol(val));
-        break;
-
-      case 0x27:// rla Zpg or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchZPage(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 5;
-          Rla(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x28:// PLP
-        nClockCount = 4;
-        Plp();
-        break;
-
-      case 0x29:// AND #Imm
-        val = ReadImm(m_PC);
-        m_PC++;
-        nClockCount = 2;
-        And(val);
-        break;
-
-      case 0x2A:// ROL A
-        nClockCount = 2;
-        m_A = Rol(m_A);
-        break;
-
-      case 0x2B:// aac #Imm or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadImm(m_PC);
-          m_PC++;
-          nClockCount = 2;
-          Aac(val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x2C:// BIT Abs
-        val = ReadAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        Bit(val);
-        break;
-
-      case 0x2D:// AND Abs
-        val = ReadAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        And(val);
-        break;
-
-      case 0x2E:// ROL Abs
-        addr = FetchAbsolute(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 6;
-        WriteByte(addr, Rol(val));
-        break;
-
-      case 0x2F:// rla Abs or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsolute(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 6;
-          Rla(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x30:// BMI Rel
-        val = ReadByte(m_PC);
-        m_PC++;
-        nClockCount = Bmi(val);
-        break;
-
-      case 0x31:// AND (Zpg),Y
-        addr = FetchIndirectY(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
-        And(val);
-        break;
-
-      case 0x32:// kil or AND (Zpg)
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 0;
-        } else {
-          val = ReadZPageIndirect(m_PC);
-          m_PC++;
-          nClockCount = 5;
-          And(val);
-        }
-        break;
-
-      case 0x33:// rla (Zpg),Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchIndirectY(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 8;
-          Rla(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x34:// dop Zpg,X or BIT Zpg,X
-        if (m_cpuType == CPU_6502) {
-          val = ReadZPageX(m_PC);
-          m_PC++;
-          nClockCount = 4;
-        } else {
-          val = ReadZPageX(m_PC);
-          m_PC++;
-          nClockCount = 4;
-          Bit(val);
-        }
-        break;
-
-      case 0x35:// AND Zpg,X
-        val = ReadZPageX(m_PC);
-        m_PC++;
-        nClockCount = 4;
-        And(val);
-        break;
-
-      case 0x36:// ROL Zpg,X
-        addr = FetchZPageX(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = 6;
-        WriteByte(addr, Rol(val));
-        break;
-
-      case 0x37:// rla Zpg,X or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchZPageX(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 6;
-          Rla(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x38:// SEC
-        nClockCount = 2;
-        Sec();
-        break;
-
-      case 0x39:// AND Abs,Y
-        addr = FetchAbsoluteY(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
-        And(val);
-        break;
-
-      case 0x3A:// nop or DEA
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 2;
-        } else {
-          nClockCount = 2;
-          Dea();
-        }
-        break;
-
-      case 0x3B:// rla Abs,Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteY(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 7;
-          Rla(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x3C:// top Abs,X or BIT Abs,X
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteX(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
-        } else {
-          addr = FetchAbsoluteX(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
-          Bit(val);
-        }
-        break;
-
-      case 0x3D:// AND Abs,X
-        addr = FetchAbsoluteX(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
-        And(val);
-        break;
-
-      case 0x3E:// ROL Abs,X
-        addr = FetchAbsoluteX(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 7;
-        } else {
-          nClockCount = CROSS_PAGE(addr, m_X) ? 7 : 6;
-        }
-        WriteByte(addr, Rol(val));
-        break;
-
-      case 0x3F:// rla Abs,X or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteX(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 7;
-          Rla(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x40:// RTI
-        nClockCount = 6;
-        Rti();
-        break;
-
-      case 0x41:// EOR (Zpg,X)
-        val = ReadXIndirect(m_PC);
-        m_PC++;
-        nClockCount = 6;
-        Eor(val);
-        break;
-
-      case 0x42:// kil or NOP
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 0;
-        } else {
-          m_PC++;
-          nClockCount = 2;
-        }
-        break;
-
-      case 0x43:// sre (Zpg,X) or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchXIndirect(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 8;
-          Sre(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x44:// dop Zpg or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadZPage(m_PC);
-          m_PC++;
-          nClockCount = 3;
-        } else {
-          m_PC++;
-          nClockCount = 3;
-        }
-        break;
-
-      case 0x45:// EOR Zpg
-        val = ReadZPage(m_PC);
-        m_PC++;
-        nClockCount = 3;
-        Eor(val);
-        break;
-
-      case 0x46:// LSR Zpg
-        addr = FetchZPage(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = 5;
-        WriteByte(addr, Lsr(val));
-        break;
-
-      case 0x47:// sre Zpg or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchZPage(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 5;
-          Sre(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x48:// PHA
-        nClockCount = 3;
-        Pha();
-        break;
-
-      case 0x49:// EOR #Imm
-        val = ReadImm(m_PC);
-        m_PC++;
-        nClockCount = 2;
-        Eor(val);
-        break;
-
-      case 0x4A:// LSR A
-        nClockCount = 2;
-        m_A = Lsr(m_A);
-        break;
-
-      case 0x4B:// asr #Imm or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadImm(m_PC);
-          m_PC++;
-          nClockCount = 2;
-          Asr(val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x4C:// JMP Abs
-        addr = FetchAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 3;
-        Jmp(addr);
-        break;
-
-      case 0x4D:// EOR Abs
-        val = ReadAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        Eor(val);
-        break;
-
-      case 0x4E:// LSR Abs
-        addr = FetchAbsolute(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 6;
-        WriteByte(addr, Lsr(val));
-        break;
-
-      case 0x4F:// sre Abs or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsolute(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 6;
-          Sre(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x50:// BVC Rel
-        val = ReadByte(m_PC);
-        m_PC++;
-        nClockCount = Bvc(val);
-        break;
-
-      case 0x51:// EOR (Zpg),Y
-        addr = FetchIndirectY(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
-        Eor(val);
-        break;
-
-      case 0x52:// kil or EOR (Zpg)
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 0;
-        } else {
-          val = ReadZPageIndirect(m_PC);
-          m_PC++;
-          nClockCount = 5;
-          Eor(val);
-        }
-        break;
-
-      case 0x53:// sre (Zpg),Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchIndirectY(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 8;
-          Sre(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x54:// dop Zpg,X or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadZPageX(m_PC);
-          m_PC++;
-          nClockCount = 4;
-        } else {
-          m_PC++;
-          nClockCount = 4;
-        }
-        break;
-
-      case 0x55:// EOR Zpg,X
-        val = ReadZPageX(m_PC);
-        m_PC++;
-        nClockCount = 4;
-        Eor(val);
-        break;
-
-      case 0x56:// LSR Zpg,X
-        addr = FetchZPageX(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = 6;
-        WriteByte(addr, Lsr(val));
-        break;
-
-      case 0x57:// sre Zpg,X or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchZPageX(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 6;
-          Sre(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x58:// CLI
-        nClockCount = 2;
-        Cli();
-        break;
-
-      case 0x59:// EOR Abs,Y
-        addr = FetchAbsoluteY(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
-        Eor(val);
-        break;
-
-      case 0x5A:// nop or PHY
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 2;
-        } else {
-          nClockCount = 3;
-          Phy();
-        }
-        break;
-
-      case 0x5B:// sre Abs,Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteY(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 7;
-          Sre(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x5C:// top Abs,X or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteX(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 4;
-        } else {
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 8;
-        }
-        break;
-
-      case 0x5D:// EOR Abs,X
-        addr = FetchAbsoluteX(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
-        Eor(val);
-        break;
-
-      case 0x5E:// LSR Abs,X
-        addr = FetchAbsoluteX(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 7;
-        } else {
-          nClockCount = CROSS_PAGE(addr, m_X) ? 7 : 6;
-        }
-        WriteByte(addr, Lsr(val));
-        break;
-
-      case 0x5F:// sre Abs,X or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteX(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 7;
-          Sre(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x60:// RTS
-        Rts();
-        nClockCount = 6;
-        break;
-
-      case 0x61:// ADC (Zpg,X)
-        val = ReadXIndirect(m_PC);
-        m_PC++;
-        nClockCount = 6;
-        Adc(val);
-        break;
-
-      case 0x62:// kil or NOP
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 0;
-        } else {
-          m_PC++;
-          nClockCount = 2;
-        }
-        break;
-
-      case 0x63:// rra (Zpg,X) or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchXIndirect(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 8;
-          Rra(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x64:// dop Zpg or STZ Zpg
-        if (m_cpuType == CPU_6502) {
-          m_PC++;
-          nClockCount = 3;
-        } else {
-          addr = FetchZPage(m_PC);
-          m_PC++;
-          nClockCount = 3;
-          Stz(addr);
-        }
-        break;
-
-      case 0x65:// ADC Zpg
-        val = ReadZPage(m_PC);
-        m_PC++;
-        nClockCount = 3;
-        Adc(val);
-        break;
-
-      case 0x66:// ROR Zpg
-        addr = FetchZPage(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = 5;
-        WriteByte(addr, Ror(val));
-        break;
-
-      case 0x67:// rra Zpg or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchZPage(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 5;
-          Rra(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x68:// PLA
-        nClockCount = 4;
-        Pla();
-        break;
-
-      case 0x69:// ADC #Imm
-        val = ReadImm(m_PC);
-        m_PC++;
-        nClockCount = 2;
-        Adc(val);
-        break;
-
-      case 0x6A:// ROR A
-        nClockCount = 2;
-        m_A = Ror(m_A);
-        break;
-
-      case 0x6B:// arr #Imm or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadImm(m_PC);
-          m_PC++;
-          nClockCount = 2;
-          Arr(val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x6C:// JMP Ind
-        if (m_cpuType == CPU_6502) {
-          addr = FetchIndirectBug(m_PC);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 5;
-          Jmp(addr);
-        } else {
-          addr = FetchIndirect(m_PC);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 6;
-          Jmp(addr);
-        }
-        break;
-
-      case 0x6D:// ADC Abs
-        val = ReadAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        Adc(val);
-        break;
-
-      case 0x6E:// ROR Abs
-        addr = FetchAbsolute(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 6;
-        WriteByte(addr, Ror(val));
-        break;
-
-      case 0x6F:// rra Abs or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsolute(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 6;
-          Rra(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x70:// BVS Rel
-        val = ReadByte(m_PC);
-        m_PC++;
-        nClockCount = Bvs(val);
-        break;
-
-      case 0x71:// ADC (Zpg),Y
-        addr = FetchIndirectY(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
-        Adc(val);
-        break;
-
-      case 0x72:// kil or ADC (Zpg)
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 0;
-        } else {
-          val = ReadZPageIndirect(m_PC);
-          m_PC++;
-          nClockCount = m_SR & CPU6502_FLAG_D ? 6 : 5;
-          Adc(val);
-        }
-        break;
-
-      case 0x73:// rra (Zpg),Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchIndirectY(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 8;
-          Rra(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x74:// dop Zpg,X or STZ Zpg,X
-        if (m_cpuType == CPU_6502) {
-          val = ReadZPageX(m_PC);
-          m_PC++;
-          nClockCount = 4;
-        } else {
-          addr = FetchZPageX(m_PC);
-          m_PC++;
-          nClockCount = 4;
-          Stz(addr);
-        }
-        break;
-
-      case 0x75:// ADC Zpg,X
-        val = ReadZPageX(m_PC);
-        m_PC++;
-        nClockCount = 4;
-        Adc(val);
-        break;
-
-      case 0x76:// ROR Zpg,X
-        addr = FetchZPageX(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = 6;
-        WriteByte(addr, Ror(val));
-        break;
-
-      case 0x77:// rra Zpg,X or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchZPageX(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 6;
-          Rra(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x78:// SEI
-        nClockCount = 2;
-        Sei();
-        break;
-
-      case 0x79:// ADC Abs,Y
-        addr = FetchAbsoluteY(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
-        Adc(val);
-        break;
-
-      case 0x7A:// nop or PLY
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 2;
-        } else {
-          nClockCount = 4;
-          Ply();
-        }
-        break;
-
-      case 0x7B:// rra Abs,Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteY(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 7;
-          Rra(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x7C:// top Abs,X or JMP (Abs,X)
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteX(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 4;
-        } else {
-          addr = FetchAbsoluteXIndirect(m_PC);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 6;
-          Jmp(addr);
-        }
-        break;
-
-      case 0x7D:// ADC Abs,X
-        addr = FetchAbsoluteX(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
-        Adc(val);
-        break;
-
-      case 0x7E:// ROR Abs,X
-        addr = FetchAbsoluteX(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 7;
-        } else {
-          nClockCount = CROSS_PAGE(addr, m_X) ? 7 : 6;
-        }
-        WriteByte(addr, Ror(val));
-        break;
-
-      case 0x7F:// rra Abs,X or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteX(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 7;
-          Rra(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x80:// dop #Imm or BRA Rel
-        if (m_cpuType == CPU_6502) {
-          m_PC++;
-          nClockCount = 2;
-        } else {
-          val = ReadByte(m_PC);
-          m_PC++;
-          nClockCount = Branch(val);
-        }
-        break;
-
-      case 0x81:// STA (Zpg,X)
-        addr = FetchXIndirect(m_PC);
-        m_PC++;
-        nClockCount = 6;
-        Sta(addr);
-        break;
-
-      case 0x82:// dop #Imm or NOP
-        m_PC++;
-        nClockCount = 2;
-        break;
-
-      case 0x83:// aax (Zpg,X) or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchXIndirect(m_PC);
-          m_PC++;
-          nClockCount = 6;
-          Aax(addr);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x84:// STY Zpg
-        addr = FetchZPage(m_PC);
-        m_PC++;
-        nClockCount = 3;
-        Sty(addr);
-        break;
-
-      case 0x85:// STA Zpg
-        addr = FetchZPage(m_PC);
-        m_PC++;
-        nClockCount = 3;
-        Sta(addr);
-        break;
-
-      case 0x86:// STX Zpg
-        addr = FetchZPage(m_PC);
-        m_PC++;
-        nClockCount = 3;
-        Stx(addr);
-        break;
-
-      case 0x87:// aax Zpg or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchZPage(m_PC);
-          m_PC++;
-          nClockCount = 3;
-          Aax(addr);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x88:// DEY
-        nClockCount = 2;
-        Dey();
-        break;
-
-      case 0x89:// dop #Imm or BIT #Imm
-        if (m_cpuType == CPU_6502) {
-          m_PC++;
-          nClockCount = 2;
-        } else {
-          val = ReadImm(m_PC);
-          m_PC++;
-          nClockCount = 2;
-          BitImm(val);// do not update V and N flags
-        }
-        break;
-
-      case 0x8A:// TXA
-        nClockCount = 2;
-        Txa();
-        break;
-
-      case 0x8B:// ane #Imm or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadImm(m_PC);
-          m_PC++;
-          nClockCount = 2;
-          Ane(val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x8C:// STY Abs
-        addr = FetchAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        Sty(addr);
-        break;
-
-      case 0x8D:// STA Abs
-        addr = FetchAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        Sta(addr);
-        break;
-
-      case 0x8E:// STX Abs
-        addr = FetchAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        Stx(addr);
-        break;
-
-      case 0x8F:// aax Abs or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsolute(m_PC);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 4;
-          Aax(addr);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x90:// BCC Rel
-        val = ReadByte(m_PC);
-        m_PC++;
-        nClockCount = Bcc(val);
-        break;
-
-      case 0x91:// STA (Zpg),Y
-        addr = FetchIndirectY(m_PC);
-        m_PC++;
-        nClockCount = 6;
-        Sta(addr);
-        break;
-
-      case 0x92:// kil or STA (Zpg)
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 0;
-        } else {
-          addr = FetchZPageIndirect(m_PC);
-          m_PC++;
-          nClockCount = 5;
-          Sta(addr);
-        }
-        break;
-
-      case 0x93:// axa (Zpg),Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchIndirectY(m_PC);
-          m_PC++;
-          nClockCount = 6;
-          Axa(addr);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x94:// STY Zpg,X
-        addr = FetchZPageX(m_PC);
-        m_PC++;
-        nClockCount = 4;
-        Sty(addr);
-        break;
-
-      case 0x95:// STA Zpg,X
-        addr = FetchZPageX(m_PC);
-        m_PC++;
-        nClockCount = 4;
-        Sta(addr);
-        break;
-
-      case 0x96:// STX Zpg,Y
-        addr = FetchZPageY(m_PC);
-        m_PC++;
-        nClockCount = 4;
-        Stx(addr);
-        break;
-
-      case 0x97:// aax Zpg,Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchZPageY(m_PC);
-          m_PC++;
-          nClockCount = 4;
-          Aax(addr);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x98:// TYA
-        nClockCount = 2;
-        Tya();
-        break;
-
-      case 0x99:// STA Abs,Y
-        addr = FetchAbsoluteY(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 5;
-        Sta(addr);
-        break;
-
-      case 0x9A:// TXS
-        nClockCount = 2;
-        Txs();
-        break;
-
-      case 0x9B:// xas Abs,Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteY(m_PC);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 5;
-          Xas(addr);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0x9C:// sya Abs,X or STZ Abs
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteX(m_PC);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 5;
-          Sya(addr);
-        } else {
-          addr = FetchAbsolute(m_PC);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 4;
-          Stz(addr);
-        }
-        break;
-
-      case 0x9D:// STA Abs,X
-        addr = FetchAbsoluteX(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 5;
-        Sta(addr);
-        break;
-
-      case 0x9E:// sxa Abs,Y or STZ Abs,X
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteY(m_PC);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 5;
-          Sxa(addr);
-        } else {
-          addr = FetchAbsoluteX(m_PC);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 5;
-          Stz(addr);
-        }
-        break;
-
-      case 0x9F:// axa Abs,Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteY(m_PC);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 5;
-          Axa(addr);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xA0:// LDY #Imm
-        val = ReadImm(m_PC);
-        m_PC++;
-        nClockCount = 2;
-        Ldy(val);
-        break;
-
-      case 0xA1:// LDA (Zpg,X)
-        val = ReadXIndirect(m_PC);
-        m_PC++;
-        nClockCount = 6;
-        Lda(val);
-        break;
-
-      case 0xA2:// LDX #Imm
-        val = ReadImm(m_PC);
-        m_PC++;
-        nClockCount = 2;
-        Ldx(val);
-        break;
-
-      case 0xA3:// lax (Zpg,X) or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadXIndirect(m_PC);
-          m_PC++;
-          nClockCount = 6;
-          Lax(val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xA4:// LDY Zpg
-        val = ReadZPage(m_PC);
-        m_PC++;
-        nClockCount = 3;
-        Ldy(val);
-        break;
-
-      case 0xA5:// LDA Zpg
-        val = ReadZPage(m_PC);
-        m_PC++;
-        nClockCount = 3;
-        Lda(val);
-        break;
-
-      case 0xA6:// LDX Zpg
-        val = ReadZPage(m_PC);
-        m_PC++;
-        nClockCount = 3;
-        Ldx(val);
-        break;
-
-      case 0xA7:// lax Zpg or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadZPage(m_PC);
-          m_PC++;
-          nClockCount = 3;
-          Lax(val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xA8:// TAY
-        nClockCount = 2;
-        Tay();
-        break;
-
-      case 0xA9:// LDA #Imm
-        val = ReadImm(m_PC);
-        m_PC++;
-        nClockCount = 2;
-        Lda(val);
-        break;
-
-      case 0xAA:// TAX
-        nClockCount = 2;
-        Tax();
-        break;
-
-      case 0xAB:// atx #Imm or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadImm(m_PC);
-          m_PC++;
-          nClockCount = 2;
-          Atx(val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xAC:// LDY Abs
-        val = ReadAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        Ldy(val);
-        break;
-
-      case 0xAD:// LDA Abs
-        val = ReadAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        Lda(val);
-        break;
-
-      case 0xAE:// LDX Abs
-        val = ReadAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        Ldx(val);
-        break;
-
-      case 0xAF:// lax Abs or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadAbsolute(m_PC);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 4;
-          Lax(val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xB0:// BCS Rel
-        val = ReadByte(m_PC);
-        m_PC++;
-        nClockCount = Bcs(val);
-        break;
-
-      case 0xB1:// LDA (Zpg),Y
-        addr = FetchIndirectY(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
-        Lda(val);
-        break;
-
-      case 0xB2:// kil or LDA (Zpg)
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 0;
-        } else {
-          val = ReadZPageIndirect(m_PC);
-          m_PC++;
-          nClockCount = 5;
-          Lda(val);
-        }
-        break;
-
-      case 0xB3:// lax (Zpg),Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchIndirectY(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
-          Lax(val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xB4:// LDY Zpg,X
-        val = ReadZPageX(m_PC);
-        m_PC++;
-        nClockCount = 4;
-        Ldy(val);
-        break;
-
-      case 0xB5:// LDA Zpg,X
-        val = ReadZPageX(m_PC);
-        m_PC++;
-        nClockCount = 4;
-        Lda(val);
-        break;
-
-      case 0xB6:// LDX Zpg,Y
-        val = ReadZPageY(m_PC);
-        m_PC++;
-        nClockCount = 4;
-        Ldx(val);
-        break;
-
-      case 0xB7:// lax Zpg,Y or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadZPageY(m_PC);
-          m_PC++;
-          nClockCount = 4;
-          Lax(val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xB8:// CLV
-        nClockCount = 2;
-        Clv();
-        break;
-
-      case 0xB9:// LDA Abs,Y
-        addr = FetchAbsoluteY(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
-        Lda(val);
-        break;
-
-      case 0xBA:// TSX
-        nClockCount = 2;
-        Tsx();
-        break;
-
-      case 0xBB:// lar Abs,Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteY(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
-          Lar(val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xBC:// LDY Abs,X
-        addr = FetchAbsoluteX(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
-        Ldy(val);
-        break;
-
-      case 0xBD:// LDA Abs,X
-        addr = FetchAbsoluteX(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
-        Lda(val);
-        break;
-
-      case 0xBE:// LDX Abs,Y
-        addr = FetchAbsoluteY(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
-        Ldx(val);
-        break;
-
-      case 0xBF:// lax Abs,Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteY(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
-          Lax(val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xC0:// CPY #Imm
-        val = ReadImm(m_PC);
-        m_PC++;
-        nClockCount = 2;
-        Cpy(val);
-        break;
-
-      case 0xC1:// CMP (Zpg,X)
-        val = ReadXIndirect(m_PC);
-        m_PC++;
-        nClockCount = 6;
-        Cmp(val);
-        break;
-
-      case 0xC2:// dop #Imm or NOP
-        m_PC++;
-        nClockCount = 2;
-        break;
-
-      case 0xC3:// dcp (Zpg,X) or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchXIndirect(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 8;
-          Dcp(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xC4:// CPY Zpg
-        val = ReadZPage(m_PC);
-        m_PC++;
-        nClockCount = 3;
-        Cpy(val);
-        break;
-
-      case 0xC5:// CMP Zpg
-        val = ReadZPage(m_PC);
-        m_PC++;
-        nClockCount = 3;
-        Cmp(val);
-        break;
-
-      case 0xC6:// DEC Zpg
-        addr = FetchZPage(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = 5;
-        WriteByte(addr, Dec(val));
-        break;
-
-      case 0xC7:// dcp Zpg or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchZPage(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 5;
-          Dcp(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xC8:// INY
-        nClockCount = 2;
-        Iny();
-        break;
-
-      case 0xC9:// CMP #Imm
-        val = ReadImm(m_PC);
-        m_PC++;
-        nClockCount = 2;
-        Cmp(val);
-        break;
-
-      case 0xCA:// DEX
-        nClockCount = 2;
-        Dex();
-        break;
-
-      case 0xCB:// axs #Imm or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadImm(m_PC);
-          m_PC++;
-          nClockCount = 2;
-          Axs(val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xCC:// CPY Abs
-        val = ReadAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        Cpy(val);
-        break;
-
-      case 0xCD:// CMP Abs
-        val = ReadAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        Cmp(val);
-        break;
-
-      case 0xCE:// DEC Abs
-        addr = FetchAbsolute(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 6;
-        WriteByte(addr, Dec(val));
-        break;
-
-      case 0xCF:// dcp Abs or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsolute(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 6;
-          Dcp(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xD0:// BNE Rel
-        val = ReadByte(m_PC);
-        m_PC++;
-        nClockCount = Bne(val);
-        break;
-
-      case 0xD1:// CMP (Zpg),Y
-        addr = FetchIndirectY(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
-        Cmp(val);
-        break;
-
-      case 0xD2:// kil or CMP (Zpg)
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 0;
-        } else {
-          val = ReadZPageIndirect(m_PC);
-          m_PC++;
-          nClockCount = 5;
-          Cmp(val);
-        }
-        break;
-
-      case 0xD3:// dcp (Zpg),Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchIndirectY(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 8;
-          Dcp(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xD4:// dop Zpg,Y or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadZPageY(m_PC);
-          m_PC++;
-          nClockCount = 4;
-        } else {
-          m_PC++;
-          nClockCount = 4;
-        }
-        break;
-
-      case 0xD5:// CMP Zpg,X
-        val = ReadZPageX(m_PC);
-        m_PC++;
-        nClockCount = 4;
-        Cmp(val);
-        break;
-
-      case 0xD6:// DEC Zpg,X
-        addr = FetchZPageX(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = 6;
-        WriteByte(addr, Dec(val));
-        break;
-
-      case 0xD7:// dcp Zpg,X or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchZPageX(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 6;
-          Dcp(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xD8:// CLD
-        nClockCount = 2;
-        Cld();
-        break;
-
-      case 0xD9:// CMP Abs,Y
-        addr = FetchAbsoluteY(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
-        Cmp(val);
-        break;
-
-      case 0xDA:// nop or PHX
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 2;
-        } else {
-          nClockCount = 3;
-          Phx();
-        }
-        break;
-
-      case 0xDB:// dcp Abs,Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteY(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 7;
-          Dcp(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xDC:// top Abs,Y or NOP
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        break;
-
-      case 0xDD:// CMP Abs,X
-        addr = FetchAbsoluteX(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
-        Cmp(val);
-        break;
-
-      case 0xDE:// DEC Abs,X
-        addr = FetchAbsoluteX(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 7;
-        WriteByte(addr, Dec(val));
-        break;
-
-      case 0xDF:// dcp Abs,X or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteX(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 7;
-          Dcp(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xE0:// CPX #Imm
-        val = ReadImm(m_PC);
-        m_PC++;
-        nClockCount = 2;
-        Cpx(val);
-        break;
-
-      case 0xE1:// SBC (Zpg,X)
-        val = ReadXIndirect(m_PC);
-        m_PC++;
-        nClockCount = 6;
-        Sbc(val);
-        break;
-
-      case 0xE2:// dop #Imm or NOP
-        m_PC++;
-        nClockCount = 2;
-        break;
-
-      case 0xE3:// isc (Zpg,X) or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchXIndirect(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 8;
-          Isc(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xE4:// CPX Zpg
-        val = ReadZPage(m_PC);
-        m_PC++;
-        nClockCount = 3;
-        Cpx(val);
-        break;
-
-      case 0xE5:// SBC Zpg
-        val = ReadZPage(m_PC);
-        m_PC++;
-        nClockCount = 3;
-        Sbc(val);
-        break;
-
-      case 0xE6:// INC Zpg
-        addr = FetchZPage(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = 5;
-        WriteByte(addr, Inc(val));
-        break;
-
-      case 0xE7:// isc Zpg or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchZPage(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 5;
-          Isc(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xE8:// INX
-        nClockCount = 2;
-        Inx();
-        break;
-
-      case 0xE9:// SBC #Imm
-        val = ReadImm(m_PC);
-        m_PC++;
-        nClockCount = 2;
-        Sbc(val);
-        break;
-
-      case 0xEA:// NOP
-        nClockCount = 2;
-        break;
-
-      case 0xEB:// sbc #Imm or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadImm(m_PC);
-          m_PC++;
-          nClockCount = 2;
-          Sbc(val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xEC:// CPX Abs
-        val = ReadAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        Cpx(val);
-        break;
-
-      case 0xED:// SBC Abs
-        val = ReadAbsolute(m_PC);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        Sbc(val);
-        break;
-
-      case 0xEE:// INC Abs
-        addr = FetchAbsolute(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 6;
-        WriteByte(addr, Inc(val));
-        break;
-
-      case 0xEF:// isc Abs or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsolute(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 6;
-          Isc(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xF0:// BEQ Rel
-        val = ReadByte(m_PC);
-        m_PC++;
-        nClockCount = Beq(val);
-        break;
-
-      case 0xF1:// SBC (Zpg),Y
-        addr = FetchIndirectY(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = CROSS_PAGE(addr, m_Y) ? 6 : 5;
-        Sbc(val);
-        break;
-
-      case 0xF2:// kil or SBC (Zpg)
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 0;
-        } else {
-          val = ReadZPageIndirect(m_PC);
-          m_PC++;
-          nClockCount = m_SR & CPU6502_FLAG_D ? 6 : 5;
-          Sbc(val);
-        }
-        break;
-
-      case 0xF3:// isc (Zpg),Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchIndirectY(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 8;
-          Isc(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xF4:// dop Zpg,Y or NOP
-        if (m_cpuType == CPU_6502) {
-          val = ReadZPageY(m_PC);
-          m_PC++;
-          nClockCount = 4;
-        } else {
-          m_PC++;
-          nClockCount = 4;
-        }
-        break;
-
-      case 0xF5:// SBC Zpg,X
-        val = ReadZPageX(m_PC);
-        m_PC++;
-        nClockCount = 4;
-        Sbc(val);
-        break;
-
-      case 0xF6:// INC Zpg,X
-        addr = FetchZPageX(m_PC);
-        val = ReadByte(addr);
-        m_PC++;
-        nClockCount = 6;
-        WriteByte(addr, Inc(val));
-        break;
-
-      case 0xF7:// isc Zpg,X or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchZPageX(m_PC);
-          val = ReadByte(addr);
-          m_PC++;
-          nClockCount = 6;
-          Isc(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xF8:// SED
-        nClockCount = 2;
-        Sed();
-        break;
-
-      case 0xF9:// SBC Abs,Y
-        addr = FetchAbsoluteY(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
-        Sbc(val);
-        break;
-
-      case 0xFA:// nop or PLX
-        if (m_cpuType == CPU_6502) {
-          nClockCount = 2;
-        } else {
-          nClockCount = 4;
-          Plx();
-        }
-        break;
-
-      case 0xFB:// isc Abs,Y or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteY(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 7;
-          Isc(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-
-      case 0xFC:// top Abs,Y or NOP
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 4;
-        break;
-
-      case 0xFD:// SBC Abs,X
-        addr = FetchAbsoluteX(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
-        Sbc(val);
-        break;
-
-      case 0xFE:// INC Abs,X
-        addr = FetchAbsoluteX(m_PC);
-        val = ReadByte(addr);
-        m_PC = static_cast<unsigned short>(m_PC + 2);
-        nClockCount = 7;
-        WriteByte(addr, Inc(val));
-        break;
-
-      case 0xFF:// isc Abs,X or NOP
-        if (m_cpuType == CPU_6502) {
-          addr = FetchAbsoluteX(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
-          nClockCount = 7;
-          Isc(addr, val);
-        } else {
-          nClockCount = 1;
-        }
-        break;
-    }
-    return nClockCount;
+    // table driven O(1) dispatch: the handler fetches its operands, executes and returns the cycle count
+    const unsigned char opCode = ReadByte(m_PC++);
+    return (this->*m_activeOpTable[opCode].handler)();
   }
 
   int Cpu6502::GetOpCodeLength(const unsigned char opCode) const
   {
-    switch (m_cpuType == CPU_6502 ? tabOpcode02[opCode].wMode : tabOpcodeC02[opCode].wMode) {
-      case MODE_IMMEDIATE:
-      case MODE_ZERO_PAGE:
-      case MODE_INDEXED_INDIRECT:
-      case MODE_INDIRECT_INDEXED:
-      case MODE_ZERO_PAGE_X:
-      case MODE_ZERO_PAGE_Y:
-      case MODE_RELATIVE:
-        return 2;
-      case MODE_ABSOLUTE:
-      case MODE_ABSOLUTE_X:
-      case MODE_ABSOLUTE_Y:
-      case MODE_INDIRECT:
-        return 3;
-      default:
-        return 1;
-    }
+    return OpcodeLength(m_activeOpTable[opCode].mode);
   }
+
 
   const char *Cpu6502::GetAddressLabel(const unsigned short addr) const {
     static char buffer[6];
@@ -3548,6 +1222,121 @@ namespace DiskImages {
     return Cpu6502::GetAddressLabelAllBanks(addr);
   }
 
+  // format the operand of an instruction according to its addressing mode and return the operand address (0xFFFF if none)
+  unsigned short Cpu6502::FormatOperand(char *&p, const AddrMode mode, const unsigned char *opCodes, const unsigned short address, const bool allBanks) const {
+    const auto labelOf = [this, allBanks](const unsigned short a) { return allBanks ? GetAddressOrLabelAllBanks(a) : GetAddressOrLabel(a); };
+    const auto append = [&p](const char *s) {
+      strcpy(p, s);
+      p += strlen(p);
+    };
+    const unsigned short zp = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
+    const unsigned short abs = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
+    unsigned short addr = 0xFFFF;
+    switch (mode) {
+      case AddrMode::Immediate:
+        snprintf(p, 7, "#$%02X ", static_cast<int>(opCodes[1]) & 0xFF);
+        p += strlen(p);
+        break;
+      case AddrMode::ImmediateWord:
+        snprintf(p, 9, "#$%04X ", static_cast<int>(abs) & 0xFFFF);
+        p += strlen(p);
+        break;
+      case AddrMode::ZeroPage:
+        addr = zp;
+        append(labelOf(addr));
+        break;
+      case AddrMode::ZeroPageX:
+        addr = zp;
+        append(labelOf(addr));
+        append(",x");
+        break;
+      case AddrMode::ZeroPageY:
+        addr = zp;
+        append(labelOf(addr));
+        append(",y");
+        break;
+      case AddrMode::IndirectX:
+        addr = zp;
+        append("(");
+        append(labelOf(addr));
+        append(",x)");
+        break;
+      case AddrMode::IndirectY:
+        addr = zp;
+        append("(");
+        append(labelOf(addr));
+        append("),y");
+        break;
+      case AddrMode::ZeroPageIndirect:
+        addr = zp;
+        append("(");
+        append(labelOf(addr));
+        append(")");
+        break;
+      case AddrMode::Relative:
+        append(labelOf(static_cast<unsigned short>(address + 2 + static_cast<signed char>(opCodes[1]))));
+        break;
+      case AddrMode::Absolute:
+        addr = abs;
+        append(labelOf(addr));
+        break;
+      case AddrMode::AbsoluteX:
+        addr = abs;
+        append(labelOf(addr));
+        append(",x");
+        break;
+      case AddrMode::AbsoluteY:
+        addr = abs;
+        append(labelOf(addr));
+        append(",y");
+        break;
+      case AddrMode::AbsoluteIndirect:
+        addr = abs;
+        append("(");
+        append(labelOf(addr));
+        append(")");
+        break;
+      case AddrMode::AbsoluteXIndirect:
+        addr = abs;
+        append("(");
+        append(labelOf(addr));
+        append(",x)");
+        break;
+      default:
+        break;
+    }
+    return addr;
+  }
+
+  // format "<opcode bytes> <label>: <mnemonic> <operand>" and return the operand address (0xFFFF if none)
+  unsigned short Cpu6502::FormatInstruction(char *&p, const unsigned char *opCodes, const int lenOpCode, const unsigned short address, const bool allBanks) const {
+    for (int i = 0; i < lenOpCode; i++) {
+      snprintf(p, 5, "%02X ", static_cast<int>(opCodes[i]) & 0xFF);
+      p += 3;
+    }
+    for (int i = lenOpCode; i < 3; i++) {
+      strcpy(p, "-- ");
+      p += 3;
+    }
+    const char *label = GetAddressLabel(address);
+    size_t lenLabel = 0;
+    if (label != nullptr) {
+      strcpy(p, label);
+      lenLabel = strlen(label);
+      p += lenLabel;
+      *p++ = ':';
+      lenLabel++;
+    }
+    for (auto i = lenLabel; i < 17; i++) {
+      *p++ = ' ';
+    }
+    const OpcodeDesc &desc = m_activeOpTable[opCodes[0]];
+    strcpy(p, desc.szName);
+    p += 3;
+    *p++ = ' ';
+    return FormatOperand(p, desc.mode, opCodes, address, allBanks);
+  }
+
   unsigned short Cpu6502::BuildTrace(char *buffer) {
     char *p = buffer;
     *p = 0;
@@ -3565,152 +1354,11 @@ namespace DiskImages {
     p += strlen(p);
     snprintf(p, 6, "%04X:", static_cast<int>(m_PC) & 0xFFFF);
     p += strlen(p);
-    unsigned char opCodes[3];
-    for (int i = 0; i < lenOpCode; i++) {
+    unsigned char opCodes[3] = {opCode, 0, 0};
+    for (int i = 1; i < lenOpCode; i++) {
       opCodes[i] = ReadByte(static_cast<unsigned short>(m_PC + i));
-      snprintf(p, 5, "%02X ", static_cast<int>(opCodes[i]) & 0xFF);
-      p += 3;
     }
-    for (int i = lenOpCode; i < 3; i++) {
-      strcpy(p, "-- ");
-      p += 3;
-    }
-    const char *label = GetAddressLabel(m_PC);
-    size_t lenLabel = 0;
-    if (label != nullptr) {
-      strcpy(p, label);
-      lenLabel = strlen(label);
-      p += lenLabel;
-      *p++ = ':';
-      lenLabel++;
-    }
-    for (auto i = lenLabel; i < 17; i++) {
-      *p++ = ' ';
-    }
-    const char *opCodeName = m_cpuType == CPU_6502 ? tabOpcode02[opCode].szName : tabOpcodeC02[opCode].szName;
-    strcpy(p, opCodeName);
-    p += 3;
-    *p++ = ' ';
-    unsigned short addr = 0xFFFF;
-    const char *secondLabel = nullptr;
-    const char *thirdLabel = nullptr;
-    switch (m_cpuType == CPU_6502 ? tabOpcode02[opCode].wMode : tabOpcodeC02[opCode].wMode) {
-      case MODE_IMMEDIATE:
-        snprintf(p, 7, "#$%02X ", static_cast<int>(opCodes[1]) & 0xFF);
-        p += strlen(p);
-        break;
-      case MODE_ZERO_PAGE:
-        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
-        secondLabel = GetAddressOrLabel(addr);
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        break;
-      case MODE_INDEXED_INDIRECT:
-        secondLabel = GetAddressOrLabel(addr);
-        *p++ = '(';
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, ",x)");
-        p += strlen(p);
-        addr = ReadWord(static_cast<unsigned short>(addr + m_X));
-        break;
-      case MODE_INDIRECT_INDEXED:
-        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
-        secondLabel = GetAddressOrLabel(addr);
-        *p++ = '(';
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, "),y");
-        p += strlen(p);
-        addr = static_cast<unsigned short>(ReadWord(addr) + m_Y);
-        break;
-      case MODE_ZERO_PAGE_X:
-        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
-        secondLabel = GetAddressOrLabel(addr);
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, ",x");
-        p += strlen(p);
-        addr = static_cast<unsigned short>(addr + m_X);
-        break;
-      case MODE_ZERO_PAGE_Y:
-        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
-        secondLabel = GetAddressOrLabel(addr);
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, ",y");
-        p += strlen(p);
-        addr = static_cast<unsigned short>(addr + m_Y);
-        break;
-      case MODE_RELATIVE:
-        secondLabel = GetAddressOrLabel(static_cast<unsigned short>(m_PC + 2 + opCodes[1]));
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        break;
-      case MODE_ABSOLUTE:
-        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
-        secondLabel = GetAddressOrLabel(addr);
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        break;
-      case MODE_ABSOLUTE_X:
-        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
-        secondLabel = GetAddressOrLabel(addr);
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, ",x");
-        p += strlen(p);
-        addr = static_cast<unsigned short>(addr + m_X);
-        break;
-      case MODE_ABSOLUTE_Y:
-        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
-        secondLabel = GetAddressOrLabel(addr);
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, ",y");
-        p += strlen(p);
-        addr = static_cast<unsigned short>(addr + m_Y);
-        break;
-      case MODE_INDIRECT:
-        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
-        *p++ = '(';
-        secondLabel = GetAddressOrLabel(addr);
-        if (secondLabel != nullptr) {
-          strcpy(p, secondLabel);
-        } else {
-          snprintf(p, 7, "$%04X", static_cast<int>(addr) & 0xFFFF);
-        }
-        p += strlen(p);
-        *p++ = ')';
-        break;
-      case MODE_ZERO_PAGE_INDIRECT:
-        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
-        secondLabel = GetAddressOrLabel(addr);
-        *p++ = '(';
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, ")");
-        p += strlen(p);
-        addr = ReadWord(addr);
-        break;
-      case MODE_ZERO_PAGE_RELATIVE:
-        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
-        secondLabel = GetAddressOrLabel(addr);
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, ",");
-        p += strlen(p);
-        thirdLabel = GetAddressOrLabel(static_cast<unsigned short>(m_PC + 2 + opCodes[2]));
-        strcpy(p, thirdLabel);
-        p += strlen(p);
-        break;
-      case MODE_IMMEDIATE_WORD:
-        snprintf(p, 8, "#$%04X ", (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00));
-        p += strlen(p);
-        break;
-      default:
-        break;
-    }
+    const unsigned short addr = FormatInstruction(p, opCodes, lenOpCode, m_PC, false);
     *p = 0;
     if (m_instructionsSkipped) {
       snprintf(p, 30, " ; %d instructions skipped", m_instructionsSkipped);
@@ -3740,145 +1388,11 @@ namespace DiskImages {
     }
     snprintf(p, 8, "$%04X: ", static_cast<int>(address) & 0xFFFF);
     p += strlen(p);
-    unsigned char opCodes[3];
-    for (int i = 0; i < lenOpCode; i++) {
+    unsigned char opCodes[3] = {opCode, 0, 0};
+    for (int i = 1; i < lenOpCode; i++) {
       opCodes[i] = data[i];
-      snprintf(p, 4, "%02X ", static_cast<int>(opCodes[i]) & 0xFF);
-      p += 3;
     }
-    for (int i = lenOpCode; i < 3; i++) {
-      strcpy(p, "-- ");
-      p += 3;
-    }
-    const char *label = GetAddressLabel(address);
-    size_t lenLabel = 0;
-    if (label != nullptr) {
-      strcpy(p, label);
-      lenLabel = strlen(label);
-      p += lenLabel;
-      *p++ = ':';
-      lenLabel++;
-    }
-    for (auto i = lenLabel; i < 17; i++) {
-      *p++ = ' ';
-    }
-    const char *opCodeName = m_cpuType == CPU_6502 ? tabOpcode02[opCode].szName : tabOpcodeC02[opCode].szName;
-    strcpy(p, opCodeName);
-    p += 3;
-    *p++ = ' ';
-    unsigned short addr = 0xFFFF;
-    const char *secondLabel = nullptr;
-    const char *thirdLabel = nullptr;
-    switch (m_cpuType == CPU_6502 ? tabOpcode02[opCode].wMode : tabOpcodeC02[opCode].wMode) {
-      case MODE_IMMEDIATE:
-        snprintf(p, 10, "#$%02X ", static_cast<int>(opCodes[1]) & 0xFF);
-        p += strlen(p);
-        break;
-      case MODE_ZERO_PAGE:
-        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
-        secondLabel = GetAddressOrLabelAllBanks(addr);
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        break;
-      case MODE_INDEXED_INDIRECT:
-        secondLabel = GetAddressOrLabelAllBanks(addr);
-        *p++ = '(';
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, ",x)");
-        p += strlen(p);
-        break;
-      case MODE_INDIRECT_INDEXED:
-        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
-        secondLabel = GetAddressOrLabelAllBanks(addr);
-        *p++ = '(';
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, "),y");
-        p += strlen(p);
-        break;
-      case MODE_ZERO_PAGE_X:
-        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
-        secondLabel = GetAddressOrLabelAllBanks(addr);
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, ",x");
-        p += strlen(p);
-        break;
-      case MODE_ZERO_PAGE_Y:
-        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
-        secondLabel = GetAddressOrLabelAllBanks(addr);
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, ",y");
-        p += strlen(p);
-        break;
-      case MODE_RELATIVE:
-        secondLabel = GetAddressOrLabelAllBanks(static_cast<unsigned short>(address + 2 + static_cast<signed char>(opCodes[1])));
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        break;
-      case MODE_ABSOLUTE:
-        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
-        secondLabel = GetAddressOrLabelAllBanks(addr);
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        break;
-      case MODE_ABSOLUTE_X:
-        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
-        secondLabel = GetAddressOrLabelAllBanks(addr);
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, ",x");
-        p += strlen(p);
-        break;
-      case MODE_ABSOLUTE_Y:
-        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
-        secondLabel = GetAddressOrLabelAllBanks(addr);
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, ",y");
-        p += strlen(p);
-        break;
-      case MODE_INDIRECT:
-        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
-        *p++ = '(';
-        secondLabel = GetAddressOrLabelAllBanks(addr);
-        if (secondLabel != nullptr) {
-          strcpy(p, secondLabel);
-        } else {
-          snprintf(p, 10, "$%04X", static_cast<int>(addr) & 0xFFFF);
-        }
-        p += strlen(p);
-        *p++ = ')';
-        break;
-      case MODE_ZERO_PAGE_INDIRECT:
-        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
-        secondLabel = GetAddressOrLabelAllBanks(addr);
-        *p++ = '(';
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, ")");
-        p += strlen(p);
-        break;
-      case MODE_ZERO_PAGE_RELATIVE:
-        addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
-        secondLabel = GetAddressOrLabelAllBanks(addr);
-        strcpy(p, secondLabel);
-        p += strlen(p);
-        strcpy(p, ",");
-        p += strlen(p);
-        thirdLabel = GetAddressOrLabelAllBanks(static_cast<unsigned short>(address + 3 + static_cast<signed char>(opCodes[2])));
-        strcpy(p, thirdLabel);
-        p += strlen(p);
-        break;
-      case MODE_IMMEDIATE_WORD:
-        snprintf(p, 10, "#$%04X ", (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00));
-        p += strlen(p);
-        break;
-      default:
-        break;
-    }
+    FormatInstruction(p, opCodes, lenOpCode, address, true);
     *p = 0;
     return lenOpCode;
   }
