@@ -494,7 +494,7 @@ void Atari1020::handleGraphicsCodes(const unsigned char b)
                 mAutomataState = AUTOMATA_FIRST_INT;
                 break;
             }
-            // FALL THRU if '-' is not found
+            [[fallthrough]]; // if '-' is not found
 
         case AUTOMATA_FIRST_INT:
             if (b == ',')
@@ -567,7 +567,8 @@ void Atari1020::handleGraphicsCodes(const unsigned char b)
                 mAutomataState  = AUTOMATA_SECOND_INT;
                 break;
             }
-            // FALL THRU if '-' is not found
+
+            [[fallthrough]]; // if '-' is not found
 
         case AUTOMATA_SECOND_INT:
             if (b == ',')
@@ -633,7 +634,8 @@ void Atari1020::handleGraphicsCodes(const unsigned char b)
                 mAutomataState = AUTOMATA_THIRD_INT;
                 break;
             }
-            // FALL THRU if '-' is not found
+
+            [[fallthrough]]; // if '-' is not found
 
         case AUTOMATA_THIRD_INT:
             if (b >= '0' && b <= '9')

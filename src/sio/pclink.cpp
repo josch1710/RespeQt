@@ -297,7 +297,7 @@ bool PCLINK::processParameterBuffer(const uchar ccom, const quint8 cunit, const 
 
   QByteArray data = sio->port()->readDataFrame(parsize, false);
 
-  device[cunit].status.stat &= ~0x02;
+  device[cunit].status.stat = static_cast<uchar>(device[cunit].status.stat & ~0x02);
 
   sio->port()->writeDataAck(); /* ack the received block */
 
@@ -310,7 +310,7 @@ bool PCLINK::processParameterBuffer(const uchar ccom, const quint8 cunit, const 
   }
   memcpy(&pbuf, data.constData(), parsize);
 
-  device[cunit].status.stat &= ~0x04;
+  device[cunit].status.stat = static_cast<uchar>(device[cunit].status.stat & ~0x04);
 
   if (memcmp(&pbuf, &device[cunit].parbuf, sizeof(PARBUF)) == 0) {
     /* this is a retry of P-block. Most commands don't like that */
@@ -349,8 +349,8 @@ void PCLINK::do_pclink(uchar devno, uchar ccom, uchar caux1, uchar caux2) {
   }
 
   const uchar fno = device[cunit].parbuf.fno;
-  const ulong faux = device[cunit].parbuf.f1 + device[cunit].parbuf.f2 * 256 +
-                     device[cunit].parbuf.f3 * 65536;
+  const auto faux = static_cast<ulong>(device[cunit].parbuf.f1 + device[cunit].parbuf.f2 * 256 +
+        device[cunit].parbuf.f3 * 65536);
 
   if (fno < PCL_MAX_FNO + 1) {
     if (D) qDebug() << "!n" << tr("%1 (fno $%02)").arg(fun[fno]).arg(fno, 0, 16);
@@ -1403,9 +1403,9 @@ void PCLINK::handleChmod(const quint8 cunit, const uchar ccom) {
 
       /* On Unix, ignore Hidden and Archive bits */
       if (fatr2 & SA_UNPROTECT)
-        newmode |= S_IWUSR;
+        newmode = static_cast<mode_t>(newmode | S_IWUSR);
       if (fatr2 & SA_PROTECT)
-        newmode &= ~S_IWUSR;
+        newmode = static_cast<mode_t>(newmode & ~S_IWUSR);
       if (chmod(xpath, newmode)) {
         if (D) qDebug() << "!n" << tr("CHMOD: failed on '%1'").arg(xpath);
         device[cunit].status.err |= static_cast<uchar>(PclinkError::General);
@@ -1729,7 +1729,7 @@ void PCLINK::handleDFree(const quint8 cunit, const uchar ccom) {
 
   if (c == 0x20) {
     memcpy(dfree + 14, "PCLink  ", 8); // NOLINT(*-not-null-terminated-result)
-    dfree[21] = cunit + 0x40;
+    dfree[21] = static_cast<uchar>(cunit + 0x40);
   }
 
   if (D) qDebug() << "!n" << tr("DFREE: send info (%1 bytes)").arg(static_cast<int>(sizeof(dfree)) - 1);
@@ -2117,7 +2117,7 @@ int PCLINK::match_dos_names(const char *name, const char *mask, uchar fatr1, con
   }
 
   /* There are no such attributes in Unix */
-  fatr1 &= ~(RA_NO_HIDDEN | RA_NO_ARCHIVED);
+  fatr1 = static_cast<uchar>(fatr1 & ~(RA_NO_HIDDEN | RA_NO_ARCHIVED));
 
   /* Now check the attributes */
   if (fatr1 & (RA_HIDDEN | RA_ARCHIVED)) {
@@ -2261,7 +2261,7 @@ off_t PCLINK::get_file_len(const uchar handle) {
     while ((dp = readdir(iodesc[handle].fps.dir)) != nullptr) {
       if (check_dos_name(iodesc[handle].pathname, dp, &sb))
         continue;
-      filelen += sizeof(DIRENTRY);
+      filelen += static_cast<off_t>(sizeof(DIRENTRY));
     }
     rewinddir(iodesc[handle].fps.dir);
   } else
@@ -2277,7 +2277,7 @@ DIRENTRY *PCLINK::cache_dir(const uchar handle) {
   uchar dirnode = 0x00;
   ushort node;
   // ReSharper disable once CppRedundantCastExpression
-  const size_t dirlen = static_cast<size_t>(iodesc[handle].fpstat.st_size);
+  const off_t dirlen = iodesc[handle].fpstat.st_size;
   DIRENTRY *dbuf;
   dirent *dp;
   struct stat sb{};
@@ -2288,15 +2288,15 @@ DIRENTRY *PCLINK::cache_dir(const uchar handle) {
     iodesc[handle].dir_cache = nullptr;
   }
 
-  DIRENTRY* dir = dbuf = static_cast<DIRENTRY*>(malloc(dirlen + sizeof(DIRENTRY)));
-  memset(dbuf, 0, dirlen + sizeof(DIRENTRY));
+  DIRENTRY* dir = dbuf = static_cast<DIRENTRY*>(malloc(static_cast<size_t>(dirlen) + sizeof(DIRENTRY)));
+  memset(dbuf, 0, static_cast<size_t>(dirlen) + sizeof(DIRENTRY));
 
   dir->status = 0x28;
   dir->map_l = 0x00; /* low 11 bits: file number, high 5 bits: dir number */
   dir->map_h = dirnode;
-  dir->len_l = dirlen & 0x000000ffL;
-  dir->len_m = (dirlen & 0x0000ff00L) >> 8;
-  dir->len_h = (dirlen & 0x00ff0000L) >> 16;
+  dir->len_l = static_cast<uchar>(dirlen & 0x000000ffL);
+  dir->len_m = static_cast<uchar>((dirlen & 0x0000ff00L) >> 8);
+  dir->len_h = static_cast<uchar>((dirlen & 0x00ff0000L) >> 16);
 
   memset(dir->fname, 0x20, 11);
 
@@ -2332,7 +2332,7 @@ DIRENTRY *PCLINK::cache_dir(const uchar handle) {
   unix_time_2_sdx(&iodesc[handle].fpstat.st_mtime, dir->stamp);
 
   dir++;
-  ulong flen = sizeof(DIRENTRY);
+  off_t flen = sizeof(DIRENTRY);
 
   node = 1;
 
@@ -2348,17 +2348,17 @@ DIRENTRY *PCLINK::cache_dir(const uchar handle) {
 
     if (S_ISDIR(sb.st_mode)) {
       dir->status |= 0x20; /* directory */
-      dlen = sizeof(DIRENTRY);
+      dlen = static_cast<off_t>(sizeof(DIRENTRY));
     }
 
     ushort map = static_cast<ushort>(dirnode << 11);
     map |= node & 0x07ff;
 
-    dir->map_l = map & 0x00ff;
-    dir->map_h = (map & 0xff00) >> 8;
-    dir->len_l = dlen & 0x000000ffL;
-    dir->len_m = (dlen & 0x0000ff00L) >> 8;
-    dir->len_h = (dlen & 0x00ff0000L) >> 16;
+    dir->map_l = static_cast<uchar>(map & 0x00ff);
+    dir->map_h = static_cast<uchar>((map & 0xff00) >> 8);
+    dir->len_l = static_cast<uchar>(dlen & 0x000000ffL);
+    dir->len_m = static_cast<uchar>((dlen & 0x0000ff00L) >> 8);
+    dir->len_h = static_cast<uchar>((dlen & 0x00ff0000L) >> 16);
 
     /* convert 8+3 to NNNNNNNNXXX */
     ugefina(dp->d_name, dir->fname);
@@ -2367,7 +2367,7 @@ DIRENTRY *PCLINK::cache_dir(const uchar handle) {
 
     node++;
     dir++;
-    flen += sizeof(DIRENTRY);
+    flen += static_cast<off_t>(sizeof(DIRENTRY));
 
     if (flen >= dirlen)
       break;
@@ -2411,8 +2411,8 @@ void PCLINK::do_pclink_init(const int force) {
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void PCLINK::set_status_size(const uchar cunit, const ushort size) { // NOLINT(*-convert-member-functions-to-static)
-  device[cunit].status.tmot = size & 0x00ff;
-  device[cunit].status.none = (size & 0xff00) >> 8;
+  device[cunit].status.tmot = static_cast<uchar>(size & 0x00ff);
+  device[cunit].status.none = static_cast<uchar>((size & 0xff00) >> 8);
 }
 
 /*************************************************************************/

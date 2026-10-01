@@ -4,10 +4,14 @@ namespace Filesystems {
 
   Dos25FileSystem::Dos25FileSystem(DiskImages::SimpleDiskImage *image)
       : Dos20FileSystem(image) {
-    m_freeSectors = static_cast<quint8>(vtoc.at(3)) + static_cast<quint8>(vtoc.at(4)) * 256;
+    m_freeSectors = static_cast<quint16>(vtoc.at(3) + vtoc.at(4) * 256);
     if (m_image->readSector(1024, vtoc2)) {
       bitmap.append(vtoc2.mid(84, 38));
-      m_freeSectors += static_cast<quint8>(vtoc2.at(122)) + static_cast<quint8>(vtoc2.at(123)) * 256;
+        m_freeSectors = static_cast<quint16>(
+        m_freeSectors
+        + vtoc2.at(122)
+        + (vtoc2.at(123) * 256)
+      );
     }
   }
 
@@ -42,7 +46,7 @@ namespace Filesystems {
   }
 
   uint Dos25FileSystem::totalCapacity() {
-    return (static_cast<quint8>(vtoc.at(1)) + static_cast<quint8>(vtoc.at(2)) * 256) * (m_image->geometry().bytesPerSector() - 3);
+    return static_cast<uint>(vtoc.at(1) + vtoc.at(2) * 256 * m_image->geometry().bytesPerSector() - 3);
   }
 
 }// namespace Filesystems

@@ -49,7 +49,7 @@ namespace DiskImages {
     }
 
     // Validate the magic number
-    if (const quint16 magic = static_cast<quint8>(header[0]) + static_cast<quint8>(header[1]) * 256; magic != 0x0296) {
+    if (const auto magic = static_cast<quint16>(header[0] + header[1] * 256); magic != 0x0296) {
       qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Not a valid ATR file."));
       sourceFile->close();
       delete sourceFile;
@@ -57,10 +57,10 @@ namespace DiskImages {
     }
 
     // Decode image meta-data
-    const quint16 sizeLo = static_cast<quint8>(header[2]) + static_cast<quint8>(header[3]) * 256;
-    const quint16 sizeHi = static_cast<quint8>(header[6]) + static_cast<quint8>(header[7]) * 256;
-    const quint16 secSize = static_cast<quint8>(header[4]) + static_cast<quint8>(header[5]) * 256;
-    quint64 size = (sizeLo + sizeHi * 65536) * 16;
+    const auto sizeLo = static_cast<quint16>(header[2] + header[3] * 256);
+    const auto sizeHi = static_cast<quint16>(header[6] + header[7] * 256);
+    const auto secSize = static_cast<quint16>(header[4] + header[5] * 256);
+    auto size = static_cast<quint64>((sizeLo + sizeHi * 65536) * 16);
 
     // Try to create the temporary file
     file.setFileTemplate(QDir::temp().absoluteFilePath("respeqt-temp-XXXXXX"));
@@ -73,7 +73,7 @@ namespace DiskImages {
 
     // Copy the source file to temporary file
     while (!sourceFile->atEnd()) {
-      constexpr quint32 bufsize = 16777216;
+      constexpr int bufsize = 16777216;
       QByteArray buffer = sourceFile->read(bufsize);
       if (buffer.length() != bufsize && !sourceFile->atEnd()) {
         qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Cannot read from file: %1.").arg(sourceFile->errorString()));
@@ -126,11 +126,11 @@ namespace DiskImages {
       else
       {
           // Handle double density images with 4 or more sectors
-          const quint32 sectorsWithPadding = (size - 768) % secSize;
-          const quint32 sectorsWithoutPadding = (size - 384) % secSize;
-          const quint32 sizeWithPadding = size % secSize;
+          const auto sectorsWithPadding = static_cast<quint32>((size - 768) % secSize);
+          const auto sectorsWithoutPadding = static_cast<quint32>((size - 384) % secSize);
+          const auto sizeWithPadding = static_cast<quint32>(size % secSize);
 
-          if (const quint32 sizeWithoutPadding = (size + 384) % secSize; sizeWithPadding == 0 || sizeWithoutPadding == 0)
+          if (const auto sizeWithoutPadding = static_cast<quint32>((size + 384) % secSize); sizeWithPadding == 0 || sizeWithoutPadding == 0)
               sizeValid = true;
 
           if (sizeValid) {
@@ -675,10 +675,10 @@ namespace DiskImages {
   }
 
   bool SimpleDiskImage::writeHappyAtrTrack(const int trackNumber, const bool happy1050) {
-    const quint16 absoluteSector = static_cast<quint16>(trackNumber) * m_geometry.sectorsPerTrack();
+    const auto absoluteSector = static_cast<quint16>(trackNumber * m_geometry.sectorsPerTrack());
     for (quint16 i = 0; i < m_geometry.sectorsPerTrack(); i++) {
       QByteArray empty(m_geometry.bytesPerSector(), 0);
-      writeAtrSector(absoluteSector + i + 1, empty);
+      writeAtrSector(static_cast<quint16>(absoluteSector + i + 1), empty);
     }
     bool notNormal = false;
     int nbSectors = 0;
@@ -732,11 +732,11 @@ namespace DiskImages {
     const int lastIndex = static_cast<quint8>(m_board.m_happyRam[startOffset + 0x0F]);
     int index = 17;
     while (index >= lastIndex) {
-      const quint8 sectorNumber = 0xFF - static_cast<quint8>(m_board.m_happyRam[startOffset + 0x38 + index]);
+      const auto sectorNumber = static_cast<quint8>(0xFF - m_board.m_happyRam[startOffset + 0x38 + index]);
       m_board.m_happyRam[startOffset + 0x14 + index] = static_cast<char>(0xFF);
       if (sectorNumber > 0 && sectorNumber <= m_geometry.sectorsPerTrack()) {
-        const quint16 dataOffset = static_cast<quint16>(startData + index * 128);
-        const quint16 absoluteSector = static_cast<quint16>(trackNumber) * m_geometry.sectorsPerTrack() + sectorNumber;
+        const auto dataOffset = static_cast<quint16>(startData + index * 128);
+        const auto absoluteSector = static_cast<quint16>(trackNumber * m_geometry.sectorsPerTrack() + sectorNumber);
         if (const bool result = writeAtrSector(absoluteSector, m_board.m_happyRam.mid(dataOffset, 128)); !result) {
           return false;
         }
@@ -831,9 +831,10 @@ namespace DiskImages {
       const quint16 sectorModulo = i % m_geometry.sectorsPerTrack();
       quint16 sectorIndex = static_cast<quint16>((sectorModulo + 1) << 1);
       if (sectorModulo >= m_geometry.sectorsPerTrack() >> 1) {
-        sectorIndex -= m_geometry.sectorsPerTrack() - 1;
+        sectorIndex = static_cast<quint16>(sectorIndex - m_geometry.sectorsPerTrack() - 1);
       }
-      const quint16 sectorNumber = sectorIndex - 1;
+
+      const auto sectorNumber = static_cast<quint16>(sectorIndex - 1);
       data[currentIndexInData++] = static_cast<char>(m_trackNumber);
 #ifdef CHIP_810
       data[currentIndexInData++] = sectorModulo << 2;
@@ -842,9 +843,9 @@ namespace DiskImages {
 #endif
       data[currentIndexInData++] = static_cast<char>(sectorNumber);
       data[currentIndexInData++] = 0;
-      quint8 timing = 5 + (sectorModulo & 1);
+      auto timing = static_cast<quint8>(5 + (sectorModulo & 1));
       if (totalTiming < 0x68 && i % m_geometry.sectorsPerTrack() == m_geometry.sectorsPerTrack() - 1) {
-        timing = 0x68 - totalTiming;
+        timing = static_cast<quint8>(0x68 - totalTiming);
       }
       if (longHeader) {
         data[currentIndexInData++] = static_cast<char>(timing);
@@ -853,7 +854,7 @@ namespace DiskImages {
       if (i == 0) {
         firstTiming = timing;
       }
-      totalTiming += timing;
+      totalTiming = static_cast<quint8>(totalTiming + timing);
       if (!useCount && totalTiming - firstTiming > timeoutValue) {
         data[0] = static_cast<char>(i + 1);
         break;
@@ -895,7 +896,7 @@ namespace DiskImages {
   bool SimpleDiskImage::readAtrSectorUsingIndex(const quint16 aux, QByteArray &data) {
     const quint16 index = aux & 0x1F;
     const quint16 indexInTrack = index % m_geometry.sectorsPerTrack();
-    const quint16 absoluteSector = m_trackNumber * m_geometry.sectorsPerTrack() + m_board.m_chipRam[indexInTrack + 1];
+    const auto absoluteSector = static_cast<quint16>(m_trackNumber * m_geometry.sectorsPerTrack() + m_board.m_chipRam[indexInTrack + 1]);
     return readSector(absoluteSector, data);
   }
 
@@ -923,11 +924,11 @@ namespace DiskImages {
       for (quint16 i = 0; i < nbSectors; i++) {
         // Assume standard interleave: 1, 3, 5, 7, 9, 11, 13, 15, 17, 2, 4, 6, 8, 10, 12, 14, 16, 18
         const quint16 sectorModulo = i % m_geometry.sectorsPerTrack();
-        quint16 sectorIndex = static_cast<quint16>((sectorModulo + 1) << 1);
+        auto sectorIndex = static_cast<quint16>((sectorModulo + 1) << 1);
         if (sectorModulo >= m_geometry.sectorsPerTrack() >> 1) {
-          sectorIndex -= m_geometry.sectorsPerTrack() - 1;
+          sectorIndex = static_cast<quint16>(sectorIndex - m_geometry.sectorsPerTrack() - 1);
         }
-        const quint16 sectorNumber = sectorIndex - 1;
+        const auto sectorNumber = static_cast<quint16>(sectorIndex - 1);
         const auto sectorPosition {static_cast<quint16>(sectorPositions[i] >> 3)};
         m_board.m_trackData[0x08 + i] = static_cast<char>(sectorNumber);
         m_board.m_trackData[0x28 + i] = static_cast<char>((sectorPosition >> 8) & 0xFF);
@@ -973,10 +974,10 @@ namespace DiskImages {
 
   bool SimpleDiskImage::resetAtrTrack(const quint16 aux) {
     const quint16 trackNumber = aux & 0x3F;
-    const quint16 absoluteSector = trackNumber * m_geometry.sectorsPerTrack();
+    const auto absoluteSector = static_cast<quint16>(trackNumber * m_geometry.sectorsPerTrack());
     const QByteArray empty(m_geometry.bytesPerSector(), 0);
     for (quint16 i = 0; i < m_geometry.sectorsPerTrack(); i++) {
-      if (!writeAtrSector(absoluteSector + i + 1, empty)) {
+      if (!writeAtrSector(static_cast<quint16>(absoluteSector + i + 1), empty)) {
         return false;
       }
     }
@@ -1036,7 +1037,7 @@ namespace DiskImages {
     const int indexInTrack = index % m_geometry.sectorsPerTrack();
 
     // write the sector
-    const quint16 absoluteSector = m_trackNumber * m_geometry.sectorsPerTrack() + m_board.m_chipRam[indexInTrack + 1];
+    const auto absoluteSector = static_cast<quint16>(m_trackNumber * m_geometry.sectorsPerTrack() + m_board.m_chipRam[indexInTrack + 1]);
     return writeAtrSector(absoluteSector, data);
   }
 
@@ -1066,7 +1067,7 @@ namespace DiskImages {
     if (sectorNumber < 1 || sectorNumber > m_geometry.sectorsPerTrack()) {
       return true;
     }
-    const quint16 absoluteSector = trackNumber * m_geometry.sectorsPerTrack() + sectorNumber;
+    const auto absoluteSector = static_cast<quint16>(trackNumber * m_geometry.sectorsPerTrack() + sectorNumber);
     return writeAtrSector(absoluteSector, data);
   }
 

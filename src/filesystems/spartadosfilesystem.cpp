@@ -22,7 +22,7 @@ namespace Filesystems {
         result.append(m_currentSector.right(left));
         bytes -= left;
         if (m_currentMapOffset >= m_currentMap.count()) {
-          const quint16 nextMap = static_cast<quint8>(m_currentMap.at(0)) + static_cast<quint8>(m_currentMap.at(1)) * 256;
+          const quint16 nextMap = static_cast<quint16>(m_currentMap.at(0) + m_currentMap.at(1) * 256);
           if (nextMap == 0) {
             m_currentMap.clear();
             return result;
@@ -30,8 +30,8 @@ namespace Filesystems {
           m_fileSystem->m_image->readSector(nextMap, m_currentMap);
           m_currentMapOffset = 4;
         }
-        const quint16 sector = static_cast<quint8>(m_currentMap.at(m_currentMapOffset)) + static_cast<quint8>(m_currentMap.at(m_currentMapOffset + 1)) * 256;
-        m_currentMapOffset += 2;
+        const quint16 sector = static_cast<quint16>(m_currentMap.at(m_currentMapOffset) + m_currentMap.at(m_currentMapOffset + 1) * 256);
+        m_currentMapOffset = static_cast<quint16>(m_currentMapOffset + 2);
         if (sector == 0) {
           m_currentMap.clear();
           return result;
@@ -40,7 +40,7 @@ namespace Filesystems {
         m_currentSectorOffset = 0;
       } else {
         result.append(m_currentSector.mid(m_currentSectorOffset, bytes));
-        m_currentSectorOffset += bytes;
+        m_currentSectorOffset = static_cast<quint16>(m_currentSectorOffset + bytes);
         bytes = 0;
       }
     }
@@ -55,10 +55,10 @@ namespace Filesystems {
       : AtariFileSystem(image) {
     QByteArray boot;
     m_image->readSector(1, boot);
-    m_rootDirMap = static_cast<quint8>(boot.at(9)) + static_cast<quint8>(boot.at(10)) * 256;
-    m_freeSectors = static_cast<quint8>(boot.at(13)) + static_cast<quint8>(boot.at(14)) * 256;
+    m_rootDirMap = static_cast<quint16>(boot.at(9) + boot.at(10) * 256);
+    m_freeSectors = static_cast<quint16>(boot.at(13) + boot.at(14) * 256);
     m_bitmapCount = static_cast<quint8>(boot.at(15));
-    m_firstBitmapSector = static_cast<quint8>(boot.at(16)) + static_cast<quint8>(boot.at(17)) * 256;
+    m_firstBitmapSector = static_cast<quint16>(boot.at(16) + boot.at(17) * 256);
     m_volumeName = boot.mid(22, 8);
 
     QByteArray map;

@@ -37,9 +37,10 @@ static void setDarkTitleBar(HWND hwnd, bool dark) {
     dwmapi = LoadLibraryW(L"dwmapi.dll");
   }
   if (dwmapi) {
-    typedef HRESULT (WINAPI *DwmSetWindowAttributeFunc)(HWND, DWORD, LPCVOID, DWORD);
-    auto pDwmSetWindowAttribute = reinterpret_cast<DwmSetWindowAttributeFunc>(GetProcAddress(dwmapi, "DwmSetWindowAttribute"));
-    if (pDwmSetWindowAttribute) {
+    using DwmSetWindowAttributeFunc = HRESULT (WINAPI *)(HWND, DWORD, LPCVOID, DWORD);
+    // FARPROC has a different signature; casting via void(*)() avoids -Wcast-function-type
+    if (const auto pDwmSetWindowAttribute = reinterpret_cast<DwmSetWindowAttributeFunc>(
+            reinterpret_cast<void (*)()>(GetProcAddress(dwmapi, "DwmSetWindowAttribute")))) {
       // 20 is DWMWA_USE_IMMERSIVE_DARK_MODE (Windows 10 20H1+ and Windows 11)
       // 19 is DWMWA_USE_IMMERSIVE_DARK_MODE_BEFORE_20H1 (Windows 10 1809 - 1909)
       if (FAILED(pDwmSetWindowAttribute(hwnd, 20, &useDarkMode, sizeof(useDarkMode)))) {

@@ -531,11 +531,11 @@ bool CassetteWorker::loadCasImage(const QString &fileName) {
     return false;
   }
 
-  uint magic = static_cast<quint8>(header.at(0)) + static_cast<quint8>(header.at(1)) * 256 + static_cast<quint8>(header.at(2)) * 65536 + static_cast<quint8>(header.at(3)) * 16777216;
-  int length = static_cast<quint8>(header.at(4)) + static_cast<quint8>(header.at(5)) * 256;
+  uint magic = static_cast<uint>(header.at(0) + header.at(1) * 256 + header.at(2) * 65536 + header.at(3) * 16777216);
+  uint length = static_cast<uint>(header.at(4) + header.at(5) * 256);
 
   QByteArray data = casFile.read(length);
-  if (data.length() != length) {
+  if (data.length() != static_cast<int>(length)) {
     qCritical() << "!e" << tr("Cannot read '%1': %2").arg(fileName, casFile.errorString());
     return false;
   }
@@ -562,12 +562,12 @@ bool CassetteWorker::loadCasImage(const QString &fileName) {
       return false;
     }
 
-    magic = static_cast<quint8>(header.at(0)) + static_cast<quint8>(header.at(1)) * 256 + static_cast<quint8>(header.at(2)) * 65536 + static_cast<quint8>(header.at(3)) * 16777216;
-    length = static_cast<quint8>(header.at(4)) + static_cast<quint8>(header.at(5)) * 256;
+    magic = static_cast<uint>(header.at(0) + header.at(1) * 256 + header.at(2) * 65536 + header.at(3) * 16777216);
+    length = static_cast<uint>(header.at(4) + header.at(5) * 256);
     const int aux = static_cast<quint8>(header.at(6)) + static_cast<quint8>(header.at(7)) * 256;
 
     data = casFile.read(length);
-    if (data.length() != length) {
+    if (data.length() != static_cast<int>(length)) {
       qCritical() << "!e" << tr("Cannot read '%1': %2").arg(fileName, casFile.errorString());
       return false;
     }
@@ -584,7 +584,7 @@ bool CassetteWorker::loadCasImage(const QString &fileName) {
       record.baudRate = lastBaud;
       record.data = data;
       record.gapDuration = aux;
-      record.totalDuration = aux + (length * 10000 + lastBaud / 2) / lastBaud;
+      record.totalDuration = aux + (static_cast<int>(length) * 10000 + lastBaud / 2) / lastBaud;
       mTotalDuration += record.totalDuration;
       mRecords.append(record);
     } else {

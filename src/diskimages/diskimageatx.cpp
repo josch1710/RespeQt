@@ -477,8 +477,8 @@ namespace DiskImages {
     // initialize the array containing the sector headers
     for (int track = 0; track < 40; track++) {
       m_atxTrackInfo[track].clear();
-      for (quint8 sector = 0; sector <= sizeof(ATX_SECTOR_POSITIONS_SD) / sizeof(quint16); sector++) {
-        m_atxTrackInfo[track].add(sector + 1, 0, ATX_SECTOR_POSITIONS_SD[sector]);
+      for (quint8 sector = 0; sector <= static_cast<quint8>(sizeof(ATX_SECTOR_POSITIONS_SD) / sizeof(quint16)); sector++) {
+        m_atxTrackInfo[track].add(static_cast<quint8>(sector + 1), 0, ATX_SECTOR_POSITIONS_SD[sector]);
       }
     }
     setReady(true);
@@ -580,8 +580,8 @@ namespace DiskImages {
     m_board.m_happyRam[0x389] = 0x00;
     if (happy1050) {
       m_board.m_happyRam[0x3B0] = 0x23;
-      m_board.m_happyRam[0x3B2] = 0x9A;
-      m_board.m_happyRam[0x3B3] = 0x8D;
+      m_board.m_happyRam[0x3B2] = static_cast<char>(0x9A);
+      m_board.m_happyRam[0x3B3] = static_cast<char>(0x8D);
     } else {
       m_board.m_happyRam[0x38A] = 0x08;
       m_board.m_happyRam[0x390] = 0x05;
@@ -619,7 +619,7 @@ namespace DiskImages {
       }
       if (code < 128) {
         if (static_cast<quint8>(m_board.m_happyRam[offset]) == invertedTrack && static_cast<quint8>(m_board.m_happyRam[offset + 1]) == static_cast<quint8>(0xFF) && static_cast<quint8>(m_board.m_happyRam[offset + 2]) >= 0xED && static_cast<quint8>(m_board.m_happyRam[offset + 2]) != 0xFF && static_cast<quint8>(m_board.m_happyRam[offset + 4]) == 0x08) {
-          const quint8 sector = 0xFF - static_cast<quint8>(m_board.m_happyRam[offset + 2]);
+          const quint8 sector = static_cast<quint8>(0xFF - m_board.m_happyRam[offset + 2]);
           const quint8 normalSize = static_cast<quint8>(m_board.m_happyRam[offset + 3]) == static_cast<quint8>(0xFF);
 
           // fill corresponding slot
@@ -632,7 +632,7 @@ namespace DiskImages {
           } else {
             sectorInfo->setWd1771Status(0xF1);
           }
-          sectorPosition += static_cast<quint16>(6 + 7 + 17);
+          sectorPosition = static_cast<quint16>(sectorPosition + 6 + 7 + 17);
           if (sectorPosition > static_cast<quint16>(3600)) {
             qWarning() << "!w" << tr("[%1] Too many sectors in this track. Ignored.").arg(deviceName());
             return false;
@@ -641,14 +641,14 @@ namespace DiskImages {
           qWarning() << "!w" << tr("[%1] Special sync header at position %2. Ignored.").arg(deviceName()).arg(sectorPosition);
           return false;
         } else {
-          const quint8 track = 0xFF - static_cast<quint8>(m_board.m_happyRam[offset]);
-          const quint8 sector = 0xFF - static_cast<quint8>(m_board.m_happyRam[offset + 2]);
+          const auto track = static_cast<quint8>(0xFF - m_board.m_happyRam[offset]);
+          const auto sector = static_cast<quint8>(0xFF - m_board.m_happyRam[offset + 2]);
           qWarning() << "!w" << tr("[%1] Header has out of range values: Track=$%2 Sector=$%3. Ignored.").arg(deviceName()).arg(track, 2, 16, QChar('0')).arg(sector, 2, 16, QChar('0'));
         }
         offset += 5;
       } else {
         offset++;
-        sectorPosition += static_cast<quint16>(0xFF - code) + 1;
+        sectorPosition = static_cast<quint16>(sectorPosition + 0xFF - code + 1);
       }
     }
     return true;
@@ -657,7 +657,7 @@ namespace DiskImages {
   bool SimpleDiskImage::writeHappyAtxSectors(const int trackNumber, const int afterSectorNumber, const bool happy1050) {
     const int startOffset = happy1050 ? 0xC80 : 0x280;
     const int startData = startOffset + 128;
-    const bool sync = static_cast<quint8>(m_board.m_happyRam[startOffset]) == 0;
+    const bool sync = m_board.m_happyRam[startOffset] == static_cast<char>(0);
     // find the first index to start with.
     int position = 0;
     if (sync && afterSectorNumber != 0) {
@@ -675,8 +675,8 @@ namespace DiskImages {
     for (int passNumber = 1; passNumber <= maxPass; passNumber++) {
       int index = 18 - passNumber;
       while (index >= lastIndex) {
-        const quint8 sectorNumber = 0xFF - static_cast<quint8>(m_board.m_happyRam[startOffset + 0x38 + index]);
-        m_board.m_happyRam[startOffset + 0x14 + index] = 0xEF;
+        const auto sectorNumber = static_cast<quint8>(0xFF - m_board.m_happyRam[startOffset + 0x38 + index]);
+        m_board.m_happyRam[startOffset + 0x14 + index] = static_cast<char>(0xEF);
         if (sectorNumber > 0 && sectorNumber <= m_geometry.sectorsPerTrack()) {
           if (AtxSectorInfo *sectorInfo = m_atxTrackInfo[trackNumber].find(sectorNumber, static_cast<quint16>(position)); sectorInfo != nullptr) {
             const quint8 writeCommand = static_cast<quint8>(m_board.m_happyRam[startOffset + 0x4A + index]);
@@ -685,7 +685,7 @@ namespace DiskImages {
             sectorInfo->copySectorData(m_board.m_happyRam.mid(dataOffset, 128));
             quint8 fdcStatus = sectorInfo->wd1771Status() & dataMark;// use the data mark given in the command
             if (writeCommand & 0x08) {                               // non-IBM format generates a CRC error
-              fdcStatus &= ~0x08;
+              fdcStatus = static_cast<quint8>(fdcStatus & ~0x08);
             }
             sectorInfo->setWd1771Status(fdcStatus);
             m_board.m_happyRam[startOffset + 0x14 + index] = static_cast<char>(fdcStatus);
@@ -704,14 +704,14 @@ namespace DiskImages {
     }
     if (!happy1050) {
       for (int i = 0; i < 5; i++) {
-        m_board.m_happyRam[startOffset + 0x05 + i] = 0x80;
+        m_board.m_happyRam[startOffset + 0x05 + i] = static_cast<char>(0x80);
       }
       m_board.m_happyRam[startOffset + 0x0A] = 0x00;
       m_board.m_happyRam[startOffset + 0x0B] = 0x08;
       m_board.m_happyRam[startOffset + 0x0C] = 0x08;
       m_board.m_happyRam[startOffset + 0x0D] = 0x43;
-      m_board.m_happyRam[startOffset + 0x10] = 0xFF;
-      m_board.m_happyRam[startOffset + 0x13] = 0xEE;
+      m_board.m_happyRam[startOffset + 0x10] = static_cast<char>(0xFF);
+      m_board.m_happyRam[startOffset + 0x13] = static_cast<char>(0xEE);
     }
     return true;
   }
@@ -799,7 +799,7 @@ namespace DiskImages {
       if (i == 0) {
         firstTiming = timing;
       }
-      totalTiming += timing;
+      totalTiming = static_cast<quint8>(totalTiming + timing);
       if (!useCount && totalTiming - firstTiming > timeoutValue) {
         data[0] = static_cast<char>(i);
         break;
@@ -948,7 +948,7 @@ namespace DiskImages {
       }
       if (m_board.isChipOpen() && chipFlags != 0) {
         if ((m_wd1771Status & 0x20) == 0) {
-          m_wd1771Status &= ~0x40;
+          m_wd1771Status = static_cast<quint8>(m_wd1771Status & ~0x40);
         } else {
           m_wd1771Status |= 0x40;
         }
@@ -993,7 +993,7 @@ namespace DiskImages {
           }
           if (m_board.isChipOpen() && chipFlags != 0) {
             if ((m_wd1771Status & 0x20) == 0) {
-              m_wd1771Status &= ~0x40;
+              m_wd1771Status = static_cast<quint8>(m_wd1771Status & ~0x40);
             } else {
               m_wd1771Status |= 0x40;
             }
@@ -1090,7 +1090,7 @@ namespace DiskImages {
           // add the time to change track and issue another read sector command: 115319 microseconds for one track difference
           quint16 firstTrackByteOffset {static_cast<quint16>(static_cast<quint16>(firstTrackSectorInfo->sectorPosition() >> 3) + 6)};
           const auto seekTimeInBytes {static_cast<quint16>((104100 + 20550 * (secondTrack - firstTrack - 1)) >> 6)};
-          firstTrackByteOffset = (firstTrackByteOffset + seekTimeInBytes) % (26042 >> 3);
+          firstTrackByteOffset = static_cast<quint16>((firstTrackByteOffset + seekTimeInBytes) % (26042 >> 3));
 
           // find the first sector at the same rotation angle in the second track
           int nextIndex = 0;
@@ -1100,7 +1100,7 @@ namespace DiskImages {
             const AtxSectorInfo *secondTrackSectorInfo = m_atxTrackInfo[secondTrack].at(index);
             secondTrackByteOffset = static_cast<quint16>(secondTrackSectorInfo->sectorPosition() >> 3);
             if (secondTrackByteOffset >= firstTrackByteOffset + 6) {
-              diffByteOffset = secondTrackByteOffset - firstTrackByteOffset;
+              diffByteOffset = static_cast<quint16>(secondTrackByteOffset - firstTrackByteOffset);
               nextIndex = index;
               break;
             }
@@ -1114,13 +1114,13 @@ namespace DiskImages {
             const int oldOffset = secondTrackByteOffset;
             secondTrackByteOffset = static_cast<quint16>(secondTrackSectorInfo->sectorPosition() >> 3);
             if (secondTrackByteOffset < oldOffset) {
-              diffByteOffset += (26042 >> 3) + secondTrackByteOffset - oldOffset;
+              diffByteOffset = static_cast<quint16>(diffByteOffset + (26042 >> 3) + secondTrackByteOffset - oldOffset);
             } else {
-              diffByteOffset += secondTrackByteOffset - oldOffset;
+              diffByteOffset = static_cast<quint16>(diffByteOffset + secondTrackByteOffset - oldOffset);
             }
             m_board.m_trackData[0x08 + index] = static_cast<char>(sectorNumber);
-            m_board.m_trackData[0x28 + index] = (diffByteOffset >> 8) & 0xFF;
-            m_board.m_trackData[0x48 + index] = diffByteOffset & 0xFF;
+            m_board.m_trackData[0x28 + index] = static_cast<char>((diffByteOffset >> 8) & 0xFF);
+            m_board.m_trackData[0x48 + index] = static_cast<char>(diffByteOffset & 0xFF);
             /*
 qWarning() << "!w" << tr("[%1] track $%2 - $%3 $%4 $%5 - %6 | %7 - %8 | %9 $%10 $%11")
 			.arg(deviceName())
@@ -1184,24 +1184,24 @@ qWarning() << "!w" << tr("[%1] track $%2 - $%3 $%4 $%5 - %6 | %7 - %8 | %9 $%10 
     // add the time to change track and issue another read sector command: 115429 microseconds for one track difference
     const auto seekTime {static_cast<quint16>((115429 + 20550 * (secondTrack - firstTrack - 1)) >> 3)};
     // add also the time corresponding to the reading of the sector data: 154 bytes = 9856 microseconds
-    firstSectorPosition = (firstSectorPosition + seekTime + (154 << 3)) % 26042;
+    firstSectorPosition = static_cast<quint16>((firstSectorPosition + seekTime + (154 << 3)) % 26042);
 
     // now find the sector in the second track from the current rotation angle
     const AtxSectorInfo *secondTrackSectorInfo = m_atxTrackInfo[secondTrack].find(static_cast<quint8>(data[4]), firstSectorPosition);
     if (secondTrackSectorInfo == nullptr) {
       return false;
     }
-    const quint16 secondSectorPosition = (secondTrackSectorInfo->sectorPosition() + (154 << 3) + 1244) % 26042;
+    const quint16 secondSectorPosition = static_cast<quint16>((secondTrackSectorInfo->sectorPosition() + (154 << 3) + 1244) % 26042);
 
     // compute distance between the 2 sectors
     quint16 nbBits = 0;
     if (secondSectorPosition > firstSectorPosition) {
-      nbBits = (secondSectorPosition - firstSectorPosition) % 26042;
+      nbBits = static_cast<quint16>((secondSectorPosition - firstSectorPosition) % 26042);
     } else {
-      nbBits = (26042 + secondSectorPosition - firstSectorPosition) % 26042;
+      nbBits = static_cast<quint16>((26042 + secondSectorPosition - firstSectorPosition) % 26042);
     }
     if (nbBits < 25) {
-      nbBits += 26042;
+      nbBits = static_cast<quint16>(nbBits + 26042);
     }
     const quint32 nbMicroSeconds = static_cast<quint32>(nbBits) << 3;
 
@@ -1324,10 +1324,8 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
           QByteArray sectorData;
           sectorData.resize(128);
           if (fillByte == 0x08) {                // fill with CRC
-            dataSize = ((dataSize * 3) >> 1) + 2;// CRC takes more place to write
-            if (dataSize > static_cast<quint8>(128)) {
-              dataSize = static_cast<quint8>(128);
-            }
+            dataSize = static_cast<quint8>(((dataSize * 3) >> 1) + 2);// CRC takes more place to write
+            dataSize = std::min<quint8>(dataSize, 128);
             sectorData[0] = 0x40;
             sectorData[1] = 0x7B;
             int patternIndex = 0;
@@ -1337,7 +1335,7 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
                 patternIndex = 0;
               }
             }
-            sectorPosition += static_cast<quint16>(postDataCrc) + static_cast<quint16>(3) + static_cast<quint16>(preIDField) + static_cast<quint16>(7) + static_cast<quint16>(postIDCrc) + static_cast<quint16>(1) + static_cast<quint16>(dataSize) + static_cast<quint16>(2);
+            sectorPosition = static_cast<quint16>(sectorPosition + postDataCrc + 3 + preIDField + 7 + postIDCrc + 1 + dataSize + 2);
           } else {
             if (dataSize > static_cast<quint8>(128)) {
               dataSize = static_cast<quint8>(128);
@@ -1349,7 +1347,7 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
               crc16.Add(static_cast<unsigned char>(0xFF - fillByte));
               sectorData[j] = static_cast<char>(fillByte);
             }
-            sectorPosition += static_cast<quint16>(postDataCrc) + static_cast<quint16>(3) + static_cast<quint16>(preIDField) + static_cast<quint16>(7) + static_cast<quint16>(postIDCrc) + static_cast<quint16>(1) + static_cast<quint16>(dataSize) + static_cast<quint16>(2);
+            sectorPosition = static_cast<quint16>(sectorPosition + postDataCrc + 3 + preIDField + 7 + postIDCrc + 1 + dataSize + 2);
             if (dataSize < static_cast<quint8>(128)) {
               sectorData[dataSize++] = static_cast<char>(((0xFFFF - crc16.GetCrc()) >> 8) & 0xFF);
             }
@@ -1379,10 +1377,8 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
               sectorData[dataSize++] = 0xFF - DISK_DATA_ADDR_MARK4;
               quint8 nextDataSize = nextIndex < m_board.m_chipRam[0] ? static_cast<quint8>(data[85 + nextIndex]) : static_cast<quint8>(data[85 + nextIndex - m_board.m_chipRam[0]]);
               if (nextFillByte == 0x08) {                // fill with CRC
-                nextDataSize = (nextDataSize * 3) >> 1;// CRC takes more place to write
-                if (nextDataSize > static_cast<quint8>(128)) {
-                  nextDataSize = static_cast<quint8>(128);
-                }
+                nextDataSize = static_cast<quint8>((nextDataSize * 3) >> 1);// CRC takes more place to write
+                nextDataSize = std::min<quint8>(nextDataSize, 128);
                 if (dataSize < static_cast<quint8>(128)) {
                   sectorData[dataSize++] = 0x40;
                 }
@@ -1427,7 +1423,7 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
   quint8 SimpleDiskImage::writeAtxSectorHeader(quint8 dataSize, QByteArray &sectorData, const quint8 postDataCrc, const quint8 preIDField, const quint8 postIDCrc,
                                                const quint8 track, const quint8 index, const quint8 nextSector) {
     for (quint8 j = 0; j < postDataCrc && dataSize < static_cast<quint8>(128); j++) {
-      sectorData[dataSize++] = 0xFF;
+      sectorData[dataSize++] = static_cast<char>(0xFF);
     }
 #ifdef CHIP_810
     // these 3 zero bytes are written by CHIP 810 but not by Super Archiver 1050.
@@ -1436,7 +1432,7 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
     }
 #endif
     for (quint8 j = 0; j < preIDField && dataSize < static_cast<quint8>(128); j++) {
-      sectorData[dataSize++] = 0xFF;
+      sectorData[dataSize++] = static_cast<char>(0xFF);
     }
     Crc16 crc16;
     crc16.Reset();
@@ -1471,7 +1467,7 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
       sectorData[dataSize++] = static_cast<char>((0xFFFF - crc16.GetCrc()) & 0xFF);
     }
     for (quint8 j = 0; j < postIDCrc && dataSize < static_cast<quint8>(128); j++) {
-      sectorData[dataSize++] = 0xFF;
+      sectorData[dataSize++] = static_cast<char>(0xFF);
     }
     return dataSize;
   }
@@ -1516,7 +1512,7 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
       badSectorType |= 0x08;
     }
     if (badSectorType != 0) {
-      m_wd1771Status = 0xFF & ~badSectorType;
+      m_wd1771Status = static_cast<quint8>(0xFF & ~badSectorType);
       if (fuzzy) {
         qDebug() << "!u" << tr("[%1] Fuzzy sector starting at byte %2").arg(deviceName()).arg(static_cast<quint16>(data[126]));
       } else if ((chipFlags & 0x10) == 0) {
@@ -1539,7 +1535,7 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
     for (quint8 i = 0; i < sectorLength; i++) {
       sectorInfo->copySectorData(data);
     }
-    m_lastSector = m_trackNumber * m_geometry.sectorsPerTrack() + sectorInfo->sectorNumber();
+    m_lastSector = static_cast<quint16>(m_trackNumber * m_geometry.sectorsPerTrack() + sectorInfo->sectorNumber());
     return true;
   }
 
@@ -1569,7 +1565,7 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
     }
 
     // get sector definition for this sector number
-    const quint16 relativeSector = (sector - 1) % m_geometry.sectorsPerTrack() + 1;
+    const auto relativeSector = static_cast<quint16>((sector - 1) % m_geometry.sectorsPerTrack() + 1);
     AtxSectorInfo *sectorInfo = m_atxTrackInfo[newTrack].find(static_cast<quint8>(relativeSector), static_cast<quint16>(distance >> 3));
     if (sectorInfo == nullptr) {
       m_driveStatus = 0x10;
@@ -1589,9 +1585,9 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
       badSectorType |= 0x08;
     }
     if (badSectorType != 0) {
-      m_wd1771Status = 0xFF & ~badSectorType;
+      m_wd1771Status = static_cast<quint8>(0xFF & ~badSectorType);
       if ((chipFlags & 0x10) == 0) {
-        sectorLength = static_cast<quint16>(data[127]);
+        sectorLength = static_cast<quint8>(data[127]);
         qDebug() << "!u" << tr("[%1] Short sector: %2 bytes").arg(deviceName()).arg(sectorLength);
       } else {
         qDebug() << "!u" << tr("[%1] CRC error (type $%2)").arg(deviceName()).arg(badSectorType, 2, 16, QChar('0'));
@@ -1608,7 +1604,7 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
     }
 
     // change the status to reflect the CRC error generated by these weak bits
-    sectorInfo->setWd1771Status(((sectorInfo->wd1771Status() & ~0x08) | 0x10) & 0xFF);
+    sectorInfo->setWd1771Status(static_cast<quint8>(((sectorInfo->wd1771Status() & ~0x08) | 0x10) & 0xFF));
     m_lastDistance = sectorInfo->sectorPosition();
     return true;
   }
@@ -1660,9 +1656,9 @@ qWarning() << "!w" << tr("[%1] track $%2 low=$%3 high=$%4 timer=%5 altirra low=$
         badSectorType |= 0x08;
       }
       if (badSectorType != 0) {
-        m_wd1771Status = 0xFF & ~badSectorType;
+        m_wd1771Status = static_cast<quint8>(0xFF & ~badSectorType);
         if ((chipFlags & 0x10) == 0) {
-          sectorLength = static_cast<quint16>(data[127]);
+          sectorLength = static_cast<quint8>(data[127]);
           qDebug() << "!u" << tr("[%1] Short sector: %2 bytes").arg(deviceName()).arg(sectorLength);
         } else {
           qDebug() << "!u" << tr("[%1] CRC error (type $%2)").arg(deviceName()).arg(badSectorType, 2, 16, QChar('0'));

@@ -11,10 +11,10 @@
 #include <cstring>
 
 // test if there is a page change
-#define CROSS_PAGE(a, r) (((a) - (r) ^ (a)) & 0xFF00)
+static constexpr bool CROSS_PAGE(unsigned short a, unsigned short r) { return ((a - (r ^ a)) & 0xFF00) != 0; }
 
 // mask for Xas, Sya and other instructions
-#define UNDOC_MASK 0xDB// not sure
+constexpr unsigned char UNDOC_MASK = 0xDB;// not sure
 
 namespace DiskImages {
   /**
@@ -573,7 +573,7 @@ namespace DiskImages {
 
   int Cpu6502::Branch(const unsigned char val) {
     const unsigned short OldPC = m_PC;
-    m_PC += static_cast<char>(val);
+    m_PC = static_cast<unsigned short>(m_PC + val);
     if ((OldPC ^ m_PC) & 0xFF00) {
       return 4;// Different page
     }
@@ -591,7 +591,7 @@ namespace DiskImages {
 
   void Cpu6502::Adc(const unsigned char val) {
     const unsigned char oldA = m_A;
-    const unsigned short sum = static_cast<unsigned short>(val) + static_cast<unsigned short>(m_A) + (m_SR & CPU6502_FLAG_C);
+    const auto sum = static_cast<unsigned short>(val + m_A + (m_SR & CPU6502_FLAG_C));
     const auto lowSum {static_cast<unsigned char>(sum)};
     SetFlagN(lowSum);
     SetFlagV((lowSum ^ oldA) & 0x80 && (lowSum ^ val) & 0x80);
@@ -600,7 +600,6 @@ namespace DiskImages {
 
       // BCD mode
       if (m_BCDTable[2][m_A] || m_BCDTable[2][val]) {
-
         // bad BCD values
         unsigned char lowA = m_A & 0x0F;
         unsigned char lowVal = val & 0x0F;
@@ -609,21 +608,21 @@ namespace DiskImages {
 
         // fix low part of register A and val
         if (lowA >= 0x0A) {
-          lowA += 0x06;
+          lowA = static_cast<unsigned char>(lowA + 0x06);
         } else {
 
           // val is fixed only if register A is a good BCD value
           if (lowVal >= 0x0A) {
-            lowVal += 0x06;
+            lowVal = static_cast<unsigned char>(lowVal + 0x06);
           }
         }
 
         // make the sum of low part
-        unsigned short sumLow = lowA + lowVal + (m_SR & CPU6502_FLAG_C);
+        auto sumLow = static_cast<unsigned short>(lowA + lowVal + (m_SR & CPU6502_FLAG_C));
 
         // fix BCD value if both parts are valid BCD values
         if (sumLow >= 0x0A && lowA < 0x0A && lowVal < 0x0A) {
-          sumLow += 0x06;
+          sumLow = static_cast<unsigned short>(sumLow + 0x06);
         }
 
         // set carry for low part
@@ -632,26 +631,26 @@ namespace DiskImages {
 
         // fix high part of register A and val
         if (highA >= 0xA0) {
-          highA += 0x60;
+          highA = static_cast<unsigned short>(highA + 0x60);
         } else {
 
           // val is fixed only if register A is a good BCD value
           if (highVal >= 0xA0) {
-            highVal += 0x60;
+            highVal = static_cast<unsigned short>(highVal + 0x60);
           }
         }
 
         // make the sum of high part
-        unsigned short sumHigh = highA + highVal + lowCarry;
+        auto sumHigh = static_cast<unsigned short>(highA + highVal + lowCarry);
 
         // fix BCD value if both parts are valid BCD values
         if (sumHigh >= 0xA0 && highA < 0xA0 && highVal < 0xA0) {
-          sumHigh += 0x60;
+          sumHigh = static_cast<unsigned short>(sumHigh + 0x60);
         }
 
         // make the sum and set carry flag.
-        const unsigned short sumBCD = sumHigh + sumLow;
-        SetFlagC(sumBCD >> 8);
+        const auto sumBCD = static_cast<unsigned short>(sumHigh + sumLow);
+        SetFlagC(static_cast<unsigned char>(sumBCD >> 8));
 
         // fix A for overflow setting.
         m_A = static_cast<unsigned char>(sumBCD);
@@ -666,7 +665,7 @@ namespace DiskImages {
     } else {
 
       // binary mode
-      SetFlagC(sum >> 8);
+      SetFlagC(static_cast<unsigned char>(sum >> 8));
       m_A = static_cast<unsigned char>(sum);
     }
     SetFlagZ(m_A);
@@ -699,19 +698,19 @@ namespace DiskImages {
     if (m_SR & CPU6502_FLAG_D) {
       // BCD fixup for low part.
       if (const unsigned char lowA = tmpA & 0x0F; lowA + (lowA & 1) > 5) {
-        m_A = (m_A & 0xF0) | (m_A + 0x06 & 0xF);
+        m_A = static_cast<unsigned char>((m_A & 0xF0) | ((m_A + 0x06) & 0x0F));
       }
 
       // BCD fixup for high part.
       if (m_SR & CPU6502_FLAG_C) {
-        m_A += 0x60;
+        m_A = static_cast<unsigned char>(m_A + 0x60);
       }
     }
   }
 
   unsigned char Cpu6502::Asl(unsigned char val) {
     SetFlagC(val & 0x80);
-    val <<= 1;
+    val = static_cast<unsigned char>(val << 1);
     SetFlagN(val);
     SetFlagZ(val);
     return val;
@@ -733,7 +732,7 @@ namespace DiskImages {
   }
 
   void Cpu6502::Axs(const unsigned char val) {
-    const unsigned short reg = static_cast<unsigned short>(m_A & m_X) - val;
+    const auto reg = static_cast<unsigned short>((m_A & m_X) - val);
 
     m_X = static_cast<unsigned char>(reg);
     SetFlagC(reg < 0x100);
@@ -832,27 +831,27 @@ namespace DiskImages {
   }
 
   void Cpu6502::Cmp(const unsigned char val) {
-    const unsigned short cmp = static_cast<unsigned short>(m_A) - val;
+    const auto cmp = static_cast<unsigned short>(m_A - val);
 
     SetFlagC(cmp < 0x100);
     SetFlagN(static_cast<unsigned char>(cmp));
-    SetFlagZ(cmp & 0xFF);
+    SetFlagZ(static_cast<unsigned char>(cmp & 0xFF));
   }
 
   void Cpu6502::Cpx(const unsigned char val) {
-    const unsigned short cmp = static_cast<unsigned short>(m_X) - val;
+    const auto  cmp = static_cast<unsigned short>(m_X - val);
 
     SetFlagC(cmp < 0x100);
     SetFlagN(static_cast<unsigned char>(cmp));
-    SetFlagZ(cmp & 0xFF);
+    SetFlagZ(static_cast<unsigned char>(cmp & 0xFF));
   }
 
   void Cpu6502::Cpy(const unsigned char val) {
-    const unsigned short cmp = static_cast<unsigned short>(m_Y) - val;
+    const auto cmp = static_cast<unsigned short>(m_Y - val);
 
     SetFlagC(cmp < 0x100);
     SetFlagN(static_cast<unsigned char>(cmp));
-    SetFlagZ(cmp & 0xFF);
+    SetFlagZ(static_cast<unsigned char>(cmp & 0xFF));
   }
 
   void Cpu6502::Dcp(const unsigned short addr, const unsigned char val) {
@@ -966,7 +965,7 @@ namespace DiskImages {
 
   unsigned char Cpu6502::Lsr(unsigned char val) {
     SetFlagC(val & 0x01);
-    val >>= 1;
+    val = static_cast<unsigned char>(val >> 1);
     SetFlagN(val);
     SetFlagZ(val);
     return val;
@@ -1026,13 +1025,13 @@ namespace DiskImages {
 
   unsigned char Cpu6502::Rol(unsigned char val) {
     if (val & 0x80) {
-      val <<= 1;
+      val = static_cast<unsigned char>(val << 1);
       if (m_SR & CPU6502_FLAG_C) {
         val |= 0x01;
       }
       SetFlagC(1);
     } else {
-      val <<= 1;
+      val = static_cast<unsigned char>(val << 1);
       if (m_SR & CPU6502_FLAG_C) {
         val |= 0x01;
       }
@@ -1046,11 +1045,11 @@ namespace DiskImages {
   unsigned char Cpu6502::Ror(unsigned char val) {
     if (m_SR & CPU6502_FLAG_C) {
       SetFlagC(val & 0x01);
-      val >>= 1;
+      val = static_cast<unsigned char>(val >> 1);
       val |= 0x80;
     } else {
       SetFlagC(val & 0x01);
-      val >>= 1;
+      val = static_cast<unsigned char>(val >> 1);
     }
     SetFlagN(val);
     SetFlagZ(val);
@@ -1077,7 +1076,7 @@ namespace DiskImages {
   void Cpu6502::Sbc(const unsigned char val) {
     const unsigned char oldA = m_A;
 
-    const unsigned short dif = static_cast<unsigned short>(m_A) - static_cast<unsigned short>(val) - (m_SR & CPU6502_FLAG_C ? 0 : 1);
+    const auto dif = static_cast<unsigned short>(m_A - val - (m_SR & CPU6502_FLAG_C ? 0 : 1));
     const auto lowDif = static_cast<unsigned char>(dif);
     SetFlagN(lowDif);
     SetFlagV((lowDif ^ oldA) & 0x80 && (oldA ^ val) & 0x80);
@@ -1094,11 +1093,11 @@ namespace DiskImages {
         const unsigned short highVal = static_cast<unsigned short>(val) & 0xF0;
 
         // make the dif of low part
-        unsigned short difLow = lowA - lowVal - (m_SR & CPU6502_FLAG_C ? 0 : 1);
+        auto difLow = static_cast<unsigned short>(lowA - lowVal - (m_SR & CPU6502_FLAG_C ? 0 : 1));
 
         // fix BCD value
         if (difLow & 0x10) {
-          difLow -= 0x06;
+          difLow = static_cast<unsigned short>(difLow - 0x06);
         }
 
         // set carry for low part
@@ -1106,11 +1105,11 @@ namespace DiskImages {
         difLow &= 0x0F;
 
         // make the dif of high part
-        unsigned short difHigh = highA - highVal - lowCarry;
+        auto  difHigh = static_cast<unsigned short>(highA - highVal - lowCarry);
 
         // fix BCD value if both parts are valid BCD values
         if (difHigh & 0x100) {
-          difHigh -= 0x60;
+          difHigh = static_cast<unsigned short>(difHigh - 0x60);
         }
 
         // make the dif and set carry flag.
@@ -1362,12 +1361,12 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsolute(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 4;
         } else {
           addr = FetchAbsolute(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 6;
           WriteByte(addr, Tsb(val));
         }
@@ -1375,7 +1374,7 @@ namespace DiskImages {
 
       case 0x0D:// ORA Abs
         val = ReadAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         Ora(val);
         break;
@@ -1383,7 +1382,7 @@ namespace DiskImages {
       case 0x0E:// ASL Abs
         addr = FetchAbsolute(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 6;
         WriteByte(addr, Asl(val));
         break;
@@ -1392,7 +1391,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsolute(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 6;
           Slo(addr, val);
         } else {
@@ -1486,7 +1485,7 @@ namespace DiskImages {
       case 0x19:// ORA Abs,Y
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         Ora(val);
         break;
@@ -1504,7 +1503,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteY(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 7;
           Slo(addr, val);
         } else {
@@ -1516,12 +1515,12 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteX(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 4;
         } else {
           addr = FetchAbsolute(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 6;
           WriteByte(addr, Trb(val));
         }
@@ -1530,7 +1529,7 @@ namespace DiskImages {
       case 0x1D:// ORA Abs,X
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         Ora(val);
         break;
@@ -1538,7 +1537,7 @@ namespace DiskImages {
       case 0x1E:// ASL Abs,X
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         if (m_cpuType == CPU_6502) {
           nClockCount = 7;
         } else {
@@ -1551,7 +1550,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteX(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 7;
           Slo(addr, val);
         } else {
@@ -1561,7 +1560,7 @@ namespace DiskImages {
 
       case 0x20:// JSR Abs
         addr = FetchAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 6;
         Jsr(addr);
         break;
@@ -1658,14 +1657,14 @@ namespace DiskImages {
 
       case 0x2C:// BIT Abs
         val = ReadAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         Bit(val);
         break;
 
       case 0x2D:// AND Abs
         val = ReadAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         And(val);
         break;
@@ -1673,7 +1672,7 @@ namespace DiskImages {
       case 0x2E:// ROL Abs
         addr = FetchAbsolute(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 6;
         WriteByte(addr, Rol(val));
         break;
@@ -1682,7 +1681,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsolute(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 6;
           Rla(addr, val);
         } else {
@@ -1775,7 +1774,7 @@ namespace DiskImages {
       case 0x39:// AND Abs,Y
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         And(val);
         break;
@@ -1793,7 +1792,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteY(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 7;
           Rla(addr, val);
         } else {
@@ -1805,12 +1804,12 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteX(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         } else {
           addr = FetchAbsoluteX(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
           Bit(val);
         }
@@ -1819,7 +1818,7 @@ namespace DiskImages {
       case 0x3D:// AND Abs,X
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         And(val);
         break;
@@ -1827,7 +1826,7 @@ namespace DiskImages {
       case 0x3E:// ROL Abs,X
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         if (m_cpuType == CPU_6502) {
           nClockCount = 7;
         } else {
@@ -1840,7 +1839,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteX(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 7;
           Rla(addr, val);
         } else {
@@ -1949,14 +1948,14 @@ namespace DiskImages {
 
       case 0x4C:// JMP Abs
         addr = FetchAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 3;
         Jmp(addr);
         break;
 
       case 0x4D:// EOR Abs
         val = ReadAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         Eor(val);
         break;
@@ -1964,7 +1963,7 @@ namespace DiskImages {
       case 0x4E:// LSR Abs
         addr = FetchAbsolute(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 6;
         WriteByte(addr, Lsr(val));
         break;
@@ -1973,7 +1972,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsolute(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 6;
           Sre(addr, val);
         } else {
@@ -2064,7 +2063,7 @@ namespace DiskImages {
       case 0x59:// EOR Abs,Y
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         Eor(val);
         break;
@@ -2082,7 +2081,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteY(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 7;
           Sre(addr, val);
         } else {
@@ -2094,10 +2093,10 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteX(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 4;
         } else {
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 8;
         }
         break;
@@ -2105,7 +2104,7 @@ namespace DiskImages {
       case 0x5D:// EOR Abs,X
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         Eor(val);
         break;
@@ -2113,7 +2112,7 @@ namespace DiskImages {
       case 0x5E:// LSR Abs,X
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         if (m_cpuType == CPU_6502) {
           nClockCount = 7;
         } else {
@@ -2126,7 +2125,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteX(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 7;
           Sre(addr, val);
         } else {
@@ -2237,12 +2236,12 @@ namespace DiskImages {
       case 0x6C:// JMP Ind
         if (m_cpuType == CPU_6502) {
           addr = FetchIndirectBug(m_PC);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 5;
           Jmp(addr);
         } else {
           addr = FetchIndirect(m_PC);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 6;
           Jmp(addr);
         }
@@ -2250,7 +2249,7 @@ namespace DiskImages {
 
       case 0x6D:// ADC Abs
         val = ReadAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         Adc(val);
         break;
@@ -2258,7 +2257,7 @@ namespace DiskImages {
       case 0x6E:// ROR Abs
         addr = FetchAbsolute(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 6;
         WriteByte(addr, Ror(val));
         break;
@@ -2267,7 +2266,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsolute(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 6;
           Rra(addr, val);
         } else {
@@ -2360,7 +2359,7 @@ namespace DiskImages {
       case 0x79:// ADC Abs,Y
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         Adc(val);
         break;
@@ -2378,7 +2377,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteY(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 7;
           Rra(addr, val);
         } else {
@@ -2390,11 +2389,11 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteX(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 4;
         } else {
           addr = FetchAbsoluteXIndirect(m_PC);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 6;
           Jmp(addr);
         }
@@ -2403,7 +2402,7 @@ namespace DiskImages {
       case 0x7D:// ADC Abs,X
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         Adc(val);
         break;
@@ -2411,7 +2410,7 @@ namespace DiskImages {
       case 0x7E:// ROR Abs,X
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         if (m_cpuType == CPU_6502) {
           nClockCount = 7;
         } else {
@@ -2424,7 +2423,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteX(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 7;
           Rra(addr, val);
         } else {
@@ -2533,21 +2532,21 @@ namespace DiskImages {
 
       case 0x8C:// STY Abs
         addr = FetchAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         Sty(addr);
         break;
 
       case 0x8D:// STA Abs
         addr = FetchAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         Sta(addr);
         break;
 
       case 0x8E:// STX Abs
         addr = FetchAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         Stx(addr);
         break;
@@ -2555,7 +2554,7 @@ namespace DiskImages {
       case 0x8F:// aax Abs or NOP
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsolute(m_PC);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 4;
           Aax(addr);
         } else {
@@ -2591,7 +2590,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchIndirectY(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 6;
           Axa(addr);
         } else {
@@ -2638,7 +2637,7 @@ namespace DiskImages {
 
       case 0x99:// STA Abs,Y
         addr = FetchAbsoluteY(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 5;
         Sta(addr);
         break;
@@ -2651,7 +2650,7 @@ namespace DiskImages {
       case 0x9B:// xas Abs,Y or NOP
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteY(m_PC);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 5;
           Xas(addr);
         } else {
@@ -2662,12 +2661,12 @@ namespace DiskImages {
       case 0x9C:// sya Abs,X or STZ Abs
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteX(m_PC);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 5;
           Sya(addr);
         } else {
           addr = FetchAbsolute(m_PC);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 4;
           Stz(addr);
         }
@@ -2675,7 +2674,7 @@ namespace DiskImages {
 
       case 0x9D:// STA Abs,X
         addr = FetchAbsoluteX(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 5;
         Sta(addr);
         break;
@@ -2683,12 +2682,12 @@ namespace DiskImages {
       case 0x9E:// sxa Abs,Y or STZ Abs,X
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteY(m_PC);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 5;
           Sxa(addr);
         } else {
           addr = FetchAbsoluteX(m_PC);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 5;
           Stz(addr);
         }
@@ -2697,7 +2696,7 @@ namespace DiskImages {
       case 0x9F:// axa Abs,Y or NOP
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteY(m_PC);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 5;
           Axa(addr);
         } else {
@@ -2799,21 +2798,21 @@ namespace DiskImages {
 
       case 0xAC:// LDY Abs
         val = ReadAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         Ldy(val);
         break;
 
       case 0xAD:// LDA Abs
         val = ReadAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         Lda(val);
         break;
 
       case 0xAE:// LDX Abs
         val = ReadAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         Ldx(val);
         break;
@@ -2821,7 +2820,7 @@ namespace DiskImages {
       case 0xAF:// lax Abs or NOP
         if (m_cpuType == CPU_6502) {
           val = ReadAbsolute(m_PC);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 4;
           Lax(val);
         } else {
@@ -2906,7 +2905,7 @@ namespace DiskImages {
       case 0xB9:// LDA Abs,Y
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         Lda(val);
         break;
@@ -2920,7 +2919,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteY(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
           Lar(val);
         } else {
@@ -2931,7 +2930,7 @@ namespace DiskImages {
       case 0xBC:// LDY Abs,X
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         Ldy(val);
         break;
@@ -2939,7 +2938,7 @@ namespace DiskImages {
       case 0xBD:// LDA Abs,X
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         Lda(val);
         break;
@@ -2947,7 +2946,7 @@ namespace DiskImages {
       case 0xBE:// LDX Abs,Y
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         Ldx(val);
         break;
@@ -2956,7 +2955,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteY(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
           Lax(val);
         } else {
@@ -3059,14 +3058,14 @@ namespace DiskImages {
 
       case 0xCC:// CPY Abs
         val = ReadAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         Cpy(val);
         break;
 
       case 0xCD:// CMP Abs
         val = ReadAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         Cmp(val);
         break;
@@ -3074,7 +3073,7 @@ namespace DiskImages {
       case 0xCE:// DEC Abs
         addr = FetchAbsolute(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 6;
         WriteByte(addr, Dec(val));
         break;
@@ -3083,7 +3082,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsolute(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 6;
           Dcp(addr, val);
         } else {
@@ -3174,7 +3173,7 @@ namespace DiskImages {
       case 0xD9:// CMP Abs,Y
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         Cmp(val);
         break;
@@ -3192,7 +3191,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteY(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 7;
           Dcp(addr, val);
         } else {
@@ -3201,14 +3200,14 @@ namespace DiskImages {
         break;
 
       case 0xDC:// top Abs,Y or NOP
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         break;
 
       case 0xDD:// CMP Abs,X
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         Cmp(val);
         break;
@@ -3216,7 +3215,7 @@ namespace DiskImages {
       case 0xDE:// DEC Abs,X
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 7;
         WriteByte(addr, Dec(val));
         break;
@@ -3225,7 +3224,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteX(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 7;
           Dcp(addr, val);
         } else {
@@ -3327,14 +3326,14 @@ namespace DiskImages {
 
       case 0xEC:// CPX Abs
         val = ReadAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         Cpx(val);
         break;
 
       case 0xED:// SBC Abs
         val = ReadAbsolute(m_PC);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         Sbc(val);
         break;
@@ -3342,7 +3341,7 @@ namespace DiskImages {
       case 0xEE:// INC Abs
         addr = FetchAbsolute(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 6;
         WriteByte(addr, Inc(val));
         break;
@@ -3351,7 +3350,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsolute(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 6;
           Isc(addr, val);
         } else {
@@ -3442,7 +3441,7 @@ namespace DiskImages {
       case 0xF9:// SBC Abs,Y
         addr = FetchAbsoluteY(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_Y) ? 5 : 4;
         Sbc(val);
         break;
@@ -3460,7 +3459,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteY(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 7;
           Isc(addr, val);
         } else {
@@ -3469,14 +3468,14 @@ namespace DiskImages {
         break;
 
       case 0xFC:// top Abs,Y or NOP
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 4;
         break;
 
       case 0xFD:// SBC Abs,X
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = CROSS_PAGE(addr, m_X) ? 5 : 4;
         Sbc(val);
         break;
@@ -3484,7 +3483,7 @@ namespace DiskImages {
       case 0xFE:// INC Abs,X
         addr = FetchAbsoluteX(m_PC);
         val = ReadByte(addr);
-        m_PC += 2;
+        m_PC = static_cast<unsigned short>(m_PC + 2);
         nClockCount = 7;
         WriteByte(addr, Inc(val));
         break;
@@ -3493,7 +3492,7 @@ namespace DiskImages {
         if (m_cpuType == CPU_6502) {
           addr = FetchAbsoluteX(m_PC);
           val = ReadByte(addr);
-          m_PC += 2;
+          m_PC = static_cast<unsigned short>(m_PC + 2);
           nClockCount = 7;
           Isc(addr, val);
         } else {
@@ -3614,7 +3613,7 @@ namespace DiskImages {
         p += strlen(p);
         strcpy(p, ",x)");
         p += strlen(p);
-        addr = ReadWord(addr + m_X);
+        addr = ReadWord(static_cast<unsigned short>(addr + m_X));
         break;
       case MODE_INDIRECT_INDEXED:
         addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
@@ -3624,7 +3623,7 @@ namespace DiskImages {
         p += strlen(p);
         strcpy(p, "),y");
         p += strlen(p);
-        addr = ReadWord(addr) + m_Y;
+        addr = static_cast<unsigned short>(ReadWord(addr) + m_Y);
         break;
       case MODE_ZERO_PAGE_X:
         addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
@@ -3633,7 +3632,7 @@ namespace DiskImages {
         p += strlen(p);
         strcpy(p, ",x");
         p += strlen(p);
-        addr += m_X;
+        addr = static_cast<unsigned short>(addr + m_X);
         break;
       case MODE_ZERO_PAGE_Y:
         addr = static_cast<unsigned short>(opCodes[1]) & 0x00FF;
@@ -3642,7 +3641,7 @@ namespace DiskImages {
         p += strlen(p);
         strcpy(p, ",y");
         p += strlen(p);
-        addr += m_Y;
+        addr = static_cast<unsigned short>(addr + m_Y);
         break;
       case MODE_RELATIVE:
         secondLabel = GetAddressOrLabel(static_cast<unsigned short>(m_PC + 2 + opCodes[1]));
@@ -3650,31 +3649,31 @@ namespace DiskImages {
         p += strlen(p);
         break;
       case MODE_ABSOLUTE:
-        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
+        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
         secondLabel = GetAddressOrLabel(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
         break;
       case MODE_ABSOLUTE_X:
-        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
+        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
         secondLabel = GetAddressOrLabel(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
         strcpy(p, ",x");
         p += strlen(p);
-        addr += m_X;
+        addr = static_cast<unsigned short>(addr + m_X);
         break;
       case MODE_ABSOLUTE_Y:
-        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
+        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
         secondLabel = GetAddressOrLabel(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
         strcpy(p, ",y");
         p += strlen(p);
-        addr += m_Y;
+        addr = static_cast<unsigned short>(addr + m_Y);
         break;
       case MODE_INDIRECT:
-        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
+        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
         *p++ = '(';
         secondLabel = GetAddressOrLabel(addr);
         if (secondLabel != nullptr) {
@@ -3821,13 +3820,13 @@ namespace DiskImages {
         p += strlen(p);
         break;
       case MODE_ABSOLUTE:
-        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
+        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
         secondLabel = GetAddressOrLabelAllBanks(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
         break;
       case MODE_ABSOLUTE_X:
-        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
+        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
         secondLabel = GetAddressOrLabelAllBanks(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
@@ -3835,7 +3834,7 @@ namespace DiskImages {
         p += strlen(p);
         break;
       case MODE_ABSOLUTE_Y:
-        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
+        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
         secondLabel = GetAddressOrLabelAllBanks(addr);
         strcpy(p, secondLabel);
         p += strlen(p);
@@ -3843,7 +3842,7 @@ namespace DiskImages {
         p += strlen(p);
         break;
       case MODE_INDIRECT:
-        addr = (static_cast<unsigned short>(opCodes[1]) & 0x00FF) | ((static_cast<unsigned short>(opCodes[2]) << 8) & 0xFF00);
+        addr = static_cast<unsigned short>((opCodes[1] & 0x00FF) | ((opCodes[2] << 8) & 0xFF00));
         *p++ = '(';
         secondLabel = GetAddressOrLabelAllBanks(addr);
         if (secondLabel != nullptr) {

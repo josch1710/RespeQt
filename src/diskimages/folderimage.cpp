@@ -355,7 +355,7 @@ namespace DiskImages {
     if (sector >= 433 && sector <= 1023) {
       QFile file(atariFiles[atariFileNo].original.absoluteFilePath());
       file.open(QFile::ReadOnly);
-      atariFiles[atariFileNo].pos = 125 + (sector - 433) * 125 + static_cast<quint64>(atariFiles[atariFileNo].sectPass) * 73875;
+      atariFiles[atariFileNo].pos = static_cast<quint64>(125 + (sector - 433) * 125 + atariFiles[atariFileNo].sectPass * 73875);
       file.seek(static_cast<qint64>(atariFiles[atariFileNo].pos));
       data = file.read(125);
       next = sector + 1;

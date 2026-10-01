@@ -12,7 +12,7 @@ namespace DiskImages {
     mSectorCount = 0;
   }
 
-  DiskGeometry::DiskGeometry(const DiskGeometry &other)
+  DiskGeometry::DiskGeometry(const DiskGeometry &other): QObject() // NOLINT(*-redundant-member-init)
   {
     initialize(other);
   }
@@ -31,11 +31,11 @@ namespace DiskImages {
     mTracksPerSide = aTracksPerSide;
     mSectorsPerTrack = aSectorsPerTrack;
     mBytesPerSector = aBytesPerSector;
-    mSectorCount = (mIsDoubleSided + 1) * mTracksPerSide * mSectorsPerTrack;
+    mSectorCount = static_cast<quint16>((mIsDoubleSided + 1) * mTracksPerSide * mSectorsPerTrack);
     if (mBytesPerSector == 256) {
       mTotalSize = mSectorCount * 128;
       if (mTotalSize > 384) {
-        mTotalSize += (mBytesPerSector - 128) * (mSectorCount - 3);
+        mTotalSize = mTotalSize + static_cast<quint16>(mBytesPerSector - 128) * (mSectorCount - 3);
       }
     } else {
       mTotalSize = mSectorCount * mBytesPerSector;
@@ -126,9 +126,9 @@ namespace DiskImages {
 
   void DiskGeometry::initialize(const QByteArray &percom) {
     const auto aTracksPerSide {static_cast<quint8>(percom.at(0))};
-    const quint16 aSectorsPerTrack = static_cast<quint8>(percom.at(2)) * 256 + static_cast<quint8>(percom.at(3));
+    const quint16 aSectorsPerTrack = static_cast<quint16>(percom.at(2) * 256 + percom.at(3));
     const bool aIsDoubleSided = static_cast<quint8>(percom.at(4));
-    const quint16 aBytesPerSector = static_cast<quint8>(percom.at(6)) * 256 + static_cast<quint8>(percom.at(7));
+    const quint16 aBytesPerSector = static_cast<quint16>(percom.at(6) * 256 + percom.at(7));
     initialize(aIsDoubleSided, aTracksPerSide, aSectorsPerTrack, aBytesPerSector);
   }
 

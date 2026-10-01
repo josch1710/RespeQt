@@ -69,7 +69,7 @@ public:
     if (!mIncomingDataFrames.isEmpty()) {
       QByteArray data = mIncomingDataFrames.dequeue();
       if (data.size() > static_cast<int>(size)) {
-        return data.left(size);
+        return data.left(static_cast<int>(size));
       }
       return data;
     }

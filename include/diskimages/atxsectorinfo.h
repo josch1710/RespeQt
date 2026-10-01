@@ -37,10 +37,10 @@ namespace DiskImages {
     void setSectorData(const QByteArray &sectorData) { m_sectorData = sectorData; }
     void copySectorData(const QByteArray &sectorData);
     [[nodiscard]] quint16 sectorWeakOffset() const { return m_sectorWeakOffset; }
-    void setSectorWeakOffset(quint16 sectorWeakOffet);
+    void setSectorWeakOffset(quint16 sectorWeakOffset);
     static quint8 driveStatus() { return 0x10; }
     [[nodiscard]] quint8 wd1771Status() const { return static_cast<quint8>(~m_sectorStatus & 0x3E) | 0xC1; }
-    void setWd1771Status(const quint8 status) { m_sectorStatus |= ~status & 0x3E; }
+    void setWd1771Status(const quint8 status) { m_sectorStatus |= static_cast<quint8>(~status & 0x3E); }
     [[maybe_unused]] int dataMarkOffset(int headerOffset, int shift);
 
   private:

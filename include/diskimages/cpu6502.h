@@ -10,9 +10,9 @@
 #define CPU6502_HPP 1
 
 // get Low/High byte of a word.
-#define LO_BYTE(val) ((unsigned char) ((val) &0xff))
-#define HI_BYTE(val) ((unsigned char) (((val) >> 8) & 0xff))
-#define MAKE_WORD(l, h) ((unsigned short) ((l) | ((h) << 8)))
+constexpr unsigned char LO_BYTE(const unsigned short val) { return static_cast<unsigned char>(val & 0xff); }
+constexpr unsigned char HI_BYTE(const unsigned short val) { return static_cast<unsigned char> ((val >> 8) & 0xff); }
+constexpr unsigned short MAKE_WORD(const unsigned char l, const unsigned char h) { return static_cast<unsigned short> (l | (h << 8)); }
 
 namespace DiskImages {
   // vectors for 6502
@@ -138,16 +138,16 @@ namespace DiskImages {
     }
 
     // read/write a word in memory
-    unsigned short ReadWordBug(const unsigned short addr) { return MAKE_WORD(ReadByte(addr), ReadByte((addr & 0xFF00) | (addr + 1 & 0x00FF))); }
-    unsigned short ReadWord(const unsigned short addr) { return MAKE_WORD(ReadByte(addr), ReadByte(addr + 1)); }
+    unsigned short ReadWordBug(const unsigned short addr) { return MAKE_WORD(ReadByte(addr), ReadByte(static_cast<unsigned short>((addr & 0xFF00) | ((addr + 1) & 0x00FF)))); }
+    unsigned short ReadWord(const unsigned short addr) { return MAKE_WORD(ReadByte(addr), ReadByte(static_cast<unsigned short>(addr + 1))); }
     void WriteWord(const unsigned short addr, const unsigned short val) {
       WriteByte(addr, LO_BYTE(val));
-      WriteByte(addr + 1, HI_BYTE(val));
+      WriteByte(static_cast<unsigned short>(addr + 1), HI_BYTE(val));
     }
 
     // push/pop a value on the stack.
     void PushByte(const unsigned char val) {
-      WriteByte(0x100 + m_SP, val);
+      WriteByte(static_cast<unsigned short>(0x100 + m_SP), val);
       m_SP--;
     }
 
@@ -158,7 +158,7 @@ namespace DiskImages {
 
     unsigned char PopByte() {
       m_SP++;
-      return ReadByte(0x100 + m_SP);
+      return ReadByte(static_cast<unsigned short>(0x100 + m_SP));
     }
 
     unsigned short PopWord() {
@@ -213,12 +213,12 @@ namespace DiskImages {
     // get address depending on addressing mode
     unsigned short FetchZPage(const unsigned short addr) { return ReadByte(addr); }
     unsigned short FetchAbsolute(const unsigned short addr) { return ReadWord(addr); }
-    unsigned short FetchAbsoluteX(const unsigned short addr) { return ReadWord(addr) + m_X; }
-    unsigned short FetchAbsoluteY(const unsigned short addr) { return ReadWord(addr) + m_Y; }
+    unsigned short FetchAbsoluteX(const unsigned short addr) { return static_cast<unsigned short>(ReadWord(addr) + m_X); }
+    unsigned short FetchAbsoluteY(const unsigned short addr) { return static_cast<unsigned short>(ReadWord(addr) + m_Y); }
     unsigned short FetchZPageX(const unsigned short addr) { return static_cast<unsigned short>(ReadByte(addr) + m_X); }
     unsigned short FetchZPageY(const unsigned short addr) { return static_cast<unsigned short>(ReadByte(addr) + m_Y); }
-    unsigned short FetchXIndirect(const unsigned short addr) { return ReadWord(static_cast<unsigned char>(ReadByte(addr) + m_X)); }
-    unsigned short FetchIndirectY(const unsigned short addr) { return ReadWord(ReadByte(addr)) + m_Y; }
+    unsigned short FetchXIndirect(const unsigned short addr) { return static_cast<unsigned short>(ReadByte(addr) + m_X); }
+    unsigned short FetchIndirectY(const unsigned short addr) { return static_cast<unsigned short>(ReadWord(ReadByte(addr)) + m_Y); }
     unsigned short FetchIndirectBug(const unsigned short addr) { return ReadWordBug(ReadWord(addr)); }
     unsigned short FetchIndirect(const unsigned short addr) { return ReadWord(ReadWord(addr)); }
     unsigned short FetchZPageIndirect(const unsigned short addr) { return ReadWord( ReadByte(addr)); }
@@ -329,8 +329,8 @@ namespace DiskImages {
     [[nodiscard]] inline int GetOpCodeLength(unsigned char opCode) const;
 
     // get label for a given address
-    inline const char *GetAddressOrLabel(unsigned short addr) const;
-    inline const char *GetAddressOrLabelAllBanks(unsigned short addr) const;
+    [[nodiscard]] inline const char *GetAddressOrLabel(unsigned short addr) const;
+    [[nodiscard]] inline const char *GetAddressOrLabelAllBanks(unsigned short addr) const;
   };
 }
 #endif

@@ -49,7 +49,7 @@ void AutoBoot::handleCommand(const quint8 command, const quint8 aux1, const quin
         passToOldHandler(command, aux1, aux2);
         return;
       }
-      if (const quint16 aux = aux1 + aux2 * 256; aux >= 1 && aux <= sectorCount) {
+      if (const auto aux = static_cast<quint16>(aux1 + aux2 * 256); aux >= 1 && aux <= sectorCount) {
         if (!sio->port()->writeCommandAck()) {
           return;
         }
@@ -94,7 +94,7 @@ void AutoBoot::handleCommand(const quint8 command, const quint8 aux1, const quin
       break;
     }
     case 0xFE: { /* Get chunk */
-      const quint16 aux = aux1 + aux2 * 256;
+      const auto aux = static_cast<quint16>(aux1 + aux2 * 256);
       if (aux >= chunks.count()) {
         qDebug() << "!e" << tr("[%1] Invalid chunk in get chunk: aux = %2").arg(deviceName()).arg(aux);
         return;
@@ -110,7 +110,7 @@ void AutoBoot::handleCommand(const quint8 command, const quint8 aux1, const quin
       break;
     }
     case 0xFF: { /* Get chunk info */
-      const quint16 aux = aux1 + aux2 * 256;
+      const auto aux = static_cast<quint16>(aux1 + aux2 * 256);
       if (aux >= chunks.count()) {
         qDebug() << "!e" << tr("[%1] Invalid chunk in get chunk info: aux = %2").arg(deviceName()).arg(aux);
         return;

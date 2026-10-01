@@ -239,7 +239,7 @@ namespace Printers {
 
       case GraphicsMode::FETCH_LSB:
         // b is the LSB of the count of following columns
-        mGraphicsColumns += b;
+        mGraphicsColumns = static_cast<uint16_t>(mGraphicsColumns + b);
         mGraphicsMode = GraphicsMode::PLOT_DOTS;
         break;
 

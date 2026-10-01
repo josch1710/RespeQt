@@ -50,7 +50,7 @@ void Crc16::Reset() {
 }
 
 unsigned char Crc16::Add(const unsigned char data) {
-  m_crc = ((m_crc << 8) ^ crcTable[((m_crc >> 8) ^ data) & 0xff]) & 0xffff;
+  m_crc = static_cast<unsigned short>(((m_crc << 8) ^ crcTable[((m_crc >> 8) ^ data) & 0xff]) & 0xffff);
   return data;
 }
 

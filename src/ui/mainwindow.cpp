@@ -968,7 +968,7 @@ void MainWindow::deviceStatusChanged(const unsigned char deviceNo) {
   if (deviceNo >= DISK_BASE_CDEVIC && deviceNo < DISK_BASE_CDEVIC + DISK_COUNT) {// 0x31 - 0x3E
     const auto img {qobject_cast<DiskImages::SimpleDiskImage *>(sio->getDevice(deviceNo))};
 
-    DriveWidget *diskWidget = diskWidgets[deviceNo - DISK_BASE_CDEVIC];
+    DriveWidget *diskWidget = diskWidgets[static_cast<size_t>(deviceNo - DISK_BASE_CDEVIC)];
 
     if (img) {
 
@@ -1737,7 +1737,7 @@ void MainWindow::revertDisk(const char no) {
     img->lock();
     img->reopen();
     img->unlock();
-    deviceStatusChanged(DISK_BASE_CDEVIC + number);
+    deviceStatusChanged(static_cast<quint8>(DISK_BASE_CDEVIC + number));
   }
 }
 
@@ -1841,8 +1841,8 @@ void MainWindow::newImageTriggered() {
     return;
   }
 
-  sio->installDevice(DISK_BASE_CDEVIC + no, disk);
-  deviceStatusChanged(DISK_BASE_CDEVIC + no);
+  sio->installDevice(static_cast<quint8>(DISK_BASE_CDEVIC + no), disk);
+  deviceStatusChanged(static_cast<quint8>(DISK_BASE_CDEVIC + no));
   qDebug() << "!n" << tr("[%1] Mounted '%2' as '%3'.")
                               .arg(disk->deviceName(), disk->originalFileName(), disk->description());
 }

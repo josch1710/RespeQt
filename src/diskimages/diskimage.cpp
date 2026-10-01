@@ -637,7 +637,7 @@ namespace DiskImages {
         } else if (crc16.GetCrc() == 0xAD1D || crc16.GetCrc() == 0x8A65 || crc16.GetCrc() == 0x64B1) {// Super Archiver 3.02, 3.03, 3.12 respectively
           m_board.setLastArchiverUploadCrc16(crc16.GetCrc());
           if (crc16.GetCrc() == 0x64B1) {
-            const quint16 timing = (static_cast<quint16>(data[4]) & 0xFF) + ((static_cast<quint16>(data[5]) << 8) & 0xFF00);
+            const quint16 timing = static_cast<quint16>((data[4] & 0xFF) + ((data[5] << 8) & 0xFF00));
             qDebug() << "!u" << tr("[%1] Uploaded code is: Format track $%2 with skew alignment $%3 with track $%4").arg(deviceName()).arg(aux & 0xFF, 2, 16, QChar('0')).arg(timing, 4, 16, QChar('0')).arg(data[3] & 0x3F, 2, 16, QChar('0'));
           } else {
             qDebug() << "!u" << tr("[%1] Uploaded code is: Format track $%2 with skew alignment with track $%3").arg(deviceName()).arg(aux & 0xFF, 2, 16, QChar('0')).arg(data[3] & 0x3F, 2, 16, QChar('0'));
@@ -654,7 +654,7 @@ namespace DiskImages {
   void SimpleDiskImage::readHappyTrack(const int trackNumber, const bool happy1050) {
     Crc16 crc;
     QByteArray data;
-    readTrack(0xEA00 | static_cast<quint8>(trackNumber), data, 256);
+    readTrack(static_cast<quint16>(0xEA00 | static_cast<quint8>(trackNumber)), data, 256);
     // ReSharper disable once CppRedundantCastExpression
     quint8 nbSectors = static_cast<quint8>(data[0]);
     const int nbSectorsInTrack = sectorsInCurrentTrack();
@@ -686,7 +686,7 @@ namespace DiskImages {
         m_board.m_happyRam[dstOffset++] = static_cast<char>(0xFF - static_cast<unsigned char>((crc.GetCrc() >> 8) & 0xFF));
         m_board.m_happyRam[dstOffset++] = static_cast<char>(0xFF - static_cast<unsigned char>(crc.GetCrc() & 0xFF));
         m_board.m_happyRam[dstOffset++] = static_cast<char>(0xFF);
-        totalTiming += static_cast<quint8>(data[srcOffset++]);
+        totalTiming = static_cast<quint8>(totalTiming + data[srcOffset++]);
         srcOffset++;
         if (happy1050) {
           m_board.m_happyRam[dstOffset++] = static_cast<char>(0x7F - totalTiming);
@@ -694,11 +694,11 @@ namespace DiskImages {
           m_board.m_happyRam[dstOffset++] = static_cast<char>(0xFF - totalTiming);
         }
       } else {
-        totalTiming += static_cast<quint8>(data[srcOffset + 4]);
+        totalTiming = static_cast<quint8>(totalTiming + data[srcOffset + 4]);
         srcOffset += 6;
       }
     }
-    m_board.m_happyRam[startOffset] = static_cast<char>(dstOffset - 1 & 0xFF);
+    m_board.m_happyRam[startOffset] = static_cast<char>((dstOffset - 1) & 0xFF);
     for (int i = dstOffset; i < startOffset + 0x100; i++) {
       m_board.m_happyRam[i] = 0;
     }
@@ -722,8 +722,8 @@ namespace DiskImages {
       // read all sectors requested by Happy
       int index = 0;
       for (int i = start; i >= 0; i--) {
-        if ((0xFF - m_board.m_happyRam[baseOffset + 0x14 + i] & fdcMask) != 0) {
-          const int sector = 0xFF - m_board.m_happyRam[baseOffset + 0x38 + i] & 0xFF;
+        if (static_cast<quint8>((0xFF - m_board.m_happyRam[baseOffset + 0x14 + i]) & fdcMask) != 0) {
+          const int sector = (0xFF - m_board.m_happyRam[baseOffset + 0x38 + i]) & 0xFF;
           const int offset = baseOffset + 0x80 + i % 18 * 128;
           QByteArray data;
           const int after = firstSector ? afterSectorNumber : 0;
@@ -744,12 +744,12 @@ namespace DiskImages {
       nbSectors = 0;
       int nbSlots = 18;
       for (int i = start; i >= 0; i--) {
-        if ((0xFF - m_board.m_happyRam[baseOffset + 0x14 + i] & fdcMask) != 0) {
+        if (static_cast<quint8>((0xFF - m_board.m_happyRam[baseOffset + 0x14 + i]) & fdcMask) != 0) {
           nbSectors++;
           if ((m_board.m_happyRam[baseOffset + 0x5C + i] & 0x80) != 0) {
             int nbOtherSlots = 18;
             for (int j = start; j >= 0; j--) {
-              if (m_board.m_happyRam[baseOffset + 0x38 + i] == m_board.m_happyRam[baseOffset + 0x38 + j] && (0xFF - m_board.m_happyRam[baseOffset + 0x14 + j] & fdcMask) == 0) {
+              if (m_board.m_happyRam[baseOffset + 0x38 + i] == m_board.m_happyRam[baseOffset + 0x38 + j] && static_cast<quint8>((0xFF - m_board.m_happyRam[baseOffset + 0x14 + j]) & fdcMask) == 0) {
                 m_board.m_happyRam[baseOffset + 0x14 + j] = static_cast<char>(0xEF);
                 /*
                             if (j >= *$0091) {
@@ -998,7 +998,7 @@ namespace DiskImages {
       }
     }
     if (m_deviceNo == 0x31 && command == 0x52) {
-      quint16 sector = aux1 + aux2 * 256;
+      auto sector = static_cast<quint16>(aux1 + aux2 * 256);
       if (m_board.isChipOpen()) {
         sector &= 0x3FF;
       }
@@ -1180,7 +1180,7 @@ namespace DiskImages {
             if (!writeCommandAck()) {
               break;
             }
-            quint16 aux = aux1 + aux2 * 256;
+            auto aux = static_cast<quint16>(aux1 + aux2 * 256);
             int trackNumber = 0xFF - (aux & 0xFF);
             qDebug() << "!n" << tr("[%1] Happy Read Track %2 ($%3)").arg(deviceName()).arg(trackNumber).arg(trackNumber, 2, 16, QChar('0'));
             QThread::usleep(150);
@@ -1200,7 +1200,7 @@ namespace DiskImages {
       }
       case 0x42:// Write Sector using Index (CHIP/ARCHIVER) or Read All Sectors (HAPPY Rev.7)
       {
-        quint16 aux = aux1 + aux2 * 256;
+        auto aux = static_cast<quint16>(aux1 + aux2 * 256);
         if (m_board.isHappyEnabled() && m_board.isHappy1050()) {
           if (m_board.getLastHappyUploadCrc16() == 0x4312) {
             if (!writeCommandAck()) {
@@ -1259,7 +1259,7 @@ namespace DiskImages {
       case 0x43:// Read all Sector Statuses (CHIP/ARCHIVER) or Set Skew Alignment (HAPPY Rev.7)
       {
         if (m_board.isHappyEnabled() && m_board.isHappy1050()) {
-          quint16 aux = aux1 + aux2 * 256;
+          auto aux = static_cast<quint16>(aux1 + aux2 * 256);
           if (m_board.getLastHappyUploadCrc16() == 0x4312) {
             if (!writeCommandAck()) {
               break;
@@ -1267,8 +1267,8 @@ namespace DiskImages {
             for (int i = 0; i < 128; i++) {
               m_board.m_happyRam[0x380 + i] = 0;
             }
-            m_board.m_happyRam[0x3CB] = aux & 0xFF;
-            m_board.m_happyRam[0x3CC] = (aux >> 8) & 0xFF;
+            m_board.m_happyRam[0x3CB] = static_cast<char>(aux & 0xFF);
+            m_board.m_happyRam[0x3CC] = static_cast<char>((aux >> 8) & 0xFF);
             qDebug() << "!n" << tr("[%1] Happy Set Skew Alignment track %2 ($%3) and sector %4 ($%5)").arg(deviceName()).arg(static_cast<quint8>(0xFF) - static_cast<quint8>(m_board.m_happyRam[0x3CB])).arg(static_cast<quint8>(0xFF) - static_cast<quint8>(m_board.m_happyRam[0x3CB]), 2, 16, QChar('0')).arg(static_cast<quint8>(0xFF) - static_cast<quint8>(m_board.m_happyRam[0x3CC])).arg(static_cast<quint8>(0xFF) - static_cast<quint8>(m_board.m_happyRam[0x3CC]), 2, 16, QChar('0'));
             QThread::usleep(150);
             sio->port()->setSpeed(findNearestSpeed(38400) + 1);// +1 (odd number) is a trick to set 2 stop bits (needed by Happy 810)
@@ -1305,14 +1305,14 @@ namespace DiskImages {
       }
       case 0x44:// Read Sector using Index (CHIP/ARCHIVER) or Read Skew Alignment (HAPPY Rev.7)
       {
-        quint16 aux = aux1 + aux2 * 256;
+        auto aux = static_cast<quint16>(aux1 + aux2 * 256);
         if (m_board.isHappyEnabled() && m_board.isHappy1050()) {
           if (m_board.getLastHappyUploadCrc16() == 0x4312) {
             if (!writeCommandAck()) {
               break;
             }
-            m_board.m_happyRam[0x3C9] = aux & 0xFF;
-            m_board.m_happyRam[0x3CA] = (aux >> 8) & 0xFF;
+            m_board.m_happyRam[0x3C9] = static_cast<char>(aux & 0xFF);
+            m_board.m_happyRam[0x3CA] = static_cast<char>((aux >> 8) & 0xFF);
             qDebug() << "!n" << tr("[%1] Happy Read Skew alignment of track %2 ($%3) sector %4 ($%5) with track %6 ($%7) sector %8 ($%9)").arg(deviceName()).arg(static_cast<quint8>(0xFF) - static_cast<quint8>(m_board.m_happyRam[0x3CB])).arg(static_cast<quint8>(0xFF) - static_cast<quint8>(m_board.m_happyRam[0x3CB]), 2, 16, QChar('0')).arg(static_cast<quint8>(0xFF) - static_cast<quint8>(m_board.m_happyRam[0x3CC])).arg(static_cast<quint8>(0xFF) - static_cast<quint8>(m_board.m_happyRam[0x3CC]), 2, 16, QChar('0')).arg(static_cast<quint8>(0xFF) - static_cast<quint8>(m_board.m_happyRam[0x3C9])).arg(static_cast<quint8>(0xFF) - static_cast<quint8>(m_board.m_happyRam[0x3C9]), 2, 16, QChar('0')).arg(static_cast<quint8>(0xFF) - static_cast<quint8>(m_board.m_happyRam[0x3CA])).arg(static_cast<quint8>(0xFF) - static_cast<quint8>(m_board.m_happyRam[0x3CA]), 2, 16, QChar('0'));
             QThread::usleep(150);
             sio->port()->setSpeed(findNearestSpeed(38400) + 1);// +1 (odd number) is a trick to set 2 stop bits (needed by Happy 810)
@@ -1389,7 +1389,7 @@ namespace DiskImages {
           break;
         }
         qDebug() << "!n" << tr("[%1] Super Archiver Write Track with AUX1=$%2 and AUX2=$%3").arg(deviceName()).arg(aux1, 2, 16, QChar('0')).arg(aux2, 2, 16, QChar('0'));
-        quint16 aux = aux1 + aux2 * 256;
+        quint16 aux = static_cast<quint16>(aux1 + aux2 * 256);
         if (QByteArray data = readDataFrame(m_geometry.bytesPerSector(aux)); !data.isEmpty()) {
           if (!writeDataAck()) {
             break;
@@ -1413,7 +1413,7 @@ namespace DiskImages {
       }
       case 0x47:// Read Track (128 bytes) (CHIP/ARCHIVER) or Write all Sectors (HAPPY Rev.7)
       {
-        quint16 aux = aux1 + aux2 * 256;
+        quint16 aux = static_cast<quint16>(aux1 + aux2 * 256);
         if (m_board.isHappyEnabled() && m_board.isHappy1050()) {
           if (m_board.getLastHappyUploadCrc16() == 0x4312) {
             if (!writeCommandAck()) {
@@ -1591,7 +1591,7 @@ namespace DiskImages {
             break;
           }
           if (m_disassembleUploadedCode) {
-            if (int address = getUploadCodeStartAddress(command, aux1 + aux2 * 256, ram); address != -1) {
+            if (int address = getUploadCodeStartAddress(command, static_cast<quint16>(aux1 + aux2 * 256), ram); address != -1) {
               m_remainingBytes.clear();
               disassembleCode(ram, static_cast<unsigned short>(address), false, false);
             }
@@ -1619,7 +1619,7 @@ namespace DiskImages {
         if (!writeCommandAck()) {
           break;
         }
-        if (quint16 aux = aux1 + aux2 * 256; aux == 0x2267 || aux == 0xABCD) {
+        if (quint16 aux = static_cast<quint16>(aux1 + aux2 * 256); aux == 0x2267 || aux == 0xABCD) {
           if (m_geometry.sectorCount() <= 1040 && m_geometry.bytesPerSector() == 128) {
             m_board.setChipOpen(true);
             m_board.setLastArchiverUploadCrc16(0);
@@ -1650,7 +1650,7 @@ namespace DiskImages {
       case 0x70:// High Speed Write sector with verify or Write memory (HAPPY 1050) or BitWriter read memory
       case 0x77:// High Speed Write sector without verify or Write memory (HAPPY 1050)
       {
-        quint16 aux = aux1 + aux2 * 256;
+        quint16 aux = static_cast<quint16>(aux1 + aux2 * 256);
         quint16 sector = aux;
         if (m_board.isChipOpen()) {
           sector = aux & 0x3FF;
@@ -1827,7 +1827,7 @@ namespace DiskImages {
             // Just check the last instruction ($083D: JMP $1EFC)
             if (static_cast<quint8>(m_board.m_happyRam[0x3D]) == static_cast<quint8>(0x4C) && static_cast<quint8>(m_board.m_happyRam[0x3E]) == static_cast<quint8>(0xFC) && static_cast<quint8>(m_board.m_happyRam[0x3F]) == static_cast<quint8>(0x1E)) {
               qDebug() << "!n" << tr("[%1] Happy Clear buffer").arg(deviceName());
-              m_board.m_happyRam[0] = 0x80;
+              m_board.m_happyRam[0] = static_cast<char>(0x80);
             } else {
               qWarning() << "!w" << tr("[%1] Happy Execute custom code $%2 with AUX1 $%3, AUX2 $%4 and CRC16 $%5. Ignored").arg(deviceName()).arg(command, 2, 16, QChar('0')).arg(aux1, 2, 16, QChar('0')).arg(aux2, 2, 16, QChar('0')).arg(m_board.getLastHappyUploadCrc16(), 4, 16, QChar('0'));
             }
@@ -1852,7 +1852,7 @@ namespace DiskImages {
       case 0x52:// Read sector (ALL) or Read memory (HAPPY 810)
       case 0x72:// High Speed Read sector or Read memory (HAPPY 1050)
       {
-        quint16 aux = aux1 + aux2 * 256;
+        quint16 aux = static_cast<quint16>(aux1 + aux2 * 256);
         quint16 sector = aux;
         if (m_board.isChipOpen()) {
           sector = aux & 0x3FF;
@@ -1977,7 +1977,7 @@ namespace DiskImages {
         }
         QByteArray status(4, 0);
         getStatus(status);
-        if (quint16 aux = aux1 + aux2 * 256; aux == 0xABCD) {
+        if (quint16 aux = static_cast<quint16>(aux1 + aux2 * 256); aux == 0xABCD) {
           status[2] = static_cast<char>(0xEB);// This is a RespeQt drive
           status[3] = static_cast<char>(computeVersionByte());
           qDebug() << "!n" << tr("[%1] RespeQt version inquiry: $%2").arg(deviceName()).arg(status[3], 2, 16, QChar('0'));
@@ -1998,9 +1998,9 @@ namespace DiskImages {
               if (!writeCommandAck()) {
                 break;
               }
-              quint16 track = 0xFF - aux1;
-              quint16 relativeSector = 0xFF - aux2;
-              quint16 sector = track * m_geometry.sectorsPerTrack() + relativeSector;
+              quint16 track = static_cast<quint16>(0xFF - aux1);
+              quint16 relativeSector = static_cast<quint16>(0xFF - aux2);
+              quint16 sector = static_cast<quint16>(track * m_geometry.sectorsPerTrack() + relativeSector);
               qDebug() << "!n" << tr("[%1] Happy High Speed Write Sector %2 ($%3) #%4 in track %5 ($%6)").arg(deviceName()).arg(sector).arg(sector, 3, 16, QChar('0')).arg(relativeSector).arg(track).arg(track, 2, 16, QChar('0'));
               // We should set high speed for data with Happy 810 Rev.5 but it does not work.
               // A patched version of Happy Warp Speed Software V5.3.atr has been prepared to send data at normal speed to RespeQt
@@ -2089,7 +2089,7 @@ namespace DiskImages {
           }
           if (command == 0x55 && m_board.getLastHappyUploadCrc16() == 0x4416) {
             // Read sector at high speed
-            quint16 aux = aux1 + 256 * aux2;
+            quint16 aux = static_cast<quint16>(aux1 + 256 * aux2);
             int track = (aux - 1) / m_geometry.sectorsPerTrack();
             qDebug() << "!n" << tr("[%1] Happy High Speed Read Sector %2 ($%3) in track %4 ($%5)").arg(deviceName()).arg(aux).arg(aux, 3, 16, QChar('0')).arg(track).arg(track, 2, 16, QChar('0'));
             QThread::usleep(150);
@@ -2202,7 +2202,7 @@ namespace DiskImages {
             qWarning() << "!w" << tr("[%1] Super Archiver Write Fuzzy Sector using Index denied.").arg(deviceName());
             break;
           }
-          if (quint16 aux = aux1 + aux2 * 256; writeSectorUsingIndex(aux, data, true)) {
+          if (quint16 aux = static_cast<quint16>(aux1 + aux2 * 256); writeSectorUsingIndex(aux, data, true)) {
             writeComplete();
           } else {
             writeError();
@@ -2251,7 +2251,7 @@ namespace DiskImages {
         }
         qDebug() << "!n" << tr("[%1] Super Archiver Read Track (256 bytes) with AUX1=$%2 and AUX2=$%3").arg(deviceName()).arg(aux1, 2, 16, QChar('0')).arg(aux2, 2, 16, QChar('0'));
         QByteArray data;
-        quint16 aux = aux1 + aux2 * 256;
+        quint16 aux = static_cast<quint16>(aux1 + aux2 * 256);
         readTrack(aux, data, 256);
         if (!writeComplete()) {
           break;
@@ -2266,7 +2266,7 @@ namespace DiskImages {
           writeCommandNak();
           break;
         }
-        quint16 aux = aux1 + aux2 * 256;
+        quint16 aux = static_cast<quint16>(aux1 + aux2 * 256);
         if (quint16 sector = aux & 0x3FF; sector >= 1 && sector <= m_geometry.sectorCount()) {
           if (!writeCommandAck()) {
             break;
@@ -2308,7 +2308,7 @@ namespace DiskImages {
         if (!writeCommandAck()) {
           break;
         }
-        quint16 aux = aux1 + aux2 * 256;
+        quint16 aux = static_cast<quint16>(aux1 + aux2 * 256);
         qDebug() << "!n" << tr("[%1] Super Archiver Set Speed %2").arg(deviceName()).arg(aux);
         m_board.setLastArchiverSpeed(aux & 0xFF);
         if (!writeComplete()) {
@@ -2345,7 +2345,7 @@ namespace DiskImages {
         else if (m_board.getLastArchiverUploadCrc16() == 0xE3B5) {
           qDebug() << "!n" << tr("[%1] Super Archiver Read memory (Address marks)").arg(deviceName());
           QByteArray data;
-          quint16 aux = aux1 + aux2 * 256;
+          quint16 aux = static_cast<quint16>(aux1 + aux2 * 256);
           readTrack(aux, data, 256);
           QByteArray result(256, 0);
           for (quint16 i = 0; i < sizeof(ARCHIVER_ADDRESS_CHECK); i++) {
@@ -2361,7 +2361,7 @@ namespace DiskImages {
         // this is the code to get the sector timing for skew alignment
         else if (m_board.getLastArchiverUploadCrc16() == 0x603D || m_board.getLastArchiverUploadCrc16() == 0xBAC2 || m_board.getLastArchiverUploadCrc16() == 0xDFFF) {// Super Archiver 3.02, 3.03, 3.12 respectively
           if (m_board.getLastArchiverUploadCrc16() == 0xDFFF) {
-            quint16 timing = (static_cast<quint16>(m_board.m_trackData[0xF4]) & 0xFF) + ((static_cast<quint16>(m_board.m_trackData[0xF5]) << 8) & 0xFF00);
+            quint16 timing = static_cast<quint16>(((m_board.m_trackData[0xF4]) & 0xFF) + ((m_board.m_trackData[0xF5] << 8) & 0xFF00));
             qDebug() << "!n" << tr("[%1] Super Archiver Read Memory (Skew alignment of $%2)").arg(deviceName()).arg(timing, 4, 16, QChar('0'));
           } else {
             qDebug() << "!n" << tr("[%1] Super Archiver Read Memory (Skew alignment)").arg(deviceName());
@@ -2390,7 +2390,7 @@ namespace DiskImages {
           if (!writeDataAck()) {
             break;
           }
-          quint16 aux = aux1 + aux2 * 256;
+          quint16 aux = static_cast<quint16>(aux1 + aux2 * 256);
           if (m_disassembleUploadedCode) {
             if (int address = getUploadCodeStartAddress(command, aux, data); address != -1) {
               disassembleCode(data, static_cast<unsigned short>(address), true, false);
@@ -2421,20 +2421,20 @@ namespace DiskImages {
     const quint8 readOnlyStatus = isReadOnly() || isLeverOpen() ? 0x08 : 0;// if lever not open, the disk is reported as read-only in the status byte
     if (m_originalImageType == FileTypes::Pro || m_originalImageType == FileTypes::ProGz ||
         m_originalImageType == FileTypes::Atx || m_originalImageType == FileTypes::AtxGz) {
-      status[0] = motorSpinning | readOnlyStatus | m_driveStatus;
+      status[0] = static_cast<char>(motorSpinning | readOnlyStatus | m_driveStatus);
     } else {
-      status[0] = motorSpinning | readOnlyStatus |
+      status[0] = static_cast<char>(motorSpinning | readOnlyStatus |
                   (m_newGeometry.bytesPerSector() == 256) * 32 |
-                  (m_newGeometry.bytesPerSector() == 128 && m_newGeometry.sectorsPerTrack() == 26) * 128;
+                  (m_newGeometry.bytesPerSector() == 128 && m_newGeometry.sectorsPerTrack() == 26) * 128);
     }
     status[1] = static_cast<char>(m_wd1771Status);
     if (!isReady() || isLeverOpen()) {
-      status[1] = status[1] & static_cast<quint8>(~0x80);
+      status[1] = static_cast<char>(status[1] & ~0x80);
     }
     if (isReadOnly()) {
-      status[1] = status[1] & static_cast<quint8>(~0x40);
+      status[1] = static_cast<char>(status[1] & ~0x40);
     }
-    status[2] = 0xE0;// Timeout for format ($E0) - Time the drive will need to format a disk (1050 returns 0xe0, XF551 0xfe)
+    status[2] = static_cast<char>(0xE0);// Timeout for format ($E0) - Time the drive will need to format a disk (1050 returns 0xe0, XF551 0xfe)
     status[3] = 0;
   }
 
@@ -2480,8 +2480,8 @@ namespace DiskImages {
       return 0;
     }
     const uint v = static_cast<quint8>(data.at(0));
-    const uint s = static_cast<quint8>(data.at(1)) + static_cast<quint8>(data.at(2)) * 256;
-    const uint f = static_cast<quint8>(data.at(3)) + static_cast<quint8>(data.at(4)) * 256;
+    const uint s = static_cast<quint16>(data.at(1) + data.at(2) * 256);
+    const uint f = static_cast<quint16>(data.at(3) + data.at(4) * 256);
     if (m_geometry.isStandardSD() && v == 1 && s == 709 && f <= s) {
       return 1;
     }
@@ -2557,22 +2557,26 @@ namespace DiskImages {
   }
 
   // ReSharper disable once CppMemberFunctionMayBeStatic
-  quint16 SimpleDiskImage::getBigEndianWord(QByteArray &array, const int offset) {
-    return (static_cast<quint16>(array[offset + 1]) & 0xFF) + ((static_cast<quint16>(array[offset]) << 8) & 0xFF00);
+  quint16 SimpleDiskImage::getBigEndianWord(QByteArray &array, const int offset) { // NOLINT(*-convert-member-functions-to-static)
+    return static_cast<quint16>(((array[offset + 1]) & 0xFF) + ((array[offset]<< 8) & 0xFF00));
   }
 
   // ReSharper disable once CppMemberFunctionMayBeStatic
-  quint16 SimpleDiskImage::getLittleEndianWord(QByteArray &array, const int offset) {
-    return (static_cast<quint16>(array[offset]) & 0xFF) + ((static_cast<quint16>(array[offset + 1]) << 8) & 0xFF00);
+  quint16 SimpleDiskImage::getLittleEndianWord(QByteArray &array, const int offset) { // NOLINT(*-convert-member-functions-to-static)
+    return static_cast<quint16>((array[offset] & 0xFF) + ((array[offset + 1] << 8) & 0xFF00));
   }
 
   // ReSharper disable once CppMemberFunctionMayBeStatic
-  quint32 SimpleDiskImage::getLittleEndianLong(QByteArray &array, const int offset) {
-    return (static_cast<quint32>(array[offset]) & 0xFF) + ((static_cast<quint32>(array[offset + 1]) << 8) & 0xFF00) + ((static_cast<quint32>(array[offset + 2]) << 16) & 0xFF0000) + ((static_cast<quint32>(array[offset + 3]) << 24) & 0xFF000000);
+  quint32 SimpleDiskImage::getLittleEndianLong(QByteArray &array, const int offset) { // NOLINT(*-convert-member-functions-to-static)
+    const auto byte0 = static_cast<quint32>(array[offset] & 0xFF);
+    const auto byte1 = static_cast<quint32>((array[offset + 1] << 8) & 0xFF00);
+    const auto byte2 = static_cast<quint32>((array[offset + 2] << 16) & 0xFF0000);
+    const auto byte3 = static_cast<quint32>(array[offset + 3] << 24) & 0xFF000000;
+    return byte0 + byte1 + byte2 + byte3;
   }
 
   // ReSharper disable once CppMemberFunctionMayBeStatic
-  void SimpleDiskImage::setLittleEndianWord(QByteArray &array, const int offset, const quint16 value) {
+  void SimpleDiskImage::setLittleEndianWord(QByteArray &array, const int offset, const quint16 value) { // NOLINT(*-convert-member-functions-to-static)
     array[offset] = static_cast<char>(value & 0xFF);
     array[offset + 1] = static_cast<char>((value >> 8) & 0xFF);
   }
@@ -2586,7 +2590,7 @@ namespace DiskImages {
   }
 
   // ReSharper disable once CppMemberFunctionMayBeStatic
-  void SimpleDiskImage::fillBuffer(char *line, const unsigned char *buf, const int len, const int ofs, const bool dumpAscii) {
+  void SimpleDiskImage::fillBuffer(char *line, const unsigned char *buf, const int len, const int ofs, const bool dumpAscii) { // NOLINT(*-convert-member-functions-to-static)
     *line = 0;
     if (len - ofs >= 16) {
       if (dumpAscii) {
@@ -2704,7 +2708,7 @@ namespace DiskImages {
           command++;
         }
       } else if (m_remainingAddress == address && m_remainingBytes.size() > 0) {
-        address -= m_remainingBytes.size();
+        address = static_cast<unsigned short>(address - m_remainingBytes.size());
         code.append(m_remainingBytes);
       }
     }
@@ -2716,9 +2720,9 @@ namespace DiskImages {
     while (offset < len) {
       int lenOpCode = -1;
       if (drive1050) {
-        lenOpCode = m_disassembly1050.BuildInstruction(buf, &codePtr[offset], len - offset, address + static_cast<unsigned short>(offset));
+        lenOpCode = m_disassembly1050.BuildInstruction(buf, &codePtr[offset], len - offset, static_cast<unsigned short>(address + offset));
       } else {
-        lenOpCode = m_disassembly810.BuildInstruction(buf, &codePtr[offset], len - offset, address + static_cast<unsigned short>(offset));
+        lenOpCode = m_disassembly810.BuildInstruction(buf, &codePtr[offset], len - offset, static_cast<unsigned short>(address + offset));
       }
       if (lenOpCode == -1) {
         break;

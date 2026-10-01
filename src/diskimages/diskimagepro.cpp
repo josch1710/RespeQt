@@ -85,7 +85,7 @@ namespace DiskImages {
     // Load all sectors in memory.
     // Sector Headers are kept in memory and phantom sectors also.
     for (quint16 nbSectors = 0; nbSectors < numberOfSectors && !sourceFile->atEnd(); nbSectors++) {
-      if (!fillProSectorInfo(fileName, sourceFile, nbSectors, nbSectors + 1)) {
+      if (!fillProSectorInfo(fileName, sourceFile, nbSectors, static_cast<quint16>(nbSectors + 1))) {
         sourceFile->close();
         delete sourceFile;
         return false;
@@ -95,7 +95,7 @@ namespace DiskImages {
     // the remaining sectors are phantom sectors.
     // Load them in memory
     for (quint16 nbPhantoms = 0; nbPhantoms < 256 && !sourceFile->atEnd(); nbPhantoms++) {
-      if (!fillProSectorInfo(fileName, sourceFile, 1040 + nbPhantoms, 0xFFFF)) {
+      if (!fillProSectorInfo(fileName, sourceFile, static_cast<quint16>(1040 + nbPhantoms), 0xFFFF)) {
         sourceFile->close();
         delete sourceFile;
         return false;
@@ -110,7 +110,7 @@ namespace DiskImages {
 
           // fix sectorNumber and absoluteSector fields of duplicate sectors (slot number >= 1040)
           for (int j = 0; j < m_proSectorInfo[nbSectors].totalDuplicate; j++) {
-            const quint16 phantomSlot = 1040 + static_cast<quint16>(m_proSectorInfo[nbSectors].duplicateOffset[j]) - 1;
+            const quint16 phantomSlot = static_cast<quint16>(1040 + m_proSectorInfo[nbSectors].duplicateOffset[j] - 1);
             m_proSectorInfo[phantomSlot].sectorNumber = m_proSectorInfo[nbSectors].sectorNumber;
             m_proSectorInfo[phantomSlot].absoluteSector = m_proSectorInfo[nbSectors].absoluteSector;
           }
@@ -320,7 +320,7 @@ namespace DiskImages {
       // fill main sector header
       m_proSectorInfo[slot].used = true;
       m_proSectorInfo[slot].firstPass = true;
-      m_proSectorInfo[slot].sectorNumber = absoluteSector != 0xFFFF ? static_cast<quint8>(slot % m_geometry.sectorsPerTrack()) + 1 : static_cast<quint8>(0xFF);
+      m_proSectorInfo[slot].sectorNumber = absoluteSector != 0xFFFF ? static_cast<quint8>(slot % m_geometry.sectorsPerTrack() + 1) : static_cast<quint8>(0xFF);
       m_proSectorInfo[slot].absoluteSector = absoluteSector;
       m_proSectorInfo[slot].driveStatus = m_driveStatus;
       m_proSectorInfo[slot].wd1771Status = m_wd1771Status;
@@ -378,7 +378,7 @@ namespace DiskImages {
           // this is another phantom sector
           m_proSectorInfo[nextPhantomSlot + duplicate].used = true;
           m_proSectorInfo[nextPhantomSlot + duplicate].firstPass = true;
-          m_proSectorInfo[nextPhantomSlot + duplicate].sectorNumber = absoluteSector != 0xFFFF ? static_cast<quint8>(slot % m_geometry.sectorsPerTrack()) + 1 : static_cast<quint8>(0xFF);
+          m_proSectorInfo[nextPhantomSlot + duplicate].sectorNumber = absoluteSector != 0xFFFF ? static_cast<quint8>(slot % m_geometry.sectorsPerTrack() + 1) : static_cast<quint8>(0xFF);
           m_proSectorInfo[nextPhantomSlot + duplicate].absoluteSector = absoluteSector;
           m_proSectorInfo[nextPhantomSlot + duplicate].driveStatus = m_driveStatus;
           m_proSectorInfo[nextPhantomSlot + duplicate].wd1771Status = m_wd1771Status;
@@ -458,7 +458,7 @@ namespace DiskImages {
       m_proSectorInfo[i].totalDuplicate = 0;
       m_proSectorInfo[i].driveStatus = 0x10;
       m_proSectorInfo[i].wd1771Status = 0xFF;// no error
-      m_proSectorInfo[i].sectorTiming = 5 + (i & 1);
+      m_proSectorInfo[i].sectorTiming = static_cast<quint8>(5 + (i & 1));
       m_proSectorInfo[i].notEmpty = false;
       m_proSectorInfo[i].fillByte = 0;
       m_proSectorInfo[i].sectorData.resize(m_geometry.bytesPerSector());
@@ -640,10 +640,10 @@ namespace DiskImages {
       m_proSectorInfo[slot + i].notEmpty = false;
       m_proSectorInfo[slot + i].fillByte = 0;
       m_proSectorInfo[slot + i].weakBits = static_cast<quint16>(0xFFFF);
-      m_proSectorInfo[slot + i].sectorTiming = 5 + (i & 1);
+      m_proSectorInfo[slot + i].sectorTiming = static_cast<quint8>(5 + (i & 1));
       m_proSectorInfo[slot + i].lastSectorRead = 0;
       for (quint8 phantomIndex = 0; phantomIndex < duplicate; phantomIndex++) {
-        const quint16 phantomSlot = 1040 + m_proSectorInfo[slot + i].duplicateOffset[phantomIndex] - 1;
+        const quint16 phantomSlot = static_cast<quint16>(1040 + m_proSectorInfo[slot + i].duplicateOffset[phantomIndex] - 1);
         m_proSectorInfo[phantomSlot].used = false;
         m_proSectorInfo[phantomSlot].firstPass = false;
         m_proSectorInfo[phantomSlot].sectorData.resize(0);
@@ -665,7 +665,7 @@ namespace DiskImages {
       }
       if (code < 128) {
         if (static_cast<quint8>(m_board.m_happyRam[offset]) == invertedTrack && static_cast<quint8>(m_board.m_happyRam[offset + 1]) == static_cast<quint8>(0xFF) && static_cast<quint8>(m_board.m_happyRam[offset + 2]) >= 0xED && static_cast<quint8>(m_board.m_happyRam[offset + 3]) == static_cast<quint8>(0xFF) && static_cast<quint8>(m_board.m_happyRam[offset + 4]) == static_cast<quint8>(0x08)) {
-          const quint8 sector = 0xFF - static_cast<quint8>(m_board.m_happyRam[offset + 2]);
+          const quint8 sector = static_cast<quint8>(0xFF - m_board.m_happyRam[offset + 2]);
           const quint8 normalSize = static_cast<quint8>(m_board.m_happyRam[offset + 3]) == static_cast<quint8>(0xFF);
 
           // fill corresponding slot
@@ -677,7 +677,7 @@ namespace DiskImages {
                 // find an empty phantom slot
                 for (quint16 j = 0; j < 255; j++) {
                   if (!m_proSectorInfo[1040 + j].used) {
-                    phantomSlot = 1040 + j;
+                    phantomSlot = static_cast<quint16>(1040 + j);
                     break;
                   }
                 }
@@ -755,7 +755,7 @@ namespace DiskImages {
     for (int passNumber = 1; passNumber <= maxPass; passNumber++) {
       int index = 18 - passNumber;
       while (index >= lastIndex) {
-        const quint8 sectorNumber = 0xFF - static_cast<quint8>(m_board.m_happyRam[startOffset + 0x38 + index]);
+        const quint8 sectorNumber = static_cast<quint8>(0xFF - m_board.m_happyRam[startOffset + 0x38 + index]);
         m_board.m_happyRam[startOffset + 0x14 + index] = static_cast<char>(0xEF);
         if (sectorNumber > 0 && sectorNumber <= m_geometry.sectorsPerTrack()) {
           quint16 indexInProSector = 0xFFFF;
@@ -775,7 +775,7 @@ namespace DiskImages {
               }
               quint8 fdcStatus = m_proSectorInfo[indexInProSector].wd1771Status & dataMark;// use the data mark given in the command
               if (writeCommand & 0x08) {                                                   // non-IBM format generates a CRC error
-                fdcStatus &= ~0x08;
+                fdcStatus = static_cast<quint8>(fdcStatus & ~0x08);
               }
               m_proSectorInfo[indexInProSector].wd1771Status = fdcStatus;
               m_board.m_happyRam[startOffset + 0x14 + index] = static_cast<char>(fdcStatus);
@@ -829,7 +829,7 @@ namespace DiskImages {
       m_proSectorInfo[i].totalDuplicate = 0;
       m_proSectorInfo[i].driveStatus = 0x10;
       m_proSectorInfo[i].wd1771Status = 0xFF;// no error
-      m_proSectorInfo[i].sectorTiming = 5 + (i & 1);
+      m_proSectorInfo[i].sectorTiming = static_cast<quint8>(5 + (i & 1));
       m_proSectorInfo[i].notEmpty = false;
       m_proSectorInfo[i].fillByte = 0;
       m_proSectorInfo[i].sectorData.resize(geo.bytesPerSector());
@@ -875,8 +875,8 @@ namespace DiskImages {
         quint8 sector = static_cast<quint8>(sectorIndex - 1);
 
         // add sector slot in track if sector has data
-        quint16 absoluteSector = track * m_geometry.sectorsPerTrack() + sector;
-        if (quint16 slot = absoluteSector - 1; m_proSectorInfo[slot].used && (m_proSectorInfo[slot].wd1771Status & 0x10) == 0x10) {
+        quint16 absoluteSector = static_cast<quint16>(track * m_geometry.sectorsPerTrack() + sector);
+        if (quint16 slot = static_cast<quint16>(absoluteSector - 1); m_proSectorInfo[slot].used && (m_proSectorInfo[slot].wd1771Status & 0x10) == 0x10) {
           m_proSectorInfo[slot].firstPass = true;
           if (m_proSectorInfo[slot].weakBits == 0xFFFF) {
             // try to find a position if the data contains both an ID Address Mark and a Data Address Mark
@@ -918,7 +918,7 @@ namespace DiskImages {
           }
           increment = std::max(increment, 1);
           for (int j = 0; j < totalDuplicate; j++) {
-            quint16 phantomSlot = 1040 + m_proSectorInfo[indexInProSector].duplicateOffset[j] - 1;
+            quint16 phantomSlot = static_cast<quint16>(1040 + m_proSectorInfo[indexInProSector].duplicateOffset[j] - 1);
             m_proSectorInfo[phantomSlot].firstPass = false;
             // try to find a position if the data contains both an ID Address Mark and a Data Address Mark
             m_proSectorInfo[phantomSlot].beforeSlot = findPositionInProTrack(track, phantomSlot, false);
@@ -1073,7 +1073,7 @@ namespace DiskImages {
       data[currentIndexInData++] = 0;
       quint8 timing = m_proSectorInfo[indexInProSector].sectorTiming;
       if (totalTiming < 0x68 && i % m_sectorsInTrack == m_sectorsInTrack - 1) {
-        timing = 0x68 - totalTiming;
+        timing = static_cast<quint8>(0x68 - totalTiming);
       }
       if (longHeader) {
         data[currentIndexInData++] = static_cast<char>(timing);
@@ -1082,7 +1082,7 @@ namespace DiskImages {
       if (i == 0) {
         firstTiming = timing;
       }
-      totalTiming += timing;
+      totalTiming = static_cast<quint8>(totalTiming + timing);
       if (!useCount && totalTiming - firstTiming > timeoutValue) {
         data[0] = static_cast<char>(i + 1);
         break;
@@ -1200,7 +1200,7 @@ namespace DiskImages {
     // check if there are bad or phantom sectors for this sector number
     int nbPhantoms = 1;
     int phantomIndex = 1;
-    quint16 slot = sector - 1;
+    quint16 slot = static_cast<quint16>(sector - 1);
     if (!m_proSectorInfo[slot].used) {
       m_driveStatus = 0x10;
       m_wd1771Status = 0xEF;
@@ -1212,9 +1212,9 @@ namespace DiskImages {
         nbPhantoms = m_proSectorInfo[slot].totalDuplicate;
         phantomIndex = dupnum + 1;
 
-        m_proSectorInfo[slot].lastSectorRead = (m_proSectorInfo[slot].lastSectorRead + 1) % (m_proSectorInfo[slot].totalDuplicate + 1);
+        m_proSectorInfo[slot].lastSectorRead = static_cast<quint8>((m_proSectorInfo[slot].lastSectorRead + 1) % (m_proSectorInfo[slot].totalDuplicate + 1));
         if (dupnum != 0) {
-          slot = 1040 + m_proSectorInfo[slot].duplicateOffset[dupnum - 1] - 1;
+          slot = static_cast<quint16>(1040 + m_proSectorInfo[slot].duplicateOffset[dupnum - 1] - 1);
           if (!m_proSectorInfo[slot].used) {
             qCritical() << "!e" << tr("[%1] Sector %2 (phantom %3) does not exist in PRO file").arg(deviceName()).arg(sector).arg(m_proSectorInfo[slot].duplicateOffset[dupnum]);
             return false;
@@ -1408,7 +1408,7 @@ namespace DiskImages {
             } else {
               secondTrackByteOffset += 140;
             }
-            diffByteOffset += secondTrackByteOffset;
+            diffByteOffset = static_cast<quint16>(diffByteOffset + secondTrackByteOffset);
             m_board.m_trackData[0x08 + index] = static_cast<char>(sectorNumber);
             m_board.m_trackData[0x28 + index] = static_cast<char>((diffByteOffset >> 8) & 0xFF);
             m_board.m_trackData[0x48 + index] = static_cast<char>(diffByteOffset & 0xFF);
@@ -1507,11 +1507,11 @@ namespace DiskImages {
       m_proSectorInfo[slot + i].notEmpty = false;
       m_proSectorInfo[slot + i].fillByte = 0;
       m_proSectorInfo[slot + i].weakBits = static_cast<quint16>(0xFFFF);
-      m_proSectorInfo[slot + i].sectorTiming = 5 + (i & 1);
+      m_proSectorInfo[slot + i].sectorTiming = static_cast<quint8>(5 + (i & 1));
       m_proSectorInfo[slot + i].lastSectorRead = 0;
       m_proSectorInfo[slot + i].sectorData.resize(0);
       for (quint8 phantomIndex = 0; phantomIndex < duplicate; phantomIndex++) {
-        const quint16 phantomSlot = 1040 + m_proSectorInfo[slot + i].duplicateOffset[phantomIndex] - 1;
+        const quint16 phantomSlot = static_cast<quint16>(1040 + m_proSectorInfo[slot + i].duplicateOffset[phantomIndex] - 1);
         m_proSectorInfo[phantomSlot].used = false;
         m_proSectorInfo[phantomSlot].firstPass = false;
         m_proSectorInfo[phantomSlot].sectorData.resize(0);
@@ -1535,7 +1535,7 @@ namespace DiskImages {
     for (quint16 track = firstTrack; track < firstTrack + nbTracks; track++) {
 
       // reset track data
-      const quint16 slot = track * m_geometry.sectorsPerTrack();
+      const quint16 slot = static_cast<quint16>(track * m_geometry.sectorsPerTrack());
       if (!m_isModified) {
         m_isModified = true;
         emit statusChanged(m_deviceNo);
@@ -1548,10 +1548,10 @@ namespace DiskImages {
         m_proSectorInfo[slot + i].notEmpty = false;
         m_proSectorInfo[slot + i].fillByte = 0;
         m_proSectorInfo[slot + i].weakBits = static_cast<quint16>(0xFFFF);
-        m_proSectorInfo[slot + i].sectorTiming = 5 + (i & 1);
+        m_proSectorInfo[slot + i].sectorTiming = static_cast<quint8>(5 + (i & 1));
         m_proSectorInfo[slot + i].lastSectorRead = 0;
         for (quint8 phantomIndex = 0; phantomIndex < duplicate; phantomIndex++) {
-          const quint16 phantomSlot = 1040 + m_proSectorInfo[slot + i].duplicateOffset[phantomIndex] - 1;
+          const quint16 phantomSlot = static_cast<quint16>(1040 + m_proSectorInfo[slot + i].duplicateOffset[phantomIndex] - 1);
           m_proSectorInfo[phantomSlot].used = false;
           m_proSectorInfo[phantomSlot].firstPass = false;
           m_proSectorInfo[phantomSlot].sectorData.resize(0);
@@ -1579,14 +1579,14 @@ namespace DiskImages {
 
         // fill corresponding slot
         if (sector > 0 && sector <= m_geometry.sectorsPerTrack()) {
-          quint16 sectorSlot = track * m_geometry.sectorsPerTrack() + sector - 1;
+          quint16 sectorSlot = static_cast<quint16>(track * m_geometry.sectorsPerTrack() + sector - 1);
           if (m_proSectorInfo[sectorSlot].used) {
             if (quint8 duplicates = m_proSectorInfo[sectorSlot].totalDuplicate; duplicates < 5) {
               quint16 phantomSlot = 0;
               // find an empty phantom slot
               for (quint16 j = 0; j < 255; j++) {
                 if (!m_proSectorInfo[1040 + j].used) {
-                  phantomSlot = 1040 + j;
+                  phantomSlot = static_cast<quint16>(1040 + j);
                   break;
                 }
               }
@@ -1610,18 +1610,18 @@ namespace DiskImages {
           } else {
             m_proSectorInfo[sectorSlot].used = true;
             m_proSectorInfo[sectorSlot].sectorNumber = sector;
-            m_proSectorInfo[sectorSlot].absoluteSector = track * m_geometry.sectorsPerTrack() + sector;
+            m_proSectorInfo[sectorSlot].absoluteSector = static_cast<quint16>(track * m_geometry.sectorsPerTrack() + sector);
             m_proSectorInfo[sectorSlot].totalDuplicate = 0;
           }
           m_proSectorInfo[sectorSlot].driveStatus = 0x10;
           m_proSectorInfo[sectorSlot].wd1771Status = 0xFF;// no error
-          m_proSectorInfo[sectorSlot].sectorTiming = 5 + (index & 1);
+          m_proSectorInfo[sectorSlot].sectorTiming = static_cast<quint8>(5 + (index & 1));
           quint8 dataSize = static_cast<quint8>(data[85 + index - 1]);
           const quint8 fillByte = static_cast<quint8>(data[57 + index - 1]);
           if (dataSize != static_cast<quint8>(128)) {
             m_proSectorInfo[sectorSlot].wd1771Status = 0xF7;// CRC error
             if (dataSize < static_cast<quint8>(0x80)) {
-              m_proSectorInfo[sectorSlot].sectorTiming = 1 + (dataSize >> 5);
+              m_proSectorInfo[sectorSlot].sectorTiming = static_cast<quint8>(1 + (dataSize >> 5));
             }
           } else if (fillByte == 0xFF - DISK_ID_ADDR_MARK || (fillByte >= 0x04 && fillByte <= 0x08)) {
             m_proSectorInfo[sectorSlot].wd1771Status = 0xF7;// CRC error because these fill bytes are interpreted by FDC
@@ -1633,8 +1633,8 @@ namespace DiskImages {
           // fill sector data
           m_proSectorInfo[sectorSlot].sectorData.resize(128);
           if (fillByte == 0x08) {                // fill with CRC
-            dataSize = ((dataSize * 3) >> 1) + 2;// CRC takes more place to write
-            dataSize = std::min(dataSize, static_cast<quint8>(128));
+            dataSize = static_cast<quint8>(((dataSize * 3) >> 1) + 2);// CRC takes more place to write
+            dataSize = std::min<quint8>(dataSize, 128);
             m_proSectorInfo[sectorSlot].sectorData[0] = 0x40;
             m_proSectorInfo[sectorSlot].sectorData[1] = 0x7B;
             int patternIndex = 0;
@@ -1657,7 +1657,7 @@ namespace DiskImages {
               m_proSectorInfo[sectorSlot].sectorData[dataSize++] = static_cast<char>(((0xFFFF - crc16.GetCrc()) >> 8) & 0xFF);
             }
             if (dataSize < static_cast<quint8>(128)) {
-              m_proSectorInfo[sectorSlot].sectorData[dataSize++] = static_cast<char>(0xFFFF - crc16.GetCrc() & 0xFF);
+              m_proSectorInfo[sectorSlot].sectorData[dataSize++] = static_cast<char>((0xFFFF - crc16.GetCrc()) & 0xFF);
             }
           }
 
@@ -1682,7 +1682,7 @@ namespace DiskImages {
               m_proSectorInfo[sectorSlot].sectorData[dataSize++] = 0xFF - DISK_DATA_ADDR_MARK4;
               quint8 nextDataSize = nextIndex < m_board.m_chipRam[0] ? static_cast<quint8>(data[85 + nextIndex]) : static_cast<quint8>(data[85 + nextIndex - m_board.m_chipRam[0]]);
               if (nextFillByte == 0x08) {                // fill with CRC
-                nextDataSize = (nextDataSize * 3) >> 1;// CRC takes more place to write
+                nextDataSize = static_cast<quint8>((nextDataSize * 3) >> 1);// CRC takes more place to write
                 nextDataSize = std::min(nextDataSize, static_cast<quint8>(128));
                 if (dataSize < 128) {
                   m_proSectorInfo[sectorSlot].sectorData[dataSize++] = 0x40;
@@ -1707,7 +1707,7 @@ namespace DiskImages {
                   m_proSectorInfo[sectorSlot].sectorData[dataSize++] = static_cast<char>(((0xFFFF - crc16.GetCrc()) >> 8) & 0xFF);
                 }
                 if (dataSize < 128) {
-                  m_proSectorInfo[sectorSlot].sectorData[dataSize++] = static_cast<char>(0xFFFF - crc16.GetCrc() & 0xFF);
+                  m_proSectorInfo[sectorSlot].sectorData[dataSize++] = static_cast<char>((0xFFFF - crc16.GetCrc()) & 0xFF);
                 }
               }
             }
@@ -1751,7 +1751,7 @@ namespace DiskImages {
     }
     if (dataSize < 128) {
       crc16.Add(static_cast<unsigned char>(track & 0xFF));
-      m_proSectorInfo[sectorSlot].sectorData[dataSize++] = static_cast<char>(0xFF - (track & 0xFF));
+      m_proSectorInfo[sectorSlot].sectorData[dataSize++] = static_cast<char>((0xFF - track) & 0xFF);
     }
     if (dataSize < 128) {
       crc16.Add(static_cast<unsigned char>(index << 2));
@@ -1773,7 +1773,7 @@ namespace DiskImages {
       m_proSectorInfo[sectorSlot].sectorData[dataSize++] = static_cast<char>(((0xFFFF - crc16.GetCrc()) >> 8) & 0xFF);
     }
     if (dataSize < 128) {
-      m_proSectorInfo[sectorSlot].sectorData[dataSize++] = static_cast<char>(0xFFFF - crc16.GetCrc() & 0xFF);
+      m_proSectorInfo[sectorSlot].sectorData[dataSize++] = static_cast<char>((0xFFFF - crc16.GetCrc()) & 0xFF);
     }
     for (quint8 j = 0; j < postIDCrc && dataSize < 128; j++) {
       m_proSectorInfo[sectorSlot].sectorData[dataSize++] = static_cast<char>(0xFF);
@@ -1816,7 +1816,7 @@ namespace DiskImages {
       badSectorType |= 0x08;
     }
     if (badSectorType != 0) {
-      m_proSectorInfo[slot].wd1771Status = 0xFF & ~badSectorType;
+      m_proSectorInfo[slot].wd1771Status = static_cast<quint8>(0xFF & ~badSectorType);
       if (fuzzy) {
         qWarning() << "!w" << tr("[%1] Fuzzy sector among phantom sectors (unsupported with PRO format)").arg(deviceName());
       } else if ((chipFlags & 0x10) == 0) {
@@ -1860,7 +1860,7 @@ namespace DiskImages {
     const quint16 sector = aux & 0x3FF;
 
     // check if there are phantom sectors for this sector number
-    const quint16 slot = sector - 1;
+    const auto slot = static_cast<quint16>(sector - 1);
     if (!m_proSectorInfo[slot].used) {
       qCritical() << "!e" << tr("[%1] Sector %2 does not exist in PRO file").arg(deviceName()).arg(sector);
       m_driveStatus = 0x10;
@@ -1896,7 +1896,7 @@ namespace DiskImages {
     m_proSectorInfo[slot].totalDuplicate = 5;
     m_proSectorInfo[slot].weakBits = static_cast<quint16>(weakOffset);
     m_proSectorInfo[slot].wd1771Status |= 0x10; // now we have data in the sector
-    m_proSectorInfo[slot].wd1771Status &= ~0x08;// now we have a data CRC error
+    m_proSectorInfo[slot].wd1771Status = static_cast<quint8>(m_proSectorInfo[slot].wd1771Status & ~0x08);// now we have a data CRC error
     m_proSectorInfo[slot].notEmpty = true;
     m_proSectorInfo[slot].fillByte = 1;
 
@@ -1906,7 +1906,7 @@ namespace DiskImages {
       badSectorType |= 0x08;
     }
     if (badSectorType != 0) {
-      m_proSectorInfo[slot].wd1771Status = 0xFF & ~badSectorType;
+      m_proSectorInfo[slot].wd1771Status = static_cast<quint8>(0xFF & ~badSectorType);
       if ((chipFlags & 0x10) == 0) {
         const quint8 sectorLength = static_cast<quint8>(data[127]);
         m_proSectorInfo[slot].sectorTiming = 2;
@@ -1921,7 +1921,7 @@ namespace DiskImages {
       m_proSectorInfo[slot].sectorData[i] = data[i];
     }
     for (unsigned int i = 0; i < sizeof(lastBytes); i++) {
-      m_proSectorInfo[slot].sectorData[m_geometry.bytesPerSector() - 3 + i] = static_cast<char>(lastBytes[i]);
+      m_proSectorInfo[slot].sectorData[static_cast<quint16>(m_geometry.bytesPerSector() - 3) + i] = static_cast<char>(lastBytes[i]);
     }
     if (!m_isModified) {
       m_isModified = true;
@@ -1946,7 +1946,7 @@ namespace DiskImages {
       m_proSectorInfo[phantomSlot].totalDuplicate = 5;
       m_proSectorInfo[phantomSlot].weakBits = static_cast<quint16>(weakOffset);
       m_proSectorInfo[phantomSlot].wd1771Status |= 0x10; // now we have data in the sector
-      m_proSectorInfo[phantomSlot].wd1771Status &= ~0x08;// now we have a data CRC error
+      m_proSectorInfo[phantomSlot].wd1771Status = static_cast<quint8>(m_proSectorInfo[phantomSlot].wd1771Status & ~0x08);// now we have a data CRC error
       m_proSectorInfo[phantomSlot].notEmpty = true;
       m_proSectorInfo[phantomSlot].fillByte = 1;
 
@@ -1975,7 +1975,7 @@ namespace DiskImages {
     const quint16 sector = m_board.isChipOpen() ? aux & 0x3FF : aux;
 
     // check if there are phantom sectors for this sector number
-    quint16 slot = sector - 1;
+    auto slot = static_cast<quint16>(sector - 1);
     if (!m_proSectorInfo[slot].used) {
       qCritical() << "!e" << tr("[%1] Sector %2 does not exist in PRO file").arg(deviceName()).arg(sector);
       return false;
@@ -1984,9 +1984,9 @@ namespace DiskImages {
       const int dupnum = m_proSectorInfo[slot].lastSectorRead;
       qDebug() << "!u" << tr("[%1] Duplicate sector $%2: writing number %3").arg(deviceName()).arg(sector, 2, 16, QChar('0')).arg(dupnum);
 
-      m_proSectorInfo[slot].lastSectorRead = (m_proSectorInfo[slot].lastSectorRead + 1) % (m_proSectorInfo[slot].totalDuplicate + 1);
+      m_proSectorInfo[slot].lastSectorRead = static_cast<quint8>((m_proSectorInfo[slot].lastSectorRead + 1) % (m_proSectorInfo[slot].totalDuplicate + 1));
       if (dupnum != 0) {
-        slot = 1040 + m_proSectorInfo[slot].duplicateOffset[dupnum - 1] - 1;
+        slot = static_cast<quint16>(1040 + m_proSectorInfo[slot].duplicateOffset[dupnum - 1] - 1);
         if (!m_proSectorInfo[slot].used) {
           qCritical() << "!e" << tr("[%1] Sector %2 (phantom %3) does not exist in PRO file").arg(deviceName()).arg(sector).arg(m_proSectorInfo[slot].duplicateOffset[dupnum]);
           return false;
@@ -2016,7 +2016,7 @@ namespace DiskImages {
       badSectorType |= 0x08;
     }
     if (badSectorType != 0) {
-      m_proSectorInfo[slot].wd1771Status = 0xFF & ~badSectorType;
+      m_proSectorInfo[slot].wd1771Status = static_cast<quint8>(0xFF & ~badSectorType);
       if ((chipFlags & 0x10) == 0) {
         sectorLength = static_cast<quint8>(data[127]);
         m_proSectorInfo[slot].sectorTiming = 2;
@@ -2056,7 +2056,7 @@ namespace DiskImages {
     }
 
     // find a free slot to store this new sector
-    quint16 slot = trackNumber * m_geometry.sectorsPerTrack() + sectorNumber - 1;
+    auto slot = static_cast<quint16>(trackNumber * m_geometry.sectorsPerTrack() + sectorNumber - 1);
     int phantomSlot = 1040;
     if (m_proSectorInfo[slot].used) {
       if (m_proSectorInfo[slot].totalDuplicate < 5) {
@@ -2097,7 +2097,7 @@ namespace DiskImages {
         m_proSectorInfo[phantomSlot].totalDuplicate = 5;
         m_proSectorInfo[phantomSlot].weakBits = static_cast<quint16>(weakOffset);
         m_proSectorInfo[phantomSlot].wd1771Status |= 0x10; // now we have data in the sector
-        m_proSectorInfo[phantomSlot].wd1771Status &= ~0x08;// now we have a data CRC error
+        m_proSectorInfo[phantomSlot].wd1771Status = static_cast<quint8>(m_proSectorInfo[phantomSlot].wd1771Status & ~0x08);// now we have a data CRC error
         m_proSectorInfo[phantomSlot].notEmpty = true;
         m_proSectorInfo[phantomSlot].fillByte = 1;
 
@@ -2123,14 +2123,14 @@ namespace DiskImages {
     m_proSectorInfo[slot].used = true;
     m_proSectorInfo[slot].firstPass = true;
     m_proSectorInfo[slot].sectorNumber = sectorNumber;
-    m_proSectorInfo[slot].absoluteSector = trackNumber * m_geometry.sectorsPerTrack() + sectorNumber;
+    m_proSectorInfo[slot].absoluteSector = static_cast<quint16>(trackNumber * m_geometry.sectorsPerTrack() + sectorNumber);
     m_proSectorInfo[slot].driveStatus = 0x10;
     m_proSectorInfo[slot].wd1771Status = 0xFF;
     if (crcError || weakOffset != 0xFFFF) {
-      m_proSectorInfo[slot].wd1771Status &= ~0x08;
+      m_proSectorInfo[slot].wd1771Status = static_cast<quint8>(m_proSectorInfo[slot].wd1771Status & ~0x08);
     }
     if ((dataType & 0x01) == 0) {
-      m_proSectorInfo[slot].wd1771Status &= ~0x20;
+      m_proSectorInfo[slot].wd1771Status = static_cast<quint8>(m_proSectorInfo[slot].wd1771Status & ~0x20);
     }
     m_proSectorInfo[slot].sectorTiming = 5;
     m_proSectorInfo[slot].weakBits = static_cast<quint16>(weakOffset);
@@ -2222,9 +2222,8 @@ namespace DiskImages {
       quint16 weakBits = 9999;
       quint16 diffOffset[6];
       for (int j = 0; j < m_proSectorInfo[slot].totalDuplicate && j < 5; j++) {
-
         // check that the sector has an error
-        const quint16 phantomSlot = 1040 + static_cast<quint16>(m_proSectorInfo[slot].duplicateOffset[j]) - 1;
+        const quint16 phantomSlot = static_cast<quint16>(1040 + m_proSectorInfo[slot].duplicateOffset[j] - 1);
         if (!m_proSectorInfo[slot].used) {
           qCritical() << "!e" << tr("[%1] Sector %2 has an invalid phantom index %3.").arg(deviceName()).arg(m_proSectorInfo[slot].absoluteSector).arg(m_proSectorInfo[slot].duplicateOffset[j]);
           hasWeakBits = false;
@@ -2261,19 +2260,19 @@ namespace DiskImages {
   quint16 SimpleDiskImage::findPositionInProTrack(const int track, const int indexInProSector, const bool withoutData) {
     m_proSectorInfo[indexInProSector].shortSectorSize = 0;
     if (m_proSectorInfo[indexInProSector].weakBits == 0xFFFF) {
-      const quint8 invertedTrack = 0xFF - static_cast<quint8>(track) & 0xFF;
+      const quint8 invertedTrack = static_cast<quint8>((0xFF - track) & 0xFF);
       for (int l = 0; l < 128 - 8; l++) {
         if (static_cast<quint8>(m_proSectorInfo[indexInProSector].sectorData[l]) == 0xFF && static_cast<quint8>(m_proSectorInfo[indexInProSector].sectorData[l + 1]) == 0xFF - DISK_ID_ADDR_MARK && static_cast<quint8>(m_proSectorInfo[indexInProSector].sectorData[l + 2]) == invertedTrack) {
           Crc16 crc16;
           crc16.Reset();
           for (int m = 0; m < 5; m++) {
-            crc16.Add(static_cast<unsigned char>(0xFF - m_proSectorInfo[indexInProSector].sectorData[l + 1 + m] & 0xFF));
+            crc16.Add(static_cast<unsigned char>((0xFF - m_proSectorInfo[indexInProSector].sectorData[l + 1 + m]) & 0xFF));
           }
           //qDebug() << "!e" << tr("[%1] computed crc=%2 found crc=%3 for slot %4").arg(deviceName()).arg(readCrc, 4, 16, QChar('0')).arg(crc16.GetCrc(), 4, 16, QChar('0')).arg(indexInProSector);
           if (const unsigned short readCrc = static_cast<unsigned short>(0xFFFF - ((static_cast<unsigned short>(static_cast<quint8>(m_proSectorInfo[indexInProSector].sectorData[l + 6])) << 8) | (static_cast<unsigned short>(static_cast<quint8>(m_proSectorInfo[indexInProSector].sectorData[l + 7])) & 0xFF))); readCrc == crc16.GetCrc()) {
 
             // check if this sector exists
-            const quint8 sectorNumber = 0xFF - m_proSectorInfo[indexInProSector].sectorData[l + 4] & 0xFF;
+            const quint8 sectorNumber = static_cast<quint8>((0xFF - m_proSectorInfo[indexInProSector].sectorData[l + 4]) & 0xFF);
             if (const quint16 mainSlot = static_cast<quint16>(track * m_geometry.sectorsPerTrack() + static_cast<quint16>(sectorNumber) - 1); m_proSectorInfo[mainSlot].used) {
               // we have found a header with a valid CRC. Try to find a DATA address mark with at least 6 zero bytes between ID and DATA address mark
               int nextData = 0;
@@ -2302,7 +2301,7 @@ namespace DiskImages {
                   }
                   if (const quint8 totalDuplicate = m_proSectorInfo[mainSlot].totalDuplicate; totalDuplicate != 0) {
                     for (int j = 0; j < totalDuplicate; j++) {
-                      if (const quint16 phantomSlot = 1040 + m_proSectorInfo[mainSlot].duplicateOffset[j] - 1; !m_proSectorInfo[phantomSlot].paired) {
+                      if (const quint16 phantomSlot = static_cast<quint16>(1040 + m_proSectorInfo[mainSlot].duplicateOffset[j] - 1); !m_proSectorInfo[phantomSlot].paired) {
                         m_proSectorInfo[phantomSlot].paired = true;
                         m_proSectorInfo[indexInProSector].shortSectorSize = static_cast<quint8>(l + 1);
                         return phantomSlot;
@@ -2331,7 +2330,7 @@ namespace DiskImages {
               }
               if (const quint8 totalDuplicate = m_proSectorInfo[mainSlot].totalDuplicate; totalDuplicate != 0) {
                 for (int j = 0; j < totalDuplicate; j++) {
-                  if (const quint16 phantomSlot = 1040 + m_proSectorInfo[mainSlot].duplicateOffset[j] - 1; !m_proSectorInfo[phantomSlot].paired) {
+                  if (const quint16 phantomSlot = static_cast<quint16>(1040 + m_proSectorInfo[mainSlot].duplicateOffset[j] - 1); !m_proSectorInfo[phantomSlot].paired) {
                     for (int i = 0; i < 128 - nextData; i++) {
                       if (m_proSectorInfo[indexInProSector].sectorData[nextData + i] == m_proSectorInfo[phantomSlot].sectorData[i]) {
                         if (i >= bestDataMatch) {

@@ -58,12 +58,12 @@ namespace DiskImages {
     }
   }
 
-  void AtxSectorInfo::setSectorWeakOffset(const quint16 sectorWeakOffet) {
-    m_sectorWeakOffset = sectorWeakOffet;
-    if (sectorWeakOffet != 0xFFFF) {
+  void AtxSectorInfo::setSectorWeakOffset(const quint16 sectorWeakOffset) {
+    m_sectorWeakOffset = sectorWeakOffset;
+    if (sectorWeakOffset != 0xFFFF) {
       m_sectorStatus |= 0x40;
     } else {
-      m_sectorStatus &= ~0x40;
+      m_sectorStatus &= static_cast<quint8>(~0x40);
     }
   }
 

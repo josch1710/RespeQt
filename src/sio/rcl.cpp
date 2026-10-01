@@ -147,9 +147,9 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
       auto swapDisk1 = static_cast<qint8>(aux2);
       auto swapDisk2 = static_cast<qint8>(aux1);
       if (swapDisk1 > 25)
-        swapDisk1 -= 16;
+        swapDisk1 = static_cast<qint8>(swapDisk1 - 16);
       if (swapDisk2 > 25)
-        swapDisk2 -= 16;
+        swapDisk2 = static_cast<qint8>(swapDisk2 - 16);
       if (swapDisk1 > 0 && swapDisk1 <= 15 && swapDisk2 > 0 && swapDisk2 <= 15 && swapDisk1 != swapDisk2) {
         sio->swapDevices(static_cast<quint8>(swapDisk1 + DISK_BASE_CDEVIC - 1), static_cast<quint8>(swapDisk2 + DISK_BASE_CDEVIC - 1));
         RespeqtSettings::instance()->swapImages(swapDisk1 - 1, swapDisk2 - 1);
@@ -168,7 +168,7 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
       if (unmountDisk == -6)
         unmountDisk = 0;// All drives
       if (unmountDisk > 25)
-        unmountDisk -= 16;// Drive 10-15
+        unmountDisk = static_cast<qint8>(unmountDisk - 16);// Drive 10-15
       if (unmountDisk >= 0 && unmountDisk <= 15) {
         if (unmountDisk == 0) {
           // Eject All disks
@@ -379,7 +379,8 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
       commitDisk = static_cast<qint8>(aux1 - 1);
       commitOnOff = aux2 == 0;
 
-      if (commitDisk > 9) commitDisk -= 16;
+      if (commitDisk > 9)
+          commitDisk = static_cast<qint8>(commitDisk - 16);
       if (commitDisk != -7 && (commitDisk < 0 || commitDisk > 14)) {
         sio->port()->writeCommandNak();
         return;
@@ -406,7 +407,8 @@ void RCl::handleCommand(const quint8 command, const quint8 aux1, const quint8 au
       auto deviceNo = static_cast<qint8>(aux2);
 
       if (deviceNo == -6) deviceNo = 0;// All drives
-      if (deviceNo > 9) deviceNo -= 16;// Drive 10-15
+      if (deviceNo > 9)
+          deviceNo = static_cast<qint8>(deviceNo - 16);// Drive 10-15
       if (deviceNo >= 0 and deviceNo <= 15) {
         int diskSaved = 0;
         if (deviceNo == 0) {

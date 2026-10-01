@@ -16,7 +16,7 @@ namespace DiskImages {
     quint8 duplicateOffset[5];
     quint8 driveStatus;
     quint8 wd1771Status;
-    [[maybe_unused]]quint8 reservedByte;
+    quint8 reservedByte;
     quint16 absoluteSector;
     bool notEmpty;
     quint8 fillByte;

@@ -10,7 +10,7 @@ namespace Filesystems {
       : AtariFileSystem(image) {
     m_image->readSector(360, vtoc);
     bitmap = vtoc.mid(10, 90);
-    m_freeSectors = static_cast<quint8>(vtoc.at(3)) + static_cast<quint8>(vtoc.at(4)) * 256;
+    m_freeSectors = static_cast<quint16>(vtoc.at(3) +vtoc.at(4) * 256);
   }
 
   QList<AtariDirEntry> Dos10FileSystem::getEntries(const quint16 dir) {
@@ -54,7 +54,7 @@ namespace Filesystems {
     }
 
     quint16 sector = entry.firstSector;
-    for (quint16 n = static_cast<quint16>(entry.size) / (m_image->geometry().bytesPerSector() - 3); n > 0 && sector != 0; n--) {
+    for (quint16 n = static_cast<quint16>(entry.size) / static_cast<quint16> (m_image->geometry().bytesPerSector() - 3); n > 0 && sector != 0; n--) {
       QByteArray data;
       if (!m_image->readSector(sector, data)) {
         QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot read '%1': %2").arg(entry.niceName(), tr("Sector read failed.")));
@@ -65,9 +65,9 @@ namespace Filesystems {
           QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot read '%1': %2").arg(entry.niceName(), tr("File number mismatch.")));
           return false;
         }
-        sector = (static_cast<quint8>(data.at(data.count() - 3)) & 0x03) * 256 + static_cast<quint8>(data.at(data.count() - 2));
+        sector = static_cast<quint16>((data.at(data.count() - 3) & 0x03) * 256 + data.at(data.count() - 2));
       } else {
-        sector = static_cast<quint8>(data.at(data.count() - 3)) * 256 + static_cast<quint8>(data.at(data.count() - 2));
+        sector = static_cast<quint16>(data.at(data.count() - 3) * 256 + data.at(data.count() - 2));
       }
       const auto size = data.at(data.count() - 1);
       if (!(entry.attributes & AtariDirEntry::Dos10)) {
@@ -200,7 +200,7 @@ namespace Filesystems {
         }
       }
       if (!file.atEnd()) {
-        newSector = findFreeSector(sector + 1);
+        newSector = findFreeSector(static_cast<quint16>(sector + 1));
         allocateSector(newSector);
       } else {
         newSector = 0;
@@ -240,7 +240,7 @@ namespace Filesystems {
       sector = newSector;
     } while (!file.atEnd());
 
-    const quint16 dirsec = dir + static_cast<quint16>(no) / 8;
+    const quint16 dirsec = static_cast<quint16>(dir + no / 8);
     const int start = no % 8 * 16;
     QByteArray data;
     if (!image()->readSector(dirsec, data)) {
@@ -302,17 +302,17 @@ namespace Filesystems {
     }
     bool found = false;
     do {
-      if (sectorIsFree(sector + 1) &&
-          sectorIsFree(sector + 2) &&
-          sectorIsFree(sector + 3) &&
-          sectorIsFree(sector + 4) &&
-          sectorIsFree(sector + 5) &&
-          sectorIsFree(sector + 6) &&
-          sectorIsFree(sector + 7)) {
+      if (sectorIsFree(static_cast<quint16>(sector + 1)) &&
+          sectorIsFree(static_cast<quint16>(sector + 2)) &&
+          sectorIsFree(static_cast<quint16>(sector + 3)) &&
+          sectorIsFree(static_cast<quint16>(sector + 4)) &&
+          sectorIsFree(static_cast<quint16>(sector + 5)) &&
+          sectorIsFree(static_cast<quint16>(sector + 6)) &&
+          sectorIsFree(static_cast<quint16>(sector + 7))) {
         found = true;
         break;
       }
-      sector = findFreeSector(sector + 1);
+      sector = findFreeSector(static_cast<quint16>(sector + 1));
     } while (sector != first);
 
     if (!found) {
@@ -333,7 +333,7 @@ namespace Filesystems {
     dosEntry[3] = static_cast<char>(sector % 256);
     dosEntry[4] = static_cast<char>(sector / 256);
 
-    const quint16 dirsec = dir + static_cast<quint16>(no) / 8;
+    const quint16 dirsec = static_cast<quint16>(dir + no / 8);
     const int start = no % 8 * 16;
     QByteArray data;
     if (!image()->readSector(dirsec, data)) {
@@ -355,7 +355,7 @@ namespace Filesystems {
   }
 
   bool Dos10FileSystem::erase(const AtariDirEntry &entry) {
-    const quint16 dirsec = entry.dir + static_cast<quint16>(entry.no) / 8;
+    const quint16 dirsec = static_cast<quint16>(entry.dir + entry.no / 8);
     const int start = entry.no % 8 * 16;
     QByteArray data;
     if (!image()->readSector(dirsec, data)) {
@@ -369,7 +369,7 @@ namespace Filesystems {
     }
 
     quint16 sector = entry.firstSector;
-    for (quint16 n = static_cast<quint16>(entry.size) / (m_image->geometry().bytesPerSector() - 3); n > 0 && sector != 0; n--) {
+    for (quint16 n = static_cast<quint16>(entry.size / (m_image->geometry().bytesPerSector() - 3)); n > 0 && sector != 0; n--) {
       freeSector(sector);
       //QByteArray data;
       data.clear();
@@ -382,9 +382,9 @@ namespace Filesystems {
           QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot delete '%1': %2").arg(entry.niceName(), tr("File number mismatch.")));
           return false;
         }
-        sector = (static_cast<quint8>(data.at(data.count() - 3)) & 0x03) * 256 + static_cast<quint8>(data.at(data.count() - 2));
+        sector = static_cast<quint16>((data.at(data.count() - 3) & 0x03) * 256 + data.at(data.count() - 2));
       } else {
-        sector = static_cast<quint8>(data.at(data.count() - 3)) * 256 + static_cast<quint8>(data.at(data.count() - 2));
+        sector = static_cast<quint16>(data.at(data.count() - 3) * 256 + data.at(data.count() - 2));
       }
     }
 
@@ -396,7 +396,7 @@ namespace Filesystems {
   }
 
   bool Dos10FileSystem::rename(const AtariDirEntry &entry, const QByteArray &name) {
-    const quint16 dirsec = entry.dir + static_cast<quint16>(entry.no) / 8;
+    const quint16 dirsec = static_cast<quint16>(entry.dir + entry.no / 8);
     const int start = entry.no % 8 * 16;
     QByteArray data;
     if (!image()->readSector(dirsec, data)) {
@@ -435,7 +435,7 @@ namespace Filesystems {
   }
 
   bool Dos10FileSystem::removeDir(const AtariDirEntry &entry) {
-    const quint16 dirsec = entry.dir + static_cast<quint16>(entry.no) / 8;
+    const quint16 dirsec = static_cast<quint16>(entry.dir + entry.no / 8);
     const int start = entry.no % 8 * 16;
     QByteArray data;
     if (!image()->readSector(dirsec, data)) {

@@ -181,7 +181,7 @@ bool GzFile::isSequential() const {
 }
 
 bool GzFile::seek(const qint64 pos) {
-  const bool result = gzseek(mHandle, pos, SEEK_SET) != -1;
+  const bool result = gzseek(mHandle, static_cast<off_t>(pos), SEEK_SET) != -1;
   if (!result) {
     setErrorString(tr("gzseek() failed."));
   }

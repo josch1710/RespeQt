@@ -17,7 +17,7 @@ namespace Filesystems {
     QList<AtariDirEntry> getEntries(quint16 dir) override;
     uint totalCapacity() override;
     int findFreeFileNo(quint16 dir) override;
-    uint freeSpace() override { return m_freeSectors * (m_image->geometry().bytesPerSector() - 3); }
+    uint freeSpace() override { return static_cast<uint>(m_freeSectors * (m_image->geometry().bytesPerSector() - 3)); }
     bool extract(const AtariDirEntry &entry, const QString &target) override;
     AtariDirEntry insert(quint16 dir, const QString &name) override;
     AtariDirEntry makeDir(quint16 dir, const QString &name) override;

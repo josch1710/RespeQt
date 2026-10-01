@@ -100,27 +100,27 @@ namespace DiskImages {
       if (const int gap = nextSectorPos - sectorPos; gap > 145 << 3) {
         return 0;
       }
-      const unsigned char invertedTrack = 0xFF - static_cast<unsigned char>(track) & 0xFF;
+      const auto invertedTrack = static_cast<unsigned char>((0xFF - track) & 0xFF);
       for (int index = 0; index < sector->size() - 9; index++) {
         for (int shift = 0; shift < 8; shift++) {
           // shift the sector data to get the real header values
           unsigned char sectorHeader[8];
           for (unsigned int headerByte = 0; headerByte < sizeof(sectorHeader); headerByte++)
           {
-            sectorHeader[headerByte] = 0xFF & (
+            sectorHeader[headerByte] = static_cast<unsigned char>(0xFF & (
               sector->byteAt((static_cast<int>(headerByte) + index) << shift)
               | (sector->byteAt(static_cast<int>(headerByte) + 1 + index) >> (8 - shift))
-            );
+            ));
           }
           // the header must start with $00 $FE <track> but data is inverted so we check for $FF $01 <invertedTrack>
           if (sectorHeader[0] == 0xFF && sectorHeader[1] == 0x01 && sectorHeader[2] == invertedTrack) {
-            if (const quint8 sectorNumber = 0xFF - sectorHeader[4] & 0xFF; sectorNumber == nextSector->sectorNumber()) {
+            if (const quint8 sectorNumber = static_cast<quint8>((0xFF - sectorHeader[4]) & 0xFF); sectorNumber == nextSector->sectorNumber()) {
               Crc16 crc16;
               crc16.Reset();
               for (int m = 0; m < 5; m++) {
-                crc16.Add(static_cast<unsigned char>(0xFF - sectorHeader[m + 1] & 0xFF));
+                crc16.Add(static_cast<unsigned char>((0xFF - sectorHeader[m + 1]) & 0xFF));
               }
-              if (const unsigned short readCrc = static_cast<unsigned short>(0xFFFF - (sectorHeader[6] << 8) | (sectorHeader[7] & 0xFF)); readCrc == crc16.GetCrc()) {
+              if (const auto readCrc = static_cast<unsigned short>(0xFFFF - ((sectorHeader[6] << 8) | (sectorHeader[7] & 0xFF))); readCrc == crc16.GetCrc()) {
                 *bitShift = shift;
                 return index + 1;
               }

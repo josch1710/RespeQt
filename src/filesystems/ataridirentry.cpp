@@ -115,7 +115,7 @@ namespace Filesystems {
     }
 
     // Translate the first sector
-    firstSector = static_cast<quint8>(entry.at(3)) + static_cast<quint8>(entry.at(4)) * 256;
+    firstSector = static_cast<quint16>(entry.at(3) + entry.at(4) * 256);
 
     // Put an invalid date
     dateTime = QDateTime();
@@ -156,7 +156,7 @@ namespace Filesystems {
     }
 
     // Translate the first sector
-    firstSector = static_cast<quint8>(entry.at(1)) + static_cast<quint8>(entry.at(2)) * 256;
+    firstSector = static_cast<quint16>(entry.at(1) + entry.at(2) * 256);
 
     // Translate the date/time
     int year = static_cast<quint8>(entry.at(19)) + 1900;

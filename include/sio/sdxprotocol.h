@@ -19,7 +19,7 @@ class SDXProtocol : public SioDevice {
   Q_OBJECT
 
 public:
-  static constexpr quint32 SDX_MAXLEN = 16777215UL;
+  static constexpr off_t SDX_MAXLEN = 16777215UL;
 
   /* SDX required attribute mask */
   static constexpr quint8 RA_PROTECT     = 0x01;
