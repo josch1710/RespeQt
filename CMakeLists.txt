@@ -33,6 +33,8 @@ if (MAKE_TEST)
         tests/units/siorecordertest.h
         tests/units/pclinktest.cpp
         tests/units/pclinktest.h
+        tests/units/cpu6502test.cpp
+        tests/units/cpu6502test.h
         tests/units/mockserialport.h
         tests/units/tests.cpp
     )

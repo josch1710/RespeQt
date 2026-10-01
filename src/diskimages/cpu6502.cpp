@@ -11,7 +11,7 @@
 #include <cstring>
 
 // test if there is a page change
-static constexpr bool CROSS_PAGE(unsigned short a, unsigned short r) { return ((a - (r ^ a)) & 0xFF00) != 0; }
+static constexpr bool CROSS_PAGE(const unsigned short a, const unsigned short r) { return ((a - r) & 0xFF00) != (a & 0xFF00); }
 
 // mask for Xas, Sya and other instructions
 constexpr unsigned char UNDOC_MASK = 0xDB;// not sure
@@ -573,7 +573,7 @@ namespace DiskImages {
 
   int Cpu6502::Branch(const unsigned char val) {
     const unsigned short OldPC = m_PC;
-    m_PC = static_cast<unsigned short>(m_PC + val);
+    m_PC = static_cast<unsigned short>(m_PC + static_cast<signed char>(val));
     if ((OldPC ^ m_PC) & 0xFF00) {
       return 4;// Different page
     }
@@ -2589,8 +2589,7 @@ namespace DiskImages {
       case 0x93:// axa (Zpg),Y or NOP
         if (m_cpuType == CPU_6502) {
           addr = FetchIndirectY(m_PC);
-          val = ReadByte(addr);
-          m_PC = static_cast<unsigned short>(m_PC + 2);
+          m_PC++;
           nClockCount = 6;
           Axa(addr);
         } else {
@@ -3815,7 +3814,7 @@ namespace DiskImages {
         p += strlen(p);
         break;
       case MODE_RELATIVE:
-        secondLabel = GetAddressOrLabelAllBanks(static_cast<unsigned short>(address + 2 + opCodes[1]));
+        secondLabel = GetAddressOrLabelAllBanks(static_cast<unsigned short>(address + 2 + static_cast<signed char>(opCodes[1])));
         strcpy(p, secondLabel);
         p += strlen(p);
         break;
@@ -3869,7 +3868,7 @@ namespace DiskImages {
         p += strlen(p);
         strcpy(p, ",");
         p += strlen(p);
-        thirdLabel = GetAddressOrLabelAllBanks(static_cast<unsigned short>(address + 2 + opCodes[2]));
+        thirdLabel = GetAddressOrLabelAllBanks(static_cast<unsigned short>(address + 3 + static_cast<signed char>(opCodes[2])));
         strcpy(p, thirdLabel);
         p += strlen(p);
         break;

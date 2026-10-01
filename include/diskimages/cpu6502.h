@@ -163,7 +163,8 @@ namespace DiskImages {
 
     unsigned short PopWord() {
       const unsigned char uLow = PopByte();
-      return static_cast<unsigned short>(uLow | uLow << 8);
+      const unsigned char uHigh = PopByte();
+      return MAKE_WORD(uLow, uHigh);
     }
 
     // execute one instruction and returns the number of cycles.
@@ -215,13 +216,13 @@ namespace DiskImages {
     unsigned short FetchAbsolute(const unsigned short addr) { return ReadWord(addr); }
     unsigned short FetchAbsoluteX(const unsigned short addr) { return static_cast<unsigned short>(ReadWord(addr) + m_X); }
     unsigned short FetchAbsoluteY(const unsigned short addr) { return static_cast<unsigned short>(ReadWord(addr) + m_Y); }
-    unsigned short FetchZPageX(const unsigned short addr) { return static_cast<unsigned short>(ReadByte(addr) + m_X); }
-    unsigned short FetchZPageY(const unsigned short addr) { return static_cast<unsigned short>(ReadByte(addr) + m_Y); }
-    unsigned short FetchXIndirect(const unsigned short addr) { return static_cast<unsigned short>(ReadByte(addr) + m_X); }
-    unsigned short FetchIndirectY(const unsigned short addr) { return static_cast<unsigned short>(ReadWord(ReadByte(addr)) + m_Y); }
+    unsigned short FetchZPageX(const unsigned short addr) { return static_cast<unsigned short>((ReadByte(addr) + m_X) & 0xFF); }
+    unsigned short FetchZPageY(const unsigned short addr) { return static_cast<unsigned short>((ReadByte(addr) + m_Y) & 0xFF); }
+    unsigned short FetchXIndirect(const unsigned short addr) { return ReadWordBug(static_cast<unsigned short>((ReadByte(addr) + m_X) & 0xFF)); }
+    unsigned short FetchIndirectY(const unsigned short addr) { return static_cast<unsigned short>(ReadWordBug(ReadByte(addr)) + m_Y); }
     unsigned short FetchIndirectBug(const unsigned short addr) { return ReadWordBug(ReadWord(addr)); }
     unsigned short FetchIndirect(const unsigned short addr) { return ReadWord(ReadWord(addr)); }
-    unsigned short FetchZPageIndirect(const unsigned short addr) { return ReadWord( ReadByte(addr)); }
+    unsigned short FetchZPageIndirect(const unsigned short addr) { return ReadWordBug(ReadByte(addr)); }
     unsigned short FetchAbsoluteXIndirect(const unsigned short addr) { return ReadWord(static_cast<unsigned short>(ReadWord(addr) + static_cast<unsigned short>(m_X))); }
 
     // get value depending on addressing mode
