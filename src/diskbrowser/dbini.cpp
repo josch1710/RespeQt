@@ -10,7 +10,7 @@
 DbIni::DbIni()
 {
     _appData  = RespeqtSettings::instance()->appDataFolder();
-    _settings = RespeqtSettings::instance()->mSettings;         // did I make mSettings public for this? (probably bad)
+    _settings = RespeqtSettings::instance()->settings();         // did I make mSettings public for this? (probably bad)
                                                                 // _settings was also once optionally used for seperate ini file.
                                                                 // This is now only a ref to the app QSetting instance (TBD: fix).
     DbIni::load();
@@ -118,7 +118,7 @@ bool DbIni::load()
     if (_settings->contains("index_font"))
         _indexFont = _settings->value("index_font").toString();
 
-    foreach (QString group, _settings->childGroups())
+    for (auto group : _settings->childGroups())
     {
         DirInfo dirInfo;
 
@@ -127,7 +127,7 @@ bool DbIni::load()
         if (_settings->contains("pic"))
             dirInfo.pic = _settings->value("pic").toString().replace('@','/');
 
-        foreach (const QString& childGroup, _settings->childGroups())
+        for (const auto& childGroup : _settings->childGroups())
         {
             _settings->beginGroup(childGroup);
 

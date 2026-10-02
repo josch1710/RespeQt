@@ -22,12 +22,19 @@
 
 #include <QPrinterInfo>
 #include <QSettings>
+#include <QSharedPointer>
 #include <memory>
 
-#define NUM_RECENT_FILES 10
+
+// TODO Copy ctor for new Settingsname.
+
+constexpr int NUM_RECENT_FILES = 10;
+
+using QSettingsPtr = QSharedPointer<QSettings>;
 
 // There should always only be one instance, so this is a singleton.
-class RespeqtSettings final {
+class RespeqtSettings final
+{
 public:
   class ImageSettings {
   public:
@@ -36,6 +43,9 @@ public:
   };
 
   ~RespeqtSettings();
+
+  [[nodiscard]] QSettingsPtr settings() const { return mSettings; }
+  [[nodiscard]] QSettingsPtr settings()  { return mSettings; }
 
   [[nodiscard]] bool isFirstTime() const;
 
@@ -334,16 +344,13 @@ public:
     return sInstance;
   }
 
+
 private:
   RespeqtSettings();
 
-  static std::unique_ptr<RespeqtSettings> sInstance;
-
-public:
-  QSettings *mSettings;
-
-private:
-  static std::unique_ptr<DbSettings> sDbSettings;
+  QSettingsPtr mSettings{};
+  inline static std::unique_ptr<RespeqtSettings> sInstance;
+  inline static std::unique_ptr<DbSettings> sDbSettings;
 
   void writeRecentBrowserFolders(const QStringList& folders) const;
 //  const int maxRecentBrowserFolders = 10;

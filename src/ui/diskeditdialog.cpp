@@ -142,7 +142,7 @@ bool FileModel::setData(const QModelIndex &index, const QVariant &value, const i
       if (s.count() > 8) {
         s.resize(8);
       }
-      foreach (QChar c, s) {
+      for (const auto &c : s) {
         if (static_cast<uint8_t>(c.toLatin1()) > 0x7f || (!c.isLetterOrNumber() && c != '_')) {
           return false;
         }
@@ -176,7 +176,7 @@ bool FileModel::setData(const QModelIndex &index, const QVariant &value, const i
       if (s.count() > 3) {
         s.resize(3);
       }
-      foreach (QChar c, s) {
+      for (const auto &c : s) {
         if (static_cast<uint8_t>(c.toLatin1()) > 0x7f || (!c.isLetterOrNumber() && c != '_')) {
           return false;
         }
@@ -213,7 +213,7 @@ void FileModel::deleteFiles(const QModelIndexList& indexes) {
   QList<int> l;
 
   QList<Filesystems::AtariDirEntry> selectedEntries;
-  foreach (QModelIndex i, indexes) {
+  for (const auto &i : indexes) {
     if (i.isValid() && i.column() == 0) {
       selectedEntries.append(entries.at(i.row()));
       l.append(i.row());
@@ -365,7 +365,7 @@ void FileModel::toParent() {
   paths.removeLast();
   dirs.removeLast();
   m_currentPath = QString("D%1:").arg(fileSystem->image()->deviceNo() - 0x30);
-  foreach (QString s, paths) {
+  for (const auto &s : paths) {
     m_currentPath.append(s + ">");
   }
   emit layoutAboutToBeChanged();
@@ -399,7 +399,7 @@ void FileModel::insertFiles(const QStringList& names) {
 bool FileModel::dropMimeData(const QMimeData *data, Qt::DropAction /*action*/, int /*row*/, int /*column*/, const QModelIndex & /*parent*/) {
   if (data->hasUrls()) {
     QStringList names;
-    foreach(QUrl url, data->urls()) {
+    for(const auto &url : data->urls()) {
       if (QString name = url.toLocalFile(); !name.isEmpty()) {
         names.append(name);
       }
@@ -438,7 +438,7 @@ QMimeData *FileModel::mimeData(const QModelIndexList &indexes) const {
   }
   tempDirs->append(info.fileName());
 
-  foreach (QModelIndex i, indexes) {
+  for (const auto &i : indexes) {
     if (i.isValid() && i.column() == 0) {
       selectedEntries.append(entries.at(i.row()));
       urls.append(QUrl::fromLocalFile(QString(tempPath) + "/" + entries.at(i.row()).niceName()));
@@ -613,7 +613,7 @@ void DiskEditDialog::extractFilesTriggered() {
   RespeqtSettings::instance()->setLastExtractDir(target);
 
   QList<Filesystems::AtariDirEntry> selectedEntries;
-  foreach (QModelIndex i, indexes) {
+  for (const auto &i : indexes) {
     if (i.isValid() && i.column() == 0) {
       selectedEntries.append(model->entries.at(i.row()));
     }

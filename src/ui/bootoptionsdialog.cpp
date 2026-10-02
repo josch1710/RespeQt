@@ -103,13 +103,13 @@ void BootOptionsDialog::accept() {
           << "startup.bat"
           << "$*.bin";
   QStringList allFiles = dir.entryList(filters, QDir::Files);
-  foreach (fileName, allFiles) {
-    QFile::remove(bootFolderPath_ + "/" + fileName);
+  for (const auto &_fileName : allFiles) {
+    QFile::remove(bootFolderPath_ + "/" + _fileName);
   }
   dir.setPath(g_respeQtAppPath + "/" + selectedDOS);
   allFiles = dir.entryList(QDir::NoDotAndDotDot | QDir::Files);
-  foreach (fileName, allFiles) {
-    QFile::copy(dir.path() + "/" + fileName, bootFolderPath_ + "/" + fileName);
+  for (const auto &_fileName : allFiles) {
+    QFile::copy(dir.path() + "/" + _fileName, bootFolderPath_ + "/" + _fileName);
   }
 
   QDialog::accept();

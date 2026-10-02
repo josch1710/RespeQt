@@ -143,7 +143,7 @@ void DiskBrowserDlg::onFolderChanged(QString lastFolder)
 
     // fill in any sub-directories
     auto folders {_folderDisks.folders()};
-    foreach (const QString &subdir, folders)
+    for (const auto &subdir : folders)
     {
         if (subdir.startsWith('.') && subdir != "..")     // hide .folders on Windows
             continue;
@@ -157,7 +157,7 @@ void DiskBrowserDlg::onFolderChanged(QString lastFolder)
 
     // fill in all disk image files
     auto disks {_folderDisks.disks()};
-    foreach (const QString &disk_, disks)
+    for (const auto &disk_ : disks)
     {
         auto index {diskIndex(lastFolder, disk_)};
         const auto item {new DbItem(ui->treeDisks)};
@@ -269,7 +269,7 @@ void DiskBrowserDlg::updateDiskBrowser()
         {
             auto entries {atariFs->getEntries(atariFs->rootDir())};
 
-            foreach (const Filesystems::AtariDirEntry& entry, entries)
+            for (const auto& entry : entries)
                 fileList += entry.name() + "\n";
 
             if (fileList.isEmpty())
@@ -349,7 +349,7 @@ void DiskBrowserDlg::updateDiskBrowser()
 
 QString DiskBrowserDlg::getRecentDisk(const QString& folder) // NOLINT(*-convert-member-functions-to-static)
 {
-    foreach (const QString &text, RespeqtSettings::instance()->recentBrowserFolders())
+    for (const auto &text : RespeqtSettings::instance()->recentBrowserFolders())
     {
         if (auto fi {QFileInfo(text)}; fi.isFile() && fi.path() == folder)
             return fi.fileName();
@@ -513,7 +513,7 @@ QString DiskBrowserDlg::findPicFile()
     if (subdir.exists())
         entries += subdir.entryInfoList(fmtlist);   // also scan ./.respeqt_db sub-dir for pics
 
-    foreach (const QFileInfo& entry, entries)
+    for (const auto& entry : entries)
     {
         // 1. check for basename with viable image extension
 

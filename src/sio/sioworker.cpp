@@ -626,7 +626,7 @@ void CassetteWorker::run() {
 
   QTime tm = QTime::currentTime();
 
-  foreach (CassetteRecord record, mRecords) {
+  for (const auto &record : mRecords) {
     if (lastBaud != record.baudRate) {
       lastBaud = record.baudRate;
       if (!mPort->setSpeed(static_cast<unsigned long>(lastBaud))) {

@@ -18,7 +18,7 @@ void deltree(const QString &name) { // NOLINT(*-no-recursion)
   if (const QFileInfo info(name); info.isDir()) {
     QDir dir(name);
     QFileInfoList list = dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files);
-    foreach (QFileInfo file, list) {
+    for (const auto &file : list) {
       deltree(file.absoluteFilePath());
     }
     const QString n = dir.dirName();
@@ -214,7 +214,7 @@ QStringList toStringList(const QList<QByteArray>& list)
 {
     QStringList strings;
 
-    foreach (const QByteArray& item, list)
+    for (const auto& item : list)
     {
         QString fileSpec = "*." + QString::fromLocal8Bit(item);
         strings.append(fileSpec);

@@ -17,7 +17,7 @@ namespace Filesystems {
   /* AtariFileSystem */
 
   bool AtariFileSystem::extractRecursive(QList<AtariDirEntry> &entries, const QString &target) {
-    foreach (AtariDirEntry e, entries) {
+    for (const auto &e : entries) {
       if (e.attributes & AtariDirEntry::Directory) {
         QString newDir = target + "/" + e.niceName();
         if (!QDir(newDir).mkdir(newDir)) {
@@ -37,7 +37,7 @@ namespace Filesystems {
   }
 
   bool AtariFileSystem::deleteRecursive(QList<AtariDirEntry> &entries) {
-    foreach (AtariDirEntry e, entries) {
+    for (const auto &e : entries) {
       if (e.attributes & AtariDirEntry::Directory) {
         if (QList<AtariDirEntry> subs = getEntries(e.firstSector);!deleteRecursive(subs)) {
           return false;
@@ -54,7 +54,7 @@ namespace Filesystems {
 
   QList<AtariDirEntry> AtariFileSystem::insertRecursive(const quint16 dir, const QStringList &files) {
     QList<AtariDirEntry> result;
-    foreach (QString name, files) {
+    for (const auto &name : files) {
       AtariDirEntry entry;
       if (QFileInfo info(name); info.isDir()) {
         entry = makeDir(dir, name);
@@ -63,7 +63,7 @@ namespace Filesystems {
         }
         QDir subDir(name);
         QStringList subList;
-        foreach (QFileInfo i, subDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files)) {
+        for (const auto &i : subDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files)) {
           subList.append(i.absoluteFilePath());
         }
 
@@ -105,7 +105,7 @@ namespace Filesystems {
       atariName.append(extension);
       QByteArray result {atariName.toLatin1()};
       bool found = false;
-      foreach (AtariDirEntry e, entries) {
+      for (const auto &e : entries) {
         if (e.atariName == result) {
           found = true;
           break;

@@ -330,7 +330,7 @@ namespace DiskImages {
                                                                             << "*.atx"
                                                                             << "*.ATX",
                                                               QDir::Files);
-        foreach (QString otherFileName, images) {
+        for (const auto &otherFileName : images) {
           QFileInfo otherFileInfo(otherFileName);
           if (QString otherBaseName = otherFileInfo.completeBaseName();
             otherBaseName.contains("Side", Qt::CaseInsensitive) || otherBaseName.contains("Disk", Qt::CaseInsensitive)
@@ -344,7 +344,7 @@ namespace DiskImages {
           m_numberOfSides = imageList.size();
           std::sort(imageList.begin(), imageList.end(), std::less<QString>()); // NOLINT(*-use-transparent-functors)
           int currentIndex = 0;
-          foreach (QString otherFileName, imageList) {
+          for (const auto &otherFileName : imageList) {
             if (otherFileName == fileName) {
               break;
             }

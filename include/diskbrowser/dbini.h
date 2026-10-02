@@ -4,6 +4,7 @@
 #include "folderdisks.h"
 #include "picsourcetype.h"
 #include "diskbrowser/dbsettings.h"
+#include "respeqtsettings.h"
 
 // [db]
 // pic=<filepath>
@@ -42,6 +43,6 @@ public:
     bool isJson() override { return false; }
 
 private:
-    QSettings* _settings = nullptr;
+    QSettingsPtr _settings;
 };
 #endif // DBINI_H

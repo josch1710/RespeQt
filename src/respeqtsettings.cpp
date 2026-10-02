@@ -19,13 +19,8 @@
 #include <memory>
 #include <QStandardPaths>
 
-std::unique_ptr<RespeqtSettings> RespeqtSettings::sInstance;
-
-std::unique_ptr<DbSettings> RespeqtSettings::sDbSettings;
-
 RespeqtSettings::RespeqtSettings() {
-  mSettings = new QSettings();  // uses QApplication's info to determine setting to use
-
+  mSettings = QSettingsPtr::create();
   mIsFirstTime = mSettings->value("FirstTime", true).toBool();
   mSettings->setValue("FirstTime", false);
 }
@@ -33,8 +28,6 @@ RespeqtSettings::RespeqtSettings() {
 RespeqtSettings::~RespeqtSettings()
 {
     sDbSettings.reset();
-
-    delete mSettings;
 }
 
 // Get session file name from Mainwindow //
@@ -46,13 +39,13 @@ void RespeqtSettings::setSessionFile(const QString &g_sessionFile, const QString
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void RespeqtSettings::copySettings(QSettings& setFrom, QSettings& setTo) // NOLINT(*-no-recursion)
 {
-    foreach(const QString& key, setFrom.childKeys())
+    for(const auto &key : setFrom.childKeys())
     {
         auto value = setFrom.value(key);
         setTo.setValue(key,value);
     }
 
-    foreach(const QString& group, setFrom.childGroups())
+    for(const auto &group : setFrom.childGroups())
     {
         setFrom.beginGroup(group);
         setTo.beginGroup(group);
@@ -884,7 +877,7 @@ QStringList RespeqtSettings::recentBrowserFolders() const
 // ReSharper disable once CppMemberFunctionMayBeStatic
 bool RespeqtSettings::isDiskImage(const QString &name) // NOLINT(*-convert-member-functions-to-static)
 {
-    foreach (const QString &fileType, FileTypes::getDiskImageTypes())
+    for (const auto &fileType : FileTypes::getDiskImageTypes())
     {
       if (QString ext = fileType.right(4); name.endsWith(ext, osCaseSensitivity()))
             return true;
@@ -898,7 +891,7 @@ QStringList RespeqtSettings::buildBrowserFolders()
 
   // build a list of MRU folders for the GUI dropdown list
 
-  foreach(const QString& name, recentBrowserFolders())
+  for(const auto &name : recentBrowserFolders())
   {
     if (auto fileInfo = QFileInfo(name); fileInfo.exists())
     {
@@ -976,18 +969,14 @@ void RespeqtSettings::writeRecentBrowserFolders(const QStringList& folders) cons
   int index = 0;
 
   mSettings->beginWriteArray("RecentBrowserFolders");
-  foreach (QString folder, folders) {
-    if (auto fileInfo = QFileInfo(folder); !fileInfo.exists()) {
-      if (fileInfo.isFile())
-        folder = fileInfo.path();
-      else
-        continue;
-
-      if (!QFileInfo::exists(folder))
+  for (const auto &folder : folders) {
+    auto fileInfo{QFileInfo(folder)};
+    if (!fileInfo.exists() || !QFileInfo::exists(folder)) {
+      if (!fileInfo.isFile())
         continue;
     }
     mSettings->setArrayIndex(index++);
-    mSettings->setValue("FileFolder", folder);
+    mSettings->setValue("FileFolder", fileInfo.path());
   }
   mSettings->endArray();
 }
@@ -1154,7 +1143,7 @@ void RespeqtSettings::setDbDataSource(const DbDataSource newDbSource)
             else
                 pNew = new DbJson;
 
-            foreach (const QString& dir, buildBrowserFolders())
+            for (const auto &dir : buildBrowserFolders())
             {
                 sDbSettings = std::make_unique<DbJson>();
                 sDbSettings->setDataDir(dir);

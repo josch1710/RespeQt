@@ -172,7 +172,7 @@ MainWindow::MainWindow()
   QStringList filters;
   filters << "respeqt-*";
   QFileInfoList list = tempDir.entryInfoList(filters, QDir::NoDotAndDotDot | QDir::Dirs | QDir::Files);
-  foreach (QFileInfo file, list) {
+  for (const auto &file : list) {
     deltree(file.absoluteFilePath());
   }
 
@@ -250,6 +250,7 @@ MainWindow::MainWindow()
       }
     }
   }
+
   // Pass Session file name, path and MainWindow title to RespeQtSettings //
   RespeqtSettings::instance()->setSessionFile(g_sessionFile, g_sessionFilePath);
   RespeqtSettings::instance()->setMainWindowTitle(g_mainWindowTitle);
@@ -536,7 +537,7 @@ void MainWindow::dropEvent(QDropEvent *event) {
   }
 
   QStringList files;
-  foreach (QUrl url, event->mimeData()->urls()) {
+  for (const auto &url : event->mimeData()->urls()) {
     if (!url.toLocalFile().isEmpty()) {
       files.append(url.toLocalFile());
     }
@@ -582,7 +583,7 @@ void MainWindow::dropEvent(QDropEvent *event) {
     mountFileWithDefaultProtection(slot, files[0]);
     files.removeAt(0);
   }
-  foreach (QString file, files) {
+  for (const auto &file : files) {
     qCritical() << "!e" << tr("Cannot mount '%1': No empty disk slots.").arg(file);
   }
 }
