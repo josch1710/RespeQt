@@ -29,7 +29,9 @@ int main(int argc, char *argv[]) {
   QCoreApplication::setOrganizationName("RespeQt developers");
   QCoreApplication::setOrganizationDomain("respeqt.org");
   QCoreApplication::setApplicationName("RespeQt");
-
+#ifdef PRERELEASE
+  QCoreApplication:: setApplicationName("Respect_RC");
+#endif
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
   QApplication::setStyle(QStyleFactory::create("Fusion"));
