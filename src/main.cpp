@@ -25,6 +25,11 @@ int main(int argc, char *argv[]) {
 #ifdef Q_OS_WIN
   timeBeginPeriod(1);
 #endif
+
+  QCoreApplication::setOrganizationName("RespeQt developers");
+  QCoreApplication::setOrganizationDomain("respeqt.org");
+  QCoreApplication::setApplicationName("RespeQt");
+
   QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
   QApplication::setStyle(QStyleFactory::create("Fusion"));

@@ -176,10 +176,6 @@ MainWindow::MainWindow()
     deltree(file.absoluteFilePath());
   }
 
-  QCoreApplication::setOrganizationName("ZeeSoft");
-  QCoreApplication::setOrganizationDomain("org.respeqt");
-  QCoreApplication::setApplicationName("RespeQt");
-
   /* Load translators */
   loadTranslators();
 
