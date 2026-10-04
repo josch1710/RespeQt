@@ -477,7 +477,7 @@ namespace DiskImages {
     // initialize the array containing the sector headers
     for (int track = 0; track < 40; track++) {
       m_atxTrackInfo[track].clear();
-      for (quint8 sector = 0; sector <= static_cast<quint8>(sizeof(ATX_SECTOR_POSITIONS_SD) / sizeof(quint16)); sector++) {
+      for (quint8 sector = 0; sector < static_cast<quint8>(sizeof(ATX_SECTOR_POSITIONS_SD) / sizeof(quint16)); sector++) {
         m_atxTrackInfo[track].add(static_cast<quint8>(sector + 1), 0, ATX_SECTOR_POSITIONS_SD[sector]);
       }
     }
