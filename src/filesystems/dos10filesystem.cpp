@@ -10,7 +10,7 @@ namespace Filesystems {
       : AtariFileSystem(image) {
     m_image->readSector(360, vtoc);
     bitmap = vtoc.mid(10, 90);
-    m_freeSectors = static_cast<quint16>(vtoc.at(3) +vtoc.at(4) * 256);
+    m_freeSectors = static_cast<quint8>(vtoc.at(3)) + static_cast<quint8>(vtoc.at(4)) * 256;
   }
 
   QList<AtariDirEntry> Dos10FileSystem::getEntries(const quint16 dir) {
@@ -65,9 +65,9 @@ namespace Filesystems {
           QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot read '%1': %2").arg(entry.niceName(), tr("File number mismatch.")));
           return false;
         }
-        sector = static_cast<quint16>((data.at(data.count() - 3) & 0x03) * 256 + data.at(data.count() - 2));
+        sector = static_cast<quint8>(data.at(data.count() - 3) & 0x03) * 256 + static_cast<quint8>(data.at(data.count() - 2));
       } else {
-        sector = static_cast<quint16>(data.at(data.count() - 3) * 256 + data.at(data.count() - 2));
+        sector = static_cast<quint8>(data.at(data.count() - 3)) * 256 + static_cast<quint8>(data.at(data.count() - 2));
       }
       const auto size = data.at(data.count() - 1);
       if (!(entry.attributes & AtariDirEntry::Dos10)) {
@@ -382,9 +382,9 @@ namespace Filesystems {
           QMessageBox::critical(m_image->editDialog(), tr("Atari file system error"), tr("Cannot delete '%1': %2").arg(entry.niceName(), tr("File number mismatch.")));
           return false;
         }
-        sector = static_cast<quint16>((data.at(data.count() - 3) & 0x03) * 256 + data.at(data.count() - 2));
+        sector = static_cast<quint8>(data.at(data.count() - 3) & 0x03) * 256 + static_cast<quint8>(data.at(data.count() - 2));
       } else {
-        sector = static_cast<quint16>(data.at(data.count() - 3) * 256 + data.at(data.count() - 2));
+        sector = static_cast<quint8>(data.at(data.count() - 3)) * 256 + static_cast<quint8>(data.at(data.count() - 2));
       }
     }
 

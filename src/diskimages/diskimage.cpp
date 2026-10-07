@@ -2480,8 +2480,8 @@ namespace DiskImages {
       return 0;
     }
     const uint v = static_cast<quint8>(data.at(0));
-    const uint s = static_cast<quint16>(data.at(1) + data.at(2) * 256);
-    const uint f = static_cast<quint16>(data.at(3) + data.at(4) * 256);
+    const uint s = static_cast<quint8>(data.at(1)) + static_cast<quint8>(data.at(2)) * 256;
+    const uint f = static_cast<quint8>(data.at(3)) + static_cast<quint8>(data.at(4)) * 256;
     if (m_geometry.isStandardSD() && v == 1 && s == 709 && f <= s) {
       return 1;
     }

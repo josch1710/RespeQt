@@ -63,7 +63,7 @@ namespace Filesystems {
   }
 
   uint MyDosFileSystem::totalCapacity() {
-    return static_cast<quint16>(vtoc.at(1) + vtoc.at(2) * 256 * (m_image->geometry().bytesPerSector() - 3));
+    return static_cast<quint16>(static_cast<quint8>(vtoc.at(1)) + static_cast<quint8>(vtoc.at(2)) * 256 * (m_image->geometry().bytesPerSector() - 3));
   }
 
 

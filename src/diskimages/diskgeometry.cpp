@@ -126,9 +126,9 @@ namespace DiskImages {
 
   void DiskGeometry::initialize(const QByteArray &percom) {
     const auto aTracksPerSide {static_cast<quint8>(percom.at(0))};
-    const quint16 aSectorsPerTrack = static_cast<quint16>(percom.at(2) * 256 + percom.at(3));
+    const quint16 aSectorsPerTrack = static_cast<quint8>(percom.at(2)) * 256 + static_cast<quint8>(percom.at(3));
     const bool aIsDoubleSided = static_cast<quint8>(percom.at(4));
-    const quint16 aBytesPerSector = static_cast<quint16>(percom.at(6) * 256 + percom.at(7));
+    const quint16 aBytesPerSector = static_cast<quint8>(percom.at(6)) * 256 + static_cast<quint8>(percom.at(7));
     initialize(aIsDoubleSided, aTracksPerSide, aSectorsPerTrack, aBytesPerSector);
   }
 

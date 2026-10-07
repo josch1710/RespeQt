@@ -49,7 +49,7 @@ namespace DiskImages {
     }
 
     // Validate the magic number
-    if (const auto magic = static_cast<quint16>(header[0] + header[1] * 256); magic != 0x0296) {
+    if (const auto magic = static_cast<quint8>(header[0]) + static_cast<quint8>(header[1]) * 256; magic != 0x0296) {
       qCritical() << "!e" << tr("Cannot open '%1': %2").arg(fileName, tr("Not a valid ATR file."));
       sourceFile->close();
       delete sourceFile;
@@ -57,9 +57,9 @@ namespace DiskImages {
     }
 
     // Decode image meta-data
-    const auto sizeLo = static_cast<quint16>(header[2] + header[3] * 256);
-    const auto sizeHi = static_cast<quint16>(header[6] + header[7] * 256);
-    const auto secSize = static_cast<quint16>(header[4] + header[5] * 256);
+    const auto sizeLo = static_cast<quint16>(static_cast<quint8>(header[2]) + static_cast<quint8>(header[3]) * 256);
+    const auto sizeHi = static_cast<quint16>(static_cast<quint8>(header[6]) + static_cast<quint8>(header[7]) * 256);
+    const auto secSize = static_cast<quint16>(static_cast<quint8>(header[4]) + static_cast<quint8>(header[5]) * 256);
     auto size = static_cast<quint64>((sizeLo + sizeHi * 65536) * 16);
 
     // Try to create the temporary file
