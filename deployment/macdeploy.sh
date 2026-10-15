@@ -24,7 +24,7 @@ fi
 $DEPLOYCMD "$deploydir"/RespeQt.app -always-overwrite
 
 install -p "$1/deployment/Info.plist.app" "${deploydir}"/RespeQt.app/Contents/Info.plist
-sed -i '' -e "s/@SHORTVERSION@/$3/g" "${deploydir}"/RespeQt.app/Contents/Info.plist
+sed -i '' -e "s/@SHORTVERSION@/$4/g" "${deploydir}"/RespeQt.app/Contents/Info.plist
 sed -i '' -e "s/@LONGVERSION@/${longversion}/g" "${deploydir}"/RespeQt.app/Contents/Info.plist
 install -p "$2"/*.qm "${deploydir}"/RespeQt.app/Contents/Resources/
 
@@ -47,21 +47,21 @@ install -d "${deploydir}/rcl/menu"
 install "$1/atari/atari_8-bit_Menu/"* "${deploydir}/rcl/menu"
 
 cd "$2" || exit 2
-test -f "RespeQt_${longversion}.zip" && rm "RespeQt_${longversion}.zip"
-zip -9r -D "RespeQt_${longversion}.zip" "$(basename "${deploydir}")"
-test -f "RespeQt_${longversion}.dmg" && rm "RespeQt_${longversion}.dmg"
+test -f "RespeQtMacos_${longversion}.zip" && rm "RespeQtMacos_${longversion}.zip"
+zip -9r -D "RespeQtMacos_${longversion}.zip" "$(basename "${deploydir}")"
+test -f "RespeQt_${longversion}.dmg" && rm "RespeQtMacos_${longversion}.dmg"
 echo "${deploydir}"
 create-dmg --volname "RespeQt_${longversion}" \
     --icon-size 32 \
     --volicon "$1/resources/RespeQt.icns" \
     --eula "$1/license.txt" \
     --no-internet-enable \
-    "RespeQt_${longversion}.dmg" "${deploydir}"
+    "RespeQtMacos_${longversion}.dmg" "${deploydir}"
 
-md5 -r "RespeQt_${longversion}.zip" > "RespeQt_${longversion}.zip.md5"
-md5 -r "RespeQt_${longversion}.dmg" > "RespeQt_${longversion}.dmg.md5"
+md5 -r "RespeQtMacos_${longversion}.zip" > "RespeQtMacos_${longversion}.zip.md5"
+md5 -r "RespeQtMacos_${longversion}.dmg" > "RespeQtMacos_${longversion}.dmg.md5"
 
 # Move package to special directory (makes the GH action easier)
 packagedir="$2/packages"
 install -d "${packagedir}"
-mv "RespeQt_${longversion}.zip" "RespeQt_${longversion}.dmg" "RespeQt_${longversion}.zip.md5" "RespeQt_${longversion}.dmg.md5" "${packagedir}"
+mv "RespeQtMacos_${longversion}.zip" "RespeQtMacos_${longversion}.dmg" "RespeQtMacos_${longversion}.zip.md5" "RespeQtMacos_${longversion}.dmg.md5" "${packagedir}"

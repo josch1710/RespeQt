@@ -22,7 +22,7 @@ if (NOT ${RC_VERSION} STREQUAL "")
 endif()
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 set(CMAKE_OSX_ARCHITECTURES x86_64 arm64)
-set(CMAKE_OSX_DEPLOYMENT_TARGET 11.0) # Perhaps we can manage to build this 10.11 or whatever the min for qt5 is.
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13)
 
 option(MAKE_TEST "Build the test application" OFF)
 message(STATUS "Build tests ${MAKE_TEST}")
